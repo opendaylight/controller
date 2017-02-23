@@ -33,11 +33,11 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnerChangeListener.class);
 
     private final String localMemberName;
-    private final EntityOwnershipChangePublisher publisher;
+    private final EntityOwnershipListenerSupport listenerSupport;
 
-    EntityOwnerChangeListener(final MemberName localMemberName, final EntityOwnershipChangePublisher publisher) {
+    EntityOwnerChangeListener(final MemberName localMemberName, final EntityOwnershipListenerSupport listenerSupport) {
         this.localMemberName = Verify.verifyNotNull(localMemberName.getName());
-        this.publisher = Preconditions.checkNotNull(publisher);
+        this.listenerSupport = Preconditions.checkNotNull(listenerSupport);
     }
 
     @Override
@@ -70,12 +70,12 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
                     "{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}, hasOwner: {}",
                     logId(), entity, wasOwner, isOwner, hasOwner);
 
-                publisher.notifyEntityOwnershipListeners(entity, wasOwner, isOwner, hasOwner);
+                listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner, hasOwner);
             }
         }
     }
 
     private String logId() {
-        return publisher.getLogId();
+        return listenerSupport.getLogId();
     }
 }

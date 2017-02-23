@@ -8,13 +8,14 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
+import akka.japi.Creator;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * Proxy actor which acts as a facade to the user-provided listener. Responsible for decapsulating
@@ -22,13 +23,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     private final DOMDataTreeChangeListener listener;
-    private final YangInstanceIdentifier registeredPath;
     private boolean notificationsEnabled = false;
 
-    private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
-            final YangInstanceIdentifier registeredPath) {
+    private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener) {
         this.listener = Preconditions.checkNotNull(listener);
-        this.registeredPath = Preconditions.checkNotNull(registeredPath);
     }
 
     @Override
@@ -72,7 +70,24 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
                 listener);
     }
 
-    public static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
-        return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
+    public static Props props(final DOMDataTreeChangeListener listener) {
+        return Props.create(new DataTreeChangeListenerCreator(listener));
+    }
+
+    private static final class DataTreeChangeListenerCreator implements Creator<DataTreeChangeListenerActor> {
+        private static final long serialVersionUID = 1L;
+
+        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but we don't "
+                + "create remote instances of this actor and thus don't need it to be Serializable.")
+        private final DOMDataTreeChangeListener listener;
+
+        DataTreeChangeListenerCreator(final DOMDataTreeChangeListener listener) {
+            this.listener = Preconditions.checkNotNull(listener);
+        }
+
+        @Override
+        public DataTreeChangeListenerActor create() {
+            return new DataTreeChangeListenerActor(listener);
+        }
     }
 }

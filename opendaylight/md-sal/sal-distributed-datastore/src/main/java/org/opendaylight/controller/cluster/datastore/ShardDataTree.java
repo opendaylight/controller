@@ -772,10 +772,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingCommit();
     }
 
-    Collection<ActorRef> getCohortActors() {
-        return cohortRegistry.getCohortActors();
-    }
-
     void processCohortRegistryCommand(final ActorRef sender, final CohortRegistryCommand message) {
         cohortRegistry.process(sender, message);
     }

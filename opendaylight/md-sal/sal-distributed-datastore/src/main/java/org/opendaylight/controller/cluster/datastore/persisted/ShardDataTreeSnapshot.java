@@ -12,9 +12,8 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Optional;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -33,8 +32,7 @@ public abstract class ShardDataTreeSnapshot {
         // Hidden to prevent subclassing from outside of this package
     }
 
-    @Deprecated
-    public static ShardDataTreeSnapshot deserializePreCarbon(final byte[] bytes) throws IOException {
+    public static ShardDataTreeSnapshot deserialize(final byte[] bytes) throws IOException {
         /**
          * Unfortunately versions prior to Boron did not include any way to evolve the snapshot format and contained
          * only the raw data stored in the datastore. Furthermore utilities involved do not check if the array is
@@ -51,9 +49,9 @@ public abstract class ShardDataTreeSnapshot {
         }
 
         try {
-            try (InputStream is = new ByteArrayInputStream(bytes)) {
-                try (DataInputStream dis = new DataInputStream(is)) {
-                    final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserializePreCarbon(dis);
+            try (final InputStream is = new ByteArrayInputStream(bytes)) {
+                try (final DataInputStream dis = new DataInputStream(is)) {
+                    final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserialize(dis);
 
                     // Make sure we consume all bytes, otherwise something went very wrong
                     final int bytesLeft = dis.available();
@@ -71,19 +69,6 @@ public abstract class ShardDataTreeSnapshot {
         }
     }
 
-    public static ShardDataTreeSnapshot deserialize(final ObjectInput in) throws IOException {
-        final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.versionedDeserialize(in);
-
-        // Make sure we consume all bytes, otherwise something went very wrong
-        final int bytesLeft = in.available();
-        if (bytesLeft != 0) {
-            throw new IOException("Deserialization left " + bytesLeft + " in the buffer");
-        }
-
-
-        return ret;
-    }
-
     /**
      * Get the root data node contained in this snapshot.
      *
@@ -91,9 +76,14 @@ public abstract class ShardDataTreeSnapshot {
      */
     public abstract Optional<NormalizedNode<?, ?>> getRootNode();
 
-    public abstract void serialize(ObjectOutput out) throws IOException;
+    /**
+     * Serialize this snapshot into a byte array for persistence.
+     *
+     * @return Serialized snapshot
+     * @throws IOException when a serialization problem occurs
+     */
+    public abstract @Nonnull byte[] serialize() throws IOException;
 
-    @Deprecated
     private static boolean isLegacyStream(final byte[] bytes) {
         if (bytes.length < 2) {
             // Versioned streams have at least two bytes

@@ -8,10 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import java.io.OutputStream;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * Interface for a snapshot phase state.
@@ -56,12 +53,10 @@ public interface SnapshotState {
     /**
      * Persists a snapshot.
      *
-     * @param snapshotState the snapshot State
-     * @param installSnapshotStream Optional OutputStream that is present if the snapshot is to also be installed
-     *        on a follower.
+     * @param snapshotBytes the snapshot bytes
      * @param totalMemory the total memory threshold
      */
-    void persist(Snapshot.State snapshotState, Optional<OutputStream> installSnapshotStream, long totalMemory);
+    void persist(byte[] snapshotBytes, long totalMemory);
 
     /**
      * Commit the snapshot by trimming the log.

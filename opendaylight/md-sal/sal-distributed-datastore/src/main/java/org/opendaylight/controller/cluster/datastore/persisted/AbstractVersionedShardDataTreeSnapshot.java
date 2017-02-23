@@ -8,11 +8,12 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.base.Verify;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -29,38 +30,13 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     private static final Logger LOG = LoggerFactory.getLogger(AbstractVersionedShardDataTreeSnapshot.class);
 
     @SuppressWarnings("checkstyle:FallThrough")
-    @Deprecated
-    static ShardDataTreeSnapshot deserializePreCarbon(final DataInputStream is) throws IOException {
+    static ShardDataTreeSnapshot deserialize(final DataInputStream is) throws IOException {
         final PayloadVersion version = PayloadVersion.readFrom(is);
         switch (version) {
             case BORON:
                 // Boron snapshots use Java Serialization
-                try (ObjectInputStream ois = new ObjectInputStream(is)) {
+                try (final ObjectInputStream ois = new ObjectInputStream(is)) {
                     return (ShardDataTreeSnapshot) ois.readObject();
-                } catch (ClassNotFoundException e) {
-                    LOG.error("Failed to serialize data tree snapshot", e);
-                    throw new IOException("Snapshot failed to deserialize", e);
-                }
-            case TEST_FUTURE_VERSION:
-            case TEST_PAST_VERSION:
-                // These versions are never returned and this code is effectively dead
-                break;
-            default:
-                throw new IOException("Invalid payload version in snapshot");
-        }
-
-        // Not included as default in above switch to ensure we get warnings when new versions are added
-        throw new IOException("Encountered unhandled version" + version);
-    }
-
-    @SuppressWarnings("checkstyle:FallThrough")
-    static ShardDataTreeSnapshot versionedDeserialize(final ObjectInput in) throws IOException {
-        final PayloadVersion version = PayloadVersion.readFrom(in);
-        switch (version) {
-            case BORON:
-                // Boron snapshots use Java Serialization
-                try {
-                    return (ShardDataTreeSnapshot) in.readObject();
                 } catch (ClassNotFoundException e) {
                     LOG.error("Failed to serialize data tree snapshot", e);
                     throw new IOException("Snapshot failed to deserialize", e);
@@ -98,11 +74,13 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     @Nonnull
     abstract PayloadVersion version();
 
-    private void versionedSerialize(final ObjectOutput out, final PayloadVersion version) throws IOException {
+    private void versionedSerialize(final DataOutputStream dos, final PayloadVersion version) throws IOException {
         switch (version) {
             case BORON:
                 // Boron snapshots use Java Serialization
-                out.writeObject(this);
+                try (ObjectOutputStream oos = new ObjectOutputStream(dos)) {
+                    oos.writeObject(this);
+                }
                 return;
             case TEST_FUTURE_VERSION:
             case TEST_PAST_VERSION:
@@ -115,9 +93,15 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     }
 
     @Override
-    public void serialize(final ObjectOutput out) throws IOException {
-        final PayloadVersion version = version();
-        version.writeTo(out);
-        versionedSerialize(out, version);
+    public final byte[] serialize() throws IOException {
+        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            try (final DataOutputStream dos = new DataOutputStream(bos)) {
+                final PayloadVersion version = version();
+                version.writeTo(dos);
+                versionedSerialize(dos, version);
+            }
+
+            return bos.toByteArray();
+        }
     }
 }

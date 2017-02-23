@@ -15,19 +15,17 @@ import javax.annotation.Nonnull;
 
 /**
  * Persisted data of the ShardManager.
- *
- * @deprecated Use {@link org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot} instead.
  */
-@Deprecated
+// FIXME: make this package-protected once forShardList is removed.
 public final class ShardManagerSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
     private final List<String> shardList;
 
-    ShardManagerSnapshot(@Nonnull final List<String> shardList) {
+    ShardManagerSnapshot(final @Nonnull List<String> shardList) {
         this.shardList = ImmutableList.copyOf(shardList);
     }
 
-    public List<String> getShardList() {
+    List<String> getShardList() {
         return this.shardList;
     }
 
@@ -40,10 +38,6 @@ public final class ShardManagerSnapshot implements Serializable {
     @Deprecated
     public static ShardManagerSnapshot forShardList(final @Nonnull List<String> shardList) {
         return new ShardManagerSnapshot(shardList);
-    }
-
-    private Object readResolve() {
-        return new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(shardList);
     }
 
     @Override

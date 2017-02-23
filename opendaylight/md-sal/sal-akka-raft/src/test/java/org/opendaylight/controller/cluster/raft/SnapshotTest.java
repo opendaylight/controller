@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload
  *
  * @author Thomas Pantelis
  */
-@Deprecated
 public class SnapshotTest {
 
     @Test

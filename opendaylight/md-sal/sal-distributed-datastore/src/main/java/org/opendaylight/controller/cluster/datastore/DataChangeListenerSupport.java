@@ -10,15 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -31,20 +26,14 @@ final class DataChangeListenerSupport extends AbstractDataListenerSupport<
             DelayedDataChangeListenerRegistration, DataChangeListenerRegistration<
                     AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>> {
 
-    private final Set<ActorSelection> listenerActors = Sets.newConcurrentHashSet();
-
     DataChangeListenerSupport(final Shard shard) {
         super(shard);
     }
 
-    Collection<ActorSelection> getListenerActors() {
-        return new ArrayList<>(listenerActors);
-    }
-
     @Override
-    DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-            createDelegate(final RegisterChangeListener message) {
-        final ActorSelection dataChangeListenerPath = selectActor(message.getDataChangeListenerPath());
+    Entry<DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>,
+            Optional<DataTreeCandidate>> createDelegate(final RegisterChangeListener message) {
+        ActorSelection dataChangeListenerPath = selectActor(message.getDataChangeListenerPath());
 
         // Notify the listener if notifications should be enabled or not
         // If this shard is the leader then it will enable notifications else
@@ -68,32 +57,7 @@ final class DataChangeListenerSupport extends AbstractDataListenerSupport<
 
         getShard().getDataStore().notifyOfInitialData(regEntry.getKey(), regEntry.getValue());
 
-        listenerActors.add(dataChangeListenerPath);
-        final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-            delegate = regEntry.getKey();
-        return new DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                NormalizedNode<?,?>>>() {
-            @Override
-            public void close() {
-                listenerActors.remove(dataChangeListenerPath);
-                delegate.close();
-            }
-
-            @Override
-            public AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> getInstance() {
-                return delegate.getInstance();
-            }
-
-            @Override
-            public YangInstanceIdentifier getPath() {
-                return delegate.getPath();
-            }
-
-            @Override
-            public DataChangeScope getScope() {
-                return delegate.getScope();
-            }
-        };
+        return regEntry;
     }
 
     @Override

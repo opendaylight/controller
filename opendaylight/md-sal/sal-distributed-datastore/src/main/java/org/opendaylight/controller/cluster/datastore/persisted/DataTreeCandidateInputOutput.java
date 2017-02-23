@@ -174,7 +174,7 @@ public final class DataTreeCandidateInputOutput {
     }
 
     public static void writeDataTreeCandidate(final DataOutput out, DataTreeCandidate candidate) throws IOException {
-        try (NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
+        try (final NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();

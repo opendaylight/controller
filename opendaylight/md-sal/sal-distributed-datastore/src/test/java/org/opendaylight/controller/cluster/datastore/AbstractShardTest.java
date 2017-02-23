@@ -56,10 +56,9 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.PreBoronShardDataTreeSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -350,8 +349,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final NormalizedNode<?, ?> root = readStore(testStore, YangInstanceIdentifier.EMPTY);
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
-                new ShardSnapshotState(new PreBoronShardDataTreeSnapshot(root)),
-                Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1, 1, null, null));
+                new PreBoronShardDataTreeSnapshot(root).serialize(),
+                Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1));
         return testStore;
     }
 
@@ -490,7 +489,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @SuppressWarnings("unchecked")
-        private static <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual) {
+        private <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual ) {
             FutureCallback<T> mock = mock(FutureCallback.class);
             doAnswer(invocation -> {
                 actual.onFailure(invocation.getArgumentAt(0, Throwable.class));

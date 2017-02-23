@@ -110,11 +110,11 @@ public class ActorContextTest extends AbstractActorTest {
         }
 
         private static Props props(final boolean found, final ActorRef actorRef) {
-            return Props.create(new MockShardManagerCreator(found, actorRef));
+            return Props.create(new MockShardManagerCreator(found, actorRef) );
         }
 
         private static Props props() {
-            return Props.create(new MockShardManagerCreator());
+            return Props.create(new MockShardManagerCreator() );
         }
 
         @SuppressWarnings("serial")

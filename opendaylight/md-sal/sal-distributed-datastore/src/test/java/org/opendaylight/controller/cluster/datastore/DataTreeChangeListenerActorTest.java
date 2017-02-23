@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
-
 import akka.actor.ActorRef;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
@@ -33,7 +31,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 final DataTreeCandidate mockTreeCandidate = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates = ImmutableList.of(mockTreeCandidate);
                 final DOMDataTreeChangeListener mockListener = Mockito.mock(DOMDataTreeChangeListener.class);
-                final Props props = DataTreeChangeListenerActor.props(mockListener, TEST_PATH);
+                final Props props = DataTreeChangeListenerActor.props(mockListener);
                 final ActorRef subject = getSystem().actorOf(props, "testDataTreeChangedNotificationsEnabled");
 
                 // Let the DataChangeListener know that notifications should be
@@ -56,7 +54,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 final DataTreeCandidate mockTreeCandidate = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates = ImmutableList.of(mockTreeCandidate);
                 final DOMDataTreeChangeListener mockListener = Mockito.mock(DOMDataTreeChangeListener.class);
-                final Props props = DataTreeChangeListenerActor.props(mockListener, TEST_PATH);
+                final Props props = DataTreeChangeListenerActor.props(mockListener);
                 final ActorRef subject = getSystem().actorOf(props, "testDataTreeChangedNotificationsDisabled");
 
                 subject.tell(new DataTreeChanged(mockCandidates), getRef());
@@ -81,7 +79,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 final DataTreeCandidate mockTreeCandidate = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates = ImmutableList.of(mockTreeCandidate);
                 final DOMDataTreeChangeListener mockListener = Mockito.mock(DOMDataTreeChangeListener.class);
-                final Props props = DataTreeChangeListenerActor.props(mockListener, TEST_PATH);
+                final Props props = DataTreeChangeListenerActor.props(mockListener);
                 final ActorRef subject = getSystem().actorOf(props, "testDataTreeChangedWithNoSender");
 
                 getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
@@ -121,7 +119,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 final DOMDataTreeChangeListener mockListener = Mockito.mock(DOMDataTreeChangeListener.class);
                 Mockito.doThrow(new RuntimeException("mock")).when(mockListener).onDataTreeChanged(mockCandidates2);
 
-                Props props = DataTreeChangeListenerActor.props(mockListener, TEST_PATH);
+                Props props = DataTreeChangeListenerActor.props(mockListener);
                 ActorRef subject = getSystem().actorOf(props, "testDataTreeChangedWithListenerRuntimeEx");
 
                 // Let the DataChangeListener know that notifications should be

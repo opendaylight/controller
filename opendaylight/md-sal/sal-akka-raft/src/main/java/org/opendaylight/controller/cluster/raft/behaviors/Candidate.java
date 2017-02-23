@@ -88,8 +88,8 @@ public class Candidate extends AbstractRaftActorBehavior {
 
         // Some other candidate for the same term became a leader and sent us an append entry
         if (currentTerm() == appendEntries.getTerm()) {
-            log.info("{}: New Leader {} sent an AppendEntries to Candidate for term {} - will switch to Follower",
-                    logName(), appendEntries.getLeaderId(), currentTerm());
+            log.debug("{}: New Leader sent an append entry to Candidate for term {} will switch to Follower",
+                    logName(), currentTerm());
 
             return switchBehavior(new Follower(context));
         }
@@ -112,8 +112,8 @@ public class Candidate extends AbstractRaftActorBehavior {
 
         if (voteCount >= votesRequired) {
             if (context.getLastApplied() < context.getReplicatedLog().lastIndex()) {
-                log.info("{}: LastApplied index {} is behind last index {} - switching to PreLeader",
-                        logName(), context.getLastApplied(), context.getReplicatedLog().lastIndex());
+                log.debug("{}: LastApplied index {} is behind last index {}", logName(), context.getLastApplied(),
+                        context.getReplicatedLog().lastIndex());
                 return internalSwitchBehavior(RaftState.PreLeader);
             } else {
                 return internalSwitchBehavior(RaftState.Leader);
@@ -154,9 +154,6 @@ public class Candidate extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-                log.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
-                        logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
-
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
                 // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
@@ -184,7 +181,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         long newTerm = currentTerm + 1;
         context.getTermInformation().updateAndPersist(newTerm, context.getId());
 
-        log.info("{}: Starting new election term {}", logName(), newTerm);
+        log.debug("{}: Starting new term {}", logName(), newTerm);
 
         // Request for a vote
         // TODO: Retry request for vote if replies do not arrive in a reasonable

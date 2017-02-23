@@ -128,13 +128,4 @@ module car {
     rpc unregister-logging-dtcls {
         description "Unregisters the logging DTCL(s) for the cars container.";
     }
-
-    rpc register-commit-cohort {
-        description "Registers a sample commit cohort that validates car entry input.";
-    }
-
-    rpc unregister-commit-cohort {
-        description "Unregisters the sample commit cohort.";
-    }
-
 }

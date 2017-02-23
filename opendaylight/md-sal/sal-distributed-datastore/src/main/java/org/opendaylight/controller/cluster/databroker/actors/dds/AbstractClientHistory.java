@@ -83,19 +83,6 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         LOG.debug("Client history {} changed state from {} to {}", this, expected, next);
     }
 
-    final synchronized void doClose() {
-        final State local = state;
-        if (local != State.CLOSED) {
-            Preconditions.checkState(local == State.IDLE, "Local history %s has an open transaction", this);
-            histories.values().forEach(ProxyHistory::close);
-        }
-    }
-
-    final synchronized void onProxyDestroyed(final ProxyHistory proxyHistory) {
-        histories.remove(proxyHistory.getIdentifier().getCookie());
-        LOG.debug("{}: removed destroyed proxy {}", this, proxyHistory);
-    }
-
     @Override
     public final LocalHistoryIdentifier getIdentifier() {
         return identifier;
@@ -147,8 +134,8 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         return ret;
     }
 
-    abstract ProxyHistory createHistoryProxy(LocalHistoryIdentifier historyId,
-            AbstractClientConnection<ShardBackendInfo> connection);
+    abstract ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
+            final AbstractClientConnection<ShardBackendInfo> connection);
 
     private void createHistoryCallback(final Response<?, ?> response) {
         LOG.debug("Create history response {}", response);
@@ -320,5 +307,4 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
             }
         };
     }
-
 }

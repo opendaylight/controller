@@ -10,17 +10,15 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
-import java.io.OutputStream;
 import java.util.Collections;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -29,8 +27,6 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,8 +95,8 @@ public class RaftActorSnapshotMessageSupportTest {
         long lastIndexDuringSnapshotCapture = 2;
         byte[] snapshotBytes = {1,2,3,4,5};
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), Collections.<ReplicatedLogEntry>emptyList(),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, -1, null, null);
+        Snapshot snapshot = Snapshot.create(snapshotBytes, Collections.<ReplicatedLogEntry>emptyList(),
+                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1);
 
         ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);
         sendMessageToSupport(applySnapshot);
@@ -110,11 +106,11 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Test
     public void testOnCaptureSnapshotReply() {
-        ByteState state = ByteState.of(new byte[]{1,2,3,4,5});
-        Optional<OutputStream> optionalStream = Optional.of(mock(OutputStream.class));
-        sendMessageToSupport(new CaptureSnapshotReply(state, optionalStream));
 
-        verify(mockSnapshotManager).persist(eq(state), eq(optionalStream), anyLong());
+        byte[] snapshot = {1,2,3,4,5};
+        sendMessageToSupport(new CaptureSnapshotReply(snapshot));
+
+        verify(mockSnapshotManager).persist(same(snapshot), anyLong());
     }
 
     @Test

@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import com.google.common.base.Throwables;
-import com.google.common.io.ByteSource;
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the leader state and logic for sending snapshot chunks to a follower.
  */
-public final class LeaderInstallSnapshotState implements AutoCloseable {
+public final class LeaderInstallSnapshotState {
     private static final Logger LOG = LoggerFactory.getLogger(LeaderInstallSnapshotState.class);
 
     // The index of the first chunk that is sent when installing a snapshot
@@ -32,7 +29,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
     private final int snapshotChunkSize;
     private final String logName;
-    private ByteSource snapshotBytes;
+    private ByteString snapshotBytes;
     private int offset = 0;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
     private int replyReceivedForOffset = -1;
@@ -42,27 +39,26 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int totalChunks;
     private int lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
-    private long snapshotSize;
-    private InputStream snapshotInputStream;
 
     LeaderInstallSnapshotState(int snapshotChunkSize, String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
         this.logName = logName;
     }
 
-    void setSnapshotBytes(ByteSource snapshotBytes) throws IOException {
+    ByteString getSnapshotBytes() {
+        return snapshotBytes;
+    }
+
+    void setSnapshotBytes(ByteString snapshotBytes) {
         if (this.snapshotBytes != null) {
             return;
         }
 
-        snapshotSize = snapshotBytes.size();
-        snapshotInputStream = snapshotBytes.openStream();
-
         this.snapshotBytes = snapshotBytes;
+        int size = snapshotBytes.size();
+        totalChunks = size / snapshotChunkSize + (size % snapshotChunkSize > 0 ? 1 : 0);
 
-        totalChunks = (int) (snapshotSize / snapshotChunkSize + (snapshotSize % snapshotChunkSize > 0 ? 1 : 0));
-
-        LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, snapshotSize, totalChunks);
+        LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, size, totalChunks);
 
         replyReceivedForOffset = -1;
         chunkIndex = FIRST_CHUNK_INDEX;
@@ -114,26 +110,22 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         }
     }
 
-    byte[] getNextChunk() throws IOException {
+    byte[] getNextChunk() {
+        int snapshotLength = getSnapshotBytes().size();
         int start = incrementOffset();
         int size = snapshotChunkSize;
-        if (snapshotChunkSize > snapshotSize) {
-            size = (int) snapshotSize;
-        } else if (start + snapshotChunkSize > snapshotSize) {
-            size = (int) (snapshotSize - start);
+        if (snapshotChunkSize > snapshotLength) {
+            size = snapshotLength;
+        } else if (start + snapshotChunkSize > snapshotLength) {
+            size = snapshotLength - start;
         }
 
         byte[] nextChunk = new byte[size];
-        int numRead = snapshotInputStream.read(nextChunk);
-        if (numRead != size) {
-            throw new IOException(String.format(
-                    "The # of bytes read from the imput stream, %d, does not match the expected # %d", numRead, size));
-        }
-
+        getSnapshotBytes().copyTo(nextChunk, start, 0, size);
         nextChunkHashCode = Arrays.hashCode(nextChunk);
 
         LOG.debug("{}: Next chunk: total length={}, offset={}, size={}, hashCode={}", logName,
-                snapshotSize, start, size, nextChunkHashCode);
+                snapshotLength, start, size, nextChunkHashCode);
         return nextChunk;
     }
 
@@ -141,37 +133,11 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
      * Reset should be called when the Follower needs to be sent the snapshot from the beginning.
      */
     void reset() {
-        closeStream();
-
         offset = 0;
         replyStatus = false;
         replyReceivedForOffset = offset;
         chunkIndex = FIRST_CHUNK_INDEX;
         lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
-
-        try {
-            snapshotInputStream = snapshotBytes.openStream();
-        } catch (IOException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    @Override
-    public void close() {
-        closeStream();
-        snapshotBytes = null;
-    }
-
-    private void closeStream() {
-        if (snapshotInputStream != null) {
-            try {
-                snapshotInputStream.close();
-            } catch (IOException e) {
-                LOG.warn("{}: Error closing snapshot stream", logName);
-            }
-
-            snapshotInputStream = null;
-        }
     }
 
     int getLastChunkHashCode() {

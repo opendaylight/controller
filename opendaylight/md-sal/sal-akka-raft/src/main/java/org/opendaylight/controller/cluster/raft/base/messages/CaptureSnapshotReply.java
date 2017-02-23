@@ -7,29 +7,22 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.common.base.Preconditions;
-import java.io.OutputStream;
-import java.util.Optional;
-import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class CaptureSnapshotReply {
-    private final Snapshot.State snapshotState;
-    private final Optional<OutputStream> installSnapshotStream;
+    private final byte [] snapshot;
 
-    public CaptureSnapshotReply(@Nonnull final Snapshot.State snapshotState,
-            @Nonnull final Optional<OutputStream> installSnapshotStream) {
-        this.snapshotState = Preconditions.checkNotNull(snapshotState);
-        this.installSnapshotStream = Preconditions.checkNotNull(installSnapshotStream);
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Stores a reference to an externally mutable byte[] "
+            + "object but this is OK since this class is merely a DTO and does not process byte[] internally. "
+            + "Also it would be inefficient to create a copy as the byte[] could be large.")
+    public CaptureSnapshotReply(byte [] snapshot) {
+        this.snapshot = snapshot;
     }
 
-    @Nonnull
-    public Snapshot.State getSnapshotState() {
-        return snapshotState;
-    }
-
-    @Nonnull
-    public Optional<OutputStream> getInstallSnapshotStream() {
-        return installSnapshotStream;
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
+            + "this is OK since this class is merely a DTO and does not process the byte[] internally. "
+            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
+    public byte [] getSnapshot() {
+        return snapshot;
     }
 }

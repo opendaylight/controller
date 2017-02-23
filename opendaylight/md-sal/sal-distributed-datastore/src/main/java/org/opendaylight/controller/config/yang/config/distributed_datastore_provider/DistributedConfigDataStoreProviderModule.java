@@ -62,9 +62,6 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
 
         return DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
-                .tempFileDirectory("./data")
-                .fileBackedStreamingThresholdInMegabytes(props.getFileBackedStreamingThresholdInMegabytes()
-                        .getValue().intValue())
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize()
                         .getValue().intValue())

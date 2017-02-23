@@ -86,7 +86,7 @@ public class DataTreeCohortIntegrationTest {
         ArgumentCaptor<DOMDataTreeCandidate> candidateCapt = ArgumentCaptor.forClass(DOMDataTreeCandidate.class);
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                try (AbstractDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest",
+                try (final AbstractDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest",
                         "test-1")) {
                     final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg =
                             dataStore.registerCommitCohort(TEST_ID, cohort);
@@ -122,7 +122,7 @@ public class DataTreeCohortIntegrationTest {
 
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                try (AbstractDataStore dataStore =
+                try (final AbstractDataStore dataStore =
                         setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
                     dataStore.registerCommitCohort(TEST_ID, failedCohort);
                     Thread.sleep(1000); // Registration is asynchronous
@@ -157,7 +157,7 @@ public class DataTreeCohortIntegrationTest {
         Mockito.doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(stepToAbort).abort();
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                try (AbstractDataStore dataStore =
+                try (final AbstractDataStore dataStore =
                         setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
                     dataStore.registerCommitCohort(TEST_ID, cohortToAbort);
                     Thread.sleep(1000); // Registration is asynchronous

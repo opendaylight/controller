@@ -10,10 +10,9 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -24,11 +23,8 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
 import com.google.common.collect.Sets;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,14 +36,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -68,9 +61,6 @@ public class RaftActorRecoverySupportTest {
 
     @Mock
     private RaftActorRecoveryCohort mockCohort;
-
-    @Mock
-    private RaftActorSnapshotCohort mockSnapshotCohort;
 
     @Mock
     PersistentDataProvider mockPersistentProvider;
@@ -173,6 +163,8 @@ public class RaftActorRecoverySupportTest {
         replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
         replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
 
+        byte[] snapshotBytes = {1,2,3,4,5};
+
         ReplicatedLogEntry unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1,
                 new MockRaftActorContext.MockPayload("4", 4));
 
@@ -184,10 +176,8 @@ public class RaftActorRecoverySupportTest {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
 
-        MockSnapshotState snapshotState = new MockSnapshotState(Arrays.asList(new MockPayload("1")));
-        Snapshot snapshot = Snapshot.create(snapshotState,
-                Arrays.asList(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
+        Snapshot snapshot = Snapshot.create(snapshotBytes, Arrays.asList(unAppliedEntry1, unAppliedEntry2),
+                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
@@ -205,53 +195,7 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
-        verify(mockCohort).applyRecoverySnapshot(snapshotState);
-    }
-
-    @Deprecated
-    @Test
-    public void testOnSnapshotOfferWithPreCarbonSnapshot() {
-
-        ReplicatedLogEntry unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1,
-                new MockRaftActorContext.MockPayload("4", 4));
-
-        ReplicatedLogEntry unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1,
-                new MockRaftActorContext.MockPayload("5", 5));
-
-        long lastAppliedDuringSnapshotCapture = 3;
-        long lastIndexDuringSnapshotCapture = 5;
-        long electionTerm = 2;
-        String electionVotedFor = "member-2";
-
-        List<Object> snapshotData = Arrays.asList(new MockPayload("1"));
-        final MockSnapshotState snapshotState = new MockSnapshotState(snapshotData);
-
-        org.opendaylight.controller.cluster.raft.Snapshot snapshot = org.opendaylight.controller.cluster.raft.Snapshot
-            .create(SerializationUtils.serialize((Serializable) snapshotData),
-                Arrays.asList(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
-
-        SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
-
-        doAnswer(invocation -> new MockSnapshotState(SerializationUtils.deserialize(
-            invocation.getArgumentAt(0, byte[].class))))
-                .when(mockCohort).deserializePreCarbonSnapshot(any(byte[].class));
-
-        sendMessageToSupport(snapshotOffer);
-
-        assertEquals("Journal log size", 2, context.getReplicatedLog().size());
-        assertEquals("Journal data size", 9, context.getReplicatedLog().dataSize());
-        assertEquals("Last index", lastIndexDuringSnapshotCapture, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", lastAppliedDuringSnapshotCapture, context.getLastApplied());
-        assertEquals("Commit index", lastAppliedDuringSnapshotCapture, context.getCommitIndex());
-        assertEquals("Snapshot term", 1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
-        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
-        assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-
-        verify(mockCohort).applyRecoverySnapshot(snapshotState);
+        verify(mockCohort).applyRecoverySnapshot(snapshotBytes);
     }
 
     @Test
@@ -311,12 +255,11 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
-        doNothing().when(mockCohort).applyRecoverySnapshot(anyObject());
+        doNothing().when(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
 
-        Snapshot snapshot = Snapshot.create(new MockSnapshotState(Arrays.asList(new MockPayload("1"))),
-                Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1, -1, null, null);
+        Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
@@ -342,7 +285,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort, never()).applyRecoverySnapshot(anyObject());
+        verify(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
         verify(mockCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 
@@ -446,8 +389,7 @@ public class RaftActorRecoverySupportTest {
                                                         new ServerInfo("follower1", true),
                                                         new ServerInfo("follower2", true)));
 
-        MockSnapshotState snapshotState = new MockSnapshotState(Arrays.asList(new MockPayload("1")));
-        Snapshot snapshot = Snapshot.create(snapshotState, Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(),
                 -1, -1, -1, -1, electionTerm, electionVotedFor, serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);

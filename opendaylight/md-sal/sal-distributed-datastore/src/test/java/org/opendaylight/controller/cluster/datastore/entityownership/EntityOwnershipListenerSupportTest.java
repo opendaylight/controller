@@ -161,4 +161,25 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         support.addEntityOwnershipListener(entityType1, mockListener2);
         support.removeEntityOwnershipListener(entityType1, mockListener2);
     }
+
+    @Test
+    public void testHasCandidateForEntity() {
+        EntityOwnershipListenerSupport support = new EntityOwnershipListenerSupport(actorContext, "test");
+        DOMEntity entity = new DOMEntity("type", YangInstanceIdentifier.of(QName.create("test", "id")));
+
+        assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
+
+        support.setHasCandidateForEntity(entity);
+        support.setHasCandidateForEntity(entity); // set again - should be noop
+        assertEquals("hasCandidateForEntity", true, support.hasCandidateForEntity(entity));
+
+        support.unsetHasCandidateForEntity(entity);
+        assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
+
+        support.unsetHasCandidateForEntity(entity); // unset again - should be noop
+        assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
+
+        support.setHasCandidateForEntity(entity);
+        assertEquals("hasCandidateForEntity", true, support.hasCandidateForEntity(entity));
+    }
 }

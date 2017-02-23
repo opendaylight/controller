@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -31,9 +30,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
@@ -50,7 +46,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,42 +55,33 @@ import org.slf4j.LoggerFactory;
 public class CarProvider implements CarService {
     private static final Logger log = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
+    private final DataBroker dataProvider;
+    private final EntityOwnershipService ownershipService;
     private static final Logger LOG = LoggerFactory.getLogger(CarProvider.class);
 
     private static final String ENTITY_TYPE = "cars";
-    private static final InstanceIdentifier CARS_IID = InstanceIdentifier.builder(Cars.class).build();
-    private static final DataTreeIdentifier<Cars> CARS_DTID = new DataTreeIdentifier<>(
-            LogicalDatastoreType.CONFIGURATION, CARS_IID);
 
-    private final DataBroker dataProvider;
-    private final DOMDataBroker domDataBroker;
-    private final EntityOwnershipService ownershipService;
-    private final AtomicLong succcessCounter = new AtomicLong();
-    private final AtomicLong failureCounter = new AtomicLong();
+    private AtomicLong succcessCounter = new AtomicLong();
+    private AtomicLong failureCounter = new AtomicLong();
 
     private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
     private final AtomicBoolean registeredListener = new AtomicBoolean();
 
-    private final Collection<ListenerRegistration<DataChangeListener>> carsDclRegistrations =
-            Sets.newConcurrentHashSet();
-    private final Collection<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
-            Sets.newConcurrentHashSet();
-
     private volatile Thread testThread;
     private volatile boolean stopThread;
-    private final AtomicReference<DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort>> commitCohortReg =
-            new AtomicReference<>();
 
-    public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService,
-            DOMDataBroker domDataBroker) {
+    private static final InstanceIdentifier CARS_IID = InstanceIdentifier.builder(Cars.class).build();
+    private static final DataTreeIdentifier<Cars> CARS_DTID = new DataTreeIdentifier<>(
+            LogicalDatastoreType.CONFIGURATION, CARS_IID);
+
+    private Collection<ListenerRegistration<DataChangeListener>> carsDclRegistrations =
+            Sets.newConcurrentHashSet();
+    private Collection<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
+            Sets.newConcurrentHashSet();
+
+    public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService) {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
-        this.domDataBroker = domDataBroker;
-    }
-
-    public void close() {
-        stopThread();
-        unregisterCommitCohort();
     }
 
     private void stopThread() {
@@ -115,7 +101,7 @@ public class CarProvider implements CarService {
         final long inputCount;
 
         // If rate is not provided, or given as zero, then just return.
-        if (input.getRate() == null || input.getRate() == 0) {
+        if ((input.getRate() == null) || (input.getRate() == 0)) {
             log.info("Exiting stress test as no rate is given.");
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
                     .withError(ErrorType.PROTOCOL, "invalid rate")
@@ -184,12 +170,12 @@ public class CarProvider implements CarService {
                         break;
                     }
 
-                    if(count.get() % 1000 == 0) {
+                    if((count.get() % 1000) == 0) {
                         log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
                     }
 
                     // Check if a count is specified in input and we have created that many cars.
-                    if (inputCount != 0 && count.get() >= inputCount) {
+                    if ((inputCount != 0) && (count.get() >= inputCount)) {
                         stopThread = true;
                     }
                 }
@@ -303,56 +289,6 @@ public class CarProvider implements CarService {
             carsDtclRegistrations.clear();
             LOG.info("Unregistered {} CaraDataTreeChangeListener(s)", numListeners);
         }
-        return RpcResultBuilder.<Void>success().buildFuture();
-    }
-
-    @Override
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public Future<RpcResult<Void>> unregisterCommitCohort() {
-        final DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort> reg = commitCohortReg.getAndSet(null);
-        if (reg != null) {
-            try {
-                reg.close();
-                LOG.info("Unregistered commit cohort");
-            } catch (Exception e) {
-                return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
-                        "Error closing commit cohort registration", e).buildFuture();
-            }
-        }
-
-        return RpcResultBuilder.<Void>success().buildFuture();
-    }
-
-    @Override
-    public synchronized Future<RpcResult<Void>> registerCommitCohort() {
-        if (commitCohortReg.get() != null) {
-            return RpcResultBuilder.<Void>success().buildFuture();
-        }
-
-        final DOMDataTreeCommitCohortRegistry commitCohortRegistry = (DOMDataTreeCommitCohortRegistry)
-                domDataBroker.getSupportedExtensions().get(DOMDataTreeCommitCohortRegistry.class);
-
-        if (commitCohortRegistry == null) {
-            // Shouldn't happen
-            return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
-                    "DOMDataTreeCommitCohortRegistry not found").buildFuture();
-        }
-
-        // Note: it may look strange that we specify the CarEntry.QNAME twice in the path below. This must be done in
-        // order to register the commit cohort for CarEntry instances. In the underlying data tree, a yang list is
-        // represented as a MapNode with MapEntryNodes representing the child list entries. Therefore, in order to
-        // address a list entry, you must specify the path argument for the MapNode and the path argument for the
-        // MapEntryNode. In the path below, the first CarEntry.QNAME argument addresses the MapNode and, since we want
-        // to address all list entries, the second path argument is wild-carded by specifying just the CarEntry.QNAME.
-        final YangInstanceIdentifier carEntryPath = YangInstanceIdentifier.builder(
-                YangInstanceIdentifier.of(Cars.QNAME)).node(CarEntry.QNAME).node(CarEntry.QNAME).build();
-        commitCohortReg.set(commitCohortRegistry.registerCommitCohort(
-                new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(
-                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
-                        carEntryPath), new CarEntryDataTreeCommitCohort()));
-
-        LOG.info("Registered commit cohort");
-
         return RpcResultBuilder.<Void>success().buildFuture();
     }
 }

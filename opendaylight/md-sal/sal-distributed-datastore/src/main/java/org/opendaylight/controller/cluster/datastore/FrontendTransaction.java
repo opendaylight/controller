@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import java.util.ArrayDeque;
@@ -109,8 +108,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     }
 
     // Sequence has already been checked
-    abstract @Nullable TransactionSuccess<?> handleRequest(TransactionRequest<?> request,
-            RequestEnvelope envelope, long now) throws RequestException;
+    abstract @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
+            final RequestEnvelope envelope, final long now) throws RequestException;
 
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {
@@ -139,13 +138,5 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
             final RuntimeRequestException failure) {
         recordResponse(envelope.getMessage().getSequence(), failure);
         envelope.sendFailure(failure, executionTime(startTime));
-    }
-
-    @Override
-    public final String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues().add("identifier", getIdentifier())
-                .add("expectedSequence", expectedSequence).add("firstReplaySequence", firstReplaySequence)
-                .add("lastPurgedSequence", lastPurgedSequence)
-                .toString();
     }
 }

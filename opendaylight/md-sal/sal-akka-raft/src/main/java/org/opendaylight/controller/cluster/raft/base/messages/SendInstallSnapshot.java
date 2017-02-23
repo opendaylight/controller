@@ -9,9 +9,8 @@
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteSource;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 
 /**
  * Internal message sent from the SnapshotManager to its associated leader when a snapshot capture is complete to
@@ -19,19 +18,13 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  */
 public final class SendInstallSnapshot {
     private final Snapshot snapshot;
-    private final ByteSource snapshotBytes;
 
-    public SendInstallSnapshot(@Nonnull Snapshot snapshot, @Nonnull ByteSource snapshotBytes) {
+    public SendInstallSnapshot(@Nonnull Snapshot snapshot) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
-        this.snapshotBytes = Preconditions.checkNotNull(snapshotBytes);
     }
 
     @Nonnull
     public Snapshot getSnapshot() {
         return snapshot;
-    }
-
-    public ByteSource getSnapshotBytes() {
-        return snapshotBytes;
     }
 }

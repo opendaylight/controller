@@ -11,9 +11,9 @@ import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Props;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -23,24 +23,27 @@ import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
+import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
  * Registry to look up cluster nodes that have registered for a given RPC.
  *
  * <p>
- * It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor} to maintain this
+ * It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore} to maintain this
  * cluster wide information.
  */
-public class RpcRegistry extends BucketStoreActor<RoutingTable> {
+public class RpcRegistry extends BucketStore<RoutingTable> {
     private final ActorRef rpcRegistrar;
 
     public RpcRegistry(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
-        super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
+        super(config, new RoutingTable(rpcInvoker));
         this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
     }
 
@@ -58,19 +61,19 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     }
 
     @Override
-    protected void handleCommand(final Object message) throws Exception {
+    protected void handleReceive(final Object message) throws Exception {
         if (message instanceof AddOrUpdateRoutes) {
             receiveAddRoutes((AddOrUpdateRoutes) message);
         } else if (message instanceof RemoveRoutes) {
             receiveRemoveRoutes((RemoveRoutes) message);
         } else {
-            super.handleCommand(message);
+            super.handleReceive(message);
         }
     }
 
     private void receiveAddRoutes(final AddOrUpdateRoutes msg) {
         LOG.debug("AddOrUpdateRoutes: {}", msg.getRouteIdentifiers());
-        updateLocalBucket(getLocalData().addRpcs(msg.getRouteIdentifiers()));
+        updateLocalBucket(getLocalBucket().getData().addRpcs(msg.getRouteIdentifiers()));
     }
 
     /**
@@ -80,7 +83,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
      */
     private void receiveRemoveRoutes(final RemoveRoutes msg) {
         LOG.debug("RemoveRoutes: {}", msg.getRouteIdentifiers());
-        updateLocalBucket(getLocalData().removeRpcs(msg.getRouteIdentifiers()));
+        updateLocalBucket(getLocalBucket().getData().removeRpcs(msg.getRouteIdentifiers()));
     }
 
     @Override
@@ -95,7 +98,16 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         for (Entry<Address, Bucket<RoutingTable>> e : buckets.entrySet()) {
             final RoutingTable table = e.getValue().getData();
 
-            final Collection<DOMRpcIdentifier> rpcs = table.getRoutes();
+            final List<DOMRpcIdentifier> rpcs = new ArrayList<>(table.getRoutes().size());
+            for (RouteIdentifier<?, ?, ?> ri : table.getRoutes()) {
+                if (ri instanceof RouteIdentifierImpl) {
+                    final RouteIdentifierImpl id = (RouteIdentifierImpl) ri;
+                    rpcs.add(DOMRpcIdentifier.create(SchemaPath.create(true, id.getType()), id.getRoute()));
+                } else {
+                    LOG.warn("Skipping unsupported route {} from {}", ri, e.getKey());
+                }
+            }
+
             endpoints.put(e.getKey(), rpcs.isEmpty() ? Optional.empty()
                     : Optional.of(new RemoteRpcEndpoint(table.getRpcInvoker(), rpcs)));
         }
@@ -128,15 +140,15 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
      */
     public static class Messages {
         abstract static class AbstractRouteMessage {
-            final List<DOMRpcIdentifier> routeIdentifiers;
+            final List<RouteIdentifier<?, ?, ?>> routeIdentifiers;
 
-            AbstractRouteMessage(final Collection<DOMRpcIdentifier> routeIdentifiers) {
+            AbstractRouteMessage(final List<RouteIdentifier<?, ?, ?>> routeIdentifiers) {
                 Preconditions.checkArgument(routeIdentifiers != null && !routeIdentifiers.isEmpty(),
                         "Route Identifiers must be supplied");
-                this.routeIdentifiers = ImmutableList.copyOf(routeIdentifiers);
+                this.routeIdentifiers = routeIdentifiers;
             }
 
-            List<DOMRpcIdentifier> getRouteIdentifiers() {
+            List<RouteIdentifier<?, ?, ?>> getRouteIdentifiers() {
                 return this.routeIdentifiers;
             }
 
@@ -147,13 +159,13 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         }
 
         public static final class AddOrUpdateRoutes extends AbstractRouteMessage {
-            public AddOrUpdateRoutes(final Collection<DOMRpcIdentifier> routeIdentifiers) {
+            public AddOrUpdateRoutes(final List<RouteIdentifier<?, ?, ?>> routeIdentifiers) {
                 super(routeIdentifiers);
             }
         }
 
         public static final class RemoveRoutes extends AbstractRouteMessage {
-            public RemoveRoutes(final Collection<DOMRpcIdentifier> routeIdentifiers) {
+            public RemoveRoutes(final List<RouteIdentifier<?, ?, ?>> routeIdentifiers) {
                 super(routeIdentifiers);
             }
         }

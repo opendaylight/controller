@@ -117,8 +117,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         Future<?> future;
         do {
             future = commitFuture;
-        }
-        while (future == null);
+        } while (future == null);
 
         return future.cancel(false);
     }

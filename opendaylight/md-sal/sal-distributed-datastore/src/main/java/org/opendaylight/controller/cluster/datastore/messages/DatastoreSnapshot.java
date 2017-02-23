@@ -18,10 +18,7 @@ import javax.annotation.Nullable;
  * Stores a snapshot of the internal state of a data store.
  *
  * @author Thomas Pantelis
- *
- * @deprecated Use {@link org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot} instead.
  */
-@Deprecated
 public class DatastoreSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
 

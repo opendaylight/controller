@@ -14,11 +14,11 @@ import akka.actor.ReceiveTimeout;
 import akka.actor.UntypedActor;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
@@ -42,8 +42,7 @@ class GetSnapshotReplyActor extends UntypedActor {
     @Override
     public void onReceive(Object message) {
         if (message instanceof CaptureSnapshotReply) {
-            Snapshot snapshot = Snapshot.create(
-                    ((CaptureSnapshotReply)message).getSnapshotState(),
+            Snapshot snapshot = Snapshot.create(((CaptureSnapshotReply)message).getSnapshot(),
                     params.captureSnapshot.getUnAppliedEntries(),
                     params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
                     params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),
@@ -52,7 +51,8 @@ class GetSnapshotReplyActor extends UntypedActor {
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 
-            params.replyToActor.tell(new GetSnapshotReply(params.id, snapshot), getSelf());
+            params.replyToActor.tell(new GetSnapshotReply(params.id, SerializationUtils.serialize(snapshot)),
+                    getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         } else if (message instanceof ReceiveTimeout) {
             LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",

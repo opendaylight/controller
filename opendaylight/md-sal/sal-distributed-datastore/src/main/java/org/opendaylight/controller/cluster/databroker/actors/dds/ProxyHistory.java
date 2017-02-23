@@ -24,9 +24,7 @@ import org.opendaylight.controller.cluster.access.client.AbstractClientConnectio
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
-import org.opendaylight.controller.cluster.access.commands.DestroyLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
-import org.opendaylight.controller.cluster.access.commands.PurgeLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -48,9 +46,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private abstract static class AbstractLocal extends ProxyHistory {
         private final DataTree dataTree;
 
-        AbstractLocal(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
+        AbstractLocal(final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier, final DataTree dataTree) {
-            super(parent, connection, identifier);
+            super(connection, identifier);
             this.dataTree = Preconditions.checkNotNull(dataTree);
         }
 
@@ -60,9 +58,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     private abstract static class AbstractRemote extends ProxyHistory {
-        AbstractRemote(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
+        AbstractRemote(final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
-            super(parent, connection, identifier);
+            super(connection, identifier);
         }
     }
 
@@ -76,9 +74,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         private volatile LocalReadWriteProxyTransaction lastSealed;
 
-        Local(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier, final DataTree dataTree) {
-            super(parent, connection, identifier, dataTree);
+        Local(final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier,
+            final DataTree dataTree) {
+            super(connection, identifier, dataTree);
         }
 
         @Override
@@ -106,7 +104,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         ProxyHistory createSuccessor(final AbstractClientConnection<ShardBackendInfo> connection) {
-            return createClient(parent(), connection, getIdentifier());
+            return createClient(connection, getIdentifier());
         }
 
         @Override
@@ -135,9 +133,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     private static final class LocalSingle extends AbstractLocal {
-        LocalSingle(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
+        LocalSingle(final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier, final DataTree dataTree) {
-            super(parent, connection, identifier, dataTree);
+            super(connection, identifier, dataTree);
         }
 
         @Override
@@ -150,14 +148,13 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         ProxyHistory createSuccessor(final AbstractClientConnection<ShardBackendInfo> connection) {
-            return createSingle(parent(), connection, getIdentifier());
+            return createSingle(connection, getIdentifier());
         }
     }
 
     private static final class Remote extends AbstractRemote {
-        Remote(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
-            final LocalHistoryIdentifier identifier) {
-            super(parent, connection, identifier);
+        Remote(final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
+            super(connection, identifier);
         }
 
         @Override
@@ -168,14 +165,14 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         ProxyHistory createSuccessor(final AbstractClientConnection<ShardBackendInfo> connection) {
-            return createClient(parent(), connection, getIdentifier());
+            return createClient(connection, getIdentifier());
         }
     }
 
     private static final class RemoteSingle extends AbstractRemote {
-        RemoteSingle(final AbstractClientHistory parent, final AbstractClientConnection<ShardBackendInfo> connection,
+        RemoteSingle(final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
-            super(parent, connection, identifier);
+            super(connection, identifier);
         }
 
         @Override
@@ -186,7 +183,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         ProxyHistory createSuccessor(final AbstractClientConnection<ShardBackendInfo> connection) {
-            return createSingle(parent(), connection, getIdentifier());
+            return createSingle(connection, getIdentifier());
         }
     }
 
@@ -291,33 +288,30 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private final Lock lock = new ReentrantLock();
     private final LocalHistoryIdentifier identifier;
     private final AbstractClientConnection<ShardBackendInfo> connection;
-    private final AbstractClientHistory parent;
 
     @GuardedBy("lock")
     private final Map<TransactionIdentifier, AbstractProxyTransaction> proxies = new LinkedHashMap<>();
     @GuardedBy("lock")
     private ProxyHistory successor;
 
-    private ProxyHistory(final AbstractClientHistory parent,
-            final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
-        this.parent = Preconditions.checkNotNull(parent);
+    private ProxyHistory(final AbstractClientConnection<ShardBackendInfo> connection,
+            final LocalHistoryIdentifier identifier) {
         this.connection = Preconditions.checkNotNull(connection);
         this.identifier = Preconditions.checkNotNull(identifier);
     }
 
-    static ProxyHistory createClient(final AbstractClientHistory parent,
-            final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {
-        final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new Local(parent, connection, identifier, dataTree.get())
-             : new Remote(parent, connection, identifier);
-    }
-
-    static ProxyHistory createSingle(final AbstractClientHistory parent,
-            final AbstractClientConnection<ShardBackendInfo> connection,
+    static ProxyHistory createClient(final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
         final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new LocalSingle(parent, connection, identifier, dataTree.get())
-             : new RemoteSingle(parent, connection, identifier);
+        return dataTree.isPresent() ? new Local(connection, identifier, dataTree.get())
+             : new Remote(connection, identifier);
+    }
+
+    static ProxyHistory createSingle(final AbstractClientConnection<ShardBackendInfo> connection,
+            final LocalHistoryIdentifier identifier) {
+        final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+        return dataTree.isPresent() ? new LocalSingle(connection, identifier, dataTree.get())
+             : new RemoteSingle(connection, identifier);
     }
 
     @Override
@@ -327,10 +321,6 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     final ActorRef localActor() {
         return connection.localActor();
-    }
-
-    final AbstractClientHistory parent() {
-        return parent;
     }
 
     final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
@@ -373,22 +363,6 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
     }
 
-    final void close() {
-        lock.lock();
-        try {
-            if (successor != null) {
-                successor.close();
-                return;
-            }
-
-            LOG.debug("Proxy {} invoking destroy", this);
-            connection.sendRequest(new DestroyLocalHistoryRequest(getIdentifier(), 1, localActor()),
-                this::onDestroyComplete);
-        } finally {
-            lock.unlock();
-        }
-    }
-
     final void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         connection.sendRequest(request, callback);
     }
@@ -415,23 +389,6 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
 
         return new ReconnectCohort();
-    }
-
-    private void onDestroyComplete(final Response<?, ?> response) {
-        LOG.debug("Proxy {} destroy completed with {}", this, response);
-
-        lock.lock();
-        try {
-            parent.onProxyDestroyed(this);
-            connection.sendRequest(new PurgeLocalHistoryRequest(getIdentifier(), 2, localActor()),
-                this::onPurgeComplete);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void onPurgeComplete(final Response<?, ?> response) {
-        LOG.debug("Proxy {} purge completed with {}", this, response);
     }
 
     @GuardedBy("lock")

@@ -53,6 +53,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>config</classifier>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

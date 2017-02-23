@@ -40,6 +40,6 @@ public class ShardManagerSnapshot implements Serializable {
     }
 
     private Object readResolve() throws ObjectStreamException {
-        return new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(shardList);
+        return org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerSnapshot.forShardList(shardList);
     }
 }

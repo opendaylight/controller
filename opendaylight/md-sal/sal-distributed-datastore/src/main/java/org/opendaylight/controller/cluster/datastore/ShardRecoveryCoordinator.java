@@ -10,13 +10,9 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.io.File;
-import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -34,11 +30,11 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private final ShardDataTree store;
     private final String shardName;
     private final Logger log;
-    private final Snapshot restoreFromSnapshot;
+    private final byte[] restoreFromSnapshot;
 
     private boolean open;
 
-    ShardRecoveryCoordinator(final ShardDataTree store,  final Snapshot restoreFromSnapshot, final String shardName,
+    ShardRecoveryCoordinator(final ShardDataTree store,  final byte[] restoreFromSnapshot, final String shardName,
             final Logger log) {
         this.store = Preconditions.checkNotNull(store);
         this.shardName = Preconditions.checkNotNull(shardName);
@@ -90,37 +86,29 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
      */
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
-        if (!(snapshotState instanceof ShardSnapshotState)) {
-            log.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", snapshotState);
-        }
-
+    public void applyRecoverySnapshot(final byte[] snapshotBytes) {
         log.debug("{}: Applying recovered snapshot", shardName);
 
-        ShardDataTreeSnapshot shardSnapshot = ((ShardSnapshotState)snapshotState).getSnapshot();
+        final ShardDataTreeSnapshot snapshot;
         try {
-            store.applyRecoverySnapshot(shardSnapshot);
+            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
         } catch (Exception e) {
-            final File f = writeRoot("snapshot", shardSnapshot.getRootNode().orElse(null));
-            throw new IllegalStateException(String.format(
-                    "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
-                    shardName, shardSnapshot, f), e);
-        }
-    }
-
-    @Override
-    public Snapshot getRestoreFromSnapshot() {
-        return restoreFromSnapshot;
-    }
-
-    @Override
-    @Deprecated
-    public State deserializePreCarbonSnapshot(byte[] from) {
-        try {
-            return new ShardSnapshotState(ShardDataTreeSnapshot.deserializePreCarbon(from));
-        } catch (IOException e) {
             log.error("{}: failed to deserialize snapshot", shardName, e);
             throw Throwables.propagate(e);
         }
+
+        try {
+            store.applyRecoverySnapshot(snapshot);
+        } catch (Exception e) {
+            final File f = writeRoot("snapshot", snapshot.getRootNode().orElse(null));
+            throw new IllegalStateException(String.format(
+                    "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
+                    shardName, snapshot, f), e);
+        }
+    }
+
+    @Override
+    public byte[] getRestoreFromSnapshot() {
+        return restoreFromSnapshot;
     }
 }

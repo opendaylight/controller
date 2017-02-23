@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import java.util.HashMap;
@@ -17,8 +16,6 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -59,34 +56,26 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
+
+        // FIXME: handle purging of transactions
+
         final TransactionIdentifier id = request.getTarget();
-
-        FrontendTransaction tx;
-        if (request instanceof TransactionPurgeRequest) {
-            tx = transactions.remove(id);
-            if (tx == null) {
-                // We have no record of the transaction, nothing to do
-                LOG.debug("{}: no state for transaction {}, purge is complete", persistenceId(), id);
-                return new TransactionPurgeResponse(id, request.getSequence());
+        FrontendTransaction tx = transactions.get(id);
+        if (tx == null) {
+            // The transaction does not exist and we are about to create it, check sequence number
+            if (request.getSequence() != 0) {
+                LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
+                throw UNSEQUENCED_START;
             }
-        } else {
-            tx = transactions.get(id);
-            if (tx == null) {
-                // The transaction does not exist and we are about to create it, check sequence number
-                if (request.getSequence() != 0) {
-                    LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
-                    throw UNSEQUENCED_START;
-                }
 
-                tx = createTransaction(request, id);
-                transactions.put(id, tx);
-            } else {
-                final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
-                if (maybeReplay.isPresent()) {
-                    final TransactionSuccess<?> replay = maybeReplay.get();
-                    LOG.debug("{}: envelope {} replaying response {}", persistenceId(), envelope, replay);
-                    return replay;
-                }
+            tx = createTransaction(request, id);
+            transactions.put(id, tx);
+        } else {
+            final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
+            if (maybeReplay.isPresent()) {
+                final TransactionSuccess<?> replay = maybeReplay.get();
+                LOG.debug("{}: envelope {} replaying response {}", persistenceId(), envelope, replay);
+                return replay;
             }
         }
 
@@ -117,11 +106,5 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     abstract FrontendTransaction createReadyTransaction(TransactionIdentifier id, DataTreeModification mod)
         throws RequestException;
 
-    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues().add("identifier", getIdentifier())
-                .add("persistenceId", persistenceId).add("transactions", transactions).toString();
-    }
+    abstract ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod);
 }

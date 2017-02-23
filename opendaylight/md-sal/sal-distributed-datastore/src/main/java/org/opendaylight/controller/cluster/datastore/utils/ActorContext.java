@@ -272,7 +272,7 @@ public class ActorContext {
      *
      * @param shardName the name of the local shard that needs to be found
      */
-    public Future<ActorRef> findLocalShardAsync(final String shardName) {
+    public Future<ActorRef> findLocalShardAsync( final String shardName) {
         Future<Object> future = executeOperationAsync(shardManager,
                 new FindLocalShard(shardName, true), shardInitializationTimeout);
 

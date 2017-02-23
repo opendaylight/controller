@@ -14,17 +14,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteSource;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -125,23 +120,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     @Override
     public SnapshotManager getSnapshotManager() {
         SnapshotManager snapshotManager = super.getSnapshotManager();
-        snapshotManager.setCreateSnapshotConsumer(out -> { });
-
-        snapshotManager.setSnapshotCohort(new RaftActorSnapshotCohort() {
-            @Override
-            public State deserializeSnapshot(ByteSource snapshotBytes) throws IOException {
-                return ByteState.of(snapshotBytes.read());
-            }
-
-            @Override
-            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
-            }
-
-            @Override
-            public void applySnapshot(State snapshotState) {
-            }
-        });
-
+        snapshotManager.setCreateSnapshotRunnable(() -> { });
         return snapshotManager;
     }
 

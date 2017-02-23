@@ -17,8 +17,6 @@ import org.opendaylight.controller.cluster.access.commands.ReadTransactionReques
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
@@ -56,9 +54,6 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
             return handleReadTransaction((ReadTransactionRequest) request);
         } else if (request instanceof TransactionAbortRequest) {
             return handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
-        } else if (request instanceof TransactionPurgeRequest) {
-            // No-op for now
-            return new TransactionPurgeResponse(request.getTarget(), request.getSequence());
         } else {
             throw new UnsupportedRequestException(request);
         }

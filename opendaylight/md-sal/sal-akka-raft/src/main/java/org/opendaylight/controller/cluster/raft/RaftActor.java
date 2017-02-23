@@ -368,7 +368,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void switchBehavior(SwitchBehavior message) {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
-            if (newState == RaftState.Leader || newState == RaftState.Follower) {
+            if ( newState == RaftState.Leader || newState == RaftState.Follower) {
                 switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
                     AbstractRaftActorBehavior.createBehavior(context, message.getNewState()));
                 getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
@@ -399,7 +399,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-        OnDemandRaftState.AbstractBuilder<?> builder = newOnDemandRaftStateBuilder()
+        OnDemandRaftState.Builder builder = OnDemandRaftState.builder()
                 .commitIndex(context.getCommitIndex())
                 .currentTerm(context.getTermInformation().getCurrentTerm())
                 .inMemoryJournalDataSize(replicatedLog().dataSize())
@@ -441,10 +441,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         sender().tell(builder.build(), self());
 
-    }
-
-    protected OnDemandRaftState.AbstractBuilder<?> newOnDemandRaftStateBuilder() {
-        return OnDemandRaftState.builder();
     }
 
     private void handleBehaviorChange(BehaviorState oldBehaviorState, RaftActorBehavior currentBehavior) {
@@ -766,7 +762,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected abstract void onRecoveryComplete();
 
     /**
-     * Returns the RaftActorSnapshotCohort to participate in snapshot captures.
+     * Returns the RaftActorSnapshotCohort to participate in persistence recovery.
      */
     @Nonnull
     protected abstract RaftActorSnapshotCohort getRaftActorSnapshotCohort();

@@ -20,9 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,8 +86,8 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
         }
     }
 
-    public static Props props(Collection<String> shardNames, String datastoreType,
-            ShardManagerSnapshot shardManagerSnapshot, ActorRef replyToActor, String id, Duration receiveTimeout) {
+    public static Props props(Collection<String> shardNames, String datastoreType, byte[] shardManagerSnapshot,
+            ActorRef replyToActor, String id, Duration receiveTimeout) {
         return Props.create(ShardManagerGetSnapshotReplyActor.class, new Params(shardNames, datastoreType,
                 shardManagerSnapshot, replyToActor, id, receiveTimeout));
     }
@@ -96,13 +95,13 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
     private static final class Params {
         final Collection<String> shardNames;
         final String datastoreType;
-        final ShardManagerSnapshot shardManagerSnapshot;
+        final byte[] shardManagerSnapshot;
         final ActorRef replyToActor;
         final String id;
         final Duration receiveTimeout;
 
-        Params(Collection<String> shardNames, String datastoreType, ShardManagerSnapshot shardManagerSnapshot,
-                ActorRef replyToActor, String id, Duration receiveTimeout) {
+        Params(Collection<String> shardNames, String datastoreType, byte[] shardManagerSnapshot, ActorRef replyToActor,
+                String id, Duration receiveTimeout) {
             this.shardNames = shardNames;
             this.datastoreType = datastoreType;
             this.shardManagerSnapshot = shardManagerSnapshot;

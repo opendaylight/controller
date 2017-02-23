@@ -31,6 +31,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
 
 
 public class GossiperTest {
@@ -61,6 +63,7 @@ public class GossiperTest {
     @After
     public void resetMocks() {
         reset(mockGossiper);
+
     }
 
     @Test
@@ -82,6 +85,7 @@ public class GossiperTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReceiveGossipStatus_WhenSenderIsNonMemberShouldIgnore() {
+
         Address nonMember = new Address("tcp", "non-member");
         GossipStatus remoteStatus = new GossipStatus(nonMember, mock(Map.class));
 
@@ -91,12 +95,14 @@ public class GossiperTest {
         verify(mockGossiper, times(0)).getSender();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testReceiveGossipWhenNotAddressedToSelfShouldIgnore() {
-        doNothing().when(mockGossiper).updateRemoteBuckets(anyMap());
         Address notSelf = new Address("tcp", "not-self");
-        mockGossiper.receiveGossip(new GossipEnvelope(notSelf, notSelf, mock(Map.class)));
+
+        GossipEnvelope envelope = new GossipEnvelope(notSelf, notSelf, mock(Map.class));
+        doNothing().when(mockGossiper).updateRemoteBuckets(anyMap());
+        mockGossiper.receiveGossip(envelope);
         verify(mockGossiper, times(0)).updateRemoteBuckets(anyMap());
     }
 
@@ -106,10 +112,7 @@ public class GossiperTest {
      * @return instance of Gossiper class
      */
     private static Gossiper createGossiper() {
-        final RemoteRpcProviderConfig config =
-                new RemoteRpcProviderConfig.Builder("unit-test")
-                        .withConfigReader(ConfigFactory::load).build();
-        final Props props = Gossiper.testProps(config);
+        final Props props = Gossiper.testProps(new RemoteRpcProviderConfig(system.settings().config()));
         final TestActorRef<Gossiper> testRef = TestActorRef.create(system, props, "testGossiper");
 
         return testRef.underlyingActor();

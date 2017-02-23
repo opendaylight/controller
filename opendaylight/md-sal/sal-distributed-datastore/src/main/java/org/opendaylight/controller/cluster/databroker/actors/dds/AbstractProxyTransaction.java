@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -35,7 +34,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionCommitSucc
 import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -323,7 +321,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
             // This is a terminal request, hence we do not need to record it
             LOG.debug("Transaction {} abort completed", this);
-            purge();
+            parent.completeTransaction(this);
         });
     }
 
@@ -356,7 +354,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
                     // This is a terminal request, hence we do not need to record it
                     LOG.debug("Transaction {} directCommit completed", this);
-                    purge();
+                    parent.completeTransaction(this);
                 });
 
                 return ret;
@@ -416,24 +414,9 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                 ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
             }
 
-            onPreCommitComplete(req);
+            recordSuccessfulRequest(req);
+            LOG.debug("Transaction {} preCommit completed", this);
         });
-    }
-
-    private void onPreCommitComplete(final TransactionRequest<?> req) {
-        /*
-         * The backend has agreed that the transaction has entered PRE_COMMIT phase, meaning it will be committed
-         * to storage after the timeout completes.
-         *
-         * All state has been replicated to the backend, hence we do not need to keep it around. Retain only
-         * the precommit request, so we know which request to use for resync.
-         */
-        LOG.debug("Transaction {} preCommit completed, clearing successfulRequests", this);
-        successfulRequests.clear();
-
-        // TODO: this works, but can contain some useless state (like batched operations). Create an empty
-        //       equivalent of this request and store that.
-        recordSuccessfulRequest(req);
     }
 
     final void doCommit(final VotingFuture<?> ret) {
@@ -450,16 +433,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             }
 
             LOG.debug("Transaction {} doCommit completed", this);
-            purge();
-        });
-    }
-
-    private void purge() {
-        successfulRequests.clear();
-
-        final TransactionRequest<?> req = new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
-        sendRequest(req, t -> {
-            LOG.debug("Transaction {} purge completed", this);
             parent.completeTransaction(this);
         });
     }
@@ -557,15 +530,16 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract boolean isSnapshotOnly();
 
-    abstract void doDelete(YangInstanceIdentifier path);
+    abstract void doDelete(final YangInstanceIdentifier path);
 
-    abstract void doMerge(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+    abstract void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data);
 
-    abstract void doWrite(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+    abstract void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data);
 
-    abstract CheckedFuture<Boolean, ReadFailedException> doExists(YangInstanceIdentifier path);
+    abstract CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path);
 
-    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(YangInstanceIdentifier path);
+    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(
+            final YangInstanceIdentifier path);
 
     abstract void doSeal();
 
@@ -601,9 +575,4 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      */
     abstract void forwardToLocal(LocalProxyTransaction successor, TransactionRequest<?> request,
             Consumer<Response<?, ?>> callback);
-
-    @Override
-    public final String toString() {
-        return MoreObjects.toStringHelper(this).add("identifier", getIdentifier()).add("state", state).toString();
-    }
 }

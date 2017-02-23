@@ -18,7 +18,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -83,7 +82,8 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
         assertEquals(1, persistedSnapshots.size());
 
-        List<Object> snapshottedState = MockRaftActor.fromState(persistedSnapshots.get(0).getState());
+        @SuppressWarnings("unchecked")
+        List<Object> snapshottedState = (List<Object>)MockRaftActor.toObject(persistedSnapshots.get(0).getState());
         assertEquals("Incorrect Snapshot", Lists.newArrayList(payload0, payload1, payload2, payload3),
                 snapshottedState);
 

@@ -51,6 +51,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>config</classifier>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}" -->
@@ -59,6 +60,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>entityownershipconfig</classifier>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="configuration/initial/akka.conf" -->
@@ -67,6 +69,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>akkaconf</classifier>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="configuration/factory/akka.conf" override="true" -->
@@ -75,6 +78,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>factoryakkaconf</classifier>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="configuration/initial/module-shards.conf" -->
@@ -83,6 +87,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>moduleshardconf</classifier>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="configuration/initial/modules.conf" -->
@@ -91,6 +96,7 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>moduleconf</classifier>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="etc/org.opendaylight.controller.cluster.datastore.cfg" -->
@@ -99,6 +105,7 @@
             <version>${project.version}</version>
             <type>cfg</type>
             <classifier>datastore</classifier>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

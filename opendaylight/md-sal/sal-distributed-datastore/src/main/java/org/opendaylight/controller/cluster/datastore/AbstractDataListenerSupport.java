@@ -9,18 +9,21 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventListener;
+import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrationMessage;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class AbstractDataListenerSupport<L extends EventListener, M extends ListenerRegistrationMessage,
         D extends DelayedListenerRegistration<L, M>, R extends ListenerRegistration<L>>
-                extends LeaderLocalDelegateFactory<M, R> {
+                extends LeaderLocalDelegateFactory<M, R, Optional<DataTreeCandidate>> {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ArrayList<D> delayedListenerRegistrations = new ArrayList<>();
@@ -65,7 +68,8 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
 
         final ListenerRegistration<L> registration;
         if (hasLeader && message.isRegisterOnAllInstances() || isLeader) {
-            registration = createDelegate(message);
+            final Entry<R, Optional<DataTreeCandidate>> res = createDelegate(message);
+            registration = res.getKey();
         } else {
             log.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 

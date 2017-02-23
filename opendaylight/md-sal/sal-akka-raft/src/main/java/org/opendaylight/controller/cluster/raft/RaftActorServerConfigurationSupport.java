@@ -628,9 +628,7 @@ class RaftActorServerConfigurationSupport {
         public void initiate() {
             String serverId = getRemoveServerContext().getOperation().getServerId();
             raftContext.removePeer(serverId);
-            AbstractLeader leader = (AbstractLeader)raftActor.getCurrentBehavior();
-            leader.removeFollower(serverId);
-            leader.updateMinReplicaCount();
+            ((AbstractLeader)raftActor.getCurrentBehavior()).removeFollower(serverId);
 
             persistNewServerConfiguration(getRemoveServerContext());
         }

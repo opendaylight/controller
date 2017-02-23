@@ -58,7 +58,7 @@ import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
-import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -170,7 +170,7 @@ public class ClusterAdminRpcServiceTest {
     public void testAddShardReplica() throws Exception {
         String name = "testAddShardReplica";
         String moduleShardsConfig = "module-shards-cars-member-1.conf";
-        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name )
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars").build();
 
         MemberNode newReplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
@@ -421,7 +421,7 @@ public class ClusterAdminRpcServiceTest {
     public void testAddReplicasForAllShards() throws Exception {
         String name = "testAddReplicasForAllShards";
         String moduleShardsConfig = "module-shards-member1.conf";
-        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name )
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",

@@ -10,11 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
@@ -25,21 +21,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DOMDataTreeChangeListener,
         RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration,
         ListenerRegistration<DOMDataTreeChangeListener>> {
-
-    private final Set<ActorSelection> listenerActors = Sets.newConcurrentHashSet();
-
     DataTreeChangeListenerSupport(final Shard shard) {
         super(shard);
     }
 
-    Collection<ActorSelection> getListenerActors() {
-        return new ArrayList<>(listenerActors);
-    }
-
     @Override
-    ListenerRegistration<DOMDataTreeChangeListener> createDelegate(
+    Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> createDelegate(
             final RegisterDataTreeChangeListener message) {
-        final ActorSelection dataChangeListenerPath = selectActor(message.getDataTreeChangeListenerPath());
+        ActorSelection dataChangeListenerPath = selectActor(message.getDataTreeChangeListenerPath());
 
         // Notify the listener if notifications should be enabled or not
         // If this shard is the leader then it will enable notifications else
@@ -62,20 +51,7 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
         getShard().getDataStore().notifyOfInitialData(message.getPath(),
                 regEntry.getKey().getInstance(), regEntry.getValue());
 
-        listenerActors.add(dataChangeListenerPath);
-        final ListenerRegistration<DOMDataTreeChangeListener> delegate = regEntry.getKey();
-        return new ListenerRegistration<DOMDataTreeChangeListener>() {
-            @Override
-            public DOMDataTreeChangeListener getInstance() {
-                return delegate.getInstance();
-            }
-
-            @Override
-            public void close() {
-                listenerActors.remove(dataChangeListenerPath);
-                delegate.close();
-            }
-        };
+        return regEntry;
     }
 
     @Override

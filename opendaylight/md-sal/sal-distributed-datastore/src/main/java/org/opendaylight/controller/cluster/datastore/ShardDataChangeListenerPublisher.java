@@ -22,5 +22,5 @@ interface ShardDataChangeListenerPublisher extends ShardDataTreeNotificationPubl
     ShardDataChangeListenerPublisher newInstance();
 
     <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L>
-            registerDataChangeListener(YangInstanceIdentifier path, L listener, DataChangeScope scope);
+            registerDataChangeListener(final YangInstanceIdentifier path,final L listener, final DataChangeScope scope);
 }

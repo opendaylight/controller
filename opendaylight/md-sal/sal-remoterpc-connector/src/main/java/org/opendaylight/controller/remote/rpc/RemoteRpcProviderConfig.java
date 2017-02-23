@@ -24,9 +24,7 @@ public class RemoteRpcProviderConfig extends CommonConfig {
     protected static final String TAG_RPC_REGISTRY_PATH = "rpc-registry-path";
     protected static final String TAG_RPC_MGR_PATH = "rpc-manager-path";
     protected static final String TAG_ASK_DURATION = "ask-duration";
-
     private static final String TAG_GOSSIP_TICK_INTERVAL = "gossip-tick-interval";
-    private static final String TAG_RPC_REGISTRY_PERSISTENCE_ID = "rpc-registry-persistence-id";
 
     //locally cached values
     private Timeout cachedAskDuration;
@@ -58,10 +56,7 @@ public class RemoteRpcProviderConfig extends CommonConfig {
 
     public String getRpcRegistryPath() {
         return get().getString(TAG_RPC_REGISTRY_PATH);
-    }
 
-    public String getRpcRegistryPersistenceId() {
-        return get().getString(TAG_RPC_REGISTRY_PERSISTENCE_ID);
     }
 
     public String getRpcManagerPath() {
@@ -123,8 +118,6 @@ public class RemoteRpcProviderConfig extends CommonConfig {
             configHolder.put(TAG_ASK_DURATION, "15s");
             configHolder.put(TAG_GOSSIP_TICK_INTERVAL, "500ms");
 
-            // persistence
-            configHolder.put(TAG_RPC_REGISTRY_PERSISTENCE_ID, "remote-rpc-registry");
         }
 
         public Builder gossipTickInterval(final String interval) {

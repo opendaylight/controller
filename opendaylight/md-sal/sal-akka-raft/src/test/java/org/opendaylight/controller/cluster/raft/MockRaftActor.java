@@ -16,10 +16,10 @@ import akka.actor.Props;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,10 +27,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
 
@@ -46,7 +44,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     protected final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
     private RaftActorRecoverySupport raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
-    private final Snapshot restoreFromSnapshot;
+    private final byte[] restoreFromSnapshot;
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
     private final Function<Runnable, Void> pauseLeaderFunction;
 
@@ -171,43 +169,38 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void applyRecoverySnapshot(Snapshot.State newState) {
-        recoveryCohortDelegate.applyRecoverySnapshot(newState);
-        applySnapshotState(newState);
+    public void applyRecoverySnapshot(byte[] bytes) {
+        recoveryCohortDelegate.applyRecoverySnapshot(bytes);
+        applySnapshotBytes(bytes);
     }
 
-    private void applySnapshotState(Snapshot.State newState) {
-        if (newState instanceof MockSnapshotState) {
-            state.clear();
-            state.addAll(((MockSnapshotState)newState).getState());
+    private void applySnapshotBytes(byte[] bytes) {
+        if (bytes.length == 0) {
+            return;
         }
-    }
 
-    @Override
-    public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
-        LOG.info("{}: createSnapshot called", persistenceId());
-        snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
-    }
-
-    @Override
-    public void applySnapshot(Snapshot.State newState) {
-        LOG.info("{}: applySnapshot called", persistenceId());
-        applySnapshotState(newState);
-        snapshotCohortDelegate.applySnapshot(newState);
-    }
-
-    @Override
-    public Snapshot.State deserializeSnapshot(ByteSource snapshotBytes) {
         try {
-            return (Snapshot.State) SerializationUtils.deserialize(snapshotBytes.read());
-        } catch (IOException e) {
-            throw new RuntimeException("Error deserializing state", e);
+            Object data = toObject(bytes);
+            if (data instanceof List) {
+                state.clear();
+                state.addAll((List<?>) data);
+            }
+        } catch (ClassNotFoundException | IOException e) {
+            Throwables.propagate(e);
         }
     }
 
     @Override
-    public Snapshot.State deserializePreCarbonSnapshot(byte[] from) {
-        return new MockSnapshotState(SerializationUtils.deserialize(from));
+    public void createSnapshot(ActorRef actorRef) {
+        LOG.info("{}: createSnapshot called", persistenceId());
+        snapshotCohortDelegate.createSnapshot(actorRef);
+    }
+
+    @Override
+    public void applySnapshot(byte [] snapshot) {
+        LOG.info("{}: applySnapshot called", persistenceId());
+        applySnapshotBytes(snapshot);
+        snapshotCohortDelegate.applySnapshot(snapshot);
     }
 
     @Override
@@ -250,12 +243,23 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
     }
 
-    public static List<Object> fromState(Snapshot.State from) {
-        if (from instanceof MockSnapshotState) {
-            return ((MockSnapshotState)from).getState();
+    public static Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
+        Object obj = null;
+        ByteArrayInputStream bis = null;
+        ObjectInputStream ois = null;
+        try {
+            bis = new ByteArrayInputStream(bs);
+            ois = new ObjectInputStream(bis);
+            obj = ois.readObject();
+        } finally {
+            if (bis != null) {
+                bis.close();
+            }
+            if (ois != null) {
+                ois.close();
+            }
         }
-
-        throw new IllegalStateException("Unexpected snapshot State: " + from);
+        return obj;
     }
 
     public ReplicatedLog getReplicatedLog() {
@@ -263,7 +267,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public Snapshot getRestoreFromSnapshot() {
+    public byte[] getRestoreFromSnapshot() {
         return restoreFromSnapshot;
     }
 
@@ -288,7 +292,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private DataPersistenceProvider dataPersistenceProvider;
         private ActorRef roleChangeNotifier;
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
-        private Snapshot restoreFromSnapshot;
+        private byte[] restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.absent();
         private final Class<A> actorClass;
         private Function<Runnable, Void> pauseLeaderFunction;
@@ -333,7 +337,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             return self();
         }
 
-        public T restoreFromSnapshot(Snapshot newRestoreFromSnapshot) {
+        public T restoreFromSnapshot(byte[] newRestoreFromSnapshot) {
             this.restoreFromSnapshot = newRestoreFromSnapshot;
             return self();
         }
@@ -361,55 +365,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     public static class Builder extends AbstractBuilder<Builder, MockRaftActor> {
         private Builder() {
             super(MockRaftActor.class);
-        }
-    }
-
-    public static class MockSnapshotState implements Snapshot.State {
-        private static final long serialVersionUID = 1L;
-
-        private final List<Object> state;
-
-        public MockSnapshotState(List<Object> state) {
-            this.state = state;
-        }
-
-        public List<Object> getState() {
-            return state;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (state == null ? 0 : state.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            MockSnapshotState other = (MockSnapshotState) obj;
-            if (state == null) {
-                if (other.state != null) {
-                    return false;
-                }
-            } else if (!state.equals(other.state)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "MockSnapshotState [state=" + state + "]";
         }
     }
 }

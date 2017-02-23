@@ -215,5 +215,5 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         context().executeInActor(this::shutdown);
     }
 
-    abstract Long resolveShardForPath(YangInstanceIdentifier path);
+    abstract Long resolveShardForPath(final YangInstanceIdentifier path);
 }

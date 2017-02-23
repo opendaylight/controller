@@ -80,7 +80,6 @@
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
     <module>cds-access-client</module>
-    <module>cds-dom-api</module>
 
     <!-- sal clustering configuration -->
     <module>sal-clustering-config</module>

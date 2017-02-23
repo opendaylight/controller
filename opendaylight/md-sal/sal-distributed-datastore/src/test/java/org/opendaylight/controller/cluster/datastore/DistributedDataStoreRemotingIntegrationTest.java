@@ -36,7 +36,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -57,14 +56,10 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransact
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
-import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
-import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -136,9 +131,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Before
     public void setUp() {
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
-
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
@@ -161,9 +153,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         JavaTestKit.shutdownActorSystem(leaderSystem);
         JavaTestKit.shutdownActorSystem(followerSystem);
         JavaTestKit.shutdownActorSystem(follower2System);
-
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
     }
 
     private void initDatastoresWithCars(final String type) {
@@ -218,7 +207,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars(testName);
 
         String followerCarShardName = "member-2-shard-cars-" + testName;
-        InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 2, ApplyJournalEntries.class);
+        InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 2, ApplyJournalEntries.class );
 
         DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
@@ -521,7 +510,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars(testName);
 
         String followerCarShardName = "member-2-shard-cars-" + testName;
-        InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 1, ApplyJournalEntries.class);
+        InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 1, ApplyJournalEntries.class );
 
         // Write top-level car container from the follower so it uses a remote Tx.
 
@@ -1021,56 +1010,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             followerTestKit.doCommit(rwTx.ready());
         }
-    }
-
-    @Test
-    public void testInstallSnapshot() throws Exception {
-        final String testName = "testInstallSnapshot";
-        final String leaderCarShardName = "member-1-shard-cars-" + testName;
-        final String followerCarShardName = "member-2-shard-cars-" + testName;
-
-        // Setup a saved snapshot on the leader. The follower will startup with no data and the leader should
-        // install a snapshot to sync the follower.
-
-        TipProducingDataTree tree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
-        tree.setSchemaContext(SchemaContextHelper.full());
-
-        ContainerNode carsNode = CarsModel.newCarsNode(
-                CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000))));
-        AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
-
-        NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.EMPTY);
-        Snapshot initialSnapshot = Snapshot.create(
-                new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
-                Collections.emptyList(), 5, 1, 5, 1, 1, null, null);
-        InMemorySnapshotStore.addSnapshot(leaderCarShardName, initialSnapshot);
-
-        InMemorySnapshotStore.addSnapshotSavedLatch(leaderCarShardName);
-        InMemorySnapshotStore.addSnapshotSavedLatch(followerCarShardName);
-
-        initDatastoresWithCars(testName);
-
-        Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
-                CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, readOptional.isPresent());
-        assertEquals("Node", carsNode, readOptional.get());
-
-        verifySnapshot(InMemorySnapshotStore.waitForSavedSnapshot(leaderCarShardName, Snapshot.class),
-                initialSnapshot, snapshotRoot);
-
-        verifySnapshot(InMemorySnapshotStore.waitForSavedSnapshot(followerCarShardName, Snapshot.class),
-                initialSnapshot, snapshotRoot);
-    }
-
-    private static void verifySnapshot(Snapshot actual, Snapshot expected, NormalizedNode<?, ?> expRoot) {
-        assertEquals("Snapshot getLastAppliedTerm", expected.getLastAppliedTerm(), actual.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
-        assertEquals("Snapshot getLastTerm", expected.getLastTerm(), actual.getLastTerm());
-        assertEquals("Snapshot getLastIndex", expected.getLastIndex(), actual.getLastIndex());
-        assertEquals("Snapshot state type", ShardSnapshotState.class, actual.getState().getClass());
-        MetadataShardDataTreeSnapshot shardSnapshot =
-                (MetadataShardDataTreeSnapshot) ((ShardSnapshotState)actual.getState()).getSnapshot();
-        assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().get());
     }
 
     private static void sendDatastoreContextUpdate(final AbstractDataStore dataStore, final Builder builder) {

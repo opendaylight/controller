@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
-import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 
 public abstract class AbstractShardManagerCreator<T extends AbstractShardManagerCreator<T>> {

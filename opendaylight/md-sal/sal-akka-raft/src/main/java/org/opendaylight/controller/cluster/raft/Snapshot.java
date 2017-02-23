@@ -17,10 +17,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
  *
  * @author Moiz Raja
  * @author Thomas Pantelis
- *
- * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.Snapshot} instead.
  */
-@Deprecated
 public class Snapshot implements Serializable {
     private static final long serialVersionUID = -8298574936724056236L;
 

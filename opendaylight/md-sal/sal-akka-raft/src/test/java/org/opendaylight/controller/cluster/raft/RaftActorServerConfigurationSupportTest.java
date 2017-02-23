@@ -26,15 +26,11 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.io.ByteSource;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +58,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -172,7 +167,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
         ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.getSnapshot().getState());
+        @SuppressWarnings("unchecked")
+        List<Object> snapshotState = (List<Object>) MockRaftActor.toObject(applySnapshot.getSnapshot().getState());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
@@ -252,7 +248,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
         ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.getSnapshot().getState());
+        @SuppressWarnings("unchecked")
+        List<Object> snapshotState = (List<Object>) MockRaftActor.toObject(applySnapshot.getSnapshot().getState());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
@@ -850,68 +847,48 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServer() throws Exception {
+    public void testRemoveServer() {
         LOG.info("testRemoveServer starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
         configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
-        final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);
-        final String follower2ActorId = actorFactory.generateActorId(FOLLOWER_ID2);
-        final String follower2ActorPath = actorFactory.createTestActorPath(follower2ActorId);
+        final String followerActorId = actorFactory.generateActorId(FOLLOWER_ID);
+        final String followerActorPath = actorFactory.createTestActorPath(followerActorId);
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
-        final String downNodeId = "downNode";
-        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(MockLeaderRaftActor.props(
-                ImmutableMap.of(FOLLOWER_ID, follower1ActorPath, FOLLOWER_ID2, follower2ActorPath, downNodeId, ""),
+        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
+                MockLeaderRaftActor.props(ImmutableMap.of(FOLLOWER_ID, followerActorPath),
                         initialActorContext).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
 
         final TestActorRef<MessageCollectorActor> leaderCollector =
                 newLeaderCollectorActor(leaderActor.underlyingActor());
 
-        TestActorRef<MessageCollectorActor> follower1Collector = actorFactory.createTestActor(
-                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+        TestActorRef<MessageCollectorActor> collector = actorFactory.createTestActor(MessageCollectorActor.props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId()),
                         actorFactory.generateActorId("collector"));
-        final TestActorRef<CollectingMockRaftActor> follower1Actor = actorFactory.createTestActor(
-                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
-                        FOLLOWER_ID2, follower2ActorPath, downNodeId, ""), configParams, NO_PERSISTENCE,
-                        follower1Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), follower1ActorId);
-
-        TestActorRef<MessageCollectorActor> follower2Collector = actorFactory.createTestActor(
-                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                        actorFactory.generateActorId("collector"));
-        final TestActorRef<CollectingMockRaftActor> follower2Actor = actorFactory.createTestActor(
-                CollectingMockRaftActor.props(FOLLOWER_ID2, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
-                        FOLLOWER_ID, follower1ActorPath, downNodeId, ""), configParams, NO_PERSISTENCE,
-                        follower2Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), follower2ActorId);
-
-        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
-        follower1Actor.underlyingActor().waitForInitializeBehaviorComplete();
-        follower2Actor.underlyingActor().waitForInitializeBehaviorComplete();
+        actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
+                        configParams, NO_PERSISTENCE, collector).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                followerActorId);
 
         leaderActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());
         RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"),
                 RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
-        ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
         assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
-                votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
-
-        applyState = MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
-        verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
-                votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
+                votingServer(LEADER_ID));
 
         RaftActorBehavior currentBehavior = leaderActor.underlyingActor().getCurrentBehavior();
         assertTrue("Expected Leader", currentBehavior instanceof Leader);
-        assertEquals("Follower ids size", 2, ((Leader)currentBehavior).getFollowerIds().size());
+        assertEquals("Follower ids size", 0, ((Leader)currentBehavior).getFollowerIds().size());
 
-        MessageCollectorActor.expectFirstMatching(follower1Collector, ServerRemoved.class);
+        MessageCollectorActor.expectFirstMatching(collector, ServerRemoved.class);
 
         LOG.info("testRemoveServer ending");
     }
@@ -1541,19 +1518,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             super(id, peerAddresses, config, persistent, collectorActor);
             snapshotCohortDelegate = new RaftActorSnapshotCohort() {
                 @Override
-                public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
+                public void createSnapshot(ActorRef actorRef) {
+                    actorRef.tell(new CaptureSnapshotReply(new byte[0]), actorRef);
                 }
 
                 @Override
-                public void applySnapshot(
-                        org.opendaylight.controller.cluster.raft.persisted.Snapshot.State snapshotState) {
-                }
-
-                @Override
-                public org.opendaylight.controller.cluster.raft.persisted.Snapshot.State deserializeSnapshot(
-                        ByteSource snapshotBytes) {
-                    throw new UnsupportedOperationException();
+                public void applySnapshot(byte[] snapshotBytes) {
                 }
             };
         }
@@ -1594,13 +1564,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
-            MockSnapshotState snapshotState = new MockSnapshotState(new ArrayList<>(getState()));
-            if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream.get());
+        public void createSnapshot(ActorRef actorRef) {
+            try {
+                actorRef.tell(new CaptureSnapshotReply(RaftActorTest.fromObject(getState()).toByteArray()), actorRef);
+            } catch (Exception e) {
+                LOG.error("createSnapshot failed", e);
             }
-
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
         }
 
         static Props props(Map<String, String> peerAddresses, RaftActorContext fromContext) {

@@ -24,8 +24,6 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Kamal Rameshan
  */
 public interface ConfigParams {
-    int MEGABYTE = 1048576;
-
     /**
      * Returns the minimum number of entries to be present in the in-memory Raft log for a snapshot to be taken.
      *
@@ -116,19 +114,4 @@ public interface ConfigParams {
      */
     String getCustomRaftPolicyImplementationClass();
 
-    /**
-     * Returns the directory in which to create temp files.
-     *
-     * @return the directory in which to create temp files.
-     */
-    @Nonnull
-    String getTempFileDirectory();
-
-    /**
-     * Returns the threshold in terms of number of bytes when streaming data before it should switch from storing in
-     * memory to buffering to a file.
-     *
-     * @return the threshold in terms of number of bytes.
-     */
-    int getFileBackedStreamingThreshold();
 }

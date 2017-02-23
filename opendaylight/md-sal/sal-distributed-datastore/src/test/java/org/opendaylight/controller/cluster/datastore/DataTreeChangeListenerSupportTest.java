@@ -38,7 +38,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeChang
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
-import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Await;
@@ -158,7 +157,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     private Entry<MockDataTreeChangeListener, ActorSelection> registerChangeListener(final YangInstanceIdentifier path,
             final int expectedEvents) {
         MockDataTreeChangeListener listener = new MockDataTreeChangeListener(expectedEvents);
-        ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TestModel.TEST_PATH));
+        ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener));
 
         try {
             RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply)

@@ -32,7 +32,7 @@ public class DatastoreContextIntrospectorTest {
     public void testUpdate() {
         DatastoreContext context = DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL).build();
-        DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(context);
+        DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(context );
 
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("shard-transaction-idle-timeout-in-minutes", "31");
@@ -122,7 +122,7 @@ public class DatastoreContextIntrospectorTest {
     public void testUpdateWithInvalidValues() {
         DatastoreContext context = DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL).build();
-        DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(context);
+        DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(context );
 
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("shard-transaction-idle-timeout-in-minutes", "0"); // bad - must be > 0

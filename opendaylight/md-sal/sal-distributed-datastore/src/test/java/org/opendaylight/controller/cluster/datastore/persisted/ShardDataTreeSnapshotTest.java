@@ -10,18 +10,13 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -42,15 +37,9 @@ public class ShardDataTreeSnapshotTest {
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (final ObjectOutputStream out = new ObjectOutputStream(bos)) {
-            snapshot.serialize(out);
-        }
+        byte[] serialized = snapshot.serialize();
 
-        ShardDataTreeSnapshot deserialized;
-        try (final ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            deserialized = ShardDataTreeSnapshot.deserialize(in);
-        }
+        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(serialized);
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
         assertEquals("rootNode present", true, actualNode.isPresent());
@@ -68,15 +57,9 @@ public class ShardDataTreeSnapshotTest {
         Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> expMetadata =
                 ImmutableMap.of(TestShardDataTreeSnapshotMetadata.class, new TestShardDataTreeSnapshotMetadata("test"));
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode, expMetadata);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (final ObjectOutputStream out = new ObjectOutputStream(bos)) {
-            snapshot.serialize(out);
-        }
+        byte[] serialized = snapshot.serialize();
 
-        ShardDataTreeSnapshot deserialized;
-        try (final ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            deserialized = ShardDataTreeSnapshot.deserialize(in);
-        }
+        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(serialized);
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
         assertEquals("rootNode present", true, actualNode.isPresent());
@@ -86,15 +69,15 @@ public class ShardDataTreeSnapshotTest {
     }
 
     @Test
-    @Deprecated
     public void testPreBoronShardDataTreeSnapshot() throws Exception {
         NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        byte[] serialized = SerializationUtils.serializeNormalizedNode(expectedNode);
+        PreBoronShardDataTreeSnapshot snapshot = new PreBoronShardDataTreeSnapshot(expectedNode);
+        byte[] serialized = snapshot.serialize();
 
-        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserializePreCarbon(serialized);
+        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(serialized);
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
         assertEquals("rootNode present", true, actualNode.isPresent());
