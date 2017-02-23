@@ -287,7 +287,6 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             msg -> msg.getToIndex() == expIndex);
     }
 
-    @SuppressWarnings("unchecked")
     protected void verifySnapshot(String prefix, Snapshot snapshot, long lastAppliedTerm,
             long lastAppliedIndex, long lastTerm, long lastIndex)
                     throws Exception {

@@ -75,7 +75,6 @@ public class ShardManagerSnapshot implements Serializable {
         return this.shardList;
     }
 
-    @SuppressWarnings("static-method")
     private Object writeReplace() {
         return new Proxy(this);
     }
