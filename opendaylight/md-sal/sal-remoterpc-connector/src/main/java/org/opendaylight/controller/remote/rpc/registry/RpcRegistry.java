@@ -59,6 +59,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
+        LOG.trace("RpcRegistry handleCommand: {}", message);
         if (message instanceof AddOrUpdateRoutes) {
             receiveAddRoutes((AddOrUpdateRoutes) message);
         } else if (message instanceof RemoveRoutes) {
@@ -85,22 +86,26 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void onBucketRemoved(final Address address, final Bucket<RoutingTable> bucket) {
+        LOG.trace("RpcRegistry onBucketRemoved: {} {}", address, bucket);
         rpcRegistrar.tell(new UpdateRemoteEndpoints(ImmutableMap.of(address, Optional.empty())), ActorRef.noSender());
     }
 
     @Override
     protected void onBucketsUpdated(final Map<Address, Bucket<RoutingTable>> buckets) {
+        LOG.trace("RpcRegistry onBucketsUpdated: {}", buckets);
         final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = new HashMap<>(buckets.size());
 
         for (Entry<Address, Bucket<RoutingTable>> e : buckets.entrySet()) {
             final RoutingTable table = e.getValue().getData();
 
             final Collection<DOMRpcIdentifier> rpcs = table.getRoutes();
+            LOG.trace("RpcRegistry onBucketsUpdated putting endpoint: {} {}", e.getKey(), rpcs);
             endpoints.put(e.getKey(), rpcs.isEmpty() ? Optional.empty()
                     : Optional.of(new RemoteRpcEndpoint(table.getRpcInvoker(), rpcs)));
         }
 
         if (!endpoints.isEmpty()) {
+            LOG.trace("RpcRegistry onBucketsUpdated telling to update: {}", endpoints);
             rpcRegistrar.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
         }
     }
