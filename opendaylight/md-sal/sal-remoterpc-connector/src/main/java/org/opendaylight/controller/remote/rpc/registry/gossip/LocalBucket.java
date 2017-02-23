@@ -57,4 +57,10 @@ final class LocalBucket<T extends BucketData<T>> {
         bumpVersion = false;
         return (++version & 0xffff_ffffL) == 0;
     }
+
+    @Override
+    public String toString() {
+        return "BucketImpl{version=" + version + ", bumpVersion=" + bumpVersion + ", data=" + data + '}';
+    }
+
 }

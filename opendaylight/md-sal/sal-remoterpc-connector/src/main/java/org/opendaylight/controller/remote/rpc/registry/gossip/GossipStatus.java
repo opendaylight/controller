@@ -30,4 +30,10 @@ final class GossipStatus implements Serializable {
     Map<Address, Long> versions() {
         return versions;
     }
+
+    @Override
+    public String toString() {
+        return "GossipStatus{from=" + from + ", versions=" + versions + '}';
+    }
+
 }

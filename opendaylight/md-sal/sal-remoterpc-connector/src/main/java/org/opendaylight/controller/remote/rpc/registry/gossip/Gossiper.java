@@ -182,7 +182,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         removePeer(member.address());
-        LOG.debug("Removed member [{}], Active member list [{}]", member.address(), clusterMembers);
+        LOG.debug("Removed member [{}], Active member list [{}], Peers [{}], Buckets [{}]",
+            member.address(), clusterMembers, peers, bucketStore);
     }
 
     private void addPeer(final Address address) {
@@ -211,7 +212,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         addPeer(member.address());
-        LOG.debug("Added member [{}], Active member list [{}]", member.address(), clusterMembers);
+        LOG.debug("Added member [{}], Active member list [{}], Peers [{}], Buckets [{}]",
+            member.address(), clusterMembers, peers, bucketStore);
     }
 
     /**
@@ -256,16 +258,19 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     @VisibleForTesting
     void receiveGossipStatus(final GossipStatus status) {
+        LOG.trace("Gossiper receiveGossipStatus: {}", status);
         // Don't accept messages from non-members
         if (peers.containsKey(status.from())) {
             // FIXME: sender should be part of GossipStatus
             final ActorRef sender = getSender();
+            LOG.trace("Gossiper receiveGossipStatus handling sender: {}", sender);
             bucketStore.getBucketVersions(versions ->  processRemoteStatus(sender, status, versions));
         }
     }
 
     private void processRemoteStatus(final ActorRef remote, final GossipStatus status,
             final Map<Address, Long> localVersions) {
+        LOG.trace("Gossiper processRemoteStatus: {} {} {}", remote, status, localVersions);
         final Map<Address, Long> remoteVersions = status.versions();
 
         //diff between remote list and local
@@ -294,15 +299,20 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         if (!localIsOlder.isEmpty()) {
+            LOG.trace("Status to send from {} to {}: {}", selfAddress, remote.path().address(), localVersions);
             remote.tell(new GossipStatus(selfAddress, localVersions), getSelf());
+        } else {
+            LOG.trace("Local has no older versions.");
         }
 
         if (!localIsNewer.isEmpty()) {
             //send newer buckets to remote
             bucketStore.getBucketsByMembers(localIsNewer, buckets -> {
-                LOG.trace("Buckets to send from {}: {}", selfAddress, buckets);
+                LOG.trace("Buckets to send from {} to {}: {}", selfAddress, remote.path().address(), buckets);
                 remote.tell(new GossipEnvelope(selfAddress, remote.path().address(), buckets), getSelf());
             });
+        } else {
+            LOG.trace("Local has no newer versions.");
         }
     }
 
@@ -313,6 +323,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     @VisibleForTesting
     void receiveGossip(final GossipEnvelope envelope) {
+        LOG.trace("Gossiper receiveGossip: {}", envelope);
         //TODO: Add more validations
         if (!selfAddress.equals(envelope.to())) {
             LOG.trace("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
@@ -329,6 +340,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     @VisibleForTesting
     void updateRemoteBuckets(final Map<Address, ? extends Bucket<?>> buckets) {
+        LOG.trace("Gossiper updateRemoteBuckets: {}", buckets);
         bucketStore.updateRemoteBuckets(buckets);
     }
 
@@ -340,7 +352,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     @VisibleForTesting
     void getLocalStatusAndSendTo(final ActorSelection remoteGossiper) {
         bucketStore.getBucketVersions(versions -> {
-            LOG.trace("Sending bucket versions to [{}]", remoteGossiper);
+            LOG.trace("Sending bucket versions from [{}] to [{}]: {}", selfAddress, remoteGossiper, versions);
             /*
              * XXX: we are leaking our reference here. That may be useful for establishing buckets monitoring,
              *      but can we identify which bucket is the local one?
