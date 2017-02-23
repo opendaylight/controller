@@ -165,7 +165,6 @@ public class Snapshot implements Serializable {
         return serverConfig;
     }
 
-    @SuppressWarnings("static-method")
     private Object writeReplace() {
         return new Proxy(this);
     }

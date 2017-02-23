@@ -100,7 +100,6 @@ public class DatastoreSnapshot implements Serializable {
         return shardSnapshots;
     }
 
-    @SuppressWarnings("static-method")
     private Object writeReplace() {
         return new Proxy(this);
     }
@@ -158,7 +157,6 @@ public class DatastoreSnapshot implements Serializable {
             return snapshot;
         }
 
-        @SuppressWarnings("static-method")
         private Object writeReplace() {
             return new Proxy(this);
         }
