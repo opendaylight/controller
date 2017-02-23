@@ -256,16 +256,19 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     @VisibleForTesting
     void receiveGossipStatus(final GossipStatus status) {
+        LOG.trace("Gossiper receiveGossipStatus: {}", status);
         // Don't accept messages from non-members
         if (peers.containsKey(status.from())) {
             // FIXME: sender should be part of GossipStatus
             final ActorRef sender = getSender();
+            LOG.trace("Gossiper receiveGossipStatus handling sender: {}", sender);
             bucketStore.getBucketVersions(versions ->  processRemoteStatus(sender, status, versions));
         }
     }
 
     private void processRemoteStatus(final ActorRef remote, final GossipStatus status,
             final Map<Address, Long> localVersions) {
+        LOG.trace("Gossiper processGossipStatus: {} {} {}", remote, status, localVersion);
         final Map<Address, Long> remoteVersions = status.versions();
 
         //diff between remote list and local
@@ -300,7 +303,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         if (!localIsNewer.isEmpty()) {
             //send newer buckets to remote
             bucketStore.getBucketsByMembers(localIsNewer, buckets -> {
-                LOG.trace("Buckets to send from {}: {}", selfAddress, buckets);
+                LOG.trace("Buckets to send from {} to {}: {}", selfAddress, remote.path().address(), buckets);
                 remote.tell(new GossipEnvelope(selfAddress, remote.path().address(), buckets), getSelf());
             });
         }
