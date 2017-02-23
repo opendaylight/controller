@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRe
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -225,6 +226,9 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         } else if (request instanceof AbortLocalTransactionRequest) {
             LOG.debug("Forwarding abort {} to successor {}", request, successor);
             successor.abort();
+        } else if (request instanceof TransactionPurgeRequest) {
+            LOG.debug("Forwarding purge {} to successor {}", request, successor);
+            successor.purge();
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }

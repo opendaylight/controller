@@ -454,7 +454,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
-    private void purge() {
+    void purge() {
         successfulRequests.clear();
 
         final TransactionRequest<?> req = new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());

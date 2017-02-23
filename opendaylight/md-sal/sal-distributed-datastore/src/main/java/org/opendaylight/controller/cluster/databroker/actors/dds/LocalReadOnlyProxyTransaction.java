@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.access.commands.AbortLocalTransaction
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
+import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -126,6 +127,9 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
         } else if (request instanceof AbortLocalTransactionRequest) {
             LOG.debug("Forwarding abort {} to successor {}", request, successor);
             successor.abort();
+        } else if (request instanceof TransactionPurgeRequest) {
+            LOG.debug("Forwarding purge {} to successor {}", request, successor);
+            successor.purge();
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }
