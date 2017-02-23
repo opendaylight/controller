@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.Futures;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
+import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
@@ -39,6 +40,7 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlInput;
@@ -73,6 +75,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
+    private FlappingSingletonService flappingSingletonService;
 
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
@@ -216,7 +219,23 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public Future<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton() {
-        return null;
+        LOG.debug("unregister-flapping-singleton received.");
+
+        if (flappingSingletonService == null) {
+            final RpcError rpcError = RpcResultBuilder
+                    .newError(ErrorType.APPLICATION, "missing-registration", "No flapping-singleton registration present.");
+            final RpcResult<UnregisterFlappingSingletonOutput> result =
+                    RpcResultBuilder.<UnregisterFlappingSingletonOutput>failed().withRpcError(rpcError).build();
+            return Futures.immediateFuture(result);
+        }
+
+        final long flapCount = flappingSingletonService.setInactive();
+        flappingSingletonService = null;
+
+        final UnregisterFlappingSingletonOutput output =
+                new UnregisterFlappingSingletonOutputBuilder().setFlapCount(flapCount).build();
+
+        return Futures.immediateFuture(RpcResultBuilder.success(output).build());
     }
 
     @Override
@@ -260,7 +279,17 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public Future<RpcResult<Void>> registerFlappingSingleton() {
-        return null;
+        LOG.debug("Received register-flapping-singleton.");
+
+        if (flappingSingletonService != null) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.RPC, "Registration present.", "flappin-singleton already registered");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+        }
+
+        flappingSingletonService = new FlappingSingletonService(singletonService);
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
