@@ -23,6 +23,8 @@ import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience access to {@link BucketStoreActor}. Used mostly by {@link Gossiper}.
@@ -32,6 +34,8 @@ import java.util.function.Consumer;
 @Beta
 @VisibleForTesting
 public final class BucketStoreAccess {
+    private static final Logger LOG = LoggerFactory.getLogger(BucketStoreAccess.class);
+
     private final ActorContext context;
     private final Timeout timeout;
 
@@ -55,10 +59,12 @@ public final class BucketStoreAccess {
     }
 
     void getBucketVersions(final Consumer<Map<Address, Long>> callback) {
+        LOG.trace("BucketStoreAccess getBucketVersions: {}", callback);
         Patterns.ask(context.parent(), Singletons.GET_BUCKET_VERSIONS, timeout).onComplete(new OnComplete<Object>() {
             @SuppressWarnings("unchecked")
             @Override
             public void onComplete(final Throwable failure, final Object success) {
+                LOG.trace("BucketStoreAccess getBucketVersions complete: {}", success);
                 if (failure == null) {
                     callback.accept((Map<Address, Long>) success);
                 }
