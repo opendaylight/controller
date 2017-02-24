@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_1c02e409",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStoreActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-24T17:40:31Z",
+      "side": 1,
+      "message": "We do this in line 369...",
+      "range": {
+        "startLine": 288,
+        "startChar": 17,
+        "endLine": 288,
+        "endChar": 23
+      },
+      "revId": "1b6cb51f34be9ddb5550428674d1753265f3bf18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
