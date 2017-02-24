@@ -140,6 +140,30 @@
       "revId": "4488623d3235570322a2f9eeb95355826e834c30",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e6602dd1",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FlappingSingletonService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-24T12:50:09Z",
+      "side": 1,
+      "message": "I recommend to keep the current \"careful\" implementation for now, in order to allow Robot testing sooner. But add TODOs to change to the \"direct\" implemetation to expose the bug when test jobs are stable.",
+      "parentUuid": "fafc7978_6bafe87d",
+      "range": {
+        "startLine": 52,
+        "startChar": 36,
+        "endLine": 52,
+        "endChar": 44
+      },
+      "revId": "4488623d3235570322a2f9eeb95355826e834c30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
