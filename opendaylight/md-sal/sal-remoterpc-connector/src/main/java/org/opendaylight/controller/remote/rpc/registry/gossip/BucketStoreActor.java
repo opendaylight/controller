@@ -285,6 +285,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             bucket.getWatchActor().ifPresent(ref -> removeWatch(addr, ref));
             onBucketRemoved(addr, bucket);
         }
+        versions.remove(addr);
     }
 
     /**
