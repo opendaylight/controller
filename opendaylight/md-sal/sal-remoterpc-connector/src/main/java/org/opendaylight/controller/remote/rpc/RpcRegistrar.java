@@ -68,6 +68,7 @@ final class RpcRegistrar extends AbstractUntypedActor {
          * Note that when an RPC moves from one remote node to another, we also do not want to expose the gap,
          * hence we register all new implementations before closing all registrations.
          */
+        LOG.trace("updateRemoteEndpoints: endpoints={}", endpoints);
         final Collection<DOMRpcImplementationRegistration<?>> prevRegs = new ArrayList<>(endpoints.size());
 
         for (Entry<Address, Optional<RemoteRpcEndpoint>> e : endpoints.entrySet()) {
@@ -77,10 +78,12 @@ final class RpcRegistrar extends AbstractUntypedActor {
             final Optional<RemoteRpcEndpoint> maybeEndpoint = e.getValue();
             if (maybeEndpoint.isPresent()) {
                 final RemoteRpcEndpoint endpoint = maybeEndpoint.get();
+                LOG.trace("updateRemoteEndpoints adding: endpoint={}", endpoint);
                 final RemoteRpcImplementation impl = new RemoteRpcImplementation(endpoint.getRouter(), config);
                 prevReg = regs.put(e.getKey(), rpcProviderService.registerRpcImplementation(impl,
                     endpoint.getRpcs()));
             } else {
+                LOG.trace("updateRemoteEndpoints removing: key={}", e.getKey());
                 prevReg = regs.remove(e.getKey());
             }
 
@@ -90,6 +93,7 @@ final class RpcRegistrar extends AbstractUntypedActor {
         }
 
         for (DOMRpcImplementationRegistration<?> r : prevRegs) {
+            LOG.trace("updateRemoteEndpoints closing: registration={}", r);
             r.close();
         }
     }

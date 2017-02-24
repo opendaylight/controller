@@ -211,6 +211,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     protected final void updateLocalBucket(final T data) {
         final LocalBucket<T> local = getLocalBucket();
         final boolean bumpIncarnation = local.setData(data);
+        LOG.trace("Putting local version {} {}", selfAddress, local.getVersion());
         versions.put(selfAddress, local.getVersion());
 
         if (bumpIncarnation) {
@@ -262,30 +263,37 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      * @param members requested members
      */
     private void getBucketsByMembers(final Collection<Address> members) {
+        LOG.trace("BucketStoreActor getBucketsByMembers: {}", members);
         Map<Address, Bucket<T>> buckets = new HashMap<>();
 
         //first add the local bucket if asked
         if (members.contains(selfAddress)) {
+            LOG.trace("BucketStoreActor getBucketsByMembers adds local bucket.");
             buckets.put(selfAddress, getLocalBucket().snapshot());
         }
 
         //then get buckets for requested remote nodes
         for (Address address : members) {
             if (remoteBuckets.containsKey(address)) {
+                LOG.trace("BucketStoreActor getBucketsByMembers adds local copy of remote bucket for: {}", address);
                 buckets.put(address, remoteBuckets.get(address));
             }
         }
 
+        LOG.trace("BucketStoreActor getBucketsByMembers replying to {} with bucket map {}", getSender(), buckets);
         getSender().tell(buckets, getSelf());
     }
 
     private void removeBucket(final Address addr) {
+        LOG.trace("removeBucket: address={}", addr);
         final Bucket<T> bucket = remoteBuckets.remove(addr);
         if (bucket != null) {
+            LOG.trace("removeBucket unwatching: address={}", addr);
             bucket.getWatchActor().ifPresent(ref -> removeWatch(addr, ref));
             onBucketRemoved(addr, bucket);
         }
         versions.remove(addr);
+        LOG.trace("removeBucket end: versions={}", versions);
     }
 
     /**
@@ -326,7 +334,9 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
                     remoteVersion);
                 continue;
             }
+            // LOG.trace("Putting remote bucket {} {}", addr, receivedBucket);
             newBuckets.put(addr, receivedBucket);
+            // LOG.trace("Putting remote version {} {}", addr, remoteVersion);
             versions.put(addr, remoteVersion);
             final Bucket<T> prevBucket = remoteBuckets.put(addr, receivedBucket);
 
@@ -338,7 +348,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
                 curRef.ifPresent(ref -> addWatch(addr, ref));
             }
 
-            LOG.debug("Updating bucket from {} to version {}", entry.getKey(), remoteVersion);
+            LOG.debug("Updated bucket from {} to version {}", entry.getKey(), remoteVersion);
         }
 
         LOG.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);

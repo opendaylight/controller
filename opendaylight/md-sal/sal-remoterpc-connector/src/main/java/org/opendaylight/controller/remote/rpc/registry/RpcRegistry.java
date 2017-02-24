@@ -59,6 +59,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
+        LOG.trace("RpcRegistry handleCommand: {}", message);
         if (message instanceof AddOrUpdateRoutes) {
             receiveAddRoutes((AddOrUpdateRoutes) message);
         } else if (message instanceof RemoveRoutes) {
@@ -69,7 +70,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     }
 
     private void receiveAddRoutes(final AddOrUpdateRoutes msg) {
-        LOG.debug("AddOrUpdateRoutes: {}", msg.getRouteIdentifiers());
+        LOG.debug("AddOrUpdateRoutes: msg={}", msg);
         updateLocalBucket(getLocalData().addRpcs(msg.getRouteIdentifiers()));
     }
 
@@ -85,22 +86,26 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void onBucketRemoved(final Address address, final Bucket<RoutingTable> bucket) {
+        LOG.trace("onBucketRemoved: address={} bucket={}", address, bucket);
         rpcRegistrar.tell(new UpdateRemoteEndpoints(ImmutableMap.of(address, Optional.empty())), ActorRef.noSender());
     }
 
     @Override
     protected void onBucketsUpdated(final Map<Address, Bucket<RoutingTable>> buckets) {
+        LOG.trace("onBucketUpdated: buckets={}", buckets);
         final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = new HashMap<>(buckets.size());
 
         for (Entry<Address, Bucket<RoutingTable>> e : buckets.entrySet()) {
             final RoutingTable table = e.getValue().getData();
 
             final Collection<DOMRpcIdentifier> rpcs = table.getRoutes();
+            LOG.trace("onBucketUpdated preparing: key={} rpcs={}", e.getKey(), rpcs);
             endpoints.put(e.getKey(), rpcs.isEmpty() ? Optional.empty()
                     : Optional.of(new RemoteRpcEndpoint(table.getRpcInvoker(), rpcs)));
         }
 
         if (!endpoints.isEmpty()) {
+            LOG.trace("onBucketUpdated: telling registrar about endpoints={}", endpoints);
             rpcRegistrar.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
         }
     }
@@ -120,6 +125,11 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
         public Set<DOMRpcIdentifier> getRpcs() {
             return rpcs;
+        }
+
+        @Override
+        public String toString() {
+            return "RemoteRpcEndpoint{" + "router=" + router + ", rpcs=" + rpcs + '}';
         }
     }
 
