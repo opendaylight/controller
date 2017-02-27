@@ -79,9 +79,13 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     @Override
     public void onSessionInitiated(ProviderContext session) {
         this.dataBroker = session.getSALService(DataBroker.class);
-        this.dstReg = session.addRpcImplementation( DsbenchmarkService.class, this );
+        this.dstReg = session.addRpcImplementation(DsbenchmarkService.class, this);
         listenerProvider.setDataBroker(dataBroker);
-        setTestOperData(this.execStatus.get(), testsCompleted);
+        try {
+            setTestOperData(this.execStatus.get(), testsCompleted);
+        } catch (Exception e) {
+            LOG.warn("Working around Bug 6793, ignoring exception from setTestOperData: {}", e);
+        }
 
         LOG.info("DsbenchmarkProvider Session Initiated");
     }
@@ -96,7 +100,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     public Future<RpcResult<Void>> cleanupStore() {
         cleanupTestStore();
         LOG.info("Data Store cleaned up");
-        return Futures.immediateFuture( RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -104,7 +108,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
         // Check if there is a test in progress
-        if ( execStatus.compareAndSet(ExecStatus.Idle, ExecStatus.Executing) == false ) {
+        if (execStatus.compareAndSet(ExecStatus.Idle, ExecStatus.Executing) == false) {
             LOG.info("Test in progress");
             return RpcResultBuilder.success(new StartTestOutputBuilder()
                     .setStatus(StartTestOutput.Status.TESTINPROGRESS)
@@ -137,15 +141,15 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
             this.testsCompleted++;
 
         } catch (Exception e) {
-            LOG.error( "Test error: {}", e.toString());
-            execStatus.set( ExecStatus.Idle );
+            LOG.error("Test error: {}", e.toString());
+            execStatus.set(ExecStatus.Idle);
             return RpcResultBuilder.success(new StartTestOutputBuilder()
                     .setStatus(StartTestOutput.Status.FAILED)
                     .build()).buildFuture();
         }
 
         LOG.info("Test finished");
-        setTestOperData( ExecStatus.Idle, testsCompleted);
+        setTestOperData(ExecStatus.Idle, testsCompleted);
         execStatus.set(ExecStatus.Idle);
 
         // Get the number of data change events and cleanup the data change listeners
@@ -165,7 +169,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         return RpcResultBuilder.success(output).buildFuture();
     }
 
-    private void setTestOperData( ExecStatus sts, long tstCompl ) {
+    private void setTestOperData(ExecStatus sts, long tstCompl) {
         TestStatus status = new TestStatusBuilder()
                 .setExecStatus(sts)
                 .setTestsCompleted(tstCompl)
