@@ -9,13 +9,18 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
+import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
+import org.opendaylight.controller.clustering.it.provider.impl.YnlListener;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
@@ -63,6 +68,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private final RpcProviderRegistry rpcRegistry;
     private final BindingAwareBroker.RpcRegistration<OdlMdsalLowlevelControlService> registration;
+    private final NotificationPublishService notificationPublishService;
+    private final NotificationService notificationService;
     private final SchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
@@ -73,6 +80,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>> routedRegistrations =
             new HashMap<>();
 
+    private Map<String, ListenerRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
+
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
     private FlappingSingletonService flappingSingletonService;
@@ -80,13 +89,18 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
                                      final ClusterSingletonServiceProvider singletonService,
-                                     final SchemaService schemaService) {
+                                     final SchemaService schemaService,
+                                     final NotificationPublishService notificationPublishService,
+                                     final NotificationService notificationService) {
         this.rpcRegistry = rpcRegistry;
         this.domRpcService = domRpcService;
         this.singletonService = singletonService;
         this.schemaService = schemaService;
+        this.notificationPublishService = notificationPublishService;
+        this.notificationService = notificationService;
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
+
 
         codec = BindingToNormalizedNodeCodecFactory.newInstance(
                 GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy());
@@ -121,8 +135,16 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> publishNotifications(PublishNotificationsInput input) {
-        return null;
+    public Future<RpcResult<Void>> publishNotifications(final PublishNotificationsInput input) {
+        LOG.debug("publish-notifications, input: {}", input);
+
+        final PublishNotificationsTask task = new PublishNotificationsTask(notificationPublishService, input.getId(),
+                input.getSeconds(), input.getNotificationsPerSecond());
+
+        final SettableFuture<RpcResult<Void>> settableFuture = SettableFuture.create();
+        task.start(settableFuture);
+
+        return settableFuture;
     }
 
     @Override
@@ -151,8 +173,20 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeYnl(SubscribeYnlInput input) {
-        return null;
+    public Future<RpcResult<Void>> subscribeYnl(final SubscribeYnlInput input) {
+
+        LOG.debug("subscribe-ynl, input: {}", input);
+
+        if (ynlRegistrations.containsKey(input.getId())) {
+            final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
+                    "There is already ynl listener registered for this id: " + input.getId());
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+        }
+
+        ynlRegistrations.put(input.getId(),
+                notificationService.registerNotificationListener(new YnlListener(input.getId())));
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -303,8 +337,21 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(UnsubscribeYnlInput input) {
-        return null;
+    public Future<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
+        LOG.debug("Received unsubscribe-ynl, input: {}", input);
+
+        if (!ynlRegistrations.containsKey(input.getId())) {
+            final RpcError rpcError = RpcResultBuilder
+                    .newError(ErrorType.APPLICATION, "missing-registration", "No ynl listener with this id registered.");
+            final RpcResult<UnsubscribeYnlOutput> result =
+                    RpcResultBuilder.<UnsubscribeYnlOutput>failed().withRpcError(rpcError).build();
+            return Futures.immediateFuture(result);
+        }
+
+        final ListenerRegistration<YnlListener> registration = ynlRegistrations.get(input.getId());
+        final UnsubscribeYnlOutput output = registration.getInstance().getOutput();
+
+        return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeYnlOutput>success().withResult(output).build());
     }
 
     @Override
