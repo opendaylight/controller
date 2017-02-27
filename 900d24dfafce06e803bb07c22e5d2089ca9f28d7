@@ -22,6 +22,30 @@
       "revId": "900d24dfafce06e803bb07c22e5d2089ca9f28d7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_27efccea",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FlappingSingletonService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-02-27T08:44:30Z",
+      "side": 1,
+      "message": "https://bugs.opendaylight.org/show_bug.cgi?id\u003d7855",
+      "parentUuid": "fafc7978_6140a707",
+      "range": {
+        "startLine": 78,
+        "startChar": 15,
+        "endLine": 78,
+        "endChar": 18
+      },
+      "revId": "900d24dfafce06e803bb07c22e5d2089ca9f28d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
