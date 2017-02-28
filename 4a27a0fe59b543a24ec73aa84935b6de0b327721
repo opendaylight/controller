@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_1b514036",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-28T11:22:15Z",
+      "side": 1,
+      "message": "Why do you create your own BindingToNormalizedNodeCodec instance instead of obtaining the global one via the OSGi service registry?",
+      "revId": "4a27a0fe59b543a24ec73aa84935b6de0b327721",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
