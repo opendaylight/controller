@@ -8,19 +8,19 @@
 --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
-    <artifactId>sal-parent</artifactId>
-    <groupId>org.opendaylight.controller</groupId>
-    <version>1.5.0-SNAPSHOT</version>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-dom-xsql-config</artifactId>
-  <description>Configuration files for md-sal</description>
+  <version>1.5.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <properties>
-      <!-- Optional TODO: Rename your configfile to taste -->
-      <configfile>04-xsql.xml</configfile>
-  </properties>
+  <description>Configuration files for md-sal</description>
+
   <build>
     <plugins>
         <plugin>
@@ -36,7 +36,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.build.directory}/classes/${configfile}</file>
+                  <file>${project.build.directory}/classes/04-xsql.xml</file>
                   <type>xml</type>
                   <classifier>config</classifier>
                 </artifact>
@@ -47,10 +47,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-      <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-      <tag>HEAD</tag>
-      <url>https://git.opendaylight.org/gerrit/gitweb?p=controller.git;a=summary</url>
-   </scm>
 </project>
