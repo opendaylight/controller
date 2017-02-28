@@ -10,13 +10,18 @@
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>sal-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>md-sal-config</artifactId>
+  <version>1.5.0-SNAPSHOT</version>
   <description>Configuration files for md-sal</description>
   <packaging>jar</packaging>
+
   <build>
     <plugins>
         <plugin>
