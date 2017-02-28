@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.mdsal</groupId>
-    <artifactId>binding-parent</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
@@ -13,29 +13,6 @@
   <artifactId>sal-parent</artifactId>
   <version>1.5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <properties>
-    <jmxGeneratorPath>${project.build.directory}/generated-sources/config-binding</jmxGeneratorPath>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>0.6.0-SNAPSHOT</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <modules>
     <module>mdsal-artifacts</module>
@@ -126,30 +103,6 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
   </scm>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>yang-jmx-generator-plugin</artifactId>
-            <version>0.6.0-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>
-  </build>
 
   <profiles>
     <profile>
