@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>sal-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <artifactId>config-parent</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+    <relativePath>../../config/config-parent</relativePath>
   </parent>
 
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-clustering-commons</artifactId>
+  <version>1.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>
@@ -133,102 +135,66 @@
   </dependencies>
 
   <build>
-      <plugins>
-          <plugin>
-              <groupId>org.opendaylight.yangtools</groupId>
-              <artifactId>yang-maven-plugin</artifactId>
-              <executions>
-                  <execution>
-                      <goals>
-                          <goal>generate-sources</goal>
-                      </goals>
-                      <configuration>
-                          <codeGenerators>
-                              <generator>
-                                  <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
-                                  <outputBaseDir>${salGeneratorPath}</outputBaseDir>
-                              </generator>
-                              <generator>
-                                  <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
-                                  <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
-                                  <additionalConfiguration>
-                                      <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
-                                  </additionalConfiguration>
-                              </generator>
-                              <generator>
-                                  <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
-                                  <outputBaseDir>target/site/models</outputBaseDir>
-                              </generator>
-                          </codeGenerators>
-                          <inspectDependencies>true</inspectDependencies>
-                      </configuration>
-                  </execution>
-              </executions>
-          </plugin>
-          <plugin>
-              <groupId>org.jacoco</groupId>
-              <artifactId>jacoco-maven-plugin</artifactId>
-              <configuration>
-                  <includes>
-                      <include>org.opendaylight.controller.*</include>
-                  </includes>
-                  <excludes>
-                      <exclude>org.opendaylight.controller.protobuff.*</exclude>
-                  </excludes>
-                  <check>false</check>
-              </configuration>
-              <executions>
-                  <execution>
-                      <id>pre-test</id>
-                      <goals>
-                          <goal>prepare-agent</goal>
-                      </goals>
-                  </execution>
-                  <execution>
-                      <id>post-test</id>
-                      <goals>
-                          <goal>report</goal>
-                      </goals>
-                      <phase>test</phase>
-                  </execution>
-              </executions>
-          </plugin>
-          <plugin>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>maven-bundle-plugin</artifactId>
-              <extensions>true</extensions>
-              <configuration>
-              <instructions>
-                  <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                  <Export-Package>org.opendaylight.controller.cluster.schema.provider.impl, {local-packages}</Export-Package>
-              </instructions>
-              </configuration>
-          </plugin>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jar-plugin</artifactId>
-              <executions>
-                  <execution>
-                      <goals>
-                          <goal>test-jar</goal>
-                      </goals>
-                  </execution>
-              </executions>
-          </plugin>
-          <plugin>
-             <groupId>org.apache.maven.plugins</groupId>
-             <artifactId>maven-checkstyle-plugin</artifactId>
-             <configuration>
-                <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
-             </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>findbugs-maven-plugin</artifactId>
-            <configuration>
-              <failOnError>true</failOnError>
-            </configuration>
-          </plugin>
-      </plugins>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+        <instructions>
+          <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+          <Export-Package>org.opendaylight.controller.cluster.schema.provider.impl, {local-packages}</Export-Package>
+        </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <configuration>
+          <failOnError>true</failOnError>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
+
+  <scm>
+    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:Architecture:Clustering</url>
+  </scm>
+
+  <!--
+      Maven Site Configuration
+
+      The following configuration is necessary for maven-site-plugin to
+      correctly identify the correct deployment path for OpenDaylight Maven
+      sites.
+  -->
+  <url>${odl.site.url}/${project.groupId}/${stream}/${project.artifactId}/</url>
+
+  <distributionManagement>
+    <site>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/${project.artifactId}/</url>
+    </site>
+  </distributionManagement>
 </project>
