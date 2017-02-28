@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_2a6ae8ed",
+        "filename": "opendaylight/md-sal/mdsal-artifacts/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-28T20:57:45Z",
+      "side": 1,
+      "message": "tabs - can clean that up later as this is blocking other patches.",
+      "revId": "dda9417cc726c39a79b53f497df82ff379a2a2d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
