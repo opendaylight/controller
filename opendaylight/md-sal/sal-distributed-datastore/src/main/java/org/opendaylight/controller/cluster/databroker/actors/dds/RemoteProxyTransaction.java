@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRe
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
@@ -331,6 +332,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof TransactionAbortRequest) {
             ensureFlushedBuider();
             sendAbort(callback);
+        } else if (request instanceof TransactionPurgeRequest) {
+            purge();
         } else {
             throw new IllegalArgumentException("Unhandled request {}" + request);
         }
