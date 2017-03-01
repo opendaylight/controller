@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_4c565e2b",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/karaf/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2017-03-01T21:39:53Z",
+      "side": 1,
+      "message": "clear enough to me",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 82
+      },
+      "revId": "08dd8d7501da89fe1ec1cd78fe65fc4d1e7d8102",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ec5c724d",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2017-03-01T21:39:53Z",
+      "side": 1,
+      "message": "I think we should put \"DO NOT CHANGE or it will break Sonar\" or something along those lines. At least that\u0027s the impression I was given.",
+      "range": {
+        "startLine": 21,
+        "startChar": 29,
+        "endLine": 21,
+        "endChar": 71
+      },
+      "revId": "08dd8d7501da89fe1ec1cd78fe65fc4d1e7d8102",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
