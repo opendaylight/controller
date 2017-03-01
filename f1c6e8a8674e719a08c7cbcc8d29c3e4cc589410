@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_669d4466",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-01T12:44:20Z",
+      "side": 1,
+      "message": "I am not really sure what should we do with TransactinPurgeRequest here (or even if it is expected here at all)",
+      "revId": "f1c6e8a8674e719a08c7cbcc8d29c3e4cc589410",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
