@@ -32,6 +32,7 @@
     <fileSet filtered="true" encoding="UTF-8">
       <directory></directory>
       <includes>
+        <include>.gitreview</include>
         <include>pom.xml</include>
         <include>deploy-site.xml</include>
         <include>src/**</include>
