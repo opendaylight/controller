@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}-aggregator</artifactId>
   <version>${version}</version>
-  <name>${artifactId}</name>
+  <name>${artifactId}</name> <!-- DO NOT CHANGE - Used by Sonar to set project name -->
   <packaging>pom</packaging>
 
   <scm>

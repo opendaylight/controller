@@ -20,7 +20,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}-karaf</artifactId>
   <version>${version}</version>
-  <name>${project.artifactId}</name>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: ${groupId} :: ${project.artifactId}</name>
 
   <properties>
     <karaf.localFeature>odl-${artifactId}-ui</karaf.localFeature>
