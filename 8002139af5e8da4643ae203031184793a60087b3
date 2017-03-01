@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_66f0a491",
+        "filename": "opendaylight/md-sal/sal-dom-api/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-01T12:57:34Z",
+      "side": 1,
+      "message": "Is there a plan to introduce controller-artifacts which would contain everything (public) Controller project has to offer (including Karaf features)?",
+      "range": {
+        "startLine": 34,
+        "startChar": 20,
+        "endLine": 34,
+        "endChar": 35
+      },
+      "revId": "8002139af5e8da4643ae203031184793a60087b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
