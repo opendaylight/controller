@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2017 Pantheon Technologies s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.access.commands;
+
+import akka.actor.ActorRef;
+import akka.actor.EmptyLocalActorRef;
+import akka.actor.LocalActorRef;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+
+public class AbortLocalTransactionRequestTest extends AbstractTransactionRequestTest<AbortLocalTransactionRequest> {
+
+    private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(MemberName.forName("test"),
+            FrontendType.forName("one"));
+    private static final ClientIdentifier CLIENT = ClientIdentifier.create(FRONTEND, 0);
+    private static final LocalHistoryIdentifier HISTORY = new LocalHistoryIdentifier(CLIENT, 0);
+
+    private static final TransactionIdentifier TRANSACTION = new TransactionIdentifier(HISTORY, 0);
+    private static final ActorRef ACTOR_REF = null;
+
+    private static final AbortLocalTransactionRequest OBJECT = new AbortLocalTransactionRequest(TRANSACTION, ACTOR_REF);
+    private static final AbortLocalTransactionRequest DIFFERENT_OBJECT = new AbortLocalTransactionRequest(TRANSACTION, ACTOR_REF);
+    private static final AbortLocalTransactionRequest EQUAL_OBJECT = new AbortLocalTransactionRequest(TRANSACTION, ACTOR_REF);
+
+    @Override
+    AbortLocalTransactionRequest object() {
+        return OBJECT;
+    }
+
+    @Override
+    AbortLocalTransactionRequest differentObject() {
+        return DIFFERENT_OBJECT;
+    }
+
+    @Override
+    AbortLocalTransactionRequest equalObject() {
+        return EQUAL_OBJECT;
+    }
+}
