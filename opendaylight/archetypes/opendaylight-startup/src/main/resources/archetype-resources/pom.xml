@@ -87,6 +87,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             </execution>
             </executions>
           </plugin>
+          <plugin>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <configuration>
+              <failsOnError>true</failsOnError>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
