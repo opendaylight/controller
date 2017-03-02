@@ -1,0 +1,57 @@
+/*
+ * Copyright (c) 2017 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.cluster.access.commands;
+
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
+
+public class UnknownHistoryExceptionTest extends RequestExceptionTest<UnknownHistoryException> {
+
+    private static final UnknownHistoryException OBJECT = new UnknownHistoryException(100L);
+    private static final UnknownHistoryException EQUAL_OBJECT = new UnknownHistoryException(100L);
+    private static final UnknownHistoryException OBJECT_NULL_PARAM = new UnknownHistoryException(null);
+
+    @Override
+    public UnknownHistoryException object() {
+        return OBJECT;
+    }
+
+    @Override
+    protected UnknownHistoryException differentObject() {
+        return OBJECT_NULL_PARAM;
+    }
+
+    @Override
+    protected UnknownHistoryException equalObject() {
+        return EQUAL_OBJECT;
+    }
+
+    @Override
+    protected void isRetriable() {
+        assertTrue(OBJECT.isRetriable());
+    }
+
+    @Override
+    protected void checkMessage() {
+        String message = OBJECT.getMessage();
+        assertTrue("Last known history is 100".equals(message));
+        message = OBJECT_NULL_PARAM.getMessage();
+        assertTrue("Last known history is null".equals(message));
+        assertNull(OBJECT.getCause());
+    }
+
+    @Override
+    protected RequestException checkFromRealSituation() {
+        return null;
+    }
+}
