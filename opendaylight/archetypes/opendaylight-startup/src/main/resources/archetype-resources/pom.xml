@@ -84,7 +84,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
                   <goal>aggregate</goal>
                 </goals>
                 <phase>package</phase>
-            </execution>
+              </execution>
             </executions>
           </plugin>
           <plugin>
