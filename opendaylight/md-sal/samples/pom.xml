@@ -10,6 +10,9 @@
   <groupId>org.opendaylight.controller.samples</groupId>
   <artifactId>sal-samples</artifactId>
   <packaging>pom</packaging>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: controller :: ${project.artifactId}</name>
 
   <modules>
     <module>toaster</module>

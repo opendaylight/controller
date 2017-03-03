@@ -12,6 +12,9 @@
   <artifactId>sal-akka-raft</artifactId>
   <version>1.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: controller :: ${project.artifactId}</name>
 
   <dependencyManagement>
     <dependencies>

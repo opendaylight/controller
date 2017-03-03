@@ -15,7 +15,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>benchmark-aggregator</artifactId>
   <version>1.3.0-SNAPSHOT</version>
-  <name>${project.artifactId}</name>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: controller :: ${project.artifactId}</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   <prerequisites>
