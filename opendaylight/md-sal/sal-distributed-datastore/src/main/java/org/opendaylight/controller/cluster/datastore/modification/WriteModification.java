@@ -72,7 +72,7 @@ public class WriteModification extends AbstractModification {
     public static WriteModification fromStream(ObjectInput in, short version)
             throws ClassNotFoundException, IOException {
         WriteModification mod = new WriteModification(version);
-        mod.readExternal(in);
+        mod. readExternal(in);
         return mod;
     }
 
