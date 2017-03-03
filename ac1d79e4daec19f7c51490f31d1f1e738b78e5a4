@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_35622fae",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockIdentifier.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-03T12:59:33Z",
+      "side": 1,
+      "message": "This was refactored out of AbstractActorTest by a previous patch set and is a remnant",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_150c4bec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 74
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-03T12:59:33Z",
+      "side": 1,
+      "message": "Do we really need powermock? I\u0027d rather not introduce another mocking framework.",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_15e44bdf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/PrefixShardConfiguration.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-03T12:59:33Z",
+      "side": 1,
+      "message": "I think we should use the Externalizable proxy pattern as we have been doing with other DTO/message classes.",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_95e5db0a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManagerSnapshot.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-03T12:59:33Z",
+      "side": 1,
+      "message": "This class is deprecated - don\u0027t need this.",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_f5f0a7ca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManagerSnapshot.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-03T12:59:33Z",
+      "side": 1,
+      "message": "Just pass Collections.emptyMap",
+      "range": {
+        "startLine": 60,
+        "startChar": 16,
+        "endLine": 60,
+        "endChar": 40
+      },
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
