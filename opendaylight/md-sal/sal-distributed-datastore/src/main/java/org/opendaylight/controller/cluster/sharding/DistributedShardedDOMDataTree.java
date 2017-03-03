@@ -168,7 +168,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         dataStore.getActorContext().getShardManager().tell(createShardMessage, noSender());
     }
 
-    void init() {
+    public void init() {
         // create our writers to the configuration
         try {
             LOG.debug("{} - starting config shard lookup.",
