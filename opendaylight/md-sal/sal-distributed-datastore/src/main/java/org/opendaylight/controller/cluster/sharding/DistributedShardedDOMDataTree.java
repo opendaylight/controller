@@ -184,8 +184,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
      * Finally, we need to be sure that default shards for both operational and
      * configuration data stores are up and running and we have distributed
      * shards frontend created for them.
+     *
+     * <p>
+     * This is intended to be invoked by blueprint as initialization method.
      */
-    void init() {
+    public void init() {
         // create our writers to the configuration
         try {
             LOG.debug("{} - starting config shard lookup.",
