@@ -8,6 +8,9 @@
     <relativePath>..</relativePath>
   </parent>
   <artifactId>yang-jmx-generator-plugin</artifactId>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: controller :: ${project.artifactId}</name>
 
   <dependencies>
 
