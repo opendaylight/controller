@@ -127,9 +127,7 @@ module odl-mdsal-lowlevel-control {
     rpc publish-notifications {
         description "Upon receiving this, the member shall start publishing llt:id-sequence
             notifications with the given id and sequence numbers, increasing, from 1.
-            .get with a timeout on currently earliest non-complete Future (from .publish)
-            shall be used as the primary wait method to throttle the publish rate.
-            The RPC shall not return until all publishes are confirmed successful,
+            The RPC shall not return until all publishes are successful,
             or an exception is raised (the exception should propagate to restconf response).";
         input {
             uses llc:id-grouping;
