@@ -632,7 +632,8 @@ public class Shard extends RaftActor {
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
         final LocalHistoryIdentifier id = closeTransactionChain.getIdentifier();
-        store.closeTransactionChain(id, () -> store.purgeTransactionChain(id, null));
+        store.closeTransactionChain(id, null);
+        store.purgeTransactionChain(id, null);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
