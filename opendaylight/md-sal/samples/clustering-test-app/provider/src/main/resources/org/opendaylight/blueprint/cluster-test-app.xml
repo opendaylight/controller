@@ -15,6 +15,7 @@
   <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
   <reference id="notificationPublishService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService" />
   <reference id="notificationListenerService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService" />
+  <reference id="bindingDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" />
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <property name="notificationProvider" ref="notificationService"/>
@@ -56,6 +57,7 @@
     <argument ref="normalizedNodeSerializer"/>
     <argument ref="notificationPublishService"/>
     <argument ref="notificationListenerService"/>
+    <argument ref="domDataBroker"/>
   </bean>
 
 </blueprint>
