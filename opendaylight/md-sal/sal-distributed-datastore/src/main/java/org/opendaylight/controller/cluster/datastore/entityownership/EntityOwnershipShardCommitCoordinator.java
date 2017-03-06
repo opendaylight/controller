@@ -266,7 +266,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     private void newInflightCommitWithDifferentTransactionID() {
         BatchedModifications newBatchedModifications = newBatchedModifications();
-        newBatchedModifications.getModifications().addAll(inflightCommit.getModifications());
+        newBatchedModifications.addModifications(inflightCommit.getModifications());
         inflightCommit = newBatchedModifications;
     }
 
