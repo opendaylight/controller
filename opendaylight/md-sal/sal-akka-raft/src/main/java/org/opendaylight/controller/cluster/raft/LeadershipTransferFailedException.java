@@ -14,4 +14,8 @@ public class LeadershipTransferFailedException extends Exception {
     public LeadershipTransferFailedException(final String message) {
         super(message);
     }
+
+    public LeadershipTransferFailedException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }
