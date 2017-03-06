@@ -56,6 +56,7 @@
     <argument ref="normalizedNodeSerializer"/>
     <argument ref="notificationPublishService"/>
     <argument ref="notificationListenerService"/>
+    <argument ref="domDataBroker"/>
   </bean>
 
 </blueprint>
