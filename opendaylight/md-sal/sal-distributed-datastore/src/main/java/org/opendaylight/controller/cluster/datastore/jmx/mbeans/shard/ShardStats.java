@@ -12,13 +12,13 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Joiner;
+import com.google.common.base.Joiner.MapJoiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
@@ -42,6 +42,8 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private static final Cache<String, OnDemandRaftState> ONDEMAND_RAFT_STATE_CACHE =
             CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.SECONDS).build();
+
+    private static final MapJoiner MAP_JOINER = Joiner.on(", ").withKeyValueSeparator(": ");
 
     private long committedTransactionsCount;
 
@@ -202,7 +204,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getPeerVotingStates() {
-        return toStringMap(getOnDemandRaftState().getPeerVotingStates());
+        return MAP_JOINER.join(getOnDemandRaftState().getPeerVotingStates());
     }
 
     @Override
@@ -313,11 +315,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getPeerAddresses() {
-        return toStringMap(getOnDemandRaftState().getPeerAddresses());
-    }
-
-    private static String toStringMap(Map<?, ?> map) {
-        return Joiner.on(", ").withKeyValueSeparator(": ").join(map);
+        return MAP_JOINER.join(getOnDemandRaftState().getPeerAddresses());
     }
 
     @Override
