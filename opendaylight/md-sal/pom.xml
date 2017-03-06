@@ -94,7 +94,7 @@
     <!-- IT Base and Parent -->
     <module>mdsal-it-base</module>
     <module>mdsal-it-parent</module>
-
+    
   </modules>
 
   <scm>

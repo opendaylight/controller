@@ -65,4 +65,3 @@ class ShardProxyProducer implements DOMDataTreeShardProducer {
         this.modificationFactory = Preconditions.checkNotNull(modificationFactory);
     }
 }
-
