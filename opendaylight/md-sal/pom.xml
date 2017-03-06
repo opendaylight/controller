@@ -94,6 +94,7 @@
     <!-- IT Base and Parent -->
     <module>mdsal-it-base</module>
     <module>mdsal-it-parent</module>
+    <module>cds-dom-impl</module>
 
   </modules>
 

@@ -30,7 +30,7 @@ public interface DOMDataWriteTransaction extends AsyncWriteTransaction<YangInsta
      * <p>
      * If you need to make sure that a parent object exists but you do not want modify
      * its pre-existing state by using put, consider using {@link #merge} instead.
-     *
+     *l
      * @param store
      *            the logical data store which should be modified
      * @param path
