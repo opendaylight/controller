@@ -23,12 +23,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ForwardingObject;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
@@ -43,6 +45,8 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.controller.cluster.dom.api.CDSDataTreeProducer;
+import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor.ShardedDataTreeActorCreator;
 import org.opendaylight.controller.cluster.sharding.messages.CreatePrefixShard;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerCreated;
@@ -410,12 +414,13 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         }
     }
 
-    private static final class ProxyProducer extends ForwardingObject implements DOMDataTreeProducer {
+    private static final class ProxyProducer extends ForwardingObject implements CDSDataTreeProducer {
 
         private final DOMDataTreeProducer delegate;
         private final Collection<DOMDataTreeIdentifier> subtrees;
         private final ActorRef shardDataTreeActor;
         private final ActorContext actorContext;
+        private final Map<DOMDataTreeIdentifier, CDSShardAccessImpl> shardAccessMap = Maps.newHashMap();
 
         ProxyProducer(final DOMDataTreeProducer delegate,
                       final Collection<DOMDataTreeIdentifier> subtrees,
@@ -442,8 +447,17 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public void close() throws DOMDataTreeProducerException {
             delegate.close();
+
+            shardAccessMap.values().forEach(cdsShardAccess -> {
+                try {
+                    cdsShardAccess.close();
+                } catch (Exception e) {
+                    LOG.warn("Error at closing {} CDSShardAccess", cdsShardAccess.getShardIdentifier(), e);
+                }
+            });
 
             final Object o = actorContext.executeOperation(shardDataTreeActor, new ProducerRemoved(subtrees));
             if (o instanceof DOMDataTreeProducerException) {
@@ -456,6 +470,14 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         @Override
         protected DOMDataTreeProducer delegate() {
             return delegate;
+        }
+
+        @Nonnull
+        @Override
+        public CDSShardAccess getShardAccess(@Nonnull DOMDataTreeIdentifier subtree) {
+            Preconditions.checkArgument(subtrees.contains(subtree),
+                    "Subtree {} is not controlled by this producer {}", subtree, this);
+            return shardAccessMap.putIfAbsent(subtree, new CDSShardAccessImpl(subtree, actorContext));
         }
     }
 }
