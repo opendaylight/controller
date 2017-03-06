@@ -17,7 +17,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public class AbortLocalTransactionRequestTest extends AbstractTransactionRequestTest<AbortLocalTransactionRequest> {
+public class AbortLocalTransactionRequestTest
+        extends AbstractLocalTransactionRequestTest<AbortLocalTransactionRequest> {
 
     private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));

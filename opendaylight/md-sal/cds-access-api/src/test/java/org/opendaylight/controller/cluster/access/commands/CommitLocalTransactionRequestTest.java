@@ -22,7 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
-public class CommitLocalTransactionRequestTest extends AbstractTransactionRequestTest<CommitLocalTransactionRequest> {
+public class CommitLocalTransactionRequestTest
+        extends AbstractLocalTransactionRequestTest<CommitLocalTransactionRequest> {
 
     private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
