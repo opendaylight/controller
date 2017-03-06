@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
@@ -38,6 +39,7 @@ import scala.concurrent.Await;
 public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static final String JMX_CATEGORY_SHARD = "Shards";
 
+    @GuardedBy("DATE_FORMAT")
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private static final Cache<String, OnDemandRaftState> ONDEMAND_RAFT_STATE_CACHE =
@@ -105,6 +107,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         }
 
         return state;
+    }
+
+    private static String formatMillis(final long timeMillis) {
+        synchronized (DATE_FORMAT) {
+            return DATE_FORMAT.format(new Date(timeMillis));
+        }
     }
 
     @Override
@@ -214,9 +222,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getLastCommittedTransactionTime() {
-        synchronized (DATE_FORMAT) {
-            return DATE_FORMAT.format(new Date(lastCommittedTransactionTime));
-        }
+        return formatMillis(lastCommittedTransactionTime);
     }
 
     @Override
@@ -299,7 +305,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     }
 
-    public void setFollowerInitialSyncStatus(boolean followerInitialSyncStatus) {
+    public void setFollowerInitialSyncStatus(final boolean followerInitialSyncStatus) {
         this.followerInitialSyncStatus = followerInitialSyncStatus;
     }
 
@@ -342,9 +348,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getLastLeadershipChangeTime() {
-        synchronized (DATE_FORMAT) {
-            return DATE_FORMAT.format(new Date(lastLeadershipChangeTime));
-        }
+        return formatMillis(lastLeadershipChangeTime);
     }
 
     @Override
