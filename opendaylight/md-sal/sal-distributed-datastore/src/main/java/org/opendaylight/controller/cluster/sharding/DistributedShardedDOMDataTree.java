@@ -32,7 +32,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
@@ -54,6 +56,8 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.controller.cluster.dom.api.CDSDataTreeProducer;
+import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor.ShardedDataTreeActorCreator;
 import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
 import org.opendaylight.controller.cluster.sharding.messages.LookupPrefixShard;
@@ -611,13 +615,13 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final Future<Void> closeFuture = ask.transform(
                     new Mapper<Object, Void>() {
                         @Override
-                        public Void apply(Object parameter) {
+                        public Void apply(final Object parameter) {
                             return null;
                         }
                     },
                     new Mapper<Throwable, Throwable>() {
                         @Override
-                        public Throwable apply(Throwable throwable) {
+                        public Throwable apply(final Throwable throwable) {
                             return throwable;
                         }
                     }, actorSystem.dispatcher());
@@ -626,12 +630,16 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         }
     }
 
-    private static final class ProxyProducer extends ForwardingObject implements DOMDataTreeProducer {
+    // TODO what about producers created by this producer?
+    // They should also be CDSProducers
+    private static final class ProxyProducer extends ForwardingObject implements CDSDataTreeProducer {
 
         private final DOMDataTreeProducer delegate;
         private final Collection<DOMDataTreeIdentifier> subtrees;
         private final ActorRef shardDataTreeActor;
         private final ActorContext actorContext;
+        @GuardedBy("shardAccessMap")
+        private final Map<DOMDataTreeIdentifier, CDSShardAccessImpl> shardAccessMap = new HashMap<>();
 
         ProxyProducer(final DOMDataTreeProducer delegate,
                       final Collection<DOMDataTreeIdentifier> subtrees,
@@ -658,8 +666,12 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public void close() throws DOMDataTreeProducerException {
             delegate.close();
+            synchronized (shardAccessMap) {
+                shardAccessMap.values().forEach(CDSShardAccessImpl::close);
+            }
 
             final Object o = actorContext.executeOperation(shardDataTreeActor, new ProducerRemoved(subtrees));
             if (o instanceof DOMDataTreeProducerException) {
@@ -672,6 +684,25 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         @Override
         protected DOMDataTreeProducer delegate() {
             return delegate;
+        }
+
+        @Nonnull
+        @Override
+        public CDSShardAccess getShardAccess(@Nonnull final DOMDataTreeIdentifier subtree) {
+            synchronized (shardAccessMap) {
+                Preconditions.checkArgument(subtrees.contains(subtree),
+                        "Subtree {} is not controlled by this producer {}", subtree, this);
+                if (shardAccessMap.get(subtree) != null) {
+                    return shardAccessMap.get(subtree);
+                }
+
+                // TODO Maybe we can have static factory method and return the same instance
+                // for same subtrees. But maybe it is not needed since there can be only one
+                // producer attached to some subtree at a time. And also how we can close ShardAccess
+                // then
+                final CDSShardAccessImpl shardAccess = new CDSShardAccessImpl(subtree, actorContext);
+                return shardAccessMap.put(subtree, shardAccess);
+            }
         }
     }
 }
