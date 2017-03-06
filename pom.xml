@@ -39,6 +39,7 @@
 
     <!-- archetypes -->
     <module>opendaylight/archetypes</module>
+    <module>opendaylight/md-sal/cds-dom-impl</module>
   </modules>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>

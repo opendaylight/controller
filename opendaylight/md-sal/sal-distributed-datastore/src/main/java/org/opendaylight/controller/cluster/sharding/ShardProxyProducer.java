@@ -44,4 +44,3 @@ class ShardProxyProducer implements DOMDataTreeShardProducer {
         return new ShardProxyTransaction(shardRoot, prefixes, client);
     }
 }
-
