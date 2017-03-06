@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
@@ -21,14 +22,19 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MutableCompositeModification is just a mutable version of a CompositeModification.
  */
 public class MutableCompositeModification extends VersionedExternalizableMessage implements CompositeModification {
+    private static final Logger LOG = LoggerFactory.getLogger(MutableCompositeModification.class);
+
     private static final long serialVersionUID = 1L;
 
     private final List<Modification> modifications = new ArrayList<>();
+    private List<Modification> immutableModifications = null;
 
     public MutableCompositeModification() {
         this(DataStoreVersions.CURRENT_VERSION);
@@ -63,12 +69,23 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
      * @param modification the modification to add.
      */
     public void addModification(Modification modification) {
+        Preconditions.checkNotNull(modification);
         modifications.add(modification);
+    }
+
+    public void addModifications(Iterable<Modification> newMods) {
+        for (Modification mod : newMods) {
+            addModification(mod);
+        }
     }
 
     @Override
     public List<Modification> getModifications() {
-        return modifications;
+        if (immutableModifications == null) {
+            immutableModifications = Collections.unmodifiableList(modifications);
+        }
+
+        return immutableModifications;
     }
 
     @Override
