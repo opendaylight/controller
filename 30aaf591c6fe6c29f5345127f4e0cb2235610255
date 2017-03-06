@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_dcd307d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-06T09:35:23Z",
+      "side": 1,
+      "message": "missing space",
+      "range": {
+        "startLine": 193,
+        "startChar": 51,
+        "endLine": 193,
+        "endChar": 52
+      },
+      "revId": "30aaf591c6fe6c29f5345127f4e0cb2235610255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7ce49bab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-06T09:35:23Z",
+      "side": 1,
+      "message": "so this is the problem -- we are losing returned objects, which are expected to be used (by the API contract if I remember correctly).\n\nI think we should rather change the API (without having refreshed my memory of it).",
+      "range": {
+        "startLine": 194,
+        "startChar": 20,
+        "endLine": 194,
+        "endChar": 30
+      },
+      "revId": "30aaf591c6fe6c29f5345127f4e0cb2235610255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
