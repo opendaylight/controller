@@ -21,7 +21,7 @@ public interface CompositeModification extends Modification {
     /**
      * Get a list of modifications contained by this composite.
      *
-     * @return list of modifications
+     * @return an immutable list of modifications
      */
     List<Modification> getModifications();
 }

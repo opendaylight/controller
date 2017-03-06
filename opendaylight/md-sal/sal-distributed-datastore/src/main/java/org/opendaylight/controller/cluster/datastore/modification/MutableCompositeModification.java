@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
@@ -29,6 +30,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     private static final long serialVersionUID = 1L;
 
     private final List<Modification> modifications = new ArrayList<>();
+    private List<Modification> immutableModifications = null;
 
     public MutableCompositeModification() {
         this(DataStoreVersions.CURRENT_VERSION);
@@ -63,12 +65,23 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
      * @param modification the modification to add.
      */
     public void addModification(Modification modification) {
+        Preconditions.checkNotNull(modification);
         modifications.add(modification);
+    }
+
+    public void addModifications(Iterable<Modification> newMods) {
+        for (Modification mod : newMods) {
+            addModification(mod);
+        }
     }
 
     @Override
     public List<Modification> getModifications() {
-        return modifications;
+        if (immutableModifications == null) {
+            immutableModifications = Collections.unmodifiableList(modifications);
+        }
+
+        return immutableModifications;
     }
 
     @Override

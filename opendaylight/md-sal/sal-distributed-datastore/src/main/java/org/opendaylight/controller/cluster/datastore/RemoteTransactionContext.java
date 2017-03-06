@@ -139,13 +139,15 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             batchedModifications.setReady(ready);
             batchedModifications.setDoCommitOnReady(doCommitOnReady);
             batchedModifications.setTotalMessagesSent(++totalBatchedModificationsSent);
-            sent = executeOperationAsync(batchedModifications, actorContext.getTransactionCommitOperationTimeout());
 
+            final BatchedModifications toSend = batchedModifications;
             if (ready) {
                 batchedModifications = null;
             } else {
                 batchedModifications = newBatchedModifications();
             }
+
+            sent = executeOperationAsync(toSend, actorContext.getTransactionCommitOperationTimeout());
         }
 
         return sent;
