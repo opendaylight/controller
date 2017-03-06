@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -17,21 +14,18 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public class AbortLocalTransactionRequestTest extends AbstractTransactionRequestTest<AbortLocalTransactionRequest> {
-
+public class AbortLocalTransactionRequestTest
+        extends AbstractLocalTransactionRequestTest<AbortLocalTransactionRequest> {
     private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
     private static final ClientIdentifier CLIENT = ClientIdentifier.create(FRONTEND, 0);
     private static final LocalHistoryIdentifier HISTORY = new LocalHistoryIdentifier(CLIENT, 0);
     private static final TransactionIdentifier TRANSACTION = new TransactionIdentifier(HISTORY, 0);
 
-    private static final ActorSystem SYSTEM = ActorSystem.create("test");
-    private static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
-
     private static final AbortLocalTransactionRequest OBJECT = new AbortLocalTransactionRequest(TRANSACTION, ACTOR_REF);
 
     @Override
-    AbortLocalTransactionRequest object() {
+    protected AbortLocalTransactionRequest object() {
         return OBJECT;
     }
 }
