@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_b7f1fc6c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockIdentifier.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-06T11:54:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_35622fae",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_150c4bec",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
         "patchSetId": 74
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_972cb89a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 74
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-06T11:54:09Z",
+      "side": 1,
+      "message": "Just from a quick look, powermock is used to mock some final classes. I have to check if we easily work around this with mockito.",
+      "parentUuid": "fafc7978_150c4bec",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_15e44bdf",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/PrefixShardConfiguration.java",
         "patchSetId": 74
@@ -47,6 +83,24 @@
       "writtenOn": "2017-03-03T12:59:33Z",
       "side": 1,
       "message": "I think we should use the Externalizable proxy pattern as we have been doing with other DTO/message classes.",
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_77fb1447",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/PrefixShardConfiguration.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-06T11:54:09Z",
+      "side": 1,
+      "message": "I can do it in https://git.opendaylight.org/gerrit/#/c/50609/",
+      "parentUuid": "fafc7978_15e44bdf",
       "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -81,6 +135,30 @@
       "writtenOn": "2017-03-03T12:59:33Z",
       "side": 1,
       "message": "Just pass Collections.emptyMap",
+      "range": {
+        "startLine": 60,
+        "startChar": 16,
+        "endLine": 60,
+        "endChar": 40
+      },
+      "revId": "ac1d79e4daec19f7c51490f31d1f1e738b78e5a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3c0fb338",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManagerSnapshot.java",
+        "patchSetId": 74
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-06T11:54:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_f5f0a7ca",
       "range": {
         "startLine": 60,
         "startChar": 16,
