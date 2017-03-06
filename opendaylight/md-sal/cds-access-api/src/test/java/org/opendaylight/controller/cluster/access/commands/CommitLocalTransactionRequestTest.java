@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,16 +19,13 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
-public class CommitLocalTransactionRequestTest extends AbstractTransactionRequestTest<CommitLocalTransactionRequest> {
-
+public class CommitLocalTransactionRequestTest
+        extends AbstractLocalTransactionRequestTest<CommitLocalTransactionRequest> {
     private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
     private static final ClientIdentifier CLIENT = ClientIdentifier.create(FRONTEND, 0);
     private static final LocalHistoryIdentifier HISTORY = new LocalHistoryIdentifier(CLIENT, 0);
     private static final TransactionIdentifier TRANSACTION = new TransactionIdentifier(HISTORY, 0);
-
-    private static final ActorSystem SYSTEM = ActorSystem.create("test");
-    private static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
 
     private static final DataTreeModification MODIFICATION = Mockito.mock(DataTreeModification.class);
     private static final boolean COORDINATED = Boolean.TRUE;
@@ -40,7 +34,7 @@ public class CommitLocalTransactionRequestTest extends AbstractTransactionReques
             TRANSACTION, 0, ACTOR_REF, MODIFICATION, COORDINATED);
 
     @Override
-    CommitLocalTransactionRequest object() {
+    protected CommitLocalTransactionRequest object() {
         return OBJECT;
     }
 
