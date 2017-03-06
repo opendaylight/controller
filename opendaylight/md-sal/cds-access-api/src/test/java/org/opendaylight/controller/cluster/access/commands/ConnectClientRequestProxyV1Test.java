@@ -26,12 +26,7 @@ public class ConnectClientRequestProxyV1Test extends AbstractRequestProxyTest<Co
 
     @Test
     public void createRequestTest() {
-<<<<<<< 9bfa0a2b934b9152e47ab7f715c8cd496e266fc1
         final Request request = object().createRequest(CLIENT_IDENTIFIER, 0, ACTOR_REF);
         Assert.assertNotNull(request);
-=======
-        final Request purgeRequest = object().createRequest(CLIENT_IDENTIFIER, 0, ACTOR_REF);
-        Assert.assertNotNull(purgeRequest);
->>>>>>> Unit tests for AbstractRequestProxy derived classes
     }
 }
