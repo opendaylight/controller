@@ -28,7 +28,7 @@ public class CommitLocalTransactionRequestTest
     private static final TransactionIdentifier TRANSACTION = new TransactionIdentifier(HISTORY, 0);
 
     private static final DataTreeModification MODIFICATION = Mockito.mock(DataTreeModification.class);
-    private static final boolean COORDINATED = Boolean.TRUE;
+    private static final boolean COORDINATED = true;
 
     private static final CommitLocalTransactionRequest OBJECT = new CommitLocalTransactionRequest(
             TRANSACTION, 0, ACTOR_REF, MODIFICATION, COORDINATED);
