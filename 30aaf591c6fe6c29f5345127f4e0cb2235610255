@@ -45,6 +45,30 @@
       "revId": "30aaf591c6fe6c29f5345127f4e0cb2235610255",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_f7aa6483",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-07T12:05:22Z",
+      "side": 1,
+      "message": "I agree - the API should take a collection of DOMDataTreeCandidates. I\u0027ll propose a change in mdsal.",
+      "parentUuid": "fafc7978_7ce49bab",
+      "range": {
+        "startLine": 194,
+        "startChar": 20,
+        "endLine": 194,
+        "endChar": 30
+      },
+      "revId": "30aaf591c6fe6c29f5345127f4e0cb2235610255",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
