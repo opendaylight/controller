@@ -9,10 +9,12 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertSame;
 
-import akka.actor.ActorRef;
-import akka.actor.Scheduler;
-import akka.dispatch.Dispatcher;
+import akka.actor.ActorSystem;
+import akka.testkit.JavaTestKit;
+import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -21,6 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 public class ClientActorContextTest {
     private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
@@ -31,32 +35,47 @@ public class ClientActorContextTest {
     private static final String PERSISTENCE_ID = ClientActorContextTest.class.getSimpleName();
 
     @Mock
-    private ActorRef mockSelf;
-
-    @Mock
-    private Scheduler mockScheduler;
-
-    @Mock
-    private Dispatcher mockDispatcher;
+    private InternalCommand<? extends BackendInfo> command;
+    private ActorSystem system;
+    private TestProbe probe;
+    private ClientActorContext ctx;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        system = ActorSystem.apply();
+        probe = new TestProbe(system);
+        ctx = new ClientActorContext(probe.ref(), system.scheduler(), system.dispatcher(),
+                PERSISTENCE_ID, CLIENT_ID);
     }
 
     @Test
     public void testMockingControl() {
-        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher,
-                PERSISTENCE_ID, CLIENT_ID);
         assertSame(CLIENT_ID, ctx.getIdentifier());
         assertSame(PERSISTENCE_ID, ctx.persistenceId());
-        assertSame(mockSelf, ctx.self());
+        assertSame(probe.ref(), ctx.self());
     }
 
     @Test
     public void testTicker() {
-        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher,
-                PERSISTENCE_ID, CLIENT_ID);
         assertSame(Ticker.systemTicker(), ctx.ticker());
+    }
+
+    @Test
+    public void testExecuteInActor() throws Exception {
+        ctx.executeInActor(command);
+        probe.expectMsg(command);
+    }
+
+    @Test
+    public void testExecuteInActorScheduled() throws Exception {
+        final FiniteDuration delay = Duration.apply(1, TimeUnit.SECONDS);
+        ctx.executeInActor(command, delay);
+        probe.expectMsg(command);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        JavaTestKit.shutdownActorSystem(system);
     }
 }
