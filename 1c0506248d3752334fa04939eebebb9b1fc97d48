@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_3117c346",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-08T19:44:20Z",
+      "side": 1,
+      "message": "add debug statements into each branch. the TODO branch falls through to the add case, so I think a warn() is appropriate",
+      "range": {
+        "startLine": 594,
+        "startChar": 0,
+        "endLine": 598,
+        "endChar": 23
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_712cab99",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ClusterUtils.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-08T19:44:20Z",
+      "side": 1,
+      "message": "switch (type) {...}",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 9
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_11443f48",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-08T19:44:20Z",
+      "side": 1,
+      "message": "make this a proper constant (as a Timeout, so we reuse the object)",
+      "range": {
+        "startLine": 188,
+        "startChar": 40,
+        "endLine": 188,
+        "endChar": 99
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b159f336",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-08T19:44:20Z",
+      "side": 1,
+      "message": "use Future.transform() and scala.compat.java8.FutureConverters.toJava()",
+      "range": {
+        "startLine": 193,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 9
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_514a4755",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-08T19:44:20Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 395,
+        "startChar": 12,
+        "endLine": 397,
+        "endChar": 53
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_717aeb88",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTreeRemotingTest.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-08T19:44:20Z",
+      "side": 1,
+      "message": "this is a bit tricky, as the scala-converted CompletionStages do no support this.\n\nSince this is testing only, use FutureConverters.toScala() and Patterns.await().",
+      "range": {
+        "startLine": 370,
+        "startChar": 20,
+        "endLine": 370,
+        "endChar": 48
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
