@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_f36a63b1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 38
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:23:21Z",
+      "side": 1,
+      "message": "Minor thing but this could be combined with the else.",
+      "revId": "a9cadab697daebdd6cc0dc90d83a7144a808f3ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b3a45b08",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFactory.java",
+        "patchSetId": 38
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:23:21Z",
+      "side": 1,
+      "message": "From what Robert has said, CheckedFuture will be going away at some point. It would behoove us to use CompletionStage going forward.",
+      "range": {
+        "startLine": 39,
+        "startChar": 4,
+        "endLine": 39,
+        "endChar": 17
+      },
+      "revId": "a9cadab697daebdd6cc0dc90d83a7144a808f3ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_53d6cf4f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 38
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:23:21Z",
+      "side": 1,
+      "message": "This is a blocking call. Ideally his should be done async...",
+      "revId": "a9cadab697daebdd6cc0dc90d83a7144a808f3ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_93ccb7bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 38
+      },
+      "lineNbr": 724,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:23:21Z",
+      "side": 1,
+      "message": "...and this",
+      "revId": "a9cadab697daebdd6cc0dc90d83a7144a808f3ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_33bd0b03",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 38
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-08T15:23:21Z",
+      "side": 1,
+      "message": "This does not need to be overridden as it just calls super.",
+      "revId": "a9cadab697daebdd6cc0dc90d83a7144a808f3ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
