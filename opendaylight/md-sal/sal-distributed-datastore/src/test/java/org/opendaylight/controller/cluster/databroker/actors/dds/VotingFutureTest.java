@@ -1,0 +1,114 @@
+/*
+ * Copyright (c) 2017 Pantheon Technologies s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.databroker.actors.dds;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class VotingFutureTest {
+
+    private VotingFuture<Object> future;
+    private Object result;
+    private ScheduledExecutorService executor;
+
+    @Before
+    public void setUp() throws Exception {
+        result = new Object();
+        future = new VotingFuture<>(result, 3);
+        executor = Executors.newScheduledThreadPool(1);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        executor.shutdownNow();
+    }
+
+    @Test
+    public void testVoteYes() throws Exception {
+        future.voteYes();
+        future.voteYes();
+        future.voteYes();
+        Assert.assertEquals(result, future.get());
+    }
+
+    @Test
+    public void testVoteYesBlocking() throws Exception {
+        final AtomicBoolean voted = new AtomicBoolean(false);
+        future.voteYes();
+        future.voteYes();
+        executor.schedule(() -> {
+            voted.set(true);
+            future.voteYes();
+        }, 1, TimeUnit.SECONDS);
+        final Object actual = future.get();
+        Assert.assertTrue("Future completed before vote", voted.get());
+        Assert.assertEquals(result, actual);
+    }
+
+    @Test
+    public void testVoteNo() throws Exception {
+        future.voteYes();
+        final RuntimeException cause = new RuntimeException("fail");
+        future.voteNo(cause);
+        future.voteYes();
+        try {
+            future.get();
+            Assert.fail("ExecutionException expected");
+        } catch (final ExecutionException e) {
+            Assert.assertEquals(cause, e.getCause());
+        }
+    }
+
+    @Test
+    public void testVoteNoBlocking() throws Exception {
+        final AtomicBoolean voted = new AtomicBoolean(false);
+        future.voteYes();
+        final RuntimeException cause = new RuntimeException("fail");
+        future.voteNo(cause);
+        executor.schedule(() -> {
+            voted.set(true);
+            future.voteYes();
+        }, 1, TimeUnit.SECONDS);
+        try {
+            future.get();
+            Assert.fail("ExecutionException expected");
+        } catch (final ExecutionException e) {
+            Assert.assertTrue("Future completed before vote", voted.get());
+            Assert.assertEquals(cause, e.getCause());
+        }
+    }
+
+    @Test
+    public void testMultipleVoteNo() throws Exception {
+        future.voteYes();
+        final RuntimeException cause1 = new RuntimeException("fail");
+        final RuntimeException cause2 = new RuntimeException("fail");
+        future.voteNo(cause1);
+        future.voteNo(cause2);
+        try {
+            future.get();
+            Assert.fail("ExecutionException expected");
+        } catch (final ExecutionException e) {
+            //first no is set as cause
+            Assert.assertEquals(cause1, e.getCause());
+            //subsequent no causes are added as suppressed
+            final Throwable[] suppressed = e.getCause().getSuppressed();
+            Assert.assertEquals(1, suppressed.length);
+            Assert.assertEquals(cause2, suppressed[0]);
+        }
+    }
+
+
+}
