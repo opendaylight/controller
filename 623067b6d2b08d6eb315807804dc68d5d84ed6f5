@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_c234a34b",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/ReconnectingClientConnectionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-09T09:24:47Z",
+      "side": 1,
+      "message": "It does, but I\u0027ve added @Test for clarity",
+      "parentUuid": "fafc7978_e2928755",
+      "revId": "623067b6d2b08d6eb315807804dc68d5d84ed6f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
