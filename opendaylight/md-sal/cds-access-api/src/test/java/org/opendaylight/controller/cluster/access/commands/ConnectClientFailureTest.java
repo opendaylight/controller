@@ -20,17 +20,10 @@ public class ConnectClientFailureTest extends AbstractRequestFailureTest<Connect
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final ConnectClientFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
         Assert.assertEquals(OBJECT.getTarget(), clone.getTarget());
         Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());
         Assert.assertEquals(OBJECT.getCause(), clone.getCause());
-    }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final ConnectClientFailureProxyV1 proxy = (ConnectClientFailureProxyV1) OBJECT.externalizableProxy(
-                ABIVersion.current());
-        Assert.assertNotNull(proxy);
     }
 }
