@@ -21,7 +21,7 @@ public class ReadTransactionRequestTest extends AbstractReadTransactionRequestTe
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final ABIVersion cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
         final ReadTransactionRequest clone = OBJECT.cloneAsVersion(cloneVersion);
         Assert.assertEquals(cloneVersion, clone.getVersion());
@@ -29,10 +29,10 @@ public class ReadTransactionRequestTest extends AbstractReadTransactionRequestTe
         Assert.assertEquals(OBJECT.isSnapshotOnly(), clone.isSnapshotOnly());
     }
 
-    @Test
-    public void externalizableProxy() throws Exception {
-        final ABIVersion proxyVersion = ABIVersion.TEST_FUTURE_VERSION;
-        final ReadTransactionRequestProxyV1 proxy = OBJECT.externalizableProxy(proxyVersion);
-        Assert.assertNotNull(proxy);
+    @Override
+    protected void doAdditionalAssertions(final Object deserialize) {
+        Assert.assertTrue(deserialize instanceof ReadTransactionRequest);
+        Assert.assertEquals(OBJECT.getReplyTo(), ((ReadTransactionRequest) deserialize).getReplyTo());
+        Assert.assertEquals(OBJECT.getPath(), ((ReadTransactionRequest) deserialize).getPath());
     }
 }

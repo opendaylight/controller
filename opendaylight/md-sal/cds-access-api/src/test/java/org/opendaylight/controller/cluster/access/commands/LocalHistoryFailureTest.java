@@ -20,14 +20,8 @@ public class LocalHistoryFailureTest extends AbstractRequestFailureTest<LocalHis
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final LocalHistoryFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
         Assert.assertEquals(OBJECT, clone);
-    }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final LocalHistoryFailureProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.current());
-        Assert.assertNotNull(proxy);
     }
 }

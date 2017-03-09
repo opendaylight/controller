@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.opendaylight.controller.cluster.access.commands.TransactionModification.TYPE_WRITE;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -16,22 +14,12 @@ import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 
-public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<ModifyTransactionRequest> {
-    private static final NormalizedNode<?, ?> NODE = Builders.containerBuilder().withNodeIdentifier(
-            YangInstanceIdentifier.NodeIdentifier.create(QName.create("namespace", "localName"))).build();
-
-    private static final List<TransactionModification> MODIFICATIONS = Lists.newArrayList(
-            new TransactionWrite(YangInstanceIdentifier.EMPTY, NODE));
-
+public class ModifyTransactionRequestEmptyTest extends AbstractTransactionRequestTest<ModifyTransactionRequest> {
     private static final PersistenceProtocol PROTOCOL = PersistenceProtocol.ABORT;
 
     private static final ModifyTransactionRequest OBJECT = new ModifyTransactionRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, MODIFICATIONS, PROTOCOL);
+            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, Lists.newArrayList(), PROTOCOL);
 
     @Override
     protected ModifyTransactionRequest object() {
@@ -49,13 +37,13 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     public void getModificationsTest() throws Exception {
         final List<TransactionModification> result = OBJECT.getModifications();
         Assert.assertNotNull(result);
-        Assert.assertEquals(MODIFICATIONS, result);
+        Assert.assertTrue(result.isEmpty());
     }
 
     @Test
     public void addToStringAttributesTest() {
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        Assert.assertTrue(result.toString().contains("operations=" + MODIFICATIONS));
+        Assert.assertTrue(result.toString().contains("operations=" + Lists.newArrayList()));
         Assert.assertTrue(result.toString().contains("protocol=" + PROTOCOL));
     }
 
@@ -71,12 +59,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
         final ModifyTransactionRequest casted = ((ModifyTransactionRequest) deserialize);
 
         Assert.assertEquals(OBJECT.getReplyTo(), casted.getReplyTo());
+        Assert.assertEquals(OBJECT.getModifications(), casted.getModifications());
         Assert.assertEquals(OBJECT.getPersistenceProtocol(), casted.getPersistenceProtocol());
-
-        Assert.assertNotNull(casted.getModifications());
-        Assert.assertEquals(1, casted.getModifications().size());
-        final TransactionModification modification = casted.getModifications().get(0);
-        Assert.assertEquals(YangInstanceIdentifier.EMPTY, modification.getPath());
-        Assert.assertEquals(TYPE_WRITE, modification.getType());
     }
 }
