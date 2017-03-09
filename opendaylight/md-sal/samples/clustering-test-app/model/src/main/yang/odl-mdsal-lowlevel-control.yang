@@ -404,12 +404,10 @@ module odl-mdsal-lowlevel-control {
     rpc subscribe-dtcl {
         description "Upon receiving this, the member checks whether it has already subscribed
             and fails if yes. If no, the member subscribes a Data Tree Change Listener
-            to listen for changes on whole llt:id-ints, and stores the state
-            from the initial notification to a local variable (called the local copy).
-            Each Data Tree Change from further Notifications shall be applied
-            to the local copy if it is compatible
-            (the old state from notification is equal to the local copy state).
-            If a notification is not compatible, it shall be ignored.";
+            to listen for changes on whole llt:id-ints. The first notification received is stored immediately.
+            Every notification received after the first one has the previous data(getDataBefore()) compared with the
+            last stored notification(called local copy), if they match the local copy is overwritten with
+            this notifications new data(getDataAfter()). If they don't match the new notification is ignored.";
         // No input.
         // No output.
     }
