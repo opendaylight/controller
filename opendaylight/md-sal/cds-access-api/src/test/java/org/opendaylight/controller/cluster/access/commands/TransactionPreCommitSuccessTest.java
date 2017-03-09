@@ -15,15 +15,13 @@ public class TransactionPreCommitSuccessTest extends AbstractTransactionSuccessT
     private static final TransactionPreCommitSuccess OBJECT = new TransactionPreCommitSuccess(
             TRANSACTION_IDENTIFIER, 0);
 
-    @Test
-    public void externalizableProxy() throws Exception {
-        final AbstractTransactionSuccessProxy<TransactionPreCommitSuccess> proxy = OBJECT.externalizableProxy(
-                ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
+    @Override
+    protected TransactionPreCommitSuccess object() {
+        return OBJECT;
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final TransactionPreCommitSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }
