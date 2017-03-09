@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -36,17 +36,12 @@ import scala.util.Try;
  */
 abstract class AbstractTransactionContextFactory<F extends LocalTransactionFactory> implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactionContextFactory.class);
-    @SuppressWarnings("rawtypes")
-    private static final AtomicLongFieldUpdater<AbstractTransactionContextFactory> TX_COUNTER_UPDATER =
-            AtomicLongFieldUpdater.newUpdater(AbstractTransactionContextFactory.class, "nextTx");
+
+    private static final AtomicLong TX_COUNTER = new AtomicLong();
 
     private final ConcurrentMap<String, F> knownLocal = new ConcurrentHashMap<>();
     private final LocalHistoryIdentifier historyId;
     private final ActorContext actorContext;
-
-    // Used via TX_COUNTER_UPDATER
-    @SuppressWarnings("unused")
-    private volatile long nextTx;
 
     protected AbstractTransactionContextFactory(final ActorContext actorContext,
             final LocalHistoryIdentifier historyId) {
@@ -168,7 +163,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @return Transaction identifier, may not be null.
      */
     protected final TransactionIdentifier nextIdentifier() {
-        return new TransactionIdentifier(historyId, TX_COUNTER_UPDATER.getAndIncrement(this));
+        return new TransactionIdentifier(historyId, TX_COUNTER.getAndIncrement());
     }
 
     /**
