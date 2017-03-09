@@ -374,11 +374,7 @@ module odl-mdsal-lowlevel-control {
         description "Upon receiving this, the member checks whether it has already subscribed
             and fails if yes. If no, the member subscribes a Data Tree Change Listener
             to listen for changes on whole llt:id-ints, and stores the state
-            from the initial notification to a local variable (called the local copy).
-            Each Data Tree Change from further Notifications shall be applied
-            to the local copy if it is compatible
-            (the old state from notification is equal to the local copy state).
-            If a notification is not compatible, it shall be ignored.";
+            of the last notification received as a local copy.";
         // No input.
         // No output.
     }
