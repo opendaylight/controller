@@ -14,6 +14,7 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.access.client.ConnectionEntryMatcher.entryWithRequest;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -21,8 +22,6 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -162,39 +161,6 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         final TransactionIdentifier identifier =
                 new TransactionIdentifier(new LocalHistoryIdentifier(CLIENT_ID, 0L), 0L);
         return new AbortLocalTransactionRequest(identifier, replyTo);
-    }
-
-    private static ConnectionEntryMatcher entryWithRequest(final Request<?, ?> request) {
-        return new ConnectionEntryMatcher(request);
-    }
-
-    private static class ConnectionEntryMatcher extends BaseMatcher<ConnectionEntry> {
-
-        private final Request request;
-
-        private ConnectionEntryMatcher(final Request request) {
-            this.request = request;
-        }
-
-        @Override
-        public boolean matches(final Object item) {
-            if (!(item instanceof ConnectionEntry)) {
-                return false;
-            }
-            final ConnectionEntry entry = (ConnectionEntry) item;
-            return this.request.equals(entry.getRequest());
-        }
-
-        @Override
-        public void describeMismatch(final Object item, final Description description) {
-            final ConnectionEntry entry = (ConnectionEntry) item;
-            super.describeMismatch(entry.getRequest(), description);
-        }
-
-        @Override
-        public void describeTo(final Description description) {
-            description.appendValue(request);
-        }
     }
 
 }
