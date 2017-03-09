@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -24,5 +25,11 @@ public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLoca
     @Test
     public void cloneAsVersionTest() {
         Assert.assertEquals(object(), object().cloneAsVersion(ABIVersion.BORON));
+    }
+
+    @Override
+    @Test(expected = UnsupportedOperationException.class)
+    public void serializationTest() {
+        SerializationUtils.clone(object());
     }
 }
