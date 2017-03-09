@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_44660052",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-09T13:48:12Z",
+      "side": 1,
+      "message": "Actually I think we just have to check here if our configuration is up to date with received configuration and just return immediately if it is.",
+      "parentUuid": "fafc7978_3117c346",
+      "range": {
+        "startLine": 594,
+        "startChar": 0,
+        "endLine": 598,
+        "endChar": 23
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_712cab99",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ClusterUtils.java",
         "patchSetId": 39
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-08T19:44:20Z",
       "side": 1,
       "message": "switch (type) {...}",
+      "range": {
+        "startLine": 85,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 9
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_8208dbda",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ClusterUtils.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-09T13:48:12Z",
+      "side": 1,
+      "message": "This is distributed-data related and is removed in https://git.opendaylight.org/gerrit/#/c/50609/21",
+      "parentUuid": "fafc7978_712cab99",
       "range": {
         "startLine": 85,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_044358af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-09T13:48:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_11443f48",
+      "range": {
+        "startLine": 188,
+        "startChar": 40,
+        "endLine": 188,
+        "endChar": 99
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_b159f336",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 39
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_e4df3467",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-09T13:48:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_b159f336",
+      "range": {
+        "startLine": 193,
+        "startChar": 8,
+        "endLine": 208,
+        "endChar": 9
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_514a4755",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 39
@@ -105,6 +201,30 @@
       "writtenOn": "2017-03-08T19:44:20Z",
       "side": 1,
       "message": "same as above",
+      "range": {
+        "startLine": 395,
+        "startChar": 12,
+        "endLine": 397,
+        "endChar": 53
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_c4daf076",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-09T13:48:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_514a4755",
       "range": {
         "startLine": 395,
         "startChar": 12,
