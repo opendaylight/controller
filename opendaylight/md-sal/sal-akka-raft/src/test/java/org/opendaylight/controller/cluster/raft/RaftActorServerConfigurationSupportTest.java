@@ -37,7 +37,6 @@ import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
@@ -1190,19 +1189,19 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         node1RaftActorRef.tell(changeServers, testKit.getRef());
         ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
+        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
 
         // Send an AppendEntries so node1 has a leaderId
-
-        MessageCollectorActor.clearMessages(node1Collector);
 
         long term = node1RaftActor.getRaftActorContext().getTermInformation().getCurrentTerm();
         node1RaftActorRef.tell(new AppendEntries(term, "downNode1", -1L, -1L,
                 Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short)1), ActorRef.noSender());
 
-        // Wait for the ElectionTimeout to clear the leaderId. he leaderId must be null so on the
+        // Wait for the ElectionTimeout to clear the leaderId. The leaderId must be null so on the next
         // ChangeServersVotingStatus message, it will try to elect a leader.
 
-        MessageCollectorActor.expectFirstMatching(node1Collector, ElectionTimeout.class);
+        AbstractRaftActorIntegrationTest.verifyRaftState(node1RaftActorRef,
+            rs -> assertEquals("getLeader", null, rs.getLeader()));
 
         // Update node2's peer address and send the message again
 
