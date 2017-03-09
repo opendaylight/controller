@@ -21,14 +21,14 @@ public class TransactionAbortRequestTest extends AbstractTransactionRequestTest<
     }
 
     @Test
-    public void externalizableProxy() throws Exception {
-        final TransactionAbortRequestProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
-    }
-
-    @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final TransactionAbortRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
+    }
+
+    @Override
+    protected void doAdditionalAssertions(final Object deserialize) {
+        Assert.assertTrue(deserialize instanceof TransactionAbortRequest);
+        Assert.assertEquals(OBJECT.getReplyTo(), ((TransactionAbortRequest)deserialize).getReplyTo());
     }
 }
