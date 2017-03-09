@@ -21,7 +21,7 @@ public class ExistsTransactionRequestTest extends AbstractReadTransactionRequest
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final ABIVersion cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
         final ExistsTransactionRequest clone = OBJECT.cloneAsVersion(cloneVersion);
         Assert.assertEquals(cloneVersion, clone.getVersion());
@@ -29,10 +29,10 @@ public class ExistsTransactionRequestTest extends AbstractReadTransactionRequest
         Assert.assertEquals(OBJECT.isSnapshotOnly(), clone.isSnapshotOnly());
     }
 
-    @Test
-    public void externalizableProxy() throws Exception {
-        final ABIVersion proxyVersion = ABIVersion.TEST_FUTURE_VERSION;
-        final ExistsTransactionRequestProxyV1 proxy = OBJECT.externalizableProxy(proxyVersion);
-        Assert.assertNotNull(proxy);
+    @Override
+    protected void doAdditionalAssertions(final Object deserialize) {
+        Assert.assertTrue(deserialize instanceof ExistsTransactionRequest);
+        Assert.assertEquals(OBJECT.getReplyTo(), ((ExistsTransactionRequest) deserialize).getReplyTo());
+        Assert.assertEquals(OBJECT.getPath(), ((ExistsTransactionRequest) deserialize).getPath());
     }
 }

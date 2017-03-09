@@ -53,4 +53,11 @@ public class CommitLocalTransactionRequestTest
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
         Assert.assertTrue(result.toString().contains("coordinated=" + COORDINATED));
     }
+
+    @Override
+    protected void doAdditionalAssertions(final Object deserialize) {
+        Assert.assertTrue(deserialize instanceof CommitLocalTransactionRequest);
+        Assert.assertEquals(OBJECT.getReplyTo(), ((CommitLocalTransactionRequest) deserialize).getReplyTo());
+        Assert.assertEquals(OBJECT.getModification(), ((CommitLocalTransactionRequest) deserialize).getModification());
+    }
 }

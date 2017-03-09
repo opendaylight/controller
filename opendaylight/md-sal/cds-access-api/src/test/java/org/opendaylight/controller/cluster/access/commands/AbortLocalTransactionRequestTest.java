@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -27,5 +28,11 @@ public class AbortLocalTransactionRequestTest
     @Override
     protected AbortLocalTransactionRequest object() {
         return OBJECT;
+    }
+
+    @Override
+    protected void doAdditionalAssertions(final Object deserialize) {
+        Assert.assertTrue(deserialize instanceof AbortLocalTransactionRequest);
+        Assert.assertEquals(OBJECT.getReplyTo(), ((AbortLocalTransactionRequest) deserialize).getReplyTo());
     }
 }

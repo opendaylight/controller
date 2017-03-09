@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import org.apache.commons.lang.SerializationUtils;
+import org.junit.Assert;
+import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -23,4 +26,16 @@ public abstract class AbstractTransactionSuccessTest<T extends TransactionSucces
 
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
             HISTORY_IDENTIFIER, 0);
+
+    protected abstract T object();
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void serializationTest() {
+        final Object deserialize = SerializationUtils.clone(object());
+
+        Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
+        Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
+        Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
+    }
 }

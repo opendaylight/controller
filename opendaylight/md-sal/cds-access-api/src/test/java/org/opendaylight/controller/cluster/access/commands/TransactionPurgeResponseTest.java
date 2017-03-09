@@ -15,15 +15,13 @@ public class TransactionPurgeResponseTest extends AbstractTransactionSuccessTest
     private static final TransactionPurgeResponse OBJECT = new TransactionPurgeResponse(
             TRANSACTION_IDENTIFIER, 0);
 
-    @Test
-    public void externalizableProxy() throws Exception {
-        final AbstractTransactionSuccessProxy<TransactionPurgeResponse> proxy = OBJECT.externalizableProxy(
-                ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
+    @Override
+    protected TransactionPurgeResponse object() {
+        return OBJECT;
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final TransactionPurgeResponse clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }
