@@ -12,14 +12,10 @@ import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.reflect.Constructor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.TestUtils;
 
 public abstract class AbstractRequestProxyTest<T extends AbstractRequestProxy> {
     public abstract T object();
@@ -43,34 +39,7 @@ public abstract class AbstractRequestProxyTest<T extends AbstractRequestProxy> {
 
     @Test
     public void externalizableTest() throws Exception {
-        final T copy = copy();
-        Assert.assertTrue(copy != null);
-    }
-
-    @SuppressWarnings("unchecked")
-    private T copy() throws Exception {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            object().writeExternal(oos);
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            final Constructor constructor = object().getClass().getConstructor();
-            constructor.setAccessible(true);
-            final T result = (T) constructor.newInstance();
-            result.readExternal(ois);
-            return result;
-        }
-    }
-
-    @Test
-    public void readTargetTest() throws Exception {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            object().writeExternal(oos);
-        }
-
-        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
-        Assert.assertNotNull(object().readTarget(ois));
+        final T copy = TestUtils.copy(object());
+        Assert.assertNotNull(copy);
     }
 }
