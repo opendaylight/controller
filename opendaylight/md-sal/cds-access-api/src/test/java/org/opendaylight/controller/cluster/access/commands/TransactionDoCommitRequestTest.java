@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -21,14 +22,17 @@ public class TransactionDoCommitRequestTest extends AbstractTransactionRequestTe
     }
 
     @Test
-    public void externalizableProxy() throws Exception {
-        final TransactionDoCommitRequestProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
+    public void cloneAsVersionTest() throws Exception {
+        final TransactionDoCommitRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
+        Assert.assertEquals(OBJECT, clone);
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
-        final TransactionDoCommitRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT, clone);
+    public void serializationTest() {
+        final Object deserialize = SerializationUtils.clone(object());
+
+        Assert.assertEquals(object().getTarget(), ((TransactionDoCommitRequest) deserialize).getTarget());
+        Assert.assertEquals(object().getVersion(), ((TransactionDoCommitRequest) deserialize).getVersion());
+        Assert.assertEquals(object().getSequence(), ((TransactionDoCommitRequest) deserialize).getSequence());
     }
 }

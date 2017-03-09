@@ -20,14 +20,8 @@ public class TransactionFailureTest extends AbstractRequestFailureTest<Transacti
     }
 
     @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final TransactionFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
         Assert.assertEquals(OBJECT, clone);
-    }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final TransactionFailureProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.current());
-        Assert.assertNotNull(proxy);
     }
 }

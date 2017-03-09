@@ -7,7 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import akka.actor.ActorSystem;
+import akka.actor.ExtendedActorSystem;
+import akka.serialization.JavaSerializer;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;

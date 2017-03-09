@@ -9,9 +9,13 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.ExtendedActorSystem;
+import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public abstract class AbstractRequestTest<T extends Request> {
@@ -20,6 +24,11 @@ public abstract class AbstractRequestTest<T extends Request> {
 
     protected abstract T object();
 
+    @Before
+    public void setUp() {
+        JavaSerializer.currentSystem().value_$eq((ExtendedActorSystem) ActorSystem.create("test"));
+    }
+
     @Test
     public void getReplyToTest() {}
 
@@ -27,5 +36,15 @@ public abstract class AbstractRequestTest<T extends Request> {
     public void addToStringAttributesCommonTest() {
         final MoreObjects.ToStringHelper result = object().addToStringAttributes(MoreObjects.toStringHelper(object()));
         Assert.assertTrue(result.toString().contains("replyTo=" + ACTOR_REF));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void serializationTest() {
+        final Object deserialize = SerializationUtils.clone(object());
+
+        Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
+        Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
+        Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
     }
 }
