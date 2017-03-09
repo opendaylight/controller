@@ -56,6 +56,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
                 registration = null;
             } catch (final Exception e) {
                 LOG.warn("There was a problem closing flapping singleton service.", e);
+                setInactive();
                 flapCount = -flapCount;
             }
         });
@@ -71,9 +72,15 @@ public class FlappingSingletonService implements ClusterSingletonService {
             // remove  whole executor shenanigans after it's fixed.
             // Needs to be delayed slightly otherwise it's triggered as well.
             EXECUTOR.schedule(() -> {
-                LOG.debug("Running registration");
-                registration =
-                        singletonServiceProvider.registerClusterSingletonService(this);
+                LOG.debug("Running re-registration");
+                try {
+                    registration =
+                            singletonServiceProvider.registerClusterSingletonService(this);
+                } catch (final Exception e) {
+                    LOG.warn("There was a problem re-registering flapping singleton service.", e);
+                    setInactive();
+                    flapCount = -flapCount - 1;
+                }
 
             }, 200, TimeUnit.MILLISECONDS);
         }

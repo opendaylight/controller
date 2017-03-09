@@ -102,8 +102,8 @@ module odl-mdsal-lowlevel-control {
             If the application is instantiated, it immediatelly un-registers itself.
             When the application instance is closed, it increments flap-count
             and if active flag is set, re-registers the application implementation as a singleton.
-            If either un-registration or re-registration fails, flap-count is set
-            to negative of its previous value (minus one in case of un-registration)
+            If either un-registration or re-registration fails, 'active' flag is unset,
+            flap-count is set to negative of its previous value (minus one in case of un-registration)
             to signal a failure has happened.";
         // No input.
         // No output.
