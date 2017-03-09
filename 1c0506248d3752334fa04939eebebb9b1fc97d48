@@ -257,6 +257,30 @@
       "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_cadaf976",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTreeRemotingTest.java",
+        "patchSetId": 39
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-09T14:02:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_717aeb88",
+      "range": {
+        "startLine": 370,
+        "startChar": 20,
+        "endLine": 370,
+        "endChar": 48
+      },
+      "revId": "1c0506248d3752334fa04939eebebb9b1fc97d48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
