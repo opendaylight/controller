@@ -11,7 +11,6 @@ import com.google.common.base.MoreObjects;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -50,13 +49,6 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
         final RequestException exception = new DeadTransactionException(0);
         final ConnectClientFailure failure = OBJECT.toRequestFailure(exception);
         Assert.assertNotNull(failure);
-    }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> proxy = OBJECT.externalizableProxy(
-                ABIVersion.current());
-        Assert.assertNotNull(proxy);
     }
 
     @Test
