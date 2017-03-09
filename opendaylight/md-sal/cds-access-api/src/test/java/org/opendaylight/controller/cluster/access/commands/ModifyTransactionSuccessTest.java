@@ -15,11 +15,9 @@ public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest
     private static final ModifyTransactionSuccess OBJECT = new ModifyTransactionSuccess(
             TRANSACTION_IDENTIFIER, 0);
 
-    @Test
-    public void externalizableProxy() throws Exception {
-        final AbstractTransactionSuccessProxy<ModifyTransactionSuccess> proxy = OBJECT.externalizableProxy(
-                ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
+    @Override
+    protected ModifyTransactionSuccess object() {
+        return OBJECT;
     }
 
     @Test

@@ -11,17 +11,11 @@ import com.google.common.base.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 
-public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
-    private static final NormalizedNode<?, ?> NODE = Builders.containerBuilder().withNodeIdentifier(
-            YangInstanceIdentifier.NodeIdentifier.create(QName.create("namespace", "localName"))).build();
-
+public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(
-            TRANSACTION_IDENTIFIER, 0, Optional.of(NODE));
+            TRANSACTION_IDENTIFIER, 0, Optional.absent());
 
     @Override
     protected ReadTransactionSuccess object() {
@@ -31,8 +25,7 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
     @Test
     public void getData() throws Exception {
         final Optional<NormalizedNode<?, ?>> result = OBJECT.getData();
-        Assert.assertTrue(result.isPresent());
-        Assert.assertEquals(NODE.getValue(), result.get().getValue());
+        Assert.assertFalse(result.isPresent());
     }
 
     @Test

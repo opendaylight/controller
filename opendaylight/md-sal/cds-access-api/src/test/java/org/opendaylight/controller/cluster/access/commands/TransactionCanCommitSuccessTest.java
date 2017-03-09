@@ -15,11 +15,9 @@ public class TransactionCanCommitSuccessTest extends AbstractTransactionSuccessT
     private static final TransactionCanCommitSuccess OBJECT = new TransactionCanCommitSuccess(
             TRANSACTION_IDENTIFIER, 0);
 
-    @Test
-    public void externalizableProxy() throws Exception {
-        final AbstractTransactionSuccessProxy<TransactionCanCommitSuccess> proxy = OBJECT.externalizableProxy(
-                ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
+    @Override
+    protected TransactionCanCommitSuccess object() {
+        return OBJECT;
     }
 
     @Test

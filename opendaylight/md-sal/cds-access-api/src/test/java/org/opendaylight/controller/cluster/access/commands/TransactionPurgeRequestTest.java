@@ -21,12 +21,6 @@ public class TransactionPurgeRequestTest extends AbstractTransactionRequestTest<
     }
 
     @Test
-    public void externalizableProxy() throws Exception {
-        final TransactionPurgeRequestProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
-    }
-
-    @Test
     public void cloneAsVersion() throws Exception {
         final TransactionPurgeRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);

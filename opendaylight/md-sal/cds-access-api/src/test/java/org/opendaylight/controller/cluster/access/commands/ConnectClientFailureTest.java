@@ -26,11 +26,4 @@ public class ConnectClientFailureTest extends AbstractRequestFailureTest<Connect
         Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());
         Assert.assertEquals(OBJECT.getCause(), clone.getCause());
     }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final ConnectClientFailureProxyV1 proxy = (ConnectClientFailureProxyV1) OBJECT.externalizableProxy(
-                ABIVersion.current());
-        Assert.assertNotNull(proxy);
-    }
 }

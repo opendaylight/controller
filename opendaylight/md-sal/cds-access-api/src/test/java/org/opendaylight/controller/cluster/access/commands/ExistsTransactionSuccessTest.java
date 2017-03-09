@@ -18,16 +18,15 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
     private static final ExistsTransactionSuccess OBJECT = new ExistsTransactionSuccess(
             TRANSACTION_IDENTIFIER, 0, EXISTS);
 
+    @Override
+    protected ExistsTransactionSuccess object() {
+        return OBJECT;
+    }
+
     @Test
     public void getExists() throws Exception {
         final boolean result = OBJECT.getExists();
         Assert.assertEquals(EXISTS, result);
-    }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final ExistsTransactionSuccessProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
     }
 
     @Test

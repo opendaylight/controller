@@ -7,7 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import akka.actor.ActorSystem;
+import akka.actor.ExtendedActorSystem;
+import akka.serialization.JavaSerializer;
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -29,6 +34,11 @@ public abstract class AbstractTransactionRequestTest<T extends TransactionReques
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
             HISTORY_IDENTIFIER, 0);
 
+    @Before
+    public void setUp() {
+        JavaSerializer.currentSystem().value_$eq((ExtendedActorSystem) ActorSystem.create("test"));
+    }
+
     @Override
     protected abstract T object();
 
@@ -38,5 +48,15 @@ public abstract class AbstractTransactionRequestTest<T extends TransactionReques
         final RequestException exception = new RuntimeRequestException("fail", cause);
         final TransactionFailure failure = object().toRequestFailure(exception);
         Assert.assertNotNull(failure);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void serializationTest() {
+        final Object deserialize = SerializationUtils.clone(object());
+
+        Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
+        Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
+        Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
     }
 }

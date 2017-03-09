@@ -28,11 +28,4 @@ public class ExistsTransactionRequestTest extends AbstractReadTransactionRequest
         Assert.assertEquals(OBJECT.getPath(), clone.getPath());
         Assert.assertEquals(OBJECT.isSnapshotOnly(), clone.isSnapshotOnly());
     }
-
-    @Test
-    public void externalizableProxy() throws Exception {
-        final ABIVersion proxyVersion = ABIVersion.TEST_FUTURE_VERSION;
-        final ExistsTransactionRequestProxyV1 proxy = OBJECT.externalizableProxy(proxyVersion);
-        Assert.assertNotNull(proxy);
-    }
 }
