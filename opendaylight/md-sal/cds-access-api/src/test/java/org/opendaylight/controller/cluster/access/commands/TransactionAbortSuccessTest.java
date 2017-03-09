@@ -15,6 +15,11 @@ public class TransactionAbortSuccessTest extends AbstractTransactionSuccessTest<
     private static final TransactionAbortSuccess OBJECT = new TransactionAbortSuccess(
             TRANSACTION_IDENTIFIER, 0);
 
+    @Override
+    protected TransactionAbortSuccess object() {
+        return OBJECT;
+    }
+
     @Test
     public void externalizableProxy() throws Exception {
         final AbstractTransactionSuccessProxy<TransactionAbortSuccess> proxy = OBJECT.externalizableProxy(

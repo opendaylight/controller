@@ -23,6 +23,11 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(
             TRANSACTION_IDENTIFIER, 0, Optional.of(NODE));
 
+    @Override
+    protected ReadTransactionSuccess object() {
+        return OBJECT;
+    }
+
     @Test
     public void getData() throws Exception {
         final Optional<NormalizedNode<?, ?>> result = OBJECT.getData();
