@@ -21,13 +21,7 @@ public class TransactionDoCommitRequestTest extends AbstractTransactionRequestTe
     }
 
     @Test
-    public void externalizableProxy() throws Exception {
-        final TransactionDoCommitRequestProxyV1 proxy = OBJECT.externalizableProxy(ABIVersion.BORON);
-        Assert.assertNotNull(proxy);
-    }
-
-    @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final TransactionDoCommitRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

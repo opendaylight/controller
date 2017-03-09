@@ -11,7 +11,6 @@ import com.google.common.base.MoreObjects;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -36,38 +35,31 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     }
 
     @Test
-    public void getMinVersion() throws Exception {
+    public void getMinVersionTest() throws Exception {
         Assert.assertEquals(MIN_VERSION, OBJECT.getMinVersion());
     }
 
     @Test
-    public void getMaxVersion() throws Exception {
+    public void getMaxVersionTest() throws Exception {
         Assert.assertEquals(MAX_VERSION, OBJECT.getMaxVersion());
     }
 
     @Test
-    public void toRequestFailure() throws Exception {
+    public void toRequestFailureTest() throws Exception {
         final RequestException exception = new DeadTransactionException(0);
         final ConnectClientFailure failure = OBJECT.toRequestFailure(exception);
         Assert.assertNotNull(failure);
     }
 
     @Test
-    public void externalizableProxy() throws Exception {
-        final AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> proxy = OBJECT.externalizableProxy(
-                ABIVersion.current());
-        Assert.assertNotNull(proxy);
-    }
-
-    @Test
-    public void cloneAsVersion() throws Exception {
+    public void cloneAsVersionTest() throws Exception {
         final ConnectClientRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertNotNull(clone);
         Assert.assertEquals(ABIVersion.BORON, clone.getVersion());
     }
 
     @Test
-    public void addToStringAttributes() throws Exception {
+    public void addToStringAttributesTest() throws Exception {
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
         Assert.assertTrue(result.toString().contains("minVersion=" + MIN_VERSION));
         Assert.assertTrue(result.toString().contains("maxVersion=" + MAX_VERSION));
