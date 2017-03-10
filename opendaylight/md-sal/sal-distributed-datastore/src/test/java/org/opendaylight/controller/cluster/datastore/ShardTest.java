@@ -373,8 +373,9 @@ public class ShardTest extends AbstractShardTest {
                         CreateTransactionReply.class);
 
                 final String path = reply.getTransactionPath().toString();
-                assertTrue("Unexpected transaction path " + path, path
-                        .startsWith("akka://test/user/testCreateTransaction/shard-member-1:ShardTransactionTest@0:"));
+                assertTrue("Unexpected transaction path " + path, path.startsWith(String.format(
+                        "akka://test/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
+                            shardID.getShardName(), shardID.getMemberName().getName())));
             }
         };
     }
@@ -394,8 +395,9 @@ public class ShardTest extends AbstractShardTest {
                         CreateTransactionReply.class);
 
                 final String path = reply.getTransactionPath().toString();
-                assertTrue("Unexpected transaction path " + path, path.startsWith(
-                        "akka://test/user/testCreateTransactionOnChain/shard-member-1:ShardTransactionTest@0:"));
+                assertTrue("Unexpected transaction path " + path, path.startsWith(String.format(
+                        "akka://test/user/testCreateTransactionOnChain/shard-%s-%s:ShardTransactionTest@0:",
+                        shardID.getShardName(), shardID.getMemberName().getName())));
             }
         };
     }
