@@ -13,8 +13,8 @@ import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.mdsal.binding.generator.util.Types;
 import org.opendaylight.mdsal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.model.util.Types;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public class ListDependenciesAttribute extends AbstractDependencyAttribute {

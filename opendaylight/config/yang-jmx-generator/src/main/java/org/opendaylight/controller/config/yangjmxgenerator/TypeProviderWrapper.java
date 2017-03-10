@@ -8,8 +8,8 @@
 package org.opendaylight.controller.config.yangjmxgenerator;
 
 import org.opendaylight.mdsal.binding.generator.spi.TypeProvider;
-import org.opendaylight.mdsal.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.mdsal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.model.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;

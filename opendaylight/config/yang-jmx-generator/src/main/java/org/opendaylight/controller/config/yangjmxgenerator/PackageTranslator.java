@@ -9,7 +9,7 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import org.opendaylight.mdsal.binding.generator.util.BindingGeneratorUtil;
+import org.opendaylight.mdsal.binding.model.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
