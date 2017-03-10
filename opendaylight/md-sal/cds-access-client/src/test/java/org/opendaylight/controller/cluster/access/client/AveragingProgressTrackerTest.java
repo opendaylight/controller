@@ -9,13 +9,14 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
 public class AveragingProgressTrackerTest {
 
-    private static final long NOW = 1000000000;
-    private static final long CHECKER = 500000000;
+    private static final long NOW = TimeUnit.MILLISECONDS.toNanos(1000);
+    private static final long CHECKER = TimeUnit.MILLISECONDS.toNanos(500);
     private ProgressTracker averagingProgressTracker;
 
     @Before
