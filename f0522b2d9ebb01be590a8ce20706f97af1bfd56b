@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_6ea15a45",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/VotingFutureTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-10T17:09:14Z",
+      "side": 1,
+      "message": "I think it would be good to also have a test for the trivial case of 1 required vote.",
+      "revId": "f0522b2d9ebb01be590a8ce20706f97af1bfd56b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_4e98d61b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/VotingFutureTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-10T17:09:14Z",
+      "side": 1,
+      "message": "You should call the timed get (i.e. 5, TimeUnit.SECONDS) in case the future is never completed, otherwise the test will block forever (although I think jenkins would kill it after many hours). Also in the other tests.",
+      "revId": "f0522b2d9ebb01be590a8ce20706f97af1bfd56b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_4ebf3661",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/VotingFutureTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-10T17:09:14Z",
+      "side": 1,
+      "message": "To be complete, I think it would be good to also have tests where the no vote occurs first and last.",
+      "revId": "f0522b2d9ebb01be590a8ce20706f97af1bfd56b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
