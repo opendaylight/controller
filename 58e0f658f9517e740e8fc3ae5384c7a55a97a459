@@ -1,0 +1,40 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_fe985f76",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/TransmittingTransmitQueueTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-10T08:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_de22bb50",
+      "revId": "58e0f658f9517e740e8fc3ae5384c7a55a97a459",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9e8153fd",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/TransmittingTransmitQueueTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-10T08:38:31Z",
+      "side": 1,
+      "message": "That parameter contains timestamp and I don\u0027t know the way how to predict it, so I\u0027ve put there anyLong().",
+      "parentUuid": "fafc7978_1e0283b3",
+      "revId": "58e0f658f9517e740e8fc3ae5384c7a55a97a459",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
