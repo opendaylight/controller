@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxyTest;
@@ -26,5 +30,16 @@ public class TransactionPurgeRequestProxyV1Test extends AbstractRequestProxyTest
     public void createRequestTest() {
         final Request request = object().createRequest(TRANSACTION_IDENTIFIER, 0, ACTOR_REF);
         Assert.assertNotNull(request);
+    }
+
+    @Test
+    public void readTargetTest() throws Exception {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (final ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            TRANSACTION_IDENTIFIER.writeTo(oos);
+        }
+
+        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+        Assert.assertNotNull(object().readTarget(ois));
     }
 }

@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -27,5 +31,16 @@ public class ConnectClientRequestProxyV1Test extends AbstractRequestProxyTest<Co
     public void createRequestTest() {
         final Request request = object().createRequest(CLIENT_IDENTIFIER, 0, ACTOR_REF);
         Assert.assertNotNull(request);
+    }
+
+    @Test
+    public void readTargetTest() throws Exception {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (final ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            CLIENT_IDENTIFIER.writeTo(oos);
+        }
+
+        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
+        Assert.assertNotNull(object().readTarget(ois));
     }
 }
