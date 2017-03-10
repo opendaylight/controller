@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
  * In terms of taks processing, frontend is "opening" tasks and backend is "closing" them.
  * Latency of the backend may fluctuate wildly. To avoid backend running out of open tasks,
  * there should be a queue of requests frontend can add to.
- * In order to avoid excessive memore consumption, there should be a back-pressure mechanism
+ * In order to avoid excessive memory consumption, there should be a back-pressure mechanism
  * which blocks the frontend threads for appropriate durations.
  * Frontend can tolerate moderately delayed responses, but it only tolerates small block times.
  *
  * <p>An ideal back-pressure algorithm would keep the queue reasonably full,
- * while fairly delaying frontend threads. In other words, backend idle time should be low,
+ * while fairly delaying the frontend threads. In other words, backend idle time should be low,
  * as well as frontend block time dispersion
  * (as opposed to block time average, which is dictated by overall performance).
  *
@@ -40,7 +40,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This class is not thread safe, the callers are responsible for guarding against conflicting access.
  * Time is measured in ticks (nanos), methods never look at current time, relying on {@code now} argument instead.
- * Input data used for tracking is tightly coupled with TransitQueue#recordCompletion arguments.
+ * This means the sequence of {$code now} argument values is expected to be non-decreasing.
+ *
+ * <p>Input data used for tracking is tightly coupled with TransitQueue#recordCompletion arguments.
  *
  * @author Vratko Polak
  */
