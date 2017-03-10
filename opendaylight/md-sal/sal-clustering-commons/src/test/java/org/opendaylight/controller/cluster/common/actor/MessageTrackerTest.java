@@ -12,6 +12,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.common.testing.FakeTicker;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,12 +27,12 @@ public class MessageTrackerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageTrackerTest.class);
 
-    private TestTicker ticker;
+    private FakeTicker ticker;
     private MessageTracker messageTracker;
 
     @Before
     public void setup() {
-        ticker = new TestTicker();
+        ticker = new FakeTicker();
         messageTracker = new MessageTracker(Foo.class, 10, ticker);
     }
 
@@ -40,7 +41,7 @@ public class MessageTrackerTest {
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.close();
 
-        ticker.increment(MILLISECONDS.toNanos(20));
+        ticker.advance(20, MILLISECONDS);
         MessageTracker.Context context2 = messageTracker.received(new Foo());
         context2.close();
     }
@@ -52,7 +53,7 @@ public class MessageTrackerTest {
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.close();
 
-        ticker.increment(MILLISECONDS.toNanos(20));
+        ticker.advance(20, MILLISECONDS);
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
         Assert.assertEquals(true, context2.error().isPresent());
@@ -71,7 +72,7 @@ public class MessageTrackerTest {
         messageTracker.received(10L).close();
         MessageTracker.Context context = messageTracker.received(100);
 
-        ticker.increment(MILLISECONDS.toNanos(20));
+        ticker.advance(20, MILLISECONDS);
 
         context.close();
 
@@ -96,7 +97,6 @@ public class MessageTrackerTest {
         LOG.error("An error occurred : {}" , error);
     }
 
-
     @Test
     public void testMetExpectationOnTracking() {
         messageTracker.begin();
@@ -104,7 +104,7 @@ public class MessageTrackerTest {
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.close();
 
-        ticker.increment(MILLISECONDS.toNanos(1));
+        ticker.advance(1, MILLISECONDS);
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
         Assert.assertEquals(false, context2.error().isPresent());
@@ -135,7 +135,7 @@ public class MessageTrackerTest {
     public void testDelayInFirstExpectedMessageArrival() {
         messageTracker.begin();
 
-        ticker.increment(MILLISECONDS.toNanos(20));
+        ticker.advance(20, MILLISECONDS);
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
@@ -156,7 +156,7 @@ public class MessageTrackerTest {
     public void testCallingBeginDoesNotResetWatch() {
         messageTracker.begin();
 
-        ticker.increment(MILLISECONDS.toNanos(20));
+        ticker.advance(20, MILLISECONDS);
 
         messageTracker.begin();
 

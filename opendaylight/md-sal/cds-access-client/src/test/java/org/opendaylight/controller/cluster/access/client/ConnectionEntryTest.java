@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
+import com.google.common.testing.FakeTicker;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import org.junit.After;
@@ -30,7 +31,6 @@ import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
-import org.opendaylight.controller.cluster.common.actor.TestTicker;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -92,7 +92,7 @@ public class ConnectionEntryTest {
     @Mock
     private ClientActorBehavior<?> mockBehavior;
 
-    private TestTicker ticker;
+    private FakeTicker ticker;
     private Request<WritableIdentifier, ?> mockRequest;
     private Response<WritableIdentifier, ?> mockResponse;
 
@@ -117,8 +117,8 @@ public class ConnectionEntryTest {
 
         doNothing().when(mockCallback).accept(any(MockFailure.class));
 
-        ticker = new TestTicker();
-        ticker.increment(ThreadLocalRandom.current().nextLong());
+        ticker = new FakeTicker();
+        ticker.advance(ThreadLocalRandom.current().nextLong());
 
         mockActor = TestProbe.apply(actorSystem);
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import static org.mockito.Mockito.doReturn;
 
 import akka.actor.ActorRef;
+import com.google.common.testing.FakeTicker;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -17,7 +18,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.common.actor.TestTicker;
 
 /**
  * Abstract base class for client actors and their components.
@@ -32,7 +32,7 @@ public abstract class AbstractClientActorTest {
     @Mock
     private ActorRef mockSelf;
 
-    protected final TestTicker ticker = new TestTicker();
+    protected final FakeTicker ticker = new FakeTicker();
 
     @Before
     public void setup() {
