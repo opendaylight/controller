@@ -176,8 +176,8 @@ public class Shard extends RaftActor {
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
 
         transactionActorFactory = new ShardTransactionActorFactory(store, datastoreContext,
-                new Dispatchers(context().system().dispatchers()).getDispatcherPath(
-                        Dispatchers.DispatcherType.Transaction), self(), getContext(), shardMBean);
+            new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Transaction),
+                self(), getContext(), shardMBean, builder.getId().getShardName());
 
         snapshotCohort = ShardSnapshotCohort.create(getContext(), builder.getId().getMemberName(), store, LOG,
             this.name);

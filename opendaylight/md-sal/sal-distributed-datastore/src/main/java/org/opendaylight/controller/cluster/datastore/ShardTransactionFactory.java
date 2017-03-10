@@ -29,26 +29,30 @@ class ShardTransactionActorFactory {
     private final ShardStats shardMBean;
     private final UntypedActorContext actorContext;
     private final ActorRef shardActor;
+    private final String shardName;
 
     ShardTransactionActorFactory(ShardDataTree dataTree, DatastoreContext datastoreContext,
-            String txnDispatcherPath, ActorRef shardActor, UntypedActorContext actorContext, ShardStats shardMBean) {
+            String txnDispatcherPath, ActorRef shardActor, UntypedActorContext actorContext, ShardStats shardMBean,
+            String shardName) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
-        this.datastoreContext = datastoreContext;
-        this.txnDispatcherPath = txnDispatcherPath;
-        this.shardMBean = shardMBean;
-        this.actorContext = actorContext;
-        this.shardActor = shardActor;
+        this.datastoreContext = Preconditions.checkNotNull(datastoreContext);
+        this.txnDispatcherPath = Preconditions.checkNotNull(txnDispatcherPath);
+        this.shardMBean = Preconditions.checkNotNull(shardMBean);
+        this.actorContext = Preconditions.checkNotNull(actorContext);
+        this.shardActor = Preconditions.checkNotNull(shardActor);
+        this.shardName = Preconditions.checkNotNull(shardName);
     }
 
-    private static String actorNameFor(final TransactionIdentifier txId) {
+    private String actorNameFor(final TransactionIdentifier txId) {
         final LocalHistoryIdentifier historyId = txId.getHistoryId();
         final ClientIdentifier clientId = historyId.getClientId();
         final FrontendIdentifier frontendId = clientId.getFrontendId();
 
         final StringBuilder sb = new StringBuilder("shard-");
-        sb.append(frontendId.getMemberName().getName()).append(':');
-        sb.append(frontendId.getClientType().getName()).append('@');
-        sb.append(clientId.getGeneration()).append(':');
+        sb.append(shardName).append('-')
+            .append(frontendId.getMemberName().getName()).append(':')
+            .append(frontendId.getClientType().getName()).append('@')
+            .append(clientId.getGeneration()).append(':');
         if (historyId.getHistoryId() != 0) {
             sb.append(historyId.getHistoryId()).append('-');
         }
