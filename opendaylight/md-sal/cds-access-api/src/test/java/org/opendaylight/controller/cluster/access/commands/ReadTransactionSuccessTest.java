@@ -40,4 +40,10 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
         final ReadTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }
+
+    @Override
+    protected void doAdditionalAssertions(Object deserialize) {
+        Assert.assertTrue(deserialize instanceof ReadTransactionSuccess);
+        Assert.assertEquals(OBJECT.getData(), ((ReadTransactionSuccess) deserialize).getData());
+    }
 }

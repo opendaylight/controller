@@ -40,4 +40,10 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
         Assert.assertTrue(result.toString().contains("exists=" + EXISTS));
     }
+
+    @Override
+    protected void doAdditionalAssertions(final Object deserialize) {
+        Assert.assertTrue(deserialize instanceof ExistsTransactionSuccess);
+        Assert.assertEquals(OBJECT.getExists(), ((ExistsTransactionSuccess) deserialize).getExists());
+    }
 }
