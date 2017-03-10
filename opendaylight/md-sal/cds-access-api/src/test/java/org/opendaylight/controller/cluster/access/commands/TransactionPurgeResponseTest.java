@@ -25,4 +25,9 @@ public class TransactionPurgeResponseTest extends AbstractTransactionSuccessTest
         final TransactionPurgeResponse clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }
+
+    @Override
+    protected void doAdditionalAssertions(Object deserialize) {
+        Assert.assertTrue(deserialize instanceof TransactionPurgeResponse);
+    }
 }

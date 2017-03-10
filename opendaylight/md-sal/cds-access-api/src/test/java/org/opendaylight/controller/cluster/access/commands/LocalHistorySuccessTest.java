@@ -11,25 +11,26 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
-public class ModifyTransactionSuccessTest extends AbstractTransactionSuccessTest<ModifyTransactionSuccess> {
-    private static final ModifyTransactionSuccess OBJECT = new ModifyTransactionSuccess(
-            TRANSACTION_IDENTIFIER, 0);
+public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHistorySuccess> {
+
+    private static final LocalHistorySuccess OBJECT = new LocalHistorySuccess(
+            HISTORY_IDENTIFIER, 0);
 
     @Override
-    protected ModifyTransactionSuccess object() {
+    protected LocalHistorySuccess object() {
         return OBJECT;
     }
 
     @Test
     public void cloneAsVersionTest() throws Exception {
-        final ModifyTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
-        Assert.assertEquals(OBJECT.getVersion(), clone.getVersion());
+        final LocalHistorySuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());
         Assert.assertEquals(OBJECT.getTarget(), clone.getTarget());
+        Assert.assertEquals(OBJECT.getVersion(), clone.getVersion());
     }
 
     @Override
     protected void doAdditionalAssertions(final Object deserialize) {
-        Assert.assertTrue(deserialize instanceof ModifyTransactionSuccess);
+        Assert.assertTrue(deserialize instanceof LocalHistorySuccess);
     }
 }
