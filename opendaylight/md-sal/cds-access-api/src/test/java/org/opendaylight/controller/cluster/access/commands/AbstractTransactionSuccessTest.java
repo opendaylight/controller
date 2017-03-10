@@ -7,19 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractTransactionSuccessTest<T extends TransactionSuccess> {
-    private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
-            MemberName.forName("test"), FrontendType.forName("one"));
-    private static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
-    private static final LocalHistoryIdentifier HISTORY_IDENTIFIER = new LocalHistoryIdentifier(
-            CLIENT_IDENTIFIER, 0);
+public abstract class AbstractTransactionSuccessTest<T extends TransactionSuccess>
+        extends AbstractRequestSuccessTest {
 
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
             HISTORY_IDENTIFIER, 0);
