@@ -17,8 +17,9 @@ import javax.annotation.concurrent.NotThreadSafe;
  * <p>This class has {@code tasksOpenLimit} used as a (weak) limit,
  * as number of open tasks approaches that value, delays computed are increasing.
  *
- * <p>In order to keep delays from raising to unreasonably high values,
- * a maximal delay (per task) value is never exceeded.
+ * <p>In order to keep {@code estimateIsolatedDelay} values from raising unreasonably high,
+ * {@code defaultTicksPerTask} acts as a maximal value. {@code openTask} may return
+ * higher value if there are tasks above the limit.
  *
  * <p>On the other hand, there is no delay when number of open tasks is half the limit or less,
  * in order to prevent backend from running out of tasks while there may be waiting frontend threads.
