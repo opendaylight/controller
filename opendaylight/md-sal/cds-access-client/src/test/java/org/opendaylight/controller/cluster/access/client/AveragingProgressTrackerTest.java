@@ -9,40 +9,42 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
 public class AveragingProgressTrackerTest {
 
-    private static final long NOW = 1000000000;
-    private static final long CHECKER = 500000000;
+    private static final long CHECKER = TimeUnit.MILLISECONDS.toNanos(500);
+    
+    private static final long NOW = TimeUnit.MILLISECONDS.toNanos(1000);
     private ProgressTracker averagingProgressTracker;
 
     @Before
     public void setUp() {
         averagingProgressTracker = new AveragingProgressTracker(4);
-        long delay = averagingProgressTracker.estimateIsolatedDelay(NOW);
+        long delay = averagingProgressTracker.estimateIsolatedDelay(computeTime());
         assertEquals(0, delay);
         for (int i = 0; i < 2; i++) {
-            delay = averagingProgressTracker.openTask(NOW);
+            delay = averagingProgressTracker.openTask(computeTime());
             assertEquals(0, delay);
         }
     }
 
     @Test
     public void estimateIsolatedDelayTest() {
-        long delay = averagingProgressTracker.openTask(NOW);
+        long delay = averagingProgressTracker.openTask(computeTime());
         assertEquals(CHECKER, delay);
 
-        delay = averagingProgressTracker.openTask(NOW);
-        assertEquals(NOW, delay);
+        delay = averagingProgressTracker.openTask(computeTime());
+        assertEquals(CHECKER, delay);
 
-        delay = averagingProgressTracker.estimateIsolatedDelay(NOW);
+        delay = averagingProgressTracker.estimateIsolatedDelay(computeTime());
         assertEquals(CHECKER, delay);
 
         averagingProgressTracker.closeTask(3000000000L, 0, 0, 0);
 
-        delay = averagingProgressTracker.estimateIsolatedDelay(NOW);
+        delay = averagingProgressTracker.estimateIsolatedDelay(computeTime());
         assertEquals(0, delay);
     }
 
@@ -50,10 +52,15 @@ public class AveragingProgressTrackerTest {
     public void copyObjectTest() {
         final ProgressTracker copyAverageProgressTracker =
                 new AveragingProgressTracker((AveragingProgressTracker) averagingProgressTracker);
-        assertEquals(copyAverageProgressTracker.openTask(NOW), averagingProgressTracker.openTask(NOW));
+        assertEquals(copyAverageProgressTracker.openTask(computeTime()), averagingProgressTracker.openTask(computeTime()));
         assertEquals(averagingProgressTracker.tasksClosed(), copyAverageProgressTracker.tasksClosed());
         assertEquals(averagingProgressTracker.tasksEncountered(), copyAverageProgressTracker.tasksEncountered());
         assertEquals(averagingProgressTracker.tasksOpen(), copyAverageProgressTracker.tasksOpen());
     }
+
+    private long computeTime() {
+        return TimeUnit.MILLISECONDS.toNanos(TimeUnit.NANOSECONDS.toMillis(NOW) + 100);
+    }
+
 
 }
