@@ -8,52 +8,72 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import com.google.common.testing.FakeTicker;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
 public class AveragingProgressTrackerTest {
+    private static final long CHECKER = TimeUnit.MILLISECONDS.toNanos(500);
 
-    private static final long NOW = 1000000000;
-    private static final long CHECKER = 500000000;
-    private ProgressTracker averagingProgressTracker;
+    private static FakeTicker ticker;
+    private static Random random;
+
+    private AveragingProgressTracker averagingProgressTracker;
 
     @Before
     public void setUp() {
+        ticker = new FakeTicker();
+        random = new Random();
+
         averagingProgressTracker = new AveragingProgressTracker(4);
-        long delay = averagingProgressTracker.estimateIsolatedDelay(NOW);
+
+        long delay = averagingProgressTracker.estimateIsolatedDelay(moveTicker());
         assertEquals(0, delay);
+
         for (int i = 0; i < 2; i++) {
-            delay = averagingProgressTracker.openTask(NOW);
+            delay = averagingProgressTracker.openTask(moveTicker());
             assertEquals(0, delay);
         }
     }
 
     @Test
     public void estimateIsolatedDelayTest() {
-        long delay = averagingProgressTracker.openTask(NOW);
+        // checker reached
+        long delay = averagingProgressTracker.openTask(moveTicker());
         assertEquals(CHECKER, delay);
 
-        delay = averagingProgressTracker.openTask(NOW);
-        assertEquals(NOW, delay);
+        // delay can be more than checker if number of tasks is growing
+        delay = averagingProgressTracker.openTask(moveTicker());
+        assertTrue(delay > CHECKER);
 
-        delay = averagingProgressTracker.estimateIsolatedDelay(NOW);
+        // estimate can be max value of CHECKER
+        delay = averagingProgressTracker.estimateIsolatedDelay(moveTicker());
         assertEquals(CHECKER, delay);
 
-        averagingProgressTracker.closeTask(3000000000L, 0, 0, 0);
+        // close one task
+        averagingProgressTracker.closeTask(moveTicker(), 0, 0, 0);
 
-        delay = averagingProgressTracker.estimateIsolatedDelay(NOW);
-        assertEquals(0, delay);
+        // number of tasks is less than half of limit, so delay is zero
+        delay = averagingProgressTracker.estimateIsolatedDelay(moveTicker());
+        assertTrue(0 < delay && delay < CHECKER);
     }
 
     @Test
     public void copyObjectTest() {
-        final ProgressTracker copyAverageProgressTracker =
-                new AveragingProgressTracker((AveragingProgressTracker) averagingProgressTracker);
-        assertEquals(copyAverageProgressTracker.openTask(NOW), averagingProgressTracker.openTask(NOW));
+        final ProgressTracker copyAverageProgressTracker = new AveragingProgressTracker(averagingProgressTracker);
+        assertEquals(copyAverageProgressTracker.openTask(moveTicker()),
+                averagingProgressTracker.openTask(moveTicker()));
         assertEquals(averagingProgressTracker.tasksClosed(), copyAverageProgressTracker.tasksClosed());
         assertEquals(averagingProgressTracker.tasksEncountered(), copyAverageProgressTracker.tasksEncountered());
         assertEquals(averagingProgressTracker.tasksOpen(), copyAverageProgressTracker.tasksOpen());
     }
 
+    private static long moveTicker() {
+        final int advance = random.nextInt(Integer.MAX_VALUE) + 1;
+        return ticker.advance(advance).read();
+    }
 }
