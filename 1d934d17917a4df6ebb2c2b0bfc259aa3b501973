@@ -284,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_7225b85b",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-13T13:41:15Z",
+      "side": 1,
+      "message": "\u003e in the order that submit is called\n\nOh, I forgot we are using a single thread executor, thus the order of submits is deterministic already.",
+      "parentUuid": "fafc7978_272e5ea5",
+      "range": {
+        "startLine": 153,
+        "startChar": 20,
+        "endLine": 153,
+        "endChar": 31
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c48670b8",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
         "patchSetId": 4
