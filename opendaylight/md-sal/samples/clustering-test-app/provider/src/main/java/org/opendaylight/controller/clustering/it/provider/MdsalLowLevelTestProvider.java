@@ -91,7 +91,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterSingletonConstant() {
+    public Future<RpcResult<Void>> unregisterSingletonConstant(final UnregisterSingletonConstantInput input) {
         LOG.debug("unregister-singleton-constant");
 
         if (getSingletonConstantRegistration == null) {
@@ -117,42 +117,42 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> publishNotifications(PublishNotificationsInput input) {
+    public Future<RpcResult<Void>> publishNotifications(final PublishNotificationsInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeDtcl() {
+    public Future<RpcResult<Void>> subscribeDtcl(final SubscribeDctl input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> writeTransactions(WriteTransactionsInput input) {
+    public Future<RpcResult<Void>> writeTransactions(final WriteTransactionsInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<IsClientAbortedOutput>> isClientAborted() {
+    public Future<RpcResult<IsClientAbortedOutput>> isClientAborted(final IsClientAbortedInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> becomeModuleLeader(BecomeModuleLeaderInput input) {
+    public Future<RpcResult<Void>> becomeModuleLeader(final BecomeModuleLeaderInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
+    public Future<RpcResult<Void>> removeShardReplica(final RemoveShardReplicaInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeYnl(SubscribeYnlInput input) {
+    public Future<RpcResult<Void>> subscribeYnl(final SubscribeYnlInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> becomePrefixLeader(BecomePrefixLeaderInput input) {
+    public Future<RpcResult<Void>> becomePrefixLeader(final BecomePrefixLeaderInput input) {
         return null;
     }
 
@@ -193,12 +193,12 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerDefaultConstant(RegisterDefaultConstantInput input) {
+    public Future<RpcResult<Void>> registerDefaultConstant(final RegisterDefaultConstantInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterConstant() {
+    public Future<RpcResult<Void>> unregisterConstant(final UnregisterConstantInput input) {
 
         if (globalGetConstantRegistration == null) {
             final RpcError rpcError = RpcResultBuilder
@@ -214,7 +214,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton() {
+    public Future<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton(
+                final UnregisterFlappingSingletonInput input) {
         LOG.debug("unregister-flapping-singleton received.");
 
         if (flappingSingletonService == null) {
@@ -235,12 +236,12 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> addShardReplica(AddShardReplicaInput input) {
+    public Future<RpcResult<Void>> addShardReplica(final AddShardReplicaInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeDdtl() {
+    public Future<RpcResult<Void>> subscribeDdtl(final SubscribeDdtlInput input) {
         return null;
     }
 
@@ -275,7 +276,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerFlappingSingleton() {
+    public Future<RpcResult<Void>> registerFlappingSingleton(final RegisterFlappingSingletonInput input) {
         LOG.debug("Received register-flapping-singleton.");
 
         if (flappingSingletonService != null) {
@@ -290,22 +291,22 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl() {
+    public Future<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl(final UnsubscribeDtclInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> deconfigureIdIntsShard() {
+    public Future<RpcResult<Void>> deconfigureIdIntsShard(final DeconfigureIdIntsShardInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(UnsubscribeYnlInput input) {
+    public Future<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> produceTransactions(ProduceTransactionsInput input) {
+    public Future<RpcResult<Void>> produceTransactions(final ProduceTransactionsInput input) {
         return null;
     }
 
@@ -331,12 +332,12 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterDefaultConstant() {
+    public Future<RpcResult<Void>> unregisterDefaultConstant(final UnregisterDefaultConstantInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl() {
+    public Future<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl(final UnsubscribeDdtlInput input) {
         return null;
     }
 }
