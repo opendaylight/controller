@@ -91,7 +91,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterSingletonConstant() {
+    public Future<RpcResult<Void>> unregisterSingletonConstant(UnregisterSingletonConstantInput input) {
         LOG.debug("unregister-singleton-constant");
 
         if (getSingletonConstantRegistration == null) {
@@ -198,7 +198,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterConstant() {
+    public Future<RpcResult<Void>> unregisterConstant(UnregisterConstantInput input) {
 
         if (globalGetConstantRegistration == null) {
             final RpcError rpcError = RpcResultBuilder
@@ -214,7 +214,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton() {
+    public Future<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton(
+                UnregisterFlappingSingletonInput input) {
         LOG.debug("unregister-flapping-singleton received.");
 
         if (flappingSingletonService == null) {
@@ -275,7 +276,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerFlappingSingleton() {
+    public Future<RpcResult<Void>> registerFlappingSingleton(RegisterFlappingSingletonInput input) {
         LOG.debug("Received register-flapping-singleton.");
 
         if (flappingSingletonService != null) {
