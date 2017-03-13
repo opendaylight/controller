@@ -22,6 +22,30 @@
       "revId": "91e6bac745ddd559a7db2ae4ae0e2b4428b9554a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_302fab40",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:43:43Z",
+      "side": 1,
+      "message": "Removed, its leftover from previous patch set.",
+      "parentUuid": "fafc7978_07e19a29",
+      "range": {
+        "startLine": 30,
+        "startChar": 53,
+        "endLine": 30,
+        "endChar": 82
+      },
+      "revId": "91e6bac745ddd559a7db2ae4ae0e2b4428b9554a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
