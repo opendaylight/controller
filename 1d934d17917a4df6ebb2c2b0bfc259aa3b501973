@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_b04d5b40",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_07b35a4d",
+      "range": {
+        "startLine": 103,
+        "startChar": 8,
+        "endLine": 103,
+        "endChar": 26
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_67850659",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-09T12:26:22Z",
       "side": 1,
       "message": "This is only called from one place. Why is this a separate method?",
+      "range": {
+        "startLine": 106,
+        "startChar": 17,
+        "endLine": 106,
+        "endChar": 33
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_c78672b8",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "More readable when you have the method split into logical chunks instead of a huge wall of code.",
+      "parentUuid": "fafc7978_67850659",
       "range": {
         "startLine": 106,
         "startChar": 17,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_30084bd9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "The list is now filled with items from zero to (2^20) / 2.",
+      "parentUuid": "fafc7978_04523834",
+      "range": {
+        "startLine": 124,
+        "startChar": 8,
+        "endLine": 124,
+        "endChar": 9
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c422f0b7",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
         "patchSetId": 4
@@ -82,6 +154,30 @@
       "writtenOn": "2017-03-09T12:26:22Z",
       "side": 1,
       "message": "With DataBrokerBackedProvider this could easily lead to multiple transactions trying to access the same item at once.\n\nThe Yang model suggests:\n\"The recommended way is to require the random number has low significant bits different than the past ~100k numbers.\"",
+      "range": {
+        "startLine": 131,
+        "startChar": 29,
+        "endLine": 131,
+        "endChar": 50
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_700e53e6",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_c422f0b7",
       "range": {
         "startLine": 131,
         "startChar": 29,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_50118f02",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_2405bc13",
+      "range": {
+        "startLine": 136,
+        "startChar": 43,
+        "endLine": 136,
+        "endChar": 80
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_07451a42",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
         "patchSetId": 4
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_272e5ea5",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "Actually the transactions will be processed in the order that submit is called, there\u0027s no reason to wait for a previous transaction to finish processing on the backend before queing a new one.",
+      "parentUuid": "fafc7978_07451a42",
+      "range": {
+        "startLine": 153,
+        "startChar": 20,
+        "endLine": 153,
+        "endChar": 31
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c48670b8",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
         "patchSetId": 4
@@ -151,6 +295,30 @@
       "writtenOn": "2017-03-09T12:26:22Z",
       "side": 1,
       "message": "The test plan requires no conflicting modifications happen, the Yang model realizes it by allowing each member to write into different id.\n\nSo when the chain fails it is a bug. RPC should exit early if possible, or at least writer should stop writing.\nRe-create of transaction chain should never be needed.",
+      "range": {
+        "startLine": 210,
+        "startChar": 35,
+        "endLine": 210,
+        "endChar": 68
+      },
+      "revId": "1d934d17917a4df6ebb2c2b0bfc259aa3b501973",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b0fb9bbf",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/WriteTransactionsHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-13T11:42:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_c48670b8",
       "range": {
         "startLine": 210,
         "startChar": 35,
