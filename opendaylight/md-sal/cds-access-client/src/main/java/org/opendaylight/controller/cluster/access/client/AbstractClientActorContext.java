@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.concepts.Mutable;
  *
  * @author Robert Varga
  */
-abstract class AbstractClientActorContext implements Mutable {
+public abstract class AbstractClientActorContext implements Mutable {
     private final String persistenceId;
     private final ActorRef self;
 
@@ -28,13 +28,24 @@ abstract class AbstractClientActorContext implements Mutable {
     }
 
     // TODO: rename this to logContext()
+
+    /**
+     * Returns persistence id. This method must not be overridden and is non final only because of testing.
+     *
+     * @return persistence id.
+     */
     @Nonnull
-    final String persistenceId() {
+    String persistenceId() {
         return persistenceId;
     }
 
+    /**
+     * This method must not be overridden and is non final only because of testing.
+     *
+     * @return self.
+     */
     @Nonnull
-    public final ActorRef self() {
+    public ActorRef self() {
         return self;
     }
 }
