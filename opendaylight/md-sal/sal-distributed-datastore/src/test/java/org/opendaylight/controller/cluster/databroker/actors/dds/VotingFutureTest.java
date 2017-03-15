@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
+import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
+import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -19,8 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class VotingFutureTest {
-
-    private static final int TIMEOUT = 3;
 
     private Object result;
     private ScheduledExecutorService executor;
@@ -42,7 +44,7 @@ public class VotingFutureTest {
     public void testTrivialCases() throws Exception {
         final VotingFuture<Object> oneYesVoteFuture = new VotingFuture<>(result, 1);
         oneYesVoteFuture.voteYes();
-        checkSuccess(oneYesVoteFuture, result);
+        assertFutureEquals(result, oneYesVoteFuture);
         final VotingFuture<Object> oneNoVoteFuture = new VotingFuture<>(result, 1);
         final RuntimeException cause = new RuntimeException("fail");
         oneNoVoteFuture.voteNo(cause);
@@ -54,7 +56,7 @@ public class VotingFutureTest {
         future.voteYes();
         future.voteYes();
         future.voteYes();
-        checkSuccess(future, result);
+        assertFutureEquals(result, future);
     }
 
     @Test
@@ -66,7 +68,7 @@ public class VotingFutureTest {
             voted.set(true);
             future.voteYes();
         }, 1, TimeUnit.SECONDS);
-        checkSuccess(future, result);
+        assertFutureEquals(result, future);
         Assert.assertTrue("Future completed before vote", voted.get());
     }
 
@@ -118,30 +120,18 @@ public class VotingFutureTest {
         final RuntimeException cause2 = new RuntimeException("fail");
         future.voteNo(cause1);
         future.voteNo(cause2);
-        try {
-            future.get(TIMEOUT, TimeUnit.SECONDS);
-            Assert.fail("ExecutionException expected");
-        } catch (final ExecutionException e) {
-            //first no is set as cause
-            Assert.assertEquals(cause1, e.getCause());
-            //subsequent no causes are added as suppressed
-            final Throwable[] suppressed = e.getCause().getSuppressed();
-            Assert.assertEquals(1, suppressed.length);
-            Assert.assertEquals(cause2, suppressed[0]);
-        }
+        final Throwable thrown = assertOperationThrowsException(() -> getWithTimeout(future), ExecutionException.class);
+        //first no is set as cause
+        Assert.assertEquals(cause1, thrown.getCause());
+        //subsequent no causes are added as suppressed
+        final Throwable[] suppressed = thrown.getCause().getSuppressed();
+        Assert.assertEquals(1, suppressed.length);
+        Assert.assertEquals(cause2, suppressed[0]);
     }
 
-    private static void checkException(final Future future, final RuntimeException cause) throws Exception {
-        try {
-            future.get(TIMEOUT, TimeUnit.SECONDS);
-            Assert.fail("ExecutionException expected");
-        } catch (final ExecutionException e) {
-            Assert.assertEquals(cause, e.getCause());
-        }
-    }
-
-    private static void checkSuccess(final Future future, final Object result) throws Exception {
-        Assert.assertEquals(result, future.get(TIMEOUT, TimeUnit.SECONDS));
+    private static void checkException(final Future<Object> future, final RuntimeException cause) throws Exception {
+        final Throwable thrown = assertOperationThrowsException(() -> getWithTimeout(future), ExecutionException.class);
+        Assert.assertEquals(cause, thrown.getCause());
     }
 
 }
