@@ -26,11 +26,15 @@ import org.slf4j.LoggerFactory;
  * Simple class to push configs to the config subsystem from Feature's configfiles
  */
 public class FeatureConfigPusher {
+
     private static final Logger LOG = LoggerFactory.getLogger(FeatureConfigPusher.class);
-    private static final int MAX_RETRIES=100;
-    private static final int RETRY_PAUSE_MILLIS=1;
-    private FeaturesService featuresService = null;
-    private ConfigPusher pusher = null;
+
+    private static final int MAX_RETRIES = 100;
+    private static final int RETRY_PAUSE_MILLIS = 1;
+
+    private final FeaturesService featuresService;
+    private final ConfigPusher pusher;
+
     /*
      * A LinkedHashSet (to preserve order and insure uniqueness) of the pushedConfigs
      * This is used to prevent pushing duplicate configs if a Feature is in multiple dependency
@@ -38,6 +42,7 @@ public class FeatureConfigPusher {
      * (which is handy for logging).
      */
     Set<FeatureConfigSnapshotHolder> pushedConfigs = new LinkedHashSet<>();
+
     /*
      * LinkedHashMultimap to track which configs we pushed for each Feature installation
      * For future use
@@ -47,9 +52,9 @@ public class FeatureConfigPusher {
     /*
      * @param p - ConfigPusher to push ConfigSnapshotHolders
      */
-    public FeatureConfigPusher(final ConfigPusher p, final FeaturesService f) {
-        pusher = p;
-        featuresService = f;
+    public FeatureConfigPusher(final ConfigPusher pusher, final FeaturesService featuresService) {
+        this.pusher = pusher;
+        this.featuresService = new SynchronizedFeaturesService(featuresService);
     }
     /*
      * Push config files from Features to config subsystem
