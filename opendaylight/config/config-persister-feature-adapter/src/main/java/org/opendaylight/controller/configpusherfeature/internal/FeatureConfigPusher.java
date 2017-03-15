@@ -26,11 +26,15 @@ import org.slf4j.LoggerFactory;
  * Simple class to push configs to the config subsystem from Feature's configfiles
  */
 public class FeatureConfigPusher {
+
     private static final Logger LOG = LoggerFactory.getLogger(FeatureConfigPusher.class);
-    private static final int MAX_RETRIES=100;
-    private static final int RETRY_PAUSE_MILLIS=1;
-    private FeaturesService featuresService = null;
-    private ConfigPusher pusher = null;
+
+    private static final int MAX_RETRIES = 10;
+    private static final int RETRY_PAUSE_MILLIS = 100;
+
+    private final FeaturesService featuresService;
+    private final ConfigPusher pusher;
+
     /*
      * A LinkedHashSet (to preserve order and insure uniqueness) of the pushedConfigs
      * This is used to prevent pushing duplicate configs if a Feature is in multiple dependency
@@ -38,6 +42,7 @@ public class FeatureConfigPusher {
      * (which is handy for logging).
      */
     Set<FeatureConfigSnapshotHolder> pushedConfigs = new LinkedHashSet<>();
+
     /*
      * LinkedHashMultimap to track which configs we pushed for each Feature installation
      * For future use
@@ -47,9 +52,9 @@ public class FeatureConfigPusher {
     /*
      * @param p - ConfigPusher to push ConfigSnapshotHolders
      */
-    public FeatureConfigPusher(final ConfigPusher p, final FeaturesService f) {
-        pusher = p;
-        featuresService = f;
+    public FeatureConfigPusher(final ConfigPusher pusher, final FeaturesService featuresService) {
+        this.pusher = pusher;
+        this.featuresService = featuresService;
     }
     /*
      * Push config files from Features to config subsystem
@@ -92,16 +97,20 @@ public class FeatureConfigPusher {
     }
 
     private boolean isInstalled(final Feature feature) {
+        Exception lastException = null;
         for (int retries = 0; retries < MAX_RETRIES; retries++) {
             try {
                 List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
-                if(installedFeatures.contains(feature)) {
+                if (installedFeatures.contains(feature)) {
                     return true;
                 } else {
-                    LOG.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}",retries,feature.getName(),feature.getVersion());
+                    LOG.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}", retries, feature.getName(), feature.getVersion());
                 }
-            } catch (Exception e) {
-                LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
+            } catch (Exception e) { // ConcurrentModificationException (only?)
+                // BUG-6787 experience shows that a LOG.warn (or info) here is very confusing to end-users
+                // we have a retry loop anyway, there is no point informing (and confusing) users of this
+                // intermediate state of, so ... NOOP, do not log here.
+                lastException = e;
             }
             try {
                 Thread.sleep(RETRY_PAUSE_MILLIS);
@@ -109,7 +118,9 @@ public class FeatureConfigPusher {
                 throw new IllegalStateException(e1);
             }
         }
-        LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet finished installing feature {} {}",MAX_RETRIES,feature.getName(),feature.getVersion());
+        LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() "
+                        + "which has not yet finished installing feature {} {} (stack trace is last exception caught)",
+                MAX_RETRIES, feature.getName(), feature.getVersion(), lastException);
         return false;
     }
 
