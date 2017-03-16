@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
