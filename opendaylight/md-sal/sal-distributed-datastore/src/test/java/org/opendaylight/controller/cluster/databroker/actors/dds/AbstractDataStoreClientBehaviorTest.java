@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -28,10 +29,6 @@ import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.InternalCommand;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
-import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
-import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -43,10 +40,6 @@ import scala.concurrent.Promise;
 public abstract class AbstractDataStoreClientBehaviorTest {
 
     protected static final String SHARD = "default";
-    private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
-    private static final FrontendType FRONTEND_TYPE = FrontendType.forName("type-1");
-    private static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
-    private static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
     private static final String PERSISTENCE_ID = "per-1";
 
     private ActorSystem system;
