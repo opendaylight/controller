@@ -10,8 +10,21 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 class TestUtils {
+
+    static final MemberName MEMBER_NAME = MemberName.forName("member-1");
+    static final FrontendType FRONTEND_TYPE = FrontendType.forName("type-1");
+    static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
+    static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
+    static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0L);
+    static final TransactionIdentifier TRANSACTION_ID = new TransactionIdentifier(HISTORY_ID, 0L);
 
     @FunctionalInterface
     public interface RunnableWithException {
@@ -56,9 +69,9 @@ class TestUtils {
      */
     //Throwable is propagated if doesn't match the expected type
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static Throwable assertOperationThrowsException(final RunnableWithException operation,
-                                                    final Class<? extends Throwable> expectedException,
-                                                    final String message) throws Exception {
+    static <T extends Throwable> T assertOperationThrowsException(final RunnableWithException operation,
+                                                                  final Class<T> expectedException,
+                                                                  final String message) throws Exception {
         try {
             operation.run();
             throw new AssertionError(message + expectedException);
@@ -66,7 +79,7 @@ class TestUtils {
             if (!e.getClass().equals(expectedException)) {
                 throw e;
             }
-            return e;
+            return (T) e;
         }
     }
 
@@ -78,8 +91,8 @@ class TestUtils {
      * @return expected exception instance. Can be used for additional assertions.
      * @throws Exception unexpected exception.
      */
-    static Throwable assertOperationThrowsException(final RunnableWithException operation,
-                                                    final Class<? extends Throwable> expectedException)
+    static <T extends Throwable> T assertOperationThrowsException(final RunnableWithException operation,
+                                                                  final Class<T> expectedException)
             throws Exception {
         return assertOperationThrowsException(operation, expectedException, "Operation should throw exception: ");
     }

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
@@ -39,7 +40,6 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     private static final NormalizedNode<?, ?> DATA = Builders.containerBuilder()
             .withNodeIdentifier(YangInstanceIdentifier.NodeIdentifier.create(PATH.getLastPathArgument().getNodeType()))
             .build();
-    private static final long TIMEOUT = 3;
 
     @Mock
     private CursorAwareDataTreeModification modification;
@@ -66,7 +66,8 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     public void testOpenCloseCursor() throws Exception {
         final DOMDataTreeWriteCursor cursor = getHandle().openCursor();
         getHandle().closeCursor(cursor);
-        getHandle().openCursor();
+        getHandle().openCursor().delete(PATH.getLastPathArgument());
+        verify(modification).delete(PATH);
     }
 
     @Test
