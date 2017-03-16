@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_8f161f54",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-16T07:56:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_2f80d38a",
+      "revId": "4b8eaf954432e8ce757503dadac428f725b8831a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
