@@ -56,9 +56,9 @@ class TestUtils {
      */
     //Throwable is propagated if doesn't match the expected type
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static Throwable assertOperationThrowsException(final RunnableWithException operation,
-                                                    final Class<? extends Throwable> expectedException,
-                                                    final String message) throws Exception {
+    static <T extends Throwable> T assertOperationThrowsException(final RunnableWithException operation,
+                                                                  final Class<T> expectedException,
+                                                                  final String message) throws Exception {
         try {
             operation.run();
             throw new AssertionError(message + expectedException);
@@ -66,7 +66,7 @@ class TestUtils {
             if (!e.getClass().equals(expectedException)) {
                 throw e;
             }
-            return e;
+            return (T) e;
         }
     }
 
@@ -78,8 +78,8 @@ class TestUtils {
      * @return expected exception instance. Can be used for additional assertions.
      * @throws Exception unexpected exception.
      */
-    static Throwable assertOperationThrowsException(final RunnableWithException operation,
-                                                    final Class<? extends Throwable> expectedException)
+    static <T extends Throwable> T assertOperationThrowsException(final RunnableWithException operation,
+                                                                  final Class<T> expectedException)
             throws Exception {
         return assertOperationThrowsException(operation, expectedException, "Operation should throw exception: ");
     }
