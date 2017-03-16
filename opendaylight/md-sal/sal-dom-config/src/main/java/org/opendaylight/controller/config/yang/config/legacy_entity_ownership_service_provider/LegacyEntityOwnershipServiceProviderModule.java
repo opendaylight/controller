@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.yang.config.legacy_entity_ownership_s
 
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -50,7 +51,14 @@ public class LegacyEntityOwnershipServiceProviderModule extends AbstractLegacyEn
                     tracker.close();
                     return null;
                 } else {
-                    return method.invoke(service, args);
+                    try {
+                        return method.invoke(service, args);
+                    } catch (InvocationTargetException e) {
+                        // https://bugs.opendaylight.org/show_bug.cgi?id=6564
+                        // http://stackoverflow.com/a/10719613/421602
+                        // https://amitstechblog.wordpress.com/2011/07/24/java-proxies-and-undeclaredthrowableexception/
+                        throw e.getCause();
+                    }
                 }
             }
         });
