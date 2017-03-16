@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_e77b8f79",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-16T11:53:03Z",
+      "side": 1,
+      "message": "silence only that, with an explicit note to remove it after upgrade to karaf4.\n\nThere has to be an incentive to fix upstreams, exceptions should not be happening here at all.",
+      "range": {
+        "startLine": 109,
+        "startChar": 39,
+        "endLine": 109,
+        "endChar": 78
+      },
+      "revId": "7a549382b0d6d076ed7940aa96714beba3b83113",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
