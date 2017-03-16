@@ -22,6 +22,11 @@ public class AccessClientUtil {
         return new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id);
     }
 
+    public static <T extends BackendInfo> ConnectedClientConnection<T> createConnectedConnection(
+            final ClientActorContext context, final Long cookie, final T backend) {
+        return new ConnectedClientConnection<>(context, cookie, backend);
+    }
+
     public static void completeRequest(final AbstractClientConnection<? extends BackendInfo> connection,
                                        final ResponseEnvelope<?> envelope) {
         connection.receiveResponse(envelope);
