@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_2e69eb25",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-17T13:25:53Z",
+      "side": 1,
+      "message": "Base defines what a compatible change is, and implies that the initial notification (implemented in this patch set as null check on the local copy) is not checked for compatibility.\n\nI think this description is worse than Base.",
+      "range": {
+        "startLine": 378,
+        "startChar": 33,
+        "endLine": 378,
+        "endChar": 47
+      },
+      "revId": "b9f03b940c84a313ca94a321fa4e21260b26a384",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ce781ffb",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/IdIntsListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-17T13:25:53Z",
+      "side": 1,
+      "message": "Perhaps this should go before line 39, but no big deal.",
+      "range": {
+        "startLine": 44,
+        "startChar": 16,
+        "endLine": 44,
+        "endChar": 21
+      },
+      "revId": "b9f03b940c84a313ca94a321fa4e21260b26a384",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
