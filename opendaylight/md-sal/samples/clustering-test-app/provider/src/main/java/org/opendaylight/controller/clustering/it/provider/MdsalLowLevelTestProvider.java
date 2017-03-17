@@ -9,7 +9,8 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -32,15 +33,18 @@ import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegist
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomeModuleLeaderInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsInput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.PublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutput;
@@ -80,6 +84,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
     private FlappingSingletonService flappingSingletonService;
+    private Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
 
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
@@ -126,16 +131,17 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> publishNotifications(final PublishNotificationsInput input) {
+    public Future<RpcResult<Void>> startPublishNotifications(final StartPublishNotificationsInput input) {
         LOG.debug("publish-notifications, input: {}", input);
 
         final PublishNotificationsTask task = new PublishNotificationsTask(notificationPublishService, input.getId(),
                 input.getSeconds(), input.getNotificationsPerSecond());
 
-        final SettableFuture<RpcResult<Void>> settableFuture = SettableFuture.create();
-        task.start(settableFuture);
+        publishNotificationsTasks.put(input.getId(), task);
 
-        return settableFuture;
+        task.start();
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -346,6 +352,33 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         registration.close();
 
         return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeYnlOutput>success().withResult(output).build());
+    }
+
+    @Override
+    public Future<RpcResult<CheckPublishNotificationsOutput>> checkPublishNotifications(
+            final CheckPublishNotificationsInput input) {
+
+        final PublishNotificationsTask task = publishNotificationsTasks.get(input.getId());
+
+        if (task == null) {
+            return Futures.immediateFuture(RpcResultBuilder.success(
+                    new CheckPublishNotificationsOutputBuilder().setActive(false)).build());
+        }
+
+        final CheckPublishNotificationsOutputBuilder checkPublishNotificationsOutputBuilder =
+                new CheckPublishNotificationsOutputBuilder().setActive(!task.isFinished());
+
+        if (task.getLastError() != null) {
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw);
+            task.getLastError().printStackTrace(pw);
+            checkPublishNotificationsOutputBuilder.setLastError(task.getLastError().toString() + sw.toString());
+        }
+
+        final CheckPublishNotificationsOutput output =
+                checkPublishNotificationsOutputBuilder.setPublishCount(task.getCurrentNotif()).build();
+
+        return Futures.immediateFuture(RpcResultBuilder.success(output).build());
     }
 
     @Override
