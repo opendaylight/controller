@@ -13,6 +13,8 @@
   <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
   <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
   <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
+  <reference id="domDataTreeService" interface="org.opendaylight.mdsal.dom.api.DOMDataTreeService"/>
+  <reference id="distributedShardFactory" interface="org.opendaylight.controller.cluster.sharding.DistributedShardFactory"/>
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <property name="notificationProvider" ref="notificationService"/>
@@ -52,6 +54,8 @@
     <argument ref="clusterSingletonService"/>
     <argument ref="schemaService"/>
     <argument ref="normalizedNodeSerializer"/>
+    <argument ref="domDataTreeService"/>
+    <argument ref="distributedShardFactory"/>
   </bean>
 
 </blueprint>
