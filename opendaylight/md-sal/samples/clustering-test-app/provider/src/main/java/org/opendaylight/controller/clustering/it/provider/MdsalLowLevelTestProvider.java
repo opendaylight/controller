@@ -13,8 +13,10 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
+import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
+import org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
@@ -29,6 +31,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
@@ -37,6 +40,7 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.PublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantInput;
@@ -68,6 +72,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private final RpcProviderRegistry rpcRegistry;
     private final BindingAwareBroker.RpcRegistration<OdlMdsalLowlevelControlService> registration;
+    private final DistributedShardFactory distributedShardFactory;
+    private final DOMDataTreeService domDataTreeService;
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
     private final DOMDataBroker domDataBroker;
     private final NotificationPublishService notificationPublishService;
@@ -92,7 +98,9 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                                      final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                                      final NotificationPublishService notificationPublishService,
                                      final NotificationService notificationService,
-                                     final DOMDataBroker domDataBroker) {
+                                     final DOMDataBroker domDataBroker,
+                                     final DOMDataTreeService domDataTreeService,
+                                     final DistributedShardFactory distributedShardFactory) {
         this.rpcRegistry = rpcRegistry;
         this.domRpcService = domRpcService;
         this.singletonService = singletonService;
@@ -101,6 +109,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         this.notificationPublishService = notificationPublishService;
         this.notificationService = notificationService;
         this.domDataBroker = domDataBroker;
+        this.domDataTreeService = domDataTreeService;
+        this.distributedShardFactory = distributedShardFactory;
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
     }
@@ -362,8 +372,16 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> produceTransactions(ProduceTransactionsInput input) {
-        return null;
+    public Future<RpcResult<ProduceTransactionsOutput>> produceTransactions(final ProduceTransactionsInput input) {
+        LOG.debug("producer-transactions, input: {}", input);
+
+        final ProduceTransactionsHandler handler =
+                new ProduceTransactionsHandler(domDataTreeService, distributedShardFactory, input);
+
+        final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture = SettableFuture.create();
+        handler.start(settableFuture);
+
+        return settableFuture;
     }
 
     @Override
