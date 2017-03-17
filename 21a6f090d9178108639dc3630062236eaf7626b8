@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_941c686c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-17T16:56:47Z",
+      "side": 1,
+      "message": "We are not actually using this, as we are not using AbstractDOMStoreTreeChangePublisher logic at all. Removing this.",
+      "parentUuid": "fafc7978_36a66754",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_d6e71bab",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
         "patchSetId": 37
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_d4e8b018",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-17T16:56:47Z",
+      "side": 1,
+      "message": "This is synchronized because, it is callback called when a subshard sees a data change. This is then delegated to its parent shard.\n\nWhen parent processes data tree change (delegate.onDataTreeChanged), we don\u0027t want any other subhard data changes interfere with that.",
+      "parentUuid": "fafc7978_36f82749",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_1601a339",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
         "patchSetId": 37
@@ -64,6 +100,24 @@
       "writtenOn": "2017-03-17T07:18:51Z",
       "side": 1,
       "message": "Why is this method synchronized? Is it just to protect the registrations map? If so only access to registrations needs synchronization. Synchronized methods have the undesired side-effect of increasing the area of unnecessary contention.",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b4ed2c28",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-17T16:56:47Z",
+      "side": 1,
+      "message": "Yeah, this seems it\u0027s just to protect registration map. So I can use a ConcurrentHashMap for that",
+      "parentUuid": "fafc7978_1601a339",
       "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_912e3aa4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-17T16:56:47Z",
+      "side": 1,
+      "message": "I realized we don\u0027t even use/need this. Removing this completely.",
+      "parentUuid": "fafc7978_5657ab26",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_367dc7b2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
         "patchSetId": 37
@@ -132,6 +204,30 @@
       "writtenOn": "2017-03-17T07:18:51Z",
       "side": 1,
       "message": "It\u0027s a little clearer to use isEmpty",
+      "range": {
+        "startLine": 279,
+        "startChar": 60,
+        "endLine": 279,
+        "endChar": 71
+      },
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_d130c209",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-17T16:56:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_76358ff6",
       "range": {
         "startLine": 279,
         "startChar": 60,
