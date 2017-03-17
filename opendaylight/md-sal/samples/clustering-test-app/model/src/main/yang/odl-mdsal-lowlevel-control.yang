@@ -124,11 +124,13 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
-    rpc publish-notifications {
-        description "Upon receiving this, the member shall start publishing llt:id-sequence
-            notifications with the given id and sequence numbers, increasing, from 1.
-            The RPC shall not return until all publishes are successful,
-            or an exception is raised (the exception should propagate to restconf response).";
+    rpc start-publish-notifications {
+        description "Upon receiving this, the member checks whether it is already in the middle of publishing,
+            for this id, and fails if yes. If no, the member shall clear any state tracking data possibly present
+            from the previous call wth this id, and start publishing llt:id-sequence
+            notifications with the given id and sequence numbers increasing from 1.
+            The RPC shall return immediatelly before the first notification is published.
+            The publishing task stops on first error of after the given time.";
         input {
             uses llc:id-grouping;
             leaf seconds {
@@ -143,6 +145,35 @@ module odl-mdsal-lowlevel-control {
             }
         }
         // No output.
+    }
+
+    rpc check-publish-notifications {
+        description "Upon receiving this, the member shall immediatelly return
+            the current tracking data related to the current (or previous) task
+            started by start-publish-notifications with this id.";
+        input {
+            uses llc:id-grouping;
+        }
+        output {
+            leaf active {
+                description "True if a publishing task for this id is running, false otherwise.";
+                mandatory true;
+                type boolean;
+            }
+            leaf publish-count {
+                description "How many notifications were published for this id since last start.
+                    If there was no start-publish-notifications call for this id, this leaf is absent.";
+                mandatory false;
+                type int64;
+            }
+            leaf last-error {
+                description "If no task has been started by start-publish-notifications for this id,
+                    or if the last such call has not encountered an error, this leaf is absent.
+                    Otherwise it contains a string message from the last error, including stacktrace if possible.";
+                mandatory false;
+                type string;
+            }
+        }
     }
 
     rpc subscribe-ynl {
