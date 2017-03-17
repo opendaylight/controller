@@ -1,0 +1,146 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_36a66754",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "It isn\u0027t necessary to make a copy of notifications.",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_d6e71bab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "Why not use a ConcurrentHashMap here?",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_36f82749",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "Why is this method synchronized? It does not seem any synchronization is needed here. In particular, delegate.onDataTreeChanged should not be called while holding onto a lock.",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_1601a339",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "Why is this method synchronized? Is it just to protect the registrations map? If so only access to registrations needs synchronization. Synchronized methods have the undesired side-effect of increasing the area of unnecessary contention.",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_56e4cbab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "Access to registrations should be synchronized.",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_5657ab26",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "I\u0027m wary of static executors that aren\u0027t properly closed/cleaned up on shutdown",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_367dc7b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "Should pass in Long.MAX_VALUE as the keepAliveTime since it\u0027s a single-threaded executor.",
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_76358ff6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-17T07:18:51Z",
+      "side": 1,
+      "message": "It\u0027s a little clearer to use isEmpty",
+      "range": {
+        "startLine": 279,
+        "startChar": 60,
+        "endLine": 279,
+        "endChar": 71
+      },
+      "revId": "21a6f090d9178108639dc3630062236eaf7626b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
