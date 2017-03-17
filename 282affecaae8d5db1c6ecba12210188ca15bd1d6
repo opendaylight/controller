@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_91ac7a8e",
+        "filename": "opendaylight/md-sal/benchmark-sharding/impl/src/main/java/sharding/simple/impl/CDSTestShardFactory.java",
+        "patchSetId": 24
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-17T15:26:10Z",
+      "side": 1,
+      "message": "org.opendaylight.controller.benchmark.sharding?",
+      "range": {
+        "startLine": 9,
+        "startChar": 8,
+        "endLine": 9,
+        "endChar": 16
+      },
+      "revId": "282affecaae8d5db1c6ecba12210188ca15bd1d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
