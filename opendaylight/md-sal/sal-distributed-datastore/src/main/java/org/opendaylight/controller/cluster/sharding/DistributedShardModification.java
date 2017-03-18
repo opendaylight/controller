@@ -57,7 +57,9 @@ public class DistributedShardModification extends WriteableNodeWithSubshard {
     }
 
     DOMStoreThreePhaseCommitCohort seal() {
-        childShards.values().forEach(ForeignShardModificationContext::ready);
+        childShards.values().stream().filter(ForeignShardModificationContext::isModified)
+                .forEach(ForeignShardModificationContext::ready);
+
         return context.ready();
     }
 
