@@ -16,6 +16,7 @@ import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -53,15 +54,22 @@ import scala.concurrent.duration.FiniteDuration;
 public class RaftActorLeadershipTransferCohort {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorLeadershipTransferCohort.class);
 
-    private final RaftActor raftActor;
-    private Cancellable newLeaderTimer;
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
-    private long newLeaderTimeoutInMillis = 2000;
     private final Stopwatch transferTimer = Stopwatch.createUnstarted();
+    private final RaftActor raftActor;
+    private final String requestedFollowerId;
+
+    private long newLeaderTimeoutInMillis = 2000;
+    private Cancellable newLeaderTimer;
     private boolean isTransferring;
 
-    RaftActorLeadershipTransferCohort(RaftActor raftActor) {
+    RaftActorLeadershipTransferCohort(final RaftActor raftActor) {
+        this(raftActor, null);
+    }
+
+    RaftActorLeadershipTransferCohort(final RaftActor raftActor, @Nullable final String requestedFollowerId) {
         this.raftActor = raftActor;
+        this.requestedFollowerId = requestedFollowerId;
     }
 
     void init() {
@@ -144,7 +152,7 @@ public class RaftActorLeadershipTransferCohort {
             }, raftActor.getContext().system().dispatcher(), raftActor.self());
     }
 
-    void onNewLeader(String newLeader) {
+    void onNewLeader(final String newLeader) {
         if (newLeader != null && newLeaderTimer != null) {
             LOG.debug("{}: leader changed to {}", raftActor.persistenceId(), newLeader);
             newLeaderTimer.cancel();
@@ -152,7 +160,7 @@ public class RaftActorLeadershipTransferCohort {
         }
     }
 
-    private void finish(boolean success) {
+    private void finish(final boolean success) {
         isTransferring = false;
         if (transferTimer.isRunning()) {
             transferTimer.stop();
@@ -173,7 +181,7 @@ public class RaftActorLeadershipTransferCohort {
         }
     }
 
-    void addOnComplete(OnComplete onComplete) {
+    void addOnComplete(final OnComplete onComplete) {
         onCompleteCallbacks.add(onComplete);
     }
 
@@ -182,8 +190,12 @@ public class RaftActorLeadershipTransferCohort {
     }
 
     @VisibleForTesting
-    void setNewLeaderTimeoutInMillis(long newLeaderTimeoutInMillis) {
+    void setNewLeaderTimeoutInMillis(final long newLeaderTimeoutInMillis) {
         this.newLeaderTimeoutInMillis = newLeaderTimeoutInMillis;
+    }
+
+    public Optional<String> getRequestedFollowerId() {
+        return Optional.fromNullable(requestedFollowerId);
     }
 
     interface OnComplete {
