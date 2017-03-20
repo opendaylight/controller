@@ -25,7 +25,7 @@ public class InstallSnapshotReplyTest {
         InstallSnapshotReply cloned = (InstallSnapshotReply) SerializationUtils.clone(expected);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
+        assertEquals("getRequestedFollowerId", expected.getFollowerId(), cloned.getFollowerId());
         assertEquals("getChunkIndex", expected.getChunkIndex(), cloned.getChunkIndex());
         assertEquals("isSuccess", expected.isSuccess(), cloned.isSuccess());
     }

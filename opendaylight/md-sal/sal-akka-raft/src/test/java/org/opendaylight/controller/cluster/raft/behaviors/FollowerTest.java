@@ -857,7 +857,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
             assertEquals("isSuccess", true, reply.isSuccess());
-            assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
+            assertEquals("getRequestedFollowerId", context.getId(), reply.getFollowerId());
         }
 
         assertNull("Expected null SnapshotTracker", follower.getSnapshotTracker());
@@ -1027,7 +1027,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("isSuccess", false, reply.isSuccess());
         assertEquals("getChunkIndex", -1, reply.getChunkIndex());
         assertEquals("getTerm", 1, reply.getTerm());
-        assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
+        assertEquals("getRequestedFollowerId", context.getId(), reply.getFollowerId());
 
         assertNull("Expected null SnapshotTracker", follower.getSnapshotTracker());
     }
@@ -1347,7 +1347,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertEquals("isSuccess", expSuccess, reply.isSuccess());
         assertEquals("getTerm", expTerm, reply.getTerm());
-        assertEquals("getFollowerId", expFollowerId, reply.getFollowerId());
+        assertEquals("getRequestedFollowerId", expFollowerId, reply.getFollowerId());
         assertEquals("getLogLastTerm", expLogLastTerm, reply.getLogLastTerm());
         assertEquals("getLogLastIndex", expLogLastIndex, reply.getLogLastIndex());
         assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
