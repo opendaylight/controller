@@ -8,12 +8,14 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.actor.Status;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitionin
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -47,6 +50,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private TestActorRef<MessageCollectorActor> follower3NotifierActor;
     private TestActorRef<TestRaftActor> follower3Actor;
     private ActorRef follower3CollectorActor;
+    private ActorRef requestLeadershipResultCollectorActor;
 
     @Test
     public void testLeaderTransferOnShutDown() throws Exception {
@@ -223,5 +227,79 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         sendShutDown(leaderActor);
 
         testLog.info("testLeaderTransferSkippedOnShutdownWithNoFollowers ending");
+    }
+
+    private void sendFollower2RequestLeadershipTransferToLeader() {
+        testLog.info("sendFollower2RequestLeadershipTransferToLeader starting");
+
+        leaderActor.tell(
+                new RequestLeadership(follower2Id, requestLeadershipResultCollectorActor), ActorRef.noSender());
+
+        testLog.info("sendFollower2RequestLeadershipTransferToLeader ending");
+    }
+
+    private void createRequestLeadershipResultCollectorActor() {
+        testLog.info("createRequestLeadershipResultCollectorActor starting");
+
+        requestLeadershipResultCollectorActor = factory.createActor(MessageCollectorActor.props());
+
+        testLog.info("createRequestLeadershipResultCollectorActor ending");
+    }
+
+    @Test
+    public void testSuccessfulRequestLeadershipTransferToFollower2() {
+        testLog.info("testSuccessfulRequestLeadershipTransferToFollower2 starting");
+
+        createRaftActors();
+        createRequestLeadershipResultCollectorActor();
+
+        sendFollower2RequestLeadershipTransferToLeader();
+
+        verifyRaftState(follower2Actor, RaftState.Leader);
+
+        expectMatching(requestLeadershipResultCollectorActor, Status.Success.class, 1);
+
+        testLog.info("testSuccessfulRequestLeadershipTransferToFollower2 ending");
+    }
+
+    @Test
+    public void testRequestLeadershipTransferToFollower2WithFollower2Lagging() {
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging starting");
+
+        createRaftActors();
+        createRequestLeadershipResultCollectorActor();
+
+        sendPayloadWithFollower2Lagging();
+
+        sendFollower2RequestLeadershipTransferToLeader();
+
+        verifyRaftState(follower1Actor, RaftState.Follower);
+        verifyRaftState(follower2Actor, RaftState.Follower);
+        verifyRaftState(follower3Actor, RaftState.Follower);
+
+        Status.Failure failure = expectFirstMatching(requestLeadershipResultCollectorActor, Status.Failure.class);
+        assertTrue(failure.cause() instanceof LeadershipTransferFailedException);
+
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging ending");
+    }
+
+    @Test
+    public void testRequestLeadershipTransferToFollower2WithFollower2Shutdown() throws Exception {
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown starting");
+
+        createRaftActors();
+        createRequestLeadershipResultCollectorActor();
+
+        sendShutDown(follower2Actor);
+
+        sendFollower2RequestLeadershipTransferToLeader();
+
+        verifyRaftState(follower1Actor, RaftState.Follower);
+        verifyRaftState(follower3Actor, RaftState.Follower);
+
+        Status.Failure failure = expectFirstMatching(requestLeadershipResultCollectorActor, Status.Failure.class);
+        assertTrue(failure.cause() instanceof LeadershipTransferFailedException);
+
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown ending");
     }
 }
