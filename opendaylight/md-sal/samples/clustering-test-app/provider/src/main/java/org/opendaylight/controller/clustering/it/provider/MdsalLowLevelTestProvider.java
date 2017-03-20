@@ -8,15 +8,22 @@
 
 package org.opendaylight.controller.clustering.it.provider;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
+import org.opendaylight.controller.clustering.it.provider.impl.IdIntsDOMDataTreeLIstener;
 import org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
@@ -31,8 +38,12 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeListeningException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeLoopException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
@@ -53,10 +64,12 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -64,6 +77,8 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +106,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
     private FlappingSingletonService flappingSingletonService;
+    private ListenerRegistration<IdIntsDOMDataTreeLIstener> ddtlReg;
+    private IdIntsDOMDataTreeLIstener idIntsDdtl;
 
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
@@ -294,7 +311,27 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public Future<RpcResult<Void>> subscribeDdtl() {
-        return null;
+
+        if (ddtlReg != null) {
+            final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
+                    "There is already dataTreeChangeListener registered on id-ints list.");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+        }
+
+        idIntsDdtl = new IdIntsDOMDataTreeLIstener();
+
+        try {
+            ddtlReg =
+                    domDataTreeService.registerListener(idIntsDdtl,
+                            Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
+                                    ProduceTransactionsHandler.ID_INTS_YID))
+                            , true, Collections.emptyList());
+        } catch (DOMDataTreeLoopException e) {
+            LOG.error("Failed to register DOMDataTreeListener.", e);
+
+        }
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -413,6 +450,79 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public Future<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl() {
-        return null;
+        LOG.debug("Received unsubscribe-ddtl.");
+
+        if (idIntsDdtl == null || ddtlReg == null) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.RPC, "Ddtl missing.", "No DOMDataTreeListener registered.");
+            return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDdtlOutput>failed().withRpcError(error).build());
+        }
+
+        ddtlReg.close();
+        ddtlReg = null;
+
+        final ReadListener readListener = new ReadListener();
+        try {
+            final ListenerRegistration<ReadListener> registration = domDataTreeService.registerListener(readListener,
+                    Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
+                            ProduceTransactionsHandler.ID_INTS_YID))
+                    , true, Collections.emptyList());
+
+            final DataTreeCandidate dataTreeCandidate = readListener.getFirstNotif().get();
+            registration.close();
+
+            if (!dataTreeCandidate.getRootNode().getDataAfter().isPresent()) {
+                final RpcError error = RpcResultBuilder.newError(
+                        ErrorType.APPLICATION, "Final read empty.", "No data read from id-ints list.");
+                return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDdtlOutput>failed()
+                        .withRpcError(error).build());
+            }
+
+            final NormalizedNode<?, ?> lastRead = dataTreeCandidate.getRootNode().getDataAfter().get();
+
+            return Futures.immediateFuture(
+                    RpcResultBuilder.success(new UnsubscribeDdtlOutputBuilder()
+                            .setCopyMatches(idIntsDdtl.checkEqual(lastRead))).build());
+
+
+        } catch (final DOMDataTreeLoopException | InterruptedException | ExecutionException e) {
+            LOG.error("Unable to read data to verify ddtl data.", e);
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.APPLICATION, "Read failed.", "Final read from id-ints failed.");
+            return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDdtlOutput>failed()
+                    .withRpcError(error).build());
+        }
+    }
+
+    private static class ReadListener implements DOMDataTreeListener {
+
+        private Collection<DataTreeCandidate> changes = null;
+        private SettableFuture<DataTreeCandidate> readFuture;
+
+        @Override
+        public synchronized void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes,
+                                      @Nonnull final Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>> subtrees) {
+            Preconditions.checkArgument(changes.size() == 1);
+
+            if (this.changes == null) {
+                this.changes = changes;
+
+                readFuture.set(changes.iterator().next());
+            }
+        }
+
+        @Override
+        public void onDataTreeFailed(@Nonnull final Collection<DOMDataTreeListeningException> causes) {
+            LOG.error("Read Listener failed. {}", causes);
+        }
+
+        public synchronized ListenableFuture<DataTreeCandidate> getFirstNotif() {
+            if (changes != null) {
+                return Futures.immediateFuture(changes.iterator().next());
+            }
+
+            readFuture = SettableFuture.create();
+            return readFuture;
+        }
     }
 }
