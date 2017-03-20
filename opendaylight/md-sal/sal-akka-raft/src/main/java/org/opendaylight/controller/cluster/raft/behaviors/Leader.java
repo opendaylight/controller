@@ -99,6 +99,7 @@ public class Leader extends AbstractLeader {
     protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
         RaftActorBehavior returnBehavior = super.handleAppendEntriesReply(sender, appendEntriesReply);
         tryToCompleteLeadershipTransfer(appendEntriesReply.getFollowerId());
+
         return returnBehavior;
     }
 
@@ -130,7 +131,8 @@ public class Leader extends AbstractLeader {
     }
 
     private void tryToCompleteLeadershipTransfer(String followerId) {
-        if (leadershipTransferContext == null) {
+        if (leadershipTransferContext == null
+                || followerId.equals(leadershipTransferContext.transferCohort.getFollowerId())) {
             return;
         }
 
