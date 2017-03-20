@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
@@ -131,6 +132,13 @@ public class Leader extends AbstractLeader {
 
     private void tryToCompleteLeadershipTransfer(String followerId) {
         if (leadershipTransferContext == null) {
+            return;
+        }
+
+        final Optional<String> requestedFollowerIdOptional
+                = leadershipTransferContext.transferCohort.getRequestedFollowerId();
+        if (requestedFollowerIdOptional.isPresent() && !requestedFollowerIdOptional.get().equals(followerId)) {
+            // we want to transfer leadership to specific follower
             return;
         }
 
