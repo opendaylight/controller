@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitionin
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -223,5 +224,57 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         sendShutDown(leaderActor);
 
         testLog.info("testLeaderTransferSkippedOnShutdownWithNoFollowers ending");
+    }
+
+    private void sendFollower2RequestLeadershipTransferToLeader() {
+        testLog.info("sendFollower2RequestLeadershipTransferToLeader starting");
+        
+        leaderActor.tell(new RequestLeadership(follower2Id, getSystem().deadLetters()), ActorRef.noSender());
+
+        testLog.info("sendFollower2RequestLeadershipTransferToLeader ending");
+    }
+
+    @Test
+    public void testSuccessfulRequestLeadershipTransferToFollower2() {
+        testLog.info("testSuccessfulRequestLeadershipTransferToFollower2 starting");
+
+        createRaftActors();
+
+        sendFollower2RequestLeadershipTransferToLeader();
+
+        verifyRaftState(follower2Actor, RaftState.Leader);
+
+        testLog.info("testSuccessfulRequestLeadershipTransferToFollower2 ending");
+    }
+
+    @Test
+    public void testRequestLeadershipTransferToFollower2WithFollower2Lagging() {
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging starting");
+
+        createRaftActors();
+
+        sendPayloadWithFollower2Lagging();
+
+        sendFollower2RequestLeadershipTransferToLeader();
+
+        verifyRaftState(follower1Actor, RaftState.Follower);
+        verifyRaftState(follower2Actor, RaftState.Follower);
+        verifyRaftState(follower3Actor, RaftState.Follower);
+
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging ending");
+    }
+
+    @Test
+    public void testRequestLeadershipTransferToFollower2WithFollower2Shutdown() throws Exception {
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown starting");
+
+        createRaftActors();
+
+        sendShutDown(follower2Actor);
+
+        verifyRaftState(follower1Actor, RaftState.Follower);
+        verifyRaftState(follower3Actor, RaftState.Follower);
+
+        testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown ending");
     }
 }
