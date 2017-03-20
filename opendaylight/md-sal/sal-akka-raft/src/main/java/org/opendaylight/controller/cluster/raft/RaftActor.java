@@ -49,6 +49,8 @@ import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
+import org.opendaylight.controller.cluster.raft.messages.RequestLeadershipReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -263,10 +265,36 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof Runnable) {
             ((Runnable)message).run();
         } else if (message instanceof NoopPayload) {
-            persistData(null, null, (NoopPayload)message, false);
+            persistData(null, null, (NoopPayload) message, false);
+        } else if (message instanceof RequestLeadership) {
+            onRequestLeadership((RequestLeadership) message);
         } else if (!possiblyHandleBehaviorMessage(message)) {
             handleNonRaftCommand(message);
         }
+    }
+
+    private void onRequestLeadership(final RequestLeadership message) {
+        LOG.debug("{}: onRequestLeadership {}", message);
+        if (!isLeader()) {
+            // For non-leaders this is a no-op
+            return;
+        }
+
+        final String followerId = message.getFollowerId();
+        final ActorRef sender = message.getSender();
+        initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
+            @Override
+            public void onSuccess(final ActorRef raftActorRef) {
+                LOG.debug("{}: Leadership transferred successfully to {}", persistence(), followerId);
+                sender.tell(new RequestLeadershipReply(true), getSelf());
+            }
+
+            @Override
+            public void onFailure(final ActorRef raftActorRef) {
+                LOG.debug("{}: LeadershipTransfer request from {} failed", persistence(), followerId);
+                sender.tell(new RequestLeadershipReply(false), getSelf());
+            }
+        }, message.getFollowerId());
     }
 
     private boolean possiblyHandleBehaviorMessage(final Object message) {
@@ -286,10 +314,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete) {
+        initiateLeadershipTransfer(onComplete, null);
+    }
+
+    private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete,
+                                            final String followerId) {
         LOG.debug("{}: Initiating leader transfer", persistenceId());
 
         if (leadershipTransferInProgress == null) {
-            leadershipTransferInProgress = new RaftActorLeadershipTransferCohort(this);
+            leadershipTransferInProgress = new RaftActorLeadershipTransferCohort(this, followerId);
             leadershipTransferInProgress.addOnComplete(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
                 public void onSuccess(ActorRef raftActorRef) {
@@ -309,6 +342,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             leadershipTransferInProgress.addOnComplete(onComplete);
         }
     }
+
 
     private void onShutDown() {
         LOG.debug("{}: onShutDown", persistenceId());
