@@ -54,6 +54,7 @@ public class RaftActorLeadershipTransferCohort {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorLeadershipTransferCohort.class);
 
     private final RaftActor raftActor;
+    private final String followerId;
     private Cancellable newLeaderTimer;
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
     private long newLeaderTimeoutInMillis = 2000;
@@ -61,7 +62,12 @@ public class RaftActorLeadershipTransferCohort {
     private boolean isTransferring;
 
     RaftActorLeadershipTransferCohort(RaftActor raftActor) {
+        this(raftActor, null);
+    }
+
+    RaftActorLeadershipTransferCohort(final RaftActor raftActor, final String followerId) {
         this.raftActor = raftActor;
+        this.followerId = followerId;
     }
 
     void init() {
@@ -184,6 +190,10 @@ public class RaftActorLeadershipTransferCohort {
     @VisibleForTesting
     void setNewLeaderTimeoutInMillis(long newLeaderTimeoutInMillis) {
         this.newLeaderTimeoutInMillis = newLeaderTimeoutInMillis;
+    }
+
+    public String getFollowerId() {
+        return followerId;
     }
 
     interface OnComplete {

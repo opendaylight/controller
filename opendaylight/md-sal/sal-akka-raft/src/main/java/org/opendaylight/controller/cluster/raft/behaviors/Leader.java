@@ -98,7 +98,10 @@ public class Leader extends AbstractLeader {
     @Override
     protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
         RaftActorBehavior returnBehavior = super.handleAppendEntriesReply(sender, appendEntriesReply);
-        tryToCompleteLeadershipTransfer(appendEntriesReply.getFollowerId());
+        final String followerId = appendEntriesReply.getFollowerId();
+        if (followerId.equals(leadershipTransferContext.transferCohort.getFollowerId())) {
+            tryToCompleteLeadershipTransfer(appendEntriesReply.getFollowerId());
+        }
         return returnBehavior;
     }
 
