@@ -110,7 +110,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
+                         final Consumer<Response<?, ?>> callback) {
         if (request instanceof CommitLocalTransactionRequest) {
             final CommitLocalTransactionRequest req = (CommitLocalTransactionRequest) request;
             final DataTreeModification mod = req.getModification();
@@ -140,6 +140,9 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof AbortLocalTransactionRequest) {
             LOG.debug("Forwarding abort {} to successor {}", request, successor);
             successor.abort();
+        } else if (request instanceof TransactionPurgeRequest) {
+            LOG.debug("Forwarding purge {} to successor {}", request, successor);
+            successor.purge();
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }

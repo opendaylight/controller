@@ -12,7 +12,6 @@ import com.google.common.base.Verify;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
@@ -22,7 +21,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRe
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -142,7 +140,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     void applyModifyTransactionRequest(final ModifyTransactionRequest request,
             final @Nullable Consumer<Response<?, ?>> callback) {
-        for (TransactionModification mod : request.getModifications()) {
+        for (final TransactionModification mod : request.getModifications()) {
             if (mod instanceof TransactionWrite) {
                 modification.write(mod.getPath(), ((TransactionWrite)mod).getData());
             } else if (mod instanceof TransactionMerge) {
@@ -191,46 +189,6 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             sendAbort(callback);
         } else {
             super.handleForwardedRemoteRequest(request, callback);
-        }
-    }
-
-    @Override
-    void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
-        if (request instanceof CommitLocalTransactionRequest) {
-            final CommitLocalTransactionRequest req = (CommitLocalTransactionRequest) request;
-            final DataTreeModification mod = req.getModification();
-
-            LOG.debug("Applying modification {} to successor {}", mod, successor);
-            mod.applyToCursor(new AbstractDataTreeModificationCursor() {
-                @Override
-                public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
-                    successor.write(current().node(child), data);
-                }
-
-                @Override
-                public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
-                    successor.merge(current().node(child), data);
-                }
-
-                @Override
-                public void delete(final PathArgument child) {
-                    successor.delete(current().node(child));
-                }
-            });
-
-            successor.ensureSealed();
-
-            final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
-            successor.sendRequest(successorReq, callback);
-        } else if (request instanceof AbortLocalTransactionRequest) {
-            LOG.debug("Forwarding abort {} to successor {}", request, successor);
-            successor.abort();
-        } else if (request instanceof TransactionPurgeRequest) {
-            LOG.debug("Forwarding purge {} to successor {}", request, successor);
-            successor.purge();
-        } else {
-            throw new IllegalArgumentException("Unhandled request" + request);
         }
     }
 
