@@ -16,6 +16,7 @@ import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -54,6 +55,7 @@ public class RaftActorLeadershipTransferCohort {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorLeadershipTransferCohort.class);
 
     private final RaftActor raftActor;
+    private final String requestedFollowerId;
     private Cancellable newLeaderTimer;
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
     private long newLeaderTimeoutInMillis = 2000;
@@ -61,7 +63,12 @@ public class RaftActorLeadershipTransferCohort {
     private boolean isTransferring;
 
     RaftActorLeadershipTransferCohort(RaftActor raftActor) {
+        this(raftActor, null);
+    }
+
+    RaftActorLeadershipTransferCohort(final RaftActor raftActor, @Nullable final String requestedFollowerId) {
         this.raftActor = raftActor;
+        this.requestedFollowerId = requestedFollowerId;
     }
 
     void init() {
@@ -184,6 +191,10 @@ public class RaftActorLeadershipTransferCohort {
     @VisibleForTesting
     void setNewLeaderTimeoutInMillis(long newLeaderTimeoutInMillis) {
         this.newLeaderTimeoutInMillis = newLeaderTimeoutInMillis;
+    }
+
+    public Optional<String> getRequestedFollowerId() {
+        return requestedFollowerId == null ? Optional.absent() : Optional.of(requestedFollowerId);
     }
 
     interface OnComplete {
