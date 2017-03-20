@@ -25,7 +25,7 @@ public class AppendEntriesReplyTest {
         AppendEntriesReply cloned = (AppendEntriesReply) SerializationUtils.clone(expected);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
+        assertEquals("getRequestedFollowerId", expected.getFollowerId(), cloned.getFollowerId());
         assertEquals("getLogLastTerm", expected.getLogLastTerm(), cloned.getLogLastTerm());
         assertEquals("getLogLastIndex", expected.getLogLastIndex(), cloned.getLogLastIndex());
         assertEquals("getPayloadVersion", expected.getPayloadVersion(), cloned.getPayloadVersion());
