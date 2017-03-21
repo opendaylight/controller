@@ -71,6 +71,47 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_6235b445",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "Use Sets.newConcurrentHastSet or CopyOnWriteArrayList",
+      "parentUuid": "fafc7978_bc9b4771",
+      "range": {
+        "startLine": 41,
+        "startChar": 65,
+        "endLine": 41,
+        "endChar": 83
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_423a3037",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "both of these need to be volatile",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_5cab3b89",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
         "patchSetId": 6
@@ -117,6 +158,40 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_c2c0e02c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "This should be done async.",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a2f79c8b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "I think this should propagate a reason for the failure. In fact you can eliminate the RequestLeadershipReply and just return akka.actor.Status.Success and propagate failures via LeadershipTransferException.",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_fc8caf37",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
         "patchSetId": 6
@@ -157,6 +232,138 @@
         "endLine": 423,
         "endChar": 104
       },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_6283f4cc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "Does this need to be thread-safe? It seems so...",
+      "parentUuid": "fafc7978_3c875711",
+      "range": {
+        "startLine": 423,
+        "startChar": 85,
+        "endLine": 423,
+        "endChar": 104
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a26cbc37",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/NotifySubscriberActor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "Please add javadocs",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e24d24c6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/NotifySubscriberActor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "You can remove the Creator and avoid the findings warning by using \n\n  Props.create(NotifySubscriberActor.class, roleChangeNotifier, listener)\n\nabove.",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_c24aa0ab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImplTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "Please add unit tests.",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_62d134cd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/sharding/NotifySubscriberActorTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "You don\u0027t need to wrap with JavaTestKit here",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_22c72c14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/sharding/NotifySubscriberActorTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "spelling?",
+      "range": {
+        "startLine": 50,
+        "startChar": 68,
+        "endLine": 50,
+        "endChar": 98
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a2dafce6",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMDataWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:08Z",
+      "side": 1,
+      "message": "looks inadvertent - please remove",
       "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
