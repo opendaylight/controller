@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_5cddfb41",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "unintended whitespace change?",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 4
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_bc9b4771",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "new HashSet\u003c\u003e();",
+      "range": {
+        "startLine": 41,
+        "startChar": 65,
+        "endLine": 41,
+        "endChar": 83
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_1c889321",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "@GuardedBy ? as we are modifying this from callbacks...",
+      "range": {
+        "startLine": 41,
+        "startChar": 53,
+        "endLine": 41,
+        "endChar": 62
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_5cab3b89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "merge into constructor, as that is the only caller I can see",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 56,
+        "endChar": 25
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9c948345",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "add a message",
+      "range": {
+        "startLine": 64,
+        "startChar": 33,
+        "endLine": 64,
+        "endChar": 42
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_fc8caf37",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "does not throw",
+      "range": {
+        "startLine": 152,
+        "startChar": 24,
+        "endLine": 152,
+        "endChar": 40
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3c875711",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-21T10:36:18Z",
+      "side": 1,
+      "message": "new HashMap\u003c\u003e();",
+      "range": {
+        "startLine": 423,
+        "startChar": 85,
+        "endLine": 423,
+        "endChar": 104
+      },
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
