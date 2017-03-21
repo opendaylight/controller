@@ -56,7 +56,7 @@ public class ClientTransactionCommitCohortTest {
     @Mock
     private AbstractClientHistory history;
     private ActorSystem system;
-    private List<TranasactionTester> transactions;
+    private List<TransactionTester> transactions;
     private ClientTransactionCommitCohort cohort;
 
     @Before
@@ -71,7 +71,7 @@ public class ClientTransactionCommitCohortTest {
             transactions.add(createTransactionTester(new TestProbe(system, "backend" + i), context, history));
         }
         final Collection<AbstractProxyTransaction> proxies = transactions.stream()
-                .map(TranasactionTester::getTransaction)
+                .map(TransactionTester::getTransaction)
                 .collect(Collectors.toList());
         proxies.forEach(AbstractProxyTransaction::seal);
         cohort = new ClientTransactionCommitCohort(history, TRANSACTION_ID, proxies);
@@ -124,51 +124,51 @@ public class ClientTransactionCommitCohortTest {
         testOpFail(ClientTransactionCommitCohort::abort, this::expectAbort, this::replyAbortSuccess);
     }
 
-    private void expectCanCommit(final TranasactionTester tester) {
+    private void expectCanCommit(final TransactionTester<RemoteProxyTransaction> tester) {
         final ModifyTransactionRequest request = tester.expectTransactionRequest(ModifyTransactionRequest.class);
         Assert.assertTrue(request.getPersistenceProtocol().isPresent());
         Assert.assertEquals(PersistenceProtocol.THREE_PHASE, request.getPersistenceProtocol().get());
     }
 
-    void expectPreCommit(final TranasactionTester tester) {
+    void expectPreCommit(final TransactionTester tester) {
         tester.expectTransactionRequest(TransactionPreCommitRequest.class);
     }
 
-    void expectCommit(final TranasactionTester tester) {
+    void expectCommit(final TransactionTester tester) {
         tester.expectTransactionRequest(TransactionDoCommitRequest.class);
     }
 
-    void expectAbort(final TranasactionTester tester) {
+    void expectAbort(final TransactionTester tester) {
         tester.expectTransactionRequest(TransactionAbortRequest.class);
     }
 
-    void replyCanCommitSuccess(final TranasactionTester tester) {
+    void replyCanCommitSuccess(final TransactionTester tester) {
         final RequestSuccess<?, ?> success = new TransactionCanCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyPreCommitSuccess(final TranasactionTester tester) {
+    void replyPreCommitSuccess(final TransactionTester tester) {
         final RequestSuccess<?, ?> success = new TransactionPreCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyCommitSuccess(final TranasactionTester tester) {
+    void replyCommitSuccess(final TransactionTester tester) {
         final RequestSuccess<?, ?> success = new TransactionCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyAbortSuccess(final TranasactionTester tester) {
+    void replyAbortSuccess(final TransactionTester tester) {
         final RequestSuccess<?, ?> success = new TransactionAbortSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    private static TranasactionTester createTransactionTester(final TestProbe backendProbe,
-                                                              final ClientActorContext context,
-                                                              final AbstractClientHistory history) {
+    private static TransactionTester createTransactionTester(final TestProbe backendProbe,
+                                                             final ClientActorContext context,
+                                                             final AbstractClientHistory history) {
         final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
@@ -176,13 +176,13 @@ public class ClientTransactionCommitCohortTest {
         final ProxyHistory proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
         final RemoteProxyTransaction transaction =
                 new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false);
-        return new TranasactionTester(transaction, connection, backendProbe);
+        return new TransactionTester(transaction, connection, backendProbe);
     }
 
-    private void replySuccess(final Collection<TranasactionTester> transactions,
-                              final Consumer<TranasactionTester> expect,
-                              final Consumer<TranasactionTester> reply) {
-        for (final TranasactionTester transaction : transactions) {
+    private void replySuccess(final Collection<TransactionTester> transactions,
+                              final Consumer<TransactionTester> expect,
+                              final Consumer<TransactionTester> reply) {
+        for (final TransactionTester transaction : transactions) {
             expect.accept(transaction);
             reply.accept(transaction);
         }
@@ -201,8 +201,8 @@ public class ClientTransactionCommitCohortTest {
      * @throws Exception unexpected exception
      */
     private <T> void testOpSuccess(final Function<ClientTransactionCommitCohort, ListenableFuture<T>> operation,
-                                   final Consumer<TranasactionTester> expectFunction,
-                                   final Consumer<TranasactionTester> replyFunction,
+                                   final Consumer<TransactionTester> expectFunction,
+                                   final Consumer<TransactionTester> replyFunction,
                                    final T expectedResult) throws Exception {
         final ListenableFuture<T> result = operation.apply(cohort);
         replySuccess(transactions, expectFunction, replyFunction);
@@ -221,13 +221,13 @@ public class ClientTransactionCommitCohortTest {
      * @throws Exception unexpected exception
      */
     private <T> void testOpFail(final Function<ClientTransactionCommitCohort, ListenableFuture<T>> operation,
-                                final Consumer<TranasactionTester> expectFunction,
-                                final Consumer<TranasactionTester> replyFunction) throws Exception {
+                                final Consumer<TransactionTester> expectFunction,
+                                final Consumer<TransactionTester> replyFunction) throws Exception {
         final ListenableFuture<T> canCommit = operation.apply(cohort);
         //reply success to all except last transaction
         replySuccess(transactions.subList(0, transactions.size() - 1), expectFunction, replyFunction);
         //reply fail to last transaction
-        final TranasactionTester last = transactions.get(transactions.size() - 1);
+        final TransactionTester last = transactions.get(transactions.size() - 1);
         expectFunction.accept(last);
         final RuntimeRequestException cause = new RuntimeRequestException("fail", new RuntimeException());
         last.replyFailure(cause);

@@ -41,7 +41,7 @@ public class DirectTransactionCommitCohortTest {
     @Mock
     private AbstractClientHistory history;
     private ActorSystem system;
-    private TranasactionTester transaction;
+    private TransactionTester<?> transaction;
     private DirectTransactionCommitCohort cohort;
 
     @Before
@@ -94,9 +94,9 @@ public class DirectTransactionCommitCohortTest {
         Assert.assertNull(getWithTimeout(commit));
     }
 
-    private static TranasactionTester createTransactionTester(final TestProbe backendProbe,
-                                                              final ClientActorContext context,
-                                                              final AbstractClientHistory history) {
+    private static TransactionTester<?> createTransactionTester(final TestProbe backendProbe,
+                                                                final ClientActorContext context,
+                                                                final AbstractClientHistory history) {
         final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
@@ -104,7 +104,7 @@ public class DirectTransactionCommitCohortTest {
         final ProxyHistory proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
         final RemoteProxyTransaction transaction =
                 new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false);
-        return new TranasactionTester(transaction, connection, backendProbe);
+        return new TransactionTester<>(transaction, connection, backendProbe);
     }
 
 }

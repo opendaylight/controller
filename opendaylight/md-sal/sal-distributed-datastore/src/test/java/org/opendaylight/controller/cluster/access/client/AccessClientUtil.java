@@ -9,7 +9,10 @@ package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 
 /**
@@ -30,6 +33,12 @@ public class AccessClientUtil {
     public static void completeRequest(final AbstractClientConnection<? extends BackendInfo> connection,
                                        final ResponseEnvelope<?> envelope) {
         connection.receiveResponse(envelope);
+    }
+
+    public static ConnectionEntry createConnectionEntry(final Request<?, ?> request,
+                                                        final Consumer<Response<?, ?>> callback,
+                                                        final long now) {
+        return new ConnectionEntry(request, callback, now);
     }
 
 }
