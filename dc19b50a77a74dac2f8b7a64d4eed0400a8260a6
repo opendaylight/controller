@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_22ee0c8c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-21T14:49:46Z",
+      "side": 1,
+      "message": "Please add javadocs",
+      "revId": "dc19b50a77a74dac2f8b7a64d4eed0400a8260a6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_bc9b4771",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/CDSShardAccessImpl.java",
         "patchSetId": 6
