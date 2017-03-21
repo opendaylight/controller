@@ -1,0 +1,40 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_ff3ae4e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/LocalReadOnlyProxyTransactionTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-21T07:47:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_1f7368e8",
+      "revId": "6a45a912505309a9176ce9260a70db7e4d1dc6da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3f246cc5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/TransactionTester.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-03-21T07:47:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_5f7df0b0",
+      "revId": "6a45a912505309a9176ce9260a70db7e4d1dc6da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
