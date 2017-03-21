@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -27,22 +28,22 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Helper class. Allows checking messages received by backend and respond to them.
  */
-class TranasactionTester {
+class TransactionTester<T extends AbstractProxyTransaction> {
 
-    private final RemoteProxyTransaction transaction;
+    private final T transaction;
     private final AbstractClientConnection<ShardBackendInfo> connection;
     private final TestProbe backendProbe;
     private RequestEnvelope envelope;
 
-    TranasactionTester(final RemoteProxyTransaction transaction,
-                       final AbstractClientConnection<ShardBackendInfo> connection,
-                       final TestProbe backendProbe) {
+    TransactionTester(final T transaction,
+                      final AbstractClientConnection<ShardBackendInfo> connection,
+                      final TestProbe backendProbe) {
         this.transaction = transaction;
         this.connection = connection;
         this.backendProbe = backendProbe;
     }
 
-    RemoteProxyTransaction getTransaction() {
+    T getTransaction() {
         return transaction;
     }
 
@@ -50,10 +51,12 @@ class TranasactionTester {
         return (TransactionRequest) envelope.getMessage();
     }
 
-    <T extends TransactionRequest> T expectTransactionRequest(final Class<T> expected) {
+    <R extends TransactionRequest> R expectTransactionRequest(final Class<R> expected) {
         envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
-        Assert.assertTrue(expected.isAssignableFrom(envelope.getMessage().getClass()));
-        return (T) envelope.getMessage();
+        final Class<? extends Request> actual = envelope.getMessage().getClass();
+        final String errorMsg = String.format("Expected instance of %s, received %s", expected, actual);
+        Assert.assertTrue(errorMsg, expected.isAssignableFrom(actual));
+        return (R) envelope.getMessage();
     }
 
     void replySuccess(final RequestSuccess<?, ?> success) {
