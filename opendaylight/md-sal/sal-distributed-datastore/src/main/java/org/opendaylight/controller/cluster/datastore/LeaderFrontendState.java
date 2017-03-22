@@ -47,10 +47,10 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(LeaderFrontendState.class);
 
     // Histories which have not been purged
-    private final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories;
+    private final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories = new HashMap<>();
 
     // RangeSet performs automatic merging, hence we keep minimal state tracking information
-    private final RangeSet<UnsignedLong> purgedHistories;
+    private final RangeSet<UnsignedLong> purgedHistories = TreeRangeSet.create();
 
     // Used for all standalone transactions
     private final AbstractFrontendHistory standaloneHistory;
@@ -60,6 +60,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
     private long expectedTxSequence;
     private Long lastSeenHistory = null;
+
 
     // TODO: explicit failover notification
     //       Record the ActorRef for the originating actor and when we switch to being a leader send a notification
@@ -71,19 +72,10 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     // - per-RequestException throw counters
 
     LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
-        this(persistenceId, clientId, tree, TreeRangeSet.create(), StandaloneFrontendHistory.create(persistenceId,
-            clientId, tree), new HashMap<>());
-    }
-
-    LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
-        final RangeSet<UnsignedLong> purgedHistories, final AbstractFrontendHistory standaloneHistory,
-        final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories) {
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
         this.clientId = Preconditions.checkNotNull(clientId);
         this.tree = Preconditions.checkNotNull(tree);
-        this.purgedHistories = Preconditions.checkNotNull(purgedHistories);
-        this.standaloneHistory = Preconditions.checkNotNull(standaloneHistory);
-        this.localHistories = Preconditions.checkNotNull(localHistories);
+        standaloneHistory = new StandaloneFrontendHistory(persistenceId, tree.ticker(), clientId, tree);
     }
 
     @Override
@@ -141,7 +133,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             lastSeenHistory = id.getHistoryId();
         }
 
-        localHistories.put(id, LocalFrontendHistory.create(persistenceId, tree, id));
+        localHistories.put(id, new LocalFrontendHistory(persistenceId, tree, tree.ensureTransactionChain(id)));
         LOG.debug("{}: created history {}", persistenceId, id);
         return new LocalHistorySuccess(id, request.getSequence());
     }

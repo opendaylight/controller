@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -91,7 +90,7 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     }
 
     private static FrontendShardDataTreeSnapshotMetadata createMetadataSnapshot(final int size) {
-        final List<FrontendClientMetadata> clients = new ArrayList<>(size);
+        final List<FrontendClientMetadata> clients = new ArrayList<>();
         for (long i = 0; i < size; i++) {
             clients.add(createFrontedClientMetadata(i));
         }
@@ -108,9 +107,8 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         final RangeSet<UnsignedLong> purgedHistories = TreeRangeSet.create();
         purgedHistories.add(Range.closed(UnsignedLong.ZERO, UnsignedLong.ONE));
 
-        final Collection<FrontendHistoryMetadata> currentHistories = Collections.singleton(
-            new FrontendHistoryMetadata(num, num, true, ImmutableMap.of(UnsignedLong.ZERO, Boolean.TRUE),
-                purgedHistories));
+        final Collection<FrontendHistoryMetadata> currentHistories = Collections
+                .singleton(new FrontendHistoryMetadata(num, num, num, true));
 
         return new FrontendClientMetadata(clientIdentifier, purgedHistories, currentHistories);
     }

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableRangeSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -47,7 +46,7 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
 
     @Test
     public void toRequestFailureTest() throws Exception {
-        final RequestException exception = new DeadTransactionException(ImmutableRangeSet.of());
+        final RequestException exception = new DeadTransactionException(0);
         final ConnectClientFailure failure = OBJECT.toRequestFailure(exception);
         Assert.assertNotNull(failure);
     }

@@ -7,14 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Payload persisted when a transaction is aborted. It contains the transaction identifier.
@@ -48,22 +45,15 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbortTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
     AbortTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
         super(transactionId, serialized);
     }
 
-    public static AbortTransactionPayload create(final TransactionIdentifier transactionId) {
+    public static AbortTransactionPayload create(final TransactionIdentifier transactionId) throws IOException {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        try {
-            transactionId.writeTo(out);
-        } catch (IOException e) {
-            // This should never happen
-            LOG.error("Failed to serialize {}", transactionId, e);
-            throw Throwables.propagate(e);
-        }
+        transactionId.writeTo(out);
         return new AbortTransactionPayload(transactionId, out.toByteArray());
     }
 

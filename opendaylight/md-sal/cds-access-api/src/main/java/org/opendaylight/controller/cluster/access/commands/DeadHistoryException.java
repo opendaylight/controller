@@ -26,6 +26,6 @@ public final class DeadHistoryException extends RequestException {
 
     @Override
     public boolean isRetriable() {
-        return false;
+        return true;
     }
 }

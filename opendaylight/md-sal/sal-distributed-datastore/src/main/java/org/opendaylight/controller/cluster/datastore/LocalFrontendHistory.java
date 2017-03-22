@@ -8,16 +8,15 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
-import com.google.common.primitives.UnsignedLong;
-import java.util.HashMap;
-import java.util.Map;
+import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
+import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -26,26 +25,18 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  * @author Robert Varga
  */
 final class LocalFrontendHistory extends AbstractFrontendHistory {
+    private static final Logger LOG = LoggerFactory.getLogger(LocalFrontendHistory.class);
+
     private final ShardDataTreeTransactionChain chain;
+    private final ShardDataTree tree;
 
-    private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
-            final RangeSet<UnsignedLong> purgedTransactions) {
-        super(persistenceId, tree, closedTransactions, purgedTransactions);
+    private Long lastSeenTransaction;
+
+    LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
+            final ShardDataTreeTransactionChain chain) {
+        super(persistenceId, tree.ticker());
+        this.tree = Preconditions.checkNotNull(tree);
         this.chain = Preconditions.checkNotNull(chain);
-    }
-
-    static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
-            final LocalHistoryIdentifier historyId) {
-        return new LocalFrontendHistory(persistenceId, tree, tree.ensureTransactionChain(historyId), ImmutableMap.of(),
-            TreeRangeSet.create());
-    }
-
-    static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
-            final RangeSet<UnsignedLong> purgedTransactions) {
-        return new LocalFrontendHistory(persistenceId, tree, chain, new HashMap<>(closedTransactions),
-            TreeRangeSet.create(purgedTransactions));
     }
 
     @Override
@@ -55,22 +46,53 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
     @Override
     FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) throws RequestException {
+        checkDeadTransaction(id);
+        lastSeenTransaction = id.getTransactionId();
         return FrontendReadOnlyTransaction.create(this, chain.newReadOnlyTransaction(id));
     }
 
     @Override
     FrontendTransaction createOpenTransaction(final TransactionIdentifier id) throws RequestException {
+        checkDeadTransaction(id);
+        lastSeenTransaction = id.getTransactionId();
         return FrontendReadWriteTransaction.createOpen(this, chain.newReadWriteTransaction(id));
     }
 
     @Override
     FrontendTransaction createReadyTransaction(final TransactionIdentifier id, final DataTreeModification mod)
             throws RequestException {
+        checkDeadTransaction(id);
+        lastSeenTransaction = id.getTransactionId();
         return FrontendReadWriteTransaction.createReady(this, id, mod);
     }
 
     @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
         return chain.createReadyCohort(id, mod);
+    }
+
+    void destroy(final long sequence, final RequestEnvelope envelope, final long now)
+            throws RequestException {
+        LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
+        tree.closeTransactionChain(getIdentifier(), () -> {
+            envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
+        });
+    }
+
+    void purge(final long sequence, final RequestEnvelope envelope, final long now) {
+        LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
+        tree.purgeTransactionChain(getIdentifier(), () -> {
+            envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
+        });
+    }
+
+    private void checkDeadTransaction(final TransactionIdentifier id) throws RequestException {
+        // FIXME: check if this history is still open
+        // FIXME: check if the last transaction has been submitted
+
+        // Transaction identifiers within a local history have to have increasing IDs
+        if (lastSeenTransaction != null && Long.compareUnsigned(lastSeenTransaction, id.getTransactionId()) >= 0) {
+            throw new DeadTransactionException(lastSeenTransaction);
+        }
     }
 }

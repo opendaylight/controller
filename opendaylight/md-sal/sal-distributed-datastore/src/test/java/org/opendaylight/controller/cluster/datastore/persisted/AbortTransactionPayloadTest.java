@@ -9,13 +9,14 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 
 public class AbortTransactionPayloadTest extends AbstractTest {
     @Test
-    public void testPayloadSerDes() {
+    public void testPayloadSerDes() throws IOException {
         final AbortTransactionPayload template = AbortTransactionPayload.create(nextTransactionId());
         final AbortTransactionPayload cloned = SerializationUtils.clone(template);
         assertEquals(template.getIdentifier(), cloned.getIdentifier());
