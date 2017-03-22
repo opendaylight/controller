@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_83f7f78b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T12:05:07Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "fafc7978_daa3ae4d",
+      "range": {
+        "startLine": 191,
+        "startChar": 12,
+        "endLine": 191,
+        "endChar": 29
+      },
+      "revId": "f4e522a4785299d016b2cb5682fee6af74a45707",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_7a9282f7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-21T09:49:08Z",
       "side": 1,
       "message": "This should be a ArrayListMultimap",
+      "range": {
+        "startLine": 140,
+        "startChar": 21,
+        "endLine": 140,
+        "endChar": 106
+      },
+      "revId": "f4e522a4785299d016b2cb5682fee6af74a45707",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_63f49387",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T12:05:07Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "fafc7978_7a9282f7",
       "range": {
         "startLine": 140,
         "startChar": 21,
@@ -82,6 +130,30 @@
       "writtenOn": "2017-03-21T09:49:08Z",
       "side": 1,
       "message": "we should be able to pre-size this correctly",
+      "range": {
+        "startLine": 215,
+        "startChar": 78,
+        "endLine": 215,
+        "endChar": 83
+      },
+      "revId": "f4e522a4785299d016b2cb5682fee6af74a45707",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_8325370c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T12:05:07Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "fafc7978_fab5d27e",
       "range": {
         "startLine": 215,
         "startChar": 78,
