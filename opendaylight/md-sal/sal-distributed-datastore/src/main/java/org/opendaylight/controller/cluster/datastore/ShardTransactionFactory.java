@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActorContext;
 import com.google.common.base.Preconditions;
+import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
  * @author Thomas Pantelis
  */
 class ShardTransactionActorFactory {
+    private static final AtomicLong ACTOR_NAME_COUNTER = new AtomicLong();
 
     private final ShardDataTree dataTree;
     private final DatastoreContext datastoreContext;
@@ -57,7 +59,7 @@ class ShardTransactionActorFactory {
             sb.append(historyId.getHistoryId()).append('-');
         }
 
-        return sb.append(txId.getTransactionId()).toString();
+        return sb.append(txId.getTransactionId()).append('_').append(ACTOR_NAME_COUNTER.incrementAndGet()).toString();
     }
 
     ActorRef newShardTransaction(TransactionType type, TransactionIdentifier transactionID) {
