@@ -22,6 +22,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modules>
     <module>karaf-parent</module>
     <module>opendaylight-karaf</module>
-    <module>opendaylight-karaf-empty</module>
   </modules>
 </project>
