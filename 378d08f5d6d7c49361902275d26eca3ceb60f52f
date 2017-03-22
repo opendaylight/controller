@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_fc514f0f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_ba622a14",
+      "range": {
+        "startLine": 277,
+        "startChar": 47,
+        "endLine": 277,
+        "endChar": 54
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_eb4e9f95",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -65,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_83aff72a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Do we really need to? This should be just a sanity check. RequestLeadership message should be sent by local shard just to its leader and only leader can grant leadership to local shard.",
+      "parentUuid": "fafc7978_eb4e9f95",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_cb059b15",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -76,6 +118,30 @@
       "writtenOn": "2017-03-22T06:23:56Z",
       "side": 1,
       "message": "Should be persistenceId...",
+      "range": {
+        "startLine": 288,
+        "startChar": 75,
+        "endLine": 288,
+        "endChar": 86
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_436d0f04",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_cb059b15",
       "range": {
         "startLine": 288,
         "startChar": 75,
@@ -111,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_23728be5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_ab02d708",
+      "range": {
+        "startLine": 294,
+        "startChar": 75,
+        "endLine": 294,
+        "endChar": 86
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_3a763ad9",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -122,6 +212,24 @@
       "writtenOn": "2017-03-21T09:57:07Z",
       "side": 1,
       "message": "superfluous empty line",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7c36ffe8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_3a763ad9",
       "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -145,6 +253,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_a38f9bcb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorLeadershipTransferCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_16ffca02",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_7a80c28b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorLeadershipTransferCohort.java",
         "patchSetId": 3
@@ -156,6 +282,30 @@
       "writtenOn": "2017-03-21T09:57:07Z",
       "side": 1,
       "message": "add explicit @Nullable",
+      "range": {
+        "startLine": 68,
+        "startChar": 65,
+        "endLine": 68,
+        "endChar": 70
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_03bca76b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorLeadershipTransferCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_7a80c28b",
       "range": {
         "startLine": 68,
         "startChar": 65,
@@ -191,6 +341,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_bc47c74a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorLeadershipTransferCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_1a7376e8",
+      "range": {
+        "startLine": 195,
+        "startChar": 11,
+        "endLine": 195,
+        "endChar": 17
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_8b0b932a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
         "patchSetId": 3
@@ -208,6 +382,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_a37ddbb3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_8b0b932a",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_9a35a6f9",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestLeadership.java",
         "patchSetId": 3
@@ -219,6 +411,30 @@
       "writtenOn": "2017-03-21T09:57:07Z",
       "side": 1,
       "message": "should be final, too",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 6
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_4344ef73",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestLeadership.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_9a35a6f9",
       "range": {
         "startLine": 17,
         "startChar": 0,
@@ -254,6 +470,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_e34ec395",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestLeadership.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_5a54de20",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 29
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_da3f2ed5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestLeadershipReply.java",
         "patchSetId": 3
@@ -265,6 +505,30 @@
       "writtenOn": "2017-03-21T09:57:07Z",
       "side": 1,
       "message": "Yes, and for that we should have a failureCause carrying a Throwable instead of boolean success. Null failureCause \u003d\u003d success.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 36
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_c32e1fa5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestLeadershipReply.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Removing this message completely. Will use Status.Success for signalling success and Status.Failure with LeadershipTransferFailed otherwise.",
+      "parentUuid": "fafc7978_da3f2ed5",
       "range": {
         "startLine": 17,
         "startChar": 0,
@@ -323,6 +587,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_43834fcc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_3625aeab",
+      "range": {
+        "startLine": 355,
+        "startChar": 8,
+        "endLine": 355,
+        "endChar": 17
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_1a21b6b4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/MakeLeaderLocal.java",
         "patchSetId": 3
@@ -334,6 +622,30 @@
       "writtenOn": "2017-03-21T09:57:07Z",
       "side": 1,
       "message": "final, plus make a singleton instance available",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 6
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e33523f8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/MakeLeaderLocal.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-22T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_1a21b6b4",
       "range": {
         "startLine": 16,
         "startChar": 0,
