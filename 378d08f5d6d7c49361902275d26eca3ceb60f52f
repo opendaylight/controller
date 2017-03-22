@@ -48,6 +48,69 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_eb4e9f95",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T06:23:56Z",
+      "side": 1,
+      "message": "Should also return a (successful) reply to the sender.",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_cb059b15",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T06:23:56Z",
+      "side": 1,
+      "message": "Should be persistenceId...",
+      "range": {
+        "startLine": 288,
+        "startChar": 75,
+        "endLine": 288,
+        "endChar": 86
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ab02d708",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T06:23:56Z",
+      "side": 1,
+      "message": "...and here too",
+      "range": {
+        "startLine": 294,
+        "startChar": 75,
+        "endLine": 294,
+        "endChar": 86
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_3a763ad9",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
@@ -59,6 +122,23 @@
       "writtenOn": "2017-03-21T09:57:07Z",
       "side": 1,
       "message": "superfluous empty line",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_16ffca02",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorLeadershipTransferCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T06:23:56Z",
+      "side": 1,
+      "message": "I think rename to requestedFollowerId",
       "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -105,6 +185,23 @@
         "endLine": 195,
         "endChar": 17
       },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_8b0b932a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T06:23:56Z",
+      "side": 1,
+      "message": "This should be \n\n  ...transferCohort.getFollowerId() !\u003d null \n        \u0026\u0026 !followerId.equals(...transferCohort.getFollowerId())",
       "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -196,6 +293,29 @@
         "startChar": 0,
         "endLine": 19,
         "endChar": 5
+      },
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3625aeab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-22T06:23:56Z",
+      "side": 1,
+      "message": "getLeader can return null if there\u0027s no leader. In this case, the cluster is most likely trying to elect a leader and we should let that run its normal course. I think return just failure, at least for now. We could get fancy and wait for the election to complete and retry the request if we choose to later. We could also let the caller retry by sending a flag in the response indicating the request is \"reTryable\".",
+      "range": {
+        "startLine": 355,
+        "startChar": 8,
+        "endLine": 355,
+        "endChar": 17
       },
       "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
