@@ -75,13 +75,6 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         parent.abortTransaction(this, callback);
     }
 
-    final void purge(final Runnable callback) {
-        if (!closed) {
-            LOG.warn("Purging unclosed transaction {}", id);
-        }
-        parent.purgeTransaction(id, callback);
-    }
-
     @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("id", id).add("closed", closed).add("snapshot", snapshot)

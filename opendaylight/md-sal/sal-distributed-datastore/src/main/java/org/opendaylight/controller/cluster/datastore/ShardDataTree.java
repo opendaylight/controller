@@ -659,19 +659,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         replicatePayload(id, AbortTransactionPayload.create(id), callback);
     }
 
-
-    @Override
-    void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
-        LOG.debug("{}: purging transaction {}", logContext, id);
-        replicatePayload(id, PurgeTransactionPayload.create(id), callback);
-    }
-
     @Override
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
 
         return createReadyCohort(transaction.getIdentifier(), snapshot);
+    }
+
+    void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
+        LOG.debug("{}: purging transaction {}", logContext, id);
+        replicatePayload(id, PurgeTransactionPayload.create(id), callback);
     }
 
     public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {

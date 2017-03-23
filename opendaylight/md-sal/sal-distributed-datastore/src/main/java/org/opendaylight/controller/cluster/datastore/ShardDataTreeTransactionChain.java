@@ -84,11 +84,6 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
-        dataTree.purgeTransaction(id, callback);
-    }
-
-    @Override
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         Preconditions.checkState(openTransaction != null,
                 "Attempted to finish transaction %s while none is outstanding", transaction);

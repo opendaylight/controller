@@ -108,11 +108,6 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
-    @Override
-    void purge(final Runnable callback) {
-        openTransaction.purge(callback);
-    }
-
     private void handleTransactionPreCommit(final TransactionPreCommitRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
