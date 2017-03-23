@@ -660,6 +660,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @Override
+    void abortFromTransactionActor(final AbstractShardDataTreeTransaction<?> transaction) {
+        // No-op for free-standing transactions
+
+    }
+
+    @Override
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();

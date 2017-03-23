@@ -12,10 +12,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 
 abstract class ShardDataTreeTransactionParent {
 
+    abstract void abortFromTransactionActor(AbstractShardDataTreeTransaction<?> transaction);
+
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
     abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
 
     abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
-
 }

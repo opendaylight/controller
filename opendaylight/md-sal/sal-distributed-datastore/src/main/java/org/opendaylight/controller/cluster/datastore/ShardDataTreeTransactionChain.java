@@ -72,14 +72,18 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
+    void abortFromTransactionActor(final AbstractShardDataTreeTransaction<?> transaction) {
         if (transaction instanceof ReadWriteShardDataTreeTransaction) {
             Preconditions.checkState(openTransaction != null,
                     "Attempted to abort transaction %s while none is outstanding", transaction);
             LOG.debug("Aborted open transaction {}", transaction);
             openTransaction = null;
         }
+    }
 
+    @Override
+    void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
+        abortFromTransactionActor(transaction);
         dataTree.abortTransaction(transaction, callback);
     }
 
