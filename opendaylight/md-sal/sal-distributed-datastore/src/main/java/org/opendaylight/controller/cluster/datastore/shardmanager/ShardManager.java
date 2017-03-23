@@ -108,6 +108,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -499,6 +500,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             if (existing != null && existing.equals(config)) {
                 // we don't have to do nothing here
+                return;
+            }
+
+            if (config.getPrefix().getRootIdentifier().equals(YangInstanceIdentifier.EMPTY)) {
                 return;
             }
         }
