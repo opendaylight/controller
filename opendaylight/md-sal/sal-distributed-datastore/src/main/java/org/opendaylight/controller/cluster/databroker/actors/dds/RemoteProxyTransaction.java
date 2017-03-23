@@ -311,6 +311,9 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
                     case THREE_PHASE:
                         sendRequest(commitRequest(true), callback);
                         break;
+                    case READY:
+                        //no op
+                        break;
                     default:
                         throw new IllegalArgumentException("Unhandled protocol " + maybeProto.get());
                 }
