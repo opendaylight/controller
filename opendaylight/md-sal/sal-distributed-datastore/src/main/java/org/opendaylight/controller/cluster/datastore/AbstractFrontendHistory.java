@@ -111,7 +111,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                 return new TransactionPurgeResponse(id, request.getSequence());
             }
 
-            tx.purge(() -> {
+            tree.purgeTransaction(id, () -> {
                 purgedTransactions.add(Range.singleton(ul));
                 transactions.remove(id);
                 LOG.debug("{}: finished purging transaction {}", persistenceId(), id);

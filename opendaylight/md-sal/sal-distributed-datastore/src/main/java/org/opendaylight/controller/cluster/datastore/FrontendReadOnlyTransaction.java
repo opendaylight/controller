@@ -60,11 +60,6 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
         }
     }
 
-    @Override
-    void purge(final Runnable callback) {
-        openTransaction.purge(callback);
-    }
-
     private void handleTransactionAbort(final TransactionAbortRequest request, final RequestEnvelope envelope,
             final long now) throws RequestException {
         openTransaction.abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(request.getTarget(),
