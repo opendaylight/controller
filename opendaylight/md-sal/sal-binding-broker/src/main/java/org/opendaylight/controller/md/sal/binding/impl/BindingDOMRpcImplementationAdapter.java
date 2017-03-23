@@ -17,13 +17,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
@@ -32,7 +32,13 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.api.meta.EffectiveStatement;
+import org.opendaylight.yangtools.yang.model.api.meta.StatementSource;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 
 public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation {
 
@@ -45,16 +51,13 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
 
     public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeSerializer codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
         try {
-            this.invoker = SERVICE_INVOKERS.get(type, new Callable<RpcServiceInvoker>() {
-                @Override
-                public RpcServiceInvoker call() {
-                    final Map<QName, Method> map = new HashMap<>();
-                    for (Entry<SchemaPath, Method> e : localNameToMethod.entrySet()) {
-                        map.put(e.getKey().getLastComponent(), e.getValue());
-                    }
-
-                    return RpcServiceInvoker.from(map);
+            this.invoker = SERVICE_INVOKERS.get(type, () -> {
+                final Map<QName, Method> map = new HashMap<>();
+                for (Entry<SchemaPath, Method> e : localNameToMethod.entrySet()) {
+                    map.put(e.getKey().getLastComponent(), e.getValue());
                 }
+
+                return RpcServiceInvoker.from(map);
             });
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to create invokers for type " + type, e);
@@ -68,12 +71,29 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
         final SchemaPath schemaPath = rpc.getType();
-        final DataObject bindingInput = input != null ? deserilialize(rpc.getType(),input) : null;
-        final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath,bindingInput);
-        return transformResult(schemaPath,bindingResult);
+
+        //// way A
+        final SchemaPath rpcInput = schemaPath.createChild(QName.create(schemaPath.getLastComponent(), "input"));
+        final DataObject rpcInputObject = codec.fromNormalizedNodeRpcData(rpcInput, (ContainerNode) input);
+
+        //// way B
+        ModuleInfoBackedContext ctx = ModuleInfoBackedContext.create();
+        ctx.addModuleInfos(BindingReflections.loadModuleInfos());
+        SchemaContext schemaContext = ctx.tryToCreateSchemaContext().get();
+        final SchemaNode inputNode = SchemaContextUtil.findDataSchemaNode(schemaContext, rpcInput);
+
+        final DataObject bindingInput = input != null && isExplicitStatement((ContainerSchemaNode) inputNode)
+                ? deserialize(rpc.getType(), input) : null;
+        final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath, bindingInput);
+        return transformResult(schemaPath, bindingResult);
     }
 
-    private DataObject deserilialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
+    private static boolean isExplicitStatement(final ContainerSchemaNode node) {
+        return node instanceof EffectiveStatement
+                && ((EffectiveStatement) node).getDeclared().getStatementSource() == StatementSource.DECLARATION;
+    }
+
+    private DataObject deserialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
         if (input instanceof LazySerializedContainerNode) {
             return ((LazySerializedContainerNode) input).bindingData();
         }
