@@ -149,6 +149,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_a84812cd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-23T12:44:50Z",
+      "side": 1,
+      "message": "Oh, ok then. But I think Failure is more appropriate here than success, since follower cannot transfer leadership to another follower.",
+      "parentUuid": "fafc7978_68a2aa9b",
+      "revId": "378d08f5d6d7c49361902275d26eca3ceb60f52f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_cb059b15",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 3
