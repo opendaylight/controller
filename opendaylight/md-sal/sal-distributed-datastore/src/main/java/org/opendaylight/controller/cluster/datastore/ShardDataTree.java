@@ -659,6 +659,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         replicatePayload(id, AbortTransactionPayload.create(id), callback);
     }
 
+    @Override
+    void abortFromTransactionActor(final AbstractShardDataTreeTransaction<?> transaction) {
+        // No-op for free-standing transactions
+
+    }
 
     @Override
     void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {

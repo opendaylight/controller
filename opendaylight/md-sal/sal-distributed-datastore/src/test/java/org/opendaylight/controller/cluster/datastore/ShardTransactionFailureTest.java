@@ -70,7 +70,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        subject.underlyingActor().getDOMStoreTransaction().abort(null);
+        subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
         future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
                 DataStoreVersions.CURRENT_VERSION), 3000);
@@ -92,7 +92,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        subject.underlyingActor().getDOMStoreTransaction().abort(null);
+        subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
         future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
                 DataStoreVersions.CURRENT_VERSION), 3000);
@@ -113,7 +113,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        subject.underlyingActor().getDOMStoreTransaction().abort(null);
+        subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
         future = akka.pattern.Patterns.ask(subject,
                 new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
