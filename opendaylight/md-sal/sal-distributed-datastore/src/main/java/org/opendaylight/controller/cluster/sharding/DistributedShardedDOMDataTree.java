@@ -18,6 +18,7 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ForwardingObject;
@@ -505,6 +506,25 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                     shardedDataTreeActor, this);
         } else {
             try {
+                // There can be situation when there is already started default shard
+                // because it is present in modules.conf. In that case we have to create
+                // just frontend for default shard, but not shard itself
+                // TODO we don't have to do it for config and operational default shard
+                // separately. Just one of them should be enough
+                final ActorContext actorContext = logicalDatastoreType == LogicalDatastoreType.CONFIGURATION
+                        ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
+
+                final Optional<ActorRef> defaultLocalShardOptional =
+                        actorContext.findLocalShard(ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
+
+                if (defaultLocalShardOptional.isPresent()) {
+                    LOG.debug("{} Default shard is already started, creating just frontend", logicalDatastoreType);
+                    createShardFrontend(new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY));
+                    return new DistributedShardRegistrationImpl(
+                            new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY),
+                            shardedDataTreeActor, this);
+                }
+
                 // we should probably only have one node create the default shards
                 return Await.result(FutureConverters.toScala(createDistributedShard(
                         new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY), names)),
