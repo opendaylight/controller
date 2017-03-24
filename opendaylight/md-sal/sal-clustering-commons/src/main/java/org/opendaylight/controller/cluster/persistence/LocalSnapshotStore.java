@@ -30,6 +30,8 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
@@ -63,7 +65,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     private final int maxLoadAttempts;
     private final File snapshotDir;
 
-    public LocalSnapshotStore(Config config) {
+    public LocalSnapshotStore(final Config config) {
         this.executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
         snapshotDir = new File(config.getString("dir"));
 
@@ -86,7 +88,8 @@ public class LocalSnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public Future<Optional<SelectedSnapshot>> doLoadAsync(String persistenceId, SnapshotSelectionCriteria criteria) {
+    public Future<Optional<SelectedSnapshot>> doLoadAsync(final String persistenceId,
+                                                          final SnapshotSelectionCriteria criteria) {
         LOG.debug("In doLoadAsync - persistenceId: {}, criteria: {}", persistenceId, criteria);
 
         // Select the youngest 'maxLoadAttempts' snapshots that match the criteria. This may help in situations where
@@ -106,9 +109,9 @@ public class LocalSnapshotStore extends SnapshotStore {
         return Futures.future(() -> doLoad(metadatas), executionContext);
     }
 
-    private Optional<SelectedSnapshot> doLoad(Deque<SnapshotMetadata> metadatas) throws IOException {
+    private Optional<SelectedSnapshot> doLoad(final Deque<SnapshotMetadata> metadatas) throws IOException {
         SnapshotMetadata metadata = metadatas.removeFirst();
-        File file = toSnapshotFile(metadata, "");
+        File file = toSnapshotFile(metadata);
 
         LOG.debug("doLoad {}", file);
 
@@ -129,7 +132,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         }
     }
 
-    private Object deserialize(File file) throws IOException {
+    private Object deserialize(final File file) throws IOException {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             return in.readObject();
         } catch (ClassNotFoundException e) {
@@ -141,7 +144,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         }
     }
 
-    private Object tryDeserializeAkkaSnapshot(File file) throws IOException {
+    private Object tryDeserializeAkkaSnapshot(final File file) throws IOException {
         LOG.debug("tryDeserializeAkkaSnapshot {}", file);
 
         // The snapshot was probably previously stored via akka's LocalSnapshotStore which wraps the data
@@ -156,37 +159,44 @@ public class LocalSnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public Future<Void> doSaveAsync(SnapshotMetadata metadata, Object snapshot) {
+    public Future<Void> doSaveAsync(final SnapshotMetadata metadata, final Object snapshot) {
         LOG.debug("In doSaveAsync - metadata: {}, snapshot: {}", metadata, snapshot);
 
         return Futures.future(() -> doSave(metadata, snapshot), executionContext);
     }
 
-    private Void doSave(SnapshotMetadata metadata, Object snapshot) throws IOException {
-        File temp = toSnapshotFile(metadata, ".tmp");
+    private Void doSave(final SnapshotMetadata metadata, final Object snapshot) throws IOException {
+        final File actual = toSnapshotFile(metadata);
+        final File temp = File.createTempFile(actual.getName(), null, snapshotDir);
 
         LOG.debug("Saving to temp file: {}", temp);
 
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(temp))) {
             out.writeObject(snapshot);
         } catch (IOException e) {
-            LOG.error("Error saving snapshot file {}", temp, e);
+            LOG.error("Error saving snapshot file {}. Deleting file..", temp, e);
+            if (!temp.delete()) {
+                LOG.error("Failed to successfully delete file {}", temp);
+            }
             throw e;
         }
 
-        File actual = toSnapshotFile(metadata, "");
-
         LOG.debug("Renaming to: {}", actual);
-
-        if (!temp.renameTo(actual)) {
-            throw new IOException(String.format("Failed to rename %s to %s", temp, actual));
+        try {
+            Files.move(temp.toPath(), actual.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warn("Failed to move %s to %s. Deleting %s..", temp, actual, temp, e);
+            if (!temp.delete()) {
+                LOG.error("Failed to successfully delete file {}", temp);
+            }
+            throw e;
         }
 
         return null;
     }
 
     @Override
-    public Future<Void> doDeleteAsync(SnapshotMetadata metadata) {
+    public Future<Void> doDeleteAsync(final SnapshotMetadata metadata) {
         LOG.debug("In doDeleteAsync - metadata: {}", metadata);
 
         // Multiple snapshot files here mean that there were multiple snapshots for this seqNr - we delete all of them.
@@ -197,15 +207,15 @@ public class LocalSnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public Future<Void> doDeleteAsync(String persistenceId, SnapshotSelectionCriteria criteria) {
+    public Future<Void> doDeleteAsync(final String persistenceId, final SnapshotSelectionCriteria criteria) {
         LOG.debug("In doDeleteAsync - persistenceId: {}, criteria: {}", persistenceId, criteria);
 
         return Futures.future(() -> doDelete(persistenceId, criteria), executionContext);
     }
 
-    private Void doDelete(String persistenceId, SnapshotSelectionCriteria criteria) {
+    private Void doDelete(final String persistenceId, final SnapshotSelectionCriteria criteria) {
         final List<File> files = getSnapshotMetadatas(persistenceId, criteria).stream()
-                .flatMap(md -> Stream.of(toSnapshotFile(md, ""))).collect(Collectors.toList());
+                .flatMap(md -> Stream.of(toSnapshotFile(md))).collect(Collectors.toList());
 
         LOG.debug("Deleting files: {}", files);
 
@@ -213,7 +223,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         return null;
     }
 
-    private Void doDelete(SnapshotMetadata metadata) {
+    private Void doDelete(final SnapshotMetadata metadata) {
         final Collection<File> files = getSnapshotFiles(metadata);
 
         LOG.debug("Deleting files: {}", files);
@@ -222,7 +232,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         return null;
     }
 
-    private Collection<File> getSnapshotFiles(String persistenceId) {
+    private Collection<File> getSnapshotFiles(final String persistenceId) {
         String encodedPersistenceId = encode(persistenceId);
 
         File[] files = snapshotDir.listFiles((FilenameFilter) (dir, name) -> {
@@ -243,7 +253,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         return Arrays.asList(files);
     }
 
-    private Collection<File> getSnapshotFiles(SnapshotMetadata metadata) {
+    private Collection<File> getSnapshotFiles(final SnapshotMetadata metadata) {
         return getSnapshotFiles(metadata.persistenceId()).stream().filter(file -> {
             SnapshotMetadata possible = extractMetadata(file);
             return possible != null && possible.sequenceNr() == metadata.sequenceNr()
@@ -251,18 +261,18 @@ public class LocalSnapshotStore extends SnapshotStore {
         }).collect(Collectors.toList());
     }
 
-    private Collection<SnapshotMetadata> getSnapshotMetadatas(String persistenceId,
-            SnapshotSelectionCriteria criteria) {
+    private Collection<SnapshotMetadata> getSnapshotMetadatas(final String persistenceId,
+            final SnapshotSelectionCriteria criteria) {
         return getSnapshotFiles(persistenceId).stream().flatMap(file -> toStream(extractMetadata(file)))
                 .filter(md -> criteria.matches(md)).collect(Collectors.toList());
     }
 
-    private static Stream<SnapshotMetadata> toStream(@Nullable SnapshotMetadata md) {
+    private static Stream<SnapshotMetadata> toStream(@Nullable final SnapshotMetadata md) {
         return md != null ? Stream.of(md) : Stream.empty();
     }
 
     @Nullable
-    private static SnapshotMetadata extractMetadata(File file) {
+    private static SnapshotMetadata extractMetadata(final File file) {
         String name = file.getName();
         int sequenceNumberEndIndex = name.lastIndexOf('-');
         int persistenceIdEndIndex = name.lastIndexOf('-', sequenceNumberEndIndex - 1);
@@ -280,9 +290,9 @@ public class LocalSnapshotStore extends SnapshotStore {
         }
     }
 
-    private File toSnapshotFile(SnapshotMetadata metadata, String extension) {
-        return new File(snapshotDir, String.format("snapshot-%s-%d-%d%s", encode(metadata.persistenceId()),
-                metadata.sequenceNr(), metadata.timestamp(), extension));
+    private File toSnapshotFile(final SnapshotMetadata metadata) {
+        return new File(snapshotDir, String.format("snapshot-%s-%d-%d", encode(metadata.persistenceId()),
+            metadata.sequenceNr(), metadata.timestamp()));
     }
 
     private static <T> Collector<T, ?, List<T>> reverse() {
@@ -292,7 +302,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         });
     }
 
-    private String encode(String str) {
+    private static String encode(final String str) {
         try {
             return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
@@ -303,7 +313,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     }
 
     @VisibleForTesting
-    static int compare(SnapshotMetadata m1, SnapshotMetadata m2) {
+    static int compare(final SnapshotMetadata m1, final SnapshotMetadata m2) {
         return (int) (!m1.persistenceId().equals(m2.persistenceId())
                 ? m1.persistenceId().compareTo(m2.persistenceId()) :
             m1.sequenceNr() != m2.sequenceNr() ? m1.sequenceNr() - m2.sequenceNr() :
