@@ -230,7 +230,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     /**
      * Callback invoked from {@link ClientTransaction} when a child transaction readied for submission.
      *
-     * @param txId Transaction identifier
+     * @param tx Client transaction
      * @param cohort Transaction commit cohort
      */
     synchronized AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
