@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
+import org.opendaylight.controller.clustering.it.provider.impl.PrefixLeaderHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
@@ -31,10 +32,10 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomeModuleLeaderInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutput;
@@ -73,6 +74,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private final RpcProviderRegistry rpcRegistry;
     private final BindingAwareBroker.RpcRegistration<OdlMdsalLowlevelControlService> registration;
+    private final DOMDataTreeService domDataTreeService;
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
     private final DOMDataBroker domDataBroker;
     private final NotificationPublishService notificationPublishService;
@@ -80,6 +82,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private final SchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
+    private final PrefixLeaderHandler prefixLeaderHandler;
 
     private Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>> routedRegistrations =
             new HashMap<>();
@@ -98,7 +101,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                                      final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                                      final NotificationPublishService notificationPublishService,
                                      final NotificationService notificationService,
-                                     final DOMDataBroker domDataBroker) {
+                                     final DOMDataBroker domDataBroker,
+                                     final DOMDataTreeService domDataTreeService) {
         this.rpcRegistry = rpcRegistry;
         this.domRpcService = domRpcService;
         this.singletonService = singletonService;
@@ -107,6 +111,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         this.notificationPublishService = notificationPublishService;
         this.notificationService = notificationService;
         this.domDataBroker = domDataBroker;
+        this.domDataTreeService = domDataTreeService;
+        this.prefixLeaderHandler = new PrefixLeaderHandler(domDataTreeService, bindingNormalizedNodeSerializer);
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
     }
@@ -174,11 +180,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> becomeModuleLeader(BecomeModuleLeaderInput input) {
-        return null;
-    }
-
-    @Override
     public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
         return null;
     }
@@ -201,8 +202,10 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> becomePrefixLeader(BecomePrefixLeaderInput input) {
-        return null;
+    public Future<RpcResult<Void>> becomePrefixLeader(final BecomePrefixLeaderInput input) {
+        LOG.debug("become-prefix-leader, input: {}", input);
+
+        return prefixLeaderHandler.makeLeaderLocal(input);
     }
 
     @Override
