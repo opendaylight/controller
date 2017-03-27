@@ -94,13 +94,17 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         if (request instanceof ModifyTransactionRequest) {
             applyModifyTransactionRequest((ModifyTransactionRequest) request, callback);
         } else if (request instanceof ReadTransactionRequest) {
-            final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
-            final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);
-            callback.accept(new ReadTransactionSuccess(request.getTarget(), request.getSequence(), result));
+            if (callback != null) {
+                final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
+                final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);
+                callback.accept(new ReadTransactionSuccess(request.getTarget(), request.getSequence(), result));
+            }
         } else if (request instanceof ExistsTransactionRequest) {
-            final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
-            final boolean result = readOnlyView().readNode(path).isPresent();
-            callback.accept(new ExistsTransactionSuccess(request.getTarget(), request.getSequence(), result));
+            if (callback != null) {
+                final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
+                final boolean result = readOnlyView().readNode(path).isPresent();
+                callback.accept(new ExistsTransactionSuccess(request.getTarget(), request.getSequence(), result));
+            }
         } else if (request instanceof TransactionPurgeRequest) {
             purge();
         } else {
