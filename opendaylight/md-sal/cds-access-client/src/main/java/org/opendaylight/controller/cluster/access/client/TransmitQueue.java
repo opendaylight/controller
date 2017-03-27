@@ -112,6 +112,10 @@ abstract class TransmitQueue {
         return tracker.ticksStalling(now);
     }
 
+    final boolean hasSuccessor() {
+        return successor != null;
+    }
+
     // If a matching request was found, this will track a task was closed.
     final Optional<TransmittedConnectionEntry> complete(final ResponseEnvelope<?> envelope, final long now) {
         Optional<TransmittedConnectionEntry> maybeEntry = findMatchingEntry(inflight, envelope);

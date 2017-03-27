@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -44,11 +45,17 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @VisibleForTesting
     static final long REQUEST_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
 
+    private static final FiniteDuration REQUEST_TIMEOUT_DURATION = Duration.apply(REQUEST_TIMEOUT_NANOS,
+        TimeUnit.NANOSECONDS);
+
     private final Lock lock = new ReentrantLock();
     private final ClientActorContext context;
     @GuardedBy("lock")
     private final TransmitQueue queue;
     private final Long cookie;
+
+    @GuardedBy("lock")
+    private boolean haveTimer;
 
     private volatile RequestException poisoned;
 
@@ -108,7 +115,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     @GuardedBy("lock")
     final void finishReplay(final ReconnectForwarder forwarder) {
-        queue.setForwarder(forwarder, readTime());
+        setForwarder(forwarder);
         lock.unlock();
     }
 
@@ -127,7 +134,12 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     final long enqueueEntry(final ConnectionEntry entry, final long now) {
         lock.lock();
         try {
-            return queue.enqueue(entry, now);
+            final boolean wasEmpty = queue.isEmpty();
+            final long ret = queue.enqueue(entry, now);
+            if (wasEmpty) {
+                scheduleTimer(REQUEST_TIMEOUT_DURATION);
+            }
+            return ret;
         } finally {
             lock.unlock();
         }
@@ -138,7 +150,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         try {
             TimeUnit.NANOSECONDS.sleep(delay);
         } catch (InterruptedException e) {
-            LOG.debug("Interrupted while sleeping");
+            LOG.debug("Interrupted while sleeping", e);
         }
     }
 
@@ -147,9 +159,19 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      *
      * @param delay Delay, in nanoseconds
      */
+    @GuardedBy("lock")
     private void scheduleTimer(final FiniteDuration delay) {
+        if (haveTimer) {
+            LOG.debug("{}: timer already scheduled", context.persistenceId());
+            return;
+        }
+        if (queue.hasSuccessor()) {
+            LOG.debug("{}: connection has successor, not scheduling timer", context.persistenceId());
+            return;
+        }
         LOG.debug("{}: scheduling timeout in {}", context.persistenceId(), delay);
         context.executeInActor(this::runTimer, delay);
+        haveTimer = true;
     }
 
     /**
@@ -165,6 +187,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
         lock.lock();
         try {
+            haveTimer = false;
             final long now = readTime();
             // The following line is only reliable when queue is not forwarding, but such state should not last long.
             final long ticksSinceProgress = queue.ticksStalling(now);
@@ -185,13 +208,13 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
                 // We have timed out. There is no point in scheduling a timer
                 return reconnectConnection(current);
             }
+
+            if (delay.isPresent()) {
+                // If there is new delay, schedule a timer
+                scheduleTimer(delay.get());
+            }
         } finally {
             lock.unlock();
-        }
-
-        if (delay.isPresent()) {
-            // If there is new delay, schedule a timer
-            scheduleTimer(delay.get());
         }
 
         return current;
