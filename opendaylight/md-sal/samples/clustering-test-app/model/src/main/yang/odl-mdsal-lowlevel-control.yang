@@ -329,28 +329,9 @@ module odl-mdsal-lowlevel-control {
             to become Leader of the given shard (presumably the llt:list-ints one,
             created by produce-transactions) and return immediatelly.";
         input {
-            leaf shard-name {
-                description "TBD.
-
-                FIXME: Ask Java implementation developer about the format needed.";
+            leaf prefix {
                 mandatory true;
-                type string;
-            }
-        }
-        // No output.
-    }
-
-    rpc become-module-leader {
-        description "Upon receiving this, the member shall ask appropriate API
-            to become Leader of given config shard and return immediatelly.";
-        input {
-            leaf shard-name {
-                description "TBD.
-
-                FIXME: Ask Java implementation developer about the format needed.
-                TODO: Perhaps the names are compatible and one 'become-leader' would suffice?";
-                mandatory true;
-                type string;
+                type instance-identifier;
             }
         }
         // No output.
