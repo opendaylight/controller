@@ -18,8 +18,9 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
-import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
+import org.opendaylight.controller.clustering.it.provider.impl.PrefixShardHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler;
+import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.WriteTransactionsHandler;
@@ -34,24 +35,23 @@ import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomeModuleLeaderInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsOutput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.PublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
@@ -88,6 +88,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private final SchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
+    private final PrefixShardHandler prefixShardHandler;
 
     private Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>> routedRegistrations =
             new HashMap<>();
@@ -121,6 +122,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         this.distributedShardFactory = distributedShardFactory;
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
+
+        prefixShardHandler = new PrefixShardHandler(distributedShardFactory, bindingNormalizedNodeSerializer);
     }
 
     @Override
@@ -186,11 +189,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> becomeModuleLeader(BecomeModuleLeaderInput input) {
-        return null;
-    }
-
-    @Override
     public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
         return null;
     }
@@ -213,7 +211,14 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> becomePrefixLeader(BecomePrefixLeaderInput input) {
+    public Future<RpcResult<Void>> removePrefixShard(final RemovePrefixShardInput input) {
+        LOG.debug("remove-prefix-shard, input: {}", input);
+
+        return prefixShardHandler.onRemovePrefixShard(input);
+    }
+
+    @Override
+    public Future<RpcResult<Void>> becomePrefixLeader(final BecomePrefixLeaderInput input) {
         return null;
     }
 
@@ -353,6 +358,13 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public Future<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl() {
         return null;
+    }
+
+    @Override
+    public Future<RpcResult<Void>> createPrefixShard(final CreatePrefixShardInput input) {
+        LOG.debug("create-prefix-shard, input: {}", input);
+
+        return prefixShardHandler.onCreatePrefixShard(input);
     }
 
     @Override
