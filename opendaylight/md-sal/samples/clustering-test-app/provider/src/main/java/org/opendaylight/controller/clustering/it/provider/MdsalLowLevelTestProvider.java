@@ -27,6 +27,7 @@ import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingleton
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.IdIntsDOMDataTreeLIstener;
 import org.opendaylight.controller.clustering.it.provider.impl.IdIntsListener;
+import org.opendaylight.controller.clustering.it.provider.impl.PrefixLeaderHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.PrefixShardHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler;
 import org.opendaylight.controller.clustering.it.provider.impl.PublishNotificationsTask;
@@ -112,6 +113,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private final SchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
+    private final PrefixLeaderHandler prefixLeaderHandler;
     private final PrefixShardHandler prefixShardHandler;
     private final DOMDataTreeChangeService domDataTreeChangeService;
 
@@ -151,6 +153,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         this.domDataBroker = domDataBroker;
         this.domDataTreeService = domDataTreeService;
         this.distributedShardFactory = distributedShardFactory;
+        this.prefixLeaderHandler = new PrefixLeaderHandler(domDataTreeService, bindingNormalizedNodeSerializer);
 
         domDataTreeChangeService =
                 (DOMDataTreeChangeService) domDataBroker.getSupportedExtensions().get(DOMDataTreeChangeService.class);
@@ -268,7 +271,9 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public Future<RpcResult<Void>> becomePrefixLeader(final BecomePrefixLeaderInput input) {
-        return null;
+        LOG.debug("become-prefix-leader, input: {}", input);
+
+        return prefixLeaderHandler.makeLeaderLocal(input);
     }
 
     @Override

@@ -374,12 +374,9 @@ module odl-mdsal-lowlevel-control {
             to become Leader of the given shard (presumably the llt:list-ints one,
             created by produce-transactions) and return immediatelly.";
         input {
-            leaf shard-name {
-                description "TBD.
-
-                FIXME: Ask Java implementation developer about the format needed.";
+            leaf prefix {
                 mandatory true;
-                type string;
+                type instance-identifier;
             }
         }
         // No output.
