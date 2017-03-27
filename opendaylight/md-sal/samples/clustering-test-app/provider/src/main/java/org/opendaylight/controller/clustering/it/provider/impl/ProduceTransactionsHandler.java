@@ -63,7 +63,7 @@ public class ProduceTransactionsHandler implements Runnable {
     private static final QName NUMBER =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number");
 
-    private final YangInstanceIdentifier ID_INTS_YID =
+    public static final YangInstanceIdentifier ID_INTS_YID =
             YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(ID_INTS));
 
     private final DOMDataTreeService domDataTreeService;
