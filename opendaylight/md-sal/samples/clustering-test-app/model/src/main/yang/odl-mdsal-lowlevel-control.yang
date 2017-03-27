@@ -340,6 +340,35 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
+    rpc create-prefix-shard {
+        description "Upon receiving this, the member creates a prefix shard at the instance-identifier, with replicas
+                on the required members.";
+        input {
+
+            leaf prefix {
+                mandatory true;
+                type instance-identifier;
+            }
+            leaf-list replicas {
+                min-elements 1;
+                type string;
+            }
+        }
+    }
+
+    rpc remove-prefix-shard {
+        description "Upon receiving this, the member removes the prefix based shard identifier by this prefix.
+                This must be called from the same node that created the shard.";
+
+        input {
+            leaf prefix {
+                mandatory true;
+                type instance-identifier;
+            }
+        }
+    }
+
+
     rpc become-prefix-leader {
         description "Upon receiving this, the member shall ask the appropriate API
             to become Leader of the given shard (presumably the llt:list-ints one,
@@ -349,22 +378,6 @@ module odl-mdsal-lowlevel-control {
                 description "TBD.
 
                 FIXME: Ask Java implementation developer about the format needed.";
-                mandatory true;
-                type string;
-            }
-        }
-        // No output.
-    }
-
-    rpc become-module-leader {
-        description "Upon receiving this, the member shall ask appropriate API
-            to become Leader of given config shard and return immediatelly.";
-        input {
-            leaf shard-name {
-                description "TBD.
-
-                FIXME: Ask Java implementation developer about the format needed.
-                TODO: Perhaps the names are compatible and one 'become-leader' would suffice?";
                 mandatory true;
                 type string;
             }
