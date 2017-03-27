@@ -25,32 +25,30 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest {
 
     @Test
     public void testClose() throws Exception {
-
-    }
-
-    @Test
-    public void testDoCreateSnapshot() throws Exception {
-
+        OBJECT.close();
     }
 
     @Test
     public void testDoCreateTransaction() throws Exception {
-
+        final ClientTransaction clientTransaction = OBJECT.doCreateTransaction();
     }
 
+    @Override
     @Test
     public void testOnTransactionAbort() throws Exception {
-
+        //OBJECT.onTransactionAbort();
     }
 
+    @Override
     @Test
     public void testOnTransactionReady() throws Exception {
-
+        //OBJECT.onTransactionReady();
     }
 
+    @Override
     @Test
     public void testCreateHistoryProxy() throws Exception {
-
+        //OBJECT.createHistoryProxy();
     }
 
 }

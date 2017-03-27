@@ -10,26 +10,40 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
+import com.google.common.primitives.UnsignedLong;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import scala.concurrent.Promise;
 
 public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory> {
 
+    private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
+    private static final FrontendType FRONTEND_TYPE = FrontendType.forName("type-1");
+    private static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
+    private static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
     private static final String SHARD_NAME = "default";
     private static final String PERSISTENCE_ID = "per-1";
     private static final ActorSystem SYSTEM = ActorSystem.apply();
@@ -42,10 +56,31 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
             CLIENT_ACTOR_CONTEXT, ACTOR_CONTEXT, SHARD_NAME);
     protected static final  LocalHistoryIdentifier LOCAL_HISTORY_IDENTIFIER = new LocalHistoryIdentifier(CLIENT_ID, 1L);
 
+    private ActorSystem system;
+    private ActorContext actorContext;
+    private ModuleShardBackendResolver moduleShardBackendResolver;
+    private TestProbe contextProbe;
+    private ShardBackendInfo shardBackendInfo;
+
+    @Mock
+    private ActorRef actorRef;
+    @Mock
+    private DataTree dataTree;
+    @Mock
+    private ProxyHistory proxyHistory;
+
     protected abstract T object();
 
     @Before
     public void setUp() throws Exception {
+
+        contextProbe = new TestProbe(system, "context");
+        actorContext = createActorContextMock(system, contextProbe.ref());
+        moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorContext);
+        shardBackendInfo = new ShardBackendInfo(
+                actorRef, 0L, ABIVersion.TEST_FUTURE_VERSION, "default", UnsignedLong.ONE, Optional.of(dataTree), 10);
+
+        initMocks(this);
     }
 
     @Test
@@ -60,11 +95,13 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
 
     @Test
     public void testState() throws Exception {
+        resetIdleState(object());
         Assert.assertEquals(AbstractClientHistory.State.IDLE, object().state());
     }
 
     @Test
     public void testUpdateState() throws Exception {
+        resetIdleState(object());
         object().updateState(AbstractClientHistory.State.IDLE, AbstractClientHistory.State.IDLE);
         Assert.assertEquals(AbstractClientHistory.State.IDLE, object().state());
     }
@@ -78,18 +115,14 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
     }
 
     @Test
-    public void testOnProxyDestroyed() throws Exception {
-        //object().onProxyDestroyed();
-    }
-
-    @Test
     public void testGetIdentifier() throws Exception {
         Assert.assertEquals(LOCAL_HISTORY_IDENTIFIER, object().getIdentifier());
     }
 
     @Test
     public void testNextTx() throws Exception {
-        object().nextTx();
+        Assert.assertEquals(object().getIdentifier().);object().nextTx();
+
     }
 
     @Test
@@ -104,7 +137,12 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
 
     @Test
     public void testCreateHistoryProxy() throws Exception {
-        object().createHistoryProxy(LOCAL_HISTORY_IDENTIFIER, CLIENT_BEHAVIOUR.getConnection(0L));
+    }
+
+    @Test
+    public void testOnProxyDestroyed() throws Exception {
+        final ProxyHistory proxyHistory = object().createHistoryProxy(LOCAL_HISTORY_IDENTIFIER, CLIENT_BEHAVIOUR.getConnection(0L));
+        object().onProxyDestroyed(proxyHistory);
     }
 
     @Test
@@ -116,38 +154,39 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
 
     @Test
     public void testTakeSnapshot() throws Exception {
+        resetIdleState(object());
         object().takeSnapshot();
     }
 
     @Test
     public void testDoCreateSnapshot() throws Exception {
-        object().doCreateSnapshot();
-    }
-
-    @Test
-    public void testDoCreateTransaction() throws Exception {
-        object().doCreateTransaction();
+        resetIdleState(object());
+        final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
+        Assert.assertEquals(new TransactionIdentifier(object().getIdentifier(), object().nextTx()).getHistoryId(),
+                clientSnapshot.getIdentifier().getHistoryId());
     }
 
     @Test
     public void testOnTransactionReady() throws Exception {
-        object().onTransactionReady();
+        //object().onTransactionReady();
     }
 
     @Test
     public void testOnTransactionAbort() throws Exception {
-        object().onTransactionAbort();
+        //object().onTransactionAbort();
     }
 
     @Test
     public void testOnTransactionComplete() throws Exception {
-        object().onTransactionComplete();
+        //object().onTransactionComplete();
     }
 
-    @Test
+    /**@Test
     public void testStartReconnect() throws Exception {
+        final ConnectedClientConnection<ShardBackendInfo> connectedClientConnection =
+                new ConnectedClientConnection<>(CLIENT_ACTOR_CONTEXT, 0L, shardBackendInfo);
         object().startReconnect();
-    }
+    }*/
 
     private static ActorContext createActorContextMock(final ActorSystem system, final ActorRef actor) {
         final ActorContext mock = mock(ActorContext.class);
@@ -157,6 +196,21 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
         promise.success(shardInfo);
         when(mock.findPrimaryShardAsync(any())).thenReturn(promise.future());
         return mock;
+    }
+
+    void resetIdleState(final AbstractClientHistory clientHistory) {
+        switch (clientHistory.state()){
+            case IDLE:
+                break;
+            case TX_OPEN:
+                clientHistory.updateState(AbstractClientHistory.State.TX_OPEN, AbstractClientHistory.State.IDLE);
+                break;
+            case CLOSED:
+                clientHistory.updateState(AbstractClientHistory.State.CLOSED, AbstractClientHistory.State.IDLE);
+                break;
+            default :
+                break;
+        }
     }
 
 }

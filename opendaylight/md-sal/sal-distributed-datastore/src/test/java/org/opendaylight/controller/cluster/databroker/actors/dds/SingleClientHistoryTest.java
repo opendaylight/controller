@@ -25,17 +25,13 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest {
     }
 
     @Test
-    public void testDoCreateSnapshot() throws Exception {
-
-    }
-
-    @Test
     public void testDoCreateTransaction() throws Exception {
-
+        final ClientTransaction clientTransaction = OBJECT.doCreateTransaction();
     }
 
+    @Override
     @Test
     public void testCreateHistoryProxy() throws Exception {
-
+       // OBJECT.createHistoryProxy();
     }
 }
