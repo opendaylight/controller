@@ -62,7 +62,7 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
      *
      * @return True if this transaction became closed during this call
      */
-    public final boolean abort() {
+    public boolean abort() {
         if (commonAbort()) {
             parent.onTransactionAbort(this);
             return true;
