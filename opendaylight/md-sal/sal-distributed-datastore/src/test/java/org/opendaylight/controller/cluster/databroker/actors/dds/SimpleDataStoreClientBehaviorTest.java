@@ -13,8 +13,8 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 public class SimpleDataStoreClientBehaviorTest extends AbstractDataStoreClientBehaviorTest {
 
     @Override
-    protected AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
-                                                             final ActorContext context) {
+    public AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
+                                                          final ActorContext context) {
         return new SimpleDataStoreClientBehavior(clientContext, context, SHARD);
     }
 
