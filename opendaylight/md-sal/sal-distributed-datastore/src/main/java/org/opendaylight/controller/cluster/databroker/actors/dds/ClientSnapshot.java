@@ -36,11 +36,11 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
         return ensureProxy(path, this::createProxy);
     }
 
-    public final CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).exists(path);
     }
 
-    public final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).read(path);
     }
