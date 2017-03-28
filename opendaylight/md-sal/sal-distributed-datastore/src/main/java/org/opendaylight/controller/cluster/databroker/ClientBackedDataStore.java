@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
@@ -33,8 +34,9 @@ public class ClientBackedDataStore extends AbstractDataStore {
     }
 
     @VisibleForTesting
-    ClientBackedDataStore(final ActorContext actorContext, final ClientIdentifier identifier) {
-        super(actorContext, identifier);
+    ClientBackedDataStore(final ActorContext actorContext, final ClientIdentifier identifier,
+                          final DataStoreClient clientActor) {
+        super(actorContext, identifier, clientActor);
     }
 
     @Override
@@ -48,7 +50,7 @@ public class ClientBackedDataStore extends AbstractDataStore {
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction() {
+    public DOMStoreWriteTransaction  newWriteOnlyTransaction() {
         return new ClientBackedWriteTransaction(getClient().createTransaction());
     }
 
