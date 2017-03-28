@@ -59,8 +59,8 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         behavior = createBehavior(clientContext, context);
     }
 
-    protected abstract AbstractDataStoreClientBehavior createBehavior(ClientActorContext clientContext,
-                                                                      ActorContext context);
+    public abstract AbstractDataStoreClientBehavior createBehavior(
+            ClientActorContext clientContext, ActorContext context);
 
     @After
     public void tearDown() throws Exception {
