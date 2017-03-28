@@ -915,6 +915,30 @@
       "revId": "e5893b440000d2147323023269809cf92f30e97d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3508e1d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigUpdateHandler.java",
+        "patchSetId": 30
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-28T14:18:35Z",
+      "side": 1,
+      "message": "I switched to using instance-identifier in prefix-shard-configuration prefix leaf, we don\u0027t need this serialization anymore. Removed completely",
+      "parentUuid": "fafc7978_3c1477f4",
+      "range": {
+        "startLine": 195,
+        "startChar": 78,
+        "endLine": 195,
+        "endChar": 88
+      },
+      "revId": "e5893b440000d2147323023269809cf92f30e97d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
