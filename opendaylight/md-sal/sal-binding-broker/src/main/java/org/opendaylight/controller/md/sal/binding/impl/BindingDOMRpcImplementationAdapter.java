@@ -17,8 +17,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
@@ -43,18 +43,15 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     private final RpcService delegate;
     private final QName inputQname;
 
-    public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeSerializer codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
+    <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeSerializer codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
         try {
-            this.invoker = SERVICE_INVOKERS.get(type, new Callable<RpcServiceInvoker>() {
-                @Override
-                public RpcServiceInvoker call() {
-                    final Map<QName, Method> map = new HashMap<>();
-                    for (Entry<SchemaPath, Method> e : localNameToMethod.entrySet()) {
-                        map.put(e.getKey().getLastComponent(), e.getValue());
-                    }
-
-                    return RpcServiceInvoker.from(map);
+            this.invoker = SERVICE_INVOKERS.get(type, () -> {
+                final Map<QName, Method> map = new HashMap<>();
+                for (Entry<SchemaPath, Method> e : localNameToMethod.entrySet()) {
+                    map.put(e.getKey().getLastComponent(), e.getValue());
                 }
+
+                return RpcServiceInvoker.from(map);
             });
         } catch (ExecutionException e) {
             throw new IllegalArgumentException("Failed to create invokers for type " + type, e);
@@ -65,15 +62,16 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
         inputQname = QName.create(BindingReflections.getQNameModule(type), "input").intern();
     }
 
+    @Nonnull
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
         final SchemaPath schemaPath = rpc.getType();
-        final DataObject bindingInput = input != null ? deserilialize(rpc.getType(),input) : null;
-        final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath,bindingInput);
-        return transformResult(schemaPath,bindingResult);
+        final DataObject bindingInput = input != null ? deserialize(rpc.getType(), input) : null;
+        final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath, bindingInput);
+        return transformResult(bindingResult);
     }
 
-    private DataObject deserilialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
+    private DataObject deserialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
         if (input instanceof LazySerializedContainerNode) {
             return ((LazySerializedContainerNode) input).bindingData();
         }
@@ -85,8 +83,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
         return JdkFutureAdapters.listenInPoolThread(invoker.invokeRpc(delegate, schemaPath.getLastComponent(), input));
     }
 
-    private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(final SchemaPath schemaPath,
-            final ListenableFuture<RpcResult<?>> bindingResult) {
+    private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(final ListenableFuture<RpcResult<?>> bindingResult) {
         return LazyDOMRpcResultFuture.create(codec, bindingResult);
     }
 
