@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_2d8ffb24",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorLeadershipTransferCohort.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-28T09:01:38Z",
+      "side": 1,
+      "message": "Sorry, my bad",
+      "parentUuid": "fafc7978_5e15cf47",
+      "range": {
+        "startLine": 19,
+        "startChar": 7,
+        "endLine": 19,
+        "endChar": 33
+      },
+      "revId": "73906a3739c0453c588d06402ba99724f82f9f1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_41ffae01",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/MakeLeaderLocal.java",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-27T15:19:05Z",
       "side": 1,
       "message": "also needs a private constructor",
+      "range": {
+        "startLine": 24,
+        "startChar": 51,
+        "endLine": 24,
+        "endChar": 73
+      },
+      "revId": "73906a3739c0453c588d06402ba99724f82f9f1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_0d92f74a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/MakeLeaderLocal.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-28T09:01:38Z",
+      "side": 1,
+      "message": "Done, also do not implement Serializable since this is intended to sent to a local shard.",
+      "parentUuid": "fafc7978_41ffae01",
       "range": {
         "startLine": 24,
         "startChar": 51,
