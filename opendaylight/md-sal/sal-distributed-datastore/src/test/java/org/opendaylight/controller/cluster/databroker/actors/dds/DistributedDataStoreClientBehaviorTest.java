@@ -18,8 +18,8 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 public class DistributedDataStoreClientBehaviorTest extends AbstractDataStoreClientBehaviorTest {
     @Override
-    protected AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
-                                                             final ActorContext context) {
+    public AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
+                                                          final ActorContext context) {
         final ShardStrategyFactory factory = mock(ShardStrategyFactory.class);
         final ShardStrategy strategy = mock(ShardStrategy.class);
         when(strategy.findShard(any())).thenReturn(SHARD);
