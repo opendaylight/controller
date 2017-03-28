@@ -136,6 +136,16 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 .duration().toMillis() * READY_WAIT_FACTOR;
     }
 
+    @VisibleForTesting
+    protected AbstractDataStore(final ActorContext actorContext, final ClientIdentifier identifier,
+                                final DataStoreClient clientActor) {
+        this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.client = clientActor;
+        this.identifier = Preconditions.checkNotNull(identifier);
+        this.waitTillReadyTimeInMillis = actorContext.getDatastoreContext().getShardLeaderElectionTimeout()
+                .duration().toMillis() * READY_WAIT_FACTOR;
+    }
+
     protected final DataStoreClient getClient() {
         return client;
     }
