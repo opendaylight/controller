@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_860cfe43",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/LeadershipTransferIntegrationTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-29T15:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_c45d614a",
+      "revId": "68cc77b2834031c770b11e010e19fd70c864ab78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_e47b45bc",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/LeadershipTransferIntegrationTest.java",
         "patchSetId": 14
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_241b8d81",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/LeadershipTransferIntegrationTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-29T15:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_e47b45bc",
+      "revId": "68cc77b2834031c770b11e010e19fd70c864ab78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_4431710a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 14
@@ -47,6 +83,24 @@
       "writtenOn": "2017-03-29T13:58:30Z",
       "side": 1,
       "message": "You can put this in a local var.",
+      "revId": "68cc77b2834031c770b11e010e19fd70c864ab78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_660e3a34",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-29T15:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_4431710a",
       "revId": "68cc77b2834031c770b11e010e19fd70c864ab78",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
