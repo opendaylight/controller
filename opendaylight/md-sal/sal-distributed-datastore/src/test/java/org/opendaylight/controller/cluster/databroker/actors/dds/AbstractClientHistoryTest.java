@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -121,13 +120,13 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
 
     @Test
     public void testNextTx() throws Exception {
-        Assert.assertEquals(object().getIdentifier().);object().nextTx();
-
+        object().nextTx();
     }
 
     @Test
     public void testResolveShardForPath() throws Exception {
-        object().resolveShardForPath(YangInstanceIdentifier.EMPTY);
+        final Long shardForPath = object().resolveShardForPath(YangInstanceIdentifier.EMPTY);
+        Assert.assertEquals(0L, shardForPath.longValue());
     }
 
     @Test
@@ -136,8 +135,7 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
     }
 
     @Test
-    public void testCreateHistoryProxy() throws Exception {
-    }
+    public abstract void testCreateHistoryProxy() throws Exception;
 
     @Test
     public void testOnProxyDestroyed() throws Exception {
@@ -155,16 +153,15 @@ public abstract class AbstractClientHistoryTest<T extends  AbstractClientHistory
     @Test
     public void testTakeSnapshot() throws Exception {
         resetIdleState(object());
-        object().takeSnapshot();
+        final ClientSnapshot clientSnapshot = object().takeSnapshot();
+        Assert.assertEquals(object().getIdentifier(), clientSnapshot.getIdentifier().getHistoryId());
     }
 
     @Test
-    public void testDoCreateSnapshot() throws Exception {
-        resetIdleState(object());
-        final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
-        Assert.assertEquals(new TransactionIdentifier(object().getIdentifier(), object().nextTx()).getHistoryId(),
-                clientSnapshot.getIdentifier().getHistoryId());
-    }
+    public abstract void testDoCreateSnapshot() throws Exception;
+
+    @Test
+    public abstract void testDoCreateTransaction() throws Exception;
 
     @Test
     public void testOnTransactionReady() throws Exception {

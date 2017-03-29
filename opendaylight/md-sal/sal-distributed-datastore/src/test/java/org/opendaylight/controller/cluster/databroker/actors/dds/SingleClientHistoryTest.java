@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class SingleClientHistoryTest extends AbstractClientHistoryTest {
 
@@ -24,14 +27,26 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest {
         return OBJECT;
     }
 
+    @Override
     @Test
     public void testDoCreateTransaction() throws Exception {
         final ClientTransaction clientTransaction = OBJECT.doCreateTransaction();
+        Assert.assertEquals(OBJECT.getIdentifier(), clientTransaction.getIdentifier().getHistoryId());
     }
 
     @Override
     @Test
     public void testCreateHistoryProxy() throws Exception {
-       // OBJECT.createHistoryProxy();
+        final AbstractClientConnection<ShardBackendInfo> clientConnection = CLIENT_BEHAVIOUR.getConnection(0L);
+        final ProxyHistory historyProxy = OBJECT.createHistoryProxy(LOCAL_HISTORY_IDENTIFIER, clientConnection);
+        Assert.assertEquals(OBJECT.getIdentifier(), historyProxy.getIdentifier());
+    }
+
+    @Override
+    public void testDoCreateSnapshot() throws Exception {
+        resetIdleState(OBJECT);
+        final ClientSnapshot clientSnapshot = OBJECT.doCreateSnapshot();
+        Assert.assertEquals(new TransactionIdentifier(OBJECT.getIdentifier(), OBJECT.nextTx()).getHistoryId(),
+                clientSnapshot.getIdentifier().getHistoryId());
     }
 }
