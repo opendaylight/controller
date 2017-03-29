@@ -146,6 +146,9 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     private static final State OPEN = new State("open");
     private static final State SEALED = new State("sealed");
     private static final State FLUSHED = new State("flushed");
+    private static final Consumer<Response<?, ?>> NO_OP_CALLBACK = response -> {
+
+    };
 
     // Touched from client actor thread only
     private final Deque<Object> successfulRequests = new ArrayDeque<>();
@@ -491,7 +494,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         for (Object obj : successfulRequests) {
             if (obj instanceof TransactionRequest) {
                 LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                successor.handleForwardedRemoteRequest((TransactionRequest<?>) obj, null);
+                successor.handleForwardedRemoteRequest((TransactionRequest<?>) obj, NO_OP_CALLBACK);
             } else {
                 Verify.verify(obj instanceof IncrementSequence);
                 successor.incrementSequence(((IncrementSequence) obj).getDelta());
