@@ -69,6 +69,30 @@
       "revId": "4282a29933a4edcf7eee9cc23925781c85f829db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_c95579c7",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/PrefixLeaderHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T15:45:46Z",
+      "side": 1,
+      "message": "I think it is safer to return immediately (and not risk blocking on weird cases such as calling this on a member of minority partition).\nIf anything fails, the test will detect it by not seeing a new leader. Any error probably will be visible in karaf.log anyway.",
+      "parentUuid": "fafc7978_a6bf82a9",
+      "range": {
+        "startLine": 51,
+        "startChar": 72,
+        "endLine": 51,
+        "endChar": 79
+      },
+      "revId": "4282a29933a4edcf7eee9cc23925781c85f829db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
