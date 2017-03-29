@@ -18,7 +18,7 @@ import java.util.Optional;
  *
  * @param <T> Concrete {@link BackendInfo} type
  */
-abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
+public abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
     /**
      * Multiplication factor applied to remote's advertised limit on outstanding messages. Our default strategy
      * rate-limiting strategy in {@link AveragingProgressTracker} does not penalize threads as long as we have not
@@ -49,7 +49,7 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
     }
 
     @Override
-    public final Optional<T> getBackendInfo() {
+    public Optional<T> getBackendInfo() {
         return Optional.of(backend);
     }
 

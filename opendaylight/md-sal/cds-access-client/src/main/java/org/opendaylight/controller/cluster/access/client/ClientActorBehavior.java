@@ -259,7 +259,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         LOG.debug("{}: connection {} reconnecting as {}", persistenceId(), oldConn, newConn);
 
         final Long shard = oldConn.cookie();
-        resolver().refreshBackendInfo(shard, conn.getBackendInfo().get()).whenComplete(
+        resolver().refreshBackendInfo(shard, (T) conn.getBackendInfo().get()).whenComplete(
             (backend, failure) -> context().executeInActor(behavior -> {
                 backendConnectFinished(shard, conn, backend, failure);
                 return behavior;
