@@ -45,6 +45,30 @@
       "revId": "4282a29933a4edcf7eee9cc23925781c85f829db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a6bf82a9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/PrefixLeaderHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-29T14:41:03Z",
+      "side": 1,
+      "message": "Thats an oversight on my part, i can make it return immediately, but we will loose the error from the response in case one occurs.",
+      "parentUuid": "fafc7978_e6b98acc",
+      "range": {
+        "startLine": 51,
+        "startChar": 72,
+        "endLine": 51,
+        "endChar": 79
+      },
+      "revId": "4282a29933a4edcf7eee9cc23925781c85f829db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
