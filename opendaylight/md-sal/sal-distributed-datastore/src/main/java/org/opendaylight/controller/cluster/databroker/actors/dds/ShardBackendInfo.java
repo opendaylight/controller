@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  * @author Robert Varga
  */
 @ThreadSafe
-final class ShardBackendInfo extends BackendInfo {
+class ShardBackendInfo extends BackendInfo {
     private final Optional<DataTree> dataTree;
     private final UnsignedLong cookie;
     private final String shardName;

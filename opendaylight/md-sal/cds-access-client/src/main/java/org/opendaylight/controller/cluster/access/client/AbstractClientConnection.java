@@ -77,7 +77,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         return context;
     }
 
-    public final @Nonnull Long cookie() {
+    public @Nonnull Long cookie() {
         return cookie;
     }
 
