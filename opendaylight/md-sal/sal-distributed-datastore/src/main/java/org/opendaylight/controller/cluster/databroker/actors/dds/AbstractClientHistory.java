@@ -88,6 +88,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
         if (local != State.CLOSED) {
             Preconditions.checkState(local == State.IDLE, "Local history %s has an open transaction", this);
             histories.values().forEach(ProxyHistory::close);
+            updateState(local, State.CLOSED);
         }
     }
 
