@@ -49,7 +49,7 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
     }
 
     @Override
-    public final Optional<T> getBackendInfo() {
+    public Optional<T> getBackendInfo() {
         return Optional.of(backend);
     }
 

@@ -12,7 +12,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 @Beta
 @NotThreadSafe
-public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
+public class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
     ConnectedClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
         super(context, cookie, backend);
     }
