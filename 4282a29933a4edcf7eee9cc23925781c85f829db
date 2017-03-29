@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_06b76ed9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T14:39:04Z",
+      "side": 1,
+      "message": "Update according to the other comment.",
+      "range": {
+        "startLine": 374,
+        "startChar": 49,
+        "endLine": 374,
+        "endChar": 68
+      },
+      "revId": "4282a29933a4edcf7eee9cc23925781c85f829db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e6b98acc",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/PrefixLeaderHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T14:39:04Z",
+      "side": 1,
+      "message": "Does this mean the RPC only returns when the stage confirms success?\nIf yes, edit the Yang description part highlighted in the other comment.",
+      "range": {
+        "startLine": 51,
+        "startChar": 72,
+        "endLine": 51,
+        "endChar": 79
+      },
+      "revId": "4282a29933a4edcf7eee9cc23925781c85f829db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
