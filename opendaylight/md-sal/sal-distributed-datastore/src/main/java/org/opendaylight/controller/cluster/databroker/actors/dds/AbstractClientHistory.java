@@ -212,7 +212,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * @throws TransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
-    public final ClientSnapshot takeSnapshot() {
+    public ClientSnapshot takeSnapshot() {
         checkNotClosed();
 
         synchronized (this) {
