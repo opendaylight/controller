@@ -1002,12 +1002,9 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test
     public void testCreateChainedTransactionAfterClose() throws Exception {
-        //TODO remove when test passes also for ClientBackedDataStore
-        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
-
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                try (AbstractDataStore dataStore = setupDistributedDataStore(
+                try (final AbstractDataStore dataStore = setupDistributedDataStore(
                         testParameter, "testCreateChainedTransactionAfterClose", "test-1")) {
 
                     final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
@@ -1023,9 +1020,6 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainWithReadOnlyTxAfterPreviousReady() throws Exception {
-        //TODO remove when test passes also for ClientBackedDataStore
-        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
-
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
                 try (final AbstractDataStore dataStore = setupDistributedDataStore(
@@ -1165,9 +1159,6 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test
     public void testChangeListenerRegistration() throws Exception {
-        //TODO remove when test passes also for ClientBackedDataStore
-        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
-
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
                 try (final AbstractDataStore dataStore = setupDistributedDataStore(
