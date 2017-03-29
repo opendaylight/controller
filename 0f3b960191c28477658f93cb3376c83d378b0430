@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_66aabad3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-29T14:20:32Z",
+      "side": 1,
+      "message": "Guard with \"shardAccessMap\" instead of \"this\" since it\u0027s only shardAccessMap that needs to be protected.",
+      "revId": "0f3b960191c28477658f93cb3376c83d378b0430",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a68b0267",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 656,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-29T14:20:32Z",
+      "side": 1,
+      "message": "Why do you include this statement inside the sync block? It doesn;t seem related to shardAccessMap.",
+      "revId": "0f3b960191c28477658f93cb3376c83d378b0430",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
