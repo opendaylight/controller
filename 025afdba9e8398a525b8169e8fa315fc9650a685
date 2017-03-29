@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_e985dd59",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 7
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T15:34:57Z",
+      "side": 1,
+      "message": "Is it worth having a yang typedef for this?\nCurrently the only restriction is non-emptyness.",
+      "range": {
+        "startLine": 354,
+        "startChar": 21,
+        "endLine": 354,
+        "endChar": 27
+      },
+      "revId": "025afdba9e8398a525b8169e8fa315fc9650a685",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
