@@ -55,6 +55,8 @@ import org.slf4j.LoggerFactory;
 @NotThreadSafe
 final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalReadWriteProxyTransaction.class);
+    private static final Consumer<Response<?, ?>> NOOP_CALLBACK = response -> {
+    };
 
     private CursorAwareDataTreeModification modification;
     private CursorAwareDataTreeModification sealedModification;
@@ -154,21 +156,21 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
         final java.util.Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
-            Verify.verify(callback != null, "Request {} has null callback", request);
+            final Consumer<Response<?, ?>> requestCallback = (callback == null) ? NOOP_CALLBACK : callback;
             ensureSealed();
 
             switch (maybeProtocol.get()) {
                 case ABORT:
-                    sendAbort(callback);
+                    sendAbort(requestCallback);
                     break;
                 case READY:
                     // No-op, as we have already issued a seal()
                     break;
                 case SIMPLE:
-                    sendRequest(commitRequest(false), callback);
+                    sendRequest(commitRequest(false), requestCallback);
                     break;
                 case THREE_PHASE:
-                    sendRequest(commitRequest(true), callback);
+                    sendRequest(commitRequest(true), requestCallback);
                     break;
                 default:
                     throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.get());
