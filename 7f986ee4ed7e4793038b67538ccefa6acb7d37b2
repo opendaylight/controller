@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_a6edc2b9",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T15:30:44Z",
+      "side": 1,
+      "message": "Mention dataStoreType as well?",
+      "range": {
+        "startLine": 183,
+        "startChar": 45,
+        "endLine": 183,
+        "endChar": 46
+      },
+      "revId": "7f986ee4ed7e4793038b67538ccefa6acb7d37b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
