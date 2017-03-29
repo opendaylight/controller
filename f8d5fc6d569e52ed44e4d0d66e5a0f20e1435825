@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_24342dfa",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T14:06:16Z",
+      "side": 1,
+      "message": "Should we set min-elements to 1?",
+      "range": {
+        "startLine": 352,
+        "startChar": 31,
+        "endLine": 352,
+        "endChar": 32
+      },
+      "revId": "f8d5fc6d569e52ed44e4d0d66e5a0f20e1435825",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_04580955",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-29T14:06:16Z",
+      "side": 1,
+      "message": "No space before comma please.",
+      "range": {
+        "startLine": 359,
+        "startChar": 40,
+        "endLine": 359,
+        "endChar": 42
+      },
+      "revId": "f8d5fc6d569e52ed44e4d0d66e5a0f20e1435825",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
