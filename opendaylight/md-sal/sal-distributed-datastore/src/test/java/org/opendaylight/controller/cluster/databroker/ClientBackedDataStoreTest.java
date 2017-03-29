@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import java.lang.reflect.Field;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,6 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
@@ -69,13 +67,8 @@ public class ClientBackedDataStoreTest {
 
         Mockito.when(actorContext.getSchemaContext()).thenReturn(schemaContext);
         Mockito.when(actorContext.getDatastoreContext()).thenReturn(DatastoreContext.newBuilder().build());
-
-        final Field transactionIdField = AbstractClientHandle.class.getDeclaredField("transactionId");
-        transactionIdField.setAccessible(true);
-
-        // set transaction ids to mocked objects
-        transactionIdField.set(clientTransaction, TRANSACTION_IDENTIFIER);
-        transactionIdField.set(clientSnapshot, TRANSACTION_IDENTIFIER);
+        Mockito.when(clientTransaction.getIdentifier()).thenReturn(TRANSACTION_IDENTIFIER);
+        Mockito.when(clientSnapshot.getIdentifier()).thenReturn(TRANSACTION_IDENTIFIER);
 
         Mockito.when(clientActor.getIdentifier()).thenReturn(CLIENT_IDENTIFIER);
         Mockito.when(clientActor.createTransaction()).thenReturn(clientTransaction);
