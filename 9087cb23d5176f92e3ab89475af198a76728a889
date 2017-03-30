@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_2659c7fe",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-30T18:57:52Z",
+      "side": 1,
+      "message": "You should time-box this, something safe like a minute, and fail if the Future isn\u0027t completed so we at least have an error message instead of an indefinite hang.",
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_065c83ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-30T18:57:52Z",
+      "side": 1,
+      "message": "Remove this",
+      "range": {
+        "startLine": 310,
+        "startChar": 11,
+        "endLine": 310,
+        "endChar": 23
+      },
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a66c979d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-30T18:57:52Z",
+      "side": 1,
+      "message": "Why not just have remove return entry and call it above? This avoids a separate lookup and remove.",
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
