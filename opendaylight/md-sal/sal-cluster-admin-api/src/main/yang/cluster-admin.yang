@@ -109,6 +109,24 @@ module cluster-admin {
             described in the Raft paper.";
     }
 
+    rpc make-leader-local {
+        input {
+            leaf shard-name {
+                mandatory true;
+                type string;
+                description "The name of the shard for which to move the leader to the local node";
+            }
+
+            leaf data-store-type {
+                mandatory true;
+                type data-store-type;
+                description "The type of the data store to which the shard belongs";
+            }
+        }
+
+        description "Attempts to move the shard leader of the given module based shard to the local node.";
+    }
+
     rpc add-prefix-shard-replica {
         input {
             leaf shard-prefix {
