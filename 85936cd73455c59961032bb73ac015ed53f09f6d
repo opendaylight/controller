@@ -299,6 +299,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_e65e9fe8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-30T18:46:18Z",
+      "side": 1,
+      "message": "To be entirely correct, you do need synchronization for thread visibility, i.e. to ensure that updates done by the future callback thread are immediately observed by readers. You can avoid the need for synchronization by updating the configurationShardMap in the caller after it has awaited the returned Future instead of updating the configurationShardMap as a side effect here. That seems cleaner to me anyway.",
+      "parentUuid": "fafc7978_adfc7a3f",
+      "range": {
+        "startLine": 220,
+        "startChar": 20,
+        "endLine": 220,
+        "endChar": 41
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_4684d6d3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 41
