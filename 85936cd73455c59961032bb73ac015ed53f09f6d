@@ -323,6 +323,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_a6c49740",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-03-30T19:53:04Z",
+      "side": 1,
+      "message": "Tom, while you are entirely correct, there is one Java-specific thing which should allow us to optimize (or rather, get away with this).\n\nIf I understand it correctly, JLS requires happens-before semantics to be carried over between thread interactions. I.e. even non-volatile writes need to be visible before the volatiles -- hence if we can (I am not sure right now we can) assume that this code is invoked by code which does inter-thread communication (writes to a volatile or takes a lock), we do not have to do that ourselves.",
+      "parentUuid": "fafc7978_e65e9fe8",
+      "range": {
+        "startLine": 220,
+        "startChar": 20,
+        "endLine": 220,
+        "endChar": 41
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_4684d6d3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 41
