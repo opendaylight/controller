@@ -88,6 +88,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaInput;
@@ -230,6 +231,40 @@ public class ClusterAdminRpcServiceTest {
                 ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
 
         verifyNoShardPresent(replicaNode2.configDataStore(), ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
+    }
+
+    @Test
+    public void testModuleShardLeaderMovement() throws Exception {
+        String name = "testModuleShardLeaderMovement";
+        String moduleShardsConfig = "module-shards-member1.conf";
+
+        final MemberNode member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .waitForShardLeader("cars").moduleShardsConfig(moduleShardsConfig).build();
+        final MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(moduleShardsConfig).build();
+        final MemberNode replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(moduleShardsConfig).build();
+
+        member1.waitForMembersUp("member-2", "member-3");
+
+        doAddShardReplica(replicaNode2, "cars", "member-1");
+        doAddShardReplica(replicaNode3, "cars", "member-1", "member-2");
+
+        verifyRaftPeersPresent(member1.configDataStore(), "cars", "member-2", "member-3");
+
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
+
+        verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
+
+        doMakeShardLeaderLocal(member1, "cars", "member-1");
+        replicaNode2.kit().waitUntilLeader(replicaNode2.configDataStore().getActorContext(), "cars");
+        replicaNode3.kit().waitUntilLeader(replicaNode3.configDataStore().getActorContext(), "cars");
+
+        doMakeShardLeaderLocal(replicaNode2, "cars", "member-2");
+        member1.kit().waitUntilLeader(member1.configDataStore().getActorContext(), "cars");
+        replicaNode3.kit().waitUntilLeader(replicaNode3.configDataStore().getActorContext(), "cars");
+
+        doMakeShardLeaderLocal(replicaNode3, "cars", "member-3");
     }
 
     @Test
@@ -401,6 +436,22 @@ public class ClusterAdminRpcServiceTest {
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.operDataStore(), shardName, peerMemberNames);
+    }
+
+    private static void doMakeShardLeaderLocal(final MemberNode memberNode, String shardName, String newLeader)
+            throws Exception {
+        ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
+                memberNode.operDataStore(), null);
+
+        final RpcResult<Void> rpcResult = service.makeLeaderLocal(new MakeLeaderLocalInputBuilder()
+                .setDataStoreType(DataStoreType.Config).setShardName(shardName).build())
+                .get(10, TimeUnit.SECONDS);
+
+        verifySuccessfulRpcResult(rpcResult);
+
+        verifyRaftState(memberNode.configDataStore(), shardName, raftState -> assertThat(raftState.getLeader(),
+                containsString(newLeader)));
+
     }
 
     private static <T> T verifySuccessfulRpcResult(RpcResult<T> rpcResult) {
