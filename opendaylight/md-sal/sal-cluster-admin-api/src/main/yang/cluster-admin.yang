@@ -109,6 +109,29 @@ module cluster-admin {
             described in the Raft paper.";
     }
 
+    rpc make-leader-local {
+        input {
+            leaf shard-name {
+                mandatory true;
+                type string;
+                description "The name of the shard for which to move the leader to the local node";
+            }
+
+            leaf data-store-type {
+                mandatory true;
+                type data-store-type;
+                description "The type of the data store to which the shard belongs";
+            }
+        }
+
+        description "Attempts to move the shard leader of the given module based shard to the local node.
+                The rpc returns a response after handling of the underlying MakeLeaderLocal message completes.
+                This operation fails if there is no current shard leader due to lack of network connectivity or
+                a cluster majority. In addition, if the local node is not up to date with the current leader,
+                an attempt is made to first sync the local node with the leader. If this cannot be achieved
+                within two election timeout periods the operation fails.";
+    }
+
     rpc add-prefix-shard-replica {
         input {
             leaf shard-prefix {
