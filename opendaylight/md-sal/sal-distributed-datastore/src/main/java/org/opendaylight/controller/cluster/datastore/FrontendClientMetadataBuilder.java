@@ -39,6 +39,10 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     FrontendClientMetadataBuilder(final ClientIdentifier identifier) {
         this.identifier = Preconditions.checkNotNull(identifier);
         purgedHistories = TreeRangeSet.create();
+
+        // History for stand-alone transactions is always present
+        final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
+        currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
     }
 
     FrontendClientMetadataBuilder(final FrontendClientMetadata meta) {
@@ -49,6 +53,18 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
             final FrontendHistoryMetadataBuilder b = new FrontendHistoryMetadataBuilder(identifier, h);
             currentHistories.put(b.getIdentifier(), b);
         }
+
+        // Sanity check and recovery
+        final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
+        if (!currentHistories.containsKey(standaloneId)) {
+            LOG.warn("Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
+                identifier, currentHistories);
+            currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
+        }
+    }
+
+    private LocalHistoryIdentifier standaloneHistoryId() {
+        return new LocalHistoryIdentifier(identifier, 0);
     }
 
     @Override
