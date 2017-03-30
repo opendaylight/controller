@@ -110,9 +110,8 @@ public class ModuleShardBackendResolverTest {
     public void testGetBackendInfoFail() throws Exception {
         final CompletionStage<ShardBackendInfo> i = moduleShardBackendResolver.getBackendInfo(0L);
         final ConnectClientRequest req = contextProbe.expectMsgClass(ConnectClientRequest.class);
-        final RuntimeRequestException cause = new RuntimeRequestException("fail", new RuntimeException());
-        final ConnectClientFailure response =
-                req.toRequestFailure(cause);
+        final RuntimeException cause = new RuntimeException();
+        final ConnectClientFailure response = req.toRequestFailure(new RuntimeRequestException("fail", cause));
         contextProbe.reply(response);
         final CompletionStage<ShardBackendInfo> stage = moduleShardBackendResolver.getBackendInfo(0L);
         final ExecutionException caught =
