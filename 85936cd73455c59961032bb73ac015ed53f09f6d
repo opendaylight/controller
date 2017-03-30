@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_6058da32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_e68b4a1c",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_46833604",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 41
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_405b162e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 541,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_46833604",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_a6714246",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 41
@@ -47,6 +83,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "...and here",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a041223b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_a6714246",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -110,6 +164,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_a06802bb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 1497,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done, don\u0027t build aa string, just use localShards.keySet()",
+      "parentUuid": "fafc7978_46acd6a0",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_66f3da9f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 41
@@ -121,6 +193,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "This blocks indefinitely - ideally this should be async. Also it doesn\u0027t use the returned List from the Future.  This needs comments to explain the intent here.",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_4dd6aec4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "prefix-shard-configuration shards (config shards) are the shards we are looking for in handleConfigShardLookup(). These shards (one for operational DS and one for config DS) are used to store configuration for prefix-based shards. Other cluster nodes listens on these shards for changes so they can spawn frontends and create prefix-based shards etc. too. We have to be sure that these config shards are started correctly at the DistributedShardedDOMDataTree startup.\n\nWe shouldn\u0027t block indefintely, since this basically boils down to asking ShardedDataTreeActor to lookup config shard and this will eventually finish or time out.\n\nWe don\u0027t have to use returned list. Since we are blocking here we will fail if the task failed or we will continue if the task succeeds.",
+      "parentUuid": "fafc7978_66f3da9f",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -144,6 +234,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_63262118",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "This is not needed anymore. It was here because we had to give some time to datastoreclient to be ready, but seems that it\u0027s fixed now.",
+      "parentUuid": "fafc7978_86ca3e4d",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_2639d241",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 41
@@ -155,6 +263,30 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "This needs to be a synchronized/thread-safe map.",
+      "range": {
+        "startLine": 220,
+        "startChar": 20,
+        "endLine": 220,
+        "endChar": 41
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_adfc7a3f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "This is intended to be done only at DistributedShardedDOMDataTree\u0027s startup. After that we are just reading this map, so I don\u0027t think that there can be some synchronization issues. Maybe I can embed init() method to constructor so this will be more clear..",
+      "parentUuid": "fafc7978_2639d241",
       "range": {
         "startLine": 220,
         "startChar": 20,
@@ -190,6 +322,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_ed1202b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_4684d6d3",
+      "range": {
+        "startLine": 311,
+        "startChar": 11,
+        "endLine": 311,
+        "endChar": 23
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_e6634a3f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 41
@@ -201,6 +357,30 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "...same here...",
+      "range": {
+        "startLine": 385,
+        "startChar": 12,
+        "endLine": 385,
+        "endChar": 24
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_4d218efb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_e6634a3f",
       "range": {
         "startLine": 385,
         "startChar": 12,
@@ -236,6 +416,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_ad20faf7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_8654fe54",
+      "range": {
+        "startLine": 413,
+        "startChar": 12,
+        "endLine": 413,
+        "endChar": 24
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_a6e02297",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/LookupTask.java",
         "patchSetId": 41
@@ -247,6 +451,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "Please add javadocs. Also document/annotate that this class isn\u0027t thread-safe.",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_63546154",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/LookupTask.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_a6e02297",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -270,6 +492,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_ed05e2c2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigUpdateHandler.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_66abda1e",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_86023e3c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigUpdateHandler.java",
         "patchSetId": 41
@@ -281,6 +521,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "Why are these warn?",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_cd2f3e3d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigUpdateHandler.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_86023e3c",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -304,6 +562,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_6daf32e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigWriter.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_c6aa8618",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_2671d2e0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigWriter.java",
         "patchSetId": 41
@@ -315,6 +591,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "Why do we need to block here? Could this be a remote call?",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_8de2562d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardConfigWriter.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "No ShardConfigWriter should be accessed just locally by DistributedShardedDOMDataTree. DistributedShardedDOMDataTree uses ShardConfigWriter to update prefix-shard-configuration upon new createDistributedShard requests and also during despawning prefix-based shards.\n\nWe need to block here to be sure that prefix-shard-configuration is ready when DistributedShardedDOMDataTree is started",
+      "parentUuid": "fafc7978_2671d2e0",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -338,6 +632,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_0d24a6ad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/InitConfigListener.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_86251ec4",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_a6014208",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/prefix-shard-configuration.yang",
         "patchSetId": 41
@@ -349,6 +661,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "Please add a description here",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_bb531738",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/prefix-shard-configuration.yang",
+        "patchSetId": 41
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_a6014208",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -372,6 +702,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_9b2573c4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/prefix-shard-configuration.yang",
+        "patchSetId": 41
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Yes, replica represent member name. We need this information so that backend knows on which nodes it should spawn shard.",
+      "parentUuid": "fafc7978_092781b7",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_69356dda",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/prefix-shard-configuration.yang",
         "patchSetId": 41
@@ -389,6 +737,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_db909b97",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/prefix-shard-configuration.yang",
+        "patchSetId": 41
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_69356dda",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_693c4dc0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/simplelogger.properties",
         "patchSetId": 41
@@ -400,6 +766,24 @@
       "writtenOn": "2017-03-29T15:29:19Z",
       "side": 1,
       "message": "This adds a lot of extra debug which is why it is not enabled by default.",
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7b91af99",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/simplelogger.properties",
+        "patchSetId": 41
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-30T17:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_693c4dc0",
       "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
