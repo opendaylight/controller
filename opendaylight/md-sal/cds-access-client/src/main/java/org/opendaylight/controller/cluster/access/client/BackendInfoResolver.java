@@ -17,6 +17,13 @@ import javax.annotation.Nonnull;
  * by either the client actor (when a message timeout is detected) and by the specific frontend (on explicit
  * invalidation or when updated information becomes available).
  *
+ * <p>
+ * If the completion stage returned by this interface's methods fails with a
+ * {@link org.opendaylight.controller.cluster.access.concepts.RequestException}, it will be forwarded to all
+ * outstanding requests towards the leader. If it fails with a {@link java.util.concurrent.TimeoutException},
+ * resolution process will be retries. If it fails with any other cause, it will we wrapped as a
+ * {@link org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException} wrapping that cause.
+ *
  * @author Robert Varga
  */
 public abstract class BackendInfoResolver<T extends BackendInfo> {
