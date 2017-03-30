@@ -347,6 +347,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_a62f77a0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-30T20:44:09Z",
+      "side": 1,
+      "message": "true - since the caller waits on the future, it will hit a memory barrier and all updates should be visible. However I still thinks it\u0027s cleaner to avoid the side effect of updating the map here. The method is called handleConfigShardLookup and it seems its purpose is to lookup shards to verify their existence so that should be its only job.",
+      "parentUuid": "fafc7978_a6c49740",
+      "range": {
+        "startLine": 220,
+        "startChar": 20,
+        "endLine": 220,
+        "endChar": 41
+      },
+      "revId": "85936cd73455c59961032bb73ac015ed53f09f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_4684d6d3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 41
