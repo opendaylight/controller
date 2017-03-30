@@ -14,6 +14,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -39,16 +40,33 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     FrontendClientMetadataBuilder(final ClientIdentifier identifier) {
         this.identifier = Preconditions.checkNotNull(identifier);
         purgedHistories = TreeRangeSet.create();
+
+        // History for stand-alone transactions is always present
+        final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
+        currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
     }
 
     FrontendClientMetadataBuilder(final FrontendClientMetadata meta) {
         this.identifier = Preconditions.checkNotNull(meta.getIdentifier());
         purgedHistories = TreeRangeSet.create(meta.getPurgedHistories());
 
-        for (FrontendHistoryMetadata h : meta.getCurrentHistories()) {
+        final Collection<FrontendHistoryMetadata> metaCurrent = meta.getCurrentHistories();
+        for (FrontendHistoryMetadata h : metaCurrent) {
             final FrontendHistoryMetadataBuilder b = new FrontendHistoryMetadataBuilder(identifier, h);
             currentHistories.put(b.getIdentifier(), b);
         }
+
+        // Sanity check and recovery
+        final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
+        if (!currentHistories.containsKey(standaloneId)) {
+            LOG.warn("Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
+                identifier, currentHistories);
+            currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
+        }
+    }
+
+    private LocalHistoryIdentifier standaloneHistoryId() {
+        return new LocalHistoryIdentifier(identifier, 0);
     }
 
     @Override
