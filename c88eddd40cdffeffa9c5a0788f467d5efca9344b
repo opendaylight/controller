@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_f2bad9df",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-31T10:38:51Z",
+      "side": 1,
+      "message": "sic",
+      "range": {
+        "startLine": 189,
+        "startChar": 35,
+        "endLine": 189,
+        "endChar": 40
+      },
+      "revId": "c88eddd40cdffeffa9c5a0788f467d5efca9344b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3283c105",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-31T10:38:51Z",
+      "side": 1,
+      "message": "Why do you return success always? It should return a Future completed by the MakeLeaderLocal request to provide feedback to the caller as the other cluster admin RPCs do.",
+      "revId": "c88eddd40cdffeffa9c5a0788f467d5efca9344b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
