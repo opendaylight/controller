@@ -99,6 +99,24 @@
       "revId": "c88eddd40cdffeffa9c5a0788f467d5efca9344b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_146f8ac6",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-03-31T11:20:20Z",
+      "side": 1,
+      "message": "I\u0027ve changed it to return RpcResult based on the result of the makeLeaderLocalAsk. Timeouts wouldnt really help i think since i think they wanted to do something immediately in the same thread that the restconf request was executed on.",
+      "parentUuid": "fafc7978_320d8191",
+      "revId": "c88eddd40cdffeffa9c5a0788f467d5efca9344b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
