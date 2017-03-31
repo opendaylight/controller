@@ -22,6 +22,30 @@
       "revId": "52c4ef77b7a7290809086ff301a88c5307f1546b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_f45da67a",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-api/src/main/yang/cluster-admin.yang",
+        "patchSetId": 8
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-31T12:40:53Z",
+      "side": 1,
+      "message": "Also how about \"This operation fails if there is no current shard leader due to lack of network connectivity or a cluster majority. In addition, if the local node is not up to date with the current leader, an attempt is made to first sync the local node with the leader. If this cannot be achieved within two election timeout periods the operation fails.\"",
+      "parentUuid": "fafc7978_b4a4beb9",
+      "range": {
+        "startLine": 127,
+        "startChar": 21,
+        "endLine": 127,
+        "endChar": 29
+      },
+      "revId": "52c4ef77b7a7290809086ff301a88c5307f1546b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
