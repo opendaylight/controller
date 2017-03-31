@@ -117,6 +117,24 @@
       "revId": "c88eddd40cdffeffa9c5a0788f467d5efca9344b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_74c37657",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-03-31T12:06:46Z",
+      "side": 1,
+      "message": "I agree. Real users would prefer the call to block, so that if it returns they can immediatelly start assuming the leader has moved indeed.",
+      "parentUuid": "fafc7978_146f8ac6",
+      "revId": "c88eddd40cdffeffa9c5a0788f467d5efca9344b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
