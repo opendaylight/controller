@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_14a66a10",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-api/src/main/yang/cluster-admin.yang",
+        "patchSetId": 7
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-03-31T11:29:04Z",
+      "side": 1,
+      "message": "Please add a description for the RPC similar to the others.",
+      "revId": "e123b0d4282ed4194077815f7b59ada0c606e2fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
