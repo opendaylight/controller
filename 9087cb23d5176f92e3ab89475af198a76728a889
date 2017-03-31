@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_1c45f616",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-31T07:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_2659c7fe",
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_a606571e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 44
@@ -30,6 +48,24 @@
       "writtenOn": "2017-03-30T20:48:46Z",
       "side": 1,
       "message": "Also please add comments here explaining the initialization sequence and the reason for blocking here.",
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_fc2bd2e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-31T07:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_a606571e",
       "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_5cbf7efc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-31T07:54:31Z",
+      "side": 1,
+      "message": "Sorry must have missed it. Done",
+      "parentUuid": "fafc7978_065c83ec",
+      "range": {
+        "startLine": 310,
+        "startChar": 11,
+        "endLine": 310,
+        "endChar": 23
+      },
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_a66c979d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 44
@@ -70,6 +130,24 @@
       "writtenOn": "2017-03-30T18:57:52Z",
       "side": 1,
       "message": "Why not just have remove return entry and call it above? This avoids a separate lookup and remove.",
+      "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3c59dafe",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-03-31T07:54:31Z",
+      "side": 1,
+      "message": "DOMDataTreePrefixTable is part of md-sal project, so we would have to change it there.\n\nIt seems that we need this sequence of steps. I tried to remove the prefix from the prefix table right after the lookup, but it also affects the retrieved DOMDataTreePrefixTableEntry we have looked up. lookup.getValue() results in NPE",
+      "parentUuid": "fafc7978_a66c979d",
       "revId": "9087cb23d5176f92e3ab89475af198a76728a889",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
