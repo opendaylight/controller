@@ -14,6 +14,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -52,8 +53,9 @@ public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransact
 
         if (treeChange) {
             extensions = ImmutableMap.<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension>of(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
+                @Nonnull
                 @Override
-                public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(final DOMDataTreeIdentifier treeId, final L listener) {
+                public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(@Nonnull final DOMDataTreeIdentifier treeId, @Nonnull final L listener) {
                     DOMStore publisher = getTxFactories().get(treeId.getDatastoreType());
                     checkState(publisher != null, "Requested logical data store is not available.");
 
@@ -96,6 +98,7 @@ public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransact
         return potentialStore.registerChangeListener(path, listener, triggeringScope);
     }
 
+    @Nonnull
     @Override
     public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
         return extensions;
