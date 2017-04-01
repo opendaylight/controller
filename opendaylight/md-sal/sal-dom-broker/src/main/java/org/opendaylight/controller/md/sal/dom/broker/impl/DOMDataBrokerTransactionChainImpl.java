@@ -61,7 +61,7 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
      *            ID of transaction chain
      * @param chains
      *            Backing {@link DOMStoreTransactionChain}s.
-     * @param coordinator
+     * @param broker
      *            Commit Coordinator which should be used to coordinate commits
      *            of transaction
      *            produced by this chain.
