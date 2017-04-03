@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_2b9a9514",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-api/src/main/yang/cluster-admin.yang",
+        "patchSetId": 7
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-03T12:16:38Z",
+      "side": 1,
+      "message": "Please add description",
+      "range": {
+        "startLine": 132,
+        "startChar": 8,
+        "endLine": 132,
+        "endChar": 35
+      },
+      "revId": "1e95b5a789ffc051a6df8ae5c296b5e5fd080ddc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_2bc1f5e4",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/test/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcServiceTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-03T12:16:38Z",
+      "side": 1,
+      "message": "I believe these are already defined in CarsModel.",
+      "revId": "1e95b5a789ffc051a6df8ae5c296b5e5fd080ddc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_abacc536",
+        "filename": "opendaylight/md-sal/sal-cluster-admin-impl/src/test/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcServiceTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-03T12:16:38Z",
+      "side": 1,
+      "message": "This should go thru the ClusterAdminRpcService",
+      "revId": "1e95b5a789ffc051a6df8ae5c296b5e5fd080ddc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_6b72dde6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-03T12:16:38Z",
+      "side": 1,
+      "message": "It looks like a lot of this code is duplicated with addShard - can some be reused?",
+      "revId": "1e95b5a789ffc051a6df8ae5c296b5e5fd080ddc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
