@@ -16,17 +16,17 @@ import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
+import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -72,18 +72,15 @@ public class AbstractRpcTest {
     static RemoteRpcProviderConfig config1;
     static RemoteRpcProviderConfig config2;
 
-    protected ActorRef rpcInvoker1;
+    protected ActorRef rpcBroker1;
     protected JavaTestKit rpcRegistry1Probe;
-    protected ActorRef rpcInvoker2;
+    protected ActorRef rpcBroker2;
     protected JavaTestKit rpcRegistry2Probe;
     protected Broker.ProviderSession brokerSession;
     protected SchemaContext schemaContext;
     protected RemoteRpcImplementation remoteRpcImpl1;
     protected RemoteRpcImplementation remoteRpcImpl2;
-
-    @Mock
     protected DOMRpcService domRpcService1;
-    @Mock
     protected DOMRpcService domRpcService2;
 
     @BeforeClass
@@ -103,25 +100,32 @@ public class AbstractRpcTest {
     }
 
     @Before
-    public void setUp() throws IOException, ReactorException {
+    public void setUp() throws Exception {
         final ByteSource byteSource = new ByteSource() {
             @Override
-            public InputStream openStream() {
+            public InputStream openStream() throws IOException {
                 return AbstractRpcTest.this.getClass().getResourceAsStream("/test-rpc.yang");
             }
         };
 
         final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        schemaContext = reactor.buildEffective(Arrays.asList(byteSource));
+        final ArrayList<ByteSource> sources = Lists.newArrayList(byteSource);
 
-        MockitoAnnotations.initMocks(this);
+        try {
+            schemaContext = reactor.buildEffective(sources);
+        } catch (ReactorException e) {
+            throw new RuntimeException("Unable to build schema context from " + sources, e);
+        }
 
+        domRpcService1 = Mockito.mock(DOMRpcService.class);
+        domRpcService2 = Mockito.mock(DOMRpcService.class);
         rpcRegistry1Probe = new JavaTestKit(node1);
-        rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1));
+        rpcBroker1 = node1.actorOf(RpcBroker.props(domRpcService1));
         rpcRegistry2Probe = new JavaTestKit(node2);
-        rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2));
-        remoteRpcImpl1 = new RemoteRpcImplementation(rpcInvoker2, config1);
-        remoteRpcImpl2 = new RemoteRpcImplementation(rpcInvoker1, config2);
+        rpcBroker2 = node2.actorOf(RpcBroker.props(domRpcService2));
+        remoteRpcImpl1 = new RemoteRpcImplementation(rpcRegistry1Probe.getRef(), config1);
+        remoteRpcImpl2 = new RemoteRpcImplementation(rpcRegistry2Probe.getRef(), config2);
+
     }
 
     static void assertRpcErrorEquals(final RpcError rpcError, final ErrorSeverity severity,
