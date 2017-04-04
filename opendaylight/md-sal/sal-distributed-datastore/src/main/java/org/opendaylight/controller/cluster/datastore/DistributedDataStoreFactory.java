@@ -38,9 +38,15 @@ public class DistributedDataStoreFactory {
         ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
         DatastoreContextFactory contextFactory = introspector.newContextFactory();
 
-        final AbstractDataStore dataStore = datastoreContext.isUseTellBasedProtocol()
-                ? new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory, restoreFromSnapshot) :
-                    new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory, restoreFromSnapshot);
+        final AbstractDataStore dataStore;
+        if (datastoreContext.isUseTellBasedProtocol()) {
+            dataStore = new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory,
+                restoreFromSnapshot);
+            LOG.info("Data store {} is using tell-based protocol", datastoreContext.getDataStoreName());
+        } else {
+            dataStore = new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
+                restoreFromSnapshot);
+        }
 
         overlay.setListener(dataStore);
 
