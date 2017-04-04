@@ -58,10 +58,16 @@ public class IntegrationTestKit extends ShardTestKit {
 
     protected DatastoreContext.Builder datastoreContextBuilder;
     protected DatastoreSnapshot restoreFromSnapshot;
+    private final int commitTimeout;
 
     public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder) {
+        this(actorSystem, datastoreContextBuilder, 7);
+    }
+
+    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder, int commitTimeout) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
+        this.commitTimeout = commitTimeout;
     }
 
     public DatastoreContext.Builder getDatastoreContextBuilder() {
@@ -334,7 +340,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
-        Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
+        Boolean canCommit = cohort.canCommit().get(commitTimeout, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
@@ -342,7 +348,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
     void doCommit(final ListenableFuture<Boolean> canCommitFuture, final DOMStoreThreePhaseCommitCohort cohort)
             throws Exception {
-        Boolean canCommit = canCommitFuture.get(7, TimeUnit.SECONDS);
+        Boolean canCommit = canCommitFuture.get(commitTimeout, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
