@@ -215,7 +215,6 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
         readyCohort.commit(new FutureCallback<UnsignedLong>() {
-
             @Override
             public void onSuccess(final UnsignedLong result) {
                 successfulCommit(envelope, startTime);
@@ -237,16 +236,22 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private void handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
-        if (sealedModification.equals(request.getModification())) {
-            readyCohort = history().createReadyCohort(getIdentifier(), sealedModification);
-
-            if (request.isCoordinated()) {
-                coordinatedCommit(envelope, now);
-            } else {
-                directCommit(envelope, now);
-            }
-        } else {
+        if (!sealedModification.equals(request.getModification())) {
+            LOG.warn("Expecting modification {}, commit request has {}", sealedModification, request.getModification());
             throw new UnsupportedRequestException(request);
+        }
+
+        final java.util.Optional<Exception> optFailure = request.getDelayedFailure();
+        if (optFailure.isPresent()) {
+            readyCohort = history().createFailedCohort(getIdentifier(), sealedModification, optFailure.get());
+        } else {
+            readyCohort = history().createReadyCohort(getIdentifier(), sealedModification);
+        }
+
+        if (request.isCoordinated()) {
+            coordinatedCommit(envelope, now);
+        } else {
+            directCommit(envelope, now);
         }
     }
 
