@@ -102,7 +102,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             return;
         }
 
-        mod.delete(path);
+        try {
+            mod.delete(path);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} delete on {} incurred failure, delaying it until commit", getIdentifier(), path,
+                e);
+            recordedFailure = e;
+        }
     }
 
     @Override
@@ -114,7 +120,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             return;
         }
 
-        mod.merge(path, data);
+        try {
+            mod.merge(path, data);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} merge to {} incurred failure, delaying it until commit", getIdentifier(), path,
+                e);
+            recordedFailure = e;
+        }
     }
 
     @Override
@@ -126,7 +138,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             return;
         }
 
-        mod.write(path, data);
+        try {
+            mod.write(path, data);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} write to {} incurred failure, delaying it until commit", getIdentifier(), path,
+                e);
+            recordedFailure = e;
+        }
     }
 
     private RuntimeException abortedException() {
