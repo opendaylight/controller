@@ -109,7 +109,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         private final Set<DOMRpcIdentifier> rpcs;
         private final ActorRef router;
 
-        RemoteRpcEndpoint(final ActorRef router, final Collection<DOMRpcIdentifier> rpcs) {
+        public RemoteRpcEndpoint(final ActorRef router, final Collection<DOMRpcIdentifier> rpcs) {
             this.router = Preconditions.checkNotNull(router);
             this.rpcs = ImmutableSet.copyOf(rpcs);
         }
@@ -161,7 +161,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         public static final class UpdateRemoteEndpoints {
             private final Map<Address, Optional<RemoteRpcEndpoint>> endpoints;
 
-            UpdateRemoteEndpoints(final Map<Address, Optional<RemoteRpcEndpoint>> endpoints) {
+            public UpdateRemoteEndpoints(final Map<Address, Optional<RemoteRpcEndpoint>> endpoints) {
                 this.endpoints = ImmutableMap.copyOf(endpoints);
             }
 
