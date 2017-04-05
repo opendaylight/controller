@@ -12,7 +12,9 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Optional;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -31,13 +33,26 @@ public final class CommitLocalTransactionRequest
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
             + "aren't serialized. FindBugs does not recognize this.")
     private final DataTreeModification mod;
+    private final Exception delayedFailure;
     private final boolean coordinated;
 
     public CommitLocalTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,
-            @Nonnull final ActorRef replyTo, @Nonnull final DataTreeModification mod, final boolean coordinated) {
+            @Nonnull final ActorRef replyTo, @Nonnull final DataTreeModification mod,
+            @Nullable final Exception delayedFailure, final boolean coordinated) {
         super(identifier, sequence, replyTo);
         this.mod = Preconditions.checkNotNull(mod);
+        this.delayedFailure = delayedFailure;
         this.coordinated = coordinated;
+    }
+
+    /**
+     * Return the delayed error detected on the frontend. If this error is present, it will be reported as the result
+     * of the first step of the commit process.
+     *
+     * @return Delayed failure, if present.
+     */
+    public Optional<Exception> getDelayedFailure() {
+        return Optional.ofNullable(delayedFailure);
     }
 
     public DataTreeModification getModification() {
@@ -58,6 +73,7 @@ public final class CommitLocalTransactionRequest
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("coordinated", coordinated);
+        return super.addToStringAttributes(toStringHelper).add("coordinated", coordinated)
+                .add("delayedError", delayedFailure);
     }
 }

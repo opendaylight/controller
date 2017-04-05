@@ -31,7 +31,7 @@ public class CommitLocalTransactionRequestTest
     private static final boolean COORDINATED = true;
 
     private static final CommitLocalTransactionRequest OBJECT = new CommitLocalTransactionRequest(
-            TRANSACTION, 0, ACTOR_REF, MODIFICATION, COORDINATED);
+            TRANSACTION, 0, ACTOR_REF, MODIFICATION, null, COORDINATED);
 
     @Override
     protected CommitLocalTransactionRequest object() {
