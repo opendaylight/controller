@@ -106,15 +106,15 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         return actor -> actor.updateRemoteBuckets(buckets);
     }
 
-    public final T getLocalData() {
+    public T getLocalData() {
         return getLocalBucket().getData();
     }
 
-    public final Map<Address, Bucket<T>> getRemoteBuckets() {
+    public Map<Address, Bucket<T>> getRemoteBuckets() {
         return remoteBuckets;
     }
 
-    public final Map<Address, Long> getVersions() {
+    public Map<Address, Long> getVersions() {
         return versions;
     }
 

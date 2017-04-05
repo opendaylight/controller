@@ -30,7 +30,7 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
 
-public final class RoutingTable implements BucketData<RoutingTable>, Serializable {
+public class RoutingTable implements BucketData<RoutingTable>, Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 

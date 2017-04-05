@@ -83,7 +83,7 @@ public abstract class DOMRpcIdentifier {
      *
      * @return RPC type.
      */
-    public final @Nonnull SchemaPath getType() {
+    public @Nonnull SchemaPath getType() {
         return type;
     }
 
@@ -98,7 +98,7 @@ public abstract class DOMRpcIdentifier {
     public final int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + type.hashCode();
+        result = prime * result + getType().hashCode();
         result = prime * result + (getContextReference() == null ? 0 : getContextReference().hashCode());
         return result;
     }
