@@ -78,8 +78,7 @@ final class RpcRegistrar extends AbstractUntypedActor {
             if (maybeEndpoint.isPresent()) {
                 final RemoteRpcEndpoint endpoint = maybeEndpoint.get();
                 final RemoteRpcImplementation impl = new RemoteRpcImplementation(endpoint.getRouter(), config);
-                prevReg = regs.put(e.getKey(), rpcProviderService.registerRpcImplementation(impl,
-                    endpoint.getRpcs()));
+                prevReg = regs.put(e.getKey(), rpcProviderService.registerRpcImplementation(impl, endpoint.getRpcs()));
             } else {
                 prevReg = regs.remove(e.getKey());
             }
