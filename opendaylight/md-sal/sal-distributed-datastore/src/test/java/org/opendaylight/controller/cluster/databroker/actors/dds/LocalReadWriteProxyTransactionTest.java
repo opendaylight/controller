@@ -131,7 +131,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     public void testModifyAfterCommitRequest() throws Exception {
         transaction.doWrite(PATH_1, DATA_1);
         final boolean coordinated = true;
-        transaction.commitRequest(coordinated);
+        transaction.sendCommitRequest(coordinated, (req, resp) -> { });
         assertOperationThrowsException(() -> transaction.doMerge(PATH_1, DATA_1), IllegalStateException.class);
     }
 

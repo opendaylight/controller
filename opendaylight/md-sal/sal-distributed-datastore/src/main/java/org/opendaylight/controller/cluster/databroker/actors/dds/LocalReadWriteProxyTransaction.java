@@ -9,21 +9,26 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
+import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -58,6 +63,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     private CursorAwareDataTreeModification modification;
     private CursorAwareDataTreeModification sealedModification;
+
+    /**
+     * Delayed failure. In case we are replaying a formerly-remote transaction there is a class of application-level
+     * errors which we detect immediately as we are replaying them. Under normal circumstances we report that class
+     * of error directly to the callsite causing the error, but unfortunately in this case we are not called directly
+     * from that call site.
+     *
+     * <p>
+     * In case such a failure occurs, we record it and report it when the transaction starts committing -- either
+     * via direct commit or a three-phase commit CanCommit step.
+     */
+    private Exception delayedFailure;
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
@@ -100,10 +117,35 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
-        final CommitLocalTransactionRequest ret = new CommitLocalTransactionRequest(getIdentifier(), nextSequence(),
-            localActor(), modification, coordinated);
+        return new CommitLocalTransactionRequest(getIdentifier(), nextSequence(), localActor(), modification,
+            coordinated);
+    }
+
+    @Override
+    void sendCommitRequest(final boolean coordinated,
+            final BiConsumer<TransactionRequest<?>, Response<?, ?>> callback) {
+        final TransactionRequest<?> req;
+        final TransactionFailure delayed;
+
+        if (delayedFailure != null) {
+            req = commitRequest(coordinated);
+            delayed = req.toRequestFailure(new RuntimeRequestException("Delayed failure", delayedFailure));
+        } else {
+            LOG.debug("Transaction {} has failed, aborting it on backend", getIdentifier());
+            req = new AbortLocalTransactionRequest(getIdentifier(), localActor());
+            delayed = null;
+        }
+
         modification = new FailedDataTreeModification(this::submittedException);
-        return ret;
+        sendRequest(req, resp -> {
+            final Response<?, ?> reported;
+            if (delayed != null && resp instanceof RequestSuccess) {
+                reported = delayed;
+            } else {
+                reported = resp;
+            }
+            callback.accept(req, reported);
+        });
     }
 
     @Override
@@ -138,18 +180,29 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void applyModifyTransactionRequest(final ModifyTransactionRequest request,
             final @Nullable Consumer<Response<?, ?>> callback) {
-        for (final TransactionModification mod : request.getModifications()) {
-            if (mod instanceof TransactionWrite) {
-                modification.write(mod.getPath(), ((TransactionWrite)mod).getData());
-            } else if (mod instanceof TransactionMerge) {
-                modification.merge(mod.getPath(), ((TransactionMerge)mod).getData());
-            } else if (mod instanceof TransactionDelete) {
-                modification.delete(mod.getPath());
-            } else {
-                throw new IllegalArgumentException("Unsupported modification " + mod);
+
+        if (delayedFailure != null) {
+            try {
+                for (final TransactionModification mod : request.getModifications()) {
+                    if (mod instanceof TransactionWrite) {
+                        modification.write(mod.getPath(), ((TransactionWrite)mod).getData());
+                    } else if (mod instanceof TransactionMerge) {
+                        modification.merge(mod.getPath(), ((TransactionMerge)mod).getData());
+                    } else if (mod instanceof TransactionDelete) {
+                        modification.delete(mod.getPath());
+                    } else {
+                        throw new IllegalArgumentException("Unsupported modification " + mod);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.debug("Transaction {} failed to apply request, marking transaction as failed", getIdentifier(), e);
+                delayedFailure = e;
             }
+        } else {
+            LOG.debug("Transaction {} already failed, not applying additional modifications", getIdentifier());
         }
 
         final java.util.Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
@@ -165,10 +218,10 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                     // No-op, as we have already issued a seal()
                     break;
                 case SIMPLE:
-                    sendRequest(commitRequest(false), callback);
+                    sendCommitRequest(false, callback);
                     break;
                 case THREE_PHASE:
-                    sendRequest(commitRequest(true), callback);
+                    sendCommitRequest(true, callback);
                     break;
                 default:
                     throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.get());
@@ -210,13 +263,17 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         modification = new FailedDataTreeModification(this::abortedException);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void sendCommit(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
         // Rebase old modification on new data tree.
         try (DataTreeModificationCursor cursor = modification.createCursor(YangInstanceIdentifier.EMPTY)) {
             request.getModification().applyToCursor(cursor);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} failed to replay", getIdentifier(), e);
+            delayedFailure = e;
         }
 
         ensureSealed();
-        sendRequest(commitRequest(request.isCoordinated()), callback);
+        sendCommitRequest(request.isCoordinated(), callback);
     }
 }

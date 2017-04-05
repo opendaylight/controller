@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -22,6 +23,7 @@ import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -345,13 +347,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
                 final SettableFuture<Boolean> ret = SettableFuture.create();
-                sendRequest(Verify.verifyNotNull(commitRequest(false)), t -> {
-                    if (t instanceof TransactionCommitSuccess) {
+                sendCommitRequest(false, (req, resp) -> {
+                    if (resp instanceof TransactionCommitSuccess) {
                         ret.set(Boolean.TRUE);
-                    } else if (t instanceof RequestFailure) {
-                        ret.setException(((RequestFailure<?, ?>) t).getCause());
+                    } else if (resp instanceof RequestFailure) {
+                        ret.setException(((RequestFailure<?, ?>) resp).getCause());
                     } else {
-                        ret.setException(new IllegalStateException("Unhandled response " + t.getClass()));
+                        ret.setException(new IllegalStateException("Unhandled response " + resp));
                     }
 
                     // This is a terminal request, hence we do not need to record it
@@ -374,15 +376,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final TransactionRequest<?> req = Verify.verifyNotNull(commitRequest(true));
-
-                sendRequest(req, t -> {
-                    if (t instanceof TransactionCanCommitSuccess) {
+                sendCommitRequest(true, (req, resp) -> {
+                    if (resp instanceof TransactionCanCommitSuccess) {
                         ret.voteYes();
-                    } else if (t instanceof RequestFailure) {
-                        ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+                    } else if (resp instanceof RequestFailure) {
+                        ret.voteNo(((RequestFailure<?, ?>) resp).getCause());
                     } else {
-                        ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+                        ret.voteNo(new IllegalStateException("Unhandled response " + resp));
                     }
 
                     recordSuccessfulRequest(req);
@@ -555,6 +555,19 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
     }
 
+    final void sendCommitRequest(final boolean coordinated, final Consumer<Response<?, ?>> callback) {
+        sendCommitRequest(coordinated, callback == null ? (req, resp) -> { } : (req, resp) -> callback.accept(resp));
+    }
+
+    abstract void sendCommitRequest(boolean coordinated, BiConsumer<TransactionRequest<?>, Response<?, ?>> callback);
+
+    /**
+     * Exposed only for testing purposes, do not use directly. Use {@link #sendCommitRequest(boolean, BiConsumer)}
+     * instead.
+     */
+    @VisibleForTesting
+    abstract TransactionRequest<?> commitRequest(boolean coordinated);
+
     abstract boolean isSnapshotOnly();
 
     abstract void doDelete(YangInstanceIdentifier path);
@@ -573,8 +586,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     @GuardedBy("this")
     abstract void flushState(AbstractProxyTransaction successor);
-
-    abstract TransactionRequest<?> commitRequest(boolean coordinated);
 
     /**
      * Invoked from {@link RemoteProxyTransaction} when it replays its successful requests to its successor. There is

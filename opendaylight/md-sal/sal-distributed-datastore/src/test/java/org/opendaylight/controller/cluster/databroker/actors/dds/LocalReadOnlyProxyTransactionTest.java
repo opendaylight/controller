@@ -103,7 +103,7 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
 
     @Test(expected = UnsupportedOperationException.class)
     public void testCommitRequest() {
-        transaction.commitRequest(true);
+        transaction.sendCommitRequest(true, (req, resp) -> { });
     }
 
     @Test
