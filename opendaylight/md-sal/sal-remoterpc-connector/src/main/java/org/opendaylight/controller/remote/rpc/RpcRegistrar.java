@@ -84,6 +84,8 @@ final class RpcRegistrar extends AbstractUntypedActor {
                 prevReg = regs.remove(e.getKey());
             }
 
+            //prevReg should be nonNull, so it could be added to prevRegs
+            //so r.close() could be executed and covered by tests
             if (prevReg != null) {
                 prevRegs.add(prevReg);
             }
