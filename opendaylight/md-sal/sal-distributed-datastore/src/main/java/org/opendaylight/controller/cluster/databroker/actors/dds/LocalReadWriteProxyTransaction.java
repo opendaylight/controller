@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -56,8 +57,26 @@ import org.slf4j.LoggerFactory;
 final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(LocalReadWriteProxyTransaction.class);
 
-    private CursorAwareDataTreeModification modification;
+    /**
+     * This field needs to be accessed via {@link #getModification()}, which performs state checking to ensure
+     * the modification can actually be accessed.
+     */
+    private final CursorAwareDataTreeModification modification;
+
+    private Supplier<? extends RuntimeException> closedException;
+
     private CursorAwareDataTreeModification sealedModification;
+
+    /**
+     * Recorded failure from previous operations. Normally we would want to propagate the error directly to the
+     * offending call site, but that exposes inconsistency in behavior during initial connection, when we go through
+     * {@link RemoteProxyTransaction}, which detects this sort of issues at canCommit/directCommit time on the backend.
+     *
+     * <p>
+     * We therefore do not report incurred exceptions directly, but report them once the user attempts to commit
+     * this transaction.
+     */
+    private Exception recordedFailure;
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
@@ -72,22 +91,43 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     CursorAwareDataTreeSnapshot readOnlyView() {
-        return modification;
+        return getModification();
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void doDelete(final YangInstanceIdentifier path) {
-        modification.delete(path);
+        final CursorAwareDataTreeModification mod = getModification();
+        if (recordedFailure != null) {
+            LOG.debug("Transaction {} recorded failure, ignoring delete of {}", getIdentifier(), path);
+            return;
+        }
+
+        mod.delete(path);
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        modification.merge(path, data);
+        final CursorAwareDataTreeModification mod = getModification();
+        if (recordedFailure != null) {
+            LOG.debug("Transaction {} recorded failure, ignoring merge to {}", getIdentifier(), path);
+            return;
+        }
+
+        mod.merge(path, data);
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        modification.write(path, data);
+        final CursorAwareDataTreeModification mod = getModification();
+        if (recordedFailure != null) {
+            LOG.debug("Transaction {} recorded failure, ignoring write to {}", getIdentifier(), path);
+            return;
+        }
+
+        mod.write(path, data);
     }
 
     private RuntimeException abortedException() {
@@ -100,16 +140,19 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
+        final CursorAwareDataTreeModification mod = getModification();
         final CommitLocalTransactionRequest ret = new CommitLocalTransactionRequest(getIdentifier(), nextSequence(),
-            localActor(), modification, coordinated);
-        modification = new FailedDataTreeModification(this::submittedException);
+            localActor(), mod, coordinated);
+        closedException = this::submittedException;
         return ret;
     }
 
     @Override
     void doSeal() {
-        modification.ready();
-        sealedModification = modification;
+        Preconditions.checkState(sealedModification == null, "Transaction %s is already sealed", getIdentifier());
+        final CursorAwareDataTreeModification mod = getModification();
+        mod.ready();
+        sealedModification = mod;
     }
 
     @Override
@@ -142,11 +185,11 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             final @Nullable Consumer<Response<?, ?>> callback) {
         for (final TransactionModification mod : request.getModifications()) {
             if (mod instanceof TransactionWrite) {
-                modification.write(mod.getPath(), ((TransactionWrite)mod).getData());
+                getModification().write(mod.getPath(), ((TransactionWrite)mod).getData());
             } else if (mod instanceof TransactionMerge) {
-                modification.merge(mod.getPath(), ((TransactionMerge)mod).getData());
+                getModification().merge(mod.getPath(), ((TransactionMerge)mod).getData());
             } else if (mod instanceof TransactionDelete) {
-                modification.delete(mod.getPath());
+                getModification().delete(mod.getPath());
             } else {
                 throw new IllegalArgumentException("Unsupported modification " + mod);
             }
@@ -207,12 +250,22 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         super.sendAbort(request, callback);
-        modification = new FailedDataTreeModification(this::abortedException);
+        closedException = this::abortedException;
+    }
+
+    private CursorAwareDataTreeModification getModification() {
+        if (closedException != null) {
+            throw closedException.get();
+        }
+
+        return modification;
     }
 
     private void sendCommit(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
         // Rebase old modification on new data tree.
-        try (DataTreeModificationCursor cursor = modification.createCursor(YangInstanceIdentifier.EMPTY)) {
+        final CursorAwareDataTreeModification mod = getModification();
+
+        try (DataTreeModificationCursor cursor = mod.createCursor(YangInstanceIdentifier.EMPTY)) {
             request.getModification().applyToCursor(cursor);
         }
 
