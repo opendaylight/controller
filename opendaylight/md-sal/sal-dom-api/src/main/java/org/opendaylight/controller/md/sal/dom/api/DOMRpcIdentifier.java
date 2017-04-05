@@ -50,7 +50,7 @@ public abstract class DOMRpcIdentifier {
 
     private final SchemaPath type;
 
-    private DOMRpcIdentifier(final SchemaPath type) {
+    protected DOMRpcIdentifier(final SchemaPath type) {
         this.type = Preconditions.checkNotNull(type);
     }
 
