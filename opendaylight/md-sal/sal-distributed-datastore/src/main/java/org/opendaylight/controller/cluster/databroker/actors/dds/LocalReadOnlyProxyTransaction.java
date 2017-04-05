@@ -9,11 +9,12 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -62,7 +63,13 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
+    TransactionRequest<?> commitRequest(final boolean coordinated) {
+        throw new UnsupportedOperationException("Read-only snapshot");
+    }
+
+    @Override
+    void sendCommitRequest(final boolean coordinated,
+            final BiConsumer<TransactionRequest<?>, Response<?, ?>> callback) {
         throw new UnsupportedOperationException("Read-only snapshot");
     }
 
@@ -85,5 +92,4 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
         Verify.verify(protocol == PersistenceProtocol.ABORT);
         abort();
     }
-
 }

@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
@@ -268,6 +269,13 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
+    void sendCommitRequest(final boolean coordinated,
+            final BiConsumer<TransactionRequest<?>, Response<?, ?>> callback) {
+        final ModifyTransactionRequest req = commitRequest(coordinated);
+        sendRequest(req, resp -> callback.accept(req, resp));
+    }
+
+    @Override
     void doSeal() {
         if (sendReadyOnSeal) {
             ensureInitializedBuilder();
@@ -306,10 +314,10 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
                         sendAbort(callback);
                         break;
                     case SIMPLE:
-                        sendRequest(commitRequest(false), callback);
+                        sendCommitRequest(false, callback);
                         break;
                     case THREE_PHASE:
-                        sendRequest(commitRequest(true), callback);
+                        sendCommitRequest(true, callback);
                         break;
                     case READY:
                         //no op
