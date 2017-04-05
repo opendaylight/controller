@@ -73,6 +73,12 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
+    ShardDataTreeCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
+            final Exception failure) {
+        return tree.createFailedCohort(id, mod, failure);
+    }
+
+    @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
         return tree.createReadyCohort(id, mod);
     }

@@ -209,7 +209,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final TestProbe probe = createProbe();
         final DataTreeModification mod = mock(DataTreeModification.class);
         final TransactionRequest<?> request =
-                new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), mod, false);
+                new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), mod, null, false);
         testForwardToLocal(request, CommitLocalTransactionRequest.class);
     }
 

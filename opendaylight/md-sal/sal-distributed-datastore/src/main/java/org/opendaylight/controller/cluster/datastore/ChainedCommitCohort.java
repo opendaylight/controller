@@ -87,5 +87,4 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     public State getState() {
         return delegate.getState();
     }
-
 }
