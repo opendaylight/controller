@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>1.7.3-Boron-SR3</version>
     <relativePath>../commons/opendaylight</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller.archetypes</groupId>
   <artifactId>archetypes-parent</artifactId>
-  <version>0.4.3-SNAPSHOT</version>
+  <version>0.4.3-Boron-SR3</version>
   <packaging>pom</packaging>
 
   <build>
