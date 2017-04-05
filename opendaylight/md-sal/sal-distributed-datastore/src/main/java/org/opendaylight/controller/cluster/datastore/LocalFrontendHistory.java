@@ -70,6 +70,12 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
+    ShardDataTreeCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
+            final Exception failure) {
+        return chain.createFailedCohort(id, mod, failure);
+    }
+
+    @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
         return chain.createReadyCohort(id, mod);
     }
