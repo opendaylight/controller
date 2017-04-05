@@ -112,7 +112,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final TestProbe probe = createProbe();
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
         final CommitLocalTransactionRequest request =
-                new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), modification, true);
+                new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), modification, null, true);
         doAnswer(this::applyToCursorAnswer).when(modification).applyToCursor(any());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
         verify(modification).applyToCursor(any());

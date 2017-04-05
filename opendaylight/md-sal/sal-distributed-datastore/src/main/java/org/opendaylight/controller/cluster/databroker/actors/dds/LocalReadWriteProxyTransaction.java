@@ -103,7 +103,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             return;
         }
 
-        mod.delete(path);
+        try {
+            mod.delete(path);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} delete on {} incurred failure, delaying it until commit", getIdentifier(), path,
+                e);
+            recordedFailure = e;
+        }
     }
 
     @Override
@@ -115,7 +121,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             return;
         }
 
-        mod.merge(path, data);
+        try {
+            mod.merge(path, data);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} merge to {} incurred failure, delaying it until commit", getIdentifier(), path,
+                e);
+            recordedFailure = e;
+        }
     }
 
     @Override
@@ -127,7 +139,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             return;
         }
 
-        mod.write(path, data);
+        try {
+            mod.write(path, data);
+        } catch (Exception e) {
+            LOG.debug("Transaction {} write to {} incurred failure, delaying it until commit", getIdentifier(), path,
+                e);
+            recordedFailure = e;
+        }
     }
 
     private RuntimeException abortedException() {
@@ -142,7 +160,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
         final CursorAwareDataTreeModification mod = getModification();
         final CommitLocalTransactionRequest ret = new CommitLocalTransactionRequest(getIdentifier(), nextSequence(),
-            localActor(), mod, coordinated);
+            localActor(), mod, recordedFailure, coordinated);
         closedException = this::submittedException;
         return ret;
     }
@@ -185,11 +203,11 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             final @Nullable Consumer<Response<?, ?>> callback) {
         for (final TransactionModification mod : request.getModifications()) {
             if (mod instanceof TransactionWrite) {
-                getModification().write(mod.getPath(), ((TransactionWrite)mod).getData());
+                write(mod.getPath(), ((TransactionWrite)mod).getData());
             } else if (mod instanceof TransactionMerge) {
-                getModification().merge(mod.getPath(), ((TransactionMerge)mod).getData());
+                merge(mod.getPath(), ((TransactionMerge)mod).getData());
             } else if (mod instanceof TransactionDelete) {
-                getModification().delete(mod.getPath());
+                delete(mod.getPath());
             } else {
                 throw new IllegalArgumentException("Unsupported modification " + mod);
             }

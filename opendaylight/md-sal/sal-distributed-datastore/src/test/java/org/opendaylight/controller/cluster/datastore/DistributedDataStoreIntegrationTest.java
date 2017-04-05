@@ -45,7 +45,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1064,9 +1063,6 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception {
-        //TODO remove when test passes also for ClientBackedDataStore
-        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
-
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
                 try (final AbstractDataStore dataStore = setupAbstractDataStore(
@@ -1110,9 +1106,6 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainedTransactionFailureWithMultipleShards() throws Exception {
-        //TODO remove when test passes also for ClientBackedDataStore
-        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
-
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
                 try (final AbstractDataStore dataStore = setupAbstractDataStore(

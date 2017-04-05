@@ -24,7 +24,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
-final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
+abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
+    static final class DeadOnArrival extends SimpleShardDataTreeCohort {
+        private final Exception failure;
+
+        DeadOnArrival(final ShardDataTree dataTree, final DataTreeModification transaction,
+            final TransactionIdentifier transactionId, final Exception failure) {
+            super(dataTree, transaction, transactionId, null);
+            this.failure = Preconditions.checkNotNull(failure);
+        }
+
+        @Override
+        void throwCanCommitFailure() throws Exception {
+            throw failure;
+        }
+    }
+
+    static final class Normal extends SimpleShardDataTreeCohort {
+        Normal(final ShardDataTree dataTree, final DataTreeModification transaction,
+            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts) {
+            super(dataTree, transaction, transactionId, Preconditions.checkNotNull(userCohorts));
+        }
+
+        @Override
+        void throwCanCommitFailure() {
+            // No-op
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
 
     private final DataTreeModification transaction;
@@ -42,7 +69,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionId = Preconditions.checkNotNull(transactionId);
-        this.userCohorts = Preconditions.checkNotNull(userCohorts);
+        this.userCohorts = userCohorts;
     }
 
     @Override
@@ -145,7 +172,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         return ret;
     }
 
-    void setNewCandidate(DataTreeCandidateTip dataTreeCandidate) {
+    void setNewCandidate(final DataTreeCandidateTip dataTreeCandidate) {
         checkState(State.PRE_COMMIT_COMPLETE);
         this.candidate = Verify.verifyNotNull(dataTreeCandidate);
     }
@@ -220,6 +247,13 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     void reportFailure(final Exception cause) {
         this.nextFailure = Preconditions.checkNotNull(cause);
     }
+
+    /**
+     * If there is an initial failure, throw it so the caller can process it.
+     *
+     * @throws Exception reported failure.
+     */
+    abstract void throwCanCommitFailure() throws Exception;
 
     @Override
     public boolean isFailed() {
