@@ -244,7 +244,7 @@ public class RpcRegistryTest {
         Map<Address, Bucket<RoutingTable>> buckets;
         int numTries = 0;
         while (true) {
-            buckets = retrieveBuckets(registry1, testKit, address);
+            buckets = retrieveBuckets(registry, testKit, address);
 
             try {
                 verifyBucket(buckets.get(address), Collections.emptyList());
