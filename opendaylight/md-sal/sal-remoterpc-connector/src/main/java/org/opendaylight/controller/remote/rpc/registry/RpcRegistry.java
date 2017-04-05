@@ -10,10 +10,12 @@ package org.opendaylight.controller.remote.rpc.registry;
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Props;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +46,13 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
     }
 
+    @VisibleForTesting
+    public RpcRegistry(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar,
+                       final DOMRpcIdentifier... identifiers) {
+        super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, Arrays.asList(identifiers)));
+        this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
+    }
+
     /**
      * Create a new props instance for instantiating an RpcRegistry actor.
      *
@@ -55,6 +64,12 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     public static Props props(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker,
             final ActorRef rpcRegistrar) {
         return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar);
+    }
+
+    @VisibleForTesting
+    public static Props props(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker,
+                              final ActorRef rpcRegistrar, final DOMRpcIdentifier... identifiers) {
+        return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar, identifiers);
     }
 
     @Override
