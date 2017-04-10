@@ -47,21 +47,21 @@ public class ShardManagerSnapshot implements Serializable {
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeInt(snapshot.shardList.size());
             for (String shard: snapshot.shardList) {
                 out.writeObject(shard);
             }
 
             out.writeInt(snapshot.prefixShardConfiguration.size());
-            for (Map.Entry prefixShardConfigEntry : snapshot.prefixShardConfiguration.entrySet()) {
+            for (Map.Entry<?, ?> prefixShardConfigEntry : snapshot.prefixShardConfiguration.entrySet()) {
                 out.writeObject(prefixShardConfigEntry.getKey());
                 out.writeObject(prefixShardConfigEntry.getValue());
             }
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             int size = in.readInt();
             List<String> shardList = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
