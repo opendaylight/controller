@@ -66,7 +66,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         transaction.handleForwardedRemoteRequest(request, callback);
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
-        final Response value = captor.getValue();
+        final Response<?, ?> value = captor.getValue();
         Assert.assertTrue(value instanceof ReadTransactionSuccess);
         final ReadTransactionSuccess success = (ReadTransactionSuccess) value;
         Assert.assertTrue(success.getData().isPresent());
@@ -82,7 +82,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         transaction.handleForwardedRemoteRequest(request, callback);
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
-        final Response value = captor.getValue();
+        final Response<?, ?> value = captor.getValue();
         Assert.assertTrue(value instanceof ExistsTransactionSuccess);
         final ExistsTransactionSuccess success = (ExistsTransactionSuccess) value;
         Assert.assertTrue(success.getExists());
@@ -135,7 +135,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         testForwardToLocal(request, TransactionPurgeRequest.class);
     }
 
-    protected <T extends TransactionRequest> T testForwardToLocal(final TransactionRequest toForward,
+    protected <T extends TransactionRequest<?>> T testForwardToLocal(final TransactionRequest<?> toForward,
                                                                   final Class<T> expectedMessageClass) {
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         final TransactionTester<LocalReadWriteProxyTransaction> transactionTester = createLocalProxy();
@@ -151,7 +151,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
      * @param invocation invocation
      * @return void - always null
      */
-    protected Answer applyToCursorAnswer(final InvocationOnMock invocation) {
+    protected Answer<?> applyToCursorAnswer(final InvocationOnMock invocation) {
         final DataTreeModificationCursor cursor =
                 invocation.getArgumentAt(0, DataTreeModificationCursor.class);
         cursor.write(PATH_1.getLastPathArgument(), DATA_1);
