@@ -26,7 +26,7 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
     private ClientBackedReadTransaction object;
 
     @Mock
-    private NormalizedNode data;
+    private NormalizedNode<?, ?> data;
     @Mock
     private ClientActorContext clientContext;
     @Mock
@@ -38,7 +38,6 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
     }
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 

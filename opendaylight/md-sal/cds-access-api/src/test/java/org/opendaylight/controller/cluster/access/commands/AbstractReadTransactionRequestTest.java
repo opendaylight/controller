@@ -12,8 +12,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public abstract class AbstractReadTransactionRequestTest<T extends AbstractReadTransactionRequest>
-        extends AbstractTransactionRequestTest {
+public abstract class AbstractReadTransactionRequestTest<T extends AbstractReadTransactionRequest<?>>
+        extends AbstractTransactionRequestTest<T> {
     protected static final YangInstanceIdentifier PATH = YangInstanceIdentifier.EMPTY;
     protected static final boolean SNAPSHOT_ONLY = true;
 

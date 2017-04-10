@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 
-abstract class AbstractIdentifiablePayloadTest<T extends AbstractIdentifiablePayload> extends AbstractTest {
+public abstract class AbstractIdentifiablePayloadTest<T extends AbstractIdentifiablePayload<?>> extends AbstractTest {
 
     abstract T object();
 

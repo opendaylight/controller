@@ -86,7 +86,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         final long sequence = 0L;
         contextProbe.reply(new ConnectClientSuccess(CLIENT_ID, sequence, backendProbe.ref(),
                 Collections.emptyList(), dataTree, 3));
-        final InternalCommand command = clientContextProbe.expectMsgClass(InternalCommand.class);
+        final InternalCommand<ShardBackendInfo> command = clientContextProbe.expectMsgClass(InternalCommand.class);
         command.execute(client);
         //data tree mock
         when(dataTree.takeSnapshot()).thenReturn(dataTreeSnapshot);
@@ -118,7 +118,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     public void testAbort() throws Exception {
         doHandleOperation(handle);
         handle.abort();
-        final Envelope envelope = backendProbe.expectMsgClass(Envelope.class);
+        final Envelope<?> envelope = backendProbe.expectMsgClass(Envelope.class);
         final AbortLocalTransactionRequest request = (AbortLocalTransactionRequest) envelope.getMessage();
         Assert.assertEquals(TRANSACTION_ID, request.getTarget());
         checkClosed();
@@ -128,7 +128,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     public void testLocalAbort() throws Exception {
         doHandleOperation(handle);
         handle.localAbort(new RuntimeException("fail"));
-        final Envelope envelope = backendProbe.expectMsgClass(Envelope.class);
+        final Envelope<?> envelope = backendProbe.expectMsgClass(Envelope.class);
         final AbortLocalTransactionRequest request = (AbortLocalTransactionRequest) envelope.getMessage();
         Assert.assertEquals(TRANSACTION_ID, request.getTarget());
         checkClosed();
@@ -170,8 +170,8 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
      * @param <R>                  expected request type
      * @return request message
      */
-    protected <R extends Request> R backendRespondToRequest(final Class<R> expectedRequestClass,
-                                                            final Response response) {
+    protected <R extends Request<?, ?>> R backendRespondToRequest(final Class<R> expectedRequestClass,
+                                                            final Response<?, ?> response) {
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
         Assert.assertEquals(expectedRequestClass, envelope.getMessage().getClass());
         final AbstractClientConnection<ShardBackendInfo> connection = client.getConnection(0L);
@@ -187,7 +187,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
             final FailureEnvelope responseEnvelope = new FailureEnvelope(fail, sessionId, txSequence, executionTime);
             AccessClientUtil.completeRequest(connection, responseEnvelope);
         }
-        return (R) envelope.getMessage();
+        return expectedRequestClass.cast(envelope.getMessage());
     }
 
     protected T getHandle() {

@@ -144,7 +144,6 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testStartReconnect() throws Exception {
         // cookie and shard are the same
         final Long cookie = 0L;
@@ -152,7 +151,7 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
 
         final ShardBackendInfo info = new ShardBackendInfo(clientActorContext().self(), 0L, ABIVersion.current(),
                 SHARD_NAME, UnsignedLong.ZERO, Optional.of(tree), 10);
-        final ConnectedClientConnection newConn = AccessClientUtil.createConnectedConnection(
+        final ConnectedClientConnection<ShardBackendInfo> newConn = AccessClientUtil.createConnectedConnection(
                 clientActorContext(), cookie, info);
         object().createSnapshotProxy(TRANSACTION_ID, shard);
 
@@ -161,7 +160,6 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testStartReconnectMissingOldProxy() throws Exception {
         // cookie and shard are different
         final Long cookie = 1L;
@@ -169,7 +167,7 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
 
         final ShardBackendInfo info = new ShardBackendInfo(clientActorContext().self(), 0L, ABIVersion.current(),
                 SHARD_NAME, UnsignedLong.ZERO, Optional.of(tree), 10);
-        final ConnectedClientConnection newConn = AccessClientUtil.createConnectedConnection(
+        final ConnectedClientConnection<ShardBackendInfo> newConn = AccessClientUtil.createConnectedConnection(
                 clientActorContext(), cookie, info);
         object().createSnapshotProxy(TRANSACTION_ID, shard);
 
