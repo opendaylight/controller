@@ -130,37 +130,37 @@ public class ClientTransactionCommitCohortTest {
         Assert.assertEquals(PersistenceProtocol.THREE_PHASE, request.getPersistenceProtocol().get());
     }
 
-    void expectPreCommit(final TransactionTester tester) {
+    void expectPreCommit(final TransactionTester<?> tester) {
         tester.expectTransactionRequest(TransactionPreCommitRequest.class);
     }
 
-    void expectCommit(final TransactionTester tester) {
+    void expectCommit(final TransactionTester<?> tester) {
         tester.expectTransactionRequest(TransactionDoCommitRequest.class);
     }
 
-    void expectAbort(final TransactionTester tester) {
+    void expectAbort(final TransactionTester<?> tester) {
         tester.expectTransactionRequest(TransactionAbortRequest.class);
     }
 
-    void replyCanCommitSuccess(final TransactionTester tester) {
+    void replyCanCommitSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionCanCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyPreCommitSuccess(final TransactionTester tester) {
+    void replyPreCommitSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionPreCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyCommitSuccess(final TransactionTester tester) {
+    void replyCommitSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyAbortSuccess(final TransactionTester tester) {
+    void replyAbortSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionAbortSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);

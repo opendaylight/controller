@@ -29,7 +29,7 @@ public class ClientBackedReadWriteTransactionTest
     @Mock
     private ClientTransaction delegate;
     @Mock
-    private NormalizedNode data;
+    private NormalizedNode<?, ?> data;
     @Mock
     private DOMStoreThreePhaseCommitCohort readyCohort;
 

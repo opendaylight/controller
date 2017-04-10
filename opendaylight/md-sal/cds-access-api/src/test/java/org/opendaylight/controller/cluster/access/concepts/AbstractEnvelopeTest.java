@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class AbstractEnvelopeTest<E extends Envelope> {
+public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
     private static final FrontendIdentifier FRONTEND =
             new FrontendIdentifier(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
     private static final ClientIdentifier CLIENT = new ClientIdentifier(FRONTEND, 0);
@@ -36,8 +36,8 @@ public abstract class AbstractEnvelopeTest<E extends Envelope> {
     private void checkDeserialized(final E deserializedEnvelope) {
         Assert.assertEquals(envelope.getSessionId(), deserializedEnvelope.getSessionId());
         Assert.assertEquals(envelope.getTxSequence(), deserializedEnvelope.getTxSequence());
-        final Message expectedMessage = envelope.getMessage();
-        final Message actualMessage = deserializedEnvelope.getMessage();
+        final Message<?, ?> expectedMessage = envelope.getMessage();
+        final Message<?, ?> actualMessage = deserializedEnvelope.getMessage();
         Assert.assertEquals(expectedMessage.getSequence(), actualMessage.getSequence());
         Assert.assertEquals(expectedMessage.getTarget(), actualMessage.getTarget());
         Assert.assertEquals(expectedMessage.getVersion(), actualMessage.getVersion());

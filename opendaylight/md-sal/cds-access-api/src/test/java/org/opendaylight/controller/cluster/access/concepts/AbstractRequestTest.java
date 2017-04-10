@@ -18,7 +18,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class AbstractRequestTest<T extends Request> {
+public abstract class AbstractRequestTest<T extends Request<?, ?>> {
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
     protected static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
 
@@ -48,7 +48,7 @@ public abstract class AbstractRequestTest<T extends Request> {
         Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
         Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
         Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
-        doAdditionalAssertions((T) deserialize);
+        doAdditionalAssertions(deserialize);
     }
 
     protected abstract void doAdditionalAssertions(final Object deserialize);
