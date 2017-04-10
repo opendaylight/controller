@@ -80,6 +80,13 @@
 
     <dependencies>
         <dependency>
+            <!-- This needs to come first, otherwise mdsal's odl-mdsal-common is picked instead -->
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-mdsal-common</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>odl-yangtools-common</artifactId>
             <type>xml</type>
@@ -94,12 +101,6 @@
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
             <artifactId>odl-mdsal-models</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-common</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
