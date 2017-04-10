@@ -19,8 +19,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractTransactionRequestTest<T extends TransactionRequest>
-        extends AbstractRequestTest {
+public abstract class AbstractTransactionRequestTest<T extends TransactionRequest<?>>
+        extends AbstractRequestTest<T> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
     private static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);

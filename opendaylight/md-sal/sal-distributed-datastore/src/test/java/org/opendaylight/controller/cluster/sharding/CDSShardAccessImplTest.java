@@ -102,9 +102,9 @@ public class CDSShardAccessImplTest extends AbstractActorTest {
         final LeaderLocationListener listener3 = mock(LeaderLocationListener.class);
         doNothing().when(listener3).onLeaderLocationChanged(any());
 
-        final LeaderLocationListenerRegistration reg1 = shardAccess.registerLeaderLocationListener(listener1);
-        final LeaderLocationListenerRegistration reg2 = shardAccess.registerLeaderLocationListener(listener2);
-        final LeaderLocationListenerRegistration reg3 = shardAccess.registerLeaderLocationListener(listener3);
+        final LeaderLocationListenerRegistration<?> reg1 = shardAccess.registerLeaderLocationListener(listener1);
+        final LeaderLocationListenerRegistration<?> reg2 = shardAccess.registerLeaderLocationListener(listener2);
+        final LeaderLocationListenerRegistration<?> reg3 = shardAccess.registerLeaderLocationListener(listener3);
 
         // Error in listener1 should not affect dispatching change to other listeners
         shardAccess.onLeaderLocationChanged(LeaderLocation.LOCAL);

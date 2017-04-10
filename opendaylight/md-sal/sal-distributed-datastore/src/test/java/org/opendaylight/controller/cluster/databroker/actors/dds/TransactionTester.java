@@ -17,7 +17,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
-import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
@@ -47,16 +46,16 @@ class TransactionTester<T extends AbstractProxyTransaction> {
         return transaction;
     }
 
-    TransactionRequest getLastReceivedMessage() {
-        return (TransactionRequest) envelope.getMessage();
+    TransactionRequest<?> getLastReceivedMessage() {
+        return (TransactionRequest<?>) envelope.getMessage();
     }
 
-    <R extends TransactionRequest> R expectTransactionRequest(final Class<R> expected) {
+    <R extends TransactionRequest<?>> R expectTransactionRequest(final Class<R> expected) {
         envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
-        final Class<? extends Request> actual = envelope.getMessage().getClass();
+        final Class<?> actual = envelope.getMessage().getClass();
         final String errorMsg = String.format("Expected instance of %s, received %s", expected, actual);
         Assert.assertTrue(errorMsg, expected.isAssignableFrom(actual));
-        return (R) envelope.getMessage();
+        return expected.cast(envelope.getMessage());
     }
 
     void replySuccess(final RequestSuccess<?, ?> success) {
@@ -78,6 +77,8 @@ class TransactionTester<T extends AbstractProxyTransaction> {
     }
 
     private static class MockFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
+        private static final long serialVersionUID = 1L;
+
         private MockFailure(@Nonnull final TransactionIdentifier target, final long sequence,
                             @Nonnull final RequestException cause) {
             super(target, sequence, cause);

@@ -129,11 +129,11 @@ public class IntegrationTestKit extends ShardTestKit {
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        final Constructor constructor = implementation.getDeclaredConstructor(
+        final Constructor<? extends AbstractDataStore> constructor = implementation.getDeclaredConstructor(
                 ActorSystem.class, ClusterWrapper.class, Configuration.class,
                 DatastoreContextFactory.class, DatastoreSnapshot.class);
 
-        final AbstractDataStore dataStore = (AbstractDataStore) constructor.newInstance(
+        final AbstractDataStore dataStore = constructor.newInstance(
                 getSystem(), cluster, config, mockContextFactory, restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);

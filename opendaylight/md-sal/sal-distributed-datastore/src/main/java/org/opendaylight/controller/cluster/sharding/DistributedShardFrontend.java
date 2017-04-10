@@ -137,7 +137,6 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     @Nonnull
     @Override
-    @SuppressWarnings("unchecked")
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
             final YangInstanceIdentifier treeId, final L listener) {
         return publisher.registerTreeChangeListener(treeId, listener);

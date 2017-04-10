@@ -17,7 +17,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 
-public abstract class AbstractRequestSuccessTest<T extends RequestSuccess> {
+public abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, ?>> {
 
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
@@ -35,7 +35,7 @@ public abstract class AbstractRequestSuccessTest<T extends RequestSuccess> {
         Assert.assertEquals(object().getTarget(), ((T) deserialize).getTarget());
         Assert.assertEquals(object().getVersion(), ((T) deserialize).getVersion());
         Assert.assertEquals(object().getSequence(), ((T) deserialize).getSequence());
-        doAdditionalAssertions((T) deserialize);
+        doAdditionalAssertions(deserialize);
     }
 
     protected abstract void doAdditionalAssertions(final Object deserialize);

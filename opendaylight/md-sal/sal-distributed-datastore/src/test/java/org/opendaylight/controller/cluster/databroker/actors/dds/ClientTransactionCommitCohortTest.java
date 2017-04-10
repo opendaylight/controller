@@ -56,7 +56,7 @@ public class ClientTransactionCommitCohortTest {
     @Mock
     private AbstractClientHistory history;
     private ActorSystem system;
-    private List<TransactionTester> transactions;
+    private List<TransactionTester<RemoteProxyTransaction>> transactions;
     private ClientTransactionCommitCohort cohort;
 
     @Before
@@ -130,43 +130,43 @@ public class ClientTransactionCommitCohortTest {
         Assert.assertEquals(PersistenceProtocol.THREE_PHASE, request.getPersistenceProtocol().get());
     }
 
-    void expectPreCommit(final TransactionTester tester) {
+    void expectPreCommit(final TransactionTester<?> tester) {
         tester.expectTransactionRequest(TransactionPreCommitRequest.class);
     }
 
-    void expectCommit(final TransactionTester tester) {
+    void expectCommit(final TransactionTester<?> tester) {
         tester.expectTransactionRequest(TransactionDoCommitRequest.class);
     }
 
-    void expectAbort(final TransactionTester tester) {
+    void expectAbort(final TransactionTester<?> tester) {
         tester.expectTransactionRequest(TransactionAbortRequest.class);
     }
 
-    void replyCanCommitSuccess(final TransactionTester tester) {
+    void replyCanCommitSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionCanCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyPreCommitSuccess(final TransactionTester tester) {
+    void replyPreCommitSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionPreCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyCommitSuccess(final TransactionTester tester) {
+    void replyCommitSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionCommitSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    void replyAbortSuccess(final TransactionTester tester) {
+    void replyAbortSuccess(final TransactionTester<?> tester) {
         final RequestSuccess<?, ?> success = new TransactionAbortSuccess(tester.getTransaction().getIdentifier(),
                 tester.getLastReceivedMessage().getSequence());
         tester.replySuccess(success);
     }
 
-    private static TransactionTester createTransactionTester(final TestProbe backendProbe,
+    private static TransactionTester<RemoteProxyTransaction> createTransactionTester(final TestProbe backendProbe,
                                                              final ClientActorContext context,
                                                              final AbstractClientHistory history) {
         final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
@@ -176,13 +176,12 @@ public class ClientTransactionCommitCohortTest {
         final ProxyHistory proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
         final RemoteProxyTransaction transaction =
                 new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false);
-        return new TransactionTester(transaction, connection, backendProbe);
+        return new TransactionTester<>(transaction, connection, backendProbe);
     }
 
-    private void replySuccess(final Collection<TransactionTester> transactions,
-                              final Consumer<TransactionTester> expect,
-                              final Consumer<TransactionTester> reply) {
-        for (final TransactionTester transaction : transactions) {
+    private static <T extends TransactionTester<?>> void replySuccess(final Collection<T> transactions,
+                              final Consumer<T> expect, final Consumer<T> reply) {
+        for (final T transaction : transactions) {
             expect.accept(transaction);
             reply.accept(transaction);
         }
@@ -201,8 +200,8 @@ public class ClientTransactionCommitCohortTest {
      * @throws Exception unexpected exception
      */
     private <T> void testOpSuccess(final Function<ClientTransactionCommitCohort, ListenableFuture<T>> operation,
-                                   final Consumer<TransactionTester> expectFunction,
-                                   final Consumer<TransactionTester> replyFunction,
+                                   final Consumer<TransactionTester<RemoteProxyTransaction>> expectFunction,
+                                   final Consumer<TransactionTester<RemoteProxyTransaction>> replyFunction,
                                    final T expectedResult) throws Exception {
         final ListenableFuture<T> result = operation.apply(cohort);
         replySuccess(transactions, expectFunction, replyFunction);
@@ -221,13 +220,13 @@ public class ClientTransactionCommitCohortTest {
      * @throws Exception unexpected exception
      */
     private <T> void testOpFail(final Function<ClientTransactionCommitCohort, ListenableFuture<T>> operation,
-                                final Consumer<TransactionTester> expectFunction,
-                                final Consumer<TransactionTester> replyFunction) throws Exception {
+            final Consumer<TransactionTester<RemoteProxyTransaction>> expectFunction,
+            final Consumer<TransactionTester<RemoteProxyTransaction>> replyFunction) throws Exception {
         final ListenableFuture<T> canCommit = operation.apply(cohort);
         //reply success to all except last transaction
         replySuccess(transactions.subList(0, transactions.size() - 1), expectFunction, replyFunction);
         //reply fail to last transaction
-        final TransactionTester last = transactions.get(transactions.size() - 1);
+        final TransactionTester<RemoteProxyTransaction> last = transactions.get(transactions.size() - 1);
         expectFunction.accept(last);
         final RuntimeRequestException cause = new RuntimeRequestException("fail", new RuntimeException());
         last.replyFailure(cause);
