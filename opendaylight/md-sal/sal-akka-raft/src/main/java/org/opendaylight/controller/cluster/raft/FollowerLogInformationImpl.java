@@ -66,8 +66,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public long decrNextIndex() {
-        return nextIndex--;
+    public boolean decrNextIndex() {
+        if (nextIndex >= 0) {
+            nextIndex--;
+            return true;
+        }
+
+        return false;
     }
 
     @Override
