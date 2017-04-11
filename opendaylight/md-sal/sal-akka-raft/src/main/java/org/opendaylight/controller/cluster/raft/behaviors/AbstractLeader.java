@@ -288,12 +288,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // The follower's log conflicts with leader's log so decrement follower's next index by 1
                 // in an attempt to find where the logs match.
 
-                followerLogInformation.decrNextIndex();
-                updated = true;
+                if (followerLogInformation.decrNextIndex()) {
+                    updated = true;
 
-                log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
-                        logName(), followerId, appendEntriesReply.getLogLastTerm(), followersLastLogTermInLeadersLog,
-                        followerLogInformation.getNextIndex());
+                    log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
+                            logName(), followerId, appendEntriesReply.getLogLastTerm(),
+                            followersLastLogTermInLeadersLog, followerLogInformation.getNextIndex());
+                }
             }
         }
 
