@@ -1131,6 +1131,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
+        InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
         List<ReplicatedLogEntry> entries = Arrays.asList(
                 newReplicatedLogEntry(1, 0, "one"), newReplicatedLogEntry(1, 1, "two"));
@@ -1145,6 +1146,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
+        InMemoryJournal.waitForWriteMessagesComplete(id);
         // We expect the ApplyJournalEntries for index 1 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 1 has already been applied.
@@ -1184,6 +1186,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
+        InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
         List<ReplicatedLogEntry> entries = Arrays.asList(
                 newReplicatedLogEntry(1, 0, "one"), newReplicatedLogEntry(1, 1, "two"),
@@ -1199,6 +1202,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
+        InMemoryJournal.waitForWriteMessagesComplete(id);
         // We expect the ApplyJournalEntries for index 2 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 2 has already been applied.
@@ -1257,6 +1261,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
+        InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
         List<ReplicatedLogEntry> entries = Arrays.asList(
                 newReplicatedLogEntry(1, 0, "one"), newReplicatedLogEntry(1, 1, "two"),
@@ -1272,6 +1277,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
+        InMemoryJournal.waitForWriteMessagesComplete(id);
         // We expect the ApplyJournalEntries for index 0 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 0 has already been applied.
