@@ -39,6 +39,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +60,9 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         }
 
         actorFactory.close();
+
+        InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
     }
 
     /**
@@ -350,7 +355,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected void logStart(String name) {
-        LoggerFactory.getLogger(LeaderTest.class).info("Starting " + name);
+        LoggerFactory.getLogger(getClass()).info("Starting " + name);
     }
 
     protected RaftPolicy createRaftPolicy(final boolean automaticElectionsEnabled,
