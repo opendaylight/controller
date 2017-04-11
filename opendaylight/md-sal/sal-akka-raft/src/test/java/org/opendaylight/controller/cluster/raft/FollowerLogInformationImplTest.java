@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -111,5 +112,22 @@ public class FollowerLogInformationImplTest {
 
         followerLogInformation.markFollowerActive();
         assertTrue(followerLogInformation.isFollowerActive());
+    }
+
+    @Test
+    public void testDecrNextIndex() {
+        MockRaftActorContext context = new MockRaftActorContext();
+        context.setCommitIndex(1);
+        FollowerLogInformation followerLogInformation =
+                new FollowerLogInformationImpl(new PeerInfo("follower1", null, VotingState.VOTING), 1, context);
+
+        assertTrue(followerLogInformation.decrNextIndex());
+        assertEquals("getNextIndex", 0, followerLogInformation.getNextIndex());
+
+        assertTrue(followerLogInformation.decrNextIndex());
+        assertEquals("getNextIndex", -1, followerLogInformation.getNextIndex());
+
+        assertFalse(followerLogInformation.decrNextIndex());
+        assertEquals("getNextIndex", -1, followerLogInformation.getNextIndex());
     }
 }

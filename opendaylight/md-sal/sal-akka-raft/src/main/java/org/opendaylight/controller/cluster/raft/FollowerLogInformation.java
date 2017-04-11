@@ -27,9 +27,9 @@ public interface FollowerLogInformation {
     /**
      * Decrements the value of the follower's next index.
      *
-     * @return the new value of nextIndex,
+     * @return true if the next index was decremented, ie it was previously >= 0, false otherwise.
      */
-    long decrNextIndex();
+    boolean decrNextIndex();
 
     /**
      * Sets the index of the follower's next log entry.
