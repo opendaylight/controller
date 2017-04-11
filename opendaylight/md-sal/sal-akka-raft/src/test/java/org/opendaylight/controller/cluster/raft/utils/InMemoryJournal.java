@@ -76,6 +76,9 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     public static void clear() {
         JOURNALS.clear();
+        DELETE_MESSAGES_COMPLETE_LATCHES.clear();
+        WRITE_MESSAGES_COMPLETE.clear();
+        BLOCK_READ_MESSAGES_LATCHES.clear();
     }
 
     @SuppressWarnings("unchecked")

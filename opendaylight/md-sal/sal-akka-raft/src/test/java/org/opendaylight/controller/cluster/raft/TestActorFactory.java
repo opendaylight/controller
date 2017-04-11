@@ -22,6 +22,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Identify;
+import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.pattern.Patterns;
@@ -108,8 +109,18 @@ public class TestActorFactory implements AutoCloseable {
      */
     @SuppressWarnings("unchecked")
     public <T extends Actor> TestActorRef<T> createTestActor(Props props, String actorId) {
-        TestActorRef<T> actorRef = TestActorRef.create(system, props, actorId);
-        return (TestActorRef<T>) addActor(actorRef, true);
+        InvalidActorNameException lastError = null;
+        for (int i = 0; i < 10; i++) {
+            try {
+                TestActorRef<T> actorRef = TestActorRef.create(system, props, actorId);
+                return (TestActorRef<T>) addActor(actorRef, true);
+            } catch (InvalidActorNameException e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
     }
 
     /**
