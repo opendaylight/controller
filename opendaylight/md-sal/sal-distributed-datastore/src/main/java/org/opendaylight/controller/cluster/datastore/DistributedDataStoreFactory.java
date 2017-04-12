@@ -22,30 +22,34 @@ public class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
 
     public static AbstractDataStore createInstance(final SchemaService schemaService,
-            final DatastoreContext datastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
 
-        LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreName());
+        final String datastoreName = initialDatastoreContext.getDataStoreName();
+        LOG.info("Create data store instance of type : {}", datastoreName);
 
-        ActorSystem actorSystem = actorSystemProvider.getActorSystem();
-        DatastoreSnapshot restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(
-                datastoreContext.getDataStoreName());
-        DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
-        DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
+        final ActorSystem actorSystem = actorSystemProvider.getActorSystem();
+        final DatastoreSnapshot restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(datastoreName);
+        final DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(initialDatastoreContext);
+        final DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
-        ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
-        DatastoreContextFactory contextFactory = introspector.newContextFactory();
+        final Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
+        final ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
+        final DatastoreContextFactory contextFactory = introspector.newContextFactory();
+
+        // This is the potentially-updated datastore context, distinct from the initial one
+        final DatastoreContext datastoreContext = contextFactory.getBaseDatastoreContext();
 
         final AbstractDataStore dataStore;
         if (datastoreContext.isUseTellBasedProtocol()) {
             dataStore = new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory,
                 restoreFromSnapshot);
-            LOG.info("Data store {} is using tell-based protocol", datastoreContext.getDataStoreName());
+            LOG.info("Data store {} is using tell-based protocol", datastoreName);
         } else {
             dataStore = new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
                 restoreFromSnapshot);
+            LOG.info("Data store {} is using ask-based protocol", datastoreName);
         }
 
         overlay.setListener(dataStore);
