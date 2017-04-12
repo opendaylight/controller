@@ -291,25 +291,6 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- XSQL support -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-dom-xsql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-karaf-xsql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-dom-xsql-config</artifactId>
-                <version>${project.version}</version>
-                <classifier>config</classifier>
-                <type>xml</type>
-            </dependency>
-
             <!-- MessageBus -->
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
@@ -378,13 +359,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-mdsal-remoterpc-connector</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>odl-mdsal-xsql</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
