@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
@@ -35,6 +37,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     private ActorSystem system;
     private RaftPolicy raftPolicy;
+    private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
 
     private static ElectionTerm newElectionTerm() {
         return new ElectionTerm() {
@@ -125,7 +128,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     @Override
     public SnapshotManager getSnapshotManager() {
         SnapshotManager snapshotManager = super.getSnapshotManager();
-        snapshotManager.setCreateSnapshotConsumer(out -> { });
+        snapshotManager.setCreateSnapshotConsumer(createSnapshotProcedure);
 
         snapshotManager.setSnapshotCohort(new RaftActorSnapshotCohort() {
             @Override
@@ -143,6 +146,10 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         });
 
         return snapshotManager;
+    }
+
+    public void setCreateSnapshotProcedure(Consumer<Optional<OutputStream>> createSnapshotProcedure) {
+        this.createSnapshotProcedure = createSnapshotProcedure;
     }
 
     @Override

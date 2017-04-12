@@ -534,7 +534,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             if (wasLastChunk && !context.getSnapshotManager().isCapturing()) {
                 // Since the follower is now caught up try to purge the log.
                 purgeInMemoryLog();
-            } else if (!wasLastChunk && installSnapshotState.canSendNextChunk()) {
+            } else if (!wasLastChunk) {
                 ActorSelection followerActor = context.getPeerActorSelection(followerId);
                 if (followerActor != null) {
                     sendSnapshotChunk(followerActor, followerLogInformation);
@@ -801,6 +801,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             try {
                 // Ensure the snapshot bytes are set - this is a no-op.
                 installSnapshotState.setSnapshotBytes(snapshotHolder.get().getSnapshotBytes());
+
+                if (!installSnapshotState.canSendNextChunk()) {
+                    return;
+                }
 
                 byte[] nextSnapshotChunk = installSnapshotState.getNextChunk();
 

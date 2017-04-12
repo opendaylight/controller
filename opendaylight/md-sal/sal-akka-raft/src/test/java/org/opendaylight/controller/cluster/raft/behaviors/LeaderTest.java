@@ -31,12 +31,14 @@ import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
@@ -738,6 +740,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.getReplicatedLog().removeFrom(0);
 
+        AtomicReference<java.util.Optional<OutputStream>> installSnapshotStream = new AtomicReference<>();
+        actorContext.setCreateSnapshotProcedure(out -> installSnapshotStream.set(out));
+
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
 
@@ -768,16 +773,35 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
 
         CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
-
         assertEquals(3, cs.getLastAppliedIndex());
         assertEquals(1, cs.getLastAppliedTerm());
         assertEquals(4, cs.getLastIndex());
         assertEquals(2, cs.getLastTerm());
 
-        // if an initiate is started again when first is in progress, it should not initiate Capture
-        leader.handleMessage(leaderActor, new Replicate(null, new MockIdentifier("state-id"), entry, true));
+        assertNotNull("Create snapshot procedure not invoked", installSnapshotStream.get());
+        assertTrue("Install snapshot stream present", installSnapshotStream.get().isPresent());
 
+        MessageCollectorActor.clearMessages(followerActor);
+
+        // Sending Replicate message should not initiate another capture since the first is in progress.
+        leader.handleMessage(leaderActor, new Replicate(null, new MockIdentifier("state-id"), entry, true));
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
+
+        // Similarly sending another AppendEntriesReply to force a snapshot should not initiate another capture.
+        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true));
+        assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
+
+        // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
+        final byte[] bytes = new byte[]{1, 2, 3};
+        installSnapshotStream.get().get().write(bytes);
+        actorContext.getSnapshotManager().persist(ByteState.of(bytes), installSnapshotStream.get(),
+                Runtime.getRuntime().totalMemory());
+        MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
+
+        // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.
+        MessageCollectorActor.clearMessages(followerActor);
+        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true));
+        MessageCollectorActor.assertNoneMatching(followerActor, InstallSnapshot.class, 200);
     }
 
 
