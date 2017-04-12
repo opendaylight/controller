@@ -44,7 +44,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
-import com.typesafe.config.ConfigFactory;
 import java.net.URI;
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -139,9 +138,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     private final String shardMgrID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
     private ActorSystem newActorSystem(String config) {
-        ActorSystem system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig(config));
-        actorSystems.add(system);
-        return system;
+        return newActorSystem("cluster-test", config);
     }
 
     private ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
