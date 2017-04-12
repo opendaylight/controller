@@ -94,7 +94,8 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
     boolean canSendNextChunk() {
         // we only send a false if a chunk is sent but we have not received a reply yet
-        return snapshotBytes != null && replyReceivedForOffset == offset;
+        return snapshotBytes != null && (nextChunkHashCode == INITIAL_LAST_CHUNK_HASH_CODE
+                || replyReceivedForOffset == offset);
     }
 
     boolean isLastChunk(int index) {
@@ -127,7 +128,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         int numRead = snapshotInputStream.read(nextChunk);
         if (numRead != size) {
             throw new IOException(String.format(
-                    "The # of bytes read from the imput stream, %d, does not match the expected # %d", numRead, size));
+                    "The # of bytes read from the input stream, %d, does not match the expected # %d", numRead, size));
         }
 
         nextChunkHashCode = Arrays.hashCode(nextChunk);
