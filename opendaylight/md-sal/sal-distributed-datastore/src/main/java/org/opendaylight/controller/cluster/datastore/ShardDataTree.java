@@ -409,12 +409,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             } else {
                 allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
             }
-        } else if (payload instanceof CloseLocalHistoryPayload) {
-            if (identifier != null) {
-                payloadReplicationComplete((CloseLocalHistoryPayload) payload);
-            } else {
-                allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
-            }
         } else if (payload instanceof CreateLocalHistoryPayload) {
             if (identifier != null) {
                 payloadReplicationComplete((CreateLocalHistoryPayload)payload);

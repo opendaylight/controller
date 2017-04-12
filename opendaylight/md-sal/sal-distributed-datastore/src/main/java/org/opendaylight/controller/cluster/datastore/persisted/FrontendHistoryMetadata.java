@@ -111,7 +111,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(FrontendHistoryMetadata.class).add("historiId", historyId)
+        return MoreObjects.toStringHelper(FrontendHistoryMetadata.class).add("historyId", historyId)
                 .add("cookie", cookie).add("closed", closed).add("closedTransactions", closedTransactions)
                 .add("purgedTransactions", purgedTransactions).toString();
     }

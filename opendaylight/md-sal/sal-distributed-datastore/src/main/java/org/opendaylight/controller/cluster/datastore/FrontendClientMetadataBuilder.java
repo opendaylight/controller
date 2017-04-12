@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Collections2;
@@ -174,5 +175,11 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
 
     private FrontendHistoryMetadataBuilder getHistory(final TransactionIdentifier txId) {
         return currentHistories.get(txId.getHistoryId());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("identifier", identifier).add("current", currentHistories)
+                .add("purged", purgedHistories).toString();
     }
 }

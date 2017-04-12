@@ -91,7 +91,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(FrontendClientMetadata.class).add("Identifier", identifier)
-                .add("CurrentHistory", currentHistories).add("Range", purgedHistories).toString();
+        return MoreObjects.toStringHelper(FrontendClientMetadata.class).add("identifer", identifier)
+                .add("current", currentHistories).add("purged", purgedHistories).toString();
     }
 }
