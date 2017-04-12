@@ -111,7 +111,7 @@ public class DistributedDataStoreIntegrationTest {
     @Parameter
     public Class<? extends AbstractDataStore> testParameter;
 
-    private static ActorSystem system;
+    private ActorSystem system;
 
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
             .shardHeartbeatIntervalInMillis(100);
@@ -125,7 +125,7 @@ public class DistributedDataStoreIntegrationTest {
 
     @After
     public void tearDown() throws IOException {
-        JavaTestKit.shutdownActorSystem(system);
+        JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
         system = null;
     }
 
