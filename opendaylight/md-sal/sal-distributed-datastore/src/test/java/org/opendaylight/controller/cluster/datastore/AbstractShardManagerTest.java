@@ -12,13 +12,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -43,7 +39,6 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
 
     protected final String shardMrgIDSuffix = "config" + ID_COUNTER++;
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-    protected final Collection<ActorSystem> actorSystems = new ArrayList<>();
     protected final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
             .dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
             .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
@@ -84,10 +79,6 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
     public void tearDown() {
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
-
-        for (final ActorSystem system : actorSystems) {
-            JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
-        }
 
         mockShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         mockShardActor = null;
