@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableMap;
@@ -125,4 +126,8 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         return new Proxy(this);
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("metadata", metadata).toString();
+    }
 }
