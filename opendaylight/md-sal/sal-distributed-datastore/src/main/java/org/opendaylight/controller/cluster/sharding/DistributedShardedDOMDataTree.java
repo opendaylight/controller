@@ -48,7 +48,7 @@ import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -112,8 +112,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
     private final ShardedDOMDataTree shardedDOMDataTree;
     private final ActorSystem actorSystem;
-    private final DistributedDataStore distributedOperDatastore;
-    private final DistributedDataStore distributedConfigDatastore;
+    private final AbstractDataStore distributedOperDatastore;
+    private final AbstractDataStore distributedConfigDatastore;
 
     private final ActorRef shardedDataTreeActor;
     private final MemberName memberName;
@@ -134,8 +134,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private final PrefixedShardConfigUpdateHandler updateHandler;
 
     public DistributedShardedDOMDataTree(final ActorSystemProvider actorSystemProvider,
-                                         final DistributedDataStore distributedOperDatastore,
-                                         final DistributedDataStore distributedConfigDatastore) {
+                                         final AbstractDataStore distributedOperDatastore,
+                                         final AbstractDataStore distributedConfigDatastore) {
         this.actorSystem = Preconditions.checkNotNull(actorSystemProvider).getActorSystem();
         this.distributedOperDatastore = Preconditions.checkNotNull(distributedOperDatastore);
         this.distributedConfigDatastore = Preconditions.checkNotNull(distributedConfigDatastore);
@@ -161,7 +161,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         createPrefixConfigShard(distributedOperDatastore);
     }
 
-    private void createPrefixConfigShard(final DistributedDataStore dataStore) {
+    private void createPrefixConfigShard(final AbstractDataStore dataStore) {
         Configuration configuration = dataStore.getActorContext().getConfiguration();
         Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShardMessage =
@@ -398,7 +398,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private void createShardFrontend(final DOMDataTreeIdentifier prefix) {
         LOG.debug("Member {}: Creating CDS shard for prefix: {}", memberName, prefix);
         final String shardName = ClusterUtils.getCleanShardName(prefix.getRootIdentifier());
-        final DistributedDataStore distributedDataStore =
+        final AbstractDataStore distributedDataStore =
                 prefix.getDatastoreType().equals(org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION)
                         ? distributedConfigDatastore : distributedOperDatastore;
 
