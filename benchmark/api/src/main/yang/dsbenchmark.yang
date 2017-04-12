@@ -184,12 +184,14 @@ module dsbenchmark {
                     "Indicates whether the test finished successfuly";
             }
             leaf listBuildTime {
-                type uint32;
+                type int64;
+                units microseconds;
                 description
                   "The time it took to build the list of lists";
             }
             leaf execTime {
-                type uint32;
+                type int64;
+                units microseconds;
                 description
                   "The time it took to execute all transactions";
             }
