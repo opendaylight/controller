@@ -7,8 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorSystem;
+import akka.testkit.JavaTestKit;
+import com.typesafe.config.ConfigFactory;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.After;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -32,6 +38,8 @@ public abstract class AbstractTest {
     private static final AtomicLong HISTORY_COUNTER = new AtomicLong();
     private static final AtomicLong TX_COUNTER = new AtomicLong();
 
+    private final Collection<ActorSystem> actorSystems = new ArrayList<>();
+
     protected static void setUpStatic() {
         HISTORY_COUNTER.set(1L);
         TX_COUNTER.set(1L);
@@ -48,5 +56,18 @@ public abstract class AbstractTest {
     protected static <T> T waitOnAsyncTask(final CompletionStage<T> completionStage, final Duration timeout)
             throws Exception {
         return Await.result(FutureConverters.toScala(completionStage), timeout);
+    }
+
+    @After
+    public void actorSystemCleanup() {
+        for (final ActorSystem system : actorSystems) {
+            JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
+        }
+    }
+
+    protected ActorSystem newActorSystem(String name, String config) {
+        ActorSystem system = ActorSystem.create(name, ConfigFactory.load().getConfig(config));
+        actorSystems.add(system);
+        return system;
     }
 }
