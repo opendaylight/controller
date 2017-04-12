@@ -41,8 +41,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
@@ -93,8 +93,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     // for calls that need specific actor context tied to a datastore use the one provided in the DistributedDataStore
     private final ActorContext actorContext;
     private final ShardingServiceAddressResolver resolver;
-    private final DistributedDataStore distributedConfigDatastore;
-    private final DistributedDataStore distributedOperDatastore;
+    private final AbstractDataStore distributedConfigDatastore;
+    private final AbstractDataStore distributedOperDatastore;
     private final int lookupTaskMaxRetries;
 
     private final Map<DOMDataTreeIdentifier, ActorProducerRegistration> idToProducer = new HashMap<>();
@@ -768,8 +768,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     public static class ShardedDataTreeActorCreator {
 
         private DistributedShardedDOMDataTree shardingService;
-        private DistributedDataStore distributedConfigDatastore;
-        private DistributedDataStore distributedOperDatastore;
+        private AbstractDataStore distributedConfigDatastore;
+        private AbstractDataStore distributedOperDatastore;
         private ActorSystem actorSystem;
         private ClusterWrapper cluster;
         private int maxRetries;
@@ -801,22 +801,22 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             return cluster;
         }
 
-        public DistributedDataStore getDistributedConfigDatastore() {
+        public AbstractDataStore getDistributedConfigDatastore() {
             return distributedConfigDatastore;
         }
 
         public ShardedDataTreeActorCreator setDistributedConfigDatastore(
-                final DistributedDataStore distributedConfigDatastore) {
+                final AbstractDataStore distributedConfigDatastore) {
             this.distributedConfigDatastore = distributedConfigDatastore;
             return this;
         }
 
-        public DistributedDataStore getDistributedOperDatastore() {
+        public AbstractDataStore getDistributedOperDatastore() {
             return distributedOperDatastore;
         }
 
         public ShardedDataTreeActorCreator setDistributedOperDatastore(
-                final DistributedDataStore distributedOperDatastore) {
+                final AbstractDataStore distributedOperDatastore) {
             this.distributedOperDatastore = distributedOperDatastore;
             return this;
         }

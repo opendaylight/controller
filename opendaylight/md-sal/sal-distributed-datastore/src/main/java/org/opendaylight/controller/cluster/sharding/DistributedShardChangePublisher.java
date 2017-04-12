@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
@@ -53,7 +53,7 @@ public class DistributedShardChangePublisher
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardChangePublisher.class);
 
-    private final DistributedDataStore distributedDataStore;
+    private final AbstractDataStore distributedDataStore;
     private final YangInstanceIdentifier shardPath;
 
     // This will be useful for signaling back pressure
@@ -65,7 +65,7 @@ public class DistributedShardChangePublisher
     private final DataTree dataTree;
 
     public DistributedShardChangePublisher(final DataStoreClient client,
-                                           final DistributedDataStore distributedDataStore,
+                                           final AbstractDataStore distributedDataStore,
                                            final DOMDataTreeIdentifier prefix,
                                            final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
         this.client = client;
