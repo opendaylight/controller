@@ -48,15 +48,22 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
 
     @Override
     void reset() {
+        LOG.debug("{}: clearing clients {}", shardName, clients);
         clients.clear();
     }
 
     @Override
     void doApplySnapshot(final FrontendShardDataTreeSnapshotMetadata snapshot) {
+        LOG.debug("{}: applying snapshot {} over clients {}", shardName, snapshot, clients);
         clients.clear();
 
         for (FrontendClientMetadata m : snapshot.getClients()) {
-            clients.put(m.getIdentifier().getFrontendId(), new FrontendClientMetadataBuilder(m));
+            LOG.debug("{}: applying metadata {}", shardName, m);
+            final FrontendClientMetadataBuilder b = new FrontendClientMetadataBuilder(m);
+            final FrontendIdentifier client = m.getIdentifier().getFrontendId();
+
+            LOG.debug("{}: client {} updated to {}", shardName, client, b);
+            clients.put(client, b);
         }
     }
 
