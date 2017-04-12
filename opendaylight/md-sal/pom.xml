@@ -68,12 +68,6 @@
     <module>sal-cluster-admin-api</module>
     <module>sal-cluster-admin-impl</module>
 
-    <!-- XSQL -->
-    <module>sal-dom-xsql</module>
-    <module>sal-karaf-xsql</module>
-    <module>sal-karaf4-xsql</module>
-    <module>sal-dom-xsql-config</module>
-
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>
 

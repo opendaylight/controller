@@ -17,7 +17,6 @@
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
-        <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
     <feature name='odl-mdsal-common' version='${project.version}' description="OpenDaylight :: Config :: All">
@@ -66,12 +65,6 @@
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/{{VERSION}}</bundle>
-    </feature>
-    <feature name ='odl-mdsal-xsql' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
-        <bundle>mvn:org.opendaylight.controller/sal-dom-xsql/{{VERSION}}</bundle>
-        <bundle>mvn:org.opendaylight.controller/sal-karaf-xsql/{{VERSION}}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/{{VERSION}}/xml/config</configfile>
     </feature>
     <feature name ='odl-mdsal-clustering-commons' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
