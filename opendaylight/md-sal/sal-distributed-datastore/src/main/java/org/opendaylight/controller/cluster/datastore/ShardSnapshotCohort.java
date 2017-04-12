@@ -65,7 +65,10 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     @Override
     public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         // Forward the request to the snapshot actor
-        ShardSnapshotActor.requestSnapshot(snapshotActor, store.takeStateSnapshot(), installSnapshotStream, actorRef);
+        final ShardDataTreeSnapshot snapshot = store.takeStateSnapshot();
+        log.debug("{}: requesting serialization of snapshot {}", logId, snapshot);
+
+        ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, actorRef);
     }
 
     @Override
@@ -94,7 +97,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
-    public State deserializeSnapshot(ByteSource snapshotBytes) throws IOException {
+    public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
         try (final ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
             return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
         }
