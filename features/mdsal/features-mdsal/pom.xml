@@ -30,7 +30,6 @@
     <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
     <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
-    <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
   </properties>
 
   <dependencyManagement>
@@ -174,11 +173,6 @@
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-karaf-xsql</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
     </dependency>
     <dependency>
@@ -196,17 +190,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-connector-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-dom-xsql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-dom-xsql-config</artifactId>
-      <classifier>config</classifier>
-      <type>xml</type>
     </dependency>
 
     <dependency>
