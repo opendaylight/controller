@@ -17,7 +17,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShard;
@@ -48,7 +48,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     private final DistributedShardChangePublisher publisher;
 
-    DistributedShardFrontend(final DistributedDataStore distributedDataStore,
+    DistributedShardFrontend(final AbstractDataStore distributedDataStore,
                              final DataStoreClient client,
                              final DOMDataTreeIdentifier shardRoot) {
         this.client = Preconditions.checkNotNull(client);
