@@ -117,6 +117,11 @@ class PrefixedShardConfigWriter {
         } catch (final ReadFailedException e) {
             LOG.error("Presence check of default shard in configuration failed.", e);
             return false;
+        } catch (final IllegalStateException e) {
+            LOG.error("Presence check failed.", e);
+            // TODO what do we do here? the client most likely needs to be restarted and we cant go ahead and treat this
+            // as if the default is not present.
+            return true;
         }
     }
 
