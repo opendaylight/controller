@@ -58,11 +58,6 @@
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-distributed-data-experimental_${scala.version}</artifactId>
-      <version>2.4.7</version>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-slf4j_${scala.version}</artifactId>
     </dependency>
     <dependency>
