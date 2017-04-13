@@ -22,6 +22,30 @@
       "revId": "8bc063d457bb6355fa7b94a6ea08a18221ad687d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_ee4a2482",
+        "filename": "opendaylight/md-sal/sal-akka-subchannel/src/main/java/org/opendaylight/controller/subchannel/generic/api/data/SliceMessageTimer.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 7228
+      },
+      "writtenOn": "2017-04-13T09:14:21Z",
+      "side": 1,
+      "message": "sorry, it is not used here and should be deleted.",
+      "parentUuid": "da01753e_c43469e0",
+      "range": {
+        "startLine": 16,
+        "startChar": 34,
+        "endLine": 16,
+        "endChar": 37
+      },
+      "revId": "8bc063d457bb6355fa7b94a6ea08a18221ad687d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
