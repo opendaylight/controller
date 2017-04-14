@@ -1052,8 +1052,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionRetryWithInitialAskTimeoutExOnCreateTx() throws Exception {
-        //TODO remove when test passes also for ClientBackedDataStore
-        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         String testName = "testTransactionRetryWithInitialAskTimeoutExOnCreateTx";
         initDatastores(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, CARS);
 
