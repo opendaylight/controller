@@ -30,7 +30,7 @@ public final class ConnectingClientConnection<T extends BackendInfo> extends Abs
     }
 
     @Override
-    ClientActorBehavior<T> reconnectConnection(final ClientActorBehavior<T> current) {
+    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current) {
         throw new UnsupportedOperationException("Attempted to reconnect a connecting connection");
     }
 }
