@@ -10,15 +10,15 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
-public final class CloseDataTreeChangeListenerRegistration implements Serializable {
+public final class CloseDataTreeNotificationListenerRegistration implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final CloseDataTreeChangeListenerRegistration INSTANCE =
-            new CloseDataTreeChangeListenerRegistration();
+    private static final CloseDataTreeNotificationListenerRegistration INSTANCE =
+            new CloseDataTreeNotificationListenerRegistration();
 
-    private CloseDataTreeChangeListenerRegistration() {
+    private CloseDataTreeNotificationListenerRegistration() {
     }
 
-    public static CloseDataTreeChangeListenerRegistration getInstance() {
+    public static CloseDataTreeNotificationListenerRegistration getInstance() {
         return INSTANCE;
     }
 

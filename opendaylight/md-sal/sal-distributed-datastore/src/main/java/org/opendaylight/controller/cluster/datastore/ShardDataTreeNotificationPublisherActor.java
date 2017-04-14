@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.Props;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
@@ -19,31 +18,43 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  *
  * @author Thomas Pantelis
  */
-public class ShardDataTreeNotificationPublisherActor extends AbstractUntypedActor {
+public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNotificationPublisher>
+        extends AbstractUntypedActor {
+    private final T publisher;
     private final Stopwatch timer = Stopwatch.createUnstarted();
     private final String name;
+    private final String logContext;
 
-    private ShardDataTreeNotificationPublisherActor(String name) {
+    protected ShardDataTreeNotificationPublisherActor(final T publisher, final String name, final String logContext) {
+        this.publisher = publisher;
         this.name = name;
+        this.logContext = logContext;
+    }
+
+    protected T publisher() {
+        return publisher;
+    }
+
+    protected String logContext() {
+        return logContext;
     }
 
     @Override
     protected void handleReceive(Object message) {
         if (message instanceof PublishNotifications) {
-            PublishNotifications publisher = (PublishNotifications)message;
+            PublishNotifications toPublish = (PublishNotifications)message;
             timer.start();
 
             try {
-                publisher.publish();
+                publisher.publishChanges(toPublish.candidate, logContext);
             } finally {
                 long elapsedTime = timer.elapsed(TimeUnit.MILLISECONDS);
 
                 if (elapsedTime >= ShardDataTreeNotificationPublisher.PUBLISH_DELAY_THRESHOLD_IN_MS) {
                     LOG.warn("{}: Generation of change events for {} took longer than expected. Elapsed time: {}",
-                            publisher.logContext, name, timer);
+                            logContext, name, timer);
                 } else {
-                    LOG.debug("{}: Elapsed time for generation of change events for {}: {}", publisher.logContext,
-                            name, timer);
+                    LOG.debug("{}: Elapsed time for generation of change events for {}: {}", logContext, name, timer);
                 }
 
                 timer.reset();
@@ -51,24 +62,11 @@ public class ShardDataTreeNotificationPublisherActor extends AbstractUntypedActo
         }
     }
 
-    static Props props(String notificationType) {
-        return Props.create(ShardDataTreeNotificationPublisherActor.class, notificationType);
-    }
-
     static class PublishNotifications {
-        private final ShardDataTreeNotificationPublisher publisher;
         private final DataTreeCandidate candidate;
-        private final String logContext;
 
-        PublishNotifications(ShardDataTreeNotificationPublisher publisher, DataTreeCandidate candidate,
-                String logContext) {
-            this.publisher = publisher;
+        PublishNotifications(DataTreeCandidate candidate) {
             this.candidate = candidate;
-            this.logContext = logContext;
-        }
-
-        private void publish() {
-            publisher.publishChanges(candidate, logContext);
         }
     }
 }

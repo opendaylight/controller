@@ -30,7 +30,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
-import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
@@ -114,7 +114,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 proxy.close();
 
                 // The listener registration actor should get a Close message
-                expectMsgClass(timeout, CloseDataChangeListenerRegistration.class);
+                expectMsgClass(timeout, CloseDataTreeNotificationListenerRegistration.class);
 
                 // The DataChangeListener actor should be terminated
                 expectMsgClass(timeout, Terminated.class);
@@ -174,7 +174,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 proxy.close();
 
                 // The listener registration actor should get a Close message
-                expectMsgClass(timeout, CloseDataChangeListenerRegistration.class);
+                expectMsgClass(timeout, CloseDataTreeNotificationListenerRegistration.class);
 
                 // The DataChangeListener actor should be terminated
                 expectMsgClass(timeout, Terminated.class);
@@ -326,7 +326,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 proxy.init(YangInstanceIdentifier.of(TestModel.TEST_QNAME),
                         AsyncDataBroker.DataChangeScope.ONE);
 
-                expectMsgClass(duration("5 seconds"), CloseDataChangeListenerRegistration.class);
+                expectMsgClass(duration("5 seconds"), CloseDataTreeNotificationListenerRegistration.class);
 
                 Assert.assertEquals("getListenerRegistrationActor", null, proxy.getListenerRegistrationActor());
                 proxy.close();
