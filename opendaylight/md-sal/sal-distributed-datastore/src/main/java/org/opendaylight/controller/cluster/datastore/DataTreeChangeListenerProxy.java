@@ -15,7 +15,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
-import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeChangeListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -55,7 +55,8 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     @Override
     protected synchronized void removeRegistration() {
         if (listenerRegistrationActor != null) {
-            listenerRegistrationActor.tell(CloseDataTreeChangeListenerRegistration.getInstance(), ActorRef.noSender());
+            listenerRegistrationActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(),
+                    ActorRef.noSender());
             listenerRegistrationActor = null;
         }
 
@@ -94,7 +95,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         }
 
         // This registration has already been closed, notify the actor
-        actor.tell(CloseDataTreeChangeListenerRegistration.getInstance(), null);
+        actor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), null);
     }
 
     private void doRegistration(final ActorRef shard) {

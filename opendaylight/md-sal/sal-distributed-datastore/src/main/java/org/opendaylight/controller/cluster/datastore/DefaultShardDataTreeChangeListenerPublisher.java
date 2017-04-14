@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Optional;
 import java.util.Collection;
+import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -35,11 +37,6 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     }
 
     @Override
-    public ShardDataTreeChangeListenerPublisher newInstance() {
-        return new DefaultShardDataTreeChangeListenerPublisher();
-    }
-
-    @Override
     protected void notifyListener(AbstractDOMDataTreeChangeListenerRegistration<?> registration,
             Collection<DataTreeCandidate> changes) {
         registration.getInstance().onDataTreeChanged(changes);
@@ -51,18 +48,32 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     }
 
     @Override
-    public <L extends org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> ListenerRegistration<L>
-            registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
-        final AbstractDOMDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> registration =
-            super.registerTreeChangeListener(treeId, (org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener)
-                changes -> listener.onDataTreeChanged(changes));
+    public void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
+            Optional<DataTreeCandidate> initialState,
+            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+        AbstractDOMDataTreeChangeListenerRegistration<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener>
+            registration = super.registerTreeChangeListener(treeId,
+                (org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener)changes ->
+                    listener.onDataTreeChanged(changes));
 
-        return new org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration<L>(
-                listener) {
-            @Override
-            protected void removeRegistration() {
-                registration.close();
-            }
-        };
+        onRegistration.accept(
+            new org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration<
+                    DOMDataTreeChangeListener>(listener) {
+                @Override
+                protected void removeRegistration() {
+                    registration.close();
+                }
+            });
+
+        if (initialState.isPresent()) {
+            notifySingleListener(treeId, listener, initialState.get());
+        }
+    }
+
+    static void notifySingleListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
+            DataTreeCandidate state) {
+        DefaultShardDataTreeChangeListenerPublisher publisher = new DefaultShardDataTreeChangeListenerPublisher();
+        publisher.registerTreeChangeListener(treeId, listener, Optional.absent(), noop -> { });
+        publisher.publishChanges(state, "");
     }
 }

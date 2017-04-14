@@ -9,22 +9,17 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DOMDataTreeChangeListener,
-        RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration,
-        ListenerRegistration<DOMDataTreeChangeListener>> {
+        RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration> {
 
     private final Set<ActorSelection> listenerActors = Sets.newConcurrentHashSet();
 
@@ -37,8 +32,7 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
     }
 
     @Override
-    ListenerRegistration<DOMDataTreeChangeListener> createDelegate(
-            final RegisterDataTreeChangeListener message) {
+    void doRegistration(final RegisterDataTreeChangeListener message, final ActorRef registrationActor) {
         final ActorSelection dataChangeListenerPath = selectActor(message.getDataTreeChangeListenerPath());
 
         // Notify the listener if notifications should be enabled or not
@@ -49,44 +43,28 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
         if (!message.isRegisterOnAllInstances()) {
-            addListenerActor(dataChangeListenerPath);
+            addLeaderOnlyListenerActor(dataChangeListenerPath);
         }
 
         DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(dataChangeListenerPath);
 
         log().debug("{}: Registering for path {}", persistenceId(), message.getPath());
 
-        Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> regEntry =
-                getShard().getDataStore().registerTreeChangeListener(message.getPath(), listener);
-
-        getShard().getDataStore().notifyOfInitialData(message.getPath(),
-                regEntry.getKey().getInstance(), regEntry.getValue());
-
         listenerActors.add(dataChangeListenerPath);
-        final ListenerRegistration<DOMDataTreeChangeListener> delegate = regEntry.getKey();
-        return new ListenerRegistration<DOMDataTreeChangeListener>() {
-            @Override
-            public DOMDataTreeChangeListener getInstance() {
-                return delegate.getInstance();
-            }
 
-            @Override
-            public void close() {
-                listenerActors.remove(dataChangeListenerPath);
-                delegate.close();
-            }
-        };
+        final ShardDataTree shardDataTree = getShard().getDataStore();
+        shardDataTree.registerTreeChangeListener(message.getPath(),
+                listener, shardDataTree.readCurrentData(), registration -> registrationActor.tell(
+                        new DataTreeNotificationListenerRegistrationActor.SetRegistration(registration, () -> {
+                            listenerActors.remove(dataChangeListenerPath);
+                            removeLeaderOnlyListenerActor(dataChangeListenerPath);
+                        }), ActorRef.noSender()));
     }
 
     @Override
     protected DelayedDataTreeListenerRegistration newDelayedListenerRegistration(
-            RegisterDataTreeChangeListener message) {
-        return new DelayedDataTreeListenerRegistration(message);
-    }
-
-    @Override
-    protected ActorRef newRegistrationActor(ListenerRegistration<DOMDataTreeChangeListener> registration) {
-        return createActor(DataTreeChangeListenerRegistrationActor.props(registration));
+            RegisterDataTreeChangeListener message, ActorRef registrationActor) {
+        return new DelayedDataTreeListenerRegistration(message, registrationActor);
     }
 
     @Override

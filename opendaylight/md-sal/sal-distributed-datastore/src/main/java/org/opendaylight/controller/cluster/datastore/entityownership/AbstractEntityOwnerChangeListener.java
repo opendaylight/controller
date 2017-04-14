@@ -12,6 +12,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
@@ -24,7 +25,7 @@ public abstract class AbstractEntityOwnerChangeListener implements DOMDataTreeCh
             .node(ENTITY_OWNER_QNAME).build();
 
     void init(ShardDataTree shardDataTree) {
-        shardDataTree.registerTreeChangeListener(EOS_PATH, this);
+        shardDataTree.registerTreeChangeListener(EOS_PATH, this, Optional.absent(), reg -> { });
     }
 
     protected static String extractOwner(LeafNode<?> ownerLeaf) {
