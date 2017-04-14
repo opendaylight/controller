@@ -39,8 +39,13 @@ abstract class DelayedListenerRegistration<L extends EventListener, M> implement
 
     @Override
     public L getInstance() {
-        final ListenerRegistration<L> d = delegate;
-        return d == null ? null : (L)d.getInstance();
+        // ObjectRegistration annotates this method as @Nonnull but we could return null if the delegate is not set yet.
+        // In reality, we do not and should not ever call this method on DelayedListenerRegistration instances anyway
+        // but, since we have to provide an implementation to satisfy the interface, we throw
+        // UnsupportedOperationException to honor the API contract of not returning null and to avoid a FindBugs error
+        // for possibly returning null.
+        throw new UnsupportedOperationException(
+                "getInstance should not be called on this instance since it could be null");
     }
 
     @Override
