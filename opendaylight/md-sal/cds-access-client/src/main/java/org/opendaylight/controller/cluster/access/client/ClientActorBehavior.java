@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -132,13 +133,17 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     private void onResponse(final ResponseEnvelope<?> response) {
-        final long cookie = extractCookie(response.getMessage().getTarget());
-        final AbstractClientConnection<T> connection = connections.get(cookie);
+        final AbstractClientConnection<T> connection = getConnection(response);
         if (connection != null) {
             connection.receiveResponse(response);
         } else {
             LOG.info("{}: Ignoring unknown response {}", persistenceId(), response);
         }
+    }
+
+    private AbstractClientConnection<T> getConnection(final ResponseEnvelope<?> response) {
+        // Always called from actor context: no locking required
+        return connections.get(extractCookie(response.getMessage().getTarget()));
     }
 
     private ClientActorBehavior<T> onRequestSuccess(final SuccessEnvelope success) {
@@ -159,6 +164,13 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             haltClient(cause);
             poison(cause);
             return null;
+        }
+        if (cause instanceof NotLeaderException) {
+            final AbstractClientConnection<T> conn = getConnection(command);
+            if (conn != null) {
+                LOG.info("{}: connection {} indicated no leadership, reconnecting it", persistenceId(), conn, cause);
+                return conn.reconnectConnection(this);
+            }
         }
 
         return onRequestFailure(command);
