@@ -14,6 +14,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
 
 import akka.actor.ActorRef;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +61,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
     void init(ShardDataTree shardDataTree) {
         shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH)
                 .node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME)
-                    .node(Candidate.QNAME).node(Candidate.QNAME).build(), this);
+                    .node(Candidate.QNAME).node(Candidate.QNAME).build(), this, Optional.absent(), noop -> { });
     }
 
     @Override

@@ -15,7 +15,7 @@ import akka.dispatch.OnComplete;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
-import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -86,7 +86,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }
 
         if (sendCloseMessage) {
-            listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE, null);
+            listenerRegistrationActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(),
+                    ActorRef.noSender());
         }
     }
 
@@ -145,7 +146,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }
 
         if (sendCloseMessage) {
-            listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE, ActorRef.noSender());
+            listenerRegistrationActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(),
+                    ActorRef.noSender());
             listenerRegistrationActor = null;
         }
 
