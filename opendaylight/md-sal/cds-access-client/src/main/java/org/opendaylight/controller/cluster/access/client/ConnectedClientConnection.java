@@ -18,7 +18,7 @@ public final class ConnectedClientConnection<T extends BackendInfo> extends Abst
     }
 
     @Override
-    ClientActorBehavior<T> reconnectConnection(final ClientActorBehavior<T> current) {
+    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current) {
         final ReconnectingClientConnection<T> next = new ReconnectingClientConnection<>(this);
         setForwarder(new SimpleReconnectForwarder(next));
         current.reconnectConnection(this, next);

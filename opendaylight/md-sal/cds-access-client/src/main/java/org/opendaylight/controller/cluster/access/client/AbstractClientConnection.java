@@ -124,7 +124,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     @GuardedBy("lock")
-    abstract ClientActorBehavior<T> reconnectConnection(ClientActorBehavior<T> current);
+    abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current);
 
     private long readTime() {
         return context.ticker().read();
@@ -149,6 +149,15 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             TimeUnit.NANOSECONDS.sleep(delay);
         } catch (InterruptedException e) {
             LOG.debug("Interrupted while sleeping", e);
+        }
+    }
+
+    final ClientActorBehavior<T> reconnect(final ClientActorBehavior<T> current) {
+        lock.lock();
+        try {
+            return lockedReconnect(current);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -204,7 +213,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             delay = lockedCheckTimeout(now);
             if (delay == null) {
                 // We have timed out. There is no point in scheduling a timer
-                return reconnectConnection(current);
+                return lockedReconnect(current);
             }
 
             if (delay.isPresent()) {
