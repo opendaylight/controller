@@ -41,7 +41,7 @@ public class ReconnectingClientConnectionTest
     @Test
     public void testReconnectConnection() throws Exception {
         final ClientActorBehavior<BackendInfo> behavior = mock(ClientActorBehavior.class);
-        Assert.assertSame(behavior, connection.reconnectConnection(behavior));
+        Assert.assertSame(behavior, connection.lockedReconnect(behavior));
     }
 
     @Override

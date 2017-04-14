@@ -28,7 +28,7 @@ public class ConnectedClientConnectionTest
     @Test
     public void testReconnectConnection() throws Exception {
         final ClientActorBehavior<BackendInfo> behavior = mock(ClientActorBehavior.class);
-        connection.reconnectConnection(behavior);
+        connection.lockedReconnect(behavior);
         verify(behavior).reconnectConnection(same(connection), any(ReconnectingClientConnection.class));
     }
 

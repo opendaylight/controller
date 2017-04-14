@@ -25,7 +25,7 @@ public final class ReconnectingClientConnection<T extends BackendInfo> extends A
     }
 
     @Override
-    ClientActorBehavior<T> reconnectConnection(final ClientActorBehavior<T> current) {
+    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current) {
         // Intentional no-op
         LOG.debug("Skipping reconnect of already-reconnecting connection {}", this);
         return current;
