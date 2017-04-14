@@ -8,10 +8,15 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorContext;
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import com.google.common.base.Optional;
+import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
  * Implementation of ShardDataTreeChangeListenerPublisher that offloads the generation and publication
@@ -23,30 +28,20 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 class ShardDataTreeChangeListenerPublisherActorProxy extends AbstractShardDataTreeNotificationPublisherActorProxy
         implements ShardDataTreeChangeListenerPublisher {
 
-    private final ShardDataTreeChangeListenerPublisher delegatePublisher =
-            new DefaultShardDataTreeChangeListenerPublisher();
-
-    ShardDataTreeChangeListenerPublisherActorProxy(ActorContext actorContext, String actorName) {
-        super(actorContext, actorName);
-    }
-
-    private ShardDataTreeChangeListenerPublisherActorProxy(ShardDataTreeChangeListenerPublisherActorProxy other) {
-        super(other);
+    ShardDataTreeChangeListenerPublisherActorProxy(ActorContext actorContext, String actorName, String logContext) {
+        super(actorContext, actorName, logContext);
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
-            YangInstanceIdentifier treeId, L listener) {
-        return delegatePublisher.registerTreeChangeListener(treeId, listener);
+    public void registerTreeChangeListener(YangInstanceIdentifier treeId,
+            DOMDataTreeChangeListener listener, Optional<DataTreeCandidate> currentState,
+            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+        notifierActor().tell(new ShardDataTreeChangePublisherActor.RegisterListener(treeId, listener, currentState,
+                onRegistration), ActorRef.noSender());
     }
 
     @Override
-    public ShardDataTreeChangeListenerPublisher newInstance() {
-        return new ShardDataTreeChangeListenerPublisherActorProxy(this);
-    }
-
-    @Override
-    protected ShardDataTreeNotificationPublisher getDelegatePublisher() {
-        return delegatePublisher;
+    protected Props props() {
+        return ShardDataTreeChangePublisherActor.props(actorName(), logContext());
     }
 }

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -15,7 +16,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 final class DelayedDataChangeListenerRegistration extends DelayedListenerRegistration<
            AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>, RegisterChangeListener> {
 
-    DelayedDataChangeListenerRegistration(final RegisterChangeListener registerChangeListener) {
-        super(registerChangeListener);
+    DelayedDataChangeListenerRegistration(final RegisterChangeListener registerChangeListener,
+            final ActorRef registrationActor) {
+        super(registerChangeListener, registrationActor);
     }
 }

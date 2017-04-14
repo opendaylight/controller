@@ -9,26 +9,30 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventListener;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrationMessage;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class AbstractDataListenerSupport<L extends EventListener, M extends ListenerRegistrationMessage,
-        D extends DelayedListenerRegistration<L, M>, R extends ListenerRegistration<L>>
-                extends LeaderLocalDelegateFactory<M, R> {
+        D extends DelayedListenerRegistration<L, M>> extends LeaderLocalDelegateFactory<M> {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final ArrayList<D> delayedListenerRegistrations = new ArrayList<>();
-    private final ArrayList<D> delayedListenerOnAllRegistrations = new ArrayList<>();
-    private final Collection<ActorSelection> actors = new ArrayList<>();
+    private final Collection<D> delayedListenerRegistrations = Sets.newConcurrentHashSet();
+    private final Collection<D> delayedListenerOnAllRegistrations = Sets.newConcurrentHashSet();
+    private final Collection<ActorSelection> leaderOnlyListenerActors = Sets.newConcurrentHashSet();
+    private final Collection<ActorSelection> allListenerActors = Sets.newConcurrentHashSet();
 
     protected AbstractDataListenerSupport(Shard shard) {
         super(shard);
+    }
+
+    Collection<ActorSelection> getListenerActors() {
+        return new ArrayList<>(allListenerActors);
     }
 
     @Override
@@ -36,7 +40,7 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
         log.debug("{}: onLeadershipChange, isLeader: {}, hasLeader : {}", persistenceId(), isLeader, hasLeader);
 
         final EnableNotification msg = new EnableNotification(isLeader);
-        for (ActorSelection dataChangeListener : actors) {
+        for (ActorSelection dataChangeListener : leaderOnlyListenerActors) {
             dataChangeListener.tell(msg, getSelf());
         }
 
@@ -46,7 +50,6 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
             }
 
             delayedListenerOnAllRegistrations.clear();
-            delayedListenerOnAllRegistrations.trimToSize();
         }
 
         if (isLeader) {
@@ -55,7 +58,6 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
             }
 
             delayedListenerRegistrations.clear();
-            delayedListenerRegistrations.trimToSize();
         }
     }
 
@@ -63,23 +65,25 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
     void onMessage(M message, boolean isLeader, boolean hasLeader) {
         log.debug("{}: {} for {}, leader: {}", persistenceId(), logName(), message.getPath(), isLeader);
 
-        final ListenerRegistration<L> registration;
+        ActorRef registrationActor = createActor(DataTreeNotificationListenerRegistrationActor.props());
+
         if (hasLeader && message.isRegisterOnAllInstances() || isLeader) {
-            registration = createDelegate(message);
+            doRegistration(message, registrationActor);
         } else {
             log.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
-            D delayedReg = newDelayedListenerRegistration(message);
+            D delayedReg = newDelayedListenerRegistration(message, registrationActor);
+            Collection<D> delayedRegList;
             if (message.isRegisterOnAllInstances()) {
-                delayedListenerOnAllRegistrations.add(delayedReg);
+                delayedRegList = delayedListenerOnAllRegistrations;
             } else {
-                delayedListenerRegistrations.add(delayedReg);
+                delayedRegList = delayedListenerRegistrations;
             }
 
-            registration = delayedReg;
+            delayedRegList.add(delayedReg);
+            registrationActor.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(
+                    delayedReg, () -> delayedRegList.remove(delayedReg)), ActorRef.noSender());
         }
-
-        ActorRef registrationActor = newRegistrationActor(registration);
 
         log.debug("{}: {} sending reply, listenerRegistrationPath = {} ", persistenceId(), logName(),
                 registrationActor.path());
@@ -87,17 +91,35 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
         tellSender(newRegistrationReplyMessage(registrationActor));
     }
 
+    protected ActorSelection processListenerRegistrationMessage(M message) {
+        final ActorSelection listenerActor = selectActor(message.getListenerActorPath());
+
+        // We have a leader so enable the listener.
+        listenerActor.tell(new EnableNotification(true), getSelf());
+
+        if (!message.isRegisterOnAllInstances()) {
+            // This is a leader-only registration so store a reference to the listener actor so it can be notified
+            // at a later point if notifications should be enabled or disabled.
+            leaderOnlyListenerActors.add(listenerActor);
+        }
+
+        allListenerActors.add(listenerActor);
+
+        return listenerActor;
+    }
+
     protected Logger log() {
         return log;
     }
 
-    protected void addListenerActor(ActorSelection actor) {
-        actors.add(actor);
+    protected void removeListenerActor(ActorSelection listenerActor) {
+        allListenerActors.remove(listenerActor);
+        leaderOnlyListenerActors.remove(listenerActor);
     }
 
-    protected abstract D newDelayedListenerRegistration(M message);
+    abstract void doRegistration(M message, ActorRef registrationActor);
 
-    protected abstract ActorRef newRegistrationActor(ListenerRegistration<L> registration);
+    protected abstract D newDelayedListenerRegistration(M message, ActorRef registrationActor);
 
     protected abstract Object newRegistrationReplyMessage(ActorRef registrationActor);
 

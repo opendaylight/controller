@@ -7,10 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import akka.actor.ActorPath;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public interface ListenerRegistrationMessage {
     YangInstanceIdentifier getPath();
 
     boolean isRegisterOnAllInstances();
+
+    ActorPath getListenerActorPath();
 }
