@@ -7,49 +7,46 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import java.util.EventListener;
 import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrationMessage;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-abstract class DelayedListenerRegistration<L extends EventListener, M> implements ListenerRegistration<L> {
+abstract class DelayedListenerRegistration<L extends EventListener, M extends ListenerRegistrationMessage>
+        implements ListenerRegistration<L> {
     private final M registrationMessage;
-    private volatile ListenerRegistration<L> delegate;
+    private final ActorRef registrationActor;
 
     @GuardedBy("this")
     private boolean closed;
 
-    protected DelayedListenerRegistration(M registrationMessage) {
+    protected DelayedListenerRegistration(M registrationMessage, ActorRef registrationActor) {
         this.registrationMessage = registrationMessage;
+        this.registrationActor = registrationActor;
     }
 
     M getRegistrationMessage() {
         return registrationMessage;
     }
 
-    ListenerRegistration<L> getDelegate() {
-        return delegate;
-    }
-
-    synchronized <R extends ListenerRegistration<L>> void createDelegate(
-            final LeaderLocalDelegateFactory<M, R> factory) {
+    synchronized void createDelegate(final AbstractDataListenerSupport<L, M, ?> support) {
         if (!closed) {
-            this.delegate = factory.createDelegate(registrationMessage);
+            support.doRegistration(registrationMessage, registrationActor);
         }
     }
 
     @Override
     public L getInstance() {
-        final ListenerRegistration<L> d = delegate;
-        return d == null ? null : (L)d.getInstance();
+        // We could return null if the delegate is not set yet. In reality though, we do not and should not ever call
+        // this method on DelayedListenerRegistration instances but, since we have to provide an implementation to
+        // satisfy the interface, we throw UnsupportedOperationException to avoid possibly returning null.
+        throw new UnsupportedOperationException(
+                "getInstance should not be called on this instance since it could be null");
     }
 
     @Override
     public synchronized void close() {
-        if (!closed) {
-            closed = true;
-            if (delegate != null) {
-                delegate.close();
-            }
-        }
+        closed = true;
     }
 }

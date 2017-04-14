@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
-import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeChangeListenerRegistration;
+import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
@@ -93,7 +93,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 proxy.close();
 
                 // The listener registration actor should get a Close message
-                expectMsgClass(timeout, CloseDataTreeChangeListenerRegistration.class);
+                expectMsgClass(timeout, CloseDataTreeNotificationListenerRegistration.class);
 
                 // The DataChangeListener actor should be terminated
                 expectMsgClass(timeout, Terminated.class);
@@ -277,7 +277,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 proxy.init(shardName);
 
-                expectMsgClass(duration("5 seconds"), CloseDataTreeChangeListenerRegistration.class);
+                expectMsgClass(duration("5 seconds"), CloseDataTreeNotificationListenerRegistration.class);
 
                 Assert.assertEquals("getListenerRegistrationActor", null, proxy.getListenerRegistrationActor());
             }

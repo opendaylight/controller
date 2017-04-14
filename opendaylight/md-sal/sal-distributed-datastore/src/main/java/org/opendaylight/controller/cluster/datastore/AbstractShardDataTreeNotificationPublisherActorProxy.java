@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
+import akka.actor.Props;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -28,38 +29,40 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
 
     private final ActorContext actorContext;
     private final String actorName;
+    private final String logContext;
     private ActorRef notifierActor;
 
-    protected AbstractShardDataTreeNotificationPublisherActorProxy(ActorContext actorContext, String actorName) {
+    protected AbstractShardDataTreeNotificationPublisherActorProxy(ActorContext actorContext, String actorName,
+            String logContext) {
         this.actorContext = actorContext;
         this.actorName = actorName;
+        this.logContext = logContext;
     }
 
-    protected AbstractShardDataTreeNotificationPublisherActorProxy(
-            AbstractShardDataTreeNotificationPublisherActorProxy other) {
-        this.actorContext = null;
-        this.actorName = null;
-        this.notifierActor = other.getNotifierActor();
+    protected abstract Props props();
+
+    protected final String actorName() {
+        return actorName;
     }
 
-    protected abstract ShardDataTreeNotificationPublisher getDelegatePublisher();
+    protected final String logContext() {
+        return logContext;
+    }
 
     @Override
     public void publishChanges(DataTreeCandidate candidate, String logContext) {
-        getNotifierActor().tell(new ShardDataTreeNotificationPublisherActor.PublishNotifications(
-                getDelegatePublisher(), candidate, logContext), ActorRef.noSender());
+        notifierActor().tell(new ShardDataTreeNotificationPublisherActor.PublishNotifications(candidate),
+                ActorRef.noSender());
     }
 
-    private ActorRef getNotifierActor() {
+    protected final ActorRef notifierActor() {
         if (notifierActor == null) {
             LOG.debug("Creating actor {}", actorName);
 
             String dispatcher = new Dispatchers(actorContext.system().dispatchers()).getDispatcherPath(
                     Dispatchers.DispatcherType.Notification);
-            notifierActor = actorContext.actorOf(ShardDataTreeNotificationPublisherActor.props(actorName)
-                    .withDispatcher(dispatcher).withMailbox(
-                            org.opendaylight.controller.cluster.datastore.utils.ActorContext.BOUNDED_MAILBOX),
-                    actorName);
+            notifierActor = actorContext.actorOf(props().withDispatcher(dispatcher).withMailbox(
+                    org.opendaylight.controller.cluster.datastore.utils.ActorContext.BOUNDED_MAILBOX), actorName);
         }
 
         return notifierActor;

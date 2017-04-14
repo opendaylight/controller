@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Optional;
+import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -14,6 +16,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeE
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.controller.md.sal.dom.store.impl.ResolveDataChangeEventsTask;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -59,14 +62,26 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     }
 
     @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-            DataChangeListenerRegistration<L> registerDataChangeListener(YangInstanceIdentifier path, L listener,
-                    DataChangeScope scope) {
-        return dataChangeListenerTree.registerDataChangeListener(path, listener, scope);
+    public void registerDataChangeListener(YangInstanceIdentifier path,
+            AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, DataChangeScope scope,
+            Optional<DataTreeCandidate> initialState,
+            Consumer<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>>
+                    onRegistration) {
+        final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+                registration = dataChangeListenerTree.registerDataChangeListener(path, listener, scope);
+
+        onRegistration.accept(registration);
+
+        if (initialState.isPresent()) {
+            notifySingleListener(path, listener, scope, initialState.get());
+        }
     }
 
-    @Override
-    public ShardDataChangeListenerPublisher newInstance() {
-        return new DefaultShardDataChangeListenerPublisher();
+    static void notifySingleListener(final YangInstanceIdentifier path,
+            final AsyncDataChangeListener<YangInstanceIdentifier,NormalizedNode<?, ?>> listener,
+            final DataChangeScope scope, final DataTreeCandidate initialState) {
+        DefaultShardDataChangeListenerPublisher publisher = new DefaultShardDataChangeListenerPublisher();
+        publisher.registerDataChangeListener(path, listener, scope, Optional.absent(), noop -> { });
+        publisher.publishChanges(initialState, "");
     }
 }

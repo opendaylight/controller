@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Arrays;
@@ -23,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
@@ -54,11 +58,45 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
-    public void waitForChangeEvents() {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void waitForChangeEvents(YangInstanceIdentifier... expPaths) {
         boolean done = Uninterruptibles.awaitUninterruptibly(changeLatch, 5, TimeUnit.SECONDS);
         if (!done) {
             fail(String.format("Missing change notifications. Expected: %d. Actual: %d",
                     expChangeEventCount, expChangeEventCount - changeLatch.getCount()));
+        }
+
+        for (int i = 0; i < expPaths.length; i++) {
+            final DataTreeCandidate candidate = changeList.get(i);
+            final Optional<NormalizedNode<?, ?>> maybeDataAfter = candidate.getRootNode().getDataAfter();
+            if (!maybeDataAfter.isPresent()) {
+                fail(String.format("Change %d does not contain data after. Actual: %s", i + 1,
+                        candidate.getRootNode()));
+            }
+
+            final NormalizedNode<?, ?> dataAfter = maybeDataAfter.get();
+            final Optional<YangInstanceIdentifier> relativePath = expPaths[i].relativeTo(candidate.getRootPath());
+            if (!relativePath.isPresent()) {
+                assertEquals(String.format("Change %d does not contain %s. Actual: %s", i + 1, expPaths[i],
+                        dataAfter), expPaths[i].getLastPathArgument(), dataAfter.getIdentifier());
+            } else {
+                NormalizedNode<?, ?> nextChild = dataAfter;
+                for (PathArgument pathArg: relativePath.get().getPathArguments()) {
+                    boolean found = false;
+                    if (nextChild instanceof NormalizedNodeContainer) {
+                        Optional<NormalizedNode<?, ?>> maybeChild = ((NormalizedNodeContainer)nextChild)
+                                .getChild(pathArg);
+                        if (maybeChild.isPresent()) {
+                            found = true;
+                            nextChild = maybeChild.get();
+                        }
+                    }
+
+                    if (!found) {
+                        fail(String.format("Change %d does not contain %s. Actual: %s", i + 1, expPaths[i], dataAfter));
+                    }
+                }
+            }
         }
     }
 

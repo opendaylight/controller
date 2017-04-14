@@ -15,15 +15,14 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class RegisterChangeListener implements ListenerRegistrationMessage {
     private final YangInstanceIdentifier path;
-    private final ActorRef dataChangeListener;
+    private final ActorRef dataChangeListenerActor;
     private final AsyncDataBroker.DataChangeScope scope;
     private final boolean registerOnAllInstances;
 
-    public RegisterChangeListener(YangInstanceIdentifier path,
-        ActorRef dataChangeListener,
-        AsyncDataBroker.DataChangeScope scope, boolean registerOnAllInstances) {
+    public RegisterChangeListener(YangInstanceIdentifier path, ActorRef dataChangeListenerActor,
+            AsyncDataBroker.DataChangeScope scope, boolean registerOnAllInstances) {
         this.path = path;
-        this.dataChangeListener = dataChangeListener;
+        this.dataChangeListenerActor = dataChangeListenerActor;
         this.scope = scope;
         this.registerOnAllInstances = registerOnAllInstances;
     }
@@ -37,8 +36,9 @@ public class RegisterChangeListener implements ListenerRegistrationMessage {
         return scope;
     }
 
-    public ActorPath getDataChangeListenerPath() {
-        return dataChangeListener.path();
+    @Override
+    public ActorPath getListenerActorPath() {
+        return dataChangeListenerActor.path();
     }
 
     @Override
