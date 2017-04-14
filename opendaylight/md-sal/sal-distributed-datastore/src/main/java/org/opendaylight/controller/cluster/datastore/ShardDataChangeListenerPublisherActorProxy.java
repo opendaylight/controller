@@ -8,12 +8,17 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorContext;
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import com.google.common.base.Optional;
+import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
  * Implementation of ShardDataChangeListenerPublisher that offloads the generation and publication
@@ -25,30 +30,22 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 class ShardDataChangeListenerPublisherActorProxy extends AbstractShardDataTreeNotificationPublisherActorProxy
         implements ShardDataChangeListenerPublisher {
 
-    private final ShardDataChangeListenerPublisher delegatePublisher = new DefaultShardDataChangeListenerPublisher();
-
-    ShardDataChangeListenerPublisherActorProxy(ActorContext actorContext, String actorName) {
-        super(actorContext, actorName);
-    }
-
-    private ShardDataChangeListenerPublisherActorProxy(ShardDataChangeListenerPublisherActorProxy other) {
-        super(other);
+    ShardDataChangeListenerPublisherActorProxy(ActorContext actorContext, String actorName, String logContext) {
+        super(actorContext, actorName, logContext);
     }
 
     @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-            DataChangeListenerRegistration<L> registerDataChangeListener(YangInstanceIdentifier path, L listener,
-                    DataChangeScope scope) {
-        return delegatePublisher.registerDataChangeListener(path, listener, scope);
+    public void registerDataChangeListener(YangInstanceIdentifier path,
+            AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, DataChangeScope scope,
+            Optional<DataTreeCandidate> initialState,
+            Consumer<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>>
+                onRegistration) {
+        notifierActor().tell(new ShardDataChangePublisherActor.RegisterListener(path, listener, scope, initialState,
+                onRegistration), ActorRef.noSender());
     }
 
     @Override
-    public ShardDataChangeListenerPublisher newInstance() {
-        return new ShardDataChangeListenerPublisherActorProxy(this);
-    }
-
-    @Override
-    protected ShardDataTreeNotificationPublisher getDelegatePublisher() {
-        return delegatePublisher;
+    protected Props props() {
+        return ShardDataChangePublisherActor.props(actorName(), logContext());
     }
 }

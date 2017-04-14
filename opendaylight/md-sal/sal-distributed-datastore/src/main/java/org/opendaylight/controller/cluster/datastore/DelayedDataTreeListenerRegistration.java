@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 
@@ -18,8 +19,9 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 final class DelayedDataTreeListenerRegistration
         extends DelayedListenerRegistration<DOMDataTreeChangeListener, RegisterDataTreeChangeListener> {
 
-    DelayedDataTreeListenerRegistration(final RegisterDataTreeChangeListener registerTreeChangeListener) {
-        super(registerTreeChangeListener);
+    DelayedDataTreeListenerRegistration(final RegisterDataTreeChangeListener registerTreeChangeListener,
+            final ActorRef registrationActor) {
+        super(registerTreeChangeListener, registrationActor);
     }
 }
 

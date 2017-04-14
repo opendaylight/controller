@@ -7,13 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTreeChangePublisher;
+import com.google.common.base.Optional;
+import java.util.function.Consumer;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
  * Interface for a class that generates and publishes notifications for DataTreeChangeListeners.
  *
  * @author Thomas Pantelis
  */
-interface ShardDataTreeChangeListenerPublisher extends ShardDataTreeNotificationPublisher, DOMStoreTreeChangePublisher {
-    ShardDataTreeChangeListenerPublisher newInstance();
+interface ShardDataTreeChangeListenerPublisher extends ShardDataTreeNotificationPublisher {
+    void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
+            Optional<DataTreeCandidate> initialState,
+            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration);
 }
