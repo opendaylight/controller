@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.io.Externalizable;
@@ -42,8 +43,9 @@ public final class RegisterDataTreeChangeListener implements Externalizable, Lis
         return path;
     }
 
-    public ActorRef getDataTreeChangeListenerPath() {
-        return dataTreeChangeListenerPath;
+    @Override
+    public ActorPath getListenerActorPath() {
+        return dataTreeChangeListenerPath.path();
     }
 
     @Override

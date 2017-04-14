@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
  * @param <D> delegate type
  * @param <M> message type
  */
-abstract class LeaderLocalDelegateFactory<M, D> extends DelegateFactory<M, D> {
+abstract class LeaderLocalDelegateFactory<M> {
     private final Shard shard;
 
     protected LeaderLocalDelegateFactory(final Shard shard) {

@@ -188,9 +188,9 @@ public class Shard extends RaftActor {
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
         ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
-                new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher");
+                new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
         ShardDataChangeListenerPublisherActorProxy dataChangeListenerPublisher =
-                new ShardDataChangeListenerPublisherActorProxy(getContext(), name + "-DCL-publisher");
+                new ShardDataChangeListenerPublisherActorProxy(getContext(), name + "-DCL-publisher", name);
         if (builder.getDataTree() != null) {
             store = new ShardDataTree(this, builder.getSchemaContext(), builder.getDataTree(),
                     treeChangeListenerPublisher, dataChangeListenerPublisher, name, frontendMetadata);
