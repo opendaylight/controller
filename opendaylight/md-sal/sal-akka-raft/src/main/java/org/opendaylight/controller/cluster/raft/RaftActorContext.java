@@ -335,4 +335,19 @@ public interface RaftActorContext {
      */
     @Nonnull
     FileBackedOutputStream newFileBackedOutputStream();
+
+    /**
+     * Returns the RaftActorLeadershipTransferCohort if leadership transfer is in progress.
+     *
+     * @return the RaftActorLeadershipTransferCohort if leadership transfer is in progress, null otherwise
+     */
+    @Nullable
+    RaftActorLeadershipTransferCohort getRaftActorLeadershipTransferCohort();
+
+    /**
+     * Sets the RaftActorLeadershipTransferCohort for transferring leadership.
+     *
+     * @param leadershipTransferCohort the RaftActorLeadershipTransferCohort or null to clear the existing one
+     */
+    void setRaftActorLeadershipTransferCohort(@Nullable RaftActorLeadershipTransferCohort leadershipTransferCohort);
 }
