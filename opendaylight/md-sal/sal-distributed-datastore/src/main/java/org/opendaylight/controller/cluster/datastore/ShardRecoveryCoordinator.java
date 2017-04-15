@@ -8,15 +8,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import java.io.File;
-import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -111,16 +108,5 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     @Override
     public Snapshot getRestoreFromSnapshot() {
         return restoreFromSnapshot;
-    }
-
-    @Override
-    @Deprecated
-    public State deserializePreCarbonSnapshot(final byte[] from) {
-        try {
-            return new ShardSnapshotState(ShardDataTreeSnapshot.deserializePreCarbon(from));
-        } catch (IOException e) {
-            log.error("{}: failed to deserialize snapshot", shardName, e);
-            throw Throwables.propagate(e);
-        }
     }
 }
