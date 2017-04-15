@@ -21,7 +21,6 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -85,30 +84,13 @@ public class ShardDataTreeSnapshotTest {
         assertEquals("Metadata", expMetadata, ((MetadataShardDataTreeSnapshot)deserialized).getMetadata());
     }
 
-    @Test
-    @Deprecated
-    public void testPreBoronShardDataTreeSnapshot() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
-
-        byte[] serialized = SerializationUtils.serializeNormalizedNode(expectedNode);
-
-        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserializePreCarbon(serialized);
-
-        Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
-        assertEquals("rootNode present", true, actualNode.isPresent());
-        assertEquals("rootNode", expectedNode, actualNode.get());
-        assertEquals("Deserialized type", PreBoronShardDataTreeSnapshot.class, deserialized.getClass());
-    }
-
     static class TestShardDataTreeSnapshotMetadata
             extends ShardDataTreeSnapshotMetadata<TestShardDataTreeSnapshotMetadata> {
         private static final long serialVersionUID = 1L;
 
         private final String data;
 
-        TestShardDataTreeSnapshotMetadata(String data) {
+        TestShardDataTreeSnapshotMetadata(final String data) {
             this.data = data;
         }
 
@@ -128,7 +110,7 @@ public class ShardDataTreeSnapshotTest {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return obj instanceof TestShardDataTreeSnapshotMetadata
                     && data.equals(((TestShardDataTreeSnapshotMetadata)obj).data);
         }
@@ -140,17 +122,17 @@ public class ShardDataTreeSnapshotTest {
             public Proxy() {
             }
 
-            Proxy(String data) {
+            Proxy(final String data) {
                 this.data = data;
             }
 
             @Override
-            public void writeExternal(ObjectOutput out) throws IOException {
+            public void writeExternal(final ObjectOutput out) throws IOException {
                 out.writeObject(data);
             }
 
             @Override
-            public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
                 data = (String) in.readObject();
             }
 
