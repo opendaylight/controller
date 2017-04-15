@@ -137,7 +137,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         }
 
         // Update last history we have seen
-        if (lastSeenHistory != null && Long.compareUnsigned(lastSeenHistory, id.getHistoryId()) < 0) {
+        if (lastSeenHistory == null || Long.compareUnsigned(lastSeenHistory, id.getHistoryId()) < 0) {
             lastSeenHistory = id.getHistoryId();
         }
 
