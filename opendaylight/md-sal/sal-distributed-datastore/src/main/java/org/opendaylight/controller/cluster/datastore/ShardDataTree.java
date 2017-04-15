@@ -336,8 +336,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
         } else if (payload instanceof PurgeLocalHistoryPayload) {
             allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
-        } else if (payload instanceof DataTreeCandidatePayload) {
-            applyRecoveryCandidate(((DataTreeCandidatePayload) payload).getCandidate());
         } else {
             LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
         }
