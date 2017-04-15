@@ -50,21 +50,6 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         peopleDataTree = new ShardDataTree(mockShard, peopleSchemaContext, TreeType.OPERATIONAL);
     }
 
-    @Deprecated
-    @Test
-    public void testAppendRecoveredLogEntryDataTreeCandidatePayload() {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
-        try {
-            coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
-        } catch (final SchemaValidationFailedException e) {
-            fail("SchemaValidationFailedException should not happen if pruning is done");
-        }
-
-        coordinator.applyCurrentLogRecoveryBatch();
-    }
-
     @Test
     public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException {
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
