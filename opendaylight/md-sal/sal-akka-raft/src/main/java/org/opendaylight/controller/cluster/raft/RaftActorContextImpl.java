@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -87,6 +88,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     private Optional<Cluster> cluster;
 
     private final Consumer<ApplyState> applyStateConsumer;
+
+    private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
             @Nonnull ElectionTerm termInformation, long commitIndex, long lastApplied,
@@ -415,5 +418,17 @@ public class RaftActorContextImpl implements RaftActorContext {
                 log.debug("{}: Error closing behavior {}", getId(), currentBehavior.state(), e);
             }
         }
+    }
+
+    @Override
+    @Nullable
+    public RaftActorLeadershipTransferCohort getRaftActorLeadershipTransferCohort() {
+        return leadershipTransferCohort;
+    }
+
+    @Override
+    public void setRaftActorLeadershipTransferCohort(
+            @Nullable RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+        this.leadershipTransferCohort = leadershipTransferCohort;
     }
 }

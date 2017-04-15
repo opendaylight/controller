@@ -17,8 +17,10 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.pattern.Patterns;
+import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +33,10 @@ import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
+import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
+import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -138,6 +144,16 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
+        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, Collections.emptyList(), -1, -1, -1, -1,
+                1, null, new org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload(
+                        Arrays.asList(new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
+                                new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false))));
+
+        InMemorySnapshotStore.addSnapshot(leaderId, snapshot);
+        InMemorySnapshotStore.addSnapshot(follower1Id, snapshot);
+        InMemorySnapshotStore.addSnapshot(follower2Id, snapshot);
+        InMemorySnapshotStore.addSnapshot(follower3Id, snapshot);
+
         follower1NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
                 factory.generateActorId(follower1Id + "-notifier"));
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
@@ -177,7 +193,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
-        leaderContext.getPeerInfo(follower3Id).setVotingState(VotingState.NON_VOTING);
+        //leaderContext.getPeerInfo(follower3Id).setVotingState(VotingState.NON_VOTING);
 
         waitUntilLeader(leaderActor);
 
@@ -283,6 +299,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging ending");
     }
 
+
     @Test
     public void testRequestLeadershipTransferToFollower2WithFollower2Shutdown() throws Exception {
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown starting");
@@ -301,5 +318,25 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         assertTrue(failure.cause() instanceof LeadershipTransferFailedException);
 
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown ending");
+    }
+
+    @Test
+    public void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() throws Exception {
+        testLog.info("testRequestLeadershipTransferToFollower2WithOtherFollowersDown starting");
+
+        createRaftActors();
+        createRequestLeadershipResultCollectorActor();
+
+        factory.killActor(follower1Actor, new JavaTestKit(getSystem()));
+        factory.killActor(follower3Actor, new JavaTestKit(getSystem()));
+
+        sendFollower2RequestLeadershipTransferToLeader();
+
+        expectFirstMatching(requestLeadershipResultCollectorActor, Status.Success.class);
+
+        verifyRaftState(follower2Actor, RaftState.Leader);
+        verifyRaftState(leaderActor, RaftState.Follower);
+
+        testLog.info("testRequestLeadershipTransferToFollower2WithOtherFollowersDown ending");
     }
 }

@@ -186,11 +186,12 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
-        LOG.info("Moving leader to local node for shard {}, datastoreType {}", shardName, dataStoreType);
-
         ActorContext actorContext = dataStoreType == DataStoreType.Config
                 ? configDataStore.getActorContext()
                 : operDataStore.getActorContext();
+
+        LOG.info("Moving leader to local node {} for shard {}, datastoreType {}", actorContext.getCurrentMemberName(),
+                shardName, dataStoreType);
 
         final scala.concurrent.Future<ActorRef> localShardReply =
                 actorContext.findLocalShardAsync(shardName);
@@ -222,7 +223,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                     return;
                 }
 
-                LOG.debug("Leadership transfer complete {}.", success);
+                LOG.debug("Leadership transfer complete");
                 future.set(RpcResultBuilder.<Void>success().build());
             }
         }, actorContext.getClientDispatcher());
