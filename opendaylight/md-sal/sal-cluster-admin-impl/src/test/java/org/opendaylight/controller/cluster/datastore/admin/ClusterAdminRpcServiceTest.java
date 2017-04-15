@@ -246,6 +246,8 @@ public class ClusterAdminRpcServiceTest {
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         member1.waitForMembersUp("member-2", "member-3");
+        replicaNode2.waitForMembersUp("member-1");
+        replicaNode3.waitForMembersUp("member-1", "member-2");
 
         doAddShardReplica(replicaNode2, "cars", "member-1");
         doAddShardReplica(replicaNode3, "cars", "member-1", "member-2");
@@ -257,13 +259,18 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
 
         doMakeShardLeaderLocal(member1, "cars", "member-1");
-        replicaNode2.kit().waitUntilLeader(replicaNode2.configDataStore().getActorContext(), "cars");
-        replicaNode3.kit().waitUntilLeader(replicaNode3.configDataStore().getActorContext(), "cars");
+        verifyRaftState(replicaNode2.configDataStore(), "cars",
+            raftState -> assertThat(raftState.getLeader(),containsString("member-1")));
+        verifyRaftState(replicaNode3.configDataStore(), "cars",
+            raftState -> assertThat(raftState.getLeader(),containsString("member-1")));
 
         doMakeShardLeaderLocal(replicaNode2, "cars", "member-2");
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorContext(), "cars");
-        replicaNode3.kit().waitUntilLeader(replicaNode3.configDataStore().getActorContext(), "cars");
+        verifyRaftState(member1.configDataStore(), "cars",
+            raftState -> assertThat(raftState.getLeader(),containsString("member-2")));
+        verifyRaftState(replicaNode3.configDataStore(), "cars",
+            raftState -> assertThat(raftState.getLeader(),containsString("member-2")));
 
+        replicaNode2.waitForMembersUp("member-3");
         doMakeShardLeaderLocal(replicaNode3, "cars", "member-3");
     }
 

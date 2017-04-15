@@ -54,6 +54,8 @@ import scala.concurrent.duration.FiniteDuration;
 public class RaftActorLeadershipTransferCohort {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorLeadershipTransferCohort.class);
 
+    static final long USE_DEFAULT_LEADER_TIMEOUT = -1;
+
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
     private final Stopwatch transferTimer = Stopwatch.createUnstarted();
     private final RaftActor raftActor;
@@ -70,6 +72,13 @@ public class RaftActorLeadershipTransferCohort {
     RaftActorLeadershipTransferCohort(final RaftActor raftActor, @Nullable final String requestedFollowerId) {
         this.raftActor = raftActor;
         this.requestedFollowerId = requestedFollowerId;
+
+        // We'll wait an election timeout period for a new leader to be elected plus some cushion to take into
+        // account the variance.
+        final long electionTimeout = raftActor.getRaftActorContext().getConfigParams()
+                .getElectionTimeOutInterval().toMillis();
+        final int variance = raftActor.getRaftActorContext().getConfigParams().getElectionTimeVariance();
+        newLeaderTimeoutInMillis = electionTimeout + variance * 2;
     }
 
     void init() {
@@ -141,9 +150,8 @@ public class RaftActorLeadershipTransferCohort {
         // and convert to follower due to higher term. We should then get an AppendEntries heart
         // beat with the new leader id.
 
-        // Add a timer in case we don't get a leader change - 2 sec should be plenty of time if a new
-        // leader is elected. Note: the Runnable is sent as a message to the raftActor which executes it
-        // safely run on the actor's thread dispatcher.
+        // Add a timer in case we don't get a leader change. Note: the Runnable is sent as a message to the raftActor
+        // which executes it safely run on the actor's thread dispatcher.
         FiniteDuration timeout = FiniteDuration.create(newLeaderTimeoutInMillis, TimeUnit.MILLISECONDS);
         newLeaderTimer = raftActor.getContext().system().scheduler().scheduleOnce(timeout, raftActor.self(),
             (Runnable) () -> {
@@ -189,9 +197,10 @@ public class RaftActorLeadershipTransferCohort {
         return isTransferring;
     }
 
-    @VisibleForTesting
     void setNewLeaderTimeoutInMillis(final long newLeaderTimeoutInMillis) {
-        this.newLeaderTimeoutInMillis = newLeaderTimeoutInMillis;
+        if (newLeaderTimeoutInMillis != USE_DEFAULT_LEADER_TIMEOUT) {
+            this.newLeaderTimeoutInMillis = newLeaderTimeoutInMillis;
+        }
     }
 
     public Optional<String> getRequestedFollowerId() {
