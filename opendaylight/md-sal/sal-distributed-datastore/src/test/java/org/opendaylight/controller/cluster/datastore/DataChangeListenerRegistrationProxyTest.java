@@ -35,7 +35,7 @@ import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
@@ -100,7 +100,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 Assert.assertEquals("getScope", scope, registerMsg.getScope());
                 Assert.assertEquals("isRegisterOnAllInstances", false, registerMsg.isRegisterOnAllInstances());
 
-                reply(new RegisterChangeListenerReply(getRef()));
+                reply(new RegisterDataTreeNotificationListenerReply(getRef()));
 
                 for (int i = 0; i < 20 * 5 && proxy.getListenerRegistrationActor() == null; i++) {
                     Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -160,7 +160,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 Assert.assertEquals("getScope", scope, registerMsg.getScope());
                 Assert.assertEquals("isRegisterOnAllInstances", true, registerMsg.isRegisterOnAllInstances());
 
-                reply(new RegisterChangeListenerReply(getRef()));
+                reply(new RegisterDataTreeNotificationListenerReply(getRef()));
 
                 for (int i = 0; i < 20 * 5 && proxy.getListenerRegistrationActor() == null; i++) {
                     Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -317,7 +317,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
                 Answer<Future<Object>> answer = invocation -> {
                     proxy.close();
-                    return Futures.successful((Object)new RegisterChangeListenerReply(getRef()));
+                    return Futures.successful((Object)new RegisterDataTreeNotificationListenerReply(getRef()));
                 };
 
                 doAnswer(answer).when(actorContext).executeOperationAsync(any(ActorRef.class),

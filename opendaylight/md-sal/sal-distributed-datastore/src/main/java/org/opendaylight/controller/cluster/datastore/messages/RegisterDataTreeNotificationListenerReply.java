@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2017 Inocybe Technologies and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,17 +10,19 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
-
 import java.io.Serializable;
 
 /**
- * Successful reply to a {@link RegisterDataTreeChangeListener} request.
+ * Successful reply to a notification listener registration request.
+ *
+ * @author Thomas Pantelis
  */
-public final class RegisterDataTreeChangeListenerReply implements Serializable {
+public class RegisterDataTreeNotificationListenerReply implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private final ActorRef listenerRegistrationPath;
 
-    public RegisterDataTreeChangeListenerReply(final ActorRef listenerRegistrationPath) {
+    public RegisterDataTreeNotificationListenerReply(final ActorRef listenerRegistrationPath) {
         this.listenerRegistrationPath = Preconditions.checkNotNull(listenerRegistrationPath);
     }
 

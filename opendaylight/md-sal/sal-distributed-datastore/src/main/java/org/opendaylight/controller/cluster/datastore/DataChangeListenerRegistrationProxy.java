@@ -17,7 +17,7 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -128,7 +128,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
                     LOG.error("Failed to register DataChangeListener {} at path {}",
                             listener, path.toString(), failure);
                 } else {
-                    RegisterChangeListenerReply reply = (RegisterChangeListenerReply) result;
+                    RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)result;
                     setListenerRegistrationActor(actorContext.actorSelection(
                             reply.getListenerRegistrationPath()));
                 }

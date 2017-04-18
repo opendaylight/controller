@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.controller.cluster.datastore.actors.DataTreeNotificationListenerRegistrationActor;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrationMessage;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +93,7 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
         log.debug("{}: {} sending reply, listenerRegistrationPath = {} ", persistenceId(), logName(),
                 registrationActor.path());
 
-        tellSender(newRegistrationReplyMessage(registrationActor));
+        tellSender(new RegisterDataTreeNotificationListenerReply(registrationActor));
     }
 
     protected ActorSelection processListenerRegistrationMessage(M message) {
@@ -122,8 +123,6 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
     }
 
     abstract void doRegistration(M message, ActorRef registrationActor);
-
-    protected abstract Object newRegistrationReplyMessage(ActorRef registrationActor);
 
     protected abstract String logName();
 }
