@@ -25,6 +25,5 @@ public class ApplyJournalEntriesTest {
         ApplyJournalEntries cloned = (ApplyJournalEntries) SerializationUtils.clone(expected);
 
         assertEquals("getFromIndex", expected.getToIndex(), cloned.getToIndex());
-        assertEquals("isMigrated", false, cloned.isMigrated());
     }
 }

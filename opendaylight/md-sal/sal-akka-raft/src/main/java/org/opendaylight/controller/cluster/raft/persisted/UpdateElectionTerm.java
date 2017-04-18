@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * Message class to persist election term information.
  */
-public class UpdateElectionTerm implements Serializable, MigratedSerializable {
+public class UpdateElectionTerm implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -53,16 +53,10 @@ public class UpdateElectionTerm implements Serializable, MigratedSerializable {
 
     private final long currentTerm;
     private final String votedFor;
-    private final boolean migrated;
-
-    private UpdateElectionTerm(final long currentTerm, final String votedFor, final boolean migrated) {
-        this.currentTerm = currentTerm;
-        this.votedFor = votedFor;
-        this.migrated = migrated;
-    }
 
     public UpdateElectionTerm(final long currentTerm, final String votedFor) {
-        this(currentTerm, votedFor, false);
+        this.currentTerm = currentTerm;
+        this.votedFor = votedFor;
     }
 
     public long getCurrentTerm() {
@@ -73,19 +67,8 @@ public class UpdateElectionTerm implements Serializable, MigratedSerializable {
         return votedFor;
     }
 
-    @Override
-    public boolean isMigrated() {
-        return migrated;
-    }
-
-    @Override
-    public Object writeReplace() {
+    private Object writeReplace() {
         return new Proxy(this);
-    }
-
-    @Deprecated
-    public static UpdateElectionTerm createMigrated(final long currentTerm, final String votedFor) {
-        return new UpdateElectionTerm(currentTerm, votedFor, true);
     }
 
     @Override

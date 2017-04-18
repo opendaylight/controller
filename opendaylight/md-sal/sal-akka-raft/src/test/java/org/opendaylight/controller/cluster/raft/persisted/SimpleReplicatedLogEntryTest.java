@@ -29,6 +29,5 @@ public class SimpleReplicatedLogEntryTest {
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getIndex", expected.getIndex(), cloned.getIndex());
         assertEquals("getData", expected.getData(), cloned.getData());
-        assertEquals("isMigrated", false, cloned.isMigrated());
     }
 }

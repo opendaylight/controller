@@ -18,7 +18,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class DeleteEntries implements Serializable, MigratedSerializable {
+public class DeleteEntries implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -53,34 +53,17 @@ public class DeleteEntries implements Serializable, MigratedSerializable {
     private static final long serialVersionUID = 1L;
 
     private final long fromIndex;
-    private final boolean migrated;
-
-    private DeleteEntries(final long fromIndex, final boolean migrated) {
-        this.fromIndex = fromIndex;
-        this.migrated = migrated;
-    }
 
     public DeleteEntries(final long fromIndex) {
-        this(fromIndex, false);
+        this.fromIndex = fromIndex;
     }
 
     public long getFromIndex() {
         return fromIndex;
     }
 
-    @Override
-    public boolean isMigrated() {
-        return migrated;
-    }
-
-    @Override
-    public Object writeReplace() {
+    private Object writeReplace() {
         return new Proxy(this);
-    }
-
-    @Deprecated
-    public static DeleteEntries createMigrated(final long fromIndex) {
-        return new DeleteEntries(fromIndex, true);
     }
 
     @Override
