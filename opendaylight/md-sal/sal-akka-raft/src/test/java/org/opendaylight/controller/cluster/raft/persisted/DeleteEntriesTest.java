@@ -25,6 +25,5 @@ public class DeleteEntriesTest {
         DeleteEntries cloned = (DeleteEntries) SerializationUtils.clone(expected);
 
         assertEquals("getFromIndex", expected.getFromIndex(), cloned.getFromIndex());
-        assertEquals("isMigrated", false, cloned.isMigrated());
     }
 }

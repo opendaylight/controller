@@ -157,10 +157,6 @@ class RaftActorRecoverySupport {
 
         if (snapshot.getServerConfiguration() != null) {
             context.updatePeerIds(snapshot.getServerConfiguration());
-
-            if (isMigratedSerializable(snapshot.getServerConfiguration())) {
-                hasMigratedDataRecovered = true;
-            }
         }
 
         timer.stop();

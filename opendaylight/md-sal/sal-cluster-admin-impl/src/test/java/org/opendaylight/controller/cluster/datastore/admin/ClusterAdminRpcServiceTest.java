@@ -64,9 +64,9 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -1045,7 +1045,7 @@ public class ClusterAdminRpcServiceTest {
                 String shardID = ShardIdentifier.create(shard, MemberName.forName(member),
                         type + datastoreTypeSuffix).toString();
                 InMemoryJournal.addEntry(shardID, 1, new UpdateElectionTerm(1, null));
-                InMemoryJournal.addEntry(shardID, 2, new ReplicatedLogImplEntry(0, 1,
+                InMemoryJournal.addEntry(shardID, 2, new SimpleReplicatedLogEntry(0, 1,
                         new ServerConfigurationPayload(newServerInfo)));
             }
         }

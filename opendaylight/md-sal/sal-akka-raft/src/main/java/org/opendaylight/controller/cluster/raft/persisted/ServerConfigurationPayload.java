@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public final class ServerConfigurationPayload extends Payload implements PersistentPayload, MigratedSerializable {
+public final class ServerConfigurationPayload extends Payload implements PersistentPayload, Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -77,27 +78,10 @@ public final class ServerConfigurationPayload extends Payload implements Persist
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
             + "aren't serialized. FindBugs does not recognize this.")
     private final List<ServerInfo> serverConfig;
-    private final boolean migrated;
     private int serializedSize = -1;
 
-    private ServerConfigurationPayload(@Nonnull final List<ServerInfo> serverConfig, boolean migrated) {
-        this.serverConfig = ImmutableList.copyOf(serverConfig);
-        this.migrated = migrated;
-    }
-
     public ServerConfigurationPayload(@Nonnull final List<ServerInfo> serverConfig) {
-        this(serverConfig, false);
-    }
-
-    @Deprecated
-    public static ServerConfigurationPayload createMigrated(@Nonnull final List<ServerInfo> serverConfig) {
-        return new ServerConfigurationPayload(serverConfig, true);
-    }
-
-    @Deprecated
-    @Override
-    public boolean isMigrated() {
-        return migrated;
+        this.serverConfig = ImmutableList.copyOf(serverConfig);
     }
 
     @Nonnull
@@ -128,8 +112,7 @@ public final class ServerConfigurationPayload extends Payload implements Persist
         return "ServerConfigurationPayload [serverConfig=" + serverConfig + "]";
     }
 
-    @Override
-    public Object writeReplace() {
+    private Object writeReplace() {
         return new Proxy(this);
     }
 }

@@ -13,6 +13,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
@@ -21,7 +22,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
  *
  * @author Thomas Pantelis
  */
-public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, MigratedSerializable {
+public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -61,14 +62,6 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Migra
     private final long term;
     private final Payload payload;
     private boolean persistencePending;
-    private final boolean migrated;
-
-    private SimpleReplicatedLogEntry(long index, long term, Payload payload, boolean migrated) {
-        this.index = index;
-        this.term = term;
-        this.payload = Preconditions.checkNotNull(payload);
-        this.migrated = migrated;
-    }
 
     /**
      * Constructs an instance.
@@ -77,13 +70,10 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Migra
      * @param term the term
      * @param payload the payload
      */
-    public SimpleReplicatedLogEntry(final long index, final long term, final Payload payload) {
-        this(index, term, payload, false);
-    }
-
-    @Deprecated
-    public static ReplicatedLogEntry createMigrated(final long index, final long term, final Payload payload) {
-        return new SimpleReplicatedLogEntry(index, term, payload, true);
+    public SimpleReplicatedLogEntry(long index, long term, Payload payload) {
+        this.index = index;
+        this.term = term;
+        this.payload = Preconditions.checkNotNull(payload);
     }
 
     @Override
@@ -116,13 +106,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Migra
         persistencePending = pending;
     }
 
-    @Override
-    public boolean isMigrated() {
-        return migrated;
-    }
-
-    @Override
-    public Object writeReplace() {
+    private Object writeReplace() {
         return new Proxy(this);
     }
 

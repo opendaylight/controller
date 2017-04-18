@@ -28,7 +28,6 @@ public class ServerConfigurationPayloadTest {
         ServerConfigurationPayload cloned = (ServerConfigurationPayload) SerializationUtils.clone(expected);
 
         assertEquals("getServerConfig", expected.getServerConfig(), cloned.getServerConfig());
-        assertEquals("isMigrated", false, cloned.isMigrated());
     }
 
     @Test
