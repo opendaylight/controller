@@ -13,7 +13,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrationMessage;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-abstract class DelayedListenerRegistration<L extends EventListener, M extends ListenerRegistrationMessage>
+class DelayedListenerRegistration<L extends EventListener, M extends ListenerRegistrationMessage>
         implements ListenerRegistration<L> {
     private final M registrationMessage;
     private final ActorRef registrationActor;
@@ -30,7 +30,7 @@ abstract class DelayedListenerRegistration<L extends EventListener, M extends Li
         return registrationMessage;
     }
 
-    synchronized void createDelegate(final AbstractDataListenerSupport<L, M, ?> support) {
+    synchronized void doRegistration(final AbstractDataListenerSupport<L, M> support) {
         if (!closed) {
             support.doRegistration(registrationMessage, registrationActor);
         }

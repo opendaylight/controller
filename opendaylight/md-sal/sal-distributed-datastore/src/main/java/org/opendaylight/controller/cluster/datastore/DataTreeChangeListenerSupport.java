@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeCh
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 
 final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DOMDataTreeChangeListener,
-        RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration> {
+        RegisterDataTreeChangeListener> {
 
     DataTreeChangeListenerSupport(final Shard shard) {
         super(shard);
@@ -34,12 +34,6 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
                 listener, shardDataTree.readCurrentData(), registration -> registrationActor.tell(
                         new DataTreeNotificationListenerRegistrationActor.SetRegistration(registration, () ->
                             removeListenerActor(listenerActor)), ActorRef.noSender()));
-    }
-
-    @Override
-    protected DelayedDataTreeListenerRegistration newDelayedListenerRegistration(
-            RegisterDataTreeChangeListener message, ActorRef registrationActor) {
-        return new DelayedDataTreeListenerRegistration(message, registrationActor);
     }
 
     @Override
