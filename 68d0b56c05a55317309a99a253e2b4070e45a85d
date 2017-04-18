@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da01753e_9df45dd0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractDataListenerSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-18T15:29:02Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "da01753e_77839a04",
+      "range": {
+        "startLine": 25,
+        "startChar": 63,
+        "endLine": 25,
+        "endChar": 90
+      },
+      "revId": "68d0b56c05a55317309a99a253e2b4070e45a85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_7d21b99e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeNotificationPublisherActorProxy.java",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "da01753e_fd03e9b5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeNotificationPublisherActorProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-18T15:29:02Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "da01753e_7d21b99e",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "68d0b56c05a55317309a99a253e2b4070e45a85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_dd2f0587",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeNotificationListenerRegistrationActor.java",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2017-04-18T15:03:02Z",
       "side": 1,
       "message": "create it in datastore.actors?",
+      "range": {
+        "startLine": 8,
+        "startChar": 44,
+        "endLine": 8,
+        "endChar": 53
+      },
+      "revId": "68d0b56c05a55317309a99a253e2b4070e45a85d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_5d2af52c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeNotificationListenerRegistrationActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-18T15:29:02Z",
+      "side": 1,
+      "message": "yeah - good point - that seems to fit. We could move others as well later.",
+      "parentUuid": "da01753e_dd2f0587",
       "range": {
         "startLine": 8,
         "startChar": 44,
