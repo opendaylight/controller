@@ -34,7 +34,7 @@ import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
@@ -79,7 +79,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 Assert.assertEquals("getPath", path, registerMsg.getPath());
                 Assert.assertEquals("isRegisterOnAllInstances", false, registerMsg.isRegisterOnAllInstances());
 
-                reply(new RegisterDataTreeChangeListenerReply(getRef()));
+                reply(new RegisterDataTreeNotificationListenerReply(getRef()));
 
                 for (int i = 0; i < 20 * 5 && proxy.getListenerRegistrationActor() == null; i++) {
                     Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -270,7 +270,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 Answer<Future<Object>> answer = invocation -> {
                     proxy.close();
-                    return Futures.successful((Object) new RegisterDataTreeChangeListenerReply(getRef()));
+                    return Futures.successful((Object) new RegisterDataTreeNotificationListenerReply(getRef()));
                 };
 
                 doAnswer(answer).when(actorContext).executeOperationAsync(any(ActorRef.class), any(Object.class),

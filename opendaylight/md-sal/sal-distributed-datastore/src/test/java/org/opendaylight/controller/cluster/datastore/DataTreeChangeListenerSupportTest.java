@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -161,7 +161,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TestModel.TEST_PATH));
 
         try {
-            RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply)
+            RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)
                 Await.result(Patterns.ask(shardActor, new RegisterDataTreeChangeListener(path, dclActor, false),
                     new Timeout(5, TimeUnit.SECONDS)), Duration.create(5, TimeUnit.SECONDS));
             return new SimpleEntry<>(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));

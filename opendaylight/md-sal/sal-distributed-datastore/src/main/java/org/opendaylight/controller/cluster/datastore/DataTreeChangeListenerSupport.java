@@ -11,7 +11,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import org.opendaylight.controller.cluster.datastore.actors.DataTreeNotificationListenerRegistrationActor;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 
 final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DOMDataTreeChangeListener,
@@ -34,11 +33,6 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
                 listener, shardDataTree.readCurrentData(), registration -> registrationActor.tell(
                         new DataTreeNotificationListenerRegistrationActor.SetRegistration(registration, () ->
                             removeListenerActor(listenerActor)), ActorRef.noSender()));
-    }
-
-    @Override
-    protected Object newRegistrationReplyMessage(ActorRef registrationActor) {
-        return new RegisterDataTreeChangeListenerReply(registrationActor);
     }
 
     @Override

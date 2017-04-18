@@ -17,7 +17,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -116,7 +116,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                     LOG.error("{}: Failed to register DataTreeChangeListener {} at path {}", logContext(),
                             getInstance(), registeredPath, failure);
                 } else {
-                    RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply) result;
+                    RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)result;
                     setListenerRegistrationActor(actorContext.actorSelection(
                             reply.getListenerRegistrationPath()));
                 }

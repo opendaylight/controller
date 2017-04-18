@@ -71,9 +71,8 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -148,8 +147,8 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new RegisterChangeListener(TestModel.TEST_PATH, dclActor,
                         AsyncDataBroker.DataChangeScope.BASE, true), getRef());
 
-                final RegisterChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
-                        RegisterChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("3 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 final String replyPath = reply.getListenerRegistrationPath().toString();
                 assertTrue("Incorrect reply path: " + replyPath,
                         replyPath.matches("akka:\\/\\/test\\/user\\/testRegisterChangeListener\\/\\$.*"));
@@ -238,8 +237,8 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new RegisterChangeListener(path, dclActor, AsyncDataBroker.DataChangeScope.SUBTREE, false),
                         getRef());
 
-                final RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
                 // Sanity check - verify the shard is not the leader yet.
@@ -278,8 +277,8 @@ public class ShardTest extends AbstractShardTest {
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, false), getRef());
 
-                final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
-                        RegisterDataTreeChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("3 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 final String replyPath = reply.getListenerRegistrationPath().toString();
                 assertTrue("Incorrect reply path: " + replyPath,
                         replyPath.matches("akka:\\/\\/test\\/user\\/testRegisterDataTreeChangeListener\\/\\$.*"));
@@ -342,8 +341,8 @@ public class ShardTest extends AbstractShardTest {
                 assertEquals("Got first ElectionTimeout", true, onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
 
                 shard.tell(new RegisterDataTreeChangeListener(path, dclActor, false), getRef());
-                final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterDataTreeChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistratioznPath", reply.getListenerRegistrationPath());
 
                 shard.tell(FindLeader.INSTANCE, getRef());
@@ -2146,8 +2145,8 @@ public class ShardTest extends AbstractShardTest {
 
                 shard.tell(new RegisterChangeListener(path, dclActor, AsyncDataBroker.DataChangeScope.BASE, true),
                         getRef());
-                final RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
                 shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build())
@@ -2196,9 +2195,9 @@ public class ShardTest extends AbstractShardTest {
                 followerShard.tell(
                         new RegisterChangeListener(path, dclActor, AsyncDataBroker.DataChangeScope.BASE, true),
                         getRef());
-                final RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterChangeListenerReply.class);
-                assertNotNull("getListenerRegistratioznPath", reply.getListenerRegistrationPath());
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
+                assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
                 writeToStore(followerShard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
@@ -2228,8 +2227,8 @@ public class ShardTest extends AbstractShardTest {
                 waitUntilNoLeader(shard);
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());
-                final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterDataTreeChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
                 shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build())
@@ -2261,8 +2260,8 @@ public class ShardTest extends AbstractShardTest {
                 waitUntilNoLeader(shard);
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());
-                final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterDataTreeChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
                 final ActorSelection regActor = getSystem().actorSelection(reply.getListenerRegistrationPath());
@@ -2313,8 +2312,8 @@ public class ShardTest extends AbstractShardTest {
                         actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
                 followerShard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());
-                final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
-                        RegisterDataTreeChangeListenerReply.class);
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                        RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
                 writeToStore(followerShard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
