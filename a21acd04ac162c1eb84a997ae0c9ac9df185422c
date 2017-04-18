@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_9a63c3dc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractFrontendHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-18T13:04:25Z",
+      "side": 1,
+      "message": "We don\u0027t differentiate read-write from write-only?",
+      "revId": "a21acd04ac162c1eb84a997ae0c9ac9df185422c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
