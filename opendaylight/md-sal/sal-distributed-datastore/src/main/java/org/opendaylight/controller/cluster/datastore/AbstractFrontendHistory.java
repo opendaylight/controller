@@ -170,16 +170,19 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             throws RequestException {
         if (request instanceof CommitLocalTransactionRequest) {
             LOG.debug("{}: allocating new ready transaction {}", persistenceId(), id);
+            tree.getStats().incrementReadWriteTransactionCount();
             return createReadyTransaction(id, ((CommitLocalTransactionRequest) request).getModification());
         }
         if (request instanceof AbstractReadTransactionRequest) {
             if (((AbstractReadTransactionRequest<?>) request).isSnapshotOnly()) {
                 LOG.debug("{}: allocatint new open snapshot {}", persistenceId(), id);
+                tree.getStats().incrementReadOnlyTransactionCount();
                 return createOpenSnapshot(id);
             }
         }
 
         LOG.debug("{}: allocating new open transaction {}", persistenceId(), id);
+        tree.getStats().incrementReadWriteTransactionCount();
         return createOpenTransaction(id);
     }
 
