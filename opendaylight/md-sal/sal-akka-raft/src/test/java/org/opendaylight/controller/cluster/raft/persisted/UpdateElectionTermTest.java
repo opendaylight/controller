@@ -26,6 +26,5 @@ public class UpdateElectionTermTest {
 
         assertEquals("getCurrentTerm", expected.getCurrentTerm(), cloned.getCurrentTerm());
         assertEquals("getVotedFor", expected.getVotedFor(), cloned.getVotedFor());
-        assertEquals("isMigrated", false, cloned.isMigrated());
     }
 }

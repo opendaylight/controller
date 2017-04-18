@@ -21,7 +21,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class ApplyJournalEntries implements Serializable, MigratedSerializable {
+public class ApplyJournalEntries implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -56,34 +56,17 @@ public class ApplyJournalEntries implements Serializable, MigratedSerializable {
     private static final long serialVersionUID = 1L;
 
     private final long toIndex;
-    private final boolean migrated;
-
-    private ApplyJournalEntries(final long toIndex, final boolean migrated) {
-        this.toIndex = toIndex;
-        this.migrated = migrated;
-    }
 
     public ApplyJournalEntries(final long toIndex) {
-        this(toIndex, false);
+        this.toIndex = toIndex;
     }
 
     public long getToIndex() {
         return toIndex;
     }
 
-    @Override
-    public boolean isMigrated() {
-        return migrated;
-    }
-
-    @Override
-    public Object writeReplace() {
+    private Object writeReplace() {
         return new Proxy(this);
-    }
-
-    @Deprecated
-    public static ApplyJournalEntries createMigrated(final long fromIndex) {
-        return new ApplyJournalEntries(fromIndex, true);
     }
 
     @Override
