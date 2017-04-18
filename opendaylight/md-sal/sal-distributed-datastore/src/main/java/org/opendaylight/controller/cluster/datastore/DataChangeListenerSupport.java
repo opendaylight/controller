@@ -17,8 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 final class DataChangeListenerSupport extends AbstractDataListenerSupport<
-        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>, RegisterChangeListener,
-            DelayedDataChangeListenerRegistration> {
+        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>, RegisterChangeListener> {
 
     DataChangeListenerSupport(final Shard shard) {
         super(shard);
@@ -38,12 +37,6 @@ final class DataChangeListenerSupport extends AbstractDataListenerSupport<
                 shardDataTree.readCurrentData(), registration -> registrationActor.tell(
                         new DataTreeNotificationListenerRegistrationActor.SetRegistration(registration, () ->
                             removeListenerActor(listenerActor)), ActorRef.noSender()));
-    }
-
-    @Override
-    protected DelayedDataChangeListenerRegistration newDelayedListenerRegistration(RegisterChangeListener message,
-            ActorRef registrationActor) {
-        return new DelayedDataChangeListenerRegistration(message, registrationActor);
     }
 
     @Override

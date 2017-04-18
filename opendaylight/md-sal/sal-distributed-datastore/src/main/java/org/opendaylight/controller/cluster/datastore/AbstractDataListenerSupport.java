@@ -19,12 +19,14 @@ import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrati
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class AbstractDataListenerSupport<L extends EventListener, M extends ListenerRegistrationMessage,
-        D extends DelayedListenerRegistration<L, M>> extends LeaderLocalDelegateFactory<M> {
+abstract class AbstractDataListenerSupport<L extends EventListener, M extends ListenerRegistrationMessage>
+        extends LeaderLocalDelegateFactory<M> {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final Collection<D> delayedListenerRegistrations = ConcurrentHashMap.newKeySet();
-    private final Collection<D> delayedListenerOnAllRegistrations = ConcurrentHashMap.newKeySet();
+    private final Collection<DelayedListenerRegistration<L, M>> delayedListenerRegistrations =
+            ConcurrentHashMap.newKeySet();
+    private final Collection<DelayedListenerRegistration<L, M>> delayedListenerOnAllRegistrations =
+            ConcurrentHashMap.newKeySet();
     private final Collection<ActorSelection> leaderOnlyListenerActors = ConcurrentHashMap.newKeySet();
     private final Collection<ActorSelection> allListenerActors = ConcurrentHashMap.newKeySet();
 
@@ -46,16 +48,16 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
         }
 
         if (hasLeader) {
-            for (D reg : delayedListenerOnAllRegistrations) {
-                reg.createDelegate(this);
+            for (DelayedListenerRegistration<L, M> reg : delayedListenerOnAllRegistrations) {
+                reg.doRegistration(this);
             }
 
             delayedListenerOnAllRegistrations.clear();
         }
 
         if (isLeader) {
-            for (D reg : delayedListenerRegistrations) {
-                reg.createDelegate(this);
+            for (DelayedListenerRegistration<L, M> reg : delayedListenerRegistrations) {
+                reg.doRegistration(this);
             }
 
             delayedListenerRegistrations.clear();
@@ -73,8 +75,9 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
         } else {
             log.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
-            D delayedReg = newDelayedListenerRegistration(message, registrationActor);
-            Collection<D> delayedRegList;
+            DelayedListenerRegistration<L, M> delayedReg =
+                    new DelayedListenerRegistration<>(message, registrationActor);
+            Collection<DelayedListenerRegistration<L, M>> delayedRegList;
             if (message.isRegisterOnAllInstances()) {
                 delayedRegList = delayedListenerOnAllRegistrations;
             } else {
@@ -119,8 +122,6 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
     }
 
     abstract void doRegistration(M message, ActorRef registrationActor);
-
-    protected abstract D newDelayedListenerRegistration(M message, ActorRef registrationActor);
 
     protected abstract Object newRegistrationReplyMessage(ActorRef registrationActor);
 
