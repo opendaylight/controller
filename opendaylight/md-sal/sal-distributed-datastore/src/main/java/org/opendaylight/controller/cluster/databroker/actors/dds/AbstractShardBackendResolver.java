@@ -24,7 +24,6 @@ import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -137,7 +136,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
                     return;
                 }
                 if (response instanceof RequestFailure) {
-                    final RequestException cause = ((RequestFailure<?, ?>) response).getCause();
+                    final Throwable cause = ((RequestFailure<?, ?>) response).getCause().unwrap();
                     LOG.debug("Connect attempt to {} failed to process", shardName, cause);
                     future.completeExceptionally(cause);
                     return;

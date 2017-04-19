@@ -316,7 +316,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             if (t instanceof TransactionAbortSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
             } else {
                 ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
             }
@@ -349,7 +349,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     if (t instanceof TransactionCommitSuccess) {
                         ret.set(Boolean.TRUE);
                     } else if (t instanceof RequestFailure) {
-                        ret.setException(((RequestFailure<?, ?>) t).getCause());
+                        ret.setException(((RequestFailure<?, ?>) t).getCause().unwrap());
                     } else {
                         ret.setException(new IllegalStateException("Unhandled response " + t.getClass()));
                     }
@@ -380,7 +380,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     if (t instanceof TransactionCanCommitSuccess) {
                         ret.voteYes();
                     } else if (t instanceof RequestFailure) {
-                        ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+                        ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
                     } else {
                         ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
                     }
@@ -411,7 +411,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             if (t instanceof TransactionPreCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
             } else {
                 ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
             }
@@ -444,7 +444,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             if (t instanceof TransactionCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
             } else {
                 ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
             }

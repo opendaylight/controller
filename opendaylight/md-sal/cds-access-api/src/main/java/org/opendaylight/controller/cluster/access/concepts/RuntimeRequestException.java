@@ -21,13 +21,17 @@ public final class RuntimeRequestException extends RequestException {
     private static final long serialVersionUID = 1L;
 
     public RuntimeRequestException(final String message, final Throwable cause) {
-        super(message, cause);
+        super(message, Preconditions.checkNotNull(cause));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(message), "Exception message is mandatory");
-        Preconditions.checkNotNull(cause);
     }
 
     @Override
     public boolean isRetriable() {
         return false;
+    }
+
+    @Override
+    public Throwable unwrap() {
+        return getCause();
     }
 }
