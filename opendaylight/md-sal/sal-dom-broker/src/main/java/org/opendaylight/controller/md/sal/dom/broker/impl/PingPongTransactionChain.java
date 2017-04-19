@@ -173,7 +173,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
         if (!LOCKED_UPDATER.compareAndSet(this, null, newTx)) {
             delegateTx.cancel();
-            throw new IllegalStateException(String.format("New transaction %s raced with transacion %s", newTx, lockedTx));
+            throw new IllegalStateException(String.format("New transaction %s raced with transaction %s", newTx, lockedTx));
         }
 
         return newTx;
