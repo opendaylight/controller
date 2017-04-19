@@ -117,8 +117,7 @@ public class ModuleShardBackendResolverTest {
         final ExecutionException caught =
                 TestUtils.assertOperationThrowsException(() -> TestUtils.getWithTimeout(stage.toCompletableFuture()),
                         ExecutionException.class);
-        Assert.assertNotNull(caught.getCause());
-        Assert.assertEquals(cause, caught.getCause().getCause());
+        Assert.assertEquals(cause, caught.getCause());
     }
 
     @Test

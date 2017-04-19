@@ -29,4 +29,14 @@ public abstract class RequestException extends Exception {
     }
 
     public abstract boolean isRetriable();
+
+    /**
+     * Unwraps the underlying failure. This method is overridden only in {@link RuntimeRequestException}.
+     *
+     * @return Underlying cause of the failure if exception is a {@link RuntimeRequestException}, or the exception
+     *         itself.
+     */
+    public Throwable unwrap() {
+        return this;
+    }
 }

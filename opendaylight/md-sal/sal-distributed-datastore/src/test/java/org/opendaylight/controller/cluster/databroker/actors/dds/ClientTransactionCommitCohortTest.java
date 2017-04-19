@@ -228,12 +228,13 @@ public class ClientTransactionCommitCohortTest {
         //reply fail to last transaction
         final TransactionTester<RemoteProxyTransaction> last = transactions.get(transactions.size() - 1);
         expectFunction.accept(last);
-        final RuntimeRequestException cause = new RuntimeRequestException("fail", new RuntimeException());
+        final RuntimeException e = new RuntimeException();
+        final RuntimeRequestException cause = new RuntimeRequestException("fail", e);
         last.replyFailure(cause);
         //check future fail
         final ExecutionException exception =
                 assertOperationThrowsException(() -> getWithTimeout(canCommit), ExecutionException.class);
-        Assert.assertEquals(cause, exception.getCause());
+        Assert.assertEquals(e, exception.getCause());
     }
 
 }
