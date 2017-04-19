@@ -144,10 +144,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     private ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
         String name = ShardIdentifier.create(shardName, MemberName.forName(memberName), "config").toString();
         if (system == getSystem()) {
-            return actorFactory.createTestActor(Props.create(MessageCollectorActor.class), name);
+            return actorFactory.createActor(Props.create(MessageCollectorActor.class), name);
         }
 
-        return TestActorRef.create(system, Props.create(MessageCollectorActor.class), name);
+        return system.actorOf(Props.create(MessageCollectorActor.class), name);
     }
 
     private Props newShardMgrProps() {
@@ -177,7 +177,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     }
 
     private Props newPropsShardMgrWithMockShardActor(ActorRef shardActor) {
-        return newTestShardMgrBuilderWithMockShardActor(shardActor).props();
+        return newTestShardMgrBuilderWithMockShardActor(shardActor).props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId());
     }
 
 
@@ -246,9 +247,9 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             }
         };
 
-        final TestActorRef<MessageCollectorActor> defaultShardActor = actorFactory.createTestActor(
+        final ActorRef defaultShardActor = actorFactory.createActor(
                 Props.create(MessageCollectorActor.class), actorFactory.generateActorId("default"));
-        final TestActorRef<MessageCollectorActor> topologyShardActor = actorFactory.createTestActor(
+        final ActorRef topologyShardActor = actorFactory.createActor(
                 Props.create(MessageCollectorActor.class), actorFactory.generateActorId("topology"));
 
         final Map<String, Entry<ActorRef, DatastoreContext>> shardInfoMap = Collections.synchronizedMap(
@@ -1212,7 +1213,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
                 ActorRef shardManager = actorFactory
-                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 SchemaContext schemaContext = TestModel.createTestContext();
                 shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
@@ -1263,7 +1265,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
                 ActorRef shardManager = actorFactory
-                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), ActorRef.noSender());
 
@@ -1292,7 +1295,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         new JavaTestKit(getSystem()) {
             {
                 ActorRef shardManager = actorFactory
-                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 Shard.Builder shardBuilder = Shard.builder();
 
@@ -1326,8 +1330,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 .put("shard1", Arrays.asList("member-1")).put("shard2", Arrays.asList("member-1"))
                 .put("astronauts", Collections.<String>emptyList()).build());
 
-        TestActorRef<TestShardManager> shardManager = actorFactory
-                .createTestActor(newShardMgrProps(mockConfig).withDispatcher(Dispatchers.DefaultDispatcherId()));
+        TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig)
+                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
         Failure failure = kit.expectMsgClass(Failure.class);
@@ -1424,7 +1428,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         new JavaTestKit(getSystem()) {
             {
                 ActorRef shardManager = actorFactory
-                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.tell(new AddShardReplica("model-inventory"), getRef());
                 Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
@@ -1623,7 +1628,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 ActorRef mockNewReplicaShardActor = newMockShardActor(getSystem(), "astronauts", "member-1");
                 final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
-                        newTestShardMgrBuilder(mockConfig).shardActor(mockNewReplicaShardActor).props(), shardMgrID);
+                        newTestShardMgrBuilder(mockConfig).shardActor(mockNewReplicaShardActor).props()
+                            .withDispatcher(Dispatchers.DefaultDispatcherId()), shardMgrID);
                 shardManager.underlyingActor()
                         .setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
 
@@ -1674,7 +1680,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         .put("astronauts", Arrays.asList("member-2")).build());
 
                 final ActorRef newReplicaShardManager = actorFactory
-                        .createActor(newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor).props(), shardMgrID);
+                        .createActor(newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor).props()
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()), shardMgrID);
 
                 newReplicaShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 MockClusterWrapper.sendMemberUp(newReplicaShardManager, "member-2",
@@ -1694,7 +1701,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         new JavaTestKit(getSystem()) {
             {
                 ActorRef shardManager = actorFactory
-                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+                        .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.tell(new RemoveShardReplica("model-inventory", MEMBER_1), getRef());
                 Status.Failure resp = expectMsgClass(duration("10 seconds"), Status.Failure.class);
@@ -1712,9 +1720,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
-                final TestActorRef<MockRespondActor> respondActor = actorFactory
-                        .createTestActor(Props.create(MockRespondActor.class, RemoveServer.class,
-                                new RemoveServerReply(ServerChangeStatus.OK, null)), memberId);
+                final ActorRef respondActor = actorFactory.createActor(Props.create(MockRespondActor.class,
+                        RemoveServer.class, new RemoveServerReply(ServerChangeStatus.OK, null)), memberId);
 
                 ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
@@ -1883,8 +1890,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         .put("astronauts", Arrays.asList("member-2"))
                         .put("people", Arrays.asList("member-1", "member-2")).build());
 
-                TestActorRef<TestShardManager> shardManager = actorFactory
-                        .createTestActor(newShardMgrProps(mockConfig));
+                TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
+                        newShardMgrProps(mockConfig).withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.underlyingActor().waitForRecoveryComplete();
                 shardManager.tell(new FindLocalShard("people", false), getRef());
@@ -1917,11 +1924,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         .put("people", Arrays.asList("member-1", "member-2")).build());
 
                 String shardId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
-                TestActorRef<MessageCollectorActor> shard = actorFactory.createTestActor(MessageCollectorActor.props(),
-                        shardId);
+                ActorRef shard = actorFactory.createActor(MessageCollectorActor.props(), shardId);
 
                 TestActorRef<TestShardManager> shardManager = actorFactory
-                        .createTestActor(newTestShardMgrBuilder(mockConfig).addShardActor("default", shard).props());
+                        .createTestActor(newTestShardMgrBuilder(mockConfig).addShardActor("default", shard).props()
+                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.underlyingActor().waitForRecoveryComplete();
 
@@ -1959,8 +1966,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 InMemorySnapshotStore.addSnapshot("shard-manager-" + shardMrgIDSuffix, snapshot);
 
                 // create shardManager to come up with restored data
-                TestActorRef<TestShardManager> newRestoredShardManager = actorFactory
-                        .createTestActor(newShardMgrProps(mockConfig));
+                TestActorRef<TestShardManager> newRestoredShardManager = actorFactory.createTestActor(
+                        newShardMgrProps(mockConfig).withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 newRestoredShardManager.underlyingActor().waitForRecoveryComplete();
 
@@ -1992,17 +1999,13 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         .put("shard1", Arrays.asList("member-1")).put("shard2", Arrays.asList("member-1")).build());
 
                 String shardId1 = ShardIdentifier.create("shard1", MEMBER_1, shardMrgIDSuffix).toString();
-                TestActorRef<MessageCollectorActor> shard1 = actorFactory.createTestActor(
-                        MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardId1);
+                ActorRef shard1 = actorFactory.createActor(MessageCollectorActor.props(), shardId1);
 
                 String shardId2 = ShardIdentifier.create("shard2", MEMBER_1, shardMrgIDSuffix).toString();
-                TestActorRef<MessageCollectorActor> shard2 = actorFactory.createTestActor(
-                        MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardId2);
+                ActorRef shard2 = actorFactory.createActor(MessageCollectorActor.props(), shardId2);
 
-                TestActorRef<TestShardManager> shardManager = actorFactory
-                        .createTestActor(newTestShardMgrBuilder(mockConfig).addShardActor("shard1", shard1)
-                                .addShardActor("shard2", shard2).props()
-                                .withDispatcher(Dispatchers.DefaultDispatcherId()));
+                ActorRef shardManager = actorFactory.createActor(newTestShardMgrBuilder(mockConfig)
+                        .addShardActor("shard1", shard1).addShardActor("shard2", shard2).props());
 
                 shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 shardManager.tell(new ActorInitialized(), shard1);
@@ -2038,8 +2041,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
-                TestActorRef<MockRespondActor> respondActor = actorFactory
-                        .createTestActor(Props.create(MockRespondActor.class, ChangeServersVotingStatus.class,
+                ActorRef respondActor = actorFactory
+                        .createActor(Props.create(MockRespondActor.class, ChangeServersVotingStatus.class,
                                 new ServerChangeReply(ServerChangeStatus.OK, null)), memberId);
 
                 ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
@@ -2074,8 +2077,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
-                TestActorRef<MockRespondActor> respondActor = actorFactory
-                        .createTestActor(Props.create(MockRespondActor.class, ChangeServersVotingStatus.class,
+                ActorRef respondActor = actorFactory
+                        .createActor(Props.create(MockRespondActor.class, ChangeServersVotingStatus.class,
                                 new ServerChangeReply(ServerChangeStatus.NO_LEADER, null)), memberId);
 
                 ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
