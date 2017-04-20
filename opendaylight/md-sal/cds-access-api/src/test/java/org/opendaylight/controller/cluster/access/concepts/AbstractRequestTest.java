@@ -51,5 +51,5 @@ public abstract class AbstractRequestTest<T extends Request<?, ?>> {
         doAdditionalAssertions(deserialize);
     }
 
-    protected abstract void doAdditionalAssertions(final Object deserialize);
+    protected abstract void doAdditionalAssertions(Object deserialize);
 }
