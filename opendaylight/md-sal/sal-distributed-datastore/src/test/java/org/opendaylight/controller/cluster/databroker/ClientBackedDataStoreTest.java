@@ -78,7 +78,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testCreateTransactionChain() throws Exception {
-        try (final ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreTransactionChain txChain = clientBackedDataStore.createTransactionChain();
             Assert.assertNotNull(txChain);
@@ -88,7 +88,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testNewReadOnlyTransaction() throws Exception {
-        try (final ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadTransaction tx = clientBackedDataStore.newReadOnlyTransaction();
             Assert.assertNotNull(tx);
@@ -98,7 +98,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testNewWriteOnlyTransaction() throws Exception {
-        try (final ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreWriteTransaction tx = clientBackedDataStore.newWriteOnlyTransaction();
             Assert.assertNotNull(tx);
@@ -108,7 +108,7 @@ public class ClientBackedDataStoreTest {
 
     @Test
     public void testNewReadWriteTransaction() throws Exception {
-        try (final ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
+        try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadWriteTransaction tx = clientBackedDataStore.newReadWriteTransaction();
             Assert.assertNotNull(tx);

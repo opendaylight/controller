@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -43,12 +43,12 @@ public class ShardDataTreeSnapshotTest {
 
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (final ObjectOutputStream out = new ObjectOutputStream(bos)) {
+        try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
             snapshot.serialize(out);
         }
 
         ShardDataTreeSnapshot deserialized;
-        try (final ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
             deserialized = ShardDataTreeSnapshot.deserialize(in);
         }
 
@@ -69,12 +69,12 @@ public class ShardDataTreeSnapshotTest {
                 ImmutableMap.of(TestShardDataTreeSnapshotMetadata.class, new TestShardDataTreeSnapshotMetadata("test"));
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode, expMetadata);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (final ObjectOutputStream out = new ObjectOutputStream(bos)) {
+        try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
             snapshot.serialize(out);
         }
 
         ShardDataTreeSnapshot deserialized;
-        try (final ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
             deserialized = ShardDataTreeSnapshot.deserialize(in);
         }
 
