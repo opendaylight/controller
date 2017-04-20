@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -116,7 +116,7 @@ public class DistributedShardFrontendTest {
 
         final DistributedShardFrontend rootShard = new DistributedShardFrontend(distributedDataStore, client, ROOT);
 
-        try (final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(ROOT))) {
+        try (DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(ROOT))) {
             shardedDOMDataTree.registerDataTreeShard(ROOT, rootShard, producer);
         }
 
@@ -142,7 +142,7 @@ public class DistributedShardFrontendTest {
 
         final DistributedShardFrontend outerListShard = new DistributedShardFrontend(
                 distributedDataStore, outerListClient, OUTER_LIST_ID);
-        try (final DOMDataTreeProducer producer =
+        try (DOMDataTreeProducer producer =
                      shardedDOMDataTree.createProducer(Collections.singletonList(OUTER_LIST_ID))) {
             shardedDOMDataTree.registerDataTreeShard(OUTER_LIST_ID, outerListShard, producer);
         }
@@ -213,6 +213,4 @@ public class DistributedShardFrontendTest {
 
         return testContainer;
     }
-
-
 }
