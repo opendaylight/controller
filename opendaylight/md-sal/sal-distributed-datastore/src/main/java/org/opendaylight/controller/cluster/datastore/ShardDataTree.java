@@ -597,10 +597,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         replicatePayload(id, PurgeLocalHistoryPayload.create(id), callback);
     }
 
-    void registerDataChangeListener(YangInstanceIdentifier path,
-            AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, DataChangeScope scope,
-            Optional<DataTreeCandidate> initialState,
-            Consumer<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>>
+    void registerDataChangeListener(final YangInstanceIdentifier path,
+            final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, final DataChangeScope scope,
+            final Optional<DataTreeCandidate> initialState,
+            final Consumer<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>>
                     onRegistration) {
         dataChangeListenerPublisher.registerDataChangeListener(path, listener, scope, initialState, onRegistration);
     }
@@ -612,9 +612,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             YangInstanceIdentifier.EMPTY, currentState.get())) : Optional.<DataTreeCandidate>absent();
     }
 
-    public void registerTreeChangeListener(YangInstanceIdentifier path, DOMDataTreeChangeListener listener,
-            Optional<DataTreeCandidate> initialState,
-            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+    public void registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
+            final Optional<DataTreeCandidate> initialState,
+            final Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         treeChangeListenerPublisher.registerTreeChangeListener(path, listener, initialState, onRegistration);
     }
 
@@ -926,7 +926,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         cohortRegistry.process(sender, message);
     }
 
-
     @Override
     ShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
@@ -941,6 +940,16 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 cohortRegistry.createCohort(schemaContext, txId, COMMIT_STEP_TIMEOUT));
         pendingTransactions.add(new CommitEntry(cohort, ticker().read()));
         return cohort;
+    }
+
+    // Exposed for ShardCommitCoordinator so it does not have deal with local histories (it does not care), this mimics
+    // the newReadWriteTransaction()
+    ShardDataTreeCohort newReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
+        if (txId.getHistoryId().getHistoryId() == 0) {
+            return createReadyCohort(txId, mod);
+        }
+
+        return ensureTransactionChain(txId.getHistoryId()).createReadyCohort(txId, mod);
     }
 
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
