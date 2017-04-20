@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2017 Inocybe Technologies and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.message;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import org.apache.commons.lang.SerializationUtils;
+import org.junit.Test;
+
+/**
+ * Unit tests for MessageSlice.
+ *
+ * @author Thomas Pantelis
+ */
+public class MessageSliceTest {
+
+    @Test
+    public void testSerialization() {
+        byte[] data = new byte[1000];
+        for (int i = 0, j = 0; i < data.length; i++) {
+            data[i] = (byte)j;
+            if (++j >= 255) {
+                j = 0;
+            }
+        }
+
+        MessageSlice expected = new MessageSlice(new StringIdentifier("test"), data, 2, 3, 54321);
+        MessageSlice cloned = (MessageSlice) SerializationUtils.clone(expected);
+
+        assertEquals("getIdentifier", expected.getIdentifier(), cloned.getIdentifier());
+        assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());
+        assertEquals("getTotalSlices", expected.getTotalSlices(), cloned.getTotalSlices());
+        assertEquals("getLastSliceHashCode", expected.getLastSliceHashCode(), cloned.getLastSliceHashCode());
+        assertArrayEquals("getData", expected.getData(), cloned.getData());
+    }
+}
