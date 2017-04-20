@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -604,7 +604,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
         IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder, commitTimeout);
 
-        try (final AbstractDataStore ds =
+        try (AbstractDataStore ds =
                 newMember1TestKit.setupAbstractDataStore(
                         testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
 
@@ -880,7 +880,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System,
                 DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).operationTimeoutInMillis(100),
                 commitTimeout);
-        try (final AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
+        try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
                 testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
 
             // Create and submit a couple tx's so they're pending.
@@ -1060,7 +1060,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
                 follower2System, follower2DatastoreContextBuilder, commitTimeout);
 
-        try (final AbstractDataStore ds =
+        try (AbstractDataStore ds =
                 follower2TestKit.setupAbstractDataStore(
                         testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false, CARS)) {
 

@@ -38,5 +38,5 @@ public abstract class AbstractRequestSuccessTest<T extends RequestSuccess> {
         doAdditionalAssertions((T) deserialize);
     }
 
-    protected abstract void doAdditionalAssertions(final Object deserialize);
+    protected abstract void doAdditionalAssertions(Object deserialize);
 }

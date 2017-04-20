@@ -146,7 +146,7 @@ public class DatastoreSnapshotListTest {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (root != null) {
             MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(root);
-            try (final DataOutputStream dos = new DataOutputStream(bos)) {
+            try (DataOutputStream dos = new DataOutputStream(bos)) {
                 PayloadVersion.BORON.writeTo(dos);
                 try (ObjectOutputStream oos = new ObjectOutputStream(dos)) {
                     oos.writeObject(snapshot);

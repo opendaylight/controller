@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -230,14 +230,14 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      * @param address Remote address
      * @param bucket Bucket removed
      */
-    protected abstract void onBucketRemoved(final Address address, final Bucket<T> bucket);
+    protected abstract void onBucketRemoved(Address address, Bucket<T> bucket);
 
     /**
      * Callback to subclasses invoked when the set of remote buckets is updated.
      *
      * @param newBuckets Map of address to new bucket. Never null, but can be empty.
      */
-    protected abstract void onBucketsUpdated(final Map<Address, Bucket<T>> newBuckets);
+    protected abstract void onBucketsUpdated(Map<Address, Bucket<T>> newBuckets);
 
     /**
      * Helper to collect all known buckets.
