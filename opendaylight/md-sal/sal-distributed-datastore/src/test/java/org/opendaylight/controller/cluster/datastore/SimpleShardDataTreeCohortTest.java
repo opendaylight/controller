@@ -230,7 +230,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     @Test
     public void testAbort() throws Exception {
-        doReturn(true).when(mockShardDataTree).startAbort(cohort);
+        doReturn(Boolean.TRUE).when(mockShardDataTree).startAbort(cohort);
 
         abort(cohort).get();
         verify(mockShardDataTree).startAbort(cohort);
@@ -241,7 +241,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         doReturn(true).when(mockShardDataTree).startAbort(cohort);
 
         final Promise<Iterable<Object>> cohortFuture = akka.dispatch.Futures.promise();
-        doReturn(Optional.of(cohortFuture.future())).when(mockUserCohorts).abort();
+        doReturn(Optional.of(Collections.singletonList(cohortFuture.future()))).when(mockUserCohorts).abort();
 
         final Future<?> abortFuture = abort(cohort);
 
