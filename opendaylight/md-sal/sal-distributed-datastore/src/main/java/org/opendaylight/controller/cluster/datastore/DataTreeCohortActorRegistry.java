@@ -82,7 +82,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         cohort.tell(PoisonPill.getInstance(), cohort);
     }
 
-    Collection<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
+    List<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
             final DataTreeCandidate candidate, final SchemaContext schema) {
         try (RegistrationTreeSnapshot<ActorRef> cohorts = takeSnapshot()) {
             return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
@@ -204,12 +204,12 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
             return new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, path);
         }
 
-        private Collection<DataTreeCohortActor.CanCommit> perform(final RegistrationTreeNode<ActorRef> rootNode) {
+        List<DataTreeCohortActor.CanCommit> perform(final RegistrationTreeNode<ActorRef> rootNode) {
             final List<PathArgument> toLookup = candidate.getRootPath().getPathArguments();
             lookupAndCreateCanCommits(toLookup, 0, rootNode);
 
             final Map<ActorRef, Collection<DOMDataTreeCandidate>> mapView = actorToCandidates.asMap();
-            Collection<DataTreeCohortActor.CanCommit> messages = new ArrayList<>(mapView.size());
+            final List<DataTreeCohortActor.CanCommit> messages = new ArrayList<>(mapView.size());
             for (Map.Entry<ActorRef, Collection<DOMDataTreeCandidate>> entry: mapView.entrySet()) {
                 messages.add(new DataTreeCohortActor.CanCommit(txId, entry.getValue(), schema, entry.getKey()));
             }
