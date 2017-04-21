@@ -8,11 +8,13 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.dispatch.ExecutionContexts;
+import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -126,13 +128,13 @@ abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         candidate = null;
         state = State.ABORTED;
 
-        final Optional<Future<Iterable<Object>>> maybeAborts = userCohorts.abort();
+        final Optional<List<Future<Object>>> maybeAborts = userCohorts.abort();
         if (!maybeAborts.isPresent()) {
             abortCallback.onSuccess(null);
             return;
         }
 
-        final Future<Iterable<Object>> aborts = maybeAborts.get();
+        final Future<Iterable<Object>> aborts = Futures.sequence(maybeAborts.get(), ExecutionContexts.global());
         if (aborts.isCompleted()) {
             abortCallback.onSuccess(null);
             return;

@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import akka.actor.Status;
 import akka.actor.Status.Failure;
 import akka.dispatch.ExecutionContexts;
@@ -17,9 +18,14 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -82,19 +88,19 @@ class CompositeDataTreeCohort {
         ABORTED
     }
 
-    protected static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<Object>() {
+    static final Recover<Object> EXCEPTION_TO_MESSAGE = new Recover<Object>() {
         @Override
-        public Failure recover(final Throwable error) throws Throwable {
+        public Failure recover(final Throwable error) {
             return new Failure(error);
         }
     };
-
 
     private final DataTreeCohortActorRegistry registry;
     private final TransactionIdentifier txId;
     private final SchemaContext schema;
     private final Timeout timeout;
-    private Iterable<Success> successfulFromPrevious;
+
+    private List<Success> successfulFromPrevious;
     private State state = State.IDLE;
 
     CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
@@ -114,7 +120,10 @@ class CompositeDataTreeCohort {
             case COMMIT_SENT:
                 abort();
                 break;
-            default :
+            case ABORTED:
+            case COMMITED:
+            case FAILED:
+            case IDLE:
                 break;
         }
 
@@ -123,86 +132,139 @@ class CompositeDataTreeCohort {
     }
 
     void canCommit(final DataTreeCandidate tip) throws ExecutionException, TimeoutException {
-        LOG.debug("{}: canCommit -  candidate: {}", txId, tip);
+        LOG.debug("{}: canCommit - candidate: {}", txId, tip);
 
-        Collection<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
-
+        final List<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
         LOG.debug("{}: canCommit - messages: {}", txId, messages);
+        if (messages.isEmpty()) {
+            successfulFromPrevious = ImmutableList.of();
+            changeStateFrom(State.IDLE, State.CAN_COMMIT_SUCCESSFUL);
+            return;
+        }
 
-        // FIXME: Optimize empty collection list with pre-created futures, containing success.
-        Future<Iterable<Object>> canCommitsFuture = Futures.traverse(messages,
-            input -> Patterns.ask(input.getCohort(), input, timeout).recover(EXCEPTION_TO_MESSAGE,
-                    ExecutionContexts.global()), ExecutionContexts.global());
+        final List<Entry<ActorRef, Future<Object>>> futures = new ArrayList<>(messages.size());
+        for (CanCommit message : messages) {
+            final ActorRef actor = message.getCohort();
+            final Future<Object> future = Patterns.ask(actor, message, timeout).recover(EXCEPTION_TO_MESSAGE,
+                ExecutionContexts.global());
+            LOG.trace("{}: requesting canCommit from {}", txId, actor);
+            futures.add(new SimpleImmutableEntry<>(actor, future));
+        }
+
         changeStateFrom(State.IDLE, State.CAN_COMMIT_SENT);
-        processResponses(canCommitsFuture, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL);
+        processResponses(futures, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL);
     }
 
     void preCommit() throws ExecutionException, TimeoutException {
         LOG.debug("{}: preCommit - successfulFromPrevious: {}", txId, successfulFromPrevious);
 
         Preconditions.checkState(successfulFromPrevious != null);
-        Future<Iterable<Object>> preCommitFutures = sendMesageToSuccessful(new DataTreeCohortActor.PreCommit(txId));
+        if (successfulFromPrevious.isEmpty()) {
+            changeStateFrom(State.CAN_COMMIT_SUCCESSFUL, State.PRE_COMMIT_SUCCESSFUL);
+            return;
+        }
+
+        final List<Entry<ActorRef, Future<Object>>> futures = sendMessageToSuccessful(
+            new DataTreeCohortActor.PreCommit(txId));
         changeStateFrom(State.CAN_COMMIT_SUCCESSFUL, State.PRE_COMMIT_SENT);
-        processResponses(preCommitFutures, State.PRE_COMMIT_SENT, State.PRE_COMMIT_SUCCESSFUL);
+        processResponses(futures, State.PRE_COMMIT_SENT, State.PRE_COMMIT_SUCCESSFUL);
     }
 
     void commit() throws ExecutionException, TimeoutException {
         LOG.debug("{}: commit - successfulFromPrevious: {}", txId, successfulFromPrevious);
+        if (successfulFromPrevious.isEmpty()) {
+            changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMITED);
+            return;
+        }
 
         Preconditions.checkState(successfulFromPrevious != null);
-        Future<Iterable<Object>> commitsFuture = sendMesageToSuccessful(new DataTreeCohortActor.Commit(txId));
+        final List<Entry<ActorRef, Future<Object>>> futures = sendMessageToSuccessful(
+            new DataTreeCohortActor.Commit(txId));
         changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMIT_SENT);
-        processResponses(commitsFuture, State.COMMIT_SENT, State.COMMITED);
+        processResponses(futures, State.COMMIT_SENT, State.COMMITED);
     }
 
-    Optional<Future<Iterable<Object>>> abort() {
+    Optional<List<Future<Object>>> abort() {
         LOG.debug("{}: abort - successfulFromPrevious: {}", txId, successfulFromPrevious);
 
         state = State.ABORTED;
-        if (successfulFromPrevious != null && !Iterables.isEmpty(successfulFromPrevious)) {
-            return Optional.of(sendMesageToSuccessful(new DataTreeCohortActor.Abort(txId)));
+        if (successfulFromPrevious == null || successfulFromPrevious.isEmpty()) {
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        final DataTreeCohortActor.Abort message = new DataTreeCohortActor.Abort(txId);
+        final List<Future<Object>> futures = new ArrayList<>(successfulFromPrevious.size());
+        for (Success s : successfulFromPrevious) {
+            futures.add(Patterns.ask(s.getCohort(), message, timeout));
+        }
+        return Optional.of(futures);
     }
 
-    private Future<Iterable<Object>> sendMesageToSuccessful(final Object message) {
+    private List<Entry<ActorRef, Future<Object>>> sendMessageToSuccessful(final Object message) {
         LOG.debug("{}: sendMesageToSuccessful: {}", txId, message);
 
-        return Futures.traverse(successfulFromPrevious, cohortResponse -> Patterns.ask(
-                cohortResponse.getCohort(), message, timeout), ExecutionContexts.global());
+        final List<Entry<ActorRef, Future<Object>>> ret = new ArrayList<>(successfulFromPrevious.size());
+        for (Success s : successfulFromPrevious) {
+            final ActorRef actor = s.getCohort();
+            ret.add(new SimpleImmutableEntry<>(actor, Patterns.ask(actor, message, timeout)));
+        }
+        return ret;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void processResponses(final Future<Iterable<Object>> resultsFuture, final State currentState,
+    private void processResponses(final List<Entry<ActorRef, Future<Object>>> futures, final State currentState,
             final State afterState) throws TimeoutException, ExecutionException {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
 
         final Iterable<Object> results;
         try {
-            results = Await.result(resultsFuture, timeout.duration());
+            results = Await.result(Futures.sequence(Lists.transform(futures, e -> e.getValue()),
+                ExecutionContexts.global()), timeout.duration());
+        } catch (TimeoutException e) {
+            successfulFromPrevious = null;
+            LOG.debug("{}: processResponses - error from Future", txId, e);
+
+            for (Entry<ActorRef, Future<Object>> f : futures) {
+                if (!f.getValue().isCompleted()) {
+                    LOG.info("{}: actor {} failed to respond", txId, f.getKey());
+                }
+            }
+            throw e;
+        } catch (ExecutionException e) {
+            successfulFromPrevious = null;
+            LOG.debug("{}: processResponses - error from Future", txId, e);
+            throw e;
         } catch (Exception e) {
             successfulFromPrevious = null;
             LOG.debug("{}: processResponses - error from Future", txId, e);
-            Throwables.propagateIfInstanceOf(e, TimeoutException.class);
-            throw Throwables.propagate(e);
+            throw new ExecutionException(e);
         }
-        Iterable<Failure> failed = Iterables.filter(results, Status.Failure.class);
-        Iterable<Success> successful = Iterables.filter(results, DataTreeCohortActor.Success.class);
+
+        final Collection<Failure> failed = new ArrayList<>(1);
+        final List<Success> successful = new ArrayList<>(futures.size());
+        for (Object result : results) {
+            if (result instanceof DataTreeCohortActor.Success) {
+                successful.add((Success) result);
+            } if (result instanceof Status.Failure) {
+                failed.add((Failure) result);
+            } else {
+                LOG.warn("{}: unrecognized response {}, ignoring it", result);
+            }
+        }
 
         LOG.debug("{}: processResponses - successful: {}, failed: {}", txId, successful, failed);
 
         successfulFromPrevious = successful;
-        if (!Iterables.isEmpty(failed)) {
+        if (!failed.isEmpty()) {
             changeStateFrom(currentState, State.FAILED);
-            Iterator<Failure> it = failed.iterator();
-            Throwable firstEx = it.next().cause();
+            final Iterator<Failure> it = failed.iterator();
+            final Throwable firstEx = it.next().cause();
             while (it.hasNext()) {
                 firstEx.addSuppressed(it.next().cause());
             }
-            Throwables.propagateIfPossible(firstEx, ExecutionException.class);
-            Throwables.propagateIfPossible(firstEx, TimeoutException.class);
-            throw Throwables.propagate(firstEx);
+            Throwables.propagateIfInstanceOf(firstEx, ExecutionException.class);
+            Throwables.propagateIfInstanceOf(firstEx, TimeoutException.class);
+            throw new ExecutionException(firstEx);
         }
         changeStateFrom(currentState, afterState);
     }
