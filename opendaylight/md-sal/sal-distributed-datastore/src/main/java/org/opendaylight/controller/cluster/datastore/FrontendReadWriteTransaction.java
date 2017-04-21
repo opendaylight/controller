@@ -199,7 +199,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         });
     }
 
-    private void successfulDirectCanCommit(final RequestEnvelope envelope, final long startTime) {
+    void successfulDirectCanCommit(final RequestEnvelope envelope, final long startTime) {
         readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
             @Override
             public void onSuccess(final DataTreeCandidate result) {
@@ -214,7 +214,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         });
     }
 
-    private void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
+    void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
         readyCohort.commit(new FutureCallback<UnsignedLong>() {
             @Override
             public void onSuccess(final UnsignedLong result) {
@@ -229,7 +229,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         });
     }
 
-    private void successfulCommit(final RequestEnvelope envelope, final long startTime) {
+    void successfulCommit(final RequestEnvelope envelope, final long startTime) {
         recordAndSendSuccess(envelope, startTime, new TransactionCommitSuccess(readyCohort.getIdentifier(),
             envelope.getMessage().getSequence()));
         readyCohort = null;
