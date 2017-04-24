@@ -51,7 +51,7 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
         public void finalizeReferent() {
             FINALIZERS.remove(this);
             if (transaction.abort()) {
-                LOG.warn("Aborted orphan transaction {}", transaction.getIdentifier());
+                LOG.info("Aborted orphan transaction {}", transaction);
             }
         }
     }

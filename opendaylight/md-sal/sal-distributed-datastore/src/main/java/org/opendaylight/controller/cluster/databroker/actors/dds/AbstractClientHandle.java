@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Map;
@@ -115,5 +116,11 @@ public abstract class AbstractClientHandle<T extends AbstractProxyTransaction> e
         final State<T> local = state;
         Preconditions.checkState(local != null, "Transaction %s is closed", transactionId);
         return local;
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).omitNullValues().add("identifier", transactionId).add("state", state)
+                .toString();
     }
 }
