@@ -104,6 +104,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
             return null;
         } else {
+            LOG.warn("Rejecting unsupported request {}", request);
             throw new UnsupportedRequestException(request);
         }
     }
@@ -314,6 +315,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 coordinatedCommit(envelope, now);
                 return null;
             default:
+                LOG.warn("{}: rejecting unsupported protocol {}", history().persistenceId(), maybeProto.get());
                 throw new UnsupportedRequestException(request);
         }
     }
