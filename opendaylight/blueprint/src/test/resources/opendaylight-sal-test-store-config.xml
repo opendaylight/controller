@@ -1,0 +1,6 @@
+<lists xmlns:"urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:store">
+  <unordered-container>
+    <name>someName</name>
+    <value>someValue</value>
+  </unordered-container>
+</lists>

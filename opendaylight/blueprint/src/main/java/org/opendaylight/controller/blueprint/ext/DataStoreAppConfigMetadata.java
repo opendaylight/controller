@@ -14,8 +14,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
+import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader.ConfigURLProvider;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -37,14 +36,12 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -52,14 +49,11 @@ import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.Dom
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 /**
  * Factory metadata corresponding to the "clustered-app-config" element that obtains an application's
@@ -196,7 +190,6 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private void readInitialAppConfig(final DataBroker dataBroker) {
-
         final ReadOnlyTransaction readOnlyTx = dataBroker.newReadOnlyTransaction();
         CheckedFuture<Optional<DataObject>, ReadFailedException> future = readOnlyTx.read(
                 LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath);
@@ -279,113 +272,44 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private DataObject createDefaultInstance() {
-        YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
+        try {
+            @SuppressWarnings("resource")
+            ConfigURLProvider inputStreamProvider = appConfigFileName -> {
+                File appConfigFile = new File(DEFAULT_APP_CONFIG_FILE_PATH, appConfigFileName);
+                LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(),
+                        appConfigFile.getAbsolutePath());
 
-        LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName(), yangPath,
-                bindingContext.bindingQName);
+                if (!appConfigFile.exists()) {
+                    return Optional.absent();
+                }
 
-        SchemaService schemaService = getOSGiService(SchemaService.class);
-        if (schemaService == null) {
-            setFailureMessage(String.format("%s: Could not obtain the SchemaService OSGi service", logName()));
-            return null;
-        }
+                LOG.debug("{}: Found file {}", logName(), appConfigFile.getAbsolutePath());
 
-        SchemaContext schemaContext = schemaService.getGlobalContext();
+                return Optional.of(appConfigFile.toURI().toURL());
+            };
 
-        Module module = schemaContext.findModuleByNamespaceAndRevision(bindingContext.bindingQName.getNamespace(),
-                bindingContext.bindingQName.getRevision());
-        if (module == null) {
-            setFailureMessage(String.format("%s: Could not obtain the module schema for namespace %s, revision %s",
-                    logName(), bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision()));
-            return null;
-        }
+            DataStoreAppConfigDefaultXMLReader reader = new DataStoreAppConfigDefaultXMLReader(logName(),
+                    defaultAppConfigFileName, getOSGiService(SchemaService.class), bindingSerializer, bindingContext,
+                    inputStreamProvider);
+            return reader.createDefaultInstance((schemaContext, dataSchema) -> {
+                // Fallback if file cannot be read, try XML from Config
+                NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
+                if (dataNode == null) {
+                    // or, as last ressort, defaults from the model
+                    return bindingContext.newDefaultNode(dataSchema);
+                } else {
+                    return dataNode;
+                }
+            });
 
-        DataSchemaNode dataSchema = module.getDataChildByName(bindingContext.bindingQName);
-        if (dataSchema == null) {
-            setFailureMessage(String.format("%s: Could not obtain the schema for %s", logName(),
-                    bindingContext.bindingQName));
-            return null;
-        }
-
-        if (!bindingContext.schemaType.isAssignableFrom(dataSchema.getClass())) {
-            setFailureMessage(String.format("%s: Expected schema type %s for %s but actual type is %s", logName(),
-                    bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass()));
-            return null;
-        }
-
-        NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
-        if (dataNode == null) {
-            dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
-        }
-
-        if (dataNode == null) {
-            dataNode = bindingContext.newDefaultNode(dataSchema);
-        }
-
-        DataObject appConfig = bindingSerializer.fromNormalizedNode(yangPath, dataNode).getValue();
-
-        if (appConfig == null) {
-            // This shouldn't happen but need to handle it in case...
-            setFailureMessage(String.format("%s: Could not create instance for app config binding %s",
-                    logName(), bindingContext.appConfigBindingClass));
-        }
-
-        return appConfig;
-    }
-
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final SchemaContext schemaContext,
-            final DataSchemaNode dataSchema) {
-
-        String appConfigFileName = defaultAppConfigFileName;
-        if (Strings.isNullOrEmpty(appConfigFileName)) {
-            String moduleName = findYangModuleName(bindingContext.bindingQName, schemaContext);
-            if (moduleName == null) {
-                return null;
+        } catch (ConfigXMLReaderException e) {
+            if (e.getCause() == null) {
+                setFailureMessage(e.getMessage());
+            } else {
+                setFailure(e.getMessage(), e);
             }
-
-            appConfigFileName = moduleName + "_" + bindingContext.bindingQName.getLocalName() + ".xml";
-        }
-
-        File appConfigFile = new File(DEFAULT_APP_CONFIG_FILE_PATH, appConfigFileName);
-
-        LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(),
-                appConfigFile.getAbsolutePath());
-
-        if (!appConfigFile.exists()) {
             return null;
         }
-
-        LOG.debug("{}: Found file {}", logName(), appConfigFile.getAbsolutePath());
-
-        DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
-                XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
-
-        try (FileInputStream fis = new FileInputStream(appConfigFile)) {
-            Document root = UntrustedXML.newDocumentBuilder().parse(fis);
-            NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
-                    parserFactory);
-
-            LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
-
-            return dataNode;
-        } catch (SAXException | IOException e) {
-            String msg = String.format("%s: Could not read/parse app config file %s", logName(), appConfigFile);
-            LOG.error(msg, e);
-            setFailureMessage(msg);
-        }
-
-        return null;
-    }
-
-    private String findYangModuleName(final QName qname, final SchemaContext schemaContext) {
-        for (Module m : schemaContext.getModules()) {
-            if (qname.getModule().equals(m.getQNameModule())) {
-                return m.getName();
-            }
-        }
-
-        setFailureMessage(String.format("%s: Could not find yang module for QName %s", logName(), qname));
-        return null;
     }
 
     @Nullable
@@ -411,7 +335,6 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         return dataNode;
     }
 
-
     @Override
     public void destroy(final Object instance) {
         super.destroy(instance);
@@ -425,7 +348,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     /**
      * Internal base class to abstract binding type-specific behavior.
      */
-    private abstract static class BindingContext {
+    abstract static class BindingContext {
         final InstanceIdentifier<DataObject> appConfigPath;
         final Class<DataObject> appConfigBindingClass;
         final Class<? extends DataSchemaNode> schemaType;
@@ -449,7 +372,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     /**
      * BindingContext implementation for a container binding.
      */
-    private static class ContainerBindingContext extends BindingContext {
+    static class ContainerBindingContext extends BindingContext {
         ContainerBindingContext(final Class<DataObject> appConfigBindingClass) {
             super(appConfigBindingClass, InstanceIdentifier.create(appConfigBindingClass), ContainerSchemaNode.class);
         }
@@ -470,7 +393,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     /**
      * BindingContext implementation for a list binding.
      */
-    private static class ListBindingContext extends BindingContext {
+    static class ListBindingContext extends BindingContext {
         final String appConfigListKeyValue;
 
         ListBindingContext(final Class<DataObject> appConfigBindingClass,
