@@ -25,6 +25,13 @@ public abstract class AbstractBaseDataBrokerTest extends AbstractSchemaAwareTest
 
     protected abstract AbstractDataBrokerTestCustomizer createDataBrokerTestCustomizer();
 
+    public AbstractDataBrokerTestCustomizer getDataBrokerTestCustomizer() {
+        if (testCustomizer == null) {
+            throw new IllegalStateException("testCustomizer not yet set by call to createDataBrokerTestCustomizer()");
+        }
+        return testCustomizer;
+    }
+
     @Override
     protected void setupWithSchema(final SchemaContext context) {
         testCustomizer = createDataBrokerTestCustomizer();
