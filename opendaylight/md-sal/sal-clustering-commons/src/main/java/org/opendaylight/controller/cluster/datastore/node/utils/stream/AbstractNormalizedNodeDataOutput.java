@@ -164,7 +164,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     @Override
     public void leafNode(final NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Writing a new leaf node");
+        LOG.trace("Writing a new leaf node");
         startNode(name.getNodeType(), NodeTypes.LEAF_NODE);
 
         writeObject(value);
@@ -175,7 +175,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new leaf set");
+        LOG.trace("Starting a new leaf set");
 
         lastLeafSetQName = name.getNodeType();
         startNode(name.getNodeType(), NodeTypes.LEAF_SET);
@@ -185,7 +185,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startOrderedLeafSet(final NodeIdentifier name, final int childSizeHint)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new ordered leaf set");
+        LOG.trace("Starting a new ordered leaf set");
 
         lastLeafSetQName = name.getNodeType();
         startNode(name.getNodeType(), NodeTypes.ORDERED_LEAF_SET);
@@ -193,7 +193,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void leafSetEntryNode(final QName name, final Object value) throws IOException, IllegalArgumentException {
-        LOG.debug("Writing a new leaf set entry node");
+        LOG.trace("Writing a new leaf set entry node");
 
         output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
 
@@ -221,7 +221,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
 
-        LOG.debug("Starting a new yang modeled anyXml node");
+        LOG.trace("Starting a new yang modeled anyXml node");
 
         startNode(name.getNodeType(), NodeTypes.YANG_MODELED_ANY_XML_NODE);
     }
@@ -230,7 +230,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startUnkeyedList(final NodeIdentifier name, final int childSizeHint)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new unkeyed list");
+        LOG.trace("Starting a new unkeyed list");
 
         startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST);
     }
@@ -239,7 +239,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startUnkeyedListItem(final NodeIdentifier name, final int childSizeHint)
             throws IOException, IllegalStateException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new unkeyed list item");
+        LOG.trace("Starting a new unkeyed list item");
 
         startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST_ITEM);
     }
@@ -248,7 +248,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startMapNode(final NodeIdentifier name, final int childSizeHint)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new map node");
+        LOG.trace("Starting a new map node");
 
         startNode(name.getNodeType(), NodeTypes.MAP_NODE);
     }
@@ -257,7 +257,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startMapEntryNode(final NodeIdentifierWithPredicates identifier, final int childSizeHint)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
-        LOG.debug("Starting a new map entry node");
+        LOG.trace("Starting a new map entry node");
         startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
 
         writeKeyValueMap(identifier.getKeyValues());
@@ -277,7 +277,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startChoiceNode(final NodeIdentifier name, final int childSizeHint)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new choice node");
+        LOG.trace("Starting a new choice node");
 
         startNode(name.getNodeType(), NodeTypes.CHOICE_NODE);
     }
@@ -286,7 +286,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startAugmentationNode(final AugmentationIdentifier identifier)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
-        LOG.debug("Starting a new augmentation node");
+        LOG.trace("Starting a new augmentation node");
 
         output.writeByte(NodeTypes.AUGMENTATION_NODE);
         writeQNameSet(identifier.getPossibleChildNames());
@@ -295,7 +295,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     @Override
     public void anyxmlNode(final NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Writing any xml node");
+        LOG.trace("Writing any xml node");
 
         startNode(name.getNodeType(), NodeTypes.ANY_XML_NODE);
 
@@ -310,7 +310,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     @Override
     public void endNode() throws IOException, IllegalStateException {
-        LOG.debug("Ending the node");
+        LOG.trace("Ending the node");
 
         output.writeByte(NodeTypes.END_NODE);
     }
