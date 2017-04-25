@@ -29,7 +29,7 @@ public class ClientBackedReadWriteTransactionTest
     @Mock
     private ClientTransaction delegate;
     @Mock
-    private NormalizedNode data;
+    private NormalizedNode<?, ?> data;
     @Mock
     private DOMStoreThreePhaseCommitCohort readyCohort;
 
@@ -50,7 +50,7 @@ public class ClientBackedReadWriteTransactionTest
         Mockito.doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate)
                 .read(YangInstanceIdentifier.EMPTY);
 
-        object = new ClientBackedReadWriteTransaction(delegate);
+        object = new ClientBackedReadWriteTransaction(delegate, null);
     }
 
     @Test
