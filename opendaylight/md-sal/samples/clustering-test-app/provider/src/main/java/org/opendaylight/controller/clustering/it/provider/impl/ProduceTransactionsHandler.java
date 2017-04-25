@@ -40,10 +40,14 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +60,8 @@ public class ProduceTransactionsHandler implements Runnable {
 
     private static final QName ID_INTS =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints");
+    private static final QName ID_INT =
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int");
     private static final QName ID =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id");
     private static final QName ITEM =
@@ -63,8 +69,8 @@ public class ProduceTransactionsHandler implements Runnable {
     private static final QName NUMBER =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number");
 
-    public static final YangInstanceIdentifier ID_INTS_YID =
-            YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(ID_INTS));
+    public static final YangInstanceIdentifier ID_INTS_YID = YangInstanceIdentifier.of(ID_INTS);
+    public static final YangInstanceIdentifier ID_INT_YID = ID_INTS_YID.node(ID_INT);
 
     private final DOMDataTreeService domDataTreeService;
 
@@ -107,10 +113,10 @@ public class ProduceTransactionsHandler implements Runnable {
     }
 
     public void start(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
+        completionFuture = settableFuture;
 
         if (ensureListExists(completionFuture) && fillInitialList(completionFuture)) {
             startTime = System.nanoTime();
-            completionFuture = settableFuture;
             scheduledFuture = executor.scheduleAtFixedRate(this, 0, delay, TimeUnit.NANOSECONDS);
         } else {
             executor.shutdown();
@@ -119,13 +125,18 @@ public class ProduceTransactionsHandler implements Runnable {
 
     private boolean ensureListExists(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
 
-        final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INTS, ID, id)
+        final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INT, ID, id)
                 .withChild(ImmutableNodes.mapNodeBuilder(ITEM).build())
                 .build();
         final MapNode mapNode =
-                ImmutableNodes.mapNodeBuilder(ID_INTS)
+                ImmutableNodes.mapNodeBuilder(ID_INT)
                         .withChild(entry)
                         .build();
+
+        final ContainerNode containerNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(ID_INTS))
+                .withChild(mapNode)
+                .build();
 
         final DOMDataTreeProducer producer = domDataTreeService.createProducer(Collections.singleton(
                 new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY)));
@@ -136,9 +147,9 @@ public class ProduceTransactionsHandler implements Runnable {
                 tx.createCursor(new DOMDataTreeIdentifier(
                         LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY));
 
-        idListWithKey = ID_INTS_YID.node(entry.getIdentifier());
+        idListWithKey = ID_INT_YID.node(entry.getIdentifier());
 
-        cursor.merge(mapNode.getIdentifier(), mapNode);
+        cursor.merge(containerNode.getIdentifier(), containerNode);
         cursor.close();
 
         try {
@@ -195,7 +206,7 @@ public class ProduceTransactionsHandler implements Runnable {
         final int i = random.nextInt(MAX_ITEM + 1);
 
         final YangInstanceIdentifier entryId =
-                idListWithKey.node(ITEM).node(new YangInstanceIdentifier.NodeIdentifierWithPredicates(ITEM, NUMBER, i));
+                idListWithKey.node(ITEM).node(new NodeIdentifierWithPredicates(ITEM, NUMBER, i));
 
         final DOMDataTreeCursorAwareTransaction tx = itemProducer.createTransaction(false);
         final DOMDataTreeWriteCursor cursor = tx.createCursor(

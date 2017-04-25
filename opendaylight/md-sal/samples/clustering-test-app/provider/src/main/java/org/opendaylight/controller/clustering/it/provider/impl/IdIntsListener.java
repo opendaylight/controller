@@ -37,7 +37,9 @@ public class IdIntsListener implements DOMDataTreeChangeListener {
 
         changes.forEach(change -> {
             if (change.getRootNode().getDataAfter().isPresent()) {
-                LOG.trace("Received change, data before: {}, data after: ", change.getRootNode().getDataBefore().get(),
+                LOG.trace("Received change, data before: {}, data after: ",
+                        change.getRootNode().getDataBefore().isPresent()
+                                ? change.getRootNode().getDataBefore().get() : "",
                         change.getRootNode().getDataAfter().get());
 
                 if (localCopy == null || checkEqual(change.getRootNode().getDataBefore().get())) {
