@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.databroker;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -24,8 +25,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 final class ClientBackedReadWriteTransaction extends ClientBackedWriteTransaction
         implements DOMStoreReadWriteTransaction {
 
-    ClientBackedReadWriteTransaction(final ClientTransaction delegate) {
-        super(delegate);
+    ClientBackedReadWriteTransaction(final ClientTransaction delegate, @Nullable final Throwable allocationContext) {
+        super(delegate, allocationContext);
     }
 
     @Override

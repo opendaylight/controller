@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
@@ -35,15 +36,19 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
         private static final Logger LOG = LoggerFactory.getLogger(Finalizer.class);
 
         private final AbstractClientHandle<?> transaction;
+        private final Throwable allocationContext;
 
-        private Finalizer(final ClientBackedTransaction<?> referent, final AbstractClientHandle<?> transaction) {
+        private Finalizer(final ClientBackedTransaction<?> referent, final AbstractClientHandle<?> transaction,
+                final Throwable allocationContext) {
             super(referent, QUEUE);
             this.transaction = Preconditions.checkNotNull(transaction);
+            this.allocationContext = allocationContext;
         }
 
         static @Nonnull <T extends AbstractClientHandle<?>> T recordTransaction(
-                @Nonnull final ClientBackedTransaction<T> referent, @Nonnull final T transaction) {
-            FINALIZERS.add(new Finalizer(referent, transaction));
+                @Nonnull final ClientBackedTransaction<T> referent, @Nonnull final T transaction,
+                @Nullable final Throwable allocationContext) {
+            FINALIZERS.add(new Finalizer(referent, transaction, allocationContext));
             return transaction;
         }
 
@@ -51,16 +56,16 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
         public void finalizeReferent() {
             FINALIZERS.remove(this);
             if (transaction.abort()) {
-                LOG.info("Aborted orphan transaction {}", transaction);
+                LOG.info("Aborted orphan transaction {}", transaction, allocationContext);
             }
         }
     }
 
     private final T delegate;
 
-    ClientBackedTransaction(final T delegate) {
+    ClientBackedTransaction(final T delegate, final Throwable allocationContext) {
         super(delegate.getIdentifier());
-        this.delegate = Finalizer.recordTransaction(this, delegate);
+        this.delegate = Finalizer.recordTransaction(this, delegate, allocationContext);
     }
 
     final T delegate() {

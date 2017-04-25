@@ -49,7 +49,7 @@ public class ClientBackedTransactionChainTest {
         Mockito.when(history.takeSnapshot()).thenReturn(snapshot);
         Mockito.when(history.createTransaction()).thenReturn(transaction);
 
-        chain = new ClientBackedTransactionChain(history);
+        chain = new ClientBackedTransactionChain(history, false);
     }
 
     @Test

@@ -50,7 +50,7 @@ public class ClientBackedReadWriteTransactionTest
         Mockito.doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate)
                 .read(YangInstanceIdentifier.EMPTY);
 
-        object = new ClientBackedReadWriteTransaction(delegate);
+        object = new ClientBackedReadWriteTransaction(delegate, null);
     }
 
     @Test
