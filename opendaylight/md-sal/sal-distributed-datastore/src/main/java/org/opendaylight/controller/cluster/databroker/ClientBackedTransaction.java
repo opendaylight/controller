@@ -35,10 +35,12 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
         private static final Logger LOG = LoggerFactory.getLogger(Finalizer.class);
 
         private final AbstractClientHandle<?> transaction;
+        private final Throwable allocationContext;
 
         private Finalizer(final ClientBackedTransaction<?> referent, final AbstractClientHandle<?> transaction) {
             super(referent, QUEUE);
             this.transaction = Preconditions.checkNotNull(transaction);
+            this.allocationContext = new Throwable("allocated at");
         }
 
         static @Nonnull <T extends AbstractClientHandle<?>> T recordTransaction(
@@ -51,7 +53,7 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
         public void finalizeReferent() {
             FINALIZERS.remove(this);
             if (transaction.abort()) {
-                LOG.info("Aborted orphan transaction {}", transaction);
+                LOG.info("Aborted orphan transaction {}", transaction, allocationContext);
             }
         }
     }
