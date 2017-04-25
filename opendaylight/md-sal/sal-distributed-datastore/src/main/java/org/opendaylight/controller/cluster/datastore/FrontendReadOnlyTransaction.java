@@ -23,6 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Read-only frontend transaction state as observed by the shard leader.
@@ -31,6 +33,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 @NotThreadSafe
 final class FrontendReadOnlyTransaction extends FrontendTransaction {
+    private static final Logger LOG = LoggerFactory.getLogger(FrontendReadOnlyTransaction.class);
+
     private final ReadOnlyShardDataTreeTransaction openTransaction;
 
     private FrontendReadOnlyTransaction(final AbstractFrontendHistory history,
@@ -56,6 +60,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
             handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
             return null;
         } else {
+            LOG.warn("Rejecting unsupported request {}", request);
             throw new UnsupportedRequestException(request);
         }
     }

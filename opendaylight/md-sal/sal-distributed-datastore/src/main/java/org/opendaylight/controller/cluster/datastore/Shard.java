@@ -453,7 +453,7 @@ public class Shard extends RaftActor {
             final ClientIdentifier clientId = lhReq.getTarget().getClientId();
             return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope, now);
         } else {
-            LOG.debug("{}: rejecting unsupported request {}", persistenceId(), request);
+            LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
             throw new UnsupportedRequestException(request);
         }
     }

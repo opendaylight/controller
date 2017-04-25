@@ -113,6 +113,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             } else if (request instanceof PurgeLocalHistoryRequest) {
                 return handlePurgeHistory((PurgeLocalHistoryRequest)request, envelope, now);
             } else {
+                LOG.warn("{}: rejecting unsupported request {}", persistenceId, request);
                 throw new UnsupportedRequestException(request);
             }
         } finally {
