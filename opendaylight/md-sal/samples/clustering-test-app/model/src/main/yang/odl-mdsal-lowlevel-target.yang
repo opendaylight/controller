@@ -65,27 +65,28 @@ module odl-mdsal-lowlevel-target {
         }
     }
 
-    list id-ints {
-        description "A list of integers nested in list of ids.
-            Ids are there to avoid OptimisticLockFailures from different writers.
-            Typical use of the int list is to generate data change notifications.
-            Config is true, in order to allow Restconf to reset content at will.
-            Expected writes should create and delete items at random, values 0 .. 2^20.";
-        ordered-by system;
-        config true;
-        key "id";
-        uses llc:id-grouping;
-        list item {
-            description "Unsorted keyed list item. One write should create or delete up to one item.";
+    container id-ints {
+        list id-int {
+            description "A list of integers nested in list of ids.
+                Ids are there to avoid OptimisticLockFailures from different writers.
+                Typical use of the int list is to generate data change notifications.
+                Config is true, in order to allow Restconf to reset content at will.
+                Expected writes should create and delete items at random, values 0 .. 2^20.";
             ordered-by system;
             config true;
-            key "number";
-            leaf number {
-                description "The integer value of this item.
-                    Not range restricted, to allow more scenarios.";
-                type int32;
+            key "id";
+            uses llc:id-grouping;
+            list item {
+                description "Unsorted keyed list item. One write should create or delete up to one item.";
+                ordered-by system;
+                config true;
+                key "number";
+                leaf number {
+                    description "The integer value of this item.
+                        Not range restricted, to allow more scenarios.";
+                    type int32;
+                }
             }
         }
     }
-
 }

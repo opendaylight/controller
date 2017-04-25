@@ -41,10 +41,14 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +61,8 @@ public class WriteTransactionsHandler implements Runnable {
 
     private static final QName ID_INTS =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints");
+    private static final QName ID_INT =
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int");
     private static final QName ID =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id");
     private static final QName ITEM =
@@ -65,6 +71,7 @@ public class WriteTransactionsHandler implements Runnable {
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number");
 
     public static final YangInstanceIdentifier ID_INTS_YID = YangInstanceIdentifier.of(ID_INTS);
+    public static final YangInstanceIdentifier ID_INT_YID = ID_INTS_YID.node(ID_INT);
 
     private final DOMDataBroker domDataBroker;
     private final Long timeToTake;
@@ -128,11 +135,14 @@ public class WriteTransactionsHandler implements Runnable {
 
     private boolean ensureListExists(final SettableFuture<RpcResult<WriteTransactionsOutput>> settableFuture) {
 
-        final MapNode mapNode = ImmutableNodes.mapNodeBuilder(ID_INTS).build();
+        final ContainerNode containerNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(ID_INTS))
+                .withChild(ImmutableNodes.mapNodeBuilder(ID_INT).build())
+                .build();
 
         DOMDataWriteTransaction tx = txProvider.createTransaction();
         // write only the top list
-        tx.merge(LogicalDatastoreType.CONFIGURATION, ID_INTS_YID, mapNode);
+        tx.merge(LogicalDatastoreType.CONFIGURATION, ID_INTS_YID, containerNode);
         try {
             tx.submit().checkedGet();
         } catch (final OptimisticLockFailedException e) {
@@ -146,11 +156,11 @@ public class WriteTransactionsHandler implements Runnable {
             return false;
         }
 
-        final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INTS, ID, id)
+        final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INT, ID, id)
                 .withChild(ImmutableNodes.mapNodeBuilder(ITEM).build())
                 .build();
 
-        idListWithKey = ID_INTS_YID.node(entry.getIdentifier());
+        idListWithKey = ID_INT_YID.node(entry.getIdentifier());
         tx = txProvider.createTransaction();
         tx.merge(LogicalDatastoreType.CONFIGURATION, idListWithKey, entry);
 
