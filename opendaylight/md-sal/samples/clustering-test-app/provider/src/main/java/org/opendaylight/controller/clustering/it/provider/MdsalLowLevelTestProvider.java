@@ -217,7 +217,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         dtclReg = domDataTreeChangeService
                 .registerDataTreeChangeListener(
                         new org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier(
-                                CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INTS_YID),
+                                CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID),
                         idIntsListener);
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
@@ -374,7 +374,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             ddtlReg =
                     domDataTreeService.registerListener(idIntsDdtl,
                             Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
-                                    ProduceTransactionsHandler.ID_INTS_YID))
+                                    ProduceTransactionsHandler.ID_INT_YID))
                             , true, Collections.emptyList());
         } catch (DOMDataTreeLoopException e) {
             LOG.error("Failed to register DOMDataTreeListener.", e);
@@ -447,7 +447,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             }
 
             final Optional<NormalizedNode<?, ?>> readResult =
-                    rTx.read(CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INTS_YID).checkedGet();
+                    rTx.read(CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID).checkedGet();
 
             if (!readResult.isPresent()) {
                 final RpcError error = RpcResultBuilder.newError(
@@ -584,7 +584,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         try {
             final ListenerRegistration<ReadListener> registration = domDataTreeService.registerListener(readListener,
                     Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
-                            ProduceTransactionsHandler.ID_INTS_YID))
+                            ProduceTransactionsHandler.ID_INT_YID))
                     , true, Collections.emptyList());
 
             final DataTreeCandidate dataTreeCandidate = readListener.getFirstNotif().get();
@@ -602,7 +602,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             return Futures.immediateFuture(
                     RpcResultBuilder.success(new UnsubscribeDdtlOutputBuilder()
                             .setCopyMatches(idIntsDdtl.checkEqual(lastRead))).build());
-
 
         } catch (final DOMDataTreeLoopException | InterruptedException | ExecutionException e) {
             LOG.error("Unable to read data to verify ddtl data.", e);
