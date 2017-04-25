@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_6b4c2671",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/ClientBackedTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-25T12:42:59Z",
+      "side": 1,
+      "message": "Isn\u0027t this expensive on the fast path?",
+      "revId": "a181e3612a7bbc612d6d2caec0895950aa15ce46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
