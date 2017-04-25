@@ -33,8 +33,9 @@ final class ClientBackedReadTransaction extends ClientBackedTransaction<ClientSn
     @SuppressWarnings("unused")
     private volatile ClientBackedTransactionChain parent;
 
-    ClientBackedReadTransaction(final ClientSnapshot delegate, @Nullable final ClientBackedTransactionChain parent) {
-        super(delegate);
+    ClientBackedReadTransaction(final ClientSnapshot delegate, @Nullable final ClientBackedTransactionChain parent,
+        @Nullable final Throwable allocationContext) {
+        super(delegate, allocationContext);
         this.parent = parent;
     }
 
