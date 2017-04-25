@@ -208,6 +208,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 testParameter, type, moduleShardsConfig, false, shards);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), shards);
+
+        leaderTestKit.waitForMembersUp("member-2");
+        followerTestKit.waitForMembersUp("member-1");
     }
 
     private static void verifyCars(final DOMStoreReadTransaction readTx, final MapEntryNode... entries)
@@ -883,6 +886,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 commitTimeout);
         try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupAbstractDataStore(
                 testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
+
+            followerTestKit.waitForMembersUp("member-3");
+            follower2TestKit.waitForMembersUp("member-1", "member-2");
 
             // Create and submit a couple tx's so they're pending.
 
