@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
@@ -101,7 +102,10 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             handleTransactionDoCommit((TransactionDoCommitRequest) request, envelope, now);
             return null;
         } else if (request instanceof TransactionAbortRequest) {
-            handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
+            handleTransactionAbort(request.getSequence(), envelope, now);
+            return null;
+        } else if (request instanceof AbortLocalTransactionRequest) {
+            handleLocalTransactionAbort(request.getSequence(), envelope, now);
             return null;
         } else {
             LOG.warn("Rejecting unsupported request {}", request);
@@ -142,11 +146,17 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         });
     }
 
-    private void handleTransactionAbort(final TransactionAbortRequest request,
-            final RequestEnvelope envelope, final long now) throws RequestException {
+    private void handleLocalTransactionAbort(final long sequence, final RequestEnvelope envelope, final long now) {
+        Preconditions.checkState(readyCohort == null, "Transaction {} encountered local abort with commit underway",
+                getIdentifier());
+        openTransaction.abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
+            sequence)));
+    }
+
+    private void handleTransactionAbort(final long sequence, final RequestEnvelope envelope, final long now) {
         if (readyCohort == null) {
-            openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
-                new TransactionAbortSuccess(getIdentifier(), request.getSequence())));
+            openTransaction.abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
+                sequence)));
             return;
         }
 
@@ -154,8 +164,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             @Override
             public void onSuccess(final Void result) {
                 readyCohort = null;
-                recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
-                    request.getSequence()));
+                recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(), sequence));
                 LOG.debug("Transaction {} aborted", getIdentifier());
             }
 
