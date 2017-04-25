@@ -27,35 +27,45 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
  */
 public class ClientBackedDataStore extends AbstractDataStore {
 
+    private final boolean recordTransactionAllocation;
+
     public ClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+        recordTransactionAllocation = datastoreContextFactory.getBaseDatastoreContext()
+                .isTransactionDebugContextEnabled();
     }
 
     @VisibleForTesting
     ClientBackedDataStore(final ActorContext actorContext, final ClientIdentifier identifier,
                           final DataStoreClient clientActor) {
         super(actorContext, identifier, clientActor);
+        recordTransactionAllocation = false;
     }
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return new ClientBackedTransactionChain(getClient().createLocalHistory());
+        return new ClientBackedTransactionChain(getClient().createLocalHistory(), recordTransactionAllocation);
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new ClientBackedReadTransaction(getClient().createSnapshot(), null);
+        return new ClientBackedReadTransaction(getClient().createSnapshot(), null, allocationContext());
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new ClientBackedWriteTransaction(getClient().createTransaction());
+        return new ClientBackedWriteTransaction(getClient().createTransaction(), allocationContext());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new ClientBackedReadWriteTransaction(getClient().createTransaction());
+        return new ClientBackedReadWriteTransaction(getClient().createTransaction(), allocationContext());
     }
+
+    private Throwable allocationContext() {
+        return recordTransactionAllocation ? new Throwable() : null;
+    }
+
 }

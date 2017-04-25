@@ -35,24 +35,26 @@ final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
     private final Map<AbstractClientHandle<?>, Boolean> openSnapshots = new WeakHashMap<>();
 
     private final ClientLocalHistory history;
+    private final boolean recordTransactionAllocation;
 
-    ClientBackedTransactionChain(final ClientLocalHistory history) {
+    ClientBackedTransactionChain(final ClientLocalHistory history, final boolean recordTransactionAllocation) {
         this.history = Preconditions.checkNotNull(history);
+        this.recordTransactionAllocation = recordTransactionAllocation;
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new ClientBackedReadTransaction(createSnapshot(), this);
+        return new ClientBackedReadTransaction(createSnapshot(), this, allocationContext());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new ClientBackedReadWriteTransaction(createTransaction());
+        return new ClientBackedReadWriteTransaction(createTransaction(), allocationContext());
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new ClientBackedWriteTransaction(createTransaction());
+        return new ClientBackedWriteTransaction(createTransaction(), allocationContext());
     }
 
     @Override
@@ -84,6 +86,10 @@ final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
         } catch (org.opendaylight.mdsal.common.api.TransactionChainClosedException e) {
             throw new TransactionChainClosedException("Transaction chain has been closed", e);
         }
+    }
+
+    private Throwable allocationContext() {
+        return recordTransactionAllocation ? new Throwable() : null;
     }
 
     private synchronized <T extends AbstractClientHandle<?>> T recordSnapshot(final T snapshot) {
