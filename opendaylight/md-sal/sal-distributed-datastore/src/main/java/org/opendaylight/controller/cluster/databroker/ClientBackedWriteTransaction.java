@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -20,8 +21,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 class ClientBackedWriteTransaction extends ClientBackedTransaction<ClientTransaction>
         implements DOMStoreWriteTransaction {
-    ClientBackedWriteTransaction(final ClientTransaction delegate) {
-        super(delegate);
+    ClientBackedWriteTransaction(final ClientTransaction delegate, @Nullable final Throwable allocationContext) {
+        super(delegate, allocationContext);
     }
 
     @Override

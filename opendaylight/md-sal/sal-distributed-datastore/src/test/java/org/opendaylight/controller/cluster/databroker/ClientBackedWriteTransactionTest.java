@@ -37,7 +37,7 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
         Mockito.doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
         Mockito.doReturn(readyCohort).when(delegate).ready();
 
-        object = new ClientBackedWriteTransaction(delegate);
+        object = new ClientBackedWriteTransaction(delegate, null);
     }
 
     @Override

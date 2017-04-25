@@ -49,7 +49,7 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
         Mockito.doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate)
                 .read(YangInstanceIdentifier.EMPTY);
 
-        object = new ClientBackedReadTransaction(delegate, null);
+        object = new ClientBackedReadTransaction(delegate, null, null);
     }
 
     @Test
