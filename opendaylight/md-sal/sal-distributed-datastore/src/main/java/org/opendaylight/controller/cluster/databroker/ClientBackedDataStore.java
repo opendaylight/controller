@@ -41,21 +41,29 @@ public class ClientBackedDataStore extends AbstractDataStore {
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return new ClientBackedTransactionChain(getClient().createLocalHistory());
+        return new ClientBackedTransactionChain(getClient().createLocalHistory(), debugAllocation());
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new ClientBackedReadTransaction(getClient().createSnapshot(), null);
+        return new ClientBackedReadTransaction(getClient().createSnapshot(), null, allocationContext());
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return new ClientBackedWriteTransaction(getClient().createTransaction());
+        return new ClientBackedWriteTransaction(getClient().createTransaction(), allocationContext());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return new ClientBackedReadWriteTransaction(getClient().createTransaction());
+        return new ClientBackedReadWriteTransaction(getClient().createTransaction(), allocationContext());
+    }
+
+    private boolean debugAllocation() {
+        return getActorContext().getDatastoreContext().isTransactionDebugContextEnabled();
+    }
+
+    private Throwable allocationContext() {
+        return debugAllocation() ? new Throwable("allocated at") : null;
     }
 }
