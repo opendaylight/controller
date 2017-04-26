@@ -10,9 +10,7 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -23,9 +21,9 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListen
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.Operation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -37,8 +35,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     private final DataBroker bindingDataBroker;
     private List<OuterList> list;
 
-    public TxchainBaWrite(DataBroker bindingDataBroker, Operation oper,
-                          int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+    public TxchainBaWrite(final DataBroker bindingDataBroker, final Operation oper,
+                          final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaWrite");
@@ -51,12 +49,12 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void executeList() {
+        final BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
+        final LogicalDatastoreType dsType = getDataStoreType();
+
+        WriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
         int writeCnt = 0;
-
-        BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
-        WriteTransaction tx = chain.newWriteOnlyTransaction();
-        LogicalDatastoreType dsType = getDataStoreType();
 
         for (OuterList element : this.list) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
@@ -85,7 +83,6 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
                     }
                 });
                 tx = chain.newWriteOnlyTransaction();
-                dsType = getDataStoreType();
                 writeCnt = 0;
             }
         }
@@ -110,14 +107,14 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
-            AsyncTransaction<?, ?> transaction, Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
+            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
         LOG.error("Broken chain {} in DatastoreBaAbstractWrite, transaction {}, cause {}",
                 chain, transaction.getIdentifier(), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
         LOG.info("DatastoreBaAbstractWrite closed successfully, chain {}", chain);
     }
 
