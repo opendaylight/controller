@@ -38,7 +38,7 @@ public abstract class DatastoreAbstractWriter {
         this.writesPerTx = writesPerTx;
         this.oper = oper;
         this.dataStore = dataStore;
-        LOG.info("DatastoreAbstractWriter created: {}", this);
+        LOG.debug("DatastoreAbstractWriter created: {}", this);
     }
 
     public abstract void createList();

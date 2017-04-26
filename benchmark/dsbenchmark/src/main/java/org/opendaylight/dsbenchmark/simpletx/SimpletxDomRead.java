@@ -36,13 +36,13 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
                            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
-        LOG.info("Created simpleTxDomRead");
+        LOG.debug("Created simpleTxDomRead");
 
     }
 
     @Override
     public void createList() {
-        LOG.info("SimpletxDomRead: creating data in the data store");
+        LOG.debug("SimpletxDomRead: creating data in the data store");
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
         SimpletxDomWrite dd = new SimpletxDomWrite(domDataBroker,

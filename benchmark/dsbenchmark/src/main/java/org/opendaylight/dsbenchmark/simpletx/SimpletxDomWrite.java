@@ -34,7 +34,7 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
                                     final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore ) {
         super(oper, outerListElem, innerListElem, putsPerTx, dataStore);
         this.domDataBroker = domDataBroker;
-        LOG.info("Created SimpletxDomWrite");
+        LOG.debug("Created SimpletxDomWrite");
     }
 
     @Override

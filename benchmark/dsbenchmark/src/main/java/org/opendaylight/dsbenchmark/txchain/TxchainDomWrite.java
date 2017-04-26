@@ -40,7 +40,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
             final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
-        LOG.info("Created TxchainDomWrite");
+        LOG.debug("Created TxchainDomWrite");
     }
 
     @Override
@@ -109,7 +109,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
             LOG.error("Transaction close failed,", e);
         }
 
-        LOG.info("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
     }
 
     @Override
@@ -121,7 +121,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
 
     @Override
     public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-        LOG.info("Chain {} closed successfully", chain);
+        LOG.debug("Chain {} closed successfully", chain);
     }
 
 }

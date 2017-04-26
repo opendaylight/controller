@@ -41,20 +41,20 @@ public class NtfbenchmarkProvider implements BindingAwareProvider, AutoCloseable
 
     public NtfbenchmarkProvider(NotificationService listenServiceDependency,
             NotificationPublishService publishServiceDependency) {
-        LOG.info("NtfbenchmarkProvider Constructor");
+        LOG.debug("NtfbenchmarkProvider Constructor");
         listenService = listenServiceDependency;
         publishService = publishServiceDependency;
     }
 
     @Override
     public void onSessionInitiated(final ProviderContext session) {
-        LOG.info("NtfbenchmarkProvider Session Initiated");
+        LOG.debug("NtfbenchmarkProvider Session Initiated");
         session.addRpcImplementation(NtfbenchmarkService.class, this);
     }
 
     @Override
     public void close() throws Exception {
-        LOG.info("NtfbenchmarkProvider Closed");
+        LOG.debug("NtfbenchmarkProvider Closed");
     }
 
     @Override

@@ -31,12 +31,12 @@ public class SimpletxBaDelete extends DatastoreAbstractWriter {
             final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
-        LOG.info("Created SimpletxBaDelete");
+        LOG.debug("Created SimpletxBaDelete");
     }
 
     @Override
     public void createList() {
-        LOG.info("DatastoreDelete: creating data in the data store");
+        LOG.debug("DatastoreDelete: creating data in the data store");
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
         SimpletxBaWrite dd = new SimpletxBaWrite(dataBroker,
