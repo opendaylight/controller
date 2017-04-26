@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
 
 public class SimpletxBaDelete extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxBaDelete.class);
-    private DataBroker dataBroker;
+    private final DataBroker dataBroker;
 
-    public SimpletxBaDelete(DataBroker dataBroker, int outerListElem, int innerListElem,
-            long writesPerTx, DataStore dataStore) {
+    public SimpletxBaDelete(final DataBroker dataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
         LOG.info("Created SimpletxBaDelete");
@@ -51,13 +51,15 @@ public class SimpletxBaDelete extends DatastoreAbstractWriter {
 
     @Override
     public void executeList() {
+        final LogicalDatastoreType dsType = getDataStoreType();
+
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         long putCnt = 0;
 
         for (long l = 0; l < outerListElem; l++) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                                                         .child(OuterList.class, new OuterListKey((int)l));
-            tx.delete(LogicalDatastoreType.CONFIGURATION, iid);
+            tx.delete(dsType, iid);
             putCnt++;
             if (putCnt == writesPerTx) {
                 try {

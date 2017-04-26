@@ -9,7 +9,6 @@
 package org.opendaylight.dsbenchmark.simpletx;
 
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -29,8 +28,8 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
     private final DataBroker dataBroker;
     private List<OuterList> list;
 
-    public SimpletxBaWrite(DataBroker dataBroker, StartTestInput.Operation oper,
-            int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+    public SimpletxBaWrite(final DataBroker dataBroker, final StartTestInput.Operation oper,
+            final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
         LOG.info("Created SimpletxBaWrite");
@@ -43,9 +42,9 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
 
     @Override
     public void executeList() {
-        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
-        LogicalDatastoreType dsType = getDataStoreType();
+        final LogicalDatastoreType dsType = getDataStoreType();
 
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         long writeCnt = 0;
 
         for (OuterList element : this.list) {
@@ -68,7 +67,6 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
                     txError++;
                 }
                 tx = dataBroker.newWriteOnlyTransaction();
-                dsType = getDataStoreType();
 
                 writeCnt = 0;
             }
