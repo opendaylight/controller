@@ -8,6 +8,8 @@
 
 package org.opendaylight.dsbenchmark.txchain;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
@@ -27,15 +29,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-
 public class TxchainDomDelete extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaWrite.class);
     private final DOMDataBroker domDataBroker;
 
-    public TxchainDomDelete(DOMDataBroker domDataBroker, int outerListElem, int innerListElem,
-            long writesPerTx, DataStore dataStore) {
+    public TxchainDomDelete(final DOMDataBroker domDataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created TxchainDomDelete");
@@ -59,18 +58,19 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
 
     @Override
     public void executeList() {
+        final LogicalDatastoreType dsType = getDataStoreType();
+        final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
+        final YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+        final DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
+
+        DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
         int writeCnt = 0;
 
-        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
-        DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
-        DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
-
-        YangInstanceIdentifier pid =
-                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (int l = 0; l < outerListElem; l++) {
             YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
-            tx.delete(LogicalDatastoreType.CONFIGURATION, yid);
+            tx.delete(dsType, yid);
 
             writeCnt++;
 
@@ -113,14 +113,14 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
-            AsyncTransaction<?, ?> transaction, Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
+            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
         LOG.error("Broken chain {} in TxchainDomDelete, transaction {}, cause {}",
                 chain, transaction.getIdentifier(), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
         LOG.info("TxchainDomDelete closed successfully, chain {}", chain);
     }
 }

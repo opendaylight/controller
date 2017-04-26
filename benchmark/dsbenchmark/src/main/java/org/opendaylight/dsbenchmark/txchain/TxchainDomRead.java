@@ -10,8 +10,11 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
-import org.opendaylight.controller.md.sal.common.api.data.*;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
@@ -30,8 +33,8 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomRead.class);
     private final DOMDataBroker domDataBroker;
 
-    public TxchainDomRead(DOMDataBroker domDataBroker, int outerListElem, int innerListElem,
-            long writesPerTx, DataStore dataStore) {
+    public TxchainDomRead(final DOMDataBroker domDataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created TxchainDomDelete");
@@ -55,40 +58,38 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void executeList() {
-
-        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
-        DOMDataReadOnlyTransaction tx = domDataBroker.newReadOnlyTransaction();
-
-        YangInstanceIdentifier pid =
+        final LogicalDatastoreType dsType = getDataStoreType();
+        final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
+        final YangInstanceIdentifier pid =
                 YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
-        for (int l = 0; l < outerListElem; l++) {
-            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
-            Optional<NormalizedNode<?,?>> optionalDataObject;
-            CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture =
-                    tx.read(LogicalDatastoreType.CONFIGURATION, yid);
-            try {
-                optionalDataObject = submitFuture.checkedGet();
-                if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                    txOk++;
+
+        try (DOMDataReadOnlyTransaction tx = domDataBroker.newReadOnlyTransaction()) {
+            for (int l = 0; l < outerListElem; l++) {
+                YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
+                Optional<NormalizedNode<?,?>> optionalDataObject;
+                CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture = tx.read(dsType, yid);
+                try {
+                    optionalDataObject = submitFuture.checkedGet();
+                    if (optionalDataObject != null && optionalDataObject.isPresent()) {
+                        txOk++;
+                    }
+                } catch (ReadFailedException e) {
+                    LOG.warn("failed to ....", e);
+                    txError++;
                 }
-            } catch (ReadFailedException e) {
-                LOG.warn("failed to ....", e);
-                txError++;
             }
         }
-
-
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
-                                         AsyncTransaction<?, ?> transaction, Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
+                                         final AsyncTransaction<?, ?> transaction, final Throwable cause) {
         LOG.error("Broken chain {} in TxchainDomDelete, transaction {}, cause {}",
                 chain, transaction.getIdentifier(), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
         LOG.info("TxchainDomDelete closed successfully, chain {}", chain);
     }
 }
