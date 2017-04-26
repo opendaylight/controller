@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da01753e_30c3a68a",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/BindingContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-26T16:20:35Z",
+      "side": 1,
+      "message": "nope (FYI this code is simply refactored, been there like before)",
+      "parentUuid": "da01753e_353ef828",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 37
+      },
+      "revId": "9478d98d9f2a198aeb61ca71a29b7ce586d957db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_f538f03e",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/BindingContext.java",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-26T15:00:26Z",
       "side": 1,
       "message": "keys.get(0);",
+      "range": {
+        "startLine": 133,
+        "startChar": 33,
+        "endLine": 133,
+        "endChar": 55
+      },
+      "revId": "9478d98d9f2a198aeb61ca71a29b7ce586d957db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b03e768a",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/BindingContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-26T16:20:35Z",
+      "side": 1,
+      "message": "Sure, if you insist.. Done.  (FYI this code is simply refactored, been there like before)",
+      "parentUuid": "da01753e_f538f03e",
       "range": {
         "startLine": 133,
         "startChar": 33,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "da01753e_f0447e1c",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-26T16:20:35Z",
+      "side": 1,
+      "message": "Done, Tx",
+      "parentUuid": "da01753e_35255809",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 5
+      },
+      "revId": "9478d98d9f2a198aeb61ca71a29b7ce586d957db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_951ec4b9",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "da01753e_b065d6b6",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-26T16:20:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da01753e_951ec4b9",
+      "range": {
+        "startLine": 100,
+        "startChar": 48,
+        "endLine": 100,
+        "endChar": 54
+      },
+      "revId": "9478d98d9f2a198aeb61ca71a29b7ce586d957db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_b58028c1",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2017-04-26T15:00:26Z",
       "side": 1,
       "message": "Integrate string formatting into the exception\u0027s constructor to save a lot of boilerplate...",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 114,
+        "endChar": 9
+      },
+      "revId": "9478d98d9f2a198aeb61ca71a29b7ce586d957db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_3071e676",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-04-26T16:20:35Z",
+      "side": 1,
+      "message": "Nice idea and would do if this was a more widely used API, but as this is just a internal utility, I don\u0027t have the time - OK for you, or do you insist? ;) Tom?",
+      "parentUuid": "da01753e_b58028c1",
       "range": {
         "startLine": 111,
         "startChar": 0,
