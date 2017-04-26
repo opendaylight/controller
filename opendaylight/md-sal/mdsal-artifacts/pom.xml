@@ -206,38 +206,6 @@
                 <version>1.0.4-SNAPSHOT</version>
             </dependency>
 
-            <!-- RESTCONF -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-remote</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-rest-connector</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-rest-connector-config</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-restconf-broker</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-rest-docgen</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-rest-docgen-maven</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Toaster -->
             <dependency>
                 <groupId>org.opendaylight.controller.samples</groupId>
