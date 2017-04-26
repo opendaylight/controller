@@ -36,8 +36,10 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     private final Map<LocalHistoryIdentifier, FrontendHistoryMetadataBuilder> currentHistories = new HashMap<>();
     private final RangeSet<UnsignedLong> purgedHistories;
     private final ClientIdentifier identifier;
+    private final String shardName;
 
-    FrontendClientMetadataBuilder(final ClientIdentifier identifier) {
+    FrontendClientMetadataBuilder(final String shardName, final ClientIdentifier identifier) {
+        this.shardName = Preconditions.checkNotNull(shardName);
         this.identifier = Preconditions.checkNotNull(identifier);
         purgedHistories = TreeRangeSet.create();
 
@@ -46,7 +48,8 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
     }
 
-    FrontendClientMetadataBuilder(final FrontendClientMetadata meta) {
+    FrontendClientMetadataBuilder(final String shardName, final FrontendClientMetadata meta) {
+        this.shardName = Preconditions.checkNotNull(shardName);
         this.identifier = Preconditions.checkNotNull(meta.getIdentifier());
         purgedHistories = TreeRangeSet.create(meta.getPurgedHistories());
 
@@ -58,8 +61,8 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         // Sanity check and recovery
         final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
         if (!currentHistories.containsKey(standaloneId)) {
-            LOG.warn("Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
-                identifier, currentHistories);
+            LOG.warn("{}: Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
+                shardName, identifier, currentHistories);
             currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
         }
     }
@@ -84,9 +87,9 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         final FrontendHistoryMetadataBuilder oldMeta = currentHistories.putIfAbsent(historyId, newMeta);
         if (oldMeta != null) {
             // This should not be happening, warn about it
-            LOG.warn("Reused local history {}", historyId);
+            LOG.warn("{}: Reused local history {}", shardName, historyId);
         } else {
-            LOG.debug("Created local history {}", historyId);
+            LOG.debug("{}: Created local history {}", shardName, historyId);
         }
     }
 
@@ -94,30 +97,30 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         final FrontendHistoryMetadataBuilder builder = currentHistories.get(historyId);
         if (builder != null) {
             builder.onHistoryClosed();
-            LOG.debug("Closed history {}", historyId);
+            LOG.debug("{}: Closed history {}", shardName, historyId);
         } else {
-            LOG.warn("Closed unknown history {}, ignoring", historyId);
+            LOG.warn("{}: Closed unknown history {}, ignoring", shardName, historyId);
         }
     }
 
     void onHistoryPurged(final LocalHistoryIdentifier historyId) {
         final FrontendHistoryMetadataBuilder history = currentHistories.remove(historyId);
         if (history == null) {
-            LOG.warn("Purging unknown history {}", historyId);
+            LOG.warn("{}: Purging unknown history {}", shardName, historyId);
         }
 
         // XXX: do we need to account for cookies?
         purgedHistories.add(Range.singleton(UnsignedLong.fromLongBits(historyId.getHistoryId())));
-        LOG.debug("Purged history {}", historyId);
+        LOG.debug("{}: Purged history {}", historyId);
     }
 
     void onTransactionAborted(final TransactionIdentifier txId) {
         final FrontendHistoryMetadataBuilder history = getHistory(txId);
         if (history != null) {
             history.onTransactionAborted(txId);
-            LOG.debug("Committed transaction {}", txId);
+            LOG.debug("{}: Committed transaction {}", shardName, txId);
         } else {
-            LOG.warn("Unknown history for aborted transaction {}, ignoring", txId);
+            LOG.warn("{}: Unknown history for aborted transaction {}, ignoring", shardName, txId);
         }
     }
 
@@ -125,9 +128,9 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         final FrontendHistoryMetadataBuilder history = getHistory(txId);
         if (history != null) {
             history.onTransactionCommitted(txId);
-            LOG.debug("Aborted transaction {}", txId);
+            LOG.debug("{}: Aborted transaction {}", txId);
         } else {
-            LOG.warn("Unknown history for commited transaction {}, ignoring", txId);
+            LOG.warn("{}: Unknown history for commited transaction {}, ignoring", shardName, txId);
         }
     }
 
@@ -135,9 +138,9 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         final FrontendHistoryMetadataBuilder history = getHistory(txId);
         if (history != null) {
             history.onTransactionPurged(txId);
-            LOG.debug("Purged transaction {}", txId);
+            LOG.debug("{}: Purged transaction {}", txId);
         } else {
-            LOG.warn("Unknown history for purged transaction {}, ignoring", txId);
+            LOG.warn("{}: Unknown history for purged transaction {}, ignoring", shardName, txId);
         }
     }
 
