@@ -11,7 +11,6 @@ package org.opendaylight.dsbenchmark.simpletx;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -23,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +32,8 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxDomRead.class);
     private final DOMDataBroker domDataBroker;
 
-    public SimpletxDomRead(DOMDataBroker domDataBroker, int outerListElem,
-                           int innerListElem, long writesPerTx, DataStore dataStore) {
+    public SimpletxDomRead(final DOMDataBroker domDataBroker, final int outerListElem,
+                           final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created simpleTxDomRead");
@@ -57,35 +57,30 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
 
     @Override
     public void executeList() {
-        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
-        DOMDataReadOnlyTransaction tx = domDataBroker.newReadOnlyTransaction();
+        final LogicalDatastoreType dsType = getDataStoreType();
+        final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
+        final YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
 
-        for (long l = 0; l < outerListElem; l++) {
-            NormalizedNode<?,?> ret = null;
-
-            YangInstanceIdentifier yid = YangInstanceIdentifier.builder()
-                    .node(TestExec.QNAME)
-                    .node(OuterList.QNAME)
-                    .nodeWithKey(OuterList.QNAME, olId, l)
-                    .build();
-            Optional<NormalizedNode<?,?>> optionalDataObject;
-            CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture =
-                    tx.read(LogicalDatastoreType.CONFIGURATION, yid);
-            try {
-                optionalDataObject = submitFuture.checkedGet();
-                if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                    ret = optionalDataObject.get();
-                    LOG.info("/n" + String.valueOf(ret));
-                    txOk++;
-                } else {
+        try (DOMDataReadOnlyTransaction tx = domDataBroker.newReadOnlyTransaction()) {
+            for (int l = 0; l < outerListElem; l++) {
+                YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
+                CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture = tx.read(dsType, yid);
+                try {
+                    Optional<NormalizedNode<?,?>> optionalDataObject = submitFuture.checkedGet();
+                    if (optionalDataObject != null && optionalDataObject.isPresent()) {
+                        NormalizedNode<?, ?> ret = optionalDataObject.get();
+                        LOG.info("/n" + String.valueOf(ret));
+                        txOk++;
+                    } else {
+                        txError++;
+                        LOG.warn("optionalDataObject is either null or .isPresent is false");
+                    }
+                } catch (ReadFailedException e) {
+                    LOG.warn("failed to ....", e);
                     txError++;
-                    LOG.warn("optionalDataObject is either null or .isPresent is false");
                 }
-            } catch (ReadFailedException e) {
-                LOG.warn("failed to ....", e);
-                txError++;
             }
         }
     }
-
 }

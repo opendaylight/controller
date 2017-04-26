@@ -10,7 +10,6 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -31,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 public class TxchainBaDelete extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaDelete.class);
-    private DataBroker bindingDataBroker;
+    private final DataBroker bindingDataBroker;
 
-    public TxchainBaDelete(DataBroker bindingDataBroker, int outerListElem, int innerListElem,
-            long writesPerTx, DataStore dataStore) {
+    public TxchainBaDelete(final DataBroker bindingDataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaDelete");
@@ -58,16 +57,17 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
 
     @Override
     public void executeList() {
+        final LogicalDatastoreType dsType = getDataStoreType();
+        final BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
+
+        WriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
         int writeCnt = 0;
 
-        BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
-        WriteTransaction tx = chain.newWriteOnlyTransaction();
-
-        for (long l = 0; l < outerListElem; l++) {
+        for (int l = 0; l < outerListElem; l++) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                                                    .child(OuterList.class, new OuterListKey((int)l));
-            tx.delete(LogicalDatastoreType.CONFIGURATION, iid);
+                                                    .child(OuterList.class, new OuterListKey(l));
+            tx.delete(dsType, iid);
 
             writeCnt++;
 
@@ -109,14 +109,14 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
-            AsyncTransaction<?, ?> transaction, Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
+            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
         LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}",
                 chain, transaction.getIdentifier(), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
         LOG.info("TxchainBaDelete closed successfully, chain {}", chain);
     }
 

@@ -11,9 +11,8 @@ package org.opendaylight.dsbenchmark.simpletx;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
@@ -30,10 +29,10 @@ import org.slf4j.LoggerFactory;
 
 public class SimpletxBaRead extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxBaRead.class);
-    private DataBroker dataBroker;
+    private final DataBroker dataBroker;
 
-    public SimpletxBaRead(DataBroker dataBroker, int outerListElem, int innerListElem,
-            long writesPerTx, DataStore dataStore) {
+    public SimpletxBaRead(final DataBroker dataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
         LOG.info("Created SimpletxBaRead");
@@ -56,46 +55,45 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
 
     @Override
     public void executeList() {
-        ReadTransaction tx = dataBroker.newReadOnlyTransaction();
+        final LogicalDatastoreType dsType = getDataStoreType();
 
-        for (long l = 0; l < outerListElem; l++) {
+        try (ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction()) {
+            for (long l = 0; l < outerListElem; l++) {
 
-            OuterList outerList;
-            InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                    .child(OuterList.class, new OuterListKey((int)l));
-            Optional<OuterList> optionalDataObject;
-            CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
-                    tx.read(LogicalDatastoreType.CONFIGURATION, iid);
-            try {
-                optionalDataObject = submitFuture.checkedGet();
-                if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                    outerList = optionalDataObject.get();
+                InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
+                        .child(OuterList.class, new OuterListKey((int)l));
+                Optional<OuterList> optionalDataObject;
+                CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture = tx.read(dsType, iid);
+                try {
+                    optionalDataObject = submitFuture.checkedGet();
+                    if (optionalDataObject != null && optionalDataObject.isPresent()) {
+                        OuterList outerList = optionalDataObject.get();
 
-                    String[] objectsArray = new String[outerList.getInnerList().size()];
+                        String[] objectsArray = new String[outerList.getInnerList().size()];
 
-                    for (InnerList innerList : outerList.getInnerList()) {
-                        if (objectsArray[innerList.getName()] != null) {
-                            LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
+                        for (InnerList innerList : outerList.getInnerList()) {
+                            if (objectsArray[innerList.getName()] != null) {
+                                LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
                                     innerList.getValue());
+                            }
+                            objectsArray[innerList.getName()] = innerList.getValue();
                         }
-                        objectsArray[innerList.getName()] = innerList.getValue();
-                    }
-                    for (int i = 0; i < outerList.getInnerList().size(); i++) {
-                        String itemStr = objectsArray[i];
-                        if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
-                            LOG.error("innerList: name: {}, value: {}", i, itemStr);
-                            break;
+                        for (int i = 0; i < outerList.getInnerList().size(); i++) {
+                            String itemStr = objectsArray[i];
+                            if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
+                                LOG.error("innerList: name: {}, value: {}", i, itemStr);
+                                break;
+                            }
                         }
+                        txOk++;
+                    } else {
+                        txError++;
                     }
-                    txOk++;
-                } else {
+                } catch (ReadFailedException e) {
+                    LOG.warn("failed to ....", e);
                     txError++;
                 }
-            } catch (ReadFailedException e) {
-                LOG.warn("failed to ....", e);
-                txError++;
             }
         }
-
     }
 }
