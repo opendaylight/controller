@@ -31,7 +31,7 @@ abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTransactio
 
     @Override
     protected final AbstractTransactionRequestProxy<T> externalizableProxy(final ABIVersion version) {
-        throw new UnsupportedOperationException("Local transaction request should never be serialized");
+        throw new UnsupportedOperationException("Local transaction request " + this + " should never be serialized");
     }
 
     @SuppressWarnings("unchecked")

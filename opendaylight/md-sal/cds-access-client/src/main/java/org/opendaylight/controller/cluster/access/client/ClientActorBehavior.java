@@ -262,13 +262,13 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             return;
         }
 
-        LOG.debug("{}: resolved shard {} to {}", persistenceId(), shard, backend);
+        LOG.info("{}: resolved shard {} to {}", persistenceId(), shard, backend);
         final long stamp = connectionsLock.writeLock();
         try {
             // Create a new connected connection
             final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn.context(),
                     conn.cookie(), backend);
-            LOG.debug("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
+            LOG.info("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
 
             // Start reconnecting without the old connection lock held
             final ConnectionConnectCohort cohort = Verify.verifyNotNull(connectionUp(newConn));
@@ -284,7 +284,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
             // Make sure new lookups pick up the new connection
             connections.replace(shard, conn, newConn);
-            LOG.debug("{}: replaced connection {} with {}", persistenceId(), conn, newConn);
+            LOG.info("{}: replaced connection {} with {}", persistenceId(), conn, newConn);
         } finally {
             connectionsLock.unlockWrite(stamp);
         }
@@ -299,10 +299,17 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     void reconnectConnection(final ConnectedClientConnection<?> oldConn,
             final ReconnectingClientConnection<?> newConn) {
         final ReconnectingClientConnection<T> conn = (ReconnectingClientConnection<T>)newConn;
-        connections.replace(oldConn.cookie(), (AbstractClientConnection<T>)oldConn, conn);
-        LOG.debug("{}: connection {} reconnecting as {}", persistenceId(), oldConn, newConn);
+        LOG.info("{}: connection {} reconnecting as {}", persistenceId(), oldConn, newConn);
+
+        final boolean replaced = connections.replace(oldConn.cookie(), (AbstractClientConnection<T>)oldConn, conn);
+        if (!replaced) {
+            final AbstractClientConnection<T> existing = connections.get(oldConn.cookie());
+            LOG.warn("{}: old connection {} does not match existing {}, new connection {} in limbo", persistenceId(),
+                oldConn, existing, newConn);
+        }
 
         final Long shard = oldConn.cookie();
+        LOG.info("{}: refreshing backend for shard {}", persistenceId(), shard);
         resolver().refreshBackendInfo(shard, conn.getBackendInfo().get()).whenComplete(
             (backend, failure) -> context().executeInActor(behavior -> {
                 backendConnectFinished(shard, conn, backend, failure);
