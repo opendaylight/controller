@@ -19,6 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,8 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxDomDelete.class);
     private final DOMDataBroker domDataBroker;
 
-    public SimpletxDomDelete(DOMDataBroker domDataBroker, int outerListElem,
-            int innerListElem, long writesPerTx, DataStore dataStore) {
+    public SimpletxDomDelete(final DOMDataBroker domDataBroker, final int outerListElem,
+            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created simpleTxDomDelete");
@@ -50,19 +51,19 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
 
     @Override
     public void executeList() {
+        final LogicalDatastoreType dsType = getDataStoreType();
+        final org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
+        final YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+
+
+        DOMDataWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
         long writeCnt = 0;
 
-        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
-        DOMDataWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
-
         for (int l = 0; l < outerListElem; l++) {
-            YangInstanceIdentifier yid = YangInstanceIdentifier.builder()
-                                         .node(TestExec.QNAME)
-                                         .node(OuterList.QNAME)
-                                         .nodeWithKey(OuterList.QNAME, olId, l)
-                                         .build();
+            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
 
-            tx.delete(LogicalDatastoreType.CONFIGURATION, yid);
+            tx.delete(dsType, yid);
             writeCnt++;
             if (writeCnt == writesPerTx) {
                 try {
