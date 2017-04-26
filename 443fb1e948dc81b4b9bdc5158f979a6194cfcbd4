@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_10b5c27d",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-26T17:19:09Z",
+      "side": 1,
+      "message": "Perhaps we should cast it to Bundle and put in a local? That would avoid  the \"unlikely-arg-type\" warning although we may have to suppress \"unchecked\" but I think that\u0027s clearer.",
+      "revId": "443fb1e948dc81b4b9bdc5158f979a6194cfcbd4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_b0ce762c",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-26T17:19:09Z",
+      "side": 1,
+      "message": "Here we call toString on serviceType. We could define serviceType in that manner above after the null check on line 150. That should avoid the need for the warning suppression.",
+      "range": {
+        "startLine": 170,
+        "startChar": 38,
+        "endLine": 170,
+        "endChar": 60
+      },
+      "revId": "443fb1e948dc81b4b9bdc5158f979a6194cfcbd4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
