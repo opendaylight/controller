@@ -36,12 +36,12 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
             final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
-        LOG.info("Created TxchainBaRead");
+        LOG.debug("Created TxchainBaRead");
     }
 
     @Override
     public void createList() {
-        LOG.info("TxchainBaRead: reading data in the data store");
+        LOG.debug("TxchainBaRead: reading data in the data store");
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
@@ -108,7 +108,7 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
 
     @Override
     public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-        LOG.info("TxchainBaDelete closed successfully, chain {}", chain);
+        LOG.debug("TxchainBaDelete closed successfully, chain {}", chain);
     }
 
 }

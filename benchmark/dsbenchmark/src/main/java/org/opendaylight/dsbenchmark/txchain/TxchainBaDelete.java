@@ -36,12 +36,12 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
             final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
-        LOG.info("Created TxchainBaDelete");
+        LOG.debug("Created TxchainBaDelete");
     }
 
     @Override
     public void createList() {
-        LOG.info("TxchainBaDelete: creating data in the data store");
+        LOG.debug("TxchainBaDelete: creating data in the data store");
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
@@ -105,7 +105,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
         } catch (IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
-        LOG.info("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
     }
 
     @Override
@@ -117,7 +117,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
 
     @Override
     public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-        LOG.info("TxchainBaDelete closed successfully, chain {}", chain);
+        LOG.debug("TxchainBaDelete closed successfully, chain {}", chain);
     }
 
 }

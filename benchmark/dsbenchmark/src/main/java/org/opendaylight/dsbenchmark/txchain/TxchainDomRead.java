@@ -37,12 +37,12 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
             final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
-        LOG.info("Created TxchainDomDelete");
+        LOG.debug("Created TxchainDomDelete");
     }
 
     @Override
     public void createList() {
-        LOG.info("TxchainDomDelete: creating data in the data store");
+        LOG.debug("TxchainDomDelete: creating data in the data store");
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
@@ -90,6 +90,6 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-        LOG.info("TxchainDomDelete closed successfully, chain {}", chain);
+        LOG.debug("TxchainDomDelete closed successfully, chain {}", chain);
     }
 }

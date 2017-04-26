@@ -39,7 +39,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
                           final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
-        LOG.info("Created TxchainBaWrite");
+        LOG.debug("Created TxchainBaWrite");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
         } catch (IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
-        LOG.info("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
     }
 
     @Override
@@ -115,7 +115,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-        LOG.info("DatastoreBaAbstractWrite closed successfully, chain {}", chain);
+        LOG.debug("DatastoreBaAbstractWrite closed successfully, chain {}", chain);
     }
 
 }

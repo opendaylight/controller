@@ -51,7 +51,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
-        LOG.info("RpcbenchmarkProvider Session Initiated");
+        LOG.debug("RpcbenchmarkProvider Session Initiated");
         consumerRegistry = session.getSALService(RpcConsumerRegistry.class);
         providerRegistry = session.getSALService(RpcProviderRegistry.class);
 
@@ -63,12 +63,12 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
 
     @Override
     public void close() throws Exception {
-        LOG.info("RpcbenchmarkProvider Closed");
+        LOG.debug("RpcbenchmarkProvider Closed");
     }
 
     @Override
     public Future<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
-        LOG.info("startTest {}", input);
+        LOG.debug("startTest {}", input);
 
         final RTCClient client;
         final List<RoutedRpcRegistration<?>> rpcRegs = new ArrayList<>();

@@ -30,7 +30,7 @@ public class DsbenchmarkListenerProvider {
 
     public void setDataBroker(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
-        LOG.info("DsbenchmarkListenerProvider created");
+        LOG.debug("DsbenchmarkListenerProvider created");
     }
 
     public void createAndRegisterListeners(int numListeners) {
@@ -42,7 +42,7 @@ public class DsbenchmarkListenerProvider {
                     new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
 
         }
-        LOG.info("DsbenchmarkListenerProvider created {} listeneres", numListeners);
+        LOG.debug("DsbenchmarkListenerProvider created {} listeneres", numListeners);
     }
 
     public long getDataChangeCount() {
@@ -51,7 +51,7 @@ public class DsbenchmarkListenerProvider {
         for (ListenerRegistration<DsbenchmarkListener> listenerRegistration : listeners) {
             dataChanges += listenerRegistration.getInstance().getNumDataChanges();
         }
-        LOG.info("DsbenchmarkListenerProvider , total data changes {}", dataChanges);
+        LOG.debug("DsbenchmarkListenerProvider , total data changes {}", dataChanges);
         return dataChanges;
     }
 
@@ -63,7 +63,7 @@ public class DsbenchmarkListenerProvider {
             listenerRegistration.close();
         }
         listeners.clear();
-        LOG.info("DsbenchmarkListenerProvider destroyed listeneres, total events {}", totalEvents);
+        LOG.debug("DsbenchmarkListenerProvider destroyed listeneres, total events {}", totalEvents);
         return totalEvents;
     }
 }
