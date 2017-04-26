@@ -156,6 +156,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private void readInitialAppConfig(final DataBroker dataBroker) {
+        @SuppressWarnings("resource") // it's closed in the callback
         final ReadOnlyTransaction readOnlyTx = dataBroker.newReadOnlyTransaction();
         CheckedFuture<Optional<DataObject>, ReadFailedException> future = readOnlyTx.read(
                 LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath);

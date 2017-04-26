@@ -131,8 +131,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         // restart config modules.
         final CountDownLatch containerCreationComplete = new CountDownLatch(containerBundles.size());
         ServiceRegistration<?> eventHandlerReg = registerEventHandler(forBundle.getBundleContext(), event -> {
-            LOG.debug("handleEvent {} for bundle {}", event.getTopic(), event.getProperty(EventConstants.BUNDLE));
-            if (containerBundles.contains(event.getProperty(EventConstants.BUNDLE))) {
+            final Bundle bundle = (Bundle) event.getProperty(EventConstants.BUNDLE);
+            LOG.debug("handleEvent {} for bundle {}", event.getTopic(), bundle);
+            if (containerBundles.contains(bundle)) {
                 containerCreationComplete.countDown();
             }
         });

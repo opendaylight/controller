@@ -141,7 +141,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
 
     private Object serviceAdded(ServiceReference<Object> reference) {
         Object service = container().getBundleContext().getService(reference);
-        Object serviceType = reference.getProperty(OpendaylightNamespaceHandler.TYPE_ATTR);
+        String serviceType = (String) reference.getProperty(OpendaylightNamespaceHandler.TYPE_ATTR);
 
         LOG.debug("{}: Service type {} added from bundle {}", logName(), serviceType,
                 reference.getBundle().getSymbolicName());
