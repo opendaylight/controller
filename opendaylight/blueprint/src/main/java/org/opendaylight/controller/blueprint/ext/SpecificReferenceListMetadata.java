@@ -139,6 +139,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         }
     }
 
+    @SuppressWarnings("unlikely-arg-type") // serviceType is (should be) String
     private Object serviceAdded(ServiceReference<Object> reference) {
         Object service = container().getBundleContext().getService(reference);
         Object serviceType = reference.getProperty(OpendaylightNamespaceHandler.TYPE_ATTR);

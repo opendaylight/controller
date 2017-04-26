@@ -77,7 +77,7 @@ public class ActionProviderBean {
 
     public void init() {
         // First resolve the interface class
-        final Class<RpcService> interfaceClass = getRpcClass(interfaceName);
+        final Class<RpcService> interfaceClass = getRpcClass();
 
         LOG.debug("{}: resolved interface {} to {}", ACTION_PROVIDER, interfaceName, interfaceClass);
 
@@ -102,7 +102,7 @@ public class ActionProviderBean {
     }
 
     @SuppressWarnings("unchecked")
-    private Class<RpcService> getRpcClass(final String interfaceName) {
+    private Class<RpcService> getRpcClass() {
         final Class<?> iface;
 
         try {

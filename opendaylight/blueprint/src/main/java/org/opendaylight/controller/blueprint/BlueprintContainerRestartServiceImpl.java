@@ -130,6 +130,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         // containers are complete. This is done to ensure all blueprint containers are finished before we
         // restart config modules.
         final CountDownLatch containerCreationComplete = new CountDownLatch(containerBundles.size());
+        @SuppressWarnings("unlikely-arg-type") // getProperty(EventConstants.BUNDLE) *IS* of type Bundle
         ServiceRegistration<?> eventHandlerReg = registerEventHandler(forBundle.getBundleContext(), event -> {
             LOG.debug("handleEvent {} for bundle {}", event.getTopic(), event.getProperty(EventConstants.BUNDLE));
             if (containerBundles.contains(event.getProperty(EventConstants.BUNDLE))) {
