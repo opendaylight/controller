@@ -10,10 +10,13 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.*;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
@@ -27,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 public class TxchainBaRead extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaRead.class);
-    private DataBroker bindingDataBroker;
+    private final DataBroker bindingDataBroker;
 
-    public TxchainBaRead(DataBroker bindingDataBroker, int outerListElem, int innerListElem,
-            long writesPerTx, DataStore dataStore) {
+    public TxchainBaRead(final DataBroker bindingDataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaRead");
@@ -54,57 +57,57 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
 
     @Override
     public void executeList() {
-        ReadTransaction tx = bindingDataBroker.newReadOnlyTransaction();
+        final LogicalDatastoreType dsType = getDataStoreType();
 
-        for (long l = 0; l < outerListElem; l++) {
+        try (ReadOnlyTransaction tx = bindingDataBroker.newReadOnlyTransaction()) {
+            for (long l = 0; l < outerListElem; l++) {
 
-            OuterList outerList;
-            InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                    .child(OuterList.class, new OuterListKey((int) l));
-            Optional<OuterList> optionalDataObject;
-            CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
-                    tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+                InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
+                        .child(OuterList.class, new OuterListKey((int) l));
+                CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
+                        tx.read(dsType, iid);
 
-            try {
-                optionalDataObject = submitFuture.checkedGet();
-                if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                    outerList = optionalDataObject.get();
+                try {
+                    Optional<OuterList> optionalDataObject = submitFuture.checkedGet();
+                    if (optionalDataObject != null && optionalDataObject.isPresent()) {
+                        OuterList outerList = optionalDataObject.get();
 
-                    String[] objectsArray = new String[outerList.getInnerList().size()];
-                    for (InnerList innerList : outerList.getInnerList()) {
-                        if (objectsArray[innerList.getName()] != null) {
-                            LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
+                        String[] objectsArray = new String[outerList.getInnerList().size()];
+                        for (InnerList innerList : outerList.getInnerList()) {
+                            if (objectsArray[innerList.getName()] != null) {
+                                LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
                                     innerList.getValue());
+                            }
+                            objectsArray[innerList.getName()] = innerList.getValue();
                         }
-                        objectsArray[innerList.getName()] = innerList.getValue();
-                    }
-                    for (int i = 0; i < outerList.getInnerList().size(); i++) {
-                        String itemStr = objectsArray[i];
-                        if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
-                            LOG.error("innerList: name: {}, value: {}", i, itemStr);
-                            break;
+                        for (int i = 0; i < outerList.getInnerList().size(); i++) {
+                            String itemStr = objectsArray[i];
+                            if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
+                                LOG.error("innerList: name: {}, value: {}", i, itemStr);
+                                break;
+                            }
                         }
+                        txOk++;
+                    } else {
+                        txError++;
                     }
-                    txOk++;
-                } else {
+                } catch (ReadFailedException e) {
+                    LOG.warn("failed to ....", e);
                     txError++;
                 }
-            } catch (ReadFailedException e) {
-                LOG.warn("failed to ....", e);
-                txError++;
             }
         }
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chain,
-                                         AsyncTransaction<?, ?> transaction, Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
+                                         final AsyncTransaction<?, ?> transaction, final Throwable cause) {
         LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}",
                 chain, transaction.getIdentifier(), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
         LOG.info("TxchainBaDelete closed successfully, chain {}", chain);
     }
 

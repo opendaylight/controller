@@ -9,7 +9,6 @@
 package org.opendaylight.dsbenchmark.simpletx;
 
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -31,8 +30,8 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
     private final DOMDataBroker domDataBroker;
     private List<MapEntryNode> list;
 
-    public SimpletxDomWrite(DOMDataBroker domDataBroker, StartTestInput.Operation oper,
-                                    int outerListElem, int innerListElem, long putsPerTx, DataStore dataStore ) {
+    public SimpletxDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
+                                    final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore ) {
         super(oper, outerListElem, innerListElem, putsPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created SimpletxDomWrite");
@@ -45,12 +44,13 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
 
     @Override
     public void executeList() {
+        final LogicalDatastoreType dsType = getDataStoreType();
+        final YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+
         DOMDataWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
-        LogicalDatastoreType dsType = getDataStoreType();
         long writeCnt = 0;
 
-        YangInstanceIdentifier pid =
-                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (MapEntryNode element : this.list) {
             YangInstanceIdentifier yid =
                     pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
@@ -72,7 +72,6 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
                     txError++;
                 }
                 tx = domDataBroker.newWriteOnlyTransaction();
-                dsType = getDataStoreType();
                 writeCnt = 0;
             }
         }
