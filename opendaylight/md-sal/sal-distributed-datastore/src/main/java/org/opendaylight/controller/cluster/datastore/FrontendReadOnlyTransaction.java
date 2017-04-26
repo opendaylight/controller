@@ -13,10 +13,11 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
-import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
@@ -56,8 +57,8 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
             return handleExistsTransaction((ExistsTransactionRequest) request);
         } else if (request instanceof ReadTransactionRequest) {
             return handleReadTransaction((ReadTransactionRequest) request);
-        } else if (request instanceof TransactionAbortRequest) {
-            handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
+        } else if (request instanceof ModifyTransactionRequest) {
+            handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
             return null;
         } else {
             LOG.warn("Rejecting unsupported request {}", request);
@@ -65,10 +66,15 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
         }
     }
 
-    private void handleTransactionAbort(final TransactionAbortRequest request, final RequestEnvelope envelope,
-            final long now) throws RequestException {
-        openTransaction.abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(request.getTarget(),
-            request.getSequence())));
+    private void handleModifyTransaction(final ModifyTransactionRequest request, final RequestEnvelope envelope,
+            final long now) {
+        // The only valid request here is with abort protocol
+        final java.util.Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
+        Preconditions.checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
+        Preconditions.checkArgument(optProto.get() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s",
+                request);
+        openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
+            new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
     }
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request)
