@@ -83,19 +83,19 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         listenerProvider.setDataBroker(dataBroker);
         setTestOperData(this.execStatus.get(), testsCompleted);
 
-        LOG.info("DsbenchmarkProvider Session Initiated");
+        LOG.debug("DsbenchmarkProvider Session Initiated");
     }
 
     @Override
     public void close() throws Exception {
         dstReg.close();
-        LOG.info("DsbenchmarkProvider Closed");
+        LOG.debug("DsbenchmarkProvider Closed");
     }
 
     @Override
     public Future<RpcResult<Void>> cleanupStore() {
         cleanupTestStore();
-        LOG.info("Data Store cleaned up");
+        LOG.debug("Data Store cleaned up");
         return Futures.immediateFuture( RpcResultBuilder.<Void>success().build());
     }
 
@@ -180,7 +180,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
             throw new IllegalStateException(e);
         }
 
-        LOG.info("DataStore test oper status populated: {}", status);
+        LOG.debug("DataStore test oper status populated: {}", status);
     }
 
     private void cleanupTestStore() {
@@ -192,7 +192,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         tx.put(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID, data);
         try {
             tx.submit().checkedGet();
-            LOG.info("DataStore config test data cleaned up");
+            LOG.debug("DataStore config test data cleaned up");
         } catch (TransactionCommitFailedException e) {
             LOG.info("Failed to cleanup DataStore configtest data");
             throw new IllegalStateException(e);
@@ -202,7 +202,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         tx.put(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID, data);
         try {
             tx.submit().checkedGet();
-            LOG.info("DataStore operational test data cleaned up");
+            LOG.debug("DataStore operational test data cleaned up");
         } catch (TransactionCommitFailedException e) {
             LOG.info("Failed to cleanup DataStore operational test data");
             throw new IllegalStateException(e);

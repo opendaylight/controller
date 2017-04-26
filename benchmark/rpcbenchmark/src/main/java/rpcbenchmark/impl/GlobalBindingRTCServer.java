@@ -30,7 +30,7 @@ public class GlobalBindingRTCServer implements RpcbenchPayloadService {
     private int numRpcs = 0;
 
     public GlobalBindingRTCServer() {
-        LOG.info("GlobalBindingRTCServer created.");
+        LOG.debug("GlobalBindingRTCServer created.");
     }
 
     @Override

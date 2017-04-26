@@ -32,7 +32,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
             final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
-        LOG.info("Created SimpletxBaWrite");
+        LOG.debug("Created SimpletxBaWrite");
     }
 
     @Override
