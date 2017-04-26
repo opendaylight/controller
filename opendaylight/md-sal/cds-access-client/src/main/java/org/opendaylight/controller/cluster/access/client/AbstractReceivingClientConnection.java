@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
 
@@ -55,5 +56,10 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
 
     final T backend() {
         return backend;
+    }
+
+    @Override
+    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return super.addToStringAttributes(toStringHelper).add("backend", backend);
     }
 }
