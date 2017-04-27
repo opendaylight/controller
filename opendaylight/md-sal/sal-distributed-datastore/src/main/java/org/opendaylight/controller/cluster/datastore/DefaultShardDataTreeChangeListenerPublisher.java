@@ -30,15 +30,22 @@ import org.slf4j.LoggerFactory;
 final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStoreTreeChangePublisher
         implements ShardDataTreeChangeListenerPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataTreeChangeListenerPublisher.class);
+    private String logContext;
+
+    DefaultShardDataTreeChangeListenerPublisher(String logContext) {
+        this.logContext = logContext;
+    }
 
     @Override
-    public void publishChanges(final DataTreeCandidate candidate, String logContext) {
+    public void publishChanges(final DataTreeCandidate candidate) {
+        LOG.debug("{}: publishChanges: {}", logContext, candidate);
         processCandidateTree(candidate);
     }
 
     @Override
     protected void notifyListener(AbstractDOMDataTreeChangeListenerRegistration<?> registration,
             Collection<DataTreeCandidate> changes) {
+        LOG.debug("{}: notifyListener: listener: {}", logContext, registration.getInstance());
         registration.getInstance().onDataTreeChanged(changes);
     }
 
@@ -51,10 +58,10 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     public void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
             Optional<DataTreeCandidate> initialState,
             Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+        LOG.debug("{}: registerTreeChangeListener: path: {}, listener: {}", logContext, treeId, listener);
+
         AbstractDOMDataTreeChangeListenerRegistration<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener>
-            registration = super.registerTreeChangeListener(treeId,
-                (org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener)changes ->
-                    listener.onDataTreeChanged(changes));
+            registration = super.registerTreeChangeListener(treeId, new ForwardingDOMDataTreeChangeListener(listener));
 
         onRegistration.accept(
             new org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration<
@@ -66,14 +73,36 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
             });
 
         if (initialState.isPresent()) {
-            notifySingleListener(treeId, listener, initialState.get());
+            notifySingleListener(treeId, listener, initialState.get(), logContext);
         }
     }
 
     static void notifySingleListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
-            DataTreeCandidate state) {
-        DefaultShardDataTreeChangeListenerPublisher publisher = new DefaultShardDataTreeChangeListenerPublisher();
+            DataTreeCandidate state, String logContext) {
+        LOG.debug("{}: notifySingleListener: path: {}, listener: {}", logContext, treeId, listener);
+        DefaultShardDataTreeChangeListenerPublisher publisher =
+                new DefaultShardDataTreeChangeListenerPublisher(logContext);
+        publisher.logContext = logContext;
         publisher.registerTreeChangeListener(treeId, listener, Optional.absent(), noop -> { });
-        publisher.publishChanges(state, "");
+        publisher.publishChanges(state);
+    }
+
+    private static class ForwardingDOMDataTreeChangeListener
+            implements org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener {
+        final DOMDataTreeChangeListener delegate;
+
+        ForwardingDOMDataTreeChangeListener(DOMDataTreeChangeListener delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
+            delegate.onDataTreeChanged(changes);
+        }
+
+        @Override
+        public String toString() {
+            return delegate.toString();
+        }
     }
 }
