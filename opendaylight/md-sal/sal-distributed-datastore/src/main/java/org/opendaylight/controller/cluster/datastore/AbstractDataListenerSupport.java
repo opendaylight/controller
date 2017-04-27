@@ -40,7 +40,7 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
     void onLeadershipChange(boolean isLeader, boolean hasLeader) {
         log.debug("{}: onLeadershipChange, isLeader: {}, hasLeader : {}", persistenceId(), isLeader, hasLeader);
 
-        final EnableNotification msg = new EnableNotification(isLeader);
+        final EnableNotification msg = new EnableNotification(isLeader, persistenceId());
         for (ActorSelection dataChangeListener : leaderOnlyListenerActors) {
             dataChangeListener.tell(msg, getSelf());
         }
@@ -64,7 +64,8 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
 
     @Override
     void onMessage(M message, boolean isLeader, boolean hasLeader) {
-        log.debug("{}: {} for {}, leader: {}", persistenceId(), logName(), message.getPath(), isLeader);
+        log.debug("{}: {} for {}, isLeader: {}, hasLeader: {}", persistenceId(), logName(), message,
+                isLeader, hasLeader);
 
         ActorRef registrationActor = createActor(DataTreeNotificationListenerRegistrationActor.props());
 
@@ -96,7 +97,7 @@ abstract class AbstractDataListenerSupport<L extends EventListener, M extends Li
         final ActorSelection listenerActor = selectActor(message.getListenerActorPath());
 
         // We have a leader so enable the listener.
-        listenerActor.tell(new EnableNotification(true), getSelf());
+        listenerActor.tell(new EnableNotification(true, persistenceId()), getSelf());
 
         if (!message.isRegisterOnAllInstances()) {
             // This is a leader-only registration so store a reference to the listener actor so it can be notified

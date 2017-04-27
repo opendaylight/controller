@@ -45,4 +45,10 @@ public class RegisterChangeListener implements ListenerRegistrationMessage {
     public boolean isRegisterOnAllInstances() {
         return registerOnAllInstances;
     }
+
+    @Override
+    public String toString() {
+        return "RegisterChangeListener [path=" + path + ", scope=" + scope + ", registerOnAllInstances="
+                + registerOnAllInstances + ", dataChangeListenerActor=" + dataChangeListenerActor + "]";
+    }
 }
