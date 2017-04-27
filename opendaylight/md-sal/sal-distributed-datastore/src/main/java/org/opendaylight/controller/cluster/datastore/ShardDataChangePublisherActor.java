@@ -27,7 +27,7 @@ public class ShardDataChangePublisherActor
         extends ShardDataTreeNotificationPublisherActor<ShardDataChangeListenerPublisher> {
 
     private ShardDataChangePublisherActor(final String name, final String logContext) {
-        super(new DefaultShardDataChangeListenerPublisher(), name, logContext);
+        super(new DefaultShardDataChangeListenerPublisher(logContext), name, logContext);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ShardDataChangePublisherActor
             RegisterListener reg = (RegisterListener)message;
             if (reg.initialState.isPresent()) {
                 DefaultShardDataChangeListenerPublisher.notifySingleListener(reg.path, reg.listener, reg.scope,
-                        reg.initialState.get());
+                        reg.initialState.get(), logContext());
             }
 
             publisher().registerDataChangeListener(reg.path, reg.listener, reg.scope, Optional.absent(),
