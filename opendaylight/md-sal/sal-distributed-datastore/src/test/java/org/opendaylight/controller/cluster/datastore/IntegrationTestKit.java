@@ -128,7 +128,7 @@ public class IntegrationTestKit extends ShardTestKit {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final Configuration config = new ConfigurationImpl(moduleShardsConfig, modulesConfig);
 
-        datastoreContextBuilder.dataStoreName(typeName);
+        setDataStoreName(typeName);
 
         final DatastoreContext datastoreContext = datastoreContextBuilder.build();
         final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
@@ -152,12 +152,22 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
+    private void setDataStoreName(String typeName) {
+        if ("config".equals(typeName)) {
+            datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.CONFIGURATION);
+        } else if ("operational".equals(typeName)) {
+            datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.OPERATIONAL);
+        } else {
+            datastoreContextBuilder.dataStoreName(typeName);
+        }
+    }
+
     public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
                                                                        final SchemaContext schemaContext) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
 
-        getDatastoreContextBuilder().dataStoreName(typeName);
+        setDataStoreName(typeName);
 
         final DatastoreContext datastoreContext = getDatastoreContextBuilder().build();
 
@@ -180,7 +190,7 @@ public class IntegrationTestKit extends ShardTestKit {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
 
-        getDatastoreContextBuilder().dataStoreName(typeName);
+        setDataStoreName(typeName);
 
         final DatastoreContext datastoreContext =
                 getDatastoreContextBuilder().logicalStoreType(storeType).build();
