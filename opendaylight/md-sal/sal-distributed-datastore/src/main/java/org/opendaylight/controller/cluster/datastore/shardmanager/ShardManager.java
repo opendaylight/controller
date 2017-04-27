@@ -559,7 +559,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 .storeRoot(config.getPrefix().getRootIdentifier());
         DatastoreContext shardDatastoreContext = builder.build();
 
-        final Map<String, String> peerAddresses = Collections.emptyMap();
+        final Map<String, String> peerAddresses = getPeerAddresses(shardName);
         final boolean isActiveMember = true;
 
         LOG.debug("{} doCreatePrefixShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
