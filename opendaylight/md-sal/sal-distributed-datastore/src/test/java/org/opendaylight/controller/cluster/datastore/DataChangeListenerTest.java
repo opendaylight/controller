@@ -37,7 +37,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
                 // Let the DataChangeListener know that notifications should be
                 // enabled
-                subject.tell(new EnableNotification(true), getRef());
+                subject.tell(new EnableNotification(true, "test"), getRef());
 
                 subject.tell(new DataChanged(mockChangeEvent), getRef());
 
@@ -122,7 +122,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
                 // Let the DataChangeListener know that notifications should be
                 // enabled
-                subject.tell(new EnableNotification(true), getRef());
+                subject.tell(new EnableNotification(true, "test"), getRef());
 
                 subject.tell(new DataChanged(mockChangeEvent1), getRef());
                 expectMsgClass(DataChangedReply.class);

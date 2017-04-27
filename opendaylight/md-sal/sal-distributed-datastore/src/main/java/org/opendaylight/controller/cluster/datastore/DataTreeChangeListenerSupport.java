@@ -27,7 +27,7 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
 
         DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(listenerActor);
 
-        log().debug("{}: Registering for path {}", persistenceId(), message.getPath());
+        log().debug("{}: Registering listenerActor {} for path {}", persistenceId(), listenerActor, message.getPath());
 
         final ShardDataTree shardDataTree = getShard().getDataStore();
         shardDataTree.registerTreeChangeListener(message.getPath(),
