@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_99bf16aa",
+        "filename": "opendaylight/md-sal/sal-schema-service/src/main/java/org/opendaylight/controller/sal/schema/service/impl/GlobalBundleScanningSchemaServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-04-27T16:12:39Z",
+      "side": 1,
+      "message": "Do we need this to be a warning? Won\u0027t this happen every time as bundle 0 is stopped first on shutdown?",
+      "revId": "b83b0fb5e4b525ed3bd86f115fec92c387854f63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
