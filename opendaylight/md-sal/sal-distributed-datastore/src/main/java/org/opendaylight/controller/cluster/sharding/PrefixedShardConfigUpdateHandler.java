@@ -77,6 +77,7 @@ public class PrefixedShardConfigUpdateHandler {
         private final MemberName memberName;
         private final LogicalDatastoreType type;
         private final ActorRef handlingActor;
+        private final String logName;
 
         public ShardConfigHandler(final MemberName memberName,
                            final LogicalDatastoreType type,
@@ -84,6 +85,7 @@ public class PrefixedShardConfigUpdateHandler {
             this.memberName = memberName;
             this.type = type;
             this.handlingActor = handlingActor;
+            logName = memberName.getName() + "-" + type;
         }
 
         @Override
@@ -111,8 +113,8 @@ public class PrefixedShardConfigUpdateHandler {
 
         private void resolveWrite(final DataTreeCandidateNode rootNode) {
 
-            LOG.debug("{}: New config received {}", memberName, rootNode);
-            LOG.debug("{}: Data after: {}", memberName, rootNode.getDataAfter());
+            LOG.debug("{}: New config received {}", logName, rootNode);
+            LOG.debug("{}: Data after: {}", logName, rootNode.getDataAfter());
 
             // were in the shards list, iter children and resolve
             for (final DataTreeCandidateNode childNode : rootNode.getChildNodes()) {
@@ -134,6 +136,7 @@ public class PrefixedShardConfigUpdateHandler {
             }
         }
 
+        @SuppressWarnings("unchecked")
         private void resolveWrittenShard(final DataTreeCandidateNode childNode) {
             final MapEntryNode entryNode = (MapEntryNode) childNode.getDataAfter().get();
             final LeafNode<YangInstanceIdentifier> prefix =
@@ -141,7 +144,7 @@ public class PrefixedShardConfigUpdateHandler {
 
             final YangInstanceIdentifier identifier = prefix.getValue();
 
-            LOG.debug("{}: Deserialized {} from datastore", memberName, identifier);
+            LOG.debug("{}: Deserialized {} from datastore", logName, identifier);
 
             final ContainerNode replicas =
                     (ContainerNode) entryNode.getChild(new NodeIdentifier(SHARD_REPLICAS_QNAME)).get();
@@ -153,13 +156,13 @@ public class PrefixedShardConfigUpdateHandler {
                     .map(child -> MemberName.forName(child.getValue()))
                     .collect(Collectors.toList());
 
-            LOG.debug("{}: Replicas read from ds {}", memberName, retReplicas.toString());
+            LOG.debug("{}: Replicas read from ds {}", logName, retReplicas.toString());
 
             final PrefixShardConfiguration newConfig =
                     new PrefixShardConfiguration(new DOMDataTreeIdentifier(type, identifier),
                             PrefixShardStrategy.NAME, retReplicas);
 
-            LOG.debug("{}: Resulting config {}", memberName, newConfig);
+            LOG.debug("{}: Resulting config {} - sending PrefixShardCreated to {}", logName, newConfig, handlingActor);
 
             handlingActor.tell(new PrefixShardCreated(newConfig), noSender());
         }
@@ -182,6 +185,11 @@ public class PrefixedShardConfigUpdateHandler {
 
         private void resolveDelete(final DataTreeCandidateNode rootNode) {
 
+        }
+
+        @Override
+        public String toString() {
+            return "ShardConfigHandler [logName=" + logName + ", handlingActor=" + handlingActor + "]";
         }
     }
 }

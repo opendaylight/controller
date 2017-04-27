@@ -40,7 +40,7 @@ class ShardDataChangeListenerPublisherActorProxy extends AbstractShardDataTreeNo
             Optional<DataTreeCandidate> initialState,
             Consumer<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>>
                 onRegistration) {
-        notifierActor().tell(new ShardDataChangePublisherActor.RegisterListener(path, listener, scope, initialState,
+        publisherActor().tell(new ShardDataChangePublisherActor.RegisterListener(path, listener, scope, initialState,
                 onRegistration), ActorRef.noSender());
     }
 
