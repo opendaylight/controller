@@ -298,7 +298,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onInitConfigListener() {
-        LOG.debug("{}: Initializing config listener.", persistenceId());
+        LOG.debug("{}: Initializing config listener on {}", persistenceId(), cluster.getCurrentMemberName());
 
         final org.opendaylight.mdsal.common.api.LogicalDatastoreType type =
                 org.opendaylight.mdsal.common.api.LogicalDatastoreType

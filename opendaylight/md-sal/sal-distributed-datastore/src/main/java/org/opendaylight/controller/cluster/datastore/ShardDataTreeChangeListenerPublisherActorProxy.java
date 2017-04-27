@@ -36,8 +36,10 @@ class ShardDataTreeChangeListenerPublisherActorProxy extends AbstractShardDataTr
     public void registerTreeChangeListener(YangInstanceIdentifier treeId,
             DOMDataTreeChangeListener listener, Optional<DataTreeCandidate> currentState,
             Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
-        notifierActor().tell(new ShardDataTreeChangePublisherActor.RegisterListener(treeId, listener, currentState,
-                onRegistration), ActorRef.noSender());
+        final ShardDataTreeChangePublisherActor.RegisterListener regMessage =
+                new ShardDataTreeChangePublisherActor.RegisterListener(treeId, listener, currentState, onRegistration);
+        log.debug("{}: Sending {} to publisher actor {}", logContext(), regMessage, publisherActor());
+        publisherActor().tell(regMessage, ActorRef.noSender());
     }
 
     @Override
