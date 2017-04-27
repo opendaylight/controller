@@ -36,11 +36,16 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataChangeListenerPublisher.class);
 
     private final ListenerTree dataChangeListenerTree = ListenerTree.create();
+    private final String logContext;
+
+    DefaultShardDataChangeListenerPublisher(String logContext) {
+        this.logContext = logContext;
+    }
 
     @Override
     public void submitNotification(final DataChangeListenerRegistration<?> listener,
             final DOMImmutableDataChangeEvent notification) {
-        LOG.debug("Notifying listener {} about {}", listener.getInstance(), notification);
+        LOG.debug("{}: Notifying listener {} about {}", logContext, listener.getInstance(), notification);
 
         listener.getInstance().onDataChanged(notification);
     }
@@ -49,7 +54,7 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     public void submitNotifications(final DataChangeListenerRegistration<?> listener,
             final Iterable<DOMImmutableDataChangeEvent> notifications) {
         final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> instance = listener.getInstance();
-        LOG.debug("Notifying listener {} about {}", instance, notifications);
+        LOG.debug("{}: Notifying listener {} about {}", logContext, instance, notifications);
 
         for (DOMImmutableDataChangeEvent n : notifications) {
             instance.onDataChanged(n);
@@ -57,7 +62,7 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     }
 
     @Override
-    public void publishChanges(DataTreeCandidate candidate, String logContext) {
+    public void publishChanges(DataTreeCandidate candidate) {
         ResolveDataChangeEventsTask.create(candidate, dataChangeListenerTree).resolve(this);
     }
 
@@ -73,15 +78,15 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
         onRegistration.accept(registration);
 
         if (initialState.isPresent()) {
-            notifySingleListener(path, listener, scope, initialState.get());
+            notifySingleListener(path, listener, scope, initialState.get(), logContext);
         }
     }
 
     static void notifySingleListener(final YangInstanceIdentifier path,
             final AsyncDataChangeListener<YangInstanceIdentifier,NormalizedNode<?, ?>> listener,
-            final DataChangeScope scope, final DataTreeCandidate initialState) {
-        DefaultShardDataChangeListenerPublisher publisher = new DefaultShardDataChangeListenerPublisher();
+            final DataChangeScope scope, final DataTreeCandidate initialState, String logContext) {
+        DefaultShardDataChangeListenerPublisher publisher = new DefaultShardDataChangeListenerPublisher(logContext);
         publisher.registerDataChangeListener(path, listener, scope, Optional.absent(), noop -> { });
-        publisher.publishChanges(initialState, "");
+        publisher.publishChanges(initialState);
     }
 }
