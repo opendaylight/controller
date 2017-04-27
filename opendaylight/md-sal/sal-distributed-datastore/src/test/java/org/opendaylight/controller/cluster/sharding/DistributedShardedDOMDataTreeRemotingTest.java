@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -24,6 +25,8 @@ import akka.testkit.JavaTestKit;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,7 +66,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     private static final DOMDataTreeIdentifier TEST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
 
-    private static final String MODULE_SHARDS_CONFIG = "module-shards-cars-member-1-and-2.conf";
+    private static final String MODULE_SHARDS_CONFIG = "module-shards-default.conf";
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
@@ -168,7 +171,6 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         leaderTestKit.waitUntilLeader(leaderOperDatastore.getActorContext(),
                 ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
-
     }
 
     @Test
@@ -177,6 +179,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         leaderTestKit.waitForMembersUp("member-2");
 
+        // TODO refactor shard creation and verification to own method
         final DistributedShardRegistration shardRegistration =
                 waitOnAsyncTask(leaderShardFactory.createDistributedShard(
                         TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
@@ -192,6 +195,12 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         assertNotNull(findLocalShard(followerConfigDatastore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier())));
+
+        final Set<String> peers  = new HashSet<>();
+        IntegrationTestKit.verifyShardState(leaderConfigDatastore,
+                ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()), onDemandShardState ->
+                        peers.addAll(onDemandShardState.getPeerAddresses().values()));
+        assertEquals(peers.size(), 1);
 
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
         try {
@@ -243,6 +252,12 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
         findLocalShard(followerConfigDatastore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
+
+        final Set<String> peers  = new HashSet<>();
+        IntegrationTestKit.verifyShardState(leaderConfigDatastore,
+                ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()), onDemandShardState ->
+                        peers.addAll(onDemandShardState.getPeerAddresses().values()));
+        assertEquals(peers.size(), 1);
 
         LOG.debug("Got after waiting for nonleader");
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
@@ -322,7 +337,6 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         assertNotNull(findLocalShard(followerConfigDatastore.getActorContext(),
                 ClusterUtils.getCleanShardName(TestModel.JUNK_PATH)));
 
-
         LOG.debug("Closing registrations");
 
         reg1.close().toCompletableFuture().get();
@@ -377,6 +391,13 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
             assertNotNull(findLocalShard(followerConfigDatastore.getActorContext(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
+
+
+            final Set<String> peers  = new HashSet<>();
+            IntegrationTestKit.verifyShardState(leaderConfigDatastore,
+                    ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()), onDemandShardState ->
+                            peers.addAll(onDemandShardState.getPeerAddresses().values()));
+            assertEquals(peers.size(), 1);
 
             waitOnAsyncTask(reg1.close(), DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
