@@ -27,7 +27,6 @@ import java.util.Collections;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
@@ -54,7 +53,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLe
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore("https://bugs.opendaylight.org/show_bug.cgi?id=8301")
 public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardedDOMDataTreeRemotingTest.class);
@@ -72,14 +70,10 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
 
     private final Builder leaderDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
-                    .logicalStoreType(
-                            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
 
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
-                    .logicalStoreType(
-                            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
 
     private DistributedDataStore leaderConfigDatastore;
     private DistributedDataStore leaderOperDatastore;
@@ -163,6 +157,8 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         followerShardFactory = new DistributedShardedDOMDataTree(followerSystemProvider,
                 followerOperDatastore,
                 followerConfigDatastore);
+
+        followerTestKit.waitForMembersUp("member-1");
 
         leaderShardFactory.init();
         followerShardFactory.init();
