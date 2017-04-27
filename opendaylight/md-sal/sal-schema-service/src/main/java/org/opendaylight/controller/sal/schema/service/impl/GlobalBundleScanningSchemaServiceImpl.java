@@ -43,20 +43,23 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService, ServiceTrackerCustomizer<SchemaContextListener, SchemaContextListener>, YangTextSourceProvider, AutoCloseable {
+public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService,
+        ServiceTrackerCustomizer<SchemaContextListener, SchemaContextListener>, YangTextSourceProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
+    private static final long FRAMEWORK_BUNDLE_ID = 0;
 
     @GuardedBy(value = "lock")
     private final ListenerRegistry<SchemaContextListener> listeners = new ListenerRegistry<>();
     private final YangTextSchemaContextResolver contextResolver = YangTextSchemaContextResolver.create("global-bundle");
     private final BundleScanner scanner = new BundleScanner();
+    private final Object lock = new Object();
     private final BundleContext context;
 
     private ServiceTracker<SchemaContextListener, SchemaContextListener> listenerTracker;
     private BundleTracker<Iterable<Registration>> bundleTracker;
     private boolean starting = true;
+
     private volatile boolean stopping;
-    private final Object lock = new Object();
 
     private GlobalBundleScanningSchemaServiceImpl(final BundleContext context) {
         this.context = Preconditions.checkNotNull(context);
@@ -76,17 +79,15 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         checkState(context != null);
         LOG.debug("start() starting");
 
-        listenerTracker = new ServiceTracker<>(context, SchemaContextListener.class, GlobalBundleScanningSchemaServiceImpl.this);
+        listenerTracker = new ServiceTracker<>(context, SchemaContextListener.class, this);
         bundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
                 Bundle.STOPPING | Bundle.ACTIVE, scanner);
 
-        synchronized(lock) {
+        synchronized (lock) {
             bundleTracker.open();
 
             LOG.debug("BundleTracker.open() complete");
-
-            boolean hasExistingListeners = Iterables.size(listeners.getListeners()) > 0;
-            if(hasExistingListeners) {
+            if (Iterables.size(listeners.getListeners()) > 0) {
                 tryToUpdateSchemaContext();
             }
         }
@@ -123,8 +124,9 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
     @Override
-    public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(final SchemaContextListener listener) {
-        synchronized(lock) {
+    public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(
+            final SchemaContextListener listener) {
+        synchronized (lock) {
             Optional<SchemaContext> potentialCtx = contextResolver.getSchemaContext();
             if(potentialCtx.isPresent()) {
                 listener.onGlobalContextUpdated(potentialCtx.get());
@@ -135,20 +137,24 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
 
     @Override
     public void close() {
-        stopping = true;
-        if (bundleTracker != null) {
-            bundleTracker.close();
-        }
-        if (listenerTracker != null) {
-            listenerTracker.close();
-        }
+        synchronized (lock) {
+            stopping = true;
+            if (bundleTracker != null) {
+                bundleTracker.close();
+                bundleTracker = null;
+            }
+            if (listenerTracker != null) {
+                listenerTracker.close();
+                listenerTracker = null;
+            }
 
-        for (ListenerRegistration<SchemaContextListener> l : listeners.getListeners()) {
-            l.close();
+            for (ListenerRegistration<SchemaContextListener> l : listeners.getListeners()) {
+                l.close();
+            }
         }
     }
 
-    @GuardedBy(value = "lock")
+    @GuardedBy("lock")
     private void notifyListeners(final SchemaContext snapshot) {
         Object[] services = listenerTracker.getServices();
         for (ListenerRegistration<SchemaContextListener> listener : listeners) {
@@ -171,16 +177,15 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
     @Override
-    public CheckedFuture<YangTextSchemaSource, SchemaSourceException> getSource(final SourceIdentifier sourceIdentifier) {
+    public CheckedFuture<YangTextSchemaSource, SchemaSourceException> getSource(
+            final SourceIdentifier sourceIdentifier) {
         return contextResolver.getSource(sourceIdentifier);
-
     }
 
     private class BundleScanner implements BundleTrackerCustomizer<Iterable<Registration>> {
         @Override
         public Iterable<Registration> addingBundle(final Bundle bundle, final BundleEvent event) {
-
-            if (bundle.getBundleId() == 0) {
+            if (bundle.getBundleId() == FRAMEWORK_BUNDLE_ID) {
                 return Collections.emptyList();
             }
 
@@ -211,6 +216,13 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
 
         @Override
         public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration> object) {
+            if (bundle.getBundleId() == FRAMEWORK_BUNDLE_ID) {
+                LOG.debug("Framework bundle {} got event {}", bundle, event.getType());
+                if ((event.getType() & BundleEvent.STOPPING) != 0) {
+                    LOG.info("OSGi framework is being stopped, halting bundle scanning");
+                    stopping = true;
+                }
+            }
         }
 
         /**
@@ -218,7 +230,6 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
          * {@link #getYangStoreSnapshot()} will throw exception. There is no
          * rollback.
          */
-
         @Override
         public void removedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration> urls) {
             for (Registration url : urls) {
@@ -232,7 +243,8 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
             int numUrls = Iterables.size(urls);
             if(numUrls > 0 ) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("removedBundle: {}, state: {}, # urls: {}", bundle.getSymbolicName(), bundle.getState(), numUrls);
+                    LOG.debug("removedBundle: {}, state: {}, # urls: {}", bundle.getSymbolicName(), bundle.getState(),
+                        numUrls);
                 }
 
                 tryToUpdateSchemaContext();
@@ -256,10 +268,10 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
             return;
         }
 
-        synchronized(lock) {
+        synchronized (lock) {
             Optional<SchemaContext> schema = contextResolver.getSchemaContext();
-            if(schema.isPresent()) {
-                if(LOG.isDebugEnabled()) {
+            if (schema.isPresent()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Got new SchemaContext: # of modules {}", schema.get().getAllModuleIdentifiers().size());
                 }
 
@@ -269,12 +281,14 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
     @Override
-    public void modifiedService(final ServiceReference<SchemaContextListener> reference, final SchemaContextListener service) {
+    public void modifiedService(final ServiceReference<SchemaContextListener> reference,
+            final SchemaContextListener service) {
         // NOOP
     }
 
     @Override
-    public void removedService(final ServiceReference<SchemaContextListener> reference, final SchemaContextListener service) {
+    public void removedService(final ServiceReference<SchemaContextListener> reference,
+            final SchemaContextListener service) {
         context.ungetService(reference);
     }
 }
