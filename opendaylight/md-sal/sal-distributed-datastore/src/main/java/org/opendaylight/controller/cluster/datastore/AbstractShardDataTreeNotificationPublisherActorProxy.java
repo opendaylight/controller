@@ -24,13 +24,12 @@ import org.slf4j.LoggerFactory;
  */
 @NotThreadSafe
 abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements ShardDataTreeNotificationPublisher {
-    private static final Logger LOG = LoggerFactory.getLogger(
-            AbstractShardDataTreeNotificationPublisherActorProxy.class);
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ActorContext actorContext;
     private final String actorName;
     private final String logContext;
-    private ActorRef notifierActor;
+    private ActorRef publisherActor;
 
     protected AbstractShardDataTreeNotificationPublisherActorProxy(ActorContext actorContext, String actorName,
             String logContext) {
@@ -50,21 +49,21 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
     }
 
     @Override
-    public void publishChanges(DataTreeCandidate candidate, String logContext) {
-        notifierActor().tell(new ShardDataTreeNotificationPublisherActor.PublishNotifications(candidate),
+    public void publishChanges(DataTreeCandidate candidate) {
+        publisherActor().tell(new ShardDataTreeNotificationPublisherActor.PublishNotifications(candidate),
                 ActorRef.noSender());
     }
 
-    protected final ActorRef notifierActor() {
-        if (notifierActor == null) {
-            LOG.debug("Creating actor {}", actorName);
-
+    protected final ActorRef publisherActor() {
+        if (publisherActor == null) {
             String dispatcher = new Dispatchers(actorContext.system().dispatchers()).getDispatcherPath(
                     Dispatchers.DispatcherType.Notification);
-            notifierActor = actorContext.actorOf(props().withDispatcher(dispatcher).withMailbox(
+            publisherActor = actorContext.actorOf(props().withDispatcher(dispatcher).withMailbox(
                     org.opendaylight.controller.cluster.datastore.utils.ActorContext.BOUNDED_MAILBOX), actorName);
+
+            log.debug("{}: Created publisher actor {} with name {}", logContext, publisherActor, actorName);
         }
 
-        return notifierActor;
+        return publisherActor;
     }
 }

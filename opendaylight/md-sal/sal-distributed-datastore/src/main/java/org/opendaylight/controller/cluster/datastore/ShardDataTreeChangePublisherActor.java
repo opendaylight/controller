@@ -25,16 +25,17 @@ public class ShardDataTreeChangePublisherActor
         extends ShardDataTreeNotificationPublisherActor<ShardDataTreeChangeListenerPublisher> {
 
     private ShardDataTreeChangePublisherActor(final String name, final String logContext) {
-        super(new DefaultShardDataTreeChangeListenerPublisher(), name, logContext);
+        super(new DefaultShardDataTreeChangeListenerPublisher(logContext), name, logContext);
     }
 
     @Override
     protected void handleReceive(Object message) {
         if (message instanceof RegisterListener) {
             RegisterListener reg = (RegisterListener)message;
+            LOG.debug("{}: Received {}", logContext(), reg);
             if (reg.initialState.isPresent()) {
                 DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
-                        reg.initialState.get());
+                        reg.initialState.get(), logContext());
             }
 
             publisher().registerTreeChangeListener(reg.path, reg.listener, Optional.absent(), reg.onRegistration);
@@ -60,6 +61,12 @@ public class ShardDataTreeChangePublisherActor
             this.listener = Preconditions.checkNotNull(listener);
             this.initialState = Preconditions.checkNotNull(initialState);
             this.onRegistration = Preconditions.checkNotNull(onRegistration);
+        }
+
+        @Override
+        public String toString() {
+            return "RegisterListener [path=" + path + ", listener=" + listener + ", initialState present="
+                    + initialState.isPresent() + "]";
         }
     }
 }

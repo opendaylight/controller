@@ -46,7 +46,7 @@ public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNoti
             timer.start();
 
             try {
-                publisher.publishChanges(toPublish.candidate, logContext);
+                publisher.publishChanges(toPublish.candidate);
             } finally {
                 long elapsedTime = timer.elapsed(TimeUnit.MILLISECONDS);
 

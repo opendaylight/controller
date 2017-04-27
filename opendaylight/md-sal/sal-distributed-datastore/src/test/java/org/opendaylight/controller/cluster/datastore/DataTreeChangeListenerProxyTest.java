@@ -226,6 +226,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
 
                 doReturn(executor).when(actorContext).getClientDispatcher();
+                doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
                 doReturn(mockActorSystem).when(actorContext).getActorSystem();
 
                 String shardName = "shard-1";

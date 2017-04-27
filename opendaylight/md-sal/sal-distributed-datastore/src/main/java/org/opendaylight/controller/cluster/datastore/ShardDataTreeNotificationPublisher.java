@@ -18,5 +18,5 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 interface ShardDataTreeNotificationPublisher {
     long PUBLISH_DELAY_THRESHOLD_IN_MS = TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS);
 
-    void publishChanges(DataTreeCandidate candidate, String logContext);
+    void publishChanges(DataTreeCandidate candidate);
 }
