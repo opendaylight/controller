@@ -24,6 +24,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     private final DOMDataTreeChangeListener listener;
     private final YangInstanceIdentifier registeredPath;
     private boolean notificationsEnabled = false;
+    private String logContext = "";
 
     private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
             final YangInstanceIdentifier registeredPath) {
@@ -46,16 +47,18 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     private void dataChanged(final DataTreeChanged message) {
         // Do nothing if notifications are not enabled
         if (!notificationsEnabled) {
-            LOG.debug("Notifications not enabled for listener {} - dropping change notification", listener);
+            LOG.debug("{}: Notifications not enabled for listener {} - dropping change notification",
+                    logContext, listener);
             return;
         }
 
-        LOG.debug("Sending change notification {} to listener {}", message.getChanges(), listener);
+        LOG.debug("{}: Sending {} change notification(s) {} to listener {}", logContext, message.getChanges().size(),
+                message.getChanges(), listener);
 
         try {
             this.listener.onDataTreeChanged(message.getChanges());
         } catch (Exception e) {
-            LOG.error("Error notifying listener {}", this.listener, e);
+            LOG.error("{}: Error notifying listener {}", logContext, this.listener, e);
         }
 
         // TODO: do we really need this?
@@ -67,8 +70,9 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     }
 
     private void enableNotification(final EnableNotification message) {
+        logContext = message.getLogContext();
         notificationsEnabled = message.isEnabled();
-        LOG.debug("{} notifications for listener {}", notificationsEnabled ? "Enabled" : "Disabled",
+        LOG.debug("{}: {} notifications for listener {}", logContext, notificationsEnabled ? "Enabled" : "Disabled",
                 listener);
     }
 
