@@ -14,6 +14,8 @@ import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal implementation of a {@link DOMDataTreeChangeListener} which
@@ -21,6 +23,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * message and forwards them towards the client's {@link DataTreeChangeListenerActor}.
  */
 final class ForwardingDataTreeChangeListener implements DOMDataTreeChangeListener {
+    private static final Logger LOG = LoggerFactory.getLogger(ForwardingDataTreeChangeListener.class);
+
     private final ActorSelection actor;
 
     ForwardingDataTreeChangeListener(final ActorSelection actor) {
@@ -29,6 +33,12 @@ final class ForwardingDataTreeChangeListener implements DOMDataTreeChangeListene
 
     @Override
     public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
+        LOG.debug("Sending DataTreeChanged to {}", actor);
         actor.tell(new DataTreeChanged(changes), ActorRef.noSender());
+    }
+
+    @Override
+    public String toString() {
+        return "ForwardingDataTreeChangeListener [actor=" + actor + "]";
     }
 }

@@ -50,6 +50,9 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         this.dataChangeListenerActor = actorContext.getActorSystem().actorOf(
                 DataTreeChangeListenerActor.props(getInstance(), registeredPath)
                     .withDispatcher(actorContext.getNotificationDispatcherPath()));
+
+        LOG.debug("{}: Created actor {} for DTCL {}", actorContext.getDatastoreContext().getLogicalStoreType(),
+                dataChangeListenerActor, listener);
     }
 
     @Override
@@ -69,11 +72,12 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
             @Override
             public void onComplete(final Throwable failure, final ActorRef shard) {
                 if (failure instanceof LocalShardNotFoundException) {
-                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered", shardName, getInstance(), registeredPath);
+                    LOG.debug("{}: No local shard found for {} - DataTreeChangeListener {} at path {} "
+                            + "cannot be registered", logContext(), shardName, getInstance(), registeredPath);
                 } else if (failure != null) {
-                    LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered: {}", shardName, getInstance(), registeredPath, failure);
+                    LOG.error("{}: Failed to find local shard {} - DataTreeChangeListener {} at path {} "
+                            + "cannot be registered: {}", logContext(), shardName, getInstance(), registeredPath,
+                            failure);
                 } else {
                     doRegistration(shard);
                 }
@@ -83,7 +87,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
 
     private void setListenerRegistrationActor(final ActorSelection actor) {
         if (actor == null) {
-            LOG.debug("Ignoring null actor on {}", this);
+            LOG.debug("{}: Ignoring null actor on {}", logContext(), this);
             return;
         }
 
@@ -109,7 +113,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
             @Override
             public void onComplete(final Throwable failure, final Object result) {
                 if (failure != null) {
-                    LOG.error("Failed to register DataTreeChangeListener {} at path {}",
+                    LOG.error("{}: Failed to register DataTreeChangeListener {} at path {}", logContext(),
                             getInstance(), registeredPath, failure);
                 } else {
                     RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply) result;
@@ -128,5 +132,9 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     @VisibleForTesting
     ActorRef getDataChangeListenerActor() {
         return dataChangeListenerActor;
+    }
+
+    private String logContext() {
+        return actorContext.getDatastoreContext().getLogicalStoreType().toString();
     }
 }

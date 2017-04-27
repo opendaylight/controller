@@ -38,7 +38,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
                 // Let the DataChangeListener know that notifications should be
                 // enabled
-                subject.tell(new EnableNotification(true), getRef());
+                subject.tell(new EnableNotification(true, "test"), getRef());
 
                 subject.tell(new DataTreeChanged(mockCandidates), getRef());
 
@@ -126,7 +126,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
                 // Let the DataChangeListener know that notifications should be
                 // enabled
-                subject.tell(new EnableNotification(true), getRef());
+                subject.tell(new EnableNotification(true, "test"), getRef());
 
                 subject.tell(new DataTreeChanged(mockCandidates1), getRef());
                 expectMsgClass(DataTreeChangedReply.class);

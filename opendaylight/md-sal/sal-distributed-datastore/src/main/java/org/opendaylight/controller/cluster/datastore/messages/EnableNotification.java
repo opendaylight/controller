@@ -10,12 +10,18 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 public class EnableNotification {
     private final boolean enabled;
+    private final String logContext;
 
-    public EnableNotification(boolean enabled) {
+    public EnableNotification(boolean enabled, String logContext) {
         this.enabled = enabled;
+        this.logContext = logContext;
     }
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public String getLogContext() {
+        return logContext;
     }
 }
