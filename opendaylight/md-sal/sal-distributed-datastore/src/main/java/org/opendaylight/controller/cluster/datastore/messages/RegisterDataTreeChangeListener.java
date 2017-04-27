@@ -66,4 +66,10 @@ public final class RegisterDataTreeChangeListener implements Externalizable, Lis
         path = SerializationUtils.deserializePath(in);
         registerOnAllInstances = in.readBoolean();
     }
+
+    @Override
+    public String toString() {
+        return "RegisterDataTreeChangeListener [path=" + path + ", registerOnAllInstances=" + registerOnAllInstances
+                + ", dataTreeChangeListenerPath=" + dataTreeChangeListenerPath + "]";
+    }
 }
