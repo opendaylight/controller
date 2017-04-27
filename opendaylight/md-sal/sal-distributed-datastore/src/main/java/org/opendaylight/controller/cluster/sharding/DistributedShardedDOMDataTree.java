@@ -464,8 +464,9 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
     DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> lookupShardFrontend(
             final DOMDataTreeIdentifier prefix) {
-        return shards.lookup(prefix);
-
+        synchronized (shards) {
+            return shards.lookup(prefix);
+        }
     }
 
     DOMDataTreeProducer localCreateProducer(final Collection<DOMDataTreeIdentifier> prefix) {
@@ -675,7 +676,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
             final Object o = actorContext.executeOperation(shardDataTreeActor, new ProducerRemoved(subtrees));
             if (o instanceof DOMDataTreeProducerException) {
-                throw ((DOMDataTreeProducerException) o);
+                throw (DOMDataTreeProducerException) o;
             } else if (o instanceof Throwable) {
                 throw new DOMDataTreeProducerException("Unable to close producer", (Throwable) o);
             }
