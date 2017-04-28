@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+    <!-- MD-SAL's DOMSchemaService -->
+    <odl:static-reference id="domSchemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService"/>
+
+    <!-- Schema Service -->
+    <bean id="schemaService" class="org.opendaylight.controller.sal.schema.service.impl.GlobalBundleScanningSchemaServiceImpl"
+        factory-method="createInstance">
+        <argument ref="domSchemaService"/>
+    </bean>
+
+    <service ref="schemaService" odl:type="default">
+        <interfaces>
+            <value>org.opendaylight.controller.sal.core.api.model.SchemaService</value>
+            <value>org.opendaylight.controller.sal.core.api.model.YangTextSourceProvider</value>
+        </interfaces>
+    </service>
+</blueprint>
