@@ -27,6 +27,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
+@Deprecated
 public final class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService,
         YangTextSourceProvider, AutoCloseable {
 
