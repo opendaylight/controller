@@ -51,22 +51,6 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-            <Bundle-Activator>org.opendaylight.controller.sal.schema.service.impl.SchemaServiceActivator</Bundle-Activator>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
