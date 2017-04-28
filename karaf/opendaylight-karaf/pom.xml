@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>karaf-parent</artifactId>
+    <artifactId>karaf4-parent</artifactId>
     <version>1.8.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
@@ -30,7 +30,7 @@
     <!-- MD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-mdsal</artifactId>
+      <artifactId>features4-mdsal</artifactId>
       <version>1.5.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
@@ -38,7 +38,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-extras</artifactId>
+      <artifactId>features4-extras</artifactId>
       <version>${project.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
@@ -46,7 +46,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>features-mdsal</artifactId>
+      <artifactId>features4-mdsal</artifactId>
       <version>2.2.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
@@ -54,7 +54,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>features-mdsal-model</artifactId>
+      <artifactId>features4-mdsal-model</artifactId>
       <version>0.10.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
