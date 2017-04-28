@@ -1,0 +1,8 @@
+Code-Review+1: Robert Varga <nite@hq.sk>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Submitted-by: Stephen Kitt <skitt@redhat.com>
+Submitted-at: Fri, 28 Apr 2017 12:50:52 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/56235
+Project: controller
+Branch: refs/heads/stable/carbon
