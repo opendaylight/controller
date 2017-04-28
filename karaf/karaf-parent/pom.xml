@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>karaf-parent</artifactId>
+    <artifactId>karaf4-parent</artifactId>
     <version>1.8.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
