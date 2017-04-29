@@ -41,6 +41,7 @@ import java.util.concurrent.CompletionStage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -335,6 +336,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     // top level shard at TEST element, with subshards on each outer-list map entry
     @Test
+    @Ignore
     public void testMultipleShardLevels() throws Exception {
         initEmptyDatastores();
 
