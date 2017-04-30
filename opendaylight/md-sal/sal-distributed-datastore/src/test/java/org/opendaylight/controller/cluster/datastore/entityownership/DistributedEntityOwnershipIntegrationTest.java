@@ -130,7 +130,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     @Test
     public void testFunctionalityWithThreeNodes() throws Exception {
-        String name = "test";
+        String name = "testFunctionalityWithThreeNodes";
         MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
@@ -273,7 +273,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(5)
                     .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
-        String name = "test";
+        String name = "testLeaderEntityOwnersReassignedAfterShutdown";
         MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
@@ -350,7 +350,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(5)
                 .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
-        String name = "test";
+        String name = "testLeaderAndFollowerEntityOwnersReassignedAfterShutdown";
         final MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1")
                 .useAkkaArtery(false).testName(name)
                 .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
@@ -623,7 +623,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     @Test
     public void testOwnerSelectedOnRapidUnregisteringAndRegisteringOfCandidates() throws Exception {
-        String name = "test";
+        String name = "testOwnerSelectedOnRapidUnregisteringAndRegisteringOfCandidates";
         MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
@@ -666,7 +666,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     @Test
     public void testOwnerSelectedOnRapidRegisteringAndUnregisteringOfCandidates() throws Exception {
-        String name = "test";
+        String name = "testOwnerSelectedOnRapidRegisteringAndUnregisteringOfCandidates";
         MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
