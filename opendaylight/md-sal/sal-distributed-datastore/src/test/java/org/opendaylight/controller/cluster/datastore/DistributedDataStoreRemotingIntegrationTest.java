@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -793,6 +794,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     @Test
+    @Ignore("https://bugs.opendaylight.org/show_bug.cgi?id=8038")
     public void testLeadershipTransferOnShutdown() throws Exception {
         leaderDatastoreContextBuilder.shardBatchedModificationCount(1);
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(10).customRaftPolicyImplementation(null);
