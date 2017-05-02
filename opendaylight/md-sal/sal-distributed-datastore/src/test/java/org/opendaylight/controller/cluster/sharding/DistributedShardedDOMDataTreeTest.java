@@ -425,6 +425,15 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     @Test
+    public void testCDSDataTreeProducer() throws Exception {
+        initEmptyDatastores();
+
+        final DistributedShardRegistration testShardReg = waitOnAsyncTask(
+                leaderShardFactory.createDistributedShard(TEST_ID, SINGLE_MEMBER),
+                DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
+    }
+
+    @Test
     public void testMultipleRegistrationsAtOnePrefix() throws Exception {
         initEmptyDatastores();
 
