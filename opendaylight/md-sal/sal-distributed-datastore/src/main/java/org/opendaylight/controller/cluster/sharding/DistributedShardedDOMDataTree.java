@@ -307,7 +307,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             LOG.debug("{} - Received success from remote nodes, creating producer:{}",
                     distributedConfigDatastore.getActorContext().getClusterWrapper().getCurrentMemberName(), subtrees);
             return new ProxyProducer(producer, subtrees, shardedDataTreeActor,
-                    distributedConfigDatastore.getActorContext());
+                    distributedConfigDatastore.getActorContext(), shards);
         } else if (response instanceof Exception) {
             closeProducer(producer);
             throw Throwables.propagate((Exception) response);
@@ -642,14 +642,21 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         @GuardedBy("shardAccessMap")
         private final Map<DOMDataTreeIdentifier, CDSShardAccessImpl> shardAccessMap = new HashMap<>();
 
+        // We don't have to guard access to shardTable in ProxyProducer.
+        // ShardTable's entries relevant to this ProxyProducer shouldn't
+        // change during producer's lifetime.
+        private final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shardTable;
+
         ProxyProducer(final DOMDataTreeProducer delegate,
                       final Collection<DOMDataTreeIdentifier> subtrees,
                       final ActorRef shardDataTreeActor,
-                      final ActorContext actorContext) {
+                      final ActorContext actorContext,
+                      final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shardLayout) {
             this.delegate = Preconditions.checkNotNull(delegate);
             this.subtrees = Preconditions.checkNotNull(subtrees);
             this.shardDataTreeActor = Preconditions.checkNotNull(shardDataTreeActor);
             this.actorContext = Preconditions.checkNotNull(actorContext);
+            this.shardTable = Preconditions.checkNotNull(shardLayout);
         }
 
         @Nonnull
@@ -670,6 +677,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         @SuppressWarnings("checkstyle:IllegalCatch")
         public void close() throws DOMDataTreeProducerException {
             delegate.close();
+
             synchronized (shardAccessMap) {
                 shardAccessMap.values().forEach(CDSShardAccessImpl::close);
             }
@@ -690,19 +698,27 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         @Nonnull
         @Override
         public CDSShardAccess getShardAccess(@Nonnull final DOMDataTreeIdentifier subtree) {
+            Preconditions.checkArgument(
+                    subtrees.stream().anyMatch(dataTreeIdentifier -> dataTreeIdentifier.contains(subtree)),
+                    "Subtree {} is not controlled by this producer {}", subtree, this);
+
+            final DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> lookup =
+                    shardTable.lookup(subtree);
+            Preconditions.checkState(lookup != null, "Subtree {} is not contained in any registered shard.");
+
+            final DOMDataTreeIdentifier lookupId = lookup.getValue().getPrefix();
+
             synchronized (shardAccessMap) {
-                Preconditions.checkArgument(subtrees.contains(subtree),
-                        "Subtree {} is not controlled by this producer {}", subtree, this);
-                if (shardAccessMap.get(subtree) != null) {
-                    return shardAccessMap.get(subtree);
+                if (shardAccessMap.get(lookupId) != null) {
+                    return shardAccessMap.get(lookupId);
                 }
 
                 // TODO Maybe we can have static factory method and return the same instance
                 // for same subtrees. But maybe it is not needed since there can be only one
                 // producer attached to some subtree at a time. And also how we can close ShardAccess
                 // then
-                final CDSShardAccessImpl shardAccess = new CDSShardAccessImpl(subtree, actorContext);
-                shardAccessMap.put(subtree, shardAccess);
+                final CDSShardAccessImpl shardAccess = new CDSShardAccessImpl(lookupId, actorContext);
+                shardAccessMap.put(lookupId, shardAccess);
                 return shardAccess;
             }
         }

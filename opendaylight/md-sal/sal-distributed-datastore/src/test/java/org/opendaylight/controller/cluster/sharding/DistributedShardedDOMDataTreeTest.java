@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.sharding;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.doNothing;
@@ -55,6 +56,8 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.controller.cluster.dom.api.CDSDataTreeProducer;
+import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
@@ -445,6 +448,40 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
             waitUntilShardIsDown(leaderDistributedDataStore.getActorContext(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
         }
+    }
+
+    @Test
+    public void testCDSDataTreeProducer() throws Exception {
+        initEmptyDatastores();
+
+        final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
+                TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
+                DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
+
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
+
+
+        final DOMDataTreeIdentifier configRoot =
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+        final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(configRoot));
+
+        assertTrue(producer instanceof CDSDataTreeProducer);
+
+        final CDSDataTreeProducer cdsProducer = (CDSDataTreeProducer) producer;
+        CDSShardAccess shardAccess = cdsProducer.getShardAccess(TEST_ID);
+        assertEquals(shardAccess.getShardIdentifier(), TEST_ID);
+
+        shardAccess = cdsProducer.getShardAccess(INNER_LIST_ID);
+        assertEquals(TEST_ID, shardAccess.getShardIdentifier());
+
+        shardAccess = cdsProducer.getShardAccess(configRoot);
+        assertEquals(configRoot, shardAccess.getShardIdentifier());
+
+        waitOnAsyncTask(reg1.close(), DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
     }
 
     private static Collection<MapEntryNode> createOuterEntries(final int amount, final String valuePrefix) {
