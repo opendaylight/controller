@@ -54,6 +54,8 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
         try {
             // the inner strategy is backed by thread context cl?
             final ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();
+            final AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext, ClassLoadingStrategy.class);
+            LOG.debug("ClassLoadingStrategy registered");
 
             final BindingContextProvider bindingContextProvider = new BindingContextProvider();
 
@@ -96,7 +98,6 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     new JMXNotifierConfigRegistry(this.configRegistry, this.configMBeanServer);
 
             // register config registry to OSGi
-            final AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext, ClassLoadingStrategy.class);
             final AutoCloseable configRegReg = OsgiRegistrationUtil.registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
 
             // register config registry to jmx
@@ -124,7 +125,6 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             serviceTracker.open();
 
             final AutoCloseable configMgrReg = OsgiRegistrationUtil.registerService(context, this, ConfigSystemService.class);
-
             final List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
                     OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
                     configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
