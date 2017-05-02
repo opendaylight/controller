@@ -51,6 +51,7 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
 
     @Override
     public void start(final BundleContext context) {
+        LOG.info("Config manager starting...");
         try {
             // the inner strategy is backed by thread context cl?
             final ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();
@@ -133,17 +134,20 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
 
             context.addBundleListener(this);
         } catch(final Exception e) {
-            LOG.warn("Error starting config manager", e);
+            LOG.error("Error starting config manager", e);
         } catch(final Error e) {
             // Log JVM Error and re-throw. The OSGi container may silently fail the bundle and not always log
             // the exception. This has been seen on initial feature install.
             LOG.error("Error starting config manager", e);
             throw e;
         }
+
+        LOG.info("Config manager start complete");
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
+        LOG.info("Config manager stopping");
         context.removeBundleListener(this);
         this.autoCloseable.close();
     }
