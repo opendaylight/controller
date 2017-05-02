@@ -702,7 +702,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                 // producer attached to some subtree at a time. And also how we can close ShardAccess
                 // then
                 final CDSShardAccessImpl shardAccess = new CDSShardAccessImpl(subtree, actorContext);
-                return shardAccessMap.put(subtree, shardAccess);
+                shardAccessMap.put(subtree, shardAccess);
+                return shardAccess;
             }
         }
     }
