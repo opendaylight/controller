@@ -46,6 +46,7 @@ public class MeteredBoundedMailbox implements MailboxType,
     public MeteredMessageQueue create(final scala.Option<ActorRef> owner, scala.Option<ActorSystem> system) {
         this.queue = new MeteredMessageQueue(this.capacity, this.pushTimeOut);
         monitorQueueSize(owner, this.queue);
+        LOG.debug("Creating mailbox {} for {}", this.queue, owner);
         return this.queue;
     }
 
