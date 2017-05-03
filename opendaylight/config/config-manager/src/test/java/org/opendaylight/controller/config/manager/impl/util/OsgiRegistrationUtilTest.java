@@ -56,7 +56,7 @@ public class OsgiRegistrationUtilTest {
         verify(sTracker).close();
     }
 
-    private ServiceRegistration<?> mockServiceRegistration() {
+    private static ServiceRegistration<?> mockServiceRegistration() {
         ServiceRegistration<?> mock = mock(ServiceRegistration.class);
         doNothing().when(mock).unregister();
         return mock;

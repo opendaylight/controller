@@ -38,6 +38,7 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
@@ -95,7 +96,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     }
 
     static ObjectName createFixedThreadPool(
-            ConfigTransactionJMXClient transaction)
+            final ConfigTransactionJMXClient transaction)
             throws InstanceAlreadyExistsException, InstanceNotFoundException {
         transaction.assertVersion(0, 1);
 
@@ -130,7 +131,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     }
 
 
-    private void testValidation(ConfigTransactionClient transaction)
+    private static void testValidation(final ConfigTransactionClient transaction)
             throws InstanceAlreadyExistsException, ReflectionException,
             InstanceNotFoundException, MBeanException, ConflictingVersionException {
         ObjectName fixed1names = transaction.createModule(
@@ -276,8 +277,8 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         checkThreadPools(1, numberOfThreads2);
     }
 
-    private void checkThreadPools(int expectedTotalNumberOfExecutors,
-            int expectedNumberOfThreadsInLastExecutor) {
+    private static void checkThreadPools(final int expectedTotalNumberOfExecutors,
+            final int expectedNumberOfThreadsInLastExecutor) {
         assertEquals(expectedTotalNumberOfExecutors,
                 TestingFixedThreadPool.allExecutors.size());
         for (int i = 0; i < expectedTotalNumberOfExecutors - 1; i++) {
@@ -309,9 +310,8 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     }
 
     // return MBeanProxy for 'fixed1' and current transaction
-    private TestingFixedThreadPoolConfigMXBean startReconfiguringFixed1ThreadPool(
-            ConfigTransactionJMXClient transaction)
-            throws InstanceNotFoundException {
+    private static TestingFixedThreadPoolConfigMXBean startReconfiguringFixed1ThreadPool(
+            final ConfigTransactionJMXClient transaction) throws InstanceNotFoundException {
         ObjectName fixed1name = transaction.lookupConfigBean(
                 TestingFixedThreadPoolModuleFactory.NAME, fixed1);
 

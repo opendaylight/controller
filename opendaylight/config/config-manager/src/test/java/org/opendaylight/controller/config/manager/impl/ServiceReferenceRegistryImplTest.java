@@ -85,7 +85,7 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
         assertEquals(1, registrations.size());
         RegistrationHolder record = registrations.get(0);
         assertEquals(TestingThreadPoolIfc.class, record.clazz);
-        assertEquals(ImmutableMap.of("name","ref"), (Map<String, String>) record.props);
+        assertEquals(ImmutableMap.of("name","ref"), record.props);
 
         // switch reference to scheduled
         ConfigTransactionJMXClient transaction2 = configRegistryClient.createTransaction();
@@ -118,7 +118,7 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
         assertTrue(serviceMapping.isEmpty());
     }
 
-    private void checkApspThreadCount(int fixedNrOfThreads) throws MBeanException, AttributeNotFoundException,
+    private void checkApspThreadCount(final int fixedNrOfThreads) throws MBeanException, AttributeNotFoundException,
             InstanceNotFoundException, ReflectionException {
         ObjectName apspON = ObjectNameUtil.createReadOnlyModuleON(TestingParallelAPSPModuleFactory.NAME, apsp1);
         assertEquals(fixedNrOfThreads, platformMBeanServer.getAttribute(apspON, "MaxNumberOfThreads"));
