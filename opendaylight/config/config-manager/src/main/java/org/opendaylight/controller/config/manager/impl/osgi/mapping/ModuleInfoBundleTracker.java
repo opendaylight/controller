@@ -19,7 +19,6 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
@@ -35,20 +34,22 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     private static final Logger LOG = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
 
     public static final String MODULE_INFO_PROVIDER_PATH_PREFIX = "META-INF/services/";
-
+    private static final String YANG_MODULE_INFO_SERVICE_PATH = MODULE_INFO_PROVIDER_PATH_PREFIX
+            + YangModelBindingProvider.class.getName();
 
     private final RefreshingSCPModuleInfoRegistry moduleInfoRegistry;
+
     private BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
     private boolean starting;
 
-    public ModuleInfoBundleTracker(BundleContext context, RefreshingSCPModuleInfoRegistry moduleInfoRegistry) {
+    public ModuleInfoBundleTracker(final RefreshingSCPModuleInfoRegistry moduleInfoRegistry) {
         this.moduleInfoRegistry = moduleInfoRegistry;
     }
 
-    public void open(BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker) {
+    public void open(final BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker) {
         LOG.debug("ModuleInfoBundleTracker open starting with bundleTracker {}", bundleTracker);
 
-        if(bundleTracker != null) {
+        if (bundleTracker != null) {
             this.bundleTracker = bundleTracker;
             starting = true;
             bundleTracker.open();
@@ -64,16 +65,17 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
 
     @Override
     public void close() {
-        if(bundleTracker != null) {
+        if (bundleTracker != null) {
             bundleTracker.close();
+            bundleTracker = null;
         }
     }
 
     @Override
-    public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
-        URL resource = bundle.getEntry(MODULE_INFO_PROVIDER_PATH_PREFIX + YangModelBindingProvider.class.getName());
+    public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(final Bundle bundle, final BundleEvent event) {
+        URL resource = bundle.getEntry(YANG_MODULE_INFO_SERVICE_PATH);
         LOG.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
-        if(resource == null) {
+        if (resource == null) {
             return Collections.emptyList();
         }
         List<ObjectRegistration<YangModuleInfo>> registrations = new LinkedList<>();
@@ -99,12 +101,14 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Collection<ObjectRegistration<YangModuleInfo>> object) {
+    public void modifiedBundle(final Bundle bundle, final BundleEvent event,
+            final Collection<ObjectRegistration<YangModuleInfo>> object) {
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Collection<ObjectRegistration<YangModuleInfo>> regs) {
-        if(regs == null) {
+    public void removedBundle(final Bundle bundle, final BundleEvent event,
+            final Collection<ObjectRegistration<YangModuleInfo>> regs) {
+        if (regs == null) {
             return;
         }
 
@@ -117,15 +121,16 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         }
     }
 
-    private static YangModuleInfo retrieveModuleInfo(String moduleInfoClass, Bundle bundle) {
+    private static YangModuleInfo retrieveModuleInfo(final String moduleInfoClass, final Bundle bundle) {
         String errorMessage;
         Class<?> clazz = loadClass(moduleInfoClass, bundle);
 
         if (!YangModelBindingProvider.class.isAssignableFrom(clazz)) {
-            errorMessage = logMessage("Class {} does not implement {} in bundle {}", clazz, YangModelBindingProvider.class, bundle);
+            errorMessage = logMessage("Class {} does not implement {} in bundle {}", clazz,
+                YangModelBindingProvider.class, bundle);
             throw new IllegalStateException(errorMessage);
         }
-        YangModelBindingProvider instance;
+        final YangModelBindingProvider instance;
         try {
             Object instanceObj = clazz.newInstance();
             instance = YangModelBindingProvider.class.cast(instanceObj);
@@ -145,16 +150,17 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         }
     }
 
-    private static Class<?> loadClass(String moduleInfoClass, Bundle bundle) {
+    private static Class<?> loadClass(final String moduleInfoClass, final Bundle bundle) {
         try {
             return bundle.loadClass(moduleInfoClass);
         } catch (ClassNotFoundException e) {
-            String errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", moduleInfoClass, bundle, e);
+            String errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", moduleInfoClass,
+                bundle, e);
             throw new IllegalStateException(errorMessage);
         }
     }
 
-    public static String logMessage(String slfMessage, Object... params) {
+    public static String logMessage(final String slfMessage, final Object... params) {
         LOG.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
         return String.format(formatMessage, params);

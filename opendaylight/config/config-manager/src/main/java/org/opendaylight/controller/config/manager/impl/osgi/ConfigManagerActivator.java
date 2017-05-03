@@ -58,15 +58,16 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             final BindingContextProvider bindingContextProvider = new BindingContextProvider();
 
             final RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
-                    moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
+                    moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext,
+                    bindingContextProvider, context);
 
-            final ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(context, moduleInfoRegistryWrapper);
+            final ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
 
             // start config registry
-            final BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
-                    context);
-            this.configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, this.configMBeanServer,
-                    bindingContextProvider);
+            final BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
+                    new BundleContextBackedModuleFactoriesResolver(context);
+            this.configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver,
+                this.configMBeanServer, bindingContextProvider);
 
             // track bundles containing factories
             final BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
@@ -89,11 +90,14 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     new JMXNotifierConfigRegistry(this.configRegistry, this.configMBeanServer);
 
             // register config registry to OSGi
-            final AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext, ClassLoadingStrategy.class);
-            final AutoCloseable configRegReg = OsgiRegistrationUtil.registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
+            final AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext,
+                ClassLoadingStrategy.class);
+            final AutoCloseable configRegReg = OsgiRegistrationUtil.registerService(context, notifyingConfigRegistry,
+                ConfigRegistry.class);
 
             // register config registry to jmx
-            final ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(this.configMBeanServer);
+            final ConfigRegistryJMXRegistrator configRegistryJMXRegistrator =
+                    new ConfigRegistryJMXRegistrator(this.configMBeanServer);
             try {
                 configRegistryJMXRegistrator.registerToJMXNoNotifications(this.configRegistry);
             } catch (final InstanceAlreadyExistsException e) {
@@ -102,7 +106,8 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             }
 
             // register config registry to jmx
-            final ConfigRegistryJMXRegistrator configRegistryJMXRegistratorWithNotifications = new ConfigRegistryJMXRegistrator(this.configMBeanServer);
+            final ConfigRegistryJMXRegistrator configRegistryJMXRegistratorWithNotifications =
+                    new ConfigRegistryJMXRegistrator(this.configMBeanServer);
             try {
                 configRegistryJMXRegistrator.registerToJMX(notifyingConfigRegistry);
             } catch (final InstanceAlreadyExistsException e) {
@@ -112,16 +117,18 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             }
 
             // TODO wire directly via moduleInfoBundleTracker
-            final ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context, ModuleFactory.class,
-                    blankTransactionServiceTracker);
+            final ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context,
+                    ModuleFactory.class, blankTransactionServiceTracker);
             serviceTracker.open();
 
-            final AutoCloseable configMgrReg = OsgiRegistrationUtil.registerService(context, this, ConfigSystemService.class);
+            final AutoCloseable configMgrReg = OsgiRegistrationUtil.registerService(context, this,
+                ConfigSystemService.class);
 
             final List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
                     OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
                     configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
-                    OsgiRegistrationUtil.wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry, configMgrReg);
+                    OsgiRegistrationUtil.wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry,
+                    configMgrReg);
             this.autoCloseable = OsgiRegistrationUtil.aggregate(list);
 
             context.addBundleListener(this);
