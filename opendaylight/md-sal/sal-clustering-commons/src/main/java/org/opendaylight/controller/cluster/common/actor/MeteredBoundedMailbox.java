@@ -26,7 +26,6 @@ public class MeteredBoundedMailbox implements MailboxType,
     private static final Logger LOG = LoggerFactory.getLogger(MeteredBoundedMailbox.class);
     private static final String QUEUE_SIZE = "q-size";
 
-    private MeteredMessageQueue queue;
     private final Integer capacity;
     private final FiniteDuration pushTimeOut;
     private final MetricRegistry registry;
@@ -44,9 +43,9 @@ public class MeteredBoundedMailbox implements MailboxType,
 
     @Override
     public MeteredMessageQueue create(final scala.Option<ActorRef> owner, scala.Option<ActorSystem> system) {
-        this.queue = new MeteredMessageQueue(this.capacity, this.pushTimeOut);
-        monitorQueueSize(owner, this.queue);
-        return this.queue;
+        MeteredMessageQueue queue = new MeteredMessageQueue(this.capacity, this.pushTimeOut);
+        monitorQueueSize(owner, queue);
+        return queue;
     }
 
     private void monitorQueueSize(scala.Option<ActorRef> owner, final MeteredMessageQueue monitoredQueue) {
