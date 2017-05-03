@@ -1,0 +1,7 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Wed, 03 May 2017 16:30:02 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/56456
+Project: controller
+Branch: refs/heads/stable/carbon
