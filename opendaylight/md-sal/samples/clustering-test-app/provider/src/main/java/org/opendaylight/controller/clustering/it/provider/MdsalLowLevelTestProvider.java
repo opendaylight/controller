@@ -160,7 +160,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
 
-        prefixShardHandler = new PrefixShardHandler(distributedShardFactory, bindingNormalizedNodeSerializer);
+        prefixShardHandler = new PrefixShardHandler(distributedShardFactory, domDataTreeService,
+                bindingNormalizedNodeSerializer);
     }
 
     @Override
