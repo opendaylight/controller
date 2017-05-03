@@ -75,18 +75,11 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             final ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
-            final boolean scanResolvedBundlesForModuleInfo = true;
-            BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker = null;
-            ExtensibleBundleTracker<?> moduleFactoryBundleTracker;
-            if(scanResolvedBundlesForModuleInfo) {
-                moduleInfoResolvedBundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
-                            Bundle.STOPPING | Bundle.ACTIVE, moduleInfoBundleTracker);
-                moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context, moduleFactoryTracker);
-            } else {
-                moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
-                        moduleFactoryTracker, moduleInfoBundleTracker);
-            }
-
+            BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker =
+                    new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE,
+                            moduleInfoBundleTracker);
+            ExtensibleBundleTracker<?> moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
+                    moduleFactoryTracker);
             moduleInfoBundleTracker.open(moduleInfoResolvedBundleTracker);
 
             // start extensible tracker

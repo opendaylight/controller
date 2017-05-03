@@ -302,9 +302,9 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         String transactionName = ObjectNameUtil.getTransactionName(on);
         if (transactionName != null) {
             return ObjectNameUtil.withoutTransactionName(on);
-        } else {
-            return on;
         }
+
+        return on;
     }
 
     @Override

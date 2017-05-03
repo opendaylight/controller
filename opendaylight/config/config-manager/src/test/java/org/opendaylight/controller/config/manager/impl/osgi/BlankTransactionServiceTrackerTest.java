@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import javax.management.ObjectName;
@@ -70,7 +71,7 @@ public class BlankTransactionServiceTrackerTest {
         verify(blankTx, times(maxAttempts)).hit();
     }
 
-    private ServiceReference<ModuleFactory> getMockServiceReference() {
+    private static ServiceReference<ModuleFactory> getMockServiceReference() {
         return mock(ServiceReference.class);
     }
 }

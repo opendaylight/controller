@@ -27,7 +27,7 @@ interface ConfigTransactionControllerInternal extends
     /**
      * 1, Copy already committed modules to current transaction.
      * 2, Diff: compute added and removed factories from last run, then create new modules using
-     * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory)}
+     * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory, BundleContext)}
      * and remove modules belonging to removed factories.
      */
     void copyExistingModulesAndProcessFactoryDiff(Collection<ModuleInternalInfo> entries, List<ModuleFactory> lastListOfFactories);

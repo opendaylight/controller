@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Lists;
 import java.util.Map;
 import org.junit.Before;
@@ -49,7 +50,7 @@ public class BundleContextBackedModuleFactoriesResolverTest {
         resolver = new BundleContextBackedModuleFactoriesResolver(bundleContext);
     }
 
-    private ModuleFactory getMockFactory(final String name) {
+    private static ModuleFactory getMockFactory(final String name) {
         ModuleFactory mock = mock(ModuleFactory.class);
         doReturn(name).when(mock).toString();
         doReturn(name).when(mock).getImplementationName();
