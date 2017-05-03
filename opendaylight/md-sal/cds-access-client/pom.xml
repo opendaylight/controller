@@ -79,6 +79,18 @@
     <build>
       <plugins>
         <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <extensions>true</extensions>
+          <configuration>
+            <instructions>
+              <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+              <!-- To support the transition from Scala 2.11 to 2.12, force the range to start from 2.11 -->
+              <Import-Package>scala*;version="[2.11,3)",*</Import-Package>
+            </instructions>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <configuration>

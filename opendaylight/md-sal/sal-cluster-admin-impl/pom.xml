@@ -122,7 +122,9 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-Package></Export-Package>
+            <!-- To support the transition from Scala 2.11 to 2.12, force the range to start from 2.11 -->
             <Import-Package>
+                scala*;version="[2.11,3)",
                 !*snappy;
                 !org.jboss.*;
                 !com.jcraft.*;

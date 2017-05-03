@@ -158,6 +158,8 @@
           <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
           <Export-Package>org.opendaylight.controller.cluster.schema.provider.impl, {local-packages}</Export-Package>
           <DynamicImport-Package>*</DynamicImport-Package>
+          <!-- To support the transition from Scala 2.11 to 2.12, force the range to start from 2.11 -->
+          <Import-Package>scala*;version="[2.11,3)",*</Import-Package>
         </instructions>
         </configuration>
       </plugin>
