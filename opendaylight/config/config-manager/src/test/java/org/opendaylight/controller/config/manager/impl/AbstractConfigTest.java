@@ -12,13 +12,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 import java.util.LinkedList;
@@ -144,7 +143,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
         doNothing().when(this.mockedServiceRegistration).unregister();
         final RegisterServiceAnswer answer = new RegisterServiceAnswer();
         doAnswer(answer).when(this.mockedContext).registerService(Matchers.<String>any(), any(), Matchers.<Dictionary<String, ?>>any());
-        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<Class>any(), any(), Matchers.<Dictionary<String, ?>>any());
+        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<Class<?>>any(), any(), Matchers.<Dictionary<String, ?>>any());
     }
 
     @After
@@ -262,20 +261,17 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     protected <T> T rethrowCause(final T innerObject) {
         @SuppressWarnings("unchecked")
         final T proxy = (T)Proxy.newProxyInstance(innerObject.getClass().getClassLoader(),
-                innerObject.getClass().getInterfaces(), new InvocationHandler() {
-                        @Override
-                        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                            try {
-                                return method.invoke(innerObject, args);
-                            } catch (final InvocationTargetException e) {
-                                try {
-                                    throw e.getTargetException();
-                                } catch (final RuntimeMBeanException e2) {
-                                    throw e2.getTargetException();
-                                }
-                            }
+                innerObject.getClass().getInterfaces(), (proxy1, method, args) -> {
+                    try {
+                        return method.invoke(innerObject, args);
+                    } catch (final InvocationTargetException e) {
+                        try {
+                            throw e.getTargetException();
+                        } catch (final RuntimeMBeanException e2) {
+                            throw e2.getTargetException();
                         }
                     }
+                }
         );
         return proxy;
     }

@@ -85,16 +85,16 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
      * Simulate dependentResolver resolving its dependency identified by
      * dependentName.
      */
-    private void declareDependency(DependencyResolverImpl dependerResolver,
-            ModuleIdentifier dependentName) {
+    private static void declareDependency(final DependencyResolverImpl dependerResolver,
+            final ModuleIdentifier dependentName) {
         JmxAttribute dummyAttribute = new JmxAttribute("dummy");
         dependerResolver.resolveInstance(Object.class,
                 ObjectNameUtil.createReadOnlyModuleON(dependentName),
                 dummyAttribute);
     }
 
-    private static void mockGetInstance(DependencyResolverManager tested,
-            ModuleIdentifier moduleIdentifier) {
+    private static void mockGetInstance(final DependencyResolverManager tested,
+            final ModuleIdentifier moduleIdentifier) {
 
         ModuleFactory moduleFactory = mock(ModuleFactory.class);
         ModuleInternalInfo maybeOldInternalInfo = null;

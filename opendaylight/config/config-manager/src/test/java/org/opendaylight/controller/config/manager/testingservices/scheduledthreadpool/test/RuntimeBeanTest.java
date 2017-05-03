@@ -72,21 +72,21 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
 
     private void checkRuntimeBeans() throws Exception {
         // check runtime bean - on 2 places
-        for (ObjectName on : allObjectNames)
+        for (ObjectName on : allObjectNames) {
             checkRuntimeBean(on);
+        }
     }
 
-    private void checkRuntimeBean(ObjectName on) throws Exception {
-        assertEquals(0,
-                platformMBeanServer.getAttribute(on, "ActualNumberOfThreads"));
+    private static void checkRuntimeBean(final ObjectName on) throws Exception {
+        assertEquals(0, platformMBeanServer.getAttribute(on, "ActualNumberOfThreads"));
     }
 
-    private void checkRuntimeBeanDoesNotExist(ObjectName on) throws Exception {
+    private static void checkRuntimeBeanDoesNotExist(final ObjectName on) throws Exception {
         try {
             checkRuntimeBean(on);
             fail();
         } catch (InstanceNotFoundException e) {
-
+            // No-op
         }
     }
 
@@ -149,8 +149,9 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
         configTransaction.destroyModule(ObjectNameUtil
                 .createTransactionModuleON(configTransaction.getTransactionName(), createdConfigBean));
         configTransaction.commit();
-        for (ObjectName on : allObjectNames)
+        for (ObjectName on : allObjectNames) {
             checkRuntimeBeanDoesNotExist(on);
+        }
     }
 
 }
