@@ -230,7 +230,9 @@
                 org.opendaylight.controller.cluster.datastore.utils;
                 org.opendaylight.controller.cluster.sharding;
             </Export-Package>
+            <!-- To support the transition from Scala 2.11 to 2.12, force the range to start from 2.11 -->
             <Import-Package>
+                scala.compat.java8,scala*;version="[2.11,3)",
                 !*snappy;
                 !org.jboss.*;
                 !com.jcraft.*;

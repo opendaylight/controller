@@ -52,7 +52,8 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-package>org.opendaylight.controller.cluster.example</Export-package>
-            <Import-Package>*</Import-Package>
+            <!-- To support the transition from Scala 2.11 to 2.12, force the range to start from 2.11 -->
+            <Import-Package>scala*;version="[2.11,3)",*</Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
