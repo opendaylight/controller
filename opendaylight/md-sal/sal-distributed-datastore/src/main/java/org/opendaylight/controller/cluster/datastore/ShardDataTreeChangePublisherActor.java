@@ -26,6 +26,7 @@ public class ShardDataTreeChangePublisherActor
 
     private ShardDataTreeChangePublisherActor(final String name, final String logContext) {
         super(new DefaultShardDataTreeChangeListenerPublisher(logContext), name, logContext);
+        LOG.debug("{}: Created publisher with name {} with dispatcher {}", getContext().dispatcher());
     }
 
     @Override
