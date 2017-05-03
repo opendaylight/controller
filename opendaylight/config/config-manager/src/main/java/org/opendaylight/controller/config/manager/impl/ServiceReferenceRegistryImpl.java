@@ -160,25 +160,20 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                 return "initial";
             }
         };
-        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory = new ServiceReferenceTransactionRegistratorFactory(){
+        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory = () -> new ServiceReferenceRegistrator() {
             @Override
-            public ServiceReferenceRegistrator create() {
-                return new ServiceReferenceRegistrator() {
-                    @Override
-                    public String getNullableTransactionName() {
-                        throw new UnsupportedOperationException();
-                    }
+            public String getNullableTransactionName() {
+                throw new UnsupportedOperationException();
+            }
 
-                    @Override
-                    public ServiceReferenceJMXRegistration registerMBean(final ServiceReferenceMXBeanImpl object, final ObjectName on) throws InstanceAlreadyExistsException {
-                        throw new UnsupportedOperationException();
-                    }
+            @Override
+            public ServiceReferenceJMXRegistration registerMBean(final ServiceReferenceMXBeanImpl object, final ObjectName on) throws InstanceAlreadyExistsException {
+                throw new UnsupportedOperationException();
+            }
 
-                    @Override
-                    public void close() {
+            @Override
+            public void close() {
 
-                    }
-                };
             }
         };
         return new ServiceReferenceRegistryImpl(Collections.<String, ModuleFactory>emptyMap(), lookupRegistry,
@@ -351,7 +346,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     public synchronized void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         String actualTransactionName = ObjectNameUtil.getTransactionName(objectName);
         String expectedTransactionName = serviceReferenceRegistrator.getNullableTransactionName();
-        if (writable && actualTransactionName == null || (writable && !actualTransactionName.equals(expectedTransactionName))) {
+        if (writable && actualTransactionName == null || writable && !actualTransactionName.equals(expectedTransactionName)) {
             throw new IllegalArgumentException("Mismatched transaction name in " + objectName);
         }
         String serviceQName = ObjectNameUtil.getServiceQName(objectName);
@@ -442,9 +437,9 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         if (writable) {
             return ObjectNameUtil.createTransactionServiceON(serviceReferenceRegistrator.getNullableTransactionName(),
                     serviceReference.getServiceInterfaceQName(), serviceReference.getRefName());
-        } else {
-            return ObjectNameUtil.createReadOnlyServiceON(serviceReference.getServiceInterfaceQName(), serviceReference.getRefName());
         }
+
+        return ObjectNameUtil.createReadOnlyServiceON(serviceReference.getServiceInterfaceQName(), serviceReference.getRefName());
     }
 
     @Override

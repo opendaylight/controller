@@ -85,16 +85,15 @@ public class ConfigRegistryImplLookupTest extends
 
     }
 
-    private void registerModuleBean(TestingRuntimeBean testingRuntimeBean,
-            BaseJMXRegistrator baseJMXRegistrator, ObjectName objectName)
+    private static void registerModuleBean(final TestingRuntimeBean testingRuntimeBean,
+            final BaseJMXRegistrator baseJMXRegistrator, final ObjectName objectName)
             throws InstanceAlreadyExistsException {
         baseJMXRegistrator.createModuleJMXRegistrator().registerMBean(
                 testingRuntimeBean, objectName);
     }
 
-    private void registerRuntimeBean(RuntimeBean object,
-            BaseJMXRegistrator baseJMXRegistrator, ObjectName runtimeON)
-            throws InstanceAlreadyExistsException {
+    private static void registerRuntimeBean(final RuntimeBean object, final BaseJMXRegistrator baseJMXRegistrator,
+            final ObjectName runtimeON) throws InstanceAlreadyExistsException {
         String factoryName = ObjectNameUtil.getFactoryName(runtimeON);
         String instanceName = ObjectNameUtil.getInstanceName(runtimeON);
         Map<String, String> properties = ObjectNameUtil

@@ -61,12 +61,9 @@ public class ConfigTransactionControllerImplTest extends
         transactionsMBeanServer = MBeanServerFactory.createMBeanServer();
         Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories = new HashMap<>();
 
-        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(transactionName123), new TransactionJMXRegistratorFactory() {
-            @Override
-            public TransactionJMXRegistrator create() {
-                return baseJMXRegistrator.createTransactionJMXRegistrator(transactionName123);
-            }
-        }, currentlyRegisteredFactories);
+        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(
+            new TransactionIdentifier(transactionName123), () ->
+            baseJMXRegistrator.createTransactionJMXRegistrator(transactionName123), currentlyRegisteredFactories);
 
         SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 ServiceReferenceRegistryImpl.createInitialSRLookupRegistry(), txLookupRegistry, currentlyRegisteredFactories);
@@ -98,8 +95,6 @@ public class ConfigTransactionControllerImplTest extends
 
     /**
      * Tests if lookup method returns all beans with defined transaction name
-     *
-     * @throws Exception
      */
     @Test
     public void testLookupConfigBeans() {

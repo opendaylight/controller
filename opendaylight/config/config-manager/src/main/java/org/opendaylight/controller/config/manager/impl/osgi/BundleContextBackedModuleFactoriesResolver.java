@@ -22,14 +22,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Retrieves list of currently registered Module Factories using bundlecontext.
  */
-public class BundleContextBackedModuleFactoriesResolver implements
-        ModuleFactoriesResolver {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(BundleContextBackedModuleFactoriesResolver.class);
+public class BundleContextBackedModuleFactoriesResolver implements ModuleFactoriesResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(BundleContextBackedModuleFactoriesResolver.class);
     private final BundleContext bundleContext;
 
     public BundleContextBackedModuleFactoriesResolver(
-            BundleContext bundleContext) {
+            final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
@@ -37,8 +35,7 @@ public class BundleContextBackedModuleFactoriesResolver implements
     public Map<String, Map.Entry<ModuleFactory, BundleContext>> getAllFactories() {
         Collection<ServiceReference<ModuleFactory>> serviceReferences;
         try {
-            serviceReferences = bundleContext.getServiceReferences(
-                    ModuleFactory.class, null);
+            serviceReferences = bundleContext.getServiceReferences(ModuleFactory.class, null);
         } catch (InvalidSyntaxException e) {
             throw new IllegalStateException(e);
         }
@@ -49,7 +46,7 @@ public class BundleContextBackedModuleFactoriesResolver implements
             // returned by a ServiceFactory does not
             // implement the classes under which it was registered or the
             // ServiceFactory threw an exception.
-            if(factory == null) {
+            if (factory == null) {
                 throw new NullPointerException("ServiceReference of class" + serviceReference.getClass() + "not found.");
             }
 
@@ -65,15 +62,15 @@ public class BundleContextBackedModuleFactoriesResolver implements
 
             Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
             if (conflicting != null) {
-                String error = String
-                        .format("Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
-                                moduleName, conflicting.getKey(), factory);
+                String error = String.format(
+                    "Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
+                    moduleName, conflicting.getKey(), factory);
                 LOG.error(error);
                 throw new IllegalArgumentException(error);
-            } else {
-                result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,
-                        serviceReference.getBundle().getBundleContext()));
             }
+
+            result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,
+                    serviceReference.getBundle().getBundleContext()));
         }
         return result;
     }

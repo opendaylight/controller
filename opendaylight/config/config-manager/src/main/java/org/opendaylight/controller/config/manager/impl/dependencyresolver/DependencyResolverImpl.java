@@ -143,9 +143,6 @@ final class DependencyResolverImpl implements DependencyResolver,
         return translatedDependentReadOnlyON;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     //TODO: check for cycles
     @Override
     public <T> T resolveInstance(final Class<T> expectedType, final ObjectName dependentReadOnlyON,
@@ -158,20 +155,16 @@ final class DependencyResolverImpl implements DependencyResolver,
         final AutoCloseable instance = module.getInstance();
         if (instance == null) {
             final String message = String.format(
-                    "Error while %s resolving instance %s. getInstance() returned null. "
-                            + "Expected type %s , attribute %s", this.name,
-                    module.getIdentifier(), expectedType, jmxAttribute
-            );
+                "Error while %s resolving instance %s. getInstance() returned null. Expected type %s, attribute %s",
+                this.name, module.getIdentifier(), expectedType, jmxAttribute);
             throw new JmxAttributeValidationException(message, jmxAttribute);
         }
         try {
             return expectedType.cast(instance);
         } catch (final ClassCastException e) {
             final String message = String.format(
-                    "Instance cannot be cast to expected type. Instance class is %s , "
-                            + "expected type %s , attribute %s",
-                    instance.getClass(), expectedType, jmxAttribute
-            );
+                "Instance cannot be cast to expected type. Instance class is %s, expected type %s , attribute %s",
+                instance.getClass(), expectedType, jmxAttribute);
             throw new JmxAttributeValidationException(message, e, jmxAttribute);
         }
     }
@@ -197,9 +190,10 @@ final class DependencyResolverImpl implements DependencyResolver,
 
         final Module currentModule = resolveModuleInstance(objectName, jmxAttribute);
         final ModuleIdentifier identifier = currentModule.getIdentifier();
-        final ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = this.modulesHolder.findModuleInternalTransactionalInfo(identifier);
+        final ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = this.modulesHolder
+                .findModuleInternalTransactionalInfo(identifier);
 
-        if(moduleInternalTransactionalInfo.hasOldModule()) {
+        if (moduleInternalTransactionalInfo.hasOldModule()) {
             final Module oldModule = moduleInternalTransactionalInfo.getOldInternalInfo().getReadableModule().getModule();
             return currentModule.canReuse(oldModule);
         }
@@ -207,7 +201,8 @@ final class DependencyResolverImpl implements DependencyResolver,
     }
 
     @Override
-    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(final IdentityAttributeRef identityRef, final Class<T> expectedBaseClass) {
+    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(final IdentityAttributeRef identityRef,
+            final Class<T> expectedBaseClass) {
         final QName qName = QName.create(identityRef.getqNameOfIdentity());
         final Class<?> deserialized  = this.bindingContextProvider.getBindingContext().getIdentityClass(qName);
         if (deserialized == null) {
@@ -216,15 +211,15 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
         if (expectedBaseClass.isAssignableFrom(deserialized)) {
             return (Class<T>) deserialized;
-        } else {
-            LOG.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.",
-                    identityRef, deserialized, expectedBaseClass);
-            throw new IllegalArgumentException("Deserialized identity " + deserialized + " cannot be cast to " + expectedBaseClass);
         }
+        LOG.error("Cannot resolve class of identity {} : deserialized class {} is not a subclass of {}.", identityRef,
+            deserialized, expectedBaseClass);
+        throw new IllegalArgumentException("Deserialized identity " + deserialized + " cannot be cast to " + expectedBaseClass);
     }
 
     @Override
-    public <T extends BaseIdentity> void validateIdentity(final IdentityAttributeRef identityRef, final Class<T> expectedBaseClass, final JmxAttribute jmxAttribute) {
+    public <T extends BaseIdentity> void validateIdentity(final IdentityAttributeRef identityRef,
+            final Class<T> expectedBaseClass, final JmxAttribute jmxAttribute) {
         try {
             resolveIdentity(identityRef, expectedBaseClass);
         } catch (final Exception e) {
@@ -281,7 +276,7 @@ final class DependencyResolverImpl implements DependencyResolver,
                         chainForDetectingCycles2);
                 dependentDRI.maxDependencyDepth = subDepth;
             }
-            if ((subDepth + 1) > maxDepth) {
+            if (subDepth + 1 > maxDepth) {
                 maxDepth = subDepth + 1;
             }
         }
