@@ -37,6 +37,6 @@
   </feature>
   <feature name='odl-config-manager' version='${project.version}' description="OpenDaylight :: Config :: Manager">
     <feature version='${project.version}'>odl-config-core</feature>
-    <bundle>mvn:org.opendaylight.controller/config-manager/{{VERSION}}</bundle>
+    <bundle start-level="35">mvn:org.opendaylight.controller/config-manager/{{VERSION}}</bundle>
   </feature>
 </features>
