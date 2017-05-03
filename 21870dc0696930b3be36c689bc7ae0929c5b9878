@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_5a0522c1",
+        "filename": "features/config/odl-config-manager/src/main/feature/feature.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-03T09:35:09Z",
+      "side": 1,
+      "message": "This is doable with the startLevel parameter to karaf-maven-plugin too (but let\u0027s get this in).",
+      "revId": "21870dc0696930b3be36c689bc7ae0929c5b9878",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
