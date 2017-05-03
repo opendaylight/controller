@@ -44,8 +44,10 @@ public class MeteredBoundedMailbox implements MailboxType,
 
     @Override
     public MeteredMessageQueue create(final scala.Option<ActorRef> owner, scala.Option<ActorSystem> system) {
+        LOG.debug("Entering create mailbox {} for {}", this.queue, owner);
         this.queue = new MeteredMessageQueue(this.capacity, this.pushTimeOut);
         monitorQueueSize(owner, this.queue);
+        LOG.debug("Creating mailbox {} for {}", this.queue, owner);
         return this.queue;
     }
 
