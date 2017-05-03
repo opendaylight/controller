@@ -58,13 +58,13 @@ public class ProduceTransactionsHandler implements Runnable {
     //2^20 as in the model
     private static final int MAX_ITEM = 1048576;
 
-    private static final QName ID_INTS =
+    static final QName ID_INTS =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints");
-    private static final QName ID_INT =
+    static final QName ID_INT =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int");
-    private static final QName ID =
+    static final QName ID =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id");
-    private static final QName ITEM =
+    static final QName ITEM =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "item");
     private static final QName NUMBER =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number");
@@ -90,8 +90,8 @@ public class ProduceTransactionsHandler implements Runnable {
     private long insertTx = 0;
     private long deleteTx = 0;
     private ScheduledFuture<?> scheduledFuture;
-    private YangInstanceIdentifier idListWithKey;
     private DOMDataTreeProducer itemProducer;
+    private YangInstanceIdentifier idListWithKey;
 
     public ProduceTransactionsHandler(final DOMDataTreeService domDataTreeService,
                                       final ProduceTransactionsInput input) {
@@ -115,59 +115,12 @@ public class ProduceTransactionsHandler implements Runnable {
     public void start(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
         completionFuture = settableFuture;
 
-        if (ensureListExists(completionFuture) && fillInitialList(completionFuture)) {
+        if (fillInitialList(completionFuture)) {
             startTime = System.nanoTime();
             scheduledFuture = executor.scheduleAtFixedRate(this, 0, delay, TimeUnit.NANOSECONDS);
         } else {
             executor.shutdown();
         }
-    }
-
-    private boolean ensureListExists(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
-
-        final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INT, ID, id)
-                .withChild(ImmutableNodes.mapNodeBuilder(ITEM).build())
-                .build();
-        final MapNode mapNode =
-                ImmutableNodes.mapNodeBuilder(ID_INT)
-                        .withChild(entry)
-                        .build();
-
-        final ContainerNode containerNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new NodeIdentifier(ID_INTS))
-                .withChild(mapNode)
-                .build();
-
-        final DOMDataTreeProducer producer = domDataTreeService.createProducer(Collections.singleton(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY)));
-
-        final DOMDataTreeCursorAwareTransaction tx = producer.createTransaction(false);
-
-        final DOMDataTreeWriteCursor cursor =
-                tx.createCursor(new DOMDataTreeIdentifier(
-                        LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY));
-
-        idListWithKey = ID_INT_YID.node(entry.getIdentifier());
-
-        cursor.merge(containerNode.getIdentifier(), containerNode);
-        cursor.close();
-
-        try {
-            tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
-            settableFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
-            return false;
-        } finally {
-            try {
-                producer.close();
-            } catch (DOMDataTreeProducerException e) {
-                LOG.warn("Error while closing producer.", e);
-            }
-        }
-
-        return true;
     }
 
     private boolean fillInitialList(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
@@ -178,6 +131,8 @@ public class ProduceTransactionsHandler implements Runnable {
             usedValues.add(i);
             mapBuilder.withChild(ImmutableNodes.mapEntry(ITEM, NUMBER, i));
         }
+
+        idListWithKey = ID_INT_YID.node(new NodeIdentifierWithPredicates(ID_INT, ID, id));
 
         itemProducer = domDataTreeService.createProducer(
                 Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey)));
@@ -249,6 +204,12 @@ public class ProduceTransactionsHandler implements Runnable {
                             .setInsertTx(insertTx)
                             .setDeleteTx(deleteTx)
                             .build();
+
+                    try {
+                        itemProducer.close();
+                    } catch (final DOMDataTreeProducerException e) {
+                        LOG.warn("Failure while closing item producer.", e);
+                    }
 
                     completionFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>success()
                             .withResult(output).build());
