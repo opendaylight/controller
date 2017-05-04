@@ -1223,25 +1223,25 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), Collections.<String,String>emptyMap(), LOCAL_MEMBER_NAME);
     }
 
-    private Props newShardProps(ShardIdentifier shardId, Map<String,String> peers, String memberName) {
+    private Props newShardProps(final ShardIdentifier shardId, final Map<String,String> peers, final String memberName) {
         return newShardProps(shardId, peers, memberName, EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
 
-    private Props newShardProps(ShardIdentifier shardId, Map<String,String> peers, String memberName,
-                                EntityOwnerSelectionStrategyConfig config) {
+    private Props newShardProps(final ShardIdentifier shardId, final Map<String,String> peers, final String memberName,
+                                final EntityOwnerSelectionStrategyConfig config) {
         return newShardBuilder(shardId, peers, memberName).ownerSelectionStrategyConfig(config).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId());
     }
 
-    private EntityOwnershipShard.Builder newShardBuilder(ShardIdentifier shardId, Map<String,String> peers,
-            String memberName) {
+    private EntityOwnershipShard.Builder newShardBuilder(final ShardIdentifier shardId, final Map<String,String> peers,
+            final String memberName) {
         return EntityOwnershipShard.newBuilder().id(shardId).peerAddresses(peers).datastoreContext(
-                dataStoreContextBuilder.build()).schemaContext(SCHEMA_CONTEXT).localMemberName(
+                dataStoreContextBuilder.build()).schemaContextProvider(() -> SCHEMA_CONTEXT).localMemberName(
                         MemberName.forName(memberName)).ownerSelectionStrategyConfig(
                                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
 
-    private Map<String, String> peerMap(String... peerIds) {
+    private Map<String, String> peerMap(final String... peerIds) {
         ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder();
         for (String peerId: peerIds) {
             builder.put(peerId, actorFactory.createTestActorPath(peerId)).build();
@@ -1254,14 +1254,14 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         private final TestActorRef<MessageCollectorActor> collectorActor;
         private final Map<Class<?>, Predicate<?>> dropMessagesOfType = new ConcurrentHashMap<>();
 
-        TestEntityOwnershipShard(Builder builder, TestActorRef<MessageCollectorActor> collectorActor) {
+        TestEntityOwnershipShard(final Builder builder, final TestActorRef<MessageCollectorActor> collectorActor) {
             super(builder);
             this.collectorActor = collectorActor;
         }
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
-        public void handleCommand(Object message) {
+        public void handleCommand(final Object message) {
             Predicate drop = dropMessagesOfType.get(message.getClass());
             if (drop == null || !drop.test(message)) {
                 super.handleCommand(message);
@@ -1272,15 +1272,15 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
             }
         }
 
-        void startDroppingMessagesOfType(Class<?> msgClass) {
+        void startDroppingMessagesOfType(final Class<?> msgClass) {
             dropMessagesOfType.put(msgClass, msg -> true);
         }
 
-        <T> void startDroppingMessagesOfType(Class<T> msgClass, Predicate<T> filter) {
+        <T> void startDroppingMessagesOfType(final Class<T> msgClass, final Predicate<T> filter) {
             dropMessagesOfType.put(msgClass, filter);
         }
 
-        void stopDroppingMessagesOfType(Class<?> msgClass) {
+        void stopDroppingMessagesOfType(final Class<?> msgClass) {
             dropMessagesOfType.remove(msgClass);
         }
 
@@ -1288,11 +1288,11 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
             return collectorActor;
         }
 
-        static Props props(Builder builder) {
+        static Props props(final Builder builder) {
             return props(builder, null);
         }
 
-        static Props props(Builder builder, TestActorRef<MessageCollectorActor> collectorActor) {
+        static Props props(final Builder builder, final TestActorRef<MessageCollectorActor> collectorActor) {
             return Props.create(TestEntityOwnershipShard.class, builder, collectorActor)
                     .withDispatcher(Dispatchers.DefaultDispatcherId());
         }
