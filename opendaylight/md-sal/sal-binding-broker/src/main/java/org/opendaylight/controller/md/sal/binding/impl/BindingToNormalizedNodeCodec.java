@@ -33,11 +33,13 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTree;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeNode;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeWriterFactory;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.binding.data.codec.impl.MissingSchemaException;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
+import org.opendaylight.yangtools.yang.binding.BindingStreamEventWriter;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -49,6 +51,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -62,7 +65,8 @@ import org.opendaylight.yangtools.yang.model.api.meta.StatementSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
+public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer,
+    BindingNormalizedNodeWriterFactory, SchemaContextListener, AutoCloseable {
 
     private static final long WAIT_DURATION_SEC = 5;
     private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodec.class);
@@ -392,4 +396,27 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
         return clazzes;
     }
 
+    @Override
+    public Entry<YangInstanceIdentifier, BindingStreamEventWriter> newWriterAndIdentifier(
+        final InstanceIdentifier<?> path, final NormalizedNodeStreamWriter domWriter) {
+        return this.codecRegistry.newWriterAndIdentifier(path, domWriter);
+    }
+
+    @Override
+    public BindingStreamEventWriter newWriter(final InstanceIdentifier<?> path,
+        final NormalizedNodeStreamWriter domWriter) {
+        return this.codecRegistry.newWriter(path, domWriter);
+    }
+
+    @Override
+    public BindingStreamEventWriter newRpcWriter(final Class<? extends DataContainer> rpcInputOrOutput,
+        final NormalizedNodeStreamWriter domWriter) {
+        return this.codecRegistry.newRpcWriter(rpcInputOrOutput, domWriter);
+    }
+
+    @Override
+    public BindingStreamEventWriter newNotificationWriter(final Class<? extends Notification> notification,
+        final NormalizedNodeStreamWriter domWriter) {
+        return this.codecRegistry.newNotificationWriter(notification, domWriter);
+    }
 }
