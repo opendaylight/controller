@@ -42,7 +42,13 @@ final class ShardInformation {
     private final ShardPeerAddressResolver addressResolver;
     private final ShardIdentifier shardId;
     private final String shardName;
+
+    // This reference indirection is required to have the ability to update the SchemaContext
+    // inside actor props. Otherwise we would be keeping an old SchemaContext there, preventing
+    // it from becoming garbage.
+    private final AtomicShardContextProvider schemaContextProvider = new AtomicShardContextProvider();
     private ActorRef actor;
+
     private Optional<DataTree> localShardDataTree;
     private boolean leaderAvailable = false;
 
@@ -59,9 +65,9 @@ final class ShardInformation {
     private Shard.AbstractBuilder<?, ?> builder;
     private boolean isActiveMember = true;
 
-    ShardInformation(String shardName, ShardIdentifier shardId,
-            Map<String, String> initialPeerAddresses, DatastoreContext datastoreContext,
-            Shard.AbstractBuilder<?, ?> builder, ShardPeerAddressResolver addressResolver) {
+    ShardInformation(final String shardName, final ShardIdentifier shardId,
+            final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
+            final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
         this.shardName = shardName;
         this.shardId = shardId;
         this.initialPeerAddresses = initialPeerAddresses;
@@ -70,10 +76,10 @@ final class ShardInformation {
         this.addressResolver = addressResolver;
     }
 
-    Props newProps(SchemaContext schemaContext) {
+    Props newProps() {
         Preconditions.checkNotNull(builder);
         Props props = builder.id(shardId).peerAddresses(initialPeerAddresses).datastoreContext(datastoreContext)
-                .schemaContext(schemaContext).props();
+                .schemaContextProvider(schemaContextProvider).props();
         builder = null;
         return props;
     }
@@ -87,7 +93,7 @@ final class ShardInformation {
         return actor;
     }
 
-    void setActor(ActorRef actor) {
+    void setActor(final ActorRef actor) {
         this.actor = actor;
     }
 
@@ -95,7 +101,7 @@ final class ShardInformation {
         return shardId;
     }
 
-    void setLocalDataTree(Optional<DataTree> localShardDataTree) {
+    void setLocalDataTree(final Optional<DataTree> localShardDataTree) {
         this.localShardDataTree = localShardDataTree;
     }
 
@@ -107,7 +113,7 @@ final class ShardInformation {
         return datastoreContext;
     }
 
-    void setDatastoreContext(DatastoreContext datastoreContext, ActorRef sender) {
+    void setDatastoreContext(final DatastoreContext datastoreContext, final ActorRef sender) {
         this.datastoreContext = datastoreContext;
         if (actor != null) {
             LOG.debug("Sending new DatastoreContext to {}", shardId);
@@ -115,7 +121,7 @@ final class ShardInformation {
         }
     }
 
-    void updatePeerAddress(String peerId, String peerAddress, ActorRef sender) {
+    void updatePeerAddress(final String peerId, final String peerAddress, final ActorRef sender) {
         LOG.info("updatePeerAddress for peer {} with address {}", peerId, peerAddress);
 
         if (actor != null) {
@@ -128,13 +134,13 @@ final class ShardInformation {
         notifyOnShardInitializedCallbacks();
     }
 
-    void peerDown(MemberName memberName, String peerId, ActorRef sender) {
+    void peerDown(final MemberName memberName, final String peerId, final ActorRef sender) {
         if (actor != null) {
             actor.tell(new PeerDown(memberName, peerId), sender);
         }
     }
 
-    void peerUp(MemberName memberName, String peerId, ActorRef sender) {
+    void peerUp(final MemberName memberName, final String peerId, final ActorRef sender) {
         if (actor != null) {
             actor.tell(new PeerUp(memberName, peerId), sender);
         }
@@ -195,15 +201,15 @@ final class ShardInformation {
         }
     }
 
-    void addOnShardInitialized(OnShardInitialized onShardInitialized) {
+    void addOnShardInitialized(final OnShardInitialized onShardInitialized) {
         onShardInitializedSet.add(onShardInitialized);
     }
 
-    void removeOnShardInitialized(OnShardInitialized onShardInitialized) {
+    void removeOnShardInitialized(final OnShardInitialized onShardInitialized) {
         onShardInitializedSet.remove(onShardInitialized);
     }
 
-    void setRole(String newRole) {
+    void setRole(final String newRole) {
         this.role = newRole;
 
         notifyOnShardInitializedCallbacks();
@@ -213,7 +219,7 @@ final class ShardInformation {
         return role;
     }
 
-    void setFollowerSyncStatus(boolean syncStatus) {
+    void setFollowerSyncStatus(final boolean syncStatus) {
         this.followerSyncStatus = syncStatus;
     }
 
@@ -227,7 +233,7 @@ final class ShardInformation {
         return false;
     }
 
-    boolean setLeaderId(String leaderId) {
+    boolean setLeaderId(final String leaderId) {
         final boolean changed = !Objects.equals(this.leaderId, leaderId);
         this.leaderId = leaderId;
         if (leaderId != null) {
@@ -242,7 +248,7 @@ final class ShardInformation {
         return leaderId;
     }
 
-    void setLeaderAvailable(boolean leaderAvailable) {
+    void setLeaderAvailable(final boolean leaderAvailable) {
         this.leaderAvailable = leaderAvailable;
 
         if (leaderAvailable) {
@@ -254,7 +260,7 @@ final class ShardInformation {
         return leaderVersion;
     }
 
-    void setLeaderVersion(short leaderVersion) {
+    void setLeaderVersion(final short leaderVersion) {
         this.leaderVersion = leaderVersion;
     }
 
@@ -262,7 +268,15 @@ final class ShardInformation {
         return isActiveMember;
     }
 
-    void setActiveMember(boolean isActiveMember) {
+    void setActiveMember(final boolean isActiveMember) {
         this.isActiveMember = isActiveMember;
+    }
+
+    SchemaContext getSchemaContext() {
+        return schemaContextProvider.getSchemaContext();
+    }
+
+    void setSchemaContext(final SchemaContext schemaContext) {
+        schemaContextProvider.set(Preconditions.checkNotNull(schemaContext));
     }
 }
