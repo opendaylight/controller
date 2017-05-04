@@ -491,7 +491,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         for (Object obj : successfulRequests) {
             if (obj instanceof TransactionRequest) {
                 LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                successor.handleForwardedRemoteRequest((TransactionRequest<?>) obj, response -> { });
+                successor.replayRequest((TransactionRequest<?>) obj, response -> { });
             } else {
                 Verify.verify(obj instanceof IncrementSequence);
                 successor.incrementSequence(((IncrementSequence) obj).getDelta());
@@ -509,7 +509,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             if (getIdentifier().equals(req.getTarget())) {
                 Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
                 LOG.debug("Forwarding queued request {} to successor {}", req, successor);
-                successor.handleForwardedRemoteRequest((TransactionRequest<?>) req, e.getCallback());
+                successor.replayRequest((TransactionRequest<?>) req, e.getCallback());
                 it.remove();
             }
         }
