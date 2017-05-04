@@ -57,6 +57,7 @@ final class ShardBackendInfo extends BackendInfo {
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("cookie", cookie).add("shard", shardName);
+        return super.addToStringAttributes(toStringHelper).add("cookie", cookie).add("shard", shardName)
+                .add("dataTree", dataTree.orElse(null));
     }
 }

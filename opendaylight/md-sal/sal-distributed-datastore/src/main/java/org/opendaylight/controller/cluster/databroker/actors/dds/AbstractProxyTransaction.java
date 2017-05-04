@@ -508,7 +508,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
             if (getIdentifier().equals(req.getTarget())) {
                 Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
-                LOG.debug("Forwarding queued request{} to successor {}", req, successor);
+                LOG.debug("Forwarding queued request {} to successor {}", req, successor);
                 successor.handleForwardedRemoteRequest((TransactionRequest<?>) req, e.getCallback());
                 it.remove();
             }
