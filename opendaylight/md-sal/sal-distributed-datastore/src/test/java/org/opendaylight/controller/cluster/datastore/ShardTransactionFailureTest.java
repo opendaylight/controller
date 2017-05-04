@@ -51,7 +51,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     private ActorRef createShard() {
         ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)
-                .schemaContext(TestModel.createTestContext()).props());
+                .schemaContextProvider(() -> TEST_SCHEMA_CONTEXT).props());
         ShardTestKit.waitUntilLeader(shard);
         return shard;
     }
