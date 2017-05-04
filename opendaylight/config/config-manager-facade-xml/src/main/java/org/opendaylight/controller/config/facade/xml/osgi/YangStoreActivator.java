@@ -8,16 +8,14 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
-import com.google.common.base.Preconditions;
 import java.lang.management.ManagementFactory;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MBeanServer;
 import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactory;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
+import org.opendaylight.mdsal.binding.dom.codec.osgi.BindingRuntimeContextService;
 import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -47,15 +45,15 @@ public class YangStoreActivator implements BundleActivator {
         LOG.debug("ConfigPersister starting");
         this.context = context;
 
-        final ServiceTrackerCustomizer<SchemaContextProvider, YangStoreService> schemaServiceTrackerCustomizer = new ServiceTrackerCustomizer<SchemaContextProvider, YangStoreService>() {
+        final ServiceTrackerCustomizer<BindingRuntimeContextService, YangStoreService> schemaServiceTrackerCustomizer = new ServiceTrackerCustomizer<BindingRuntimeContextService, YangStoreService>() {
 
             private final AtomicBoolean alreadyStarted = new AtomicBoolean(false);
 
             @Override
-            public YangStoreService addingService(final ServiceReference<SchemaContextProvider> reference) {
+            public YangStoreService addingService(final ServiceReference<BindingRuntimeContextService> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event");
-                if((reference.getProperty(SchemaSourceProvider.class.getName()) == null) &&
-                    (reference.getProperty(BindingRuntimeContext.class.getName()) == null)) {
+                if(reference.getProperty(SchemaSourceProvider.class.getName()) == null &&
+                    reference.getProperty(BindingRuntimeContext.class.getName()) == null) {
                     LOG.debug("SchemaContextProvider not from config-manager. Ignoring");
                     return null;
                 }
@@ -65,17 +63,13 @@ public class YangStoreActivator implements BundleActivator {
                     LOG.warn("Starting yang store service multiple times. Received new service {}", reference);
                     throw new RuntimeException("Starting yang store service multiple times");
                 }
-                final SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
-                final Object sourceProvider = Preconditions.checkNotNull(
-                    reference.getProperty(SchemaSourceProvider.class.getName()), "Source provider not found");
-                Preconditions.checkArgument(sourceProvider instanceof SchemaSourceProvider);
+
+                final BindingRuntimeContextService service = context.getService(reference);
 
                 // TODO avoid cast
-                final YangStoreService yangStoreService = new YangStoreService(schemaContextProvider,
-                    ((SchemaSourceProvider<YangTextSchemaSource>) sourceProvider));
+                final YangStoreService yangStoreService = new YangStoreService(service);
 
-                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference
-                        .getProperty(BindingRuntimeContext.class.getName());
+                final BindingRuntimeContext runtimeContext = service.getBindingRuntimeContext();
                 LOG.debug("BindingRuntimeContext retrieved as {}", runtimeContext);
                 if(runtimeContext != null) {
                     yangStoreService.refresh(runtimeContext);
@@ -89,7 +83,7 @@ public class YangStoreActivator implements BundleActivator {
             }
 
             @Override
-            public void modifiedService(final ServiceReference<SchemaContextProvider> reference, final YangStoreService service) {
+            public void modifiedService(final ServiceReference<BindingRuntimeContextService> reference, final YangStoreService service) {
                 if (service == null) {
                     return;
                 }
@@ -102,7 +96,7 @@ public class YangStoreActivator implements BundleActivator {
             }
 
             @Override
-            public void removedService(final ServiceReference<SchemaContextProvider> reference, final YangStoreService service) {
+            public void removedService(final ServiceReference<BindingRuntimeContextService> reference, final YangStoreService service) {
                 if(service == null) {
                     return;
                 }
@@ -115,8 +109,8 @@ public class YangStoreActivator implements BundleActivator {
             }
         };
 
-        final ServiceTracker<SchemaContextProvider, YangStoreService> schemaContextProviderServiceTracker =
-                new ServiceTracker<>(context, SchemaContextProvider.class, schemaServiceTrackerCustomizer);
+        final ServiceTracker<BindingRuntimeContextService, YangStoreService> schemaContextProviderServiceTracker =
+                new ServiceTracker<>(context, BindingRuntimeContextService.class, schemaServiceTrackerCustomizer);
         schemaContextProviderServiceTracker.open();
     }
 

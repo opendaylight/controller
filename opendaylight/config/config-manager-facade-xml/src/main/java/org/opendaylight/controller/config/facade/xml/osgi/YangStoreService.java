@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -28,7 +27,6 @@ import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 
@@ -52,8 +50,7 @@ public class YangStoreService implements YangStoreContext {
      */
     private volatile YangStoreSnapshot snap;
 
-    public YangStoreService(final SchemaContextProvider schemaContextProvider,
-        final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
+    public YangStoreService(final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
         this.sourceProvider = sourceProvider;
     }
 
@@ -107,12 +104,7 @@ public class YangStoreService implements YangStoreContext {
         final YangStoreSnapshot next = new YangStoreSnapshot(runtimeContext, this.sourceProvider);
         final YangStoreSnapshot previous = this.snap;
         this.snap = next;
-        this.notificationExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                notifyListeners(previous, next);
-            }
-        });
+        this.notificationExecutor.submit(() -> notifyListeners(previous, next));
     }
 
     public AutoCloseable registerModuleListener(final ModuleListener listener) {
@@ -125,12 +117,9 @@ public class YangStoreService implements YangStoreContext {
             this.listeners.add(listener);
         }
 
-        return new AutoCloseable() {
-            @Override
-            public void close() {
-                synchronized (YangStoreService.this.listeners) {
-                    YangStoreService.this.listeners.remove(listener);
-                }
+        return () -> {
+            synchronized (YangStoreService.this.listeners) {
+                YangStoreService.this.listeners.remove(listener);
             }
         };
     }
@@ -152,11 +141,6 @@ public class YangStoreService implements YangStoreContext {
     }
 
     private static Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
-        return ImmutableSet.copyOf(Collections2.transform(modules, new Function<Module, Capability>() {
-            @Override
-            public Capability apply(final Module input) {
-                return new YangModuleCapability(input, current.getModuleSource(input));
-            }
-        }));
+        return ImmutableSet.copyOf(Collections2.transform(modules, input -> new YangModuleCapability(input, current.getModuleSource(input))));
     }
 }

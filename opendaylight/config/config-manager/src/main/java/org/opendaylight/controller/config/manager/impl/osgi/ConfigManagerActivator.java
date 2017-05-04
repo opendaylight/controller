@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -18,21 +17,12 @@ import org.opendaylight.controller.config.api.ConfigSystemService;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.JMXNotifierConfigRegistry;
-import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
-import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
-import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
 import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,17 +43,6 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
     public void start(final BundleContext context) {
         LOG.info("Config manager starting...");
         try {
-            // the inner strategy is backed by thread context cl?
-            final ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();
-
-            final BindingContextProvider bindingContextProvider = new BindingContextProvider();
-
-            final RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
-                    moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext,
-                    bindingContextProvider, context);
-
-            final ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
-
             // start config registry
             final BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
                     new BundleContextBackedModuleFactoriesResolver(context);
@@ -76,12 +55,8 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             final ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
-            BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker =
-                    new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE,
-                            moduleInfoBundleTracker);
             ExtensibleBundleTracker<?> moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
                     moduleFactoryTracker);
-            moduleInfoBundleTracker.open(moduleInfoResolvedBundleTracker);
 
             // start extensible tracker
             moduleFactoryBundleTracker.open();
@@ -90,9 +65,6 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             final JMXNotifierConfigRegistry notifyingConfigRegistry =
                     new JMXNotifierConfigRegistry(this.configRegistry, this.configMBeanServer);
 
-            // register config registry to OSGi
-            final AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext,
-                ClassLoadingStrategy.class);
             final AutoCloseable configRegReg = OsgiRegistrationUtil.registerService(context, notifyingConfigRegistry,
                 ConfigRegistry.class);
 
@@ -125,11 +97,9 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             final AutoCloseable configMgrReg = OsgiRegistrationUtil.registerService(context, this,
                 ConfigSystemService.class);
 
-            final List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
-                    OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
-                    configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
-                    OsgiRegistrationUtil.wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry,
-                    configMgrReg);
+            final List<AutoCloseable> list = Arrays.asList(OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker),
+                configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
+                OsgiRegistrationUtil.wrap(serviceTracker), notifyingConfigRegistry, configMgrReg);
             this.autoCloseable = OsgiRegistrationUtil.aggregate(list);
 
             context.addBundleListener(this);
