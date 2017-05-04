@@ -134,11 +134,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     private final String shardMgrID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
-    private ActorSystem newActorSystem(String config) {
+    private ActorSystem newActorSystem(final String config) {
         return newActorSystem("cluster-test", config);
     }
 
-    private ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
+    private ActorRef newMockShardActor(final ActorSystem system, final String shardName, final String memberName) {
         String name = ShardIdentifier.create(shardName, MemberName.forName(memberName), "config").toString();
         if (system == getSystem()) {
             return actorFactory.createActor(Props.create(MessageCollectorActor.class), name);
@@ -151,7 +151,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         return newShardMgrProps(new MockConfiguration());
     }
 
-    private static DatastoreContextFactory newDatastoreContextFactory(DatastoreContext datastoreContext) {
+    private static DatastoreContextFactory newDatastoreContextFactory(final DatastoreContext datastoreContext) {
         DatastoreContextFactory mockFactory = mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockFactory).getShardDatastoreContext(Mockito.anyString());
@@ -162,7 +162,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         return newTestShardMgrBuilderWithMockShardActor(mockShardActor);
     }
 
-    private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(ActorRef shardActor) {
+    private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(final ActorRef shardActor) {
         return TestShardManager.builder(datastoreContextBuilder).shardActor(shardActor)
                 .distributedDataStore(mock(DistributedDataStore.class));
     }
@@ -173,7 +173,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 Dispatchers.DefaultDispatcherId());
     }
 
-    private Props newPropsShardMgrWithMockShardActor(ActorRef shardActor) {
+    private Props newPropsShardMgrWithMockShardActor(final ActorRef shardActor) {
         return newTestShardMgrBuilderWithMockShardActor(shardActor).props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId());
     }
@@ -183,14 +183,15 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         return newTestShardManager(newShardMgrProps());
     }
 
-    private TestShardManager newTestShardManager(Props props) {
+    private TestShardManager newTestShardManager(final Props props) {
         TestActorRef<TestShardManager> shardManagerActor = actorFactory.createTestActor(props);
         TestShardManager shardManager = shardManagerActor.underlyingActor();
         shardManager.waitForRecoveryComplete();
         return shardManager;
     }
 
-    private static void waitForShardInitialized(ActorRef shardManager, String shardName, JavaTestKit kit) {
+    private static void waitForShardInitialized(final ActorRef shardManager, final String shardName,
+            final JavaTestKit kit) {
         AssertionError last = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
@@ -209,7 +210,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T expectMsgClassOrFailure(Class<T> msgClass, JavaTestKit kit, String msg) {
+    private static <T> T expectMsgClassOrFailure(final Class<T> msgClass, final JavaTestKit kit, final String msg) {
         Object reply = kit.expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), msgClass, Failure.class);
         if (reply instanceof Failure) {
             throw new AssertionError(msg + " failed", ((Failure)reply).cause());
@@ -234,12 +235,12 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         final MockConfiguration mockConfig = new MockConfiguration() {
             @Override
-            public Collection<String> getMemberShardNames(MemberName memberName) {
+            public Collection<String> getMemberShardNames(final MemberName memberName) {
                 return Arrays.asList("default", "topology");
             }
 
             @Override
-            public Collection<MemberName> getMembersFromShardName(String shardName) {
+            public Collection<MemberName> getMembersFromShardName(final String shardName) {
                 return members("member-1");
             }
         };
@@ -257,12 +258,12 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final CountDownLatch newShardActorLatch = new CountDownLatch(2);
         class LocalShardManager extends ShardManager {
-            LocalShardManager(AbstractShardManagerCreator<?> creator) {
+            LocalShardManager(final AbstractShardManagerCreator<?> creator) {
                 super(creator);
             }
 
             @Override
-            protected ActorRef newShardActor(SchemaContext schemaContext, ShardInformation info) {
+            protected ActorRef newShardActor(final ShardInformation info) {
                 Entry<ActorRef, DatastoreContext> entry = shardInfoMap.get(info.getShardName());
                 ActorRef ref = null;
                 if (entry != null) {
@@ -1120,7 +1121,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         LOG.info("testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards starting");
         TestShardManager shardManager = newTestShardManager(newShardMgrProps(new MockConfiguration() {
             @Override
-            public List<String> getMemberShardNames(MemberName memberName) {
+            public List<String> getMemberShardNames(final MemberName memberName) {
                 return Arrays.asList("default", "astronauts");
             }
         }));
@@ -1180,7 +1181,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         };
     }
 
-    private static List<MemberName> members(String... names) {
+    private static List<MemberName> members(final String... names) {
         return Arrays.asList(names).stream().map(MemberName::forName).collect(Collectors.toList());
     }
 
@@ -2091,14 +2092,14 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         private CountDownLatch memberReachableReceived = new CountDownLatch(1);
         private volatile MessageInterceptor messageInterceptor;
 
-        private TestShardManager(Builder builder) {
+        private TestShardManager(final Builder builder) {
             super(builder);
             shardActor = builder.shardActor;
             shardActors = builder.shardActors;
         }
 
         @Override
-        protected void handleRecover(Object message) throws Exception {
+        protected void handleRecover(final Object message) throws Exception {
             try {
                 super.handleRecover(message);
             } finally {
@@ -2108,14 +2109,14 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             }
         }
 
-        private void countDownIfOther(final Member member, CountDownLatch latch) {
+        private void countDownIfOther(final Member member, final CountDownLatch latch) {
             if (!getCluster().getCurrentMemberName().equals(memberToName(member))) {
                 latch.countDown();
             }
         }
 
         @Override
-        public void handleCommand(Object message) throws Exception {
+        public void handleCommand(final Object message) throws Exception {
             try {
                 if (messageInterceptor != null && messageInterceptor.canIntercept(message)) {
                     getSender().tell(messageInterceptor.apply(message), getSelf());
@@ -2137,7 +2138,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             }
         }
 
-        void setMessageInterceptor(MessageInterceptor messageInterceptor) {
+        void setMessageInterceptor(final MessageInterceptor messageInterceptor) {
             this.messageInterceptor = messageInterceptor;
         }
 
@@ -2177,7 +2178,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             findPrimaryMessageReceived = new CountDownLatch(1);
         }
 
-        public static Builder builder(DatastoreContext.Builder datastoreContextBuilder) {
+        public static Builder builder(final DatastoreContext.Builder datastoreContextBuilder) {
             return new Builder(datastoreContextBuilder);
         }
 
@@ -2185,37 +2186,37 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             private ActorRef shardActor;
             private final Map<String, ActorRef> shardActors = new HashMap<>();
 
-            Builder(DatastoreContext.Builder datastoreContextBuilder) {
+            Builder(final DatastoreContext.Builder datastoreContextBuilder) {
                 super(TestShardManager.class);
                 datastoreContextFactory(newDatastoreContextFactory(datastoreContextBuilder.build()));
             }
 
-            Builder shardActor(ActorRef newShardActor) {
+            Builder shardActor(final ActorRef newShardActor) {
                 this.shardActor = newShardActor;
                 return this;
             }
 
-            Builder addShardActor(String shardName, ActorRef actorRef) {
+            Builder addShardActor(final String shardName, final ActorRef actorRef) {
                 shardActors.put(shardName, actorRef);
                 return this;
             }
         }
 
         @Override
-        public void saveSnapshot(Object obj) {
+        public void saveSnapshot(final Object obj) {
             snapshot = (ShardManagerSnapshot) obj;
             snapshotPersist.countDown();
             super.saveSnapshot(obj);
         }
 
-        void verifySnapshotPersisted(Set<String> shardList) {
+        void verifySnapshotPersisted(final Set<String> shardList) {
             assertEquals("saveSnapshot invoked", true,
                     Uninterruptibles.awaitUninterruptibly(snapshotPersist, 5, TimeUnit.SECONDS));
             assertEquals("Shard Persisted", shardList, Sets.newHashSet(snapshot.getShardList()));
         }
 
         @Override
-        protected ActorRef newShardActor(SchemaContext schemaContext, ShardInformation info) {
+        protected ActorRef newShardActor(final ShardInformation info) {
             if (shardActors.get(info.getShardName()) != null) {
                 return shardActors.get(info.getShardName());
             }
@@ -2224,7 +2225,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 return shardActor;
             }
 
-            return super.newShardActor(schemaContext, info);
+            return super.newShardActor(info);
         }
     }
 
@@ -2232,7 +2233,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                                                      extends AbstractShardManagerCreator<T> {
         private final Class<C> shardManagerClass;
 
-        AbstractGenericCreator(Class<C> shardManagerClass) {
+        AbstractGenericCreator(final Class<C> shardManagerClass) {
             this.shardManagerClass = shardManagerClass;
             cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).waitTillReadyCountDownLatch(ready)
                     .primaryShardInfoCache(new PrimaryShardInfoFutureCache());
@@ -2246,7 +2247,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     }
 
     private static class GenericCreator<C extends ShardManager> extends AbstractGenericCreator<GenericCreator<C>, C> {
-        GenericCreator(Class<C> shardManagerClass) {
+        GenericCreator(final Class<C> shardManagerClass) {
             super(shardManagerClass);
         }
     }
@@ -2255,7 +2256,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         private static final long serialVersionUID = 1L;
         private final Creator<ShardManager> delegate;
 
-        DelegatingShardManagerCreator(Creator<ShardManager> delegate) {
+        DelegatingShardManagerCreator(final Creator<ShardManager> delegate) {
             this.delegate = delegate;
         }
 
@@ -2272,12 +2273,12 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     private static MessageInterceptor newFindPrimaryInterceptor(final ActorRef primaryActor) {
         return new MessageInterceptor() {
             @Override
-            public Object apply(Object message) {
+            public Object apply(final Object message) {
                 return new RemotePrimaryShardFound(Serialization.serializedActorPath(primaryActor), (short) 1);
             }
 
             @Override
-            public boolean canIntercept(Object message) {
+            public boolean canIntercept(final Object message) {
                 return message instanceof FindPrimary;
             }
         };
@@ -2290,13 +2291,13 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         private final Class<?> requestClass;
 
         @SuppressWarnings("unused")
-        MockRespondActor(Class<?> requestClass, Object responseMsg) {
+        MockRespondActor(final Class<?> requestClass, final Object responseMsg) {
             this.requestClass = requestClass;
             this.responseMsg = responseMsg;
         }
 
         @Override
-        public void onReceive(Object message) throws Exception {
+        public void onReceive(final Object message) throws Exception {
             if (message.equals(CLEAR_RESPONSE)) {
                 responseMsg = null;
             } else {
