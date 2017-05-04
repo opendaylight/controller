@@ -125,7 +125,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected Shard.Builder newShardBuilder() {
-        return Shard.builder().id(shardID).datastoreContext(newDatastoreContext()).schemaContext(SCHEMA_CONTEXT);
+        return Shard.builder().id(shardID).datastoreContext(newDatastoreContext())
+            .schemaContextProvider(() -> SCHEMA_CONTEXT);
     }
 
     protected void testRecovery(final Set<Integer> listEntryKeys) throws Exception {
