@@ -50,6 +50,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardTransactionTest extends AbstractActorTest {
 
@@ -59,6 +60,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
         ShardIdentifier.create("inventory", MEMBER_NAME, "config");
+    private static final SchemaContext TEST_MODEL = TestModel.createTestContext();
 
     private DatastoreContext datastoreContext = DatastoreContext.newBuilder().persistent(false).build();
 
@@ -70,7 +72,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Before
     public void setUp() {
         shard = actorFactory.createTestActor(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)
-                .schemaContext(TestModel.createTestContext()).props()
+                .schemaContextProvider(() -> TEST_MODEL).props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
         ShardTestKit.waitUntilLeader(shard);
         store = shard.underlyingActor().getDataStore();
