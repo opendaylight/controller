@@ -109,7 +109,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
+    final void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
                          final Consumer<Response<?, ?>> callback) {
         if (request instanceof CommitLocalTransactionRequest) {
             final CommitLocalTransactionRequest req = (CommitLocalTransactionRequest) request;
