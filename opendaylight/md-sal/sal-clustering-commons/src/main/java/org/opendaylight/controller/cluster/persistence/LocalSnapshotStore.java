@@ -185,7 +185,7 @@ public class LocalSnapshotStore extends SnapshotStore {
         try {
             Files.move(temp.toPath(), actual.toPath(), StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
-            LOG.warn("Failed to move %s to %s. Deleting %s..", temp, actual, temp, e);
+            LOG.warn("Failed to move {} to {}. Deleting {}..", temp, actual, temp, e);
             if (!temp.delete()) {
                 LOG.error("Failed to successfully delete file {}", temp);
             }
