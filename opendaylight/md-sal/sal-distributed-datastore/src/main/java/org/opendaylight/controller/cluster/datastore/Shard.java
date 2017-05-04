@@ -98,6 +98,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -892,7 +893,7 @@ public class Shard extends RaftActor {
         private ShardIdentifier id;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
-        private SchemaContext schemaContext;
+        private SchemaContextProvider schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private TipProducingDataTree dataTree;
         private volatile boolean sealed;
@@ -928,9 +929,9 @@ public class Shard extends RaftActor {
             return self();
         }
 
-        public T schemaContext(final SchemaContext newSchemaContext) {
+        public T schemaContextProvider(final SchemaContextProvider schemaContextProvider) {
             checkSealed();
-            this.schemaContext = newSchemaContext;
+            this.schemaContextProvider = Preconditions.checkNotNull(schemaContextProvider);
             return self();
         }
 
@@ -959,7 +960,7 @@ public class Shard extends RaftActor {
         }
 
         public SchemaContext getSchemaContext() {
-            return schemaContext;
+            return Verify.verifyNotNull(schemaContextProvider.getSchemaContext());
         }
 
         public DatastoreSnapshot.ShardSnapshot getRestoreFromSnapshot() {
@@ -986,7 +987,7 @@ public class Shard extends RaftActor {
             Preconditions.checkNotNull(id, "id should not be null");
             Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
             Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
-            Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+            Preconditions.checkNotNull(schemaContextProvider, "schemaContextProvider should not be null");
         }
 
         public Props props() {
