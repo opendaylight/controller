@@ -25,6 +25,8 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import akka.japi.Function;
 import akka.pattern.Patterns;
+import akka.persistence.DeleteSnapshotsFailure;
+import akka.persistence.DeleteSnapshotsSuccess;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
@@ -86,6 +88,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
+import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
@@ -294,6 +297,15 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onGetLocalShardIds();
         } else if (message instanceof RunnableMessage) {
             ((RunnableMessage)message).run();
+        } else if (message instanceof DeleteSnapshotsFailure) {
+            LOG.warn("{}: Failed to delete prior snapshots", persistenceId(),
+                    ((DeleteSnapshotsFailure) message).cause());
+        } else if (message instanceof DeleteSnapshotsSuccess) {
+            LOG.debug("{}: Successfully deleted prior snapshots", persistenceId(), message);
+        } else if (message instanceof RegisterRoleChangeListenerReply) {
+            LOG.trace("{}: Received RegisterRoleChangeListenerReply", persistenceId());
+        } else if (message instanceof ClusterEvent.MemberEvent) {
+            LOG.trace("{}: Received other ClusterEvent.MemberEvent: {}", persistenceId(), message);
         } else {
             unknownMessage(message);
         }
@@ -839,10 +851,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void onRecoveryCompleted() {
         LOG.info("Recovery complete : {}", persistenceId());
-
-        // We no longer persist SchemaContext modules so delete all the prior messages from the akka
-        // journal on upgrade from Helium.
-        deleteMessages(lastSequenceNr());
 
         if (currentSnapshot == null && restoreFromSnapshot != null
                 && restoreFromSnapshot.getShardManagerSnapshot() != null) {

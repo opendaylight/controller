@@ -40,7 +40,6 @@ import akka.util.Timeout;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -68,7 +67,6 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.Shard;
-import org.opendaylight.controller.cluster.datastore.ShardManager.SchemaContextModules;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -118,7 +116,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -987,24 +984,6 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         };
 
         LOG.info("testOnReceiveFindLocalShardWaitForShardInitialized starting");
-    }
-
-    @Test
-    public void testOnRecoveryJournalIsCleaned() {
-        String persistenceID = "shard-manager-" + shardMrgIDSuffix;
-        InMemoryJournal.addEntry(persistenceID, 1L, new SchemaContextModules(ImmutableSet.of("foo")));
-        InMemoryJournal.addEntry(persistenceID, 2L, new SchemaContextModules(ImmutableSet.of("bar")));
-        InMemoryJournal.addDeleteMessagesCompleteLatch(persistenceID);
-
-        newTestShardManager();
-
-        InMemoryJournal.waitForDeleteMessagesComplete(persistenceID);
-
-        // Journal entries up to the last one should've been deleted
-        Map<Long, Object> journal = InMemoryJournal.get(persistenceID);
-        synchronized (journal) {
-            assertEquals("Journal size", 0, journal.size());
-        }
     }
 
     @Test
