@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_bc587ffb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-05-05T11:05:48Z",
+      "side": 1,
+      "message": "do we want to block here to stop the ShardManager processing all other messages while it\u0027s shutting down the shard?",
+      "range": {
+        "startLine": 484,
+        "startChar": 16,
+        "endLine": 484,
+        "endChar": 51
+      },
+      "revId": "44b7fd5341557aa32ab0bd39e29a67eda921ff26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
