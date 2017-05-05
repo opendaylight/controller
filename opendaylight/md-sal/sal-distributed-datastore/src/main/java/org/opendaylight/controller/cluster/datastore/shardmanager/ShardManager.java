@@ -114,6 +114,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -462,15 +463,31 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onShardReplicaRemoved(ServerRemoved message) {
-        final ShardIdentifier shardId = new ShardIdentifier.Builder().fromShardIdString(message.getServerId()).build();
+        removeShard(new ShardIdentifier.Builder().fromShardIdString(message.getServerId()).build());
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void removeShard(final ShardIdentifier shardId) {
         final ShardInformation shardInformation = localShards.remove(shardId.getShardName());
         if (shardInformation == null) {
             LOG.debug("{} : Shard replica {} is not present in list", persistenceId(), shardId.toString());
             return;
-        } else if (shardInformation.getActor() != null) {
-            LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shardInformation.getActor());
-            shardInformation.getActor().tell(Shutdown.INSTANCE, self());
         }
+
+        final ActorRef shardActor = shardInformation.getActor();
+        if (shardActor != null) {
+            LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shardActor);
+            FiniteDuration duration = shardInformation.getDatastoreContext().getShardRaftConfig()
+                    .getElectionTimeOutInterval().$times(2);
+            final Future<Boolean> stopFuture = Patterns.gracefulStop(shardActor, duration, Shutdown.INSTANCE);
+            try {
+                Await.result(stopFuture, duration);
+                LOG.debug("{} : Successfully shut down Shard actor {}", persistenceId(), shardActor);
+            } catch (Exception e) {
+                LOG.warn("{}: Failed to shut down Shard actor {}", persistenceId(), shardActor, e);
+            }
+        }
+
         LOG.debug("{} : Local Shard replica for shard {} has been removed", persistenceId(), shardId.getShardName());
         persistShardList();
     }
@@ -581,22 +598,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final DOMDataTreeIdentifier prefix = message.getPrefix();
         final ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
                 ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
-        final ShardInformation shard = localShards.remove(shardId.getShardName());
 
         configuration.removePrefixShardConfiguration(prefix);
-
-        if (shard == null) {
-            LOG.warn("{}: Received removal for unconfigured shard: {}, ignoring.. ", persistenceId(), prefix);
-            return;
-        }
-
-        if (shard.getActor() != null) {
-            LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shard.getActor());
-            shard.getActor().tell(Shutdown.INSTANCE, self());
-        }
-
-        LOG.debug("{}: Local Shard replica for shard {} has been removed", persistenceId(), shardId.getShardName());
-        persistShardList();
+        removeShard(shardId);
     }
 
     private void doCreateShard(final CreateShard createShard) {
@@ -1063,9 +1067,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     @VisibleForTesting
-    protected ActorRef newShardActor(final SchemaContext schemaContext, ShardInformation info) {
-        return getContext().actorOf(info.newProps(schemaContext)
-                .withDispatcher(shardDispatcherPath), info.getShardId().toString());
+    protected ActorRef newShardActor(final SchemaContext shardSchemaContext, final ShardInformation info) {
+        return getContext().actorOf(info.newProps(shardSchemaContext).withDispatcher(shardDispatcherPath),
+                info.getShardId().toString());
     }
 
     private void findPrimary(FindPrimary message) {

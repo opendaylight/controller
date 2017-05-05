@@ -175,6 +175,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
     @Test
     public void testProducerRegistrations() throws Exception {
+        LOG.info("testProducerRegistrations starting");
         initEmptyDatastores();
 
         leaderTestKit.waitForMembersUp("member-2");
@@ -233,10 +234,13 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         }
 
         shardRegistration.close().toCompletableFuture().get();
+
+        LOG.info("testProducerRegistrations ending");
     }
 
     @Test
     public void testWriteIntoMultipleShards() throws Exception {
+        LOG.info("testWriteIntoMultipleShards starting");
         initEmptyDatastores();
 
         leaderTestKit.waitForMembersUp("member-2");
@@ -277,10 +281,13 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         tx.submit().checkedGet();
 
         shardRegistration.close().toCompletableFuture().get();
+
+        LOG.info("testWriteIntoMultipleShards ending");
     }
 
     @Test
     public void testMultipleShardRegistrations() throws Exception {
+        LOG.info("testMultipleShardRegistrations starting");
         initEmptyDatastores();
 
         final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
@@ -371,10 +378,12 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
                 ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
 
         LOG.debug("All follower shards gone");
+        LOG.info("testMultipleShardRegistrations ending");
     }
 
     @Test
     public void testMultipleRegistrationsAtOnePrefix() throws Exception {
+        LOG.info("testMultipleRegistrationsAtOnePrefix starting");
         initEmptyDatastores();
 
         for (int i = 0; i < 10; i++) {
@@ -408,5 +417,6 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
         }
 
+        LOG.info("testMultipleRegistrationsAtOnePrefix ending");
     }
 }
