@@ -9,7 +9,6 @@
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -19,11 +18,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SplittableRandom;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
@@ -40,14 +40,11 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,38 +191,35 @@ public class ProduceTransactionsHandler implements Runnable {
 
             final ListenableFuture<List<Void>> allFutures = Futures.allAsList(futures);
 
-            Futures.addCallback(allFutures, new FutureCallback<List<Void>>() {
-                @Override
-                public void onSuccess(@Nullable final List<Void> result) {
-                    LOG.debug("All futures completed successfully.");
+            try {
+                allFutures.get(30, TimeUnit.SECONDS);
 
-                    final ProduceTransactionsOutput output = new ProduceTransactionsOutputBuilder()
-                            .setAllTx(allTx)
-                            .setInsertTx(insertTx)
-                            .setDeleteTx(deleteTx)
-                            .build();
+                LOG.debug("All futures completed successfully.");
 
-                    try {
-                        itemProducer.close();
-                    } catch (final DOMDataTreeProducerException e) {
-                        LOG.warn("Failure while closing item producer.", e);
-                    }
+                final ProduceTransactionsOutput output = new ProduceTransactionsOutputBuilder()
+                        .setAllTx(allTx)
+                        .setInsertTx(insertTx)
+                        .setDeleteTx(deleteTx)
+                        .build();
 
-                    completionFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>success()
-                            .withResult(output).build());
 
-                    executor.shutdown();
+                completionFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>success()
+                        .withResult(output).build());
+
+                executor.shutdown();
+            } catch (InterruptedException | ExecutionException | TimeoutException exception) {
+                LOG.error("Write transactions failed.", exception);
+                completionFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
+                        .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", exception).build());
+
+                executor.shutdown();
+            } finally {
+                try {
+                    itemProducer.close();
+                } catch (final DOMDataTreeProducerException e) {
+                    LOG.warn("Failure while closing item producer.", e);
                 }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    LOG.error("Write transactions failed.", t);
-                    completionFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
-                            .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", t).build());
-
-                    executor.shutdown();
-                }
-            });
+            }
         }
     }
 }
