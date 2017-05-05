@@ -178,8 +178,10 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
         builder.setSequence(0L);
         builder.setAbort();
         final ModifyTransactionRequest request = builder.build();
-        final TransactionAbortRequest received = testForwardToRemote(request, TransactionAbortRequest.class);
+        final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
         Assert.assertEquals(request.getTarget(), received.getTarget());
+        Assert.assertTrue(received.getPersistenceProtocol().isPresent());
+        Assert.assertEquals(PersistenceProtocol.ABORT, received.getPersistenceProtocol().get());
     }
 
     @Test
