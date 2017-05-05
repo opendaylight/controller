@@ -14,6 +14,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -85,5 +86,4 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
         Verify.verify(protocol == PersistenceProtocol.ABORT);
         abort();
     }
-
 }

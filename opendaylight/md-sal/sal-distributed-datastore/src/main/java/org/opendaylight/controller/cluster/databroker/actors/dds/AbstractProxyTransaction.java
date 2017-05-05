@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
+import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
@@ -491,7 +492,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         for (Object obj : successfulRequests) {
             if (obj instanceof TransactionRequest) {
                 LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                successor.handleForwardedRemoteRequest((TransactionRequest<?>) obj, response -> { });
+                successor.replay((TransactionRequest<?>) obj, response -> { });
             } else {
                 Verify.verify(obj instanceof IncrementSequence);
                 successor.incrementSequence(((IncrementSequence) obj).getDelta());
@@ -509,7 +510,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             if (getIdentifier().equals(req.getTarget())) {
                 Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
                 LOG.debug("Forwarding queued request {} to successor {}", req, successor);
-                successor.handleForwardedRemoteRequest((TransactionRequest<?>) req, e.getCallback());
+                successor.replay((TransactionRequest<?>) req, e.getCallback());
                 it.remove();
             }
         }
@@ -524,6 +525,24 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             flushState(successor);
             successor.ensureSealed();
+        }
+    }
+
+    /**
+     * Invoked from {@link #replayMessages(AbstractProxyTransaction, Iterable)} to have successor adopt an in-flight
+     * request.
+     *
+     * <p>
+     * Note: this method is invoked by the predecessor on the successor.
+     *
+     * @param request Request which needs to be forwarded
+     * @param callback Callback to be invoked once the request completes
+     */
+    private void replay(TransactionRequest<?> request, Consumer<Response<?, ?>> callback) {
+        if (request instanceof AbstractLocalTransactionRequest) {
+            handleForwardedLocalRequest((AbstractLocalTransactionRequest<?>) request, callback);
+        } else {
+            handleForwardedRemoteRequest(request, callback);
         }
     }
 
@@ -577,20 +596,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract TransactionRequest<?> commitRequest(boolean coordinated);
 
     /**
-     * Invoked from {@link RemoteProxyTransaction} when it replays its successful requests to its successor. There is
-     * no equivalent of this call from {@link LocalProxyTransaction} because it does not send a request until all
-     * operations are packaged in the message.
-     *
-     * <p>
-     * Note: this method is invoked by the predecessor on the successor.
-     *
-     * @param request Request which needs to be forwarded
-     * @param callback Callback to be invoked once the request completes
-     */
-    abstract void handleForwardedRemoteRequest(TransactionRequest<?> request,
-            @Nullable Consumer<Response<?, ?>> callback);
-
-    /**
      * Replay a request originating in this proxy to a successor remote proxy.
      */
     abstract void forwardToRemote(RemoteProxyTransaction successor, TransactionRequest<?> request,
@@ -601,6 +606,30 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      */
     abstract void forwardToLocal(LocalProxyTransaction successor, TransactionRequest<?> request,
             Consumer<Response<?, ?>> callback);
+
+    /**
+     * Invoked from {@link LocalProxyTransaction} when it replays its successful requests to its successor.
+     *
+     * <p>
+     * Note: this method is invoked by the predecessor on the successor.
+     *
+     * @param request Request which needs to be forwarded
+     * @param callback Callback to be invoked once the request completes
+     */
+    abstract void handleForwardedLocalRequest(AbstractLocalTransactionRequest<?> request,
+            @Nullable Consumer<Response<?, ?>> callback);
+
+    /**
+     * Invoked from {@link RemoteProxyTransaction} when it replays its successful requests to its successor.
+     *
+     * <p>
+     * Note: this method is invoked by the predecessor on the successor.
+     *
+     * @param request Request which needs to be forwarded
+     * @param callback Callback to be invoked once the request completes
+     */
+    abstract void handleForwardedRemoteRequest(TransactionRequest<?> request,
+            @Nullable Consumer<Response<?, ?>> callback);
 
     @Override
     public final String toString() {
