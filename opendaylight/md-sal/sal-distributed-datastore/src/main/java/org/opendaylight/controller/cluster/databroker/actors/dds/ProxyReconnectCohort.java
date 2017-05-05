@@ -18,10 +18,10 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 
 abstract class ProxyReconnectCohort implements Identifiable<LocalHistoryIdentifier> {
 
-    abstract void replaySuccessfulRequests(Iterable<ConnectionEntry> previousEntries);
+    abstract void replayRequests(Iterable<ConnectionEntry> previousEntries);
 
     abstract ProxyHistory finishReconnect();
 
-    abstract void replayRequest(Request<?, ?> request, Consumer<Response<?, ?>> callback,
+    abstract void forwardRequest(Request<?, ?> request, Consumer<Response<?, ?>> callback,
             BiConsumer<Request<?, ?>, Consumer<Response<?, ?>>> replayTo) throws RequestException;
 }

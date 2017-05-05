@@ -144,7 +144,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
                 // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
                 //         the non-throttling interface to the connection, hence we use a wrapper consumer
                 for (HistoryReconnectCohort c : cohorts) {
-                    c.replaySuccessfulRequests(previousEntries);
+                    c.replayRequests(previousEntries);
                 }
 
                 // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding

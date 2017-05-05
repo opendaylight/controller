@@ -211,7 +211,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @GuardedBy("lock")
         @Override
-        void replaySuccessfulRequests(final Iterable<ConnectionEntry> previousEntries) {
+        void replayRequests(final Iterable<ConnectionEntry> previousEntries) {
             // First look for our Create message
             for (ConnectionEntry e : previousEntries) {
                 final Request<?, ?> req = e.getRequest();
@@ -257,18 +257,18 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
 
         @Override
-        void replayRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
-                final BiConsumer<Request<?, ?>, Consumer<Response<?, ?>>> replayTo) throws RequestException {
+        void forwardRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
+                final BiConsumer<Request<?, ?>, Consumer<Response<?, ?>>> forwardTo) throws RequestException {
             if (request instanceof TransactionRequest) {
-                replayTransactionRequest((TransactionRequest<?>) request, callback);
+                forwardTransactionRequest((TransactionRequest<?>) request, callback);
             } else if (request instanceof LocalHistoryRequest) {
-                replayTo.accept(request, callback);
+                forwardTo.accept(request, callback);
             } else {
                 throw new IllegalArgumentException("Unhandled request " + request);
             }
         }
 
-        private void replayTransactionRequest(final TransactionRequest<?> request,
+        private void forwardTransactionRequest(final TransactionRequest<?> request,
                 final Consumer<Response<?, ?>> callback) throws RequestException {
 
             final AbstractProxyTransaction proxy;
@@ -282,7 +282,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 throw new RequestReplayException("Failed to find proxy for %s", request);
             }
 
-            proxy.replayRequest(request, callback);
+            proxy.forwardRequest(request, callback);
         }
     }
 

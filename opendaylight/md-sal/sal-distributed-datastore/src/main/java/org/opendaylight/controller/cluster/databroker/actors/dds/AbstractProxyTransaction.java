@@ -543,7 +543,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @param request Request to be forwarded
      * @param callback Original callback
      */
-    final void replayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+    final void forwardRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         final AbstractProxyTransaction successor = getSuccessorState().getSuccessor();
 
         if (successor instanceof LocalProxyTransaction) {

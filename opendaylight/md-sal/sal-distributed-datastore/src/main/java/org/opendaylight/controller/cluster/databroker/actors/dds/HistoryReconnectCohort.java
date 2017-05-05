@@ -18,7 +18,7 @@ import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 abstract class HistoryReconnectCohort implements AutoCloseable {
     abstract ProxyReconnectCohort getProxy();
 
-    abstract void replaySuccessfulRequests(Iterable<ConnectionEntry> previousEntries);
+    abstract void replayRequests(Iterable<ConnectionEntry> previousEntries);
 
     @Override
     public abstract void close();
