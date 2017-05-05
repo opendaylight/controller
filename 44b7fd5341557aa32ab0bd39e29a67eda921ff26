@@ -22,6 +22,30 @@
       "revId": "44b7fd5341557aa32ab0bd39e29a67eda921ff26",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_57bb2cc4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-05T14:31:59Z",
+      "side": 1,
+      "message": "Ideally no. I tried catching InvalodActorNameEx in newShardActor and retrying but that did not work as expected, ie even after the Shard actor stopped (postStop finished), actorOf kept throwing InvalodActorNameEx.  \n\nAnother option is to store the Future and block a subsequent create until the Future completes. I\u0027ll try that,",
+      "parentUuid": "ba068154_bc587ffb",
+      "range": {
+        "startLine": 484,
+        "startChar": 16,
+        "endLine": 484,
+        "endChar": 51
+      },
+      "revId": "44b7fd5341557aa32ab0bd39e29a67eda921ff26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
