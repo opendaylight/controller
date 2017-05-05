@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
@@ -86,6 +87,16 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         sendAbort(new AbortLocalTransactionRequest(identifier, localActor()), response -> {
             LOG.debug("Transaction {} abort completed with {}", identifier, response);
         });
+    }
+
+    @Override
+    void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback) {
+        if (request instanceof AbortLocalTransactionRequest) {
+            sendAbort(request, callback);
+        } else {
+            throw new IllegalArgumentException("Unhandled request" + request);
+        }
     }
 
     @Override
