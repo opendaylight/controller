@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @param <T> Message type
  */
-abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTransactionRequest<T>>
+public abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTransactionRequest<T>>
         extends TransactionRequest<T> {
     private static final long serialVersionUID = 1L;
 

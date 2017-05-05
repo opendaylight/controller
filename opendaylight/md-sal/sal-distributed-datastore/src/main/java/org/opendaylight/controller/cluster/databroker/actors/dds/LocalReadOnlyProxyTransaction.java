@@ -85,5 +85,4 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
         Verify.verify(protocol == PersistenceProtocol.ABORT);
         abort();
     }
-
 }
