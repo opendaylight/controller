@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
@@ -235,6 +236,16 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                 default:
                     throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.get());
             }
+        }
+    }
+
+    @Override
+    void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback) {
+        if (request instanceof CommitLocalTransactionRequest) {
+            sendCommit((CommitLocalTransactionRequest) request, callback);
+        } else {
+            super.handleForwardedLocalRequest(request, callback);
         }
     }
 
