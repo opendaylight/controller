@@ -78,7 +78,7 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
 
             // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
             //        period required to get into the queue.
-            cohort.replayRequest(request, entry.getCallback(), this::sendToSuccessor);
+            cohort.forwardRequest(request, entry.getCallback(), this::sendToSuccessor);
         } catch (RequestException e) {
             entry.complete(request.toRequestFailure(e));
         }

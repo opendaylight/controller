@@ -306,8 +306,8 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
             }
 
             @Override
-            void replaySuccessfulRequests(final Iterable<ConnectionEntry> previousEntries) {
-                proxy.replaySuccessfulRequests(previousEntries);
+            void replayRequests(final Iterable<ConnectionEntry> previousEntries) {
+                proxy.replayRequests(previousEntries);
             }
 
             @Override
