@@ -177,7 +177,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final ModifyTransactionRequest request = builder.build();
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         transaction.applyModifyTransactionRequest(request, callback);
-        getTester().expectTransactionRequest(TransactionAbortRequest.class);
+        getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
     @Test
