@@ -259,6 +259,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void forwardRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
                 final BiConsumer<Request<?, ?>, Consumer<Response<?, ?>>> forwardTo) throws RequestException {
+            // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
+            //        period required to get into the queue.
             if (request instanceof TransactionRequest) {
                 forwardTransactionRequest((TransactionRequest<?>) request, callback);
             } else if (request instanceof LocalHistoryRequest) {
