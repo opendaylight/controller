@@ -71,7 +71,6 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private volatile Exception operationFailure;
 
-
     RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
             final boolean snapshotOnly, final boolean sendReadyOnSeal) {
         super(parent);
@@ -303,7 +302,11 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
                 switch (maybeProto.get()) {
                     case ABORT:
-                        sendAbort(callback);
+                        ensureInitializedBuilder();
+                        builder.setAbort();
+                        final ModifyTransactionRequest newReq = builder.build();
+                        builderBusy = false;
+                        sendRequest(newReq, callback);
                         break;
                     case SIMPLE:
                         sendRequest(commitRequest(false), callback);
