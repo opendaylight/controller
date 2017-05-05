@@ -39,6 +39,7 @@ import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
@@ -181,7 +182,12 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         transaction.recordSuccessfulRequest(successful2);
         transaction.startReconnect();
         transaction.replayMessages(successor.getTransaction(), entries);
-        Assert.assertEquals(successful1, successor.expectTransactionRequest(AbortLocalTransactionRequest.class));
+
+        final ModifyTransactionRequest transformed = successor.expectTransactionRequest(ModifyTransactionRequest.class);
+        Assert.assertNotNull(transformed);
+        Assert.assertEquals(successful1.getSequence(), transformed.getSequence());
+        Assert.assertTrue(transformed.getPersistenceProtocol().isPresent());
+        Assert.assertEquals(PersistenceProtocol.ABORT, transformed.getPersistenceProtocol().get());
         Assert.assertEquals(successful2, successor.expectTransactionRequest(ReadTransactionRequest.class));
         Assert.assertEquals(request1, successor.expectTransactionRequest(ReadTransactionRequest.class));
         Assert.assertEquals(request2, successor.expectTransactionRequest(ExistsTransactionRequest.class));
@@ -190,9 +196,9 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     protected void checkModifications(final ModifyTransactionRequest modifyRequest) {
         final List<TransactionModification> modifications = modifyRequest.getModifications();
         Assert.assertEquals(3, modifications.size());
-        Assert.assertThat(modifications, hasItem(both(isA(TransactionWrite.class)).and((hasPath(PATH_1)))));
-        Assert.assertThat(modifications, hasItem(both(isA(TransactionMerge.class)).and((hasPath(PATH_2)))));
-        Assert.assertThat(modifications, hasItem(both(isA(TransactionDelete.class)).and((hasPath(PATH_3)))));
+        Assert.assertThat(modifications, hasItem(both(isA(TransactionWrite.class)).and(hasPath(PATH_1))));
+        Assert.assertThat(modifications, hasItem(both(isA(TransactionMerge.class)).and(hasPath(PATH_2))));
+        Assert.assertThat(modifications, hasItem(both(isA(TransactionDelete.class)).and(hasPath(PATH_3))));
     }
 
     protected void testRequestResponse(final Consumer<VotingFuture<Void>> consumer,
