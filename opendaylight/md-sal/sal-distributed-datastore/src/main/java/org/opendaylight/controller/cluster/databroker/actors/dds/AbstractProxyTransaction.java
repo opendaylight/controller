@@ -591,6 +591,18 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             @Nullable Consumer<Response<?, ?>> callback);
 
     /**
+     * Invoked from {@link #replayMessages(AbstractProxyTransaction, Iterable)} to have successor adopt an in-flight
+     * request.
+     *
+     * <p>
+     * Note: this method is invoked by the predecessor on the successor.
+     *
+     * @param request Request which needs to be forwarded
+     * @param callback Callback to be invoked once the request completes
+     */
+    abstract void replay(TransactionRequest<?> request, @Nullable Consumer<Response<?, ?>> callback);
+
+    /**
      * Replay a request originating in this proxy to a successor remote proxy.
      */
     abstract void forwardToRemote(RemoteProxyTransaction successor, TransactionRequest<?> request,
