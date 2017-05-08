@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -54,6 +55,12 @@ public class PrefixLeaderHandler {
             LOG.error("Leader movement failed.", throwable);
             return null;
         });
+
+        try {
+            producer.close();
+        } catch (final DOMDataTreeProducerException e) {
+            LOG.warn("Error while closing producer {}", producer, e);
+        }
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
