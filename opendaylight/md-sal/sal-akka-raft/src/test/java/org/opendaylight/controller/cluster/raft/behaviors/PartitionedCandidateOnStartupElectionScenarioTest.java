@@ -182,9 +182,8 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         member2Actor.dropMessagesToBehavior(RequestVote.class, numCandidateElections);
 
-        Candidate member3Behavior = new Candidate(member3Context);
-        member3Actor.behavior = member3Behavior;
-        member3Context.setCurrentBehavior(member3Behavior);
+        member3Actor.self().tell(new SetBehavior(new Candidate(member3Context), member3Context),
+                ActorRef.noSender());
 
         // Send several additional ElectionTimeouts to Candidate member 3. Each ElectionTimeout will
         // start a new term so Candidate member 3's current term will be greater than the leader's
@@ -234,8 +233,8 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member2Context.setLastApplied(replicatedLog.lastIndex());
         member2Context.getTermInformation().update(3, "member1");
 
-        member2Actor.behavior = new Follower(member2Context);
-        member2Context.setCurrentBehavior(member2Actor.behavior);
+        member2Actor.self().tell(new SetBehavior(new Follower(member2Context), member2Context),
+                ActorRef.noSender());
 
         // Create member 1's behavior as Leader.
 
