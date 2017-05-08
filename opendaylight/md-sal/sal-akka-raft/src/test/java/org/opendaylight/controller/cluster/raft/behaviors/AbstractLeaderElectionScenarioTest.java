@@ -14,9 +14,13 @@ import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.actor.Status;
 import akka.dispatch.Dispatchers;
+import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.util.Timeout;
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +37,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
+import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -44,8 +50,7 @@ public class AbstractLeaderElectionScenarioTest {
     static final int HEARTBEAT_INTERVAL = 50;
 
     static class MemberActor extends MessageCollectorActor {
-
-        volatile RaftActorBehavior behavior;
+        private volatile RaftActorBehavior behavior;
         Map<Class<?>, CountDownLatch> messagesReceivedLatches = new ConcurrentHashMap<>();
         Map<Class<?>, Boolean> dropMessagesToBehavior = new ConcurrentHashMap<>();
         CountDownLatch behaviorStateChangeLatch;
@@ -59,6 +64,25 @@ public class AbstractLeaderElectionScenarioTest {
             // Ignore scheduled SendHeartBeat messages.
             if (message instanceof SendHeartBeat) {
                 return;
+            }
+
+            if (message instanceof SetBehavior) {
+                behavior = ((SetBehavior)message).behavior;
+                ((SetBehavior)message).context.setCurrentBehavior(behavior);
+                return;
+            }
+
+            if (message instanceof GetBehaviorState) {
+                if (behavior != null) {
+                    getSender().tell(behavior.state(), self());
+                } else {
+                    getSender().tell(new Status.Failure(new IllegalStateException(
+                            "RaftActorBehavior is not set in MemberActor")), self());
+                }
+            }
+
+            if (message instanceof SendImmediateHeartBeat) {
+                message = SendHeartBeat.INSTANCE;
             }
 
             try {
@@ -79,6 +103,15 @@ public class AbstractLeaderElectionScenarioTest {
                 if (latch != null) {
                     latch.countDown();
                 }
+            }
+        }
+
+        @Override
+        public void postStop() throws Exception {
+            super.postStop();
+
+            if (behavior != null) {
+                behavior.close();
             }
         }
 
@@ -142,6 +175,30 @@ public class AbstractLeaderElectionScenarioTest {
         }
     }
 
+    static class SendImmediateHeartBeat {
+        public static final SendImmediateHeartBeat INSTANCE = new SendImmediateHeartBeat();
+
+        private SendImmediateHeartBeat() {
+        }
+    }
+
+    static class GetBehaviorState {
+        public static final GetBehaviorState INSTANCE = new GetBehaviorState();
+
+        private GetBehaviorState() {
+        }
+    }
+
+    static class SetBehavior {
+        RaftActorBehavior behavior;
+        MockRaftActorContext context;
+
+        SetBehavior(RaftActorBehavior behavior, MockRaftActorContext context) {
+            this.behavior = behavior;
+            this.context = context;
+        }
+    }
+
     protected final Logger testLog = LoggerFactory.getLogger(MockRaftActorContext.class);
     protected final ActorSystem system = ActorSystem.create("test");
     protected final TestActorFactory factory = new TestActorFactory(system);
@@ -168,17 +225,6 @@ public class AbstractLeaderElectionScenarioTest {
 
     @After
     public void tearDown() throws Exception {
-
-        if (member1Actor.behavior != null) {
-            member1Actor.behavior.close();
-        }
-        if (member2Actor.behavior != null) {
-            member2Actor.behavior.close();
-        }
-        if (member3Actor.behavior != null) {
-            member3Actor.behavior.close();
-        }
-
         JavaTestKit.shutdownActorSystem(system);
     }
 
@@ -198,8 +244,15 @@ public class AbstractLeaderElectionScenarioTest {
         return context;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void verifyBehaviorState(String name, MemberActor actor, RaftState expState) {
-        assertEquals(name + " behavior state", expState, actor.behavior.state());
+        try {
+            RaftState actualState = (RaftState) Await.result(Patterns.ask(actor.self(), GetBehaviorState.INSTANCE,
+                    Timeout.apply(5, TimeUnit.SECONDS)), Duration.apply(5, TimeUnit.SECONDS));
+            assertEquals(name + " behavior state", expState, actualState);
+        } catch (Exception e) {
+            Throwables.propagate(e);
+        }
     }
 
     void initializeLeaderBehavior(MemberActor actor, MockRaftActorContext context, int numActiveFollowers)
@@ -230,8 +283,8 @@ public class AbstractLeaderElectionScenarioTest {
 
         context.setCurrentBehavior(leader);
 
-        // Delay assignment here so the AppendEntriesReply isn't forwarded to the behavior.
-        actor.behavior = leader;
+        // Delay assignment of the leader bevavior so the AppendEntriesReply isn't forwarded to the behavior.
+        actor.self().tell(new SetBehavior(leader, context), ActorRef.noSender());
 
         actor.forwardCapturedMessagesToBehavior(AppendEntriesReply.class, ActorRef.noSender());
         actor.clear();
@@ -247,6 +300,6 @@ public class AbstractLeaderElectionScenarioTest {
 
     void sendHeartbeat(TestActorRef<MemberActor> leaderActor) {
         Uninterruptibles.sleepUninterruptibly(HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
-        leaderActor.underlyingActor().behavior.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
+        leaderActor.tell(SendImmediateHeartBeat.INSTANCE, ActorRef.noSender());
     }
 }
