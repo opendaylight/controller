@@ -30,6 +30,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
@@ -382,6 +383,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     }
 
     @Test
+    @Ignore
     public void testMultipleRegistrationsAtOnePrefix() throws Exception {
         LOG.info("testMultipleRegistrationsAtOnePrefix starting");
         initEmptyDatastores();
