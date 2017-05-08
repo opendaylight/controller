@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -43,17 +44,20 @@ public class PrefixLeaderHandler {
         final YangInstanceIdentifier yid = serializer.toYangInstanceIdentifier(input.getPrefix());
         final DOMDataTreeIdentifier prefix = new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, yid);
 
-        final CDSDataTreeProducer producer =
-                (CDSDataTreeProducer) domDataTreeService.createProducer(Collections.singleton(prefix));
+        try (final CDSDataTreeProducer producer =
+                     (CDSDataTreeProducer) domDataTreeService.createProducer(Collections.singleton(prefix))) {
 
-        final CDSShardAccess shardAccess = producer.getShardAccess(prefix);
+            final CDSShardAccess shardAccess = producer.getShardAccess(prefix);
 
-        final CompletionStage<Void> completionStage = shardAccess.makeLeaderLocal();
+            final CompletionStage<Void> completionStage = shardAccess.makeLeaderLocal();
 
-        completionStage.exceptionally(throwable -> {
-            LOG.error("Leader movement failed.", throwable);
-            return null;
-        });
+            completionStage.exceptionally(throwable -> {
+                LOG.error("Leader movement failed.", throwable);
+                return null;
+            });
+        } catch (final DOMDataTreeProducerException e) {
+            LOG.warn("Error while closing producer", e);
+        }
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
