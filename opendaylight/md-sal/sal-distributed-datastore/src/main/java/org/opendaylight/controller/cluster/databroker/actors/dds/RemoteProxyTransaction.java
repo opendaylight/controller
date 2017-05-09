@@ -97,17 +97,17 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void doDelete(final YangInstanceIdentifier path) {
-        appendModification(new TransactionDelete(path));
+        appendModification(new TransactionDelete(path), Optional.absent());
     }
 
     @Override
     void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        appendModification(new TransactionMerge(path, data));
+        appendModification(new TransactionMerge(path, data), Optional.absent());
     }
 
     @Override
     void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        appendModification(new TransactionWrite(path, data));
+        appendModification(new TransactionWrite(path, data), Optional.absent());
     }
 
     private <T> CheckedFuture<T, ReadFailedException> sendReadRequest(final AbstractReadTransactionRequest<?> request,
@@ -158,83 +158,42 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         }
     }
 
+    private void ensureFlushedBuider(final Optional<Long> enqueuedTicks) {
+        if (builderBusy) {
+            flushBuilder(enqueuedTicks);
+        }
+    }
+
     private void flushBuilder() {
+        flushBuilder(Optional.absent());
+    }
+
+    private void flushBuilder(final Optional<Long> enqueuedTicks) {
         final ModifyTransactionRequest request = builder.build();
         builderBusy = false;
 
-        sendModification(request);
+        sendModification(request, enqueuedTicks);
     }
 
-    private void sendModification(final TransactionRequest<?> request) {
-        sendRequest(request, response -> completeModify(request, response));
-    }
-
-    @Override
-    void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
-        if (request instanceof CommitLocalTransactionRequest) {
-            replayLocalCommitRequest((CommitLocalTransactionRequest) request, callback);
-        } else if (request instanceof AbortLocalTransactionRequest) {
-            sendRequest(abortRequest(), callback);
+    private void sendModification(final TransactionRequest<?> request, final Optional<Long> enqueuedTicks) {
+        if (enqueuedTicks.isPresent()) {
+            enqueueRequest(request, response -> completeModify(request, response), enqueuedTicks.get().longValue());
         } else {
-            throw new IllegalStateException("Unhandled request " + request);
+            sendRequest(request, response -> completeModify(request, response));
         }
-    }
-
-    private void replayLocalCommitRequest(final CommitLocalTransactionRequest request,
-            final Consumer<Response<?, ?>> callback) {
-        final DataTreeModification mod = request.getModification();
-        mod.applyToCursor(new AbstractDataTreeModificationCursor() {
-            @Override
-            public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
-                doWrite(current().node(child), data);
-            }
-
-            @Override
-            public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
-                doMerge(current().node(child), data);
-            }
-
-            @Override
-            public void delete(final PathArgument child) {
-                doDelete(current().node(child));
-            }
-        });
-
-        sendRequest(commitRequest(request.isCoordinated()), callback);
-    }
-
-    @Override
-    void handleForwardedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
-        nextSequence();
-
-        if (callback == null) {
-            sendModification(request);
-            return;
-        }
-
-        /*
-         * FindBugs is utterly stupid, as it does not recognize the fact that we have checked for null
-         * and reports NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE in the lambda below.
-         */
-        final Consumer<Response<?, ?>> findBugsIsStupid = callback;
-
-        // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
-        //        period required to get into the queue.
-        sendRequest(request, response -> {
-            findBugsIsStupid.accept(Preconditions.checkNotNull(response));
-            completeModify(request, response);
-        });
     }
 
     private void appendModification(final TransactionModification modification) {
+        appendModification(modification, Optional.absent());
+    }
+
+    private void appendModification(final TransactionModification modification, final Optional<Long> enqueuedTicks) {
         if (operationFailure == null) {
             ensureInitializedBuilder();
 
             builder.addModification(modification);
             if (builder.size() >= REQUEST_MAX_MODIFICATIONS) {
-                flushBuilder();
+                flushBuilder(enqueuedTicks);
             }
         } else {
             LOG.debug("Transaction {} failed, not attempting further transactions", getIdentifier());
@@ -329,7 +288,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         if (builderBusy) {
             final ModifyTransactionRequest request = builder.build();
             builderBusy = false;
-            successor.handleForwardedRemoteRequest(request, null);
+            forwardToSuccessor(successor, request, null);
         }
     }
 
@@ -384,7 +343,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             ensureFlushedBuider();
             sendAbort(callback);
         } else if (request instanceof TransactionPurgeRequest) {
-            purge();
+            sendPurge();
         } else {
             throw new IllegalArgumentException("Unhandled request {}" + request);
         }
@@ -394,5 +353,112 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
         successor.handleForwardedRemoteRequest(request, callback);
+    }
+
+    @Override
+    void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        if (request instanceof CommitLocalTransactionRequest) {
+            replayLocalCommitRequest((CommitLocalTransactionRequest) request, callback, enqueuedTicks);
+        } else if (request instanceof AbortLocalTransactionRequest) {
+            enqueueRequest(abortRequest(), callback, enqueuedTicks);
+        } else {
+            throw new IllegalStateException("Unhandled request " + request);
+        }
+    }
+
+    private void replayLocalCommitRequest(final CommitLocalTransactionRequest request,
+            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        final DataTreeModification mod = request.getModification();
+        final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
+
+        mod.applyToCursor(new AbstractDataTreeModificationCursor() {
+            @Override
+            public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+                appendModification(new TransactionWrite(current().node(child), data), optTicks);
+            }
+
+            @Override
+            public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+                appendModification(new TransactionMerge(current().node(child), data), optTicks);
+            }
+
+            @Override
+            public void delete(final PathArgument child) {
+                appendModification(new TransactionDelete(current().node(child)), optTicks);
+            }
+        });
+
+        enqueueRequest(commitRequest(request.isCoordinated()), callback, enqueuedTicks);
+    }
+
+    @Override
+    void handleReplayedRemoteRequest(final TransactionRequest<?> request,
+            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
+
+        if (request instanceof ModifyTransactionRequest) {
+            final ModifyTransactionRequest req = (ModifyTransactionRequest) request;
+            for (TransactionModification mod : req.getModifications()) {
+                appendModification(mod, optTicks);
+            }
+
+            final java.util.Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
+            if (maybeProto.isPresent()) {
+                ensureSealed();
+
+                switch (maybeProto.get()) {
+                    case ABORT:
+                        enqueueRequest(abortRequest(), callback, enqueuedTicks);
+                        break;
+                    case SIMPLE:
+                        enqueueRequest(commitRequest(false), callback, enqueuedTicks);
+                        break;
+                    case THREE_PHASE:
+                        enqueueRequest(commitRequest(true), callback, enqueuedTicks);
+                        break;
+                    case READY:
+                        //no op
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unhandled protocol " + maybeProto.get());
+                }
+            }
+        } else if (request instanceof ReadTransactionRequest) {
+            ensureFlushedBuider(optTicks);
+            enqueueRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                ((ReadTransactionRequest) request).getPath(), isSnapshotOnly()), callback, enqueuedTicks);
+        } else if (request instanceof ExistsTransactionRequest) {
+            ensureFlushedBuider(optTicks);
+            enqueueRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                ((ExistsTransactionRequest) request).getPath(), isSnapshotOnly()), callback, enqueuedTicks);
+        } else if (request instanceof TransactionPreCommitRequest) {
+            ensureFlushedBuider(optTicks);
+            enqueueRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                enqueuedTicks);
+        } else if (request instanceof TransactionDoCommitRequest) {
+            ensureFlushedBuider(optTicks);
+            enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                enqueuedTicks);
+        } else if (request instanceof TransactionAbortRequest) {
+            ensureFlushedBuider(optTicks);
+            enqueueAbort(callback, enqueuedTicks);
+        } else if (request instanceof TransactionPurgeRequest) {
+            enqueuePurge(enqueuedTicks);
+        } else {
+            throw new IllegalArgumentException("Unhandled request {}" + request);
+        }
+
+
+        /*
+         * FindBugs is utterly stupid, as it does not recognize the fact that we have checked for null
+         * and reports NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE in the lambda below.
+         */
+        final Consumer<Response<?, ?>> findBugsIsStupid = callback;
+        enqueueRequest(request, response -> {
+            findBugsIsStupid.accept(Preconditions.checkNotNull(response));
+            completeModify(request, response);
+        }, enqueuedTicks);
+
     }
 }
