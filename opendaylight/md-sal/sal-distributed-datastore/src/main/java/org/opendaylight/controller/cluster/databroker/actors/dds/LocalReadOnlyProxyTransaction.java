@@ -79,10 +79,23 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     @Override
     void applyModifyTransactionRequest(final ModifyTransactionRequest request,
             final Consumer<Response<?, ?>> callback) {
+        commonModifyTransactionRequest(request, callback);
+        abort();
+    }
+
+    @Override
+    void replayModifyTransactionRequest(final ModifyTransactionRequest request,
+            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        commonModifyTransactionRequest(request, callback);
+        // FIXME: this should go through the enqueueRequest() path
+        abort();
+    }
+
+    private static void commonModifyTransactionRequest(final ModifyTransactionRequest request,
+            final Consumer<Response<?, ?>> callback) {
         Verify.verify(request.getModifications().isEmpty());
 
         final PersistenceProtocol protocol = request.getPersistenceProtocol().get();
         Verify.verify(protocol == PersistenceProtocol.ABORT);
-        abort();
     }
 }
