@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import com.google.common.base.Ticker;
 import com.google.common.primitives.UnsignedLong;
 import java.util.ArrayList;
 import java.util.List;
@@ -215,7 +216,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     }
 
     protected <T extends TransactionRequest> T testHandleForwardedRemoteRequest(final T request) throws Exception {
-        transaction.handleForwardedRemoteRequest(request, createCallbackMock());
+        transaction.handleForwardedRemoteRequest(request, createCallbackMock(), Ticker.systemTicker().read());
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
         final T received = (T) envelope.getMessage();
         Assert.assertTrue(received.getClass().equals(request.getClass()));

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 
 import akka.testkit.TestProbe;
+import com.google.common.base.Ticker;
 import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,7 +64,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final ReadTransactionRequest request =
                 new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
-        transaction.handleForwardedRemoteRequest(request, callback);
+        transaction.handleForwardedRemoteRequest(request, callback, Ticker.systemTicker().read());
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
         final Response value = captor.getValue();
@@ -79,7 +80,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final ExistsTransactionRequest request =
                 new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
-        transaction.handleForwardedRemoteRequest(request, callback);
+        transaction.handleForwardedRemoteRequest(request, callback, Ticker.systemTicker().read());
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
         final Response value = captor.getValue();

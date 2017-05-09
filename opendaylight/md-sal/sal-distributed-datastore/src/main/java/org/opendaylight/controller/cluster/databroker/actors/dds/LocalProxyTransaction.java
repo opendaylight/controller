@@ -91,7 +91,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
+            final Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof AbortLocalTransactionRequest) {
             sendAbort(request, callback);
         } else {
@@ -101,7 +101,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void handleForwardedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
+            final @Nullable Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof ModifyTransactionRequest) {
             applyModifyTransactionRequest((ModifyTransactionRequest) request, callback);
         } else if (request instanceof ReadTransactionRequest) {

@@ -171,7 +171,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
+            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         if (request instanceof CommitLocalTransactionRequest) {
             replayLocalCommitRequest((CommitLocalTransactionRequest) request, callback);
         } else if (request instanceof AbortLocalTransactionRequest) {
@@ -206,7 +206,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void handleForwardedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
+            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         nextSequence();
 
         if (callback == null) {
@@ -329,6 +329,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         if (builderBusy) {
             final ModifyTransactionRequest request = builder.build();
             builderBusy = false;
+            // FIXME: no notion of 'now', sendRequest() should be used
             successor.handleForwardedRemoteRequest(request, null);
         }
     }
@@ -393,6 +394,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
+        // FIXME: no notion of 'now', sendRequest() should be used
         successor.handleForwardedRemoteRequest(request, callback);
     }
 }
