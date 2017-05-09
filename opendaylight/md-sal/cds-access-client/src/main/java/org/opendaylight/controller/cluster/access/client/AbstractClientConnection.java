@@ -98,13 +98,31 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      * @param callback Callback to invoke
      */
     public final void sendRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback) {
-        final RequestException maybePoison = poisoned;
-        if (maybePoison != null) {
-            throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+        final long now = readTime();
+        final long delay = enqueueEntry(new ConnectionEntry(request, callback, now), now);
+        try {
+            TimeUnit.NANOSECONDS.sleep(delay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.debug("Interrupted after sleeping {}ns", e, readTime() - now);
         }
+    }
 
-        final ConnectionEntry entry = new ConnectionEntry(request, callback, readTime());
-        enqueueAndWait(entry, entry.getEnqueuedTicks());
+    /**
+     * Send a request to the backend and invoke a specified callback when it finishes. This method is safe to invoke
+     * from any thread.
+     *
+     * <p>
+     * Note that unlike {@link #sendRequest(Request, Consumer)}, this method does not exert backpressure, hence it
+     * should never be called from an application thread.
+     *
+     * @param request Request to send
+     * @param callback Callback to invoke
+     * @param enqueueTicks Time (according to {@link #readTime()} of request enqueue
+     */
+    public final void enqueueRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueueTicks) {
+        enqueueEntry(new ConnectionEntry(request, callback, enqueueTicks), readTime());
     }
 
     public abstract Optional<T> getBackendInfo();
@@ -135,6 +153,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     final long enqueueEntry(final ConnectionEntry entry, final long now) {
         lock.lock();
         try {
+            final RequestException maybePoison = poisoned;
+            if (maybePoison != null) {
+                throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+            }
+
             if (queue.isEmpty()) {
                 // The queue is becoming non-empty, schedule a timer
                 scheduleTimer(REQUEST_TIMEOUT_DURATION);
@@ -142,15 +165,6 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             return queue.enqueue(entry, now);
         } finally {
             lock.unlock();
-        }
-    }
-
-    final void enqueueAndWait(final ConnectionEntry entry, final long now) {
-        final long delay = enqueueEntry(entry, now);
-        try {
-            TimeUnit.NANOSECONDS.sleep(delay);
-        } catch (InterruptedException e) {
-            LOG.debug("Interrupted while sleeping", e);
         }
     }
 

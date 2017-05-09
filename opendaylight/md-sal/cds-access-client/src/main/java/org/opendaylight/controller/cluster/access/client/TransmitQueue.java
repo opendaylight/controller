@@ -159,6 +159,9 @@ abstract class TransmitQueue {
             return 0;
         }
 
+        // XXX: we should place a guard against incorrect entry sequences:
+        // entry.getEnqueueTicks() should have non-negative difference from the last entry present in the queues
+
         // Reserve an entry before we do anything that can fail
         final long delay = tracker.openTask(now);
         if (canTransmitCount(inflight.size()) <= 0) {

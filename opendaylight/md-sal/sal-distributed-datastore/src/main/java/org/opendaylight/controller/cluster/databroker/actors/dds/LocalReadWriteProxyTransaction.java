@@ -241,17 +241,17 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
+            final Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof CommitLocalTransactionRequest) {
             sendCommit((CommitLocalTransactionRequest) request, callback);
         } else {
-            super.handleForwardedLocalRequest(request, callback);
+            super.handleForwardedLocalRequest(request, callback, now);
         }
     }
 
     @Override
     void handleForwardedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
+            final @Nullable Consumer<Response<?, ?>> callback, final long now) {
         LOG.debug("Applying forwarded request {}", request);
 
         if (request instanceof TransactionPreCommitRequest) {
@@ -261,7 +261,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         } else if (request instanceof TransactionAbortRequest) {
             sendAbort(callback);
         } else {
-            super.handleForwardedRemoteRequest(request, callback);
+            super.handleForwardedRemoteRequest(request, callback, now);
         }
     }
 
