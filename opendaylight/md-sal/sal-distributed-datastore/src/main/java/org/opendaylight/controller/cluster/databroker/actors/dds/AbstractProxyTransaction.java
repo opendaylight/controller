@@ -13,6 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
+import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -229,6 +230,12 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         return doRead(path);
     }
 
+    final void enqueueRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
+        LOG.debug("Transaction proxy {} enqueing request {} callback {}", this, request, callback);
+        parent.enqueueRequest(request, callback, enqueuedTicks);
+    }
+
     final void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         LOG.debug("Transaction proxy {} sending request {} callback {}", this, request, callback);
         parent.sendRequest(request, callback);
@@ -324,8 +331,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
             // This is a terminal request, hence we do not need to record it
             LOG.debug("Transaction {} abort completed", this);
-            purge();
+            sendPurge();
         });
+    }
+
+    final void enqueueAbort(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        enqueueRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), callback,
+            enqueuedTicks);
     }
 
     final void sendAbort(final Consumer<Response<?, ?>> callback) {
@@ -357,7 +369,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
                     // This is a terminal request, hence we do not need to record it
                     LOG.debug("Transaction {} directCommit completed", this);
-                    purge();
+                    sendPurge();
                 });
 
                 return ret;
@@ -451,11 +463,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             }
 
             LOG.debug("Transaction {} doCommit completed", this);
-            purge();
+            sendPurge();
         });
     }
 
-    void purge() {
+    final void sendPurge() {
         successfulRequests.clear();
 
         final TransactionRequest<?> req = new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
@@ -463,6 +475,16 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             LOG.debug("Transaction {} purge completed", this);
             parent.completeTransaction(this);
         });
+    }
+
+    final void enqueuePurge(final long enqueuedTicks) {
+        successfulRequests.clear();
+
+        final TransactionRequest<?> req = new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
+        enqueueRequest(req, t -> {
+            LOG.debug("Transaction {} purge completed", this);
+            parent.completeTransaction(this);
+        }, enqueuedTicks);
     }
 
     // Called with the connection unlocked
@@ -489,17 +511,26 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         local.setSuccessor(successor);
 
         // Replay successful requests first
-        for (Object obj : successfulRequests) {
-            if (obj instanceof TransactionRequest) {
-                LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                successor.replay((TransactionRequest<?>) obj, response -> { });
-            } else {
-                Verify.verify(obj instanceof IncrementSequence);
-                successor.incrementSequence(((IncrementSequence) obj).getDelta());
+        if (!successfulRequests.isEmpty()) {
+            // We need to find a good timestamp to use for successful requests, as we do not want to time them out
+            // nor create timing inconsistencies in the queue -- requests are expected to be ordered by their enqueue
+            // time. We will pick the time of the first entry available. If there is none, we will just use current
+            // time, as all other requests will get enqueued afterwards.
+            final ConnectionEntry firstInQueue = Iterables.getFirst(enqueuedEntries, null);
+            final long now = firstInQueue != null ? firstInQueue.getEnqueuedTicks() : parent.currentTime();
+
+            for (Object obj : successfulRequests) {
+                if (obj instanceof TransactionRequest) {
+                    LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
+                    successor.replayRequest((TransactionRequest<?>) obj, resp -> { }, now);
+                } else {
+                    Verify.verify(obj instanceof IncrementSequence);
+                    successor.incrementSequence(((IncrementSequence) obj).getDelta());
+                }
             }
+            LOG.debug("{} replayed {} successful requests", getIdentifier(), successfulRequests.size());
+            successfulRequests.clear();
         }
-        LOG.debug("{} replayed {} successful requests", getIdentifier(), successfulRequests.size());
-        successfulRequests.clear();
 
         // Now replay whatever is in the connection
         final Iterator<ConnectionEntry> it = enqueuedEntries.iterator();
@@ -509,8 +540,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
             if (getIdentifier().equals(req.getTarget())) {
                 Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
-                LOG.debug("Forwarding queued request {} to successor {}", req, successor);
-                successor.replay((TransactionRequest<?>) req, e.getCallback());
+                LOG.debug("Replaying queued request {} to successor {}", req, successor);
+                successor.replayRequest((TransactionRequest<?>) req, e.getCallback(), e.getEnqueuedTicks());
                 it.remove();
             }
         }
@@ -537,12 +568,14 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      *
      * @param request Request which needs to be forwarded
      * @param callback Callback to be invoked once the request completes
+     * @param enqueuedTicks ticker-based time stamp when the request was enqueued
      */
-    private void replay(TransactionRequest<?> request, Consumer<Response<?, ?>> callback) {
+    private void replayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
         if (request instanceof AbstractLocalTransactionRequest) {
-            handleForwardedLocalRequest((AbstractLocalTransactionRequest<?>) request, callback);
+            handleReplayedLocalRequest((AbstractLocalTransactionRequest<?>) request, callback, enqueuedTicks);
         } else {
-            handleForwardedRemoteRequest(request, callback);
+            handleReplayedRemoteRequest(request, callback, enqueuedTicks);
         }
     }
 
@@ -563,8 +596,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @param callback Original callback
      */
     final void forwardRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
-        final AbstractProxyTransaction successor = getSuccessorState().getSuccessor();
+        forwardToSuccessor(getSuccessorState().getSuccessor(), request, callback);
+    }
 
+    final void forwardToSuccessor(final AbstractProxyTransaction successor, final TransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback) {
         if (successor instanceof LocalProxyTransaction) {
             forwardToLocal((LocalProxyTransaction)successor, request, callback);
         } else if (successor instanceof RemoteProxyTransaction) {
@@ -615,9 +651,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      *
      * @param request Request which needs to be forwarded
      * @param callback Callback to be invoked once the request completes
+     * @param enqueuedTicks Time stamp to use for enqueue time
      */
-    abstract void handleForwardedLocalRequest(AbstractLocalTransactionRequest<?> request,
-            @Nullable Consumer<Response<?, ?>> callback);
+    abstract void handleReplayedLocalRequest(AbstractLocalTransactionRequest<?> request,
+            @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
 
     /**
      * Invoked from {@link RemoteProxyTransaction} when it replays its successful requests to its successor.
@@ -627,9 +664,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      *
      * @param request Request which needs to be forwarded
      * @param callback Callback to be invoked once the request completes
+     * @param enqueuedTicks Time stamp to use for enqueue time
      */
-    abstract void handleForwardedRemoteRequest(TransactionRequest<?> request,
-            @Nullable Consumer<Response<?, ?>> callback);
+    abstract void handleReplayedRemoteRequest(TransactionRequest<?> request,
+            @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
 
     @Override
     public final String toString() {

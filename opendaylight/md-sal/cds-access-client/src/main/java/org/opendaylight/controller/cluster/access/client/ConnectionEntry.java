@@ -50,7 +50,7 @@ public class ConnectionEntry implements Immutable {
         callback.accept(response);
     }
 
-    final long getEnqueuedTicks() {
+    public final long getEnqueuedTicks() {
         return enqueuedTicks;
     }
 
@@ -60,6 +60,6 @@ public class ConnectionEntry implements Immutable {
     }
 
     ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return toStringHelper.add("request", request);
+        return toStringHelper.add("request", request).add("enqueuedTicks", enqueuedTicks);
     }
 }
