@@ -55,7 +55,6 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
             HistoryReconnectCohort::getProxy), ProxyReconnectCohort::getIdentifier));
     }
 
-
     @Override
     protected void forwardEntry(final ConnectionEntry entry, final long now) {
         final Request<? , ?> request = entry.getRequest();
@@ -76,8 +75,6 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
                 throw new CohortNotFoundException(historyId);
             }
 
-            // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
-            //        period required to get into the queue.
             cohort.forwardRequest(request, entry.getCallback(), this::sendToSuccessor);
         } catch (RequestException e) {
             entry.complete(request.toRequestFailure(e));
