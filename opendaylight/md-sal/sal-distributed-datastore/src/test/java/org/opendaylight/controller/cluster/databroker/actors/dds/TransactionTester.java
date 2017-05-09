@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import akka.actor.ActorRef;
 import akka.testkit.TestProbe;
 import javax.annotation.Nonnull;
 import org.junit.Assert;
@@ -40,6 +41,10 @@ class TransactionTester<T extends AbstractProxyTransaction> {
         this.transaction = transaction;
         this.connection = connection;
         this.backendProbe = backendProbe;
+    }
+
+    ActorRef localActor() {
+        return connection.localActor();
     }
 
     T getTransaction() {
