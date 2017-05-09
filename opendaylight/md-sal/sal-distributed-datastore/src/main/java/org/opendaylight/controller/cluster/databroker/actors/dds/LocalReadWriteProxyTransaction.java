@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -203,6 +205,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     void applyModifyTransactionRequest(final ModifyTransactionRequest request,
             final @Nullable Consumer<Response<?, ?>> callback) {
+        commonModifyTransactionRequest(request, callback, this::sendRequest);
+    }
+
+    @Override
+    void replayModifyTransactionRequest(final ModifyTransactionRequest request,
+            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        commonModifyTransactionRequest(request, callback, (req, cb) -> enqueueRequest(req, cb, enqueuedTicks));
+    }
+
+    private void commonModifyTransactionRequest(final ModifyTransactionRequest request,
+            final @Nullable Consumer<Response<?, ?>> callback,
+            final BiConsumer<TransactionRequest<?>, Consumer<Response<?, ?>>> sendMethod) {
         for (final TransactionModification mod : request.getModifications()) {
             if (mod instanceof TransactionWrite) {
                 write(mod.getPath(), ((TransactionWrite)mod).getData());
@@ -215,23 +229,23 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             }
         }
 
-        final java.util.Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
+        final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
             Verify.verify(callback != null, "Request {} has null callback", request);
             ensureSealed();
 
             switch (maybeProtocol.get()) {
                 case ABORT:
-                    sendRequest(new AbortLocalTransactionRequest(getIdentifier(), localActor()), callback);
+                    sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), callback);
                     break;
                 case READY:
                     // No-op, as we have already issued a seal()
                     break;
                 case SIMPLE:
-                    sendRequest(commitRequest(false), callback);
+                    sendMethod.accept(commitRequest(false), callback);
                     break;
                 case THREE_PHASE:
-                    sendRequest(commitRequest(true), callback);
+                    sendMethod.accept(commitRequest(true), callback);
                     break;
                 default:
                     throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.get());
@@ -240,18 +254,35 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void handleForwardedLocalRequest(final AbstractLocalTransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
+    void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof CommitLocalTransactionRequest) {
             sendCommit((CommitLocalTransactionRequest) request, callback);
         } else {
-            super.handleForwardedLocalRequest(request, callback);
+            super.handleReplayedLocalRequest(request, callback, now);
         }
     }
 
     @Override
-    void handleForwardedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
+    void handleReplayedRemoteRequest(final TransactionRequest<?> request,
+            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        LOG.debug("Applying replayed request {}", request);
+
+        if (request instanceof TransactionPreCommitRequest) {
+            enqueueRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                enqueuedTicks);
+        } else if (request instanceof TransactionDoCommitRequest) {
+            enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                enqueuedTicks);
+        } else if (request instanceof TransactionAbortRequest) {
+            enqueueAbort(callback, enqueuedTicks);
+        } else {
+            super.handleReplayedRemoteRequest(request, callback, enqueuedTicks);
+        }
+    }
+
+    @Override
+    void handleForwardedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         LOG.debug("Applying forwarded request {}", request);
 
         if (request instanceof TransactionPreCommitRequest) {
@@ -280,6 +311,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         super.sendAbort(request, callback);
+        closedException = this::abortedException;
+    }
+
+    @Override
+    void enqueueAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
+        super.enqueueAbort(request, callback, enqueuedTicks);
         closedException = this::abortedException;
     }
 

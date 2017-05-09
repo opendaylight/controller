@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
 import akka.testkit.TestProbe;
+import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -114,7 +115,7 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
         builder.setSequence(0);
         builder.setAbort();
         final ModifyTransactionRequest request = builder.build();
-        transaction.applyModifyTransactionRequest(request, createCallbackMock());
+        transaction.replayModifyTransactionRequest(request, createCallbackMock(), Ticker.systemTicker().read());
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
@@ -126,8 +127,7 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
         builder.setSequence(0);
         builder.setReady();
         final ModifyTransactionRequest request = builder.build();
-        assertOperationThrowsException(() -> transaction.applyModifyTransactionRequest(request, createCallbackMock()),
-                VerifyException.class);
+        assertOperationThrowsException(() -> transaction.replayModifyTransactionRequest(request, createCallbackMock(),
+            Ticker.systemTicker().read()), VerifyException.class);
     }
-
 }
