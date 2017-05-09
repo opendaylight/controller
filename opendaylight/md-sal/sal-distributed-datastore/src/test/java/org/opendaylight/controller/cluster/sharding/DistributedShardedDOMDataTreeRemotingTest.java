@@ -30,7 +30,6 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
@@ -383,13 +382,12 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     }
 
     @Test
-    @Ignore
     public void testMultipleRegistrationsAtOnePrefix() throws Exception {
         LOG.info("testMultipleRegistrationsAtOnePrefix starting");
         initEmptyDatastores();
 
-        for (int i = 0; i < 10; i++) {
-            LOG.debug("Round {}", i);
+        for (int i = 0; i < 5; i++) {
+            LOG.info("Round {}", i);
             final DistributedShardRegistration reg1 = waitOnAsyncTask(leaderShardFactory.createDistributedShard(
                     TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)),
                     DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
