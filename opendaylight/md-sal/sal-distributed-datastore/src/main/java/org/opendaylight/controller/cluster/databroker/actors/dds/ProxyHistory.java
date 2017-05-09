@@ -327,6 +327,10 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         return identifier;
     }
 
+    final long currentTime() {
+        return connection.currentTime();
+    }
+
     final ActorRef localActor() {
         return connection.localActor();
     }
@@ -389,6 +393,11 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         } finally {
             lock.unlock();
         }
+    }
+
+    final void enqueueRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
+        connection.enqueueRequest(request, callback, enqueuedTicks);
     }
 
     final void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {

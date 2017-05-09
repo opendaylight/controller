@@ -16,6 +16,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
 import akka.testkit.TestProbe;
+import com.google.common.base.Ticker;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.function.Consumer;
 import org.junit.Assert;
@@ -176,7 +177,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         builder.setAbort();
         final ModifyTransactionRequest request = builder.build();
         final Consumer<Response<?, ?>> callback = createCallbackMock();
-        transaction.applyModifyTransactionRequest(request, callback);
+        transaction.replayModifyTransactionRequest(request, callback, Ticker.systemTicker().read());
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
@@ -235,7 +236,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         builder.setCommit(coordinated);
         final ModifyTransactionRequest request = builder.build();
         final Consumer<Response<?, ?>> callback = createCallbackMock();
-        transaction.applyModifyTransactionRequest(request, callback);
+        transaction.replayModifyTransactionRequest(request, callback, Ticker.systemTicker().read());
         verify(modification).write(PATH_1, DATA_1);
         verify(modification).merge(PATH_2, DATA_2);
         verify(modification).delete(PATH_3);
