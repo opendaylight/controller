@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.remote.rpc.RemoteRpcImplementation;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
@@ -66,7 +67,12 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
                 final List<DOMRpcImplementation> mayBeRemoteImpls = getImplementations(YangInstanceIdentifier.EMPTY);
 
                 if(mayBeRemoteImpls != null){
-                    return mayBeRemoteImpls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
+                    //judge the implementation ,it is need RemoteRpcImplementation,or it will invoke local rpc
+                    for (DOMRpcImplementation domRpcImplementation : mayBeRemoteImpls) {
+                        if (domRpcImplementation instanceof RemoteRpcImplementation) {
+                            return domRpcImplementation.invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
+                        }
+                    }
                 }
 
             } else {

@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @author Robert Varga
  */
-final class RemoteRpcImplementation implements DOMRpcImplementation {
+public final class RemoteRpcImplementation implements DOMRpcImplementation {
     // 0 for local, 1 for binding, 2 for remote
     private static final long COST = 2;
 
