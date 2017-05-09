@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba068154_35ce565b",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-05-09T20:53:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da01753e_10b5c27d",
+      "revId": "443fb1e948dc81b4b9bdc5158f979a6194cfcbd4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_b0ce762c",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2017-04-26T17:19:09Z",
       "side": 1,
       "message": "Here we call toString on serviceType. We could define serviceType in that manner above after the null check on line 150. That should avoid the need for the warning suppression.",
+      "range": {
+        "startLine": 170,
+        "startChar": 38,
+        "endLine": 170,
+        "endChar": 60
+      },
+      "revId": "443fb1e948dc81b4b9bdc5158f979a6194cfcbd4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_d5042a80",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-05-09T20:53:52Z",
+      "side": 1,
+      "message": "Done.. if I understood you correctly, please double check.  I went straight fro String instead of Object serviceType in line 145, because even if it is null, the type cast will work (it would just be a null string), so not sure why you suggested to do it after line 150?  Like this is actually perfectly fine:\n\n        Object o \u003d null;\n        String s \u003d (String) o;  // no Exception thrown here\n        System.out.println(s);  // \"null\"",
+      "parentUuid": "da01753e_b0ce762c",
       "range": {
         "startLine": 170,
         "startChar": 38,
