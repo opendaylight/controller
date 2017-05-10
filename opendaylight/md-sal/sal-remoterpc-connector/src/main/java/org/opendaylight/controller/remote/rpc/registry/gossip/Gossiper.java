@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import scala.concurrent.duration.FiniteDuration;
@@ -175,6 +176,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param member who went down
      */
     private void receiveMemberRemoveOrUnreachable(final Member member) {
+        LOG.debug("Received memberDown or Unreachable: {}", member);
+
         //if its self, then stop itself
         if (selfAddress.equals(member.address())) {
             getContext().stop(getSelf());
@@ -205,6 +208,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param member the member to add
      */
     private void receiveMemberUpOrReachable(final Member member) {
+        LOG.debug("Received memberUp or reachable: {}", member);
+
         //ignore up notification for self
         if (selfAddress.equals(member.address())) {
             return;
@@ -329,7 +334,12 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     @VisibleForTesting
     void updateRemoteBuckets(final Map<Address, ? extends Bucket<?>> buckets) {
-        bucketStore.updateRemoteBuckets(buckets);
+        // filter this so we only handle buckets for known peers
+        final Map<Address, ? extends Bucket<?>> filteredBuckets = buckets.entrySet().stream()
+                .filter(bucketEntry -> peers.containsKey(bucketEntry.getKey()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        bucketStore.updateRemoteBuckets(filteredBuckets);
     }
 
     /**
