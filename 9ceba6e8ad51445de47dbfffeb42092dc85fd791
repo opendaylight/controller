@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_bb6877f6",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-10T09:49:28Z",
+      "side": 1,
+      "message": "You need to remove the toString() here as a result of the change above.",
+      "revId": "9ceba6e8ad51445de47dbfffeb42092dc85fd791",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
