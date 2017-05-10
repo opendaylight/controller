@@ -20,6 +20,7 @@ import akka.cluster.Member;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -175,6 +176,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param member who went down
      */
     private void receiveMemberRemoveOrUnreachable(final Member member) {
+        LOG.debug("Received memberDown or Unreachable: {}", member);
+
         //if its self, then stop itself
         if (selfAddress.equals(member.address())) {
             getContext().stop(getSelf());
@@ -205,6 +208,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param member the member to add
      */
     private void receiveMemberUpOrReachable(final Member member) {
+        LOG.debug("Received memberUp or reachable: {}", member);
+
         //ignore up notification for self
         if (selfAddress.equals(member.address())) {
             return;
@@ -329,7 +334,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     @VisibleForTesting
     void updateRemoteBuckets(final Map<Address, ? extends Bucket<?>> buckets) {
-        bucketStore.updateRemoteBuckets(buckets);
+        // filter this so we only handle buckets for known peers
+        bucketStore.updateRemoteBuckets(Maps.filterKeys(buckets, peers::containsKey));
     }
 
     /**
