@@ -26,13 +26,13 @@ public class ValidationException extends Exception {
     private final Map<String/* module name */, Map<String/* instance name */, ExceptionMessageWithStackTrace>> failedValidations;
 
     public ValidationException(
-            Map<String /* module name */, Map<String /* instance name */, ExceptionMessageWithStackTrace>> failedValidations) {
+            final Map<String /* module name */, Map<String /* instance name */, ExceptionMessageWithStackTrace>> failedValidations) {
         super(failedValidations.toString());
         this.failedValidations = Collections.unmodifiableMap(failedValidations);
     }
 
     public static ValidationException createFromCollectedValidationExceptions(
-            List<ValidationException> collectedExceptions) {
+            final List<ValidationException> collectedExceptions) {
         Map<String, Map<String, ExceptionMessageWithStackTrace>> failedValidations = new HashMap<>();
         for (ValidationException ve : collectedExceptions) {
             for (Entry<String, Map<String, ExceptionMessageWithStackTrace>> outerEntry : ve
@@ -62,7 +62,7 @@ public class ValidationException extends Exception {
     }
 
     public static ValidationException createForSingleException(
-            ModuleIdentifier moduleIdentifier, Exception e) {
+            final ModuleIdentifier moduleIdentifier, final Exception e) {
         Map<String, Map<String, ExceptionMessageWithStackTrace>> failedValidations = new HashMap<>();
         Map<String, ExceptionMessageWithStackTrace> innerMap = new HashMap<>();
 
@@ -82,12 +82,12 @@ public class ValidationException extends Exception {
         public ExceptionMessageWithStackTrace() {
         }
 
-        public ExceptionMessageWithStackTrace(String message, String stackTrace) {
+        public ExceptionMessageWithStackTrace(final String message, final String stackTrace) {
             this.message = message;
             this.stackTrace = stackTrace;
         }
 
-        public ExceptionMessageWithStackTrace(Exception e) {
+        public ExceptionMessageWithStackTrace(final Exception e) {
             this(e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
 
@@ -99,11 +99,11 @@ public class ValidationException extends Exception {
             return stackTrace;
         }
 
-        public void setMessage(String message) {
+        public void setMessage(final String message) {
             this.message = message;
         }
 
-        public void setTrace(String stackTrace) {
+        public void setTrace(final String stackTrace) {
             this.stackTrace = stackTrace;
         }
 
@@ -119,7 +119,7 @@ public class ValidationException extends Exception {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }

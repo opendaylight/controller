@@ -17,7 +17,7 @@ public final class IdentityAttributeRef {
     private final String qNameOfIdentity;
 
     @ConstructorProperties(QNAME_ATTR_NAME)
-    public IdentityAttributeRef(String qNameOfIdentity) {
+    public IdentityAttributeRef(final String qNameOfIdentity) {
         if (qNameOfIdentity == null) {
             throw new NullPointerException("Parameter " + QNAME_ATTR_NAME + " is null");
         }
@@ -28,11 +28,11 @@ public final class IdentityAttributeRef {
         return qNameOfIdentity;
     }
 
-    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(DependencyResolver resolver, Class<T> baseIdentity) {
+    public <T extends BaseIdentity> Class<? extends T> resolveIdentity(final DependencyResolver resolver, final Class<T> baseIdentity) {
         return resolver.resolveIdentity(this, baseIdentity);
     }
 
-    public <T extends BaseIdentity> void validateIdentity(DependencyResolver resolver, Class<T> baseIdentity, JmxAttribute jmxAttribute) {
+    public <T extends BaseIdentity> void validateIdentity(final DependencyResolver resolver, final Class<T> baseIdentity, final JmxAttribute jmxAttribute) {
         resolver.validateIdentity(this, baseIdentity, jmxAttribute);
     }
 
@@ -45,7 +45,7 @@ public final class IdentityAttributeRef {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

@@ -20,32 +20,32 @@ public class JmxAttributeValidationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     private final List<JmxAttribute> attributeNames;
 
-    public JmxAttributeValidationException(JmxAttribute jmxAttribute) {
+    public JmxAttributeValidationException(final JmxAttribute jmxAttribute) {
         this(Arrays.asList(jmxAttribute));
     }
 
-    public JmxAttributeValidationException(List<JmxAttribute> jmxAttribute) {
+    public JmxAttributeValidationException(final List<JmxAttribute> jmxAttribute) {
         this.attributeNames = jmxAttribute;
     }
 
-    public JmxAttributeValidationException(String message,
-            JmxAttribute jmxAttribute) {
+    public JmxAttributeValidationException(final String message,
+            final JmxAttribute jmxAttribute) {
         this(message, Arrays.asList(jmxAttribute));
     }
 
-    public JmxAttributeValidationException(String message,
-            List<JmxAttribute> jmxAttributes) {
+    public JmxAttributeValidationException(final String message,
+            final List<JmxAttribute> jmxAttributes) {
         super(message);
         this.attributeNames = jmxAttributes;
     }
 
-    public JmxAttributeValidationException(String message, Throwable cause,
-            JmxAttribute jmxAttribute) {
+    public JmxAttributeValidationException(final String message, final Throwable cause,
+            final JmxAttribute jmxAttribute) {
         this(message, cause, Arrays.asList(jmxAttribute));
     }
 
-    public JmxAttributeValidationException(String message, Throwable cause,
-            List<JmxAttribute> jmxAttributes) {
+    public JmxAttributeValidationException(final String message, final Throwable cause,
+            final List<JmxAttribute> jmxAttributes) {
         super(message, cause);
         this.attributeNames = jmxAttributes;
     }
@@ -54,13 +54,13 @@ public class JmxAttributeValidationException extends RuntimeException {
         return attributeNames;
     }
 
-    public static <T> T checkNotNull(T param, JmxAttribute jmxAttribute) {
+    public static <T> T checkNotNull(final T param, final JmxAttribute jmxAttribute) {
         String message = "is null";
         return checkNotNull(param, message, jmxAttribute);
     }
 
-    public static <T> T checkNotNull(T param, String message,
-            JmxAttribute jmxAttribute) {
+    public static <T> T checkNotNull(final T param, final String message,
+            final JmxAttribute jmxAttribute) {
         if (param == null) {
             throw new JmxAttributeValidationException(
                     jmxAttribute.getAttributeName() + " " + message,
@@ -69,21 +69,21 @@ public class JmxAttributeValidationException extends RuntimeException {
         return param;
     }
 
-    public static JmxAttributeValidationException wrap(Throwable throwable,
-            JmxAttribute jmxAttribute) throws JmxAttributeValidationException {
+    public static JmxAttributeValidationException wrap(final Throwable throwable,
+            final JmxAttribute jmxAttribute) throws JmxAttributeValidationException {
         return wrap(throwable, throwable.getMessage(), jmxAttribute);
     }
 
-    public static JmxAttributeValidationException wrap(Throwable throwable,
-            String message, JmxAttribute jmxAttribute) {
+    public static JmxAttributeValidationException wrap(final Throwable throwable,
+            final String message, final JmxAttribute jmxAttribute) {
 
         throw new JmxAttributeValidationException(
                 jmxAttribute.getAttributeName() + " " + message, throwable,
                 jmxAttribute);
     }
 
-    public static void checkCondition(boolean condition, String message,
-            JmxAttribute jmxAttribute) throws JmxAttributeValidationException {
+    public static void checkCondition(final boolean condition, final String message,
+            final JmxAttribute jmxAttribute) throws JmxAttributeValidationException {
         if (!condition) {
             throw new JmxAttributeValidationException(
                     jmxAttribute.getAttributeName() + " " + message,

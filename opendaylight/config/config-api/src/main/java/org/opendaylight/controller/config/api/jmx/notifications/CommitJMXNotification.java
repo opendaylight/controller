@@ -14,7 +14,7 @@ public class CommitJMXNotification extends ConfigJMXNotification {
 
     private static final String AFTER_COMMIT_MESSAGE_TEMPLATE = "Commit successful: %s";
 
-    CommitJMXNotification(NotificationBroadcasterSupport source, String message) {
+    CommitJMXNotification(final NotificationBroadcasterSupport source, final String message) {
         super(ConfigJMXNotification.NotificationType.COMMIT,  source, String.format(AFTER_COMMIT_MESSAGE_TEMPLATE, message));
     }
 

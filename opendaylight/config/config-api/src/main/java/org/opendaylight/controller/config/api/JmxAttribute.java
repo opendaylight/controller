@@ -14,7 +14,7 @@ package org.opendaylight.controller.config.api;
 public class JmxAttribute {
     private final String attributeName;
 
-    public JmxAttribute(String attributeName) {
+    public JmxAttribute(final String attributeName) {
         if (attributeName == null) {
             throw new NullPointerException("Parameter 'attributeName' is null");
         }
@@ -29,7 +29,7 @@ public class JmxAttribute {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

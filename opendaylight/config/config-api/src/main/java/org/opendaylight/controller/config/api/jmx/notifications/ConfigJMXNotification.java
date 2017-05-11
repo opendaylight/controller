@@ -27,8 +27,8 @@ public abstract class ConfigJMXNotification extends Notification {
 
     private final NotificationType type;
 
-    protected ConfigJMXNotification(NotificationType type,
-                                    NotificationBroadcasterSupport source, String message) {
+    protected ConfigJMXNotification(final NotificationType type,
+                                    final NotificationBroadcasterSupport source, final String message) {
         super(type.toString(), source, sequenceNumber++, System.nanoTime(), message);
         this.type = type;
     }
@@ -50,7 +50,7 @@ public abstract class ConfigJMXNotification extends Notification {
      *
      * Intended for config-persister.
      */
-    public static CommitJMXNotification afterCommit(NotificationBroadcasterSupport source, String messages) {
+    public static CommitJMXNotification afterCommit(final NotificationBroadcasterSupport source, final String messages) {
         return new CommitJMXNotification(source, messages);
     }
 
