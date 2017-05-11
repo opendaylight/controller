@@ -16,7 +16,7 @@ package org.opendaylight.controller.liblldp;
 public class PacketException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public PacketException(String message) {
+    public PacketException(final String message) {
         super(message);
     }
 }
