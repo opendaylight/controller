@@ -93,7 +93,7 @@ public class ActionProviderBean {
         if (reg != null) {
             try {
                 reg.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("{}: error while unregistering", ACTION_PROVIDER, e);
             } finally {
                 reg = null;
@@ -107,7 +107,7 @@ public class ActionProviderBean {
 
         try {
             iface = bundle.loadClass(interfaceName);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new ComponentDefinitionException(String.format(
                 "The specified \"interface\" for %s \"%s\" does not refer to an available class", interfaceName,
                 ACTION_PROVIDER), e);

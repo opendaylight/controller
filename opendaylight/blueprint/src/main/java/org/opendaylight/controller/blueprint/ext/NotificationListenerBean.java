@@ -29,15 +29,15 @@ public class NotificationListenerBean {
     private NotificationListener notificationListener;
     private ListenerRegistration<?> registration;
 
-    public void setNotificationService(NotificationService notificationService) {
+    public void setNotificationService(final NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 
-    public void setNotificationListener(NotificationListener notificationListener) {
+    public void setNotificationListener(final NotificationListener notificationListener) {
         this.notificationListener = notificationListener;
     }
 
-    public void setBundle(Bundle bundle) {
+    public void setBundle(final Bundle bundle) {
         this.bundle = bundle;
     }
 

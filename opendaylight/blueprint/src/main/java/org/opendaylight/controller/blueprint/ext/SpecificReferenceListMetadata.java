@@ -52,7 +52,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
     private volatile BundleTracker<Bundle> bundleTracker;
     private volatile ServiceTracker<Object, Object> serviceTracker;
 
-    SpecificReferenceListMetadata(String id, String interfaceName) {
+    SpecificReferenceListMetadata(final String id, final String interfaceName) {
         super(id);
         this.interfaceName = interfaceName;
         serviceResourcePath = "META-INF/services/" + interfaceName;
@@ -62,17 +62,17 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
     protected void startTracking() {
         BundleTrackerCustomizer<Bundle> bundleListener = new BundleTrackerCustomizer<Bundle>() {
             @Override
-            public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+            public Bundle addingBundle(final Bundle bundle, final BundleEvent event) {
                 bundleAdded(bundle);
                 return bundle;
             }
 
             @Override
-            public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+            public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Bundle object) {
             }
 
             @Override
-            public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+            public void removedBundle(final Bundle bundle, final BundleEvent event, final Bundle object) {
             }
         };
 
@@ -89,16 +89,16 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
 
         ServiceTrackerCustomizer<Object, Object> serviceListener = new ServiceTrackerCustomizer<Object, Object>() {
             @Override
-            public Object addingService(ServiceReference<Object> reference) {
+            public Object addingService(final ServiceReference<Object> reference) {
                 return serviceAdded(reference);
             }
 
             @Override
-            public void modifiedService(ServiceReference<Object> reference, Object service) {
+            public void modifiedService(final ServiceReference<Object> reference, final Object service) {
             }
 
             @Override
-            public void removedService(ServiceReference<Object> reference, Object service) {
+            public void removedService(final ServiceReference<Object> reference, final Object service) {
                 container().getBundleContext().ungetService(reference);
             }
         };
@@ -109,7 +109,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         serviceTracker.open();
     }
 
-    private void bundleAdded(Bundle bundle) {
+    private void bundleAdded(final Bundle bundle) {
         URL resource = bundle.getEntry(serviceResourcePath);
         if (resource == null) {
             return;
@@ -133,13 +133,13 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
                 LOG.debug("{}: Retrieved service type {}", logName(), serviceType);
                 expectedServiceTypes.add(serviceType);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             setFailure(String.format("%s: Error reading resource %s from bundle %s", logName(), resource,
                     bundle.getSymbolicName()), e);
         }
     }
 
-    private Object serviceAdded(ServiceReference<Object> reference) {
+    private Object serviceAdded(final ServiceReference<Object> reference) {
         Object service = container().getBundleContext().getService(reference);
         String serviceType = (String) reference.getProperty(OpendaylightNamespaceHandler.TYPE_ATTR);
 
@@ -196,7 +196,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
     }
 
     @Override
-    public void destroy(Object instance) {
+    public void destroy(final Object instance) {
         super.destroy(instance);
 
         if (bundleTracker != null) {
