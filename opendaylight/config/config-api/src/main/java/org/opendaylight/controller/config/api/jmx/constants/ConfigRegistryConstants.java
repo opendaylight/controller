@@ -29,14 +29,14 @@ public class ConfigRegistryConstants {
 
     public static final String GET_AVAILABLE_MODULE_NAMES_ATTRIBUT_NAME = "AvailableModuleNames";
 
-    public static ObjectName createONWithDomainAndType(String type) {
+    public static ObjectName createONWithDomainAndType(final String type) {
         return createON(ON_DOMAIN, TYPE_KEY, type);
     }
 
-    public static ObjectName createON(String name, String key, String value) {
+    public static ObjectName createON(final String name, final String key, final String value) {
         try {
             return new ObjectName(name, key, value);
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             throw new IllegalArgumentException(e);
         }
 

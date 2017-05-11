@@ -21,15 +21,15 @@ public class ConflictingVersionException extends Exception {
         super();
     }
 
-    public ConflictingVersionException(String message, Throwable cause) {
+    public ConflictingVersionException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public ConflictingVersionException(String message) {
+    public ConflictingVersionException(final String message) {
         super(message);
     }
 
-    public ConflictingVersionException(Throwable cause) {
+    public ConflictingVersionException(final Throwable cause) {
         super(cause);
     }
 

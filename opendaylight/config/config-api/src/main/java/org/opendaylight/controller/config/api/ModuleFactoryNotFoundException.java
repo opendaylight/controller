@@ -17,7 +17,7 @@ public class ModuleFactoryNotFoundException extends RuntimeException {
 
     private final String moduleName;
 
-    public ModuleFactoryNotFoundException(String moduleName) {
+    public ModuleFactoryNotFoundException(final String moduleName) {
         super("ModuleFactory not found for module name: " + moduleName);
         this.moduleName = moduleName;
     }

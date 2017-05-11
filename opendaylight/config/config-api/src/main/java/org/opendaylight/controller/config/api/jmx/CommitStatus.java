@@ -25,9 +25,9 @@ public class CommitStatus {
      */
     @ConstructorProperties({"newInstances", "reusedInstances",
             "recreatedInstances"})
-    public CommitStatus(List<ObjectName> newInstances,
-                        List<ObjectName> reusedInstances,
-                        List<ObjectName> recreatedInstances) {
+    public CommitStatus(final List<ObjectName> newInstances,
+                        final List<ObjectName> reusedInstances,
+                        final List<ObjectName> recreatedInstances) {
         this.newInstances = Collections.unmodifiableList(newInstances);
         this.reusedInstances = Collections.unmodifiableList(reusedInstances);
         this.recreatedInstances = Collections
@@ -71,7 +71,7 @@ public class CommitStatus {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

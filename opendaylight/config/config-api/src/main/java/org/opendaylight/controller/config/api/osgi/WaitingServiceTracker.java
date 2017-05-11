@@ -28,7 +28,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
     private final ServiceTracker<T, ?> tracker;
     private final Class<T> serviceInterface;
 
-    private WaitingServiceTracker(Class<T> serviceInterface, ServiceTracker<T, ?> tracker) {
+    private WaitingServiceTracker(final Class<T> serviceInterface, final ServiceTracker<T, ?> tracker) {
         this.tracker = tracker;
         this.serviceInterface = serviceInterface;
     }
@@ -41,7 +41,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
      * @throws ServiceNotFoundException if it times out or is interrupted
      */
     @SuppressWarnings("unchecked")
-    public T waitForService(long timeoutInMillis) throws ServiceNotFoundException {
+    public T waitForService(final long timeoutInMillis) throws ServiceNotFoundException {
         try {
             T service = (T) tracker.waitForService(timeoutInMillis);
             if(service == null) {
@@ -50,7 +50,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
             }
 
             return service;
-        } catch(InterruptedException e) {
+        } catch(final InterruptedException e) {
             throw new ServiceNotFoundException(String.format("Wait for OSGi service %s was interrrupted",
                     serviceInterface));
         }
@@ -63,7 +63,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
      * @param context the BundleContext
      * @return new WaitingServiceTracker instance
      */
-    public static <T> WaitingServiceTracker<T> create(@Nonnull Class<T> serviceInterface, @Nonnull BundleContext context) {
+    public static <T> WaitingServiceTracker<T> create(@Nonnull final Class<T> serviceInterface, @Nonnull final BundleContext context) {
         ServiceTracker<T, ?> tracker = new ServiceTracker<>(context, serviceInterface, null);
         tracker.open();
         return new WaitingServiceTracker<>(serviceInterface, tracker);
@@ -77,14 +77,14 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
      * @param filter the OSGi service filter
      * @return new WaitingServiceTracker instance
      */
-    public static <T> WaitingServiceTracker<T> create(@Nonnull Class<T> serviceInterface, @Nonnull BundleContext context,
-            @Nonnull String filter) {
+    public static <T> WaitingServiceTracker<T> create(@Nonnull final Class<T> serviceInterface, @Nonnull final BundleContext context,
+            @Nonnull final String filter) {
         String newFilter = String.format("(&(%s=%s)%s)", Constants.OBJECTCLASS, serviceInterface.getName(), filter);
         try {
             ServiceTracker<T, ?> tracker = new ServiceTracker<>(context, context.createFilter(newFilter), null);
             tracker.open();
             return new WaitingServiceTracker<>(serviceInterface, tracker);
-        } catch(InvalidSyntaxException e) {
+        } catch(final InvalidSyntaxException e) {
             throw new IllegalArgumentException(String.format("Invalid OSGi filter %s", newFilter), e);
         }
     }
@@ -93,7 +93,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
     public void close() {
         try {
             tracker.close();
-        } catch(RuntimeException e) {
+        } catch(final RuntimeException e) {
             // The ServiceTracker could throw IllegalStateException if the BundleContext is already closed.
             // This is benign so ignore it.
             LOG.debug("Error closing ServiceTracker", e);

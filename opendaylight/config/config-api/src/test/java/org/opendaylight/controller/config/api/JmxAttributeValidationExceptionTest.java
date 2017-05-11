@@ -63,7 +63,7 @@ public class JmxAttributeValidationExceptionTest {
     public void testCheckNotNull() throws Exception {
         try {
             JmxAttributeValidationException.checkNotNull(false, jmxAttribute);
-        } catch (JmxAttributeValidationException e) {
+        } catch (final JmxAttributeValidationException e) {
             assertJmxEx(e, jmxAttribute.getAttributeName() + " " + "message", jmxAttribute);
         }
     }

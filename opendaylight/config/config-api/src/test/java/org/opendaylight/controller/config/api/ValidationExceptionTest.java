@@ -53,7 +53,7 @@ public class ValidationExceptionTest {
         ValidationException single2 = ValidationException.createForSingleException(mi, e);
         try {
             ValidationException.createFromCollectedValidationExceptions(Lists.newArrayList(single, single2));
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ex) {
             // Duplicate exception
             assertThat(ex.getMessage(), containsString("Cannot merge"));
             return;

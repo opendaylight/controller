@@ -59,7 +59,7 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
         return identifier;
     }
 
-    public final void setCanReuseInstance(boolean canReuseInstance) {
+    public final void setCanReuseInstance(final boolean canReuseInstance) {
         this.canReuseInstance = canReuseInstance;
     }
 
@@ -79,7 +79,7 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
                 if (oldInstance != null) {
                     try {
                         oldInstance.close();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LOG.error("An error occurred while closing old instance {} for module {}", oldInstance, getIdentifier(), e);
                     }
                 }

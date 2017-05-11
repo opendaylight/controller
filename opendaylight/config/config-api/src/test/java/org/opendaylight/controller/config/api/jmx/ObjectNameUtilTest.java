@@ -151,7 +151,7 @@ public class ObjectNameUtilTest {
     private void assertFailure(final Runnable test, final Class<? extends Exception> ex) {
         try {
             test.run();
-        } catch(Exception e) {
+        } catch(final Exception e) {
             assertTrue("Failed with wrong exception: " + Throwables.getStackTraceAsString(e),
                     e.getClass().isAssignableFrom(ex));
             return;

@@ -13,7 +13,7 @@ public class ModuleIdentifier implements Identifier {
     private static final long serialVersionUID = 1L;
     private final String factoryName, instanceName;
 
-    public ModuleIdentifier(String factoryName, String instanceName) {
+    public ModuleIdentifier(final String factoryName, final String instanceName) {
         if (factoryName == null) {
             throw new IllegalArgumentException("Parameter 'factoryName' is null");
         }
@@ -33,7 +33,7 @@ public class ModuleIdentifier implements Identifier {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

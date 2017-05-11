@@ -15,11 +15,11 @@ package org.opendaylight.controller.config.api.osgi;
 public class ServiceNotFoundException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public ServiceNotFoundException(String message, Throwable cause) {
+    public ServiceNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public ServiceNotFoundException(String message) {
+    public ServiceNotFoundException(final String message) {
         super(message);
     }
 }
