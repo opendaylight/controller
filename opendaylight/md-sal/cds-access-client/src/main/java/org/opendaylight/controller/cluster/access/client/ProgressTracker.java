@@ -272,9 +272,9 @@ abstract class ProgressTracker {
      * This call can empty the collection of open tasks, that special case should be handled.
      *
      * @param now tick number corresponding to caller's present
-     * @param enqueuedTicks see TransitQueue#recordCompletion
-     * @param transmitTicks see TransitQueue#recordCompletion
-     * @param execNanos see TransitQueue#recordCompletion
+     * @param enqueuedTicks see TransmitQueue#recordCompletion
+     * @param transmitTicks see TransmitQueue#recordCompletion
+     * @param execNanos see TransmitQueue#recordCompletion
      */
     protected void protectedCloseTask(final long now, final long enqueuedTicks, final long transmitTicks,
                 final long execNanos) {

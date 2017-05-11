@@ -40,14 +40,31 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
-    // Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast path
+    /*
+     * Timers involved in communication with the backend. There are three tiers which are spaced out to allow for
+     * recovery at each tier. Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast
+     * path.
+     */
+    /**
+     * Backend aliveness timer. This is reset whenever we receive a response from the backend and kept armed whenever
+     * we have an outstanding request. If when this time expires, we tear down this connection and attept to reconnect
+     * it.
+     */
+    @VisibleForTesting
+    static final long BACKEND_ALIVE_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
+
+    /**
+     * Request timeout. If the request fails to complete within this time since it was originally enqueued, we time
+     * the request out.
+     */
+    @VisibleForTesting
+    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(2);
+
+    /**
+     * No progress timeout. A client fails to make any forward progress in this time, it will terminate itself.
+     */
     @VisibleForTesting
     static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
-    @VisibleForTesting
-    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
-
-    private static final FiniteDuration REQUEST_TIMEOUT_DURATION = FiniteDuration.apply(REQUEST_TIMEOUT_NANOS,
-        TimeUnit.NANOSECONDS);
 
     private final Lock lock = new ReentrantLock();
     private final ClientActorContext context;
@@ -58,6 +75,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @GuardedBy("lock")
     private boolean haveTimer;
 
+    /**
+     * Time reference when we saw any activity from the backend.
+     */
+    private long lastReceivedTicks;
+
     private volatile RequestException poisoned;
 
     // Do not allow subclassing outside of this package
@@ -66,6 +88,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.queue = Preconditions.checkNotNull(queue);
+        this.lastReceivedTicks = currentTime();
     }
 
     // Do not allow subclassing outside of this package
@@ -73,6 +96,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.context = oldConnection.context;
         this.cookie = oldConnection.cookie;
         this.queue = new TransmitQueue.Halted(targetQueueSize);
+        this.lastReceivedTicks = oldConnection.lastReceivedTicks;
     }
 
     public final ClientActorContext context() {
@@ -159,8 +183,16 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             }
 
             if (queue.isEmpty()) {
-                // The queue is becoming non-empty, schedule a timer
-                scheduleTimer(REQUEST_TIMEOUT_DURATION);
+                // The queue is becoming non-empty, schedule a timer. The entry being enqueued may have actually timed
+                // out, but we do not want deal with that immediately as that would make caller codepaths more
+                // complicated.
+                long entryTimeoutTicks = entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now;
+                if (entryTimeoutTicks < 0) {
+                    LOG.debug("Connection {} entry {} timed out on enqueue", this, entry);
+                    entryTimeoutTicks = 0;
+                }
+                scheduleTimer(FiniteDuration.apply(Math.min(entryTimeoutTicks, BACKEND_ALIVE_TIMEOUT_NANOS),
+                    TimeUnit.NANOSECONDS));
             }
             return queue.enqueue(entry, now);
         } finally {
@@ -213,6 +245,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             haveTimer = false;
             final long now = currentTime();
             // The following line is only reliable when queue is not forwarding, but such state should not last long.
+            // FIXME: BUG-8422: this may not be accurate w.r.t. replayed entries
             final long ticksSinceProgress = queue.ticksStalling(now);
             if (ticksSinceProgress >= NO_PROGRESS_TIMEOUT_NANOS) {
                 LOG.error("Queue {} has not seen progress in {} seconds, failing all requests", this,
@@ -263,18 +296,37 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             justification = "Returning null Optional is documented in the API contract.")
     @GuardedBy("lock")
     private Optional<FiniteDuration> lockedCheckTimeout(final long now) {
-        final ConnectionEntry head = queue.peek();
-        if (head == null) {
+        if (queue.isEmpty()) {
             return Optional.empty();
         }
 
-        final long beenOpen = now - head.getEnqueuedTicks();
-        if (beenOpen >= REQUEST_TIMEOUT_NANOS) {
-            LOG.debug("Connection {} has a request not completed for {} nanoseconds, timing out", this, beenOpen);
+        final long backendSilentTicks = now - lastReceivedTicks;
+        if (backendSilentTicks >= BACKEND_ALIVE_TIMEOUT_NANOS) {
+            LOG.debug("Connection {} has not seen activity from backend for {} nanoseconds, timing out", this,
+                backendSilentTicks);
             return null;
         }
 
-        return Optional.of(FiniteDuration.apply(REQUEST_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
+        int tasksTimedOut = 0;
+        for (ConnectionEntry head = queue.peek(); head != null; head = queue.peek()) {
+            final long beenOpen = now - head.getEnqueuedTicks();
+            if (beenOpen < REQUEST_TIMEOUT_NANOS) {
+                return Optional.of(FiniteDuration.apply(BACKEND_ALIVE_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
+            }
+
+            tasksTimedOut++;
+            queue.remove(now);
+            LOG.debug("Connection {} timed out entryt {}", this, head);
+            head.complete(head.getRequest().toRequestFailure(
+                new RequestTimeoutException("Timed out after " + beenOpen + "ns")));
+        }
+
+        LOG.debug("Connection {} timed out {} tasks", this, tasksTimedOut);
+        if (tasksTimedOut != 0) {
+            queue.tryTransmit(now);
+        }
+
+        return Optional.empty();
     }
 
     final void poison(final RequestException cause) {
@@ -299,6 +351,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     final void receiveResponse(final ResponseEnvelope<?> envelope) {
         final long now = currentTime();
+        lastReceivedTicks = now;
 
         final Optional<TransmittedConnectionEntry> maybeEntry;
         lock.lock();
