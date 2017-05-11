@@ -69,7 +69,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
 
     private long testsCompleted = 0;
 
-    public DsbenchmarkProvider(DOMDataBroker domDataBroker, DataBroker bindingDataBroker) {
+    public DsbenchmarkProvider(final DOMDataBroker domDataBroker, final DataBroker bindingDataBroker) {
         // We have to get the DOMDataBroker via the constructor,
         // since we can't get it from the session
         this.domDataBroker = domDataBroker;
@@ -77,7 +77,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     }
 
     @Override
-    public void onSessionInitiated(ProviderContext session) {
+    public void onSessionInitiated(final ProviderContext session) {
         this.dataBroker = session.getSALService(DataBroker.class);
         this.dstReg = session.addRpcImplementation( DsbenchmarkService.class, this );
         listenerProvider.setDataBroker(dataBroker);
@@ -100,7 +100,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     }
 
     @Override
-    public Future<RpcResult<StartTestOutput>> startTest(StartTestInput input) {
+    public Future<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
         // Check if there is a test in progress
@@ -136,7 +136,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
 
             this.testsCompleted++;
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error( "Test error: {}", e.toString());
             execStatus.set( ExecStatus.Idle );
             return RpcResultBuilder.success(new StartTestOutputBuilder()
@@ -165,7 +165,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         return RpcResultBuilder.success(output).buildFuture();
     }
 
-    private void setTestOperData( ExecStatus sts, long tstCompl ) {
+    private void setTestOperData( final ExecStatus sts, final long tstCompl ) {
         TestStatus status = new TestStatusBuilder()
                 .setExecStatus(sts)
                 .setTestsCompleted(tstCompl)
@@ -176,7 +176,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
 
         try {
             tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             throw new IllegalStateException(e);
         }
 
@@ -193,7 +193,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         try {
             tx.submit().checkedGet();
             LOG.debug("DataStore config test data cleaned up");
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             LOG.info("Failed to cleanup DataStore configtest data");
             throw new IllegalStateException(e);
         }
@@ -203,14 +203,14 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         try {
             tx.submit().checkedGet();
             LOG.debug("DataStore operational test data cleaned up");
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             LOG.info("Failed to cleanup DataStore operational test data");
             throw new IllegalStateException(e);
         }
 
     }
 
-    private DatastoreAbstractWriter getDatastoreWriter(StartTestInput input) {
+    private DatastoreAbstractWriter getDatastoreWriter(final StartTestInput input) {
 
         final DatastoreAbstractWriter retVal;
 

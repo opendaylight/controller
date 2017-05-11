@@ -10,11 +10,11 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbench
 import org.opendaylight.dsbenchmark.DsbenchmarkProvider;
 
 public class DsbenchmarkImplModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.impl.rev141210.AbstractDsbenchmarkImplModule {
-    public DsbenchmarkImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public DsbenchmarkImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DsbenchmarkImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.impl.rev141210.DsbenchmarkImplModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public DsbenchmarkImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.impl.rev141210.DsbenchmarkImplModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

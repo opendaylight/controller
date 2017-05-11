@@ -73,7 +73,7 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         txOk++;
                     }
-                } catch (ReadFailedException e) {
+                } catch (final ReadFailedException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }

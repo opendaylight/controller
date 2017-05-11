@@ -97,12 +97,12 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
                 txSubmitted++;
             }
             tx.submit().checkedGet();
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             LOG.error("Transaction failed", e);
         }
         try {
             chain.close();
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
         LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));

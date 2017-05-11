@@ -28,7 +28,7 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
 
     @Override
     public void onDataTreeChanged(
-            Collection<DataTreeModification<TestExec>> changes) {
+            final Collection<DataTreeModification<TestExec>> changes) {
         // Since we're registering the same DsbenchmarkListener object for both
         // OPERATIONAL and CONFIG, the onDataTreeChanged() method can be called
         // from different threads, and we need to use atomic counters.
@@ -41,8 +41,8 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
         }
     }
 
-    private static synchronized void logDataTreeChangeEvent(int eventNum,
-            Collection<DataTreeModification<TestExec>> changes) {
+    private static synchronized void logDataTreeChangeEvent(final int eventNum,
+            final Collection<DataTreeModification<TestExec>> changes) {
         LOG.debug("DsbenchmarkListener-onDataTreeChanged: Event {}", eventNum);
 
         for (DataTreeModification<TestExec> change : changes) {

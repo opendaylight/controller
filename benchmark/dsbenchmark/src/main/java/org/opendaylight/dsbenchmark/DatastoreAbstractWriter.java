@@ -31,8 +31,8 @@ public abstract class DatastoreAbstractWriter {
     protected int txError = 0;
 
 
-    public DatastoreAbstractWriter(StartTestInput.Operation oper,
-                                   int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+    public DatastoreAbstractWriter(final StartTestInput.Operation oper,
+                                   final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         this.outerListElem = outerListElem;
         this.innerListElem = innerListElem;
         this.writesPerTx = writesPerTx;

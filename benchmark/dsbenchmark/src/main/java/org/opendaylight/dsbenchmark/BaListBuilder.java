@@ -19,7 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.outer.list.InnerListKey;
 
 public final class BaListBuilder {
-    public static List<OuterList> buildOuterList(int outerElements, int innerElements) {
+    public static List<OuterList> buildOuterList(final int outerElements, final int innerElements) {
         List<OuterList> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(new OuterListBuilder()
@@ -31,7 +31,7 @@ public final class BaListBuilder {
         return outerList;
     }
 
-    private static List<InnerList> buildInnerList( int index, int elements ) {
+    private static List<InnerList> buildInnerList( final int index, final int elements ) {
         List<InnerList> innerList = new ArrayList<>( elements );
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";

@@ -28,7 +28,7 @@ public final class DomListBuilder {
     // Outer List Qname identifier for yang model's 'id'
     private static final org.opendaylight.yangtools.yang.common.QName OL_ID = QName.create(OuterList.QNAME, "id");
 
-    public static List<MapEntryNode> buildOuterList(int outerElements, int innerElements) {
+    public static List<MapEntryNode> buildOuterList(final int outerElements, final int innerElements) {
         List<MapEntryNode> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(ImmutableNodes.mapEntryBuilder()
@@ -40,7 +40,7 @@ public final class DomListBuilder {
         return outerList;
     }
 
-    private static MapNode buildInnerList(int index, int elements ) {
+    private static MapNode buildInnerList(final int index, final int elements ) {
         CollectionNodeBuilder<MapEntryNode, MapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";
