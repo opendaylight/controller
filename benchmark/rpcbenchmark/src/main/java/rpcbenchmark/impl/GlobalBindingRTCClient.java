@@ -41,7 +41,7 @@ public class GlobalBindingRTCClient implements RTCClient {
         return rpcError.get();
     }
 
-    public GlobalBindingRTCClient(RpcConsumerRegistry registry, int inSize) {
+    public GlobalBindingRTCClient(final RpcConsumerRegistry registry, final int inSize) {
         if (registry != null) {
             this.service = registry.getRpcService(RpcbenchPayloadService.class);
         } else {
@@ -56,7 +56,7 @@ public class GlobalBindingRTCClient implements RTCClient {
         inVal = new GlobalRpcBenchInputBuilder().setPayload(listVals).build();
     }
 
-    public void runTest(int iterations) {
+    public void runTest(final int iterations) {
         int rpcOk = 0;
         int rpcError = 0;
 
