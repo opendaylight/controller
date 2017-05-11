@@ -19,5 +19,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.controller/mdsal-trace-api/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.controller/mdsal-trace-dom-impl/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.controller/mdsal-trace-binding-impl/{{VERSION}}</bundle>
+    <configfile finalname="etc/opendaylight/datastore/initial/config/mdsaltrace_config.xml">mvn:org.opendaylight.controller/mdsal-trace-api/{{VERSION}}/xml/config</configfile>
   </feature>
 </features>
