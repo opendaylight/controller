@@ -39,8 +39,8 @@ public class NtfbenchmarkProvider implements BindingAwareProvider, AutoCloseable
     private NotificationPublishService publishService;
     private static final int testTimeout = 5;
 
-    public NtfbenchmarkProvider(NotificationService listenServiceDependency,
-            NotificationPublishService publishServiceDependency) {
+    public NtfbenchmarkProvider(final NotificationService listenServiceDependency,
+            final NotificationPublishService publishServiceDependency) {
         LOG.debug("NtfbenchmarkProvider Constructor");
         listenService = listenServiceDependency;
         publishService = publishServiceDependency;

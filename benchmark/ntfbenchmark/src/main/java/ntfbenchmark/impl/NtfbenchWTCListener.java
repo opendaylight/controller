@@ -16,13 +16,13 @@ public class NtfbenchWTCListener extends NtfbenchTestListener {
     private final int expectedCount;
     private final SettableFuture<?> allDone = SettableFuture.create();
 
-    public NtfbenchWTCListener(int expectedSize, int expectedCount) {
+    public NtfbenchWTCListener(final int expectedSize, final int expectedCount) {
         super(expectedSize);
         this.expectedCount = expectedCount;
     }
 
     @Override
-    public void onNtfbench(Ntfbench notification) {
+    public void onNtfbench(final Ntfbench notification) {
         // TODO Auto-generated method stub
         super.onNtfbench(notification);
         if (expectedCount == getReceived()) {
