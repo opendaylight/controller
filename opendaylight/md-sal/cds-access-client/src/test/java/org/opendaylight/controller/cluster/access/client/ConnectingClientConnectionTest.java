@@ -232,7 +232,7 @@ public class ConnectingClientConnectionTest {
     public void testRunTimeoutWithTimeoutLess() throws NoProgressException {
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.REQUEST_TIMEOUT_NANOS - 1);
+        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS - 1);
 
         Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
@@ -245,7 +245,7 @@ public class ConnectingClientConnectionTest {
 
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.REQUEST_TIMEOUT_NANOS);
+        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS);
 
         Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
@@ -257,7 +257,7 @@ public class ConnectingClientConnectionTest {
 
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.REQUEST_TIMEOUT_NANOS + 1);
+        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS + 1);
 
         Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
