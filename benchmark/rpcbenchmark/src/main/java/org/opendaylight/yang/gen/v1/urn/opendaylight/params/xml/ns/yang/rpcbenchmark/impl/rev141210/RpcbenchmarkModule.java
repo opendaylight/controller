@@ -10,11 +10,11 @@ package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenc
 import rpcbenchmark.impl.RpcbenchmarkProvider;
 
 public class RpcbenchmarkModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.impl.rev141210.AbstractRpcbenchmarkModule {
-    public RpcbenchmarkModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public RpcbenchmarkModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public RpcbenchmarkModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.impl.rev141210.RpcbenchmarkModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public RpcbenchmarkModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.impl.rev141210.RpcbenchmarkModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

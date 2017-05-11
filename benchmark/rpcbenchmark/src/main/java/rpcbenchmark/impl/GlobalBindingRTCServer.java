@@ -35,7 +35,7 @@ public class GlobalBindingRTCServer implements RpcbenchPayloadService {
 
     @Override
     public Future<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(
-            GlobalRpcBenchInput input) {
+            final GlobalRpcBenchInput input) {
         GlobalRpcBenchOutput output = new GlobalRpcBenchOutputBuilder(input).build();
         RpcResult<GlobalRpcBenchOutput> result = RpcResultBuilder.success(output).build();
         numRpcs++;
@@ -44,7 +44,7 @@ public class GlobalBindingRTCServer implements RpcbenchPayloadService {
 
     @Override
     public Future<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(
-            RoutedRpcBenchInput input) {
+            final RoutedRpcBenchInput input) {
         RoutedRpcBenchOutput output = new RoutedRpcBenchOutputBuilder(input).build();
         RpcResult<RoutedRpcBenchOutput> result = RpcResultBuilder.success(output).build();
         numRpcs++;

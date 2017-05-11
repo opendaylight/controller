@@ -50,7 +50,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
     private RpcProviderRegistry providerRegistry;
 
     @Override
-    public void onSessionInitiated(ProviderContext session) {
+    public void onSessionInitiated(final ProviderContext session) {
         LOG.debug("RpcbenchmarkProvider Session Initiated");
         consumerRegistry = session.getSALService(RpcConsumerRegistry.class);
         providerRegistry = session.getSALService(RpcProviderRegistry.class);
@@ -122,7 +122,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
             executor.shutdown();
             try {
                 executor.awaitTermination(testTimeout, TimeUnit.MINUTES);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 LOG.error("Out of time: test did not finish within the {} min deadline ", testTimeout); 
             }
 

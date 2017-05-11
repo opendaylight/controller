@@ -43,7 +43,7 @@ public class RoutedBindingRTClient implements RTCClient {
         return rpcError.get();
     }
 
-    public RoutedBindingRTClient(RpcConsumerRegistry registry, int inSize, List<InstanceIdentifier<?>> routeIid) {
+    public RoutedBindingRTClient(final RpcConsumerRegistry registry, final int inSize, final List<InstanceIdentifier<?>> routeIid) {
         if (registry != null) {
             this.service = registry.getRpcService(RpcbenchPayloadService.class);
         } else {
@@ -63,7 +63,7 @@ public class RoutedBindingRTClient implements RTCClient {
 
     }
 
-    public void runTest(int iterations) {
+    public void runTest(final int iterations) {
         int rpcOk = 0;
         int rpcError = 0;
 
