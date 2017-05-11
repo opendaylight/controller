@@ -38,7 +38,12 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
 
     @Override
     public void publishChanges(final DataTreeCandidate candidate) {
-        LOG.debug("{}: publishChanges: {}", logContext, candidate);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{}: publishChanges: {}", logContext, candidate);
+        } else {
+            LOG.debug("{}: publishChanges: rootPath: {}", logContext, candidate.getRootPath());
+        }
+
         processCandidateTree(candidate);
     }
 
