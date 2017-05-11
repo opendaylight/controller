@@ -60,7 +60,7 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
 
         pending.addListener(new GenericFutureListener<Future<Object>>() {
             @Override
-            public void operationComplete(Future<Object> future) throws Exception {
+            public void operationComplete(final Future<Object> future) throws Exception {
                 if (!future.isSuccess()) {
                     ReconnectPromise.this.setFailure(future.cause());
                 }

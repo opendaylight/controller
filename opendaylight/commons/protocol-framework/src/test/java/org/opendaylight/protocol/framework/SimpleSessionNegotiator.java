@@ -12,7 +12,7 @@ import io.netty.util.concurrent.Promise;
 
 public class SimpleSessionNegotiator extends AbstractSessionNegotiator<SimpleMessage, SimpleSession> {
 
-    public SimpleSessionNegotiator(Promise<SimpleSession> promise, Channel channel) {
+    public SimpleSessionNegotiator(final Promise<SimpleSession> promise, final Channel channel) {
         super(promise, channel);
     }
 
@@ -22,7 +22,7 @@ public class SimpleSessionNegotiator extends AbstractSessionNegotiator<SimpleMes
     }
 
     @Override
-    protected void handleMessage(SimpleMessage msg) throws Exception {
+    protected void handleMessage(final SimpleMessage msg) throws Exception {
         throw new IllegalStateException("This method should never be invoked");
     }
 }

@@ -21,12 +21,12 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 public final class NeverReconnectStrategyFactoryModule extends org.opendaylight.controller.config.yang.protocol.framework.AbstractNeverReconnectStrategyFactoryModule
  {
 
-    public NeverReconnectStrategyFactoryModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public NeverReconnectStrategyFactoryModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public NeverReconnectStrategyFactoryModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            NeverReconnectStrategyFactoryModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public NeverReconnectStrategyFactoryModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final NeverReconnectStrategyFactoryModule oldModule, final java.lang.AutoCloseable oldInstance) {
 
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }

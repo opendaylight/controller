@@ -21,12 +21,12 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 public final class ReconnectImmediatelyStrategyFactoryModule extends org.opendaylight.controller.config.yang.protocol.framework.AbstractReconnectImmediatelyStrategyFactoryModule
  {
 
-    public ReconnectImmediatelyStrategyFactoryModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public ReconnectImmediatelyStrategyFactoryModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public ReconnectImmediatelyStrategyFactoryModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            ReconnectImmediatelyStrategyFactoryModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public ReconnectImmediatelyStrategyFactoryModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final ReconnectImmediatelyStrategyFactoryModule oldModule, final java.lang.AutoCloseable oldInstance) {
 
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }

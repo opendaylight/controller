@@ -79,7 +79,7 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
         LOG.debug("Starting session negotiation on channel {}", channel);
         try {
             startNegotiation();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Unexpected negotiation failure", e);
             negotiationFailed(e);
         }
@@ -91,7 +91,7 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
         LOG.debug("Negotiation read invoked on channel {}", channel);
         try {
             handleMessage((M)msg);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.debug("Unexpected error while handling negotiation message {}", msg, e);
             negotiationFailed(e);
         }
