@@ -159,6 +159,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         List<String> paths = config.getRegistrationWatches();
         if (paths != null) {
             for (String path : paths) {
+                LOG.warn("JOSH {}", path);
                 watchRegistrations(path, null);
             }
         }
@@ -167,6 +168,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         paths = config.getWriteWatches();
         if (paths != null) {
             for (String path : paths) {
+                LOG.warn("JOSH {}", path);
                 watchWrites(path, null);
             }
         }

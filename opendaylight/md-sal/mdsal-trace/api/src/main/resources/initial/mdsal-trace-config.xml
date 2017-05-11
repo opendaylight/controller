@@ -1,0 +1,4 @@
+<config xmlns="urn:opendaylight:params:xml:ns:yang:mdsaltrace">
+    <registration-watches>josh</registration-watches>
+    <write-watches>hershberg</write-watches>
+</config>
