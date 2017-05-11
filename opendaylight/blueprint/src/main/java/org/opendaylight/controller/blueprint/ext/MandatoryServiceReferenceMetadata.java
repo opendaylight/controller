@@ -23,7 +23,7 @@ class MandatoryServiceReferenceMetadata implements ServiceReferenceMetadata {
     private final String interfaceClass;
     private final String id;
 
-    MandatoryServiceReferenceMetadata(String id, String interfaceClass) {
+    MandatoryServiceReferenceMetadata(final String id, final String interfaceClass) {
         this.id = Preconditions.checkNotNull(id);
         this.interfaceClass = interfaceClass;
     }

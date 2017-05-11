@@ -35,19 +35,19 @@ public class RpcImplementationBean {
     private RpcService implementation;
     private final List<RpcRegistration<RpcService>> rpcRegistrations = new ArrayList<>();
 
-    public void setRpcRegistry(RpcProviderRegistry rpcRegistry) {
+    public void setRpcRegistry(final RpcProviderRegistry rpcRegistry) {
         this.rpcRegistry = rpcRegistry;
     }
 
-    public void setBundle(Bundle bundle) {
+    public void setBundle(final Bundle bundle) {
         this.bundle = bundle;
     }
 
-    public void setInterfaceName(String interfaceName) {
+    public void setInterfaceName(final String interfaceName) {
         this.interfaceName = interfaceName;
     }
 
-    public void setImplementation(RpcService implementation) {
+    public void setImplementation(final RpcService implementation) {
         this.implementation = implementation;
     }
 
@@ -63,9 +63,9 @@ public class RpcImplementationBean {
             for (Class<RpcService> rpcInterface : rpcInterfaces) {
                 rpcRegistrations.add(rpcRegistry.addRpcImplementation(rpcInterface, implementation));
             }
-        } catch (ComponentDefinitionException e) {
+        } catch (final ComponentDefinitionException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new ComponentDefinitionException(String.format(
                     "Error processing \"%s\" for %s", RPC_IMPLEMENTATION, implementation.getClass()), e);
         }
@@ -78,8 +78,9 @@ public class RpcImplementationBean {
     }
 
     @SuppressWarnings("unchecked")
-    static List<Class<RpcService>> getImplementedRpcServiceInterfaces(String interfaceName,
-            Class<?> implementationClass, Bundle bundle, String logName) throws ClassNotFoundException {
+    static List<Class<RpcService>> getImplementedRpcServiceInterfaces(final String interfaceName,
+            final Class<?> implementationClass, final Bundle bundle, final String logName)
+            throws ClassNotFoundException {
         if (!Strings.isNullOrEmpty(interfaceName)) {
             Class<?> rpcInterface = bundle.loadClass(interfaceName);
 

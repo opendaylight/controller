@@ -239,7 +239,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
             }
 
             return service;
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
             // log as debug.
             log.debug("{}: Error obtaining {}", logName(), serviceInterface.getSimpleName(), e);

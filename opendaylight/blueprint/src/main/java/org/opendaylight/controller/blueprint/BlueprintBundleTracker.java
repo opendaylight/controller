@@ -71,7 +71,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * Implemented from BundleActivator.
      */
     @Override
-    public void start(BundleContext context) {
+    public void start(final BundleContext context) {
         LOG.info("Starting {}", getClass().getSimpleName());
 
         restartService = new BlueprintContainerRestartServiceImpl();
@@ -88,7 +88,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                 new ServiceTrackerCustomizer<BlueprintExtenderService, BlueprintExtenderService>() {
                     @Override
                     public BlueprintExtenderService addingService(
-                            ServiceReference<BlueprintExtenderService> reference) {
+                            final ServiceReference<BlueprintExtenderService> reference) {
                         blueprintExtenderService = reference.getBundle().getBundleContext().getService(reference);
                         bundleTracker.open();
 
@@ -105,13 +105,13 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                     }
 
                     @Override
-                    public void modifiedService(ServiceReference<BlueprintExtenderService> reference,
-                            BlueprintExtenderService service) {
+                    public void modifiedService(final ServiceReference<BlueprintExtenderService> reference,
+                            final BlueprintExtenderService service) {
                     }
 
                     @Override
-                    public void removedService(ServiceReference<BlueprintExtenderService> reference,
-                            BlueprintExtenderService service) {
+                    public void removedService(final ServiceReference<BlueprintExtenderService> reference,
+                            final BlueprintExtenderService service) {
                     }
                 });
         blueprintExtenderServiceTracker.open();
@@ -120,7 +120,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                 new ServiceTrackerCustomizer<QuiesceParticipant, QuiesceParticipant>() {
                     @Override
                     public QuiesceParticipant addingService(
-                            ServiceReference<QuiesceParticipant> reference) {
+                            final ServiceReference<QuiesceParticipant> reference) {
                         quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
 
                         LOG.debug("Got QuiesceParticipant");
@@ -131,26 +131,26 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                     }
 
                     @Override
-                    public void modifiedService(ServiceReference<QuiesceParticipant> reference,
-                                                QuiesceParticipant service) {
+                    public void modifiedService(final ServiceReference<QuiesceParticipant> reference,
+                                                final QuiesceParticipant service) {
                     }
 
                     @Override
-                    public void removedService(ServiceReference<QuiesceParticipant> reference,
-                                               QuiesceParticipant service) {
+                    public void removedService(final ServiceReference<QuiesceParticipant> reference,
+                                               final QuiesceParticipant service) {
                     }
                 });
         quiesceParticipantTracker.open();
     }
 
-    private void registerNamespaceHandler(BundleContext context) {
+    private void registerNamespaceHandler(final BundleContext context) {
         Dictionary<String, Object> props = new Hashtable<>();
         props.put("osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0);
         namespaceReg = context.registerService(NamespaceHandler.class.getName(),
                 new OpendaylightNamespaceHandler(), props);
     }
 
-    private void registerBlueprintEventHandler(BundleContext context) {
+    private void registerBlueprintEventHandler(final BundleContext context) {
         Dictionary<String, Object> props = new Hashtable<>();
         props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC,
                 new String[]{EventConstants.TOPIC_CREATED, EventConstants.TOPIC_FAILURE});
@@ -161,7 +161,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * Implemented from BundleActivator.
      */
     @Override
-    public void stop(BundleContext context) {
+    public void stop(final BundleContext context) {
         bundleTracker.close();
         blueprintExtenderServiceTracker.close();
         quiesceParticipantTracker.close();
@@ -175,7 +175,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * Implemented from SynchronousBundleListener.
      */
     @Override
-    public void bundleChanged(BundleEvent event) {
+    public void bundleChanged(final BundleEvent event) {
         // If the system bundle (id 0) is stopping, do an orderly shutdown of all blueprint containers. On
         // shutdown the system bundle is stopped first.
         if (event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
@@ -187,7 +187,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * Implemented from BundleActivator.
      */
     @Override
-    public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+    public Bundle addingBundle(final Bundle bundle, final BundleEvent event) {
         modifiedBundle(bundle, event, bundle);
         return bundle;
     }
@@ -196,7 +196,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * Implemented from BundleTrackerCustomizer.
      */
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Bundle object) {
         if (shuttingDown) {
             return;
         }
@@ -216,7 +216,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * Implemented from BundleTrackerCustomizer.
      */
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+    public void removedBundle(final Bundle bundle, final BundleEvent event, final Bundle object) {
         // BlueprintExtenderService will handle this.
     }
 
@@ -226,7 +226,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * @param event the event to handle
      */
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         if (EventConstants.TOPIC_CREATED.equals(event.getTopic())) {
             LOG.info("Blueprint container for bundle {} was successfully created",
                     event.getProperty(EventConstants.BUNDLE));
@@ -250,7 +250,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    static List<Object> findBlueprintPaths(Bundle bundle) {
+    static List<Object> findBlueprintPaths(final Bundle bundle) {
         Enumeration<?> rntries = bundle.findEntries(BLUEPRINT_FILE_PATH, BLUEPRINT_FLE_PATTERN, false);
         if (rntries == null) {
             return Collections.emptyList();
@@ -288,7 +288,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         LOG.info("Shutdown of blueprint containers complete");
     }
 
-    private List<Bundle> getBundlesToDestroy(Collection<Bundle> containerBundles) {
+    private List<Bundle> getBundlesToDestroy(final Collection<Bundle> containerBundles) {
         List<Bundle> bundlesToDestroy = new ArrayList<>();
 
         // Find all container bundles that either have no registered services or whose services are no
@@ -356,12 +356,12 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         return bundlesToDestroy;
     }
 
-    private static int getServiceUsage(ServiceReference<?> ref) {
+    private static int getServiceUsage(final ServiceReference<?> ref) {
         Bundle[] usingBundles = ref.getUsingBundles();
         return usingBundles != null ? usingBundles.length : 0;
     }
 
-    private <T> T getOSGiService(Class<T> serviceInterface) {
+    private <T> T getOSGiService(final Class<T> serviceInterface) {
         try {
             ServiceReference<T> serviceReference = bundleContext.getServiceReference(serviceInterface);
             if (serviceReference == null) {
@@ -376,7 +376,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
             }
 
             return service;
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
             // log as debug.
             LOG.debug("Error obtaining OSGi service {}", serviceInterface.getSimpleName(), e);

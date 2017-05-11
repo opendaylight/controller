@@ -34,7 +34,7 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
     private final String implementationRefId;
     private ExtendedBlueprintContainer container;
 
-    RoutedRpcMetadata(String id, String interfaceName, String implementationRefId) {
+    RoutedRpcMetadata(final String id, final String interfaceName, final String implementationRefId) {
         this.id = id;
         this.interfaceName = interfaceName;
         this.implementationRefId = implementationRefId;
@@ -56,7 +56,7 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
     }
 
     @Override
-    public void init(ExtendedBlueprintContainer newContainer) {
+    public void init(final ExtendedBlueprintContainer newContainer) {
         this.container = newContainer;
 
         LOG.debug("{}: In init", logName());
@@ -94,16 +94,16 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
                     implementation, rpcInterface);
 
             return rpcRegistry.addRoutedRpcImplementation(rpcInterface, (RpcService)implementation);
-        } catch (ComponentDefinitionException e) {
+        } catch (final ComponentDefinitionException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new ComponentDefinitionException(String.format(
                     "Error processing \"%s\" for %s", ROUTED_RPC_IMPLEMENTATION, implementation.getClass()), e);
         }
     }
 
     @Override
-    public void destroy(Object instance) {
+    public void destroy(final Object instance) {
         LOG.debug("{}: In destroy: instance: {}", logName(), instance);
 
         ((RoutedRpcRegistration<?>)instance).close();

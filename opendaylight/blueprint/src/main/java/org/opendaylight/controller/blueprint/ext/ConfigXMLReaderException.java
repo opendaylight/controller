@@ -15,11 +15,11 @@ package org.opendaylight.controller.blueprint.ext;
 public class ConfigXMLReaderException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public ConfigXMLReaderException(String message) {
+    public ConfigXMLReaderException(final String message) {
         super(message);
     }
 
-    public ConfigXMLReaderException(String message, Throwable cause) {
+    public ConfigXMLReaderException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
