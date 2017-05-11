@@ -167,7 +167,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      */
     protected RaftActorBehavior requestVote(ActorRef sender, RequestVote requestVote) {
 
-        log.debug("{}: In requestVote:  {}", logName(), requestVote);
+        log.debug("{}: In requestVote:  {} - currentTerm: {}, votedFor: {}, lastIndex: {}, lastTerm: {}", logName(),
+                requestVote, currentTerm(), votedFor(), lastIndex(), lastTerm());
 
         boolean grantVote = canGrantVote(requestVote);
 
