@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  *    <classifier>features</classifier>
  *    <type>xml</type>
  *    <scope>runtime</scope>
- *    <version>0.1.5-SNAPSHOT</version>
+ *    <version>0.1.6-SNAPSHOT</version>
  *  </dependency>
  * }
  * </pre>
@@ -117,7 +117,17 @@ public class TracingBroker implements TracingDOMDataBroker {
         }
 
         private boolean isParent(String parent, String child) {
-            return child.startsWith(parent);
+            int parentOffset = 0;
+            if (parent.length() > 0 && parent.charAt(0) == '<') {
+                parentOffset = parent.indexOf('>') + 1;
+            }
+
+            int childOffset = 0;
+            if (child.length() > 0 && child.charAt(0) == '<') {
+                childOffset = child.indexOf('>') + 1;
+            }
+
+            return child.startsWith(parent.substring(parentOffset), childOffset);
         }
 
         public boolean subtreesOverlap(YangInstanceIdentifier iid, LogicalDatastoreType store,
@@ -127,7 +137,6 @@ public class TracingBroker implements TracingDOMDataBroker {
             }
 
             String otherIidString = toIidCompString(iid);
-
             switch (scope) {
                 case BASE:
                     return isParent(iidString, otherIidString);
@@ -178,6 +187,7 @@ public class TracingBroker implements TracingDOMDataBroker {
      * @param store Which LogicalDataStore? or null for both
      */
     public void watchRegistrations(String iidString, LogicalDatastoreType store) {
+        LOG.info("Watching registrations to {} in {}", iidString, store);
         registrationWatches.add(new Watch(iidString, store));
     }
 
@@ -187,6 +197,7 @@ public class TracingBroker implements TracingDOMDataBroker {
      * @param store Which LogicalDataStore? or null for both
      */
     public void watchWrites(String iidString, LogicalDatastoreType store) {
+        LOG.info("Watching writes to {} in {}", iidString, store);
         Watch watch = new Watch(iidString, store);
         writeWatches.add(watch);
     }
@@ -243,7 +254,7 @@ public class TracingBroker implements TracingDOMDataBroker {
     }
 
     private void reconstructIidPathString(YangInstanceIdentifier yiid, StringBuilder sb) {
-        sb.append("RECONSTRUCTED: ");
+        sb.append("<RECONSTRUCTED FROM: \"").append(yiid.toString()).append("\">");
         for (YangInstanceIdentifier.PathArgument pathArg : yiid.getPathArguments()) {
             if (pathArg instanceof YangInstanceIdentifier.AugmentationIdentifier) {
                 sb.append('/').append("AUGMENTATION");
@@ -251,7 +262,6 @@ public class TracingBroker implements TracingDOMDataBroker {
             }
             sb.append('/').append(pathArg.getNodeType().getLocalName());
         }
-        sb.append(" ->->-> [[[ ").append(yiid.toString()).append(" ]]]");
     }
 
     String getStackSummary() {
