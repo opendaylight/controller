@@ -40,13 +40,36 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
-    // Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast path
+    /*
+     * Timers involved in communication with the backend. There are three tiers which are spaced out to allow for
+     * recovery at each tier. Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast
+     * path.
+     */
+    /**
+     * Backend aliveness timer. This is reset whenever we receive a response from the backend and kept armed whenever
+     * we have an outstanding request. If when this time expires, we tear down this connection and attept to reconnect
+     * it.
+     */
+    @VisibleForTesting
+    static final long BACKEND_ALIVE_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
+
+    /**
+     * Request timeout. If the request fails to complete within this time since it was originally enqueued, we time
+     * the request out.
+     */
+    @VisibleForTesting
+    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(2);
+
+    /**
+     * No progress timeout. A client fails to make any forward progress in this time, it will terminate itself.
+     */
     @VisibleForTesting
     static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
-    @VisibleForTesting
-    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
 
-    private static final FiniteDuration REQUEST_TIMEOUT_DURATION = FiniteDuration.apply(REQUEST_TIMEOUT_NANOS,
+    /**
+     * {@link #BACKEND_ALIVE_TIMEOUT_NANOS} as a {@link FiniteDuration}.
+     */
+    private static final FiniteDuration BACKEND_ALIVE_DURATION = FiniteDuration.apply(BACKEND_ALIVE_TIMEOUT_NANOS,
         TimeUnit.NANOSECONDS);
 
     private final Lock lock = new ReentrantLock();
@@ -58,6 +81,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @GuardedBy("lock")
     private boolean haveTimer;
 
+    private long lastReceivedTicks;
+
     private volatile RequestException poisoned;
 
     // Do not allow subclassing outside of this package
@@ -66,6 +91,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.queue = Preconditions.checkNotNull(queue);
+        this.lastReceivedTicks = currentTime();
     }
 
     // Do not allow subclassing outside of this package
@@ -73,6 +99,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.context = oldConnection.context;
         this.cookie = oldConnection.cookie;
         this.queue = new TransmitQueue.Halted(targetQueueSize);
+        this.lastReceivedTicks = oldConnection.lastReceivedTicks;
     }
 
     public final ClientActorContext context() {
@@ -160,7 +187,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
             if (queue.isEmpty()) {
                 // The queue is becoming non-empty, schedule a timer
-                scheduleTimer(REQUEST_TIMEOUT_DURATION);
+                scheduleTimer(BACKEND_ALIVE_DURATION);
             }
             return queue.enqueue(entry, now);
         } finally {
@@ -269,12 +296,12 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
 
         final long beenOpen = now - head.getEnqueuedTicks();
-        if (beenOpen >= REQUEST_TIMEOUT_NANOS) {
+        if (beenOpen >= BACKEND_ALIVE_TIMEOUT_NANOS) {
             LOG.debug("Connection {} has a request not completed for {} nanoseconds, timing out", this, beenOpen);
             return null;
         }
 
-        return Optional.of(FiniteDuration.apply(REQUEST_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
+        return Optional.of(FiniteDuration.apply(BACKEND_ALIVE_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
     }
 
     final void poison(final RequestException cause) {
@@ -299,6 +326,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     final void receiveResponse(final ResponseEnvelope<?> envelope) {
         final long now = currentTime();
+        lastReceivedTicks = now;
 
         final Optional<TransmittedConnectionEntry> maybeEntry;
         lock.lock();
