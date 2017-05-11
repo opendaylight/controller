@@ -89,7 +89,7 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
                     } else {
                         txError++;
                     }
-                } catch (ReadFailedException e) {
+                } catch (final ReadFailedException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }

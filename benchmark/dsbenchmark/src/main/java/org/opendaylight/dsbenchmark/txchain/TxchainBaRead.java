@@ -91,7 +91,7 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
                     } else {
                         txError++;
                     }
-                } catch (ReadFailedException e) {
+                } catch (final ReadFailedException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }

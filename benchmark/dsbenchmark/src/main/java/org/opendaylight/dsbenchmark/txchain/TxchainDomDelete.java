@@ -100,13 +100,13 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
             txSubmitted++;
             tx.submit().checkedGet();
             txOk++;
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             LOG.error("Transaction failed", e);
             txError++;
         }
         try {
             chain.close();
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
         LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));

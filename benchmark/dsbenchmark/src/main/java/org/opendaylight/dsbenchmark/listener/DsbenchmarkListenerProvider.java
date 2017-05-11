@@ -28,12 +28,12 @@ public class DsbenchmarkListenerProvider {
             new ArrayList<>();
     private DataBroker dataBroker;
 
-    public void setDataBroker(DataBroker dataBroker) {
+    public void setDataBroker(final DataBroker dataBroker) {
         this.dataBroker = dataBroker;
         LOG.debug("DsbenchmarkListenerProvider created");
     }
 
-    public void createAndRegisterListeners(int numListeners) {
+    public void createAndRegisterListeners(final int numListeners) {
         for (int i = 0; i < numListeners; i++) {
             DsbenchmarkListener listener = new DsbenchmarkListener();
             listeners.add(dataBroker.registerDataTreeChangeListener(

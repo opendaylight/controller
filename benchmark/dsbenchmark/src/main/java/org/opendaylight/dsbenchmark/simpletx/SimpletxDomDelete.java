@@ -69,7 +69,7 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
                 try {
                     tx.submit().checkedGet();
                     txOk++;
-                } catch (TransactionCommitFailedException e) {
+                } catch (final TransactionCommitFailedException e) {
                     LOG.error("Transaction failed: {}", e);
                     txError++;
                 }
@@ -80,7 +80,7 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
         if (writeCnt != 0) {
             try {
                 tx.submit().checkedGet();
-            } catch (TransactionCommitFailedException e) {
+            } catch (final TransactionCommitFailedException e) {
                 LOG.error("Transaction failed: {}", e);
             }
         }
