@@ -134,7 +134,11 @@ class CompositeDataTreeCohort {
     }
 
     void canCommit(final DataTreeCandidate tip) throws ExecutionException, TimeoutException {
-        LOG.debug("{}: canCommit - candidate: {}", txId, tip);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{}: canCommit - candidate: {}", txId, tip);
+        } else {
+            LOG.debug("{}: canCommit - candidate rootPath: {}", txId, tip.getRootPath());
+        }
 
         final List<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
         LOG.debug("{}: canCommit - messages: {}", txId, messages);
