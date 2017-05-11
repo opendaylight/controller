@@ -66,7 +66,12 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
                 final List<DOMRpcImplementation> mayBeRemoteImpls = getImplementations(YangInstanceIdentifier.EMPTY);
 
                 if(mayBeRemoteImpls != null){
-                    return mayBeRemoteImpls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
+                    //judge the implementation ,it is need RemoteRpcImplementation,or routed RPC will failure
+                    for (DOMRpcImplementation domRpcImplementation : mayBeRemoteImpls) {
+                        if ("RemoteRpcImplementation".equals(domRpcImplementation.getClass().getSimpleName())) {
+                            return domRpcImplementation.invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
+                        }
+                    }
                 }
 
             } else {
