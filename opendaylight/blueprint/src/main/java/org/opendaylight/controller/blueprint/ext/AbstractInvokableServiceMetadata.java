@@ -51,7 +51,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
         final Class<?> interfaceClass;
         try {
             interfaceClass = container().getBundleContext().getBundle().loadClass(interfaceName);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new ComponentDefinitionException(String.format("%s: Error obtaining interface class %s",
                     logName(), interfaceName), e);
         }
@@ -136,7 +136,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
             log.debug("{}: create returning service {}", logName(), rpcService);
 
             return rpcService;
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             throw new ComponentDefinitionException("Error getting RPC service for " + interfaceName, e);
         }
     }

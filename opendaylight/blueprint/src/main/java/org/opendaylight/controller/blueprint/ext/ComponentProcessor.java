@@ -47,19 +47,19 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     private boolean restartDependentsOnUpdates;
     private boolean useDefaultForReferenceTypes;
 
-    public void setBundle(Bundle bundle) {
+    public void setBundle(final Bundle bundle) {
         this.bundle = bundle;
     }
 
-    public void setBlueprintContainerRestartService(BlueprintContainerRestartService restartService) {
+    public void setBlueprintContainerRestartService(final BlueprintContainerRestartService restartService) {
         this.blueprintContainerRestartService = restartService;
     }
 
-    public void setRestartDependentsOnUpdates(boolean restartDependentsOnUpdates) {
+    public void setRestartDependentsOnUpdates(final boolean restartDependentsOnUpdates) {
         this.restartDependentsOnUpdates = restartDependentsOnUpdates;
     }
 
-    public void setUseDefaultForReferenceTypes(boolean useDefaultForReferenceTypes) {
+    public void setUseDefaultForReferenceTypes(final boolean useDefaultForReferenceTypes) {
         this.useDefaultForReferenceTypes = useDefaultForReferenceTypes;
     }
 
@@ -70,7 +70,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     }
 
     @Override
-    public void process(ComponentDefinitionRegistry registry) {
+    public void process(final ComponentDefinitionRegistry registry) {
         LOG.debug("{}: In process",  logName());
 
         for (String name : registry.getComponentDefinitionNames()) {
@@ -83,7 +83,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
         }
     }
 
-    private void processServiceReferenceMetadata(MutableServiceReferenceMetadata serviceRef) {
+    private void processServiceReferenceMetadata(final MutableServiceReferenceMetadata serviceRef) {
         if (!useDefaultForReferenceTypes) {
             return;
         }
@@ -103,7 +103,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
         }
     }
 
-    private void processMutableBeanMetadata(MutableBeanMetadata bean) {
+    private void processMutableBeanMetadata(final MutableBeanMetadata bean) {
         if (restartDependentsOnUpdates && bean.getRuntimeClass() != null
                 && AbstractPropertyPlaceholder.class.isAssignableFrom(bean.getRuntimeClass())) {
             LOG.debug("{}: Found PropertyPlaceholder bean: {}, runtime {}", logName(), bean.getId(),
@@ -136,7 +136,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
             private volatile boolean initialUpdate = true;
 
             @Override
-            public void updated(Dictionary<String, ?> properties) {
+            public void updated(final Dictionary<String, ?> properties) {
                 LOG.debug("{}: ManagedService updated for persistentId {}, properties: {}, initialUpdate: {}",
                         logName(), persistentId, properties, initialUpdate);
 

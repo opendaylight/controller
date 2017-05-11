@@ -22,13 +22,13 @@ import org.osgi.service.blueprint.container.ReifiedType;
  */
 public class RoutedRpcRegistrationConverter implements Converter {
     @Override
-    public boolean canConvert(Object sourceObject, ReifiedType targetType) {
+    public boolean canConvert(final Object sourceObject, final ReifiedType targetType) {
         return sourceObject instanceof RoutedRpcRegistration
                 && RoutedRpcRegistration.class.isAssignableFrom(targetType.getRawClass());
     }
 
     @Override
-    public Object convert(Object sourceObject, ReifiedType targetType) {
+    public Object convert(final Object sourceObject, final ReifiedType targetType) {
         return sourceObject;
     }
 }

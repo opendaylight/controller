@@ -35,26 +35,26 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     private volatile Object trackedService;
     private Consumer<Object> serviceSatisfiedCallback;
 
-    StaticServiceReferenceRecipe(String name, ExtendedBlueprintContainer blueprintContainer,
-            String interfaceClass) {
+    StaticServiceReferenceRecipe(final String name, final ExtendedBlueprintContainer blueprintContainer,
+            final String interfaceClass) {
         super(name, blueprintContainer, new MandatoryServiceReferenceMetadata(name, interfaceClass), null, null,
                 Collections.emptyList());
     }
 
-    void startTracking(Consumer<Object> newServiceSatisfiedCallback) {
+    void startTracking(final Consumer<Object> newServiceSatisfiedCallback) {
         this.serviceSatisfiedCallback = newServiceSatisfiedCallback;
         super.start(NOOP_LISTENER);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    protected void track(ServiceReference reference) {
+    protected void track(final ServiceReference reference) {
         retrack();
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    protected void untrack(ServiceReference reference) {
+    protected void untrack(final ServiceReference reference) {
         LOG.debug("{}: In untrack {}", getName(), reference);
 
         if (trackedServiceReference == reference) {
@@ -84,7 +84,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
         if (trackedServiceReference != null && trackedService != null) {
             try {
                 getBundleContextForServiceLookup().ungetService(trackedServiceReference);
-            } catch (IllegalStateException e) {
+            } catch (final IllegalStateException e) {
                 // In case the service no longer exists, ignore.
             }
 

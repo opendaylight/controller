@@ -34,8 +34,8 @@ import org.w3c.dom.Element;
  */
 public abstract class BindingContext {
 
-    public static BindingContext create(String logName, Class<? extends DataObject> klass,
-            String appConfigListKeyValue) {
+    public static BindingContext create(final String logName, final Class<? extends DataObject> klass,
+            final String appConfigListKeyValue) {
         if (Identifiable.class.isAssignableFrom(klass)) {
             // The binding class corresponds to a yang list.
             if (Strings.isNullOrEmpty(appConfigListKeyValue)) {

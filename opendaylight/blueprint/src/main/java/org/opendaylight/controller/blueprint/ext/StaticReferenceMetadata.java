@@ -24,7 +24,7 @@ class StaticReferenceMetadata extends AbstractDependentComponentFactoryMetadata 
     private final String interfaceName;
     private volatile Object retrievedService;
 
-    StaticReferenceMetadata(String id, String interfaceName) {
+    StaticReferenceMetadata(final String id, final String interfaceName) {
         super(id);
         this.interfaceName = interfaceName;
     }
