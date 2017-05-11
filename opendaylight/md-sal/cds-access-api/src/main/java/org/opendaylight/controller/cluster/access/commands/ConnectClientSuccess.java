@@ -94,7 +94,7 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("alternates", alternates).add("dataTree", dataTree)
-                .add("maxMessages", maxMessages);
+        return super.addToStringAttributes(toStringHelper).add("alternates", alternates)
+                .add("dataTree present", getDataTree().isPresent()).add("maxMessages", maxMessages);
     }
 }

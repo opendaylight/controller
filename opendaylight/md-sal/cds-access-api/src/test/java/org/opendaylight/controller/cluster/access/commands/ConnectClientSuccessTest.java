@@ -13,7 +13,6 @@ import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
 import akka.testkit.TestProbe;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
@@ -75,14 +74,6 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     public void cloneAsVersionTest() throws Exception {
         final ConnectClientSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
-    }
-
-    @Test
-    public void addToStringAttributes() throws Exception {
-        final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        Assert.assertTrue(result.toString().contains("alternates=" + ALTERNATES));
-        Assert.assertTrue(result.toString().contains("dataTree=" + TREE));
-        Assert.assertTrue(result.toString().contains("maxMessages=" + MAX_MESSAGES));
     }
 
     @Override
