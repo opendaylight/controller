@@ -29,7 +29,7 @@ public class InitParam {
         return paramName;
     }
 
-    public void setParamName(String paramName) {
+    public void setParamName(final String paramName) {
         this.paramName = paramName;
     }
 
@@ -38,7 +38,7 @@ public class InitParam {
         return paramValue;
     }
 
-    public void setParamValue(String paramValue) {
+    public void setParamValue(final String paramValue) {
         this.paramValue = paramValue;
     }
 

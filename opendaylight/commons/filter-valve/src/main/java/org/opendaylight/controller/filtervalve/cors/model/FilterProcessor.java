@@ -29,11 +29,11 @@ public class FilterProcessor {
 
     private final Host host;
 
-    public FilterProcessor(Host host) {
+    public FilterProcessor(final Host host) {
         this.host = host;
     }
 
-    public void process(Request request, Response response, FilterChain nextValveFilterChain)
+    public void process(final Request request, final Response response, final FilterChain nextValveFilterChain)
             throws IOException, ServletException {
 
         String contextPath = request.getContext().getPath();
@@ -53,7 +53,7 @@ public class FilterProcessor {
                 final FilterChain copy = fromLast;
                 fromLast = new FilterChain() {
                     @Override
-                    public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+                    public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException, ServletException {
                         if (trace) {
                             logger.trace("Applying {}", currentFilter);
                         }

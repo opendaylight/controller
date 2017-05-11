@@ -40,7 +40,7 @@ public class UrlMatcher<FILTER> {
     /**
      * @param patternMap order preserving map containing path info pattern as key
      */
-    public UrlMatcher(LinkedHashMap<String, FILTER> patternMap) {
+    public UrlMatcher(final LinkedHashMap<String, FILTER> patternMap) {
         int idx = 0;
         for (Entry<String, FILTER> entry : patternMap.entrySet()) {
             idx++;
@@ -65,7 +65,7 @@ public class UrlMatcher<FILTER> {
      * @param path relative and decoded path to resource
      * @return list of matching filters
      */
-    public List<FILTER> findMatchingFilters(String path) {
+    public List<FILTER> findMatchingFilters(final String path) {
         checkNotNull(path);
         TreeMap<Integer, FILTER> sortedMap = new TreeMap<>();
         // add matching prefixes
@@ -90,7 +90,7 @@ public class UrlMatcher<FILTER> {
         return filters;
     }
 
-    private void put(TreeMap<Integer, FILTER> sortedMap, Entry<FILTER, Integer> entry) {
+    private void put(final TreeMap<Integer, FILTER> sortedMap, final Entry<FILTER, Integer> entry) {
         sortedMap.put(entry.getValue(), entry.getKey());
     }
 }

@@ -56,7 +56,7 @@ public class Filter implements FilterConfig {
     }
 
 
-    public synchronized void initialize(String fileName, Optional<Filter> maybeTemplate) {
+    public synchronized void initialize(final String fileName, final Optional<Filter> maybeTemplate) {
         checkState(initialized == false, "Already initialized");
         logger.trace("Initializing filter {} : {}", filterName, filterClass);
         for (InitParam initParam : initParams) {
@@ -87,20 +87,20 @@ public class Filter implements FilterConfig {
         Class<?> clazz;
         try {
             clazz = Class.forName(filterClass);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalStateException("Cannot instantiate class defined in filter " + filterName
                     + " in file " + fileName, e);
         }
         try {
             actualFilter = (javax.servlet.Filter) clazz.newInstance();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalStateException("Cannot instantiate class defined in filter " + filterName
                     + " in file " + fileName, e);
         }
         logger.trace("Initializing {} with following init-params:{}", filterName, getInitParams());
         try {
             actualFilter.init(this);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalStateException("Cannot initialize filter " + filterName
                     + " in file " + fileName, e);
         }
@@ -113,7 +113,7 @@ public class Filter implements FilterConfig {
     }
 
     @Override
-    public String getInitParameter(String name) {
+    public String getInitParameter(final String name) {
         for (InitParam initParam : initParams) {
             if (Objects.equals(name, initParam.getParamName())) {
                 return initParam.getParamValue();
@@ -153,7 +153,7 @@ public class Filter implements FilterConfig {
         return filterName;
     }
 
-    public void setFilterName(String filterName) {
+    public void setFilterName(final String filterName) {
         this.filterName = filterName;
     }
 
@@ -162,7 +162,7 @@ public class Filter implements FilterConfig {
         return filterClass;
     }
 
-    public void setFilterClass(String filterClass) {
+    public void setFilterClass(final String filterClass) {
         this.filterClass = filterClass;
     }
 
@@ -171,7 +171,7 @@ public class Filter implements FilterConfig {
         return initParams;
     }
 
-    public void setInitParams(List<InitParam> initParams) {
+    public void setInitParams(final List<InitParam> initParams) {
         this.initParams = initParams;
     }
 

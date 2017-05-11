@@ -49,7 +49,7 @@ public class ParserTest {
         try {
             Parser.parse(xmlFileContent, "fileName");
             fail();
-        }catch(Exception e){
+        }catch(final Exception e){
             assertThat(e.getMessage(), containsString("Cannot find filter for filter-mapping CorsFilter"));
         }
     }
@@ -62,7 +62,7 @@ public class ParserTest {
         try {
             Parser.parse(xmlFileContent, "fileName");
             fail();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             assertThat(e.getMessage(), containsString("Error while processing filter CorsFilter of context /restconf"));
             assertThat(e.getCause().getMessage(), containsString("Conflict detected in template/filter filter-class definitions, filter name: CorsFilter"));
         }

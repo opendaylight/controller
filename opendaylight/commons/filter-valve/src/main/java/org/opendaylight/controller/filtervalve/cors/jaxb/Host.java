@@ -33,7 +33,7 @@ public class Host {
     private Map<String, Context> contextMap;
 
 
-    public synchronized void initialize(String fileName) {
+    public synchronized void initialize(final String fileName) {
         checkState(initialized == false, "Already initialized");
         Map<String, Filter> namesToTemplates = new HashMap<>();
         for (Filter template : filterTemplates) {
@@ -52,7 +52,7 @@ public class Host {
         initialized = true;
     }
 
-    public Optional<Context> findContext(String contextPath) {
+    public Optional<Context> findContext(final String contextPath) {
         checkState(initialized, "Not initialized");
         Context context = contextMap.get(contextPath);
         return Optional.fromNullable(context);
@@ -63,7 +63,7 @@ public class Host {
         return contexts;
     }
 
-    public void setContexts(List<Context> contexts) {
+    public void setContexts(final List<Context> contexts) {
         checkArgument(initialized == false, "Already initialized");
         this.contexts = contexts;
     }
@@ -73,7 +73,7 @@ public class Host {
         return filterTemplates;
     }
 
-    public void setFilterTemplates(List<Filter> filterTemplates) {
+    public void setFilterTemplates(final List<Filter> filterTemplates) {
         checkArgument(initialized == false, "Already initialized");
         this.filterTemplates = filterTemplates;
     }

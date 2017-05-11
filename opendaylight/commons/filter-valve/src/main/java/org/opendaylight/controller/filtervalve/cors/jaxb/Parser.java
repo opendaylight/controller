@@ -14,7 +14,7 @@ import javax.xml.bind.JAXBException;
 
 public class Parser {
 
-    public static Host parse(String xmlFileContent, String fileName) throws JAXBException {
+    public static Host parse(final String xmlFileContent, final String fileName) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(Host.class);
         javax.xml.bind.Unmarshaller um = context.createUnmarshaller();
         Host host = (Host) um.unmarshal(new StringReader(xmlFileContent));

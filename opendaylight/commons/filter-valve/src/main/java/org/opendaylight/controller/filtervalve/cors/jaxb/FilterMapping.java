@@ -24,7 +24,7 @@ public class FilterMapping {
         return filterName;
     }
 
-    public void setFilterName(String filterName) {
+    public void setFilterName(final String filterName) {
         checkArgument(initialized == false, "Already initialized");
         this.filterName = filterName;
     }
@@ -34,7 +34,7 @@ public class FilterMapping {
         return urlPattern;
     }
 
-    public void setUrlPattern(String urlPattern) {
+    public void setUrlPattern(final String urlPattern) {
         checkArgument(initialized == false, "Already initialized");
         this.urlPattern = urlPattern;
     }

@@ -41,7 +41,7 @@ public class FilterValve extends ValveBase {
 
         FilterChain nextValveFilterChain = new FilterChain() {
             @Override
-            public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
+            public void doFilter(final ServletRequest req, final ServletResponse resp) throws IOException, ServletException {
                 boolean reqEquals = Objects.equals(request, req);
                 boolean respEquals = Objects.equals(response, resp);
                 if (reqEquals == false || respEquals == false) {
@@ -61,7 +61,7 @@ public class FilterValve extends ValveBase {
      * @param fileName path to xml file containing valve configuration
      * @throws Exception exception
      */
-    public void setConfigurationFile(String fileName) throws Exception {
+    public void setConfigurationFile(final String fileName) throws Exception {
         File configurationFile = new File(fileName);
         if (configurationFile.exists() == false || configurationFile.canRead() == false) {
             throw new IllegalArgumentException(
@@ -70,14 +70,14 @@ public class FilterValve extends ValveBase {
         String xmlContent;
         try {
             xmlContent = FileUtils.readFileToString(configurationFile);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.error("Cannot read {} of this valve defined in tomcat-server.xml", fileName, e);
             throw new IllegalStateException("Cannot read " + fileName, e);
         }
         Host host;
         try {
             host = Parser.parse(xmlContent, fileName);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("Cannot parse {} of this valve defined in tomcat-server.xml", fileName, e);
             throw new IllegalStateException("Error while parsing " + fileName, e);
         }

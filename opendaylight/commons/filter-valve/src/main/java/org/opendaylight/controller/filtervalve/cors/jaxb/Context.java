@@ -37,13 +37,13 @@ public class Context {
     private UrlMatcher<Filter> urlMatcher;
 
 
-    public synchronized void initialize(String fileName, Map<String, Filter> namesToTemplates) {
+    public synchronized void initialize(final String fileName, final Map<String, Filter> namesToTemplates) {
         checkState(initialized == false, "Already initialized");
         Map<String, Filter> namesToFilters = new HashMap<>();
         for (Filter filter : filters) {
             try {
                 filter.initialize(fileName, Optional.fromNullable(namesToTemplates.get(filter.getFilterName())));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new IllegalStateException(format("Error while processing filter %s of context %s, defined in %s",
                         filter.getFilterName(), path, fileName), e);
             }
@@ -69,7 +69,7 @@ public class Context {
         initialized = true;
     }
 
-    public List<Filter> findMatchingFilters(String path) {
+    public List<Filter> findMatchingFilters(final String path) {
         logger.trace("findMatchingFilters({})", path);
         checkState(initialized, "Not initialized");
         return urlMatcher.findMatchingFilters(path);
@@ -80,7 +80,7 @@ public class Context {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(final String path) {
         checkArgument(initialized == false, "Already initialized");
         this.path = path;
     }
@@ -90,7 +90,7 @@ public class Context {
         return filters;
     }
 
-    public void setFilters(List<Filter> filters) {
+    public void setFilters(final List<Filter> filters) {
         checkArgument(initialized == false, "Already initialized");
         this.filters = filters;
     }
@@ -100,7 +100,7 @@ public class Context {
         return filterMappings;
     }
 
-    public void setFilterMappings(List<FilterMapping> filterMappings) {
+    public void setFilterMappings(final List<FilterMapping> filterMappings) {
         checkArgument(initialized == false, "Already initialized");
         this.filterMappings = filterMappings;
     }

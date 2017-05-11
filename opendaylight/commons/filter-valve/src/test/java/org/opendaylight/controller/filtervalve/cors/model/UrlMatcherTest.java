@@ -37,7 +37,7 @@ public class UrlMatcherTest {
         assertMatches("/foo/bar.jsp", defaultFilter, jspFilter, prefixFilter);
     }
 
-    public void assertMatches(String testedPath, String... filters) {
+    public void assertMatches(final String testedPath, final String... filters) {
         assertEquals(asList(filters), urlMatcher.findMatchingFilters(testedPath));
     }
 
