@@ -60,12 +60,12 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     }
 
     public DataStoreAppConfigDefaultXMLReader(
-            String logName,
-            String defaultAppConfigFileName,
-            SchemaService schemaService,
-            BindingNormalizedNodeSerializer bindingSerializer,
-            BindingContext bindingContext,
-            ConfigURLProvider inputStreamProvider) {
+            final String logName,
+            final String defaultAppConfigFileName,
+            final SchemaService schemaService,
+            final BindingNormalizedNodeSerializer bindingSerializer,
+            final BindingContext bindingContext,
+            final ConfigURLProvider inputStreamProvider) {
 
         this.logName = logName;
         this.defaultAppConfigFileName = defaultAppConfigFileName;
@@ -76,17 +76,17 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     }
 
     public DataStoreAppConfigDefaultXMLReader(
-            Class<?> testClass,
-            String defaultAppConfigFileName,
-            SchemaService schemaService,
-            BindingNormalizedNodeSerializer bindingSerializer,
-            Class<T> klass) {
+            final Class<?> testClass,
+            final String defaultAppConfigFileName,
+            final SchemaService schemaService,
+            final BindingNormalizedNodeSerializer bindingSerializer,
+            final Class<T> klass) {
         this(testClass.getName(), defaultAppConfigFileName, schemaService, bindingSerializer,
             BindingContext.create(testClass.getName(), klass, null),
             appConfigFileName -> Optional.of(getURL(testClass, defaultAppConfigFileName)));
     }
 
-    private static URL getURL(Class<?> testClass, String defaultAppConfigFileName) {
+    private static URL getURL(final Class<?> testClass, final String defaultAppConfigFileName) {
         return Resources.getResource(testClass, defaultAppConfigFileName);
     }
 
@@ -98,7 +98,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     }
 
     @SuppressWarnings("unchecked")
-    public T createDefaultInstance(FallbackConfigProvider fallback) throws ConfigXMLReaderException {
+    public T createDefaultInstance(final FallbackConfigProvider fallback) throws ConfigXMLReaderException {
         YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
 
         LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName, yangPath,
@@ -157,13 +157,13 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
             appConfigFileName = moduleName + "_" + bindingContext.bindingQName.getLocalName() + ".xml";
         }
 
-        DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
+        final DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
                 XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
 
         Optional<URL> optionalURL;
         try {
             optionalURL = inputStreamProvider.getURL(appConfigFileName);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             String msg = String.format("%s: Could not getURL()", logName);
             LOG.error(msg, e);
             throw new ConfigXMLReaderException(msg, e);
