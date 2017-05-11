@@ -24,7 +24,7 @@ public class HexEncode {
      * @return The hexadecimal representation of the byte array. If bytes is
      *         null, "null" string is returned
      */
-    public static String bytesToHexString(byte[] bytes) {
+    public static String bytesToHexString(final byte[] bytes) {
 
         if (bytes == null) {
             return "null";
@@ -47,7 +47,7 @@ public class HexEncode {
         return ret;
     }
 
-    public static String longToHexString(long val) {
+    public static String longToHexString(final long val) {
         char arr[] = Long.toHexString(val).toCharArray();
         StringBuffer buf = new StringBuffer();
         // prepend the right number of leading zeros
@@ -68,7 +68,7 @@ public class HexEncode {
     }
 
 
-    public static byte[] bytesFromHexString(String values) {
+    public static byte[] bytesFromHexString(final String values) {
         String target = "";
         if (values != null) {
             target = values;
@@ -82,7 +82,7 @@ public class HexEncode {
         return ret;
     }
 
-    public static long stringToLong(String values) {
+    public static long stringToLong(final String values) {
         long value = new BigInteger(values.replaceAll(":", ""), 16).longValue();
         return value;
     }
@@ -90,7 +90,7 @@ public class HexEncode {
     /**
      * This method converts byte array into HexString format with ":" inserted.
      */
-    public static String bytesToHexStringFormat(byte[] bytes) {
+    public static String bytesToHexStringFormat(final byte[] bytes) {
         if (bytes == null) {
             return "null";
         }

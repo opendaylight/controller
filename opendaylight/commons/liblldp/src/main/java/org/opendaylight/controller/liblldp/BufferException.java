@@ -13,7 +13,7 @@ package org.opendaylight.controller.liblldp;
 public class BufferException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public BufferException(String message) {
+    public BufferException(final String message) {
         super(message);
     }
 }

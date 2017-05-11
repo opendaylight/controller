@@ -54,7 +54,7 @@ public class Ethernet extends Packet {
      * Constructor that sets the access level for the packet and
      * creates and sets the HashMap
      */
-    public Ethernet(boolean writeAccess) {
+    public Ethernet(final boolean writeAccess) {
         super(writeAccess);
         fieldValues = new HashMap<>();
         hdrFieldCoordMap = fieldCoordinates;
@@ -62,7 +62,7 @@ public class Ethernet extends Packet {
     }
 
     @Override
-    public void setHeaderField(String headerField, byte[] readValue) {
+    public void setHeaderField(final String headerField, final byte[] readValue) {
         if (headerField.equals(ETHT)) {
             payloadClass = etherTypeClassMap.get(BitBufferHelper
                     .getShort(readValue));
@@ -106,7 +106,7 @@ public class Ethernet extends Packet {
      * Sets the destination MAC address for the current Ethernet object instance
      * @param destinationMACAddress the destinationMACAddress to set
      */
-    public Ethernet setDestinationMACAddress(byte[] destinationMACAddress) {
+    public Ethernet setDestinationMACAddress(final byte[] destinationMACAddress) {
         fieldValues.put(DMAC, destinationMACAddress);
         return this;
     }
@@ -115,7 +115,7 @@ public class Ethernet extends Packet {
      * Sets the source MAC address for the current Ethernet object instance
      * @param sourceMACAddress the sourceMACAddress to set
      */
-    public Ethernet setSourceMACAddress(byte[] sourceMACAddress) {
+    public Ethernet setSourceMACAddress(final byte[] sourceMACAddress) {
         fieldValues.put(SMAC, sourceMACAddress);
         return this;
     }
@@ -124,7 +124,7 @@ public class Ethernet extends Packet {
      * Sets the etherType for the current Ethernet object instance
      * @param etherType the etherType to set
      */
-    public Ethernet setEtherType(short etherType) {
+    public Ethernet setEtherType(final short etherType) {
         byte[] ethType = BitBufferHelper.toByteArray(etherType);
         fieldValues.put(ETHT, ethType);
         return this;

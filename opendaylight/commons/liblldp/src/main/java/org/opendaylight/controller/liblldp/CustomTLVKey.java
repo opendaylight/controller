@@ -17,7 +17,7 @@ public class CustomTLVKey {
      * @param oui
      * @param subtype
      */
-    public CustomTLVKey(int oui, byte subtype) {
+    public CustomTLVKey(final int oui, final byte subtype) {
         this.oui = oui;
         this.subtype = subtype;
     }
@@ -46,7 +46,7 @@ public class CustomTLVKey {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

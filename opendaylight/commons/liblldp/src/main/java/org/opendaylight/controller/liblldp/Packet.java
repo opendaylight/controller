@@ -47,7 +47,7 @@ public abstract class Packet {
         corrupted = false;
     }
 
-    public Packet(boolean writeAccess) {
+    public Packet(final boolean writeAccess) {
         this.writeAccess = writeAccess;
         corrupted = false;
     }
@@ -60,15 +60,15 @@ public abstract class Packet {
         return payload;
     }
 
-    public void setParent(Packet parent) {
+    public void setParent(final Packet parent) {
         this.parent = parent;
     }
 
-    public void setPayload(Packet payload) {
+    public void setPayload(final Packet payload) {
         this.payload = payload;
     }
 
-    public void setHeaderField(String headerField, byte[] readValue) {
+    public void setHeaderField(final String headerField, final byte[] readValue) {
         hdrFieldsMap.put(headerField, readValue);
     }
 
@@ -83,7 +83,7 @@ public abstract class Packet {
      * @return Packet
      * @throws PacketException
      */
-    public Packet deserialize(byte[] data, int bitOffset, int size)
+    public Packet deserialize(final byte[] data, final int bitOffset, final int size)
             throws PacketException {
 
         // Deserialize the header fields one by one
@@ -98,7 +98,7 @@ public abstract class Packet {
             try {
                 hdrFieldBytes = BitBufferHelper.getBits(data, startOffset,
                         numBits);
-            } catch (BufferException e) {
+            } catch (final BufferException e) {
                 throw new PacketException(e.getMessage());
             }
 
@@ -123,7 +123,7 @@ public abstract class Packet {
         if (payloadClass != null) {
             try {
                 payload = payloadClass.newInstance();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException(
                         "Error parsing payload for Ethernet packet", e);
             }
@@ -181,7 +181,7 @@ public abstract class Packet {
                 try {
                     BitBufferHelper.setBytes(packetBytes, fieldBytes,
                             getfieldOffset(field), getfieldnumBits(field));
-                } catch (BufferException e) {
+                } catch (final BufferException e) {
                     throw new PacketException(e.getMessage());
                 }
             }
@@ -257,7 +257,7 @@ public abstract class Packet {
      *
      * @return Integer - startOffset of the requested field
      */
-    public int getfieldOffset(String fieldName) {
+    public int getfieldOffset(final String fieldName) {
         return hdrFieldCoordMap.get(fieldName).getLeft();
     }
 
@@ -268,7 +268,7 @@ public abstract class Packet {
      *
      * @return Integer - number of bits of the requested field
      */
-    public int getfieldnumBits(String fieldName) {
+    public int getfieldnumBits(final String fieldName) {
         return hdrFieldCoordMap.get(fieldName).getRight();
     }
 
@@ -303,7 +303,7 @@ public abstract class Packet {
      *
      * @param payload The raw payload as byte array
      */
-    public void setRawPayload(byte[] payload) {
+    public void setRawPayload(final byte[] payload) {
         this.rawPayload = Arrays.copyOf(payload, payload.length);
     }
 
@@ -332,7 +332,7 @@ public abstract class Packet {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

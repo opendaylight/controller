@@ -32,10 +32,10 @@ public class EthernetAddress extends DataLinkAddress {
     public static final String addressName = "Ethernet MAC Address";
     public static final int SIZE = 6;
 
-    private static final EthernetAddress createWellKnownAddress(byte[] mac) {
+    private static final EthernetAddress createWellKnownAddress(final byte[] mac) {
         try {
             return new EthernetAddress(mac);
-        } catch (ConstructionException ce) {
+        } catch (final ConstructionException ce) {
             return null;
         }
     }
@@ -53,7 +53,7 @@ public class EthernetAddress extends DataLinkAddress {
      * @param macAddress A byte array in big endian format
      * representing the Ethernet MAC Address
      */
-    public EthernetAddress(byte[] macAddress) throws ConstructionException {
+    public EthernetAddress(final byte[] macAddress) throws ConstructionException {
         super(addressName);
 
         if (macAddress == null) {
@@ -72,7 +72,7 @@ public class EthernetAddress extends DataLinkAddress {
     public EthernetAddress clone() {
         try {
             return new EthernetAddress(this.macAddress.clone());
-        } catch (ConstructionException ce) {
+        } catch (final ConstructionException ce) {
             return null;
         }
     }
@@ -95,7 +95,7 @@ public class EthernetAddress extends DataLinkAddress {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

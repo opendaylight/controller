@@ -211,15 +211,15 @@ public class LLDPTest {
      * @param customItem
      * @param expectedValue
      */
-    private static void checkCustomTlv(LLDPTLV customItem, String expectedValue) {
+    private static void checkCustomTlv(final LLDPTLV customItem, final String expectedValue) {
         Assert.assertEquals(127, customItem.getType());
         LOG.debug("custom TLV1.length: {}", customItem.getLength());
         Assert.assertEquals(expectedValue,
                 new String(LLDPTLV.getCustomString(customItem.getValue(), customItem.getLength())));
     }
 
-    private static int checkTLV(byte[] serializedData, int offset, byte typeTLVBits, String typeTLVName,
-            short lengthTLV, byte[] valueTLV, byte... bytesBeforeValue) throws ArrayComparisonFailure {
+    private static int checkTLV(final byte[] serializedData, final int offset, final byte typeTLVBits, final String typeTLVName,
+            final short lengthTLV, final byte[] valueTLV, final byte... bytesBeforeValue) throws ArrayComparisonFailure {
         byte[] concreteTlvAwaited = awaitedBytes(typeTLVBits, lengthTLV, valueTLV, bytesBeforeValue);
         int concreteTlvAwaitLength = concreteTlvAwaited.length;
         assertArrayEquals("Serialization problem " + typeTLVName, concreteTlvAwaited,
@@ -227,7 +227,7 @@ public class LLDPTest {
         return offset + concreteTlvAwaitLength;
     }
 
-    private static byte[] awaitedBytes(byte typeTLV, short length, byte[] value, byte[] bytesBeforeValue) {
+    private static byte[] awaitedBytes(final byte typeTLV, final short length, final byte[] value, final byte[] bytesBeforeValue) {
         byte[] awaited = ArrayUtils.EMPTY_BYTE_ARRAY;
 
         // 0 - the less meaning byte (right), 1 most meaning byte (left)
@@ -240,8 +240,8 @@ public class LLDPTest {
         return awaited;
     }
 
-    private static LLDPTLV dummyCustomTlv(final byte tlvType, byte[] oui, byte[] ouiSubtype, short customLength,
-            byte[] subtypeValue) {
+    private static LLDPTLV dummyCustomTlv(final byte tlvType, final byte[] oui, final byte[] ouiSubtype, final short customLength,
+            final byte[] subtypeValue) {
         byte[] fullCustomValue = new byte[0];
         fullCustomValue = ArrayUtils.addAll(fullCustomValue, oui);
         fullCustomValue = ArrayUtils.addAll(fullCustomValue, ouiSubtype);
