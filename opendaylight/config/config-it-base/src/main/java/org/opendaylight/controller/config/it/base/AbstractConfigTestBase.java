@@ -119,7 +119,7 @@ public abstract class AbstractConfigTestBase {
         return null;
     }
 
-    public String logConfiguration(Class<?> klazz) {
+    public String logConfiguration(final Class<?> klazz) {
         return "log4j.logger." + klazz.getPackage().getName();
     }
 
@@ -135,7 +135,7 @@ public abstract class AbstractConfigTestBase {
             try (InputStream abstractConfigTestBaseInputStream = Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(PROPERTIES_FILENAME)) {
                 abstractConfigTestBaseProps.load(abstractConfigTestBaseInputStream);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error("Unable to load {} to determine the Karaf version", PROPERTIES_FILENAME, e);
             }
             version = abstractConfigTestBaseProps.getProperty(KARAF_DISTRO_VERSION_PROP);
@@ -192,7 +192,7 @@ public abstract class AbstractConfigTestBase {
                 LOG.info("Module: {} Instance: {} ObjectName: {}.",
                         moduleName,instanceName,objectName);
                 break;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if(i<MODULE_TIMEOUT_MILLIS) {
                     Thread.sleep(1);
                     continue;
@@ -215,27 +215,27 @@ public abstract class AbstractConfigTestBase {
     public TestRule watcher = new TestWatcher() {
 
         @Override
-        protected void starting(Description description) {
+        protected void starting(final Description description) {
             LOG.info("TestWatcher: Starting test: {}", description.getDisplayName());
         }
 
         @Override
-        protected void finished(Description description) {
+        protected void finished(final Description description) {
             LOG.info("TestWatcher: Finished test: {}", description.getDisplayName());
         }
 
         @Override
-        protected void succeeded(Description description) {
+        protected void succeeded(final Description description) {
             LOG.info("TestWatcher: Test succeeded: {}", description.getDisplayName());
         }
 
         @Override
-        protected void failed(Throwable ex, Description description) {
+        protected void failed(final Throwable ex, final Description description) {
             LOG.info("TestWatcher: Test failed: {}", description.getDisplayName(), ex);
         }
 
         @Override
-        protected void skipped(AssumptionViolatedException ex, Description description) {
+        protected void skipped(final AssumptionViolatedException ex, final Description description) {
             LOG.info("TestWatcher: Test skipped: {} ", description.getDisplayName(), ex);
         }
     };
