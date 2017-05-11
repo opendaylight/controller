@@ -191,7 +191,7 @@ public class ConnectingClientConnectionTest {
     @Test
     public void testSendRequestNeedsBackend() {
         queue.sendRequest(mockRequest, mockCallback);
-        final Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        final Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -207,7 +207,7 @@ public class ConnectingClientConnectionTest {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
-        final Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        final Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
         assertTransmit(mockRequest, 0);
@@ -215,7 +215,7 @@ public class ConnectingClientConnectionTest {
 
     @Test
     public void testRunTimeoutEmpty() throws NoProgressException {
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertFalse(ret.isPresent());
     }
@@ -223,7 +223,7 @@ public class ConnectingClientConnectionTest {
     @Test
     public void testRunTimeoutWithoutShift() throws NoProgressException {
         queue.sendRequest(mockRequest, mockCallback);
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -232,9 +232,9 @@ public class ConnectingClientConnectionTest {
     public void testRunTimeoutWithTimeoutLess() throws NoProgressException {
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.REQUEST_TIMEOUT_NANOS - 1);
+        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS - 1);
 
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -245,9 +245,9 @@ public class ConnectingClientConnectionTest {
 
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.REQUEST_TIMEOUT_NANOS);
+        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS);
 
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
     }
 
@@ -257,9 +257,9 @@ public class ConnectingClientConnectionTest {
 
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.REQUEST_TIMEOUT_NANOS + 1);
+        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS + 1);
 
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
     }
 
@@ -290,7 +290,7 @@ public class ConnectingClientConnectionTest {
         ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS);
 
         // No problem
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertFalse(ret.isPresent());
     }
@@ -300,7 +300,7 @@ public class ConnectingClientConnectionTest {
         ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS + 1);
 
         // No problem
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertFalse(ret.isPresent());
     }
@@ -348,7 +348,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS - 11);
 
-        Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
+        Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
     }
 

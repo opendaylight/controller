@@ -118,7 +118,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { DistributedDataStore.class, 7}, { ClientBackedDataStore.class, 60 }
+                { DistributedDataStore.class, 7}, { ClientBackedDataStore.class, 120 }
         });
     }
 

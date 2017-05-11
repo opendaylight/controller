@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractClientConnectionTest<T extends AbstractClientConnection<U>, U extends BackendInfo> {
 
@@ -115,7 +114,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
 
     @Test
     public void testCheckTimeoutEmptyQueue() throws Exception {
-        final Optional<FiniteDuration> timeout = connection.checkTimeout(context.ticker().read());
+        final Optional<Long> timeout = connection.checkTimeout(context.ticker().read());
         Assert.assertFalse(timeout.isPresent());
     }
 
@@ -123,8 +122,8 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     public void testCheckTimeoutConnectionTimeouted() throws Exception {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
-        final long now = context.ticker().read() + ConnectedClientConnection.REQUEST_TIMEOUT_NANOS;
-        final Optional<FiniteDuration> timeout = connection.checkTimeout(now);
+        final long now = context.ticker().read() + ConnectedClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS;
+        final Optional<Long> timeout = connection.checkTimeout(now);
         Assert.assertNull(timeout);
     }
 
@@ -133,7 +132,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
         final long now = context.ticker().read();
-        final Optional<FiniteDuration> timeout = connection.checkTimeout(now);
+        final Optional<Long> timeout = connection.checkTimeout(now);
         Assert.assertTrue(timeout.isPresent());
     }
 
