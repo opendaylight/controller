@@ -123,7 +123,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     public void testCheckTimeoutConnectionTimeouted() throws Exception {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
-        final long now = context.ticker().read() + ConnectedClientConnection.REQUEST_TIMEOUT_NANOS;
+        final long now = context.ticker().read() + ConnectedClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS;
         final Optional<FiniteDuration> timeout = connection.checkTimeout(now);
         Assert.assertNull(timeout);
     }
