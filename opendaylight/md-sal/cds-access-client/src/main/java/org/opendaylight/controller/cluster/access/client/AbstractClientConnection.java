@@ -40,14 +40,49 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
-    // Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast path
+    /*
+     * Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast path.
+     *
+     * There are three timeout tiers in order of recovery.
+     *
+     * The first is backend aliveness timer, which triggers as soon as we have not seen any response from the backend
+     * to a request we have sent. This is specified by BACKEND_ALIVE_TIMEOUT_NANOS and it is the shortest interval.
+     * It causes the connection to stop transmitting and starts the process of reconnecting the connection.
+     *
+     *
+     */
+    /**
+     * Request attempt timeout. If the backend fails to respond in this time since the request is transmitted, we
+     * trigger a reconnect request and try to send the request again once the connection completes.
+     */
+    @VisibleForTesting
+    static final long REQUEST_TRY_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
+
+    /**
+     * Request timeout. If the request fails to complete within this time since it was originally enqueued, we time
+     * the request out.
+     */
+    @VisibleForTesting
+    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(2);
+
+    /**
+     * No progress timeout. A client fails to make any forward progress in this time, it will terminate itself.
+     */
     @VisibleForTesting
     static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
-    @VisibleForTesting
-    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
 
-    private static final FiniteDuration REQUEST_TIMEOUT_DURATION = FiniteDuration.apply(REQUEST_TIMEOUT_NANOS,
+    /**
+     * {@link #REQUEST_TIMEOUT_NANOS} as a {@link FiniteDuration}.
+     */
+    private static final FiniteDuration REQUEST_TIMEOUT_DURATION = FiniteDuration.apply(REQUEST_TRY_TIMEOUT_NANOS,
         TimeUnit.NANOSECONDS);
+
+    /**
+     * {@link #REQUEST_TRY_TIMEOUT_NANOS} as a {@link FiniteDuration}.
+     */
+    private static final FiniteDuration REQUEST_TRY_TIMEOUT_DURATION = FiniteDuration.apply(REQUEST_TRY_TIMEOUT_NANOS,
+        TimeUnit.NANOSECONDS);
+
 
     private final Lock lock = new ReentrantLock();
     private final ClientActorContext context;
@@ -160,7 +195,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
             if (queue.isEmpty()) {
                 // The queue is becoming non-empty, schedule a timer
-                scheduleTimer(REQUEST_TIMEOUT_DURATION);
+                scheduleTimer(REQUEST_TRY_TIMEOUT_DURATION);
             }
             return queue.enqueue(entry, now);
         } finally {
@@ -269,12 +304,12 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
 
         final long beenOpen = now - head.getEnqueuedTicks();
-        if (beenOpen >= REQUEST_TIMEOUT_NANOS) {
+        if (beenOpen >= REQUEST_TRY_TIMEOUT_NANOS) {
             LOG.debug("Connection {} has a request not completed for {} nanoseconds, timing out", this, beenOpen);
             return null;
         }
 
-        return Optional.of(FiniteDuration.apply(REQUEST_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
+        return Optional.of(FiniteDuration.apply(REQUEST_TRY_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
     }
 
     final void poison(final RequestException cause) {
