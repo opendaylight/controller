@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -292,6 +293,8 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
+        follower1Node.waitForMembersUp("member-1", "member-3");
+
         final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
         final DOMEntityOwnershipService follower1EntityOwnershipService =
                 newOwnershipService(follower1Node.configDataStore());
@@ -321,6 +324,18 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower2EntityOwnershipService.registerCandidate(ENTITY2);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-1", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
+
+        // Get the leader's lastIndex and verify followers are fully synced before shutting down the leader
+
+        AtomicLong leaderLastIndex = new AtomicLong();
+        MemberNode.verifyRaftState(leaderDistributedDataStore, ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> leaderLastIndex.set(raftState.getLastIndex()));
+
+        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
+
+        MemberNode.verifyRaftState(follower2Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
 
         // Shutdown the leader and verify its removed from the candidate list
 
@@ -381,6 +396,11 @@ public class DistributedEntityOwnershipIntegrationTest {
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
+        follower3Node.configDataStore().waitTillReady();
+        follower4Node.configDataStore().waitTillReady();
+
+        leaderNode.waitForMembersUp("member-2", "member-3", "member-4", "member-5");
+        follower1Node.waitForMembersUp("member-1", "member-3", "member-4", "member-5");
 
         final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
         final DOMEntityOwnershipService follower1EntityOwnershipService =
@@ -420,6 +440,20 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower3EntityOwnershipService.registerCandidate(ENTITY2);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-1", "member-3", "member-4");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
+
+        // Get the leader's lastIndex and verify followers are fully synced before shutting down the leader
+        AtomicLong leaderLastIndex = new AtomicLong();
+        MemberNode.verifyRaftState(leaderDistributedDataStore, ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> leaderLastIndex.set(raftState.getLastIndex()));
+
+        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
+
+        MemberNode.verifyRaftState(follower2Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
+
+        MemberNode.verifyRaftState(follower4Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
+            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
 
         // Shutdown the leader and follower3
 
