@@ -23,12 +23,12 @@ import com.google.common.base.Preconditions;
 public final class TimedReconnectStrategyFactoryModule extends org.opendaylight.controller.config.yang.protocol.framework.AbstractTimedReconnectStrategyFactoryModule
  {
 
-    public TimedReconnectStrategyFactoryModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public TimedReconnectStrategyFactoryModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public TimedReconnectStrategyFactoryModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            TimedReconnectStrategyFactoryModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public TimedReconnectStrategyFactoryModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final TimedReconnectStrategyFactoryModule oldModule, final java.lang.AutoCloseable oldInstance) {
 
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }

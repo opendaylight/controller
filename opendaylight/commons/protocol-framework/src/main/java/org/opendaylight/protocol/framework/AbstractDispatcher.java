@@ -121,7 +121,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         }
         try {
             b.channel(channelClass);
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             // FIXME: if this is ok, document why
             LOG.trace("Not overriding channelFactory on bootstrap {}", b, e);
         }
