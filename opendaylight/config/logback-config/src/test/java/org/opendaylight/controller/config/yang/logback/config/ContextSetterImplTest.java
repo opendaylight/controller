@@ -89,7 +89,7 @@ public class ContextSetterImplTest {
         assertLoggerWithAppenders("l2", "a22");
     }
 
-    private void createContextSetter(Multimap<String, String> loggersToAppenders) throws IOException {
+    private void createContextSetter(final Multimap<String, String> loggersToAppenders) throws IOException {
         try (ContextSetterImpl setter = new ContextSetterImpl(runtimeRegistratorMock)) {
 
             List<LoggerTO> logger = Lists.newArrayList();
@@ -109,7 +109,7 @@ public class ContextSetterImplTest {
         }
     }
 
-    private void assertLoggerWithAppenders(String name, String... appenders) {
+    private void assertLoggerWithAppenders(final String name, final String... appenders) {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         ch.qos.logback.classic.Logger logger = context.getLogger(name);
         Iterator<Appender<ILoggingEvent>> it = logger.iteratorForAppenders();
@@ -132,7 +132,7 @@ public class ContextSetterImplTest {
 
     }
 
-    private LogbackModule createLogbackModule(List<LoggerTO> logger, List<ConsoleAppenderTO> consoleAppenders) {
+    private LogbackModule createLogbackModule(final List<LoggerTO> logger, final List<ConsoleAppenderTO> consoleAppenders) {
         LogbackModule logbackModule = new LogbackModule(new ModuleIdentifier("fact", "first"), dependencyResolverMock);
         logbackModule.setLoggerTO(logger);
         logbackModule.setConsoleAppenderTO(consoleAppenders);
@@ -141,7 +141,7 @@ public class ContextSetterImplTest {
         return logbackModule;
     }
 
-    private LoggerTO createLogger(String name, Collection<String> appenders) {
+    private LoggerTO createLogger(final String name, final Collection<String> appenders) {
         LoggerTO l1 = new LoggerTO();
         l1.setAppenders(Lists.newArrayList(appenders));
         l1.setLoggerName(name);
@@ -149,7 +149,7 @@ public class ContextSetterImplTest {
         return l1;
     }
 
-    private ConsoleAppenderTO createConsoleAppender(String name) {
+    private ConsoleAppenderTO createConsoleAppender(final String name) {
         ConsoleAppenderTO a = new ConsoleAppenderTO();
         a.setName(name);
         a.setEncoderPattern("%-4relative [%thread] %-5level %logger{35} - %msg%n");

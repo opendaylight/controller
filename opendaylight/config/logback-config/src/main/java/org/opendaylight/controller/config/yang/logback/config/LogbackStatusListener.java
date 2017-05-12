@@ -34,7 +34,7 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
     private final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper;
     private LogbackRuntimeRegistration reg;
 
-    public LogbackStatusListener(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
+    public LogbackStatusListener(final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         receivedStatuses = new ArrayList<>();
         this.rootRuntimeBeanRegistratorWrapper = rootRuntimeBeanRegistratorWrapper;
     }
@@ -55,7 +55,7 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
         return reg;
     }
 
-    private LogbackRuntimeRegistration registerToJMX(LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
+    private LogbackRuntimeRegistration registerToJMX(final LogbackRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         return rootRuntimeBeanRegistratorWrapper.register(this);
     }
 
@@ -70,18 +70,18 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
         addInitialStatuses(statusManager);
     }
 
-    private void addInitialStatuses(StatusManager statusManager) {
+    private void addInitialStatuses(final StatusManager statusManager) {
         for (ch.qos.logback.core.status.Status status : statusManager.getCopyOfStatusList()) {
             addStatusEvent(status);
         }
     }
 
     @Override
-    public synchronized void addStatusEvent(ch.qos.logback.core.status.Status status) {
+    public synchronized void addStatusEvent(final ch.qos.logback.core.status.Status status) {
         receivedStatuses.add(transformStatus(status));
     }
 
-    private StatusTO transformStatus(ch.qos.logback.core.status.Status status) {
+    private StatusTO transformStatus(final ch.qos.logback.core.status.Status status) {
         StatusTO transformed = new StatusTO();
 
         transformed.setDate(status.getDate());
@@ -91,7 +91,7 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
         return transformed;
     }
 
-    private String transformStatusLevel(int status) {
+    private String transformStatusLevel(final int status) {
         switch (status) {
         case StatusBase.INFO:
             return "INFO";
