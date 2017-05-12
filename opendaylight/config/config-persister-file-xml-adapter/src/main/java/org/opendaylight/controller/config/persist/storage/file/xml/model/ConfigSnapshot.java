@@ -27,12 +27,12 @@ public class ConfigSnapshot {
     private SortedSet<String> capabilities = new TreeSet<>();
     private Set<String> features = new HashSet<>();
 
-    ConfigSnapshot(String configXml, SortedSet<String> capabilities) {
+    ConfigSnapshot(final String configXml, final SortedSet<String> capabilities) {
         this.configXml = configXml;
         this.capabilities = capabilities;
     }
 
-    ConfigSnapshot(String configXml, SortedSet<String> capabilities, Set<String> features) {
+    ConfigSnapshot(final String configXml, final SortedSet<String> capabilities, final Set<String> features) {
         this.configXml = configXml;
         this.capabilities = capabilities;
         this.features = features;
@@ -41,11 +41,11 @@ public class ConfigSnapshot {
     ConfigSnapshot() {
     }
 
-    public static ConfigSnapshot fromConfigSnapshot(ConfigSnapshotHolder cfg) {
+    public static ConfigSnapshot fromConfigSnapshot(final ConfigSnapshotHolder cfg) {
         return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities());
     }
 
-    public static ConfigSnapshot fromConfigSnapshot(ConfigSnapshotHolder cfg, Set<String> features) {
+    public static ConfigSnapshot fromConfigSnapshot(final ConfigSnapshotHolder cfg, final Set<String> features) {
         return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities(), features);
     }
 
@@ -54,7 +54,7 @@ public class ConfigSnapshot {
         return configXml;
     }
 
-    public void setConfigSnapshot(String configSnapshot) {
+    public void setConfigSnapshot(final String configSnapshot) {
         this.configXml = configSnapshot;
     }
 
@@ -65,7 +65,7 @@ public class ConfigSnapshot {
         return capabilities;
     }
 
-    public void setCapabilities(SortedSet<String> capabilities) {
+    public void setCapabilities(final SortedSet<String> capabilities) {
         this.capabilities = capabilities;
     }
 

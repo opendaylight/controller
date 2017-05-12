@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 final class StringTrimAdapter extends XmlAdapter<String, String> {
     @Override
-    public String unmarshal(String v) throws Exception {
+    public String unmarshal(final String v) throws Exception {
         if (v == null) {
             return null;
         }
@@ -19,7 +19,7 @@ final class StringTrimAdapter extends XmlAdapter<String, String> {
     }
 
     @Override
-    public String marshal(String v) throws Exception {
+    public String marshal(final String v) throws Exception {
         if (v == null) {
             return null;
         }
