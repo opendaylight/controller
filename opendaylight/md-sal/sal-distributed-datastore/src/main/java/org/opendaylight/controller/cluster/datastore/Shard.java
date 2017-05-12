@@ -125,6 +125,13 @@ public class Shard extends RaftActor {
         }
     };
 
+    static final Object RESUME_NEXT_PENDING_TRANSACTION = new Object() {
+        @Override
+        public String toString() {
+            return "resumeNextPendingTransaction";
+        }
+    };
+
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";
 
@@ -275,6 +282,8 @@ public class Shard extends RaftActor {
                     maybeError.get());
             }
 
+            store.resetTransactionBatch();
+
             if (message instanceof RequestEnvelope) {
                 final long now = ticker().read();
                 final RequestEnvelope envelope = (RequestEnvelope)message;
@@ -345,6 +354,8 @@ public class Shard extends RaftActor {
                 persistPayload(txId, AbortTransactionPayload.create(txId), true);
             } else if (message instanceof MakeLeaderLocal) {
                 onMakeLeaderLocal();
+            } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
+                store.resumeNextPendingTransaction();
             } else {
                 super.handleNonRaftCommand(message);
             }
@@ -993,5 +1004,9 @@ public class Shard extends RaftActor {
 
     Ticker ticker() {
         return Ticker.systemTicker();
+    }
+
+    void scheduleNextPendingTransaction() {
+        self().tell(RESUME_NEXT_PENDING_TRANSACTION, ActorRef.noSender());
     }
 }
