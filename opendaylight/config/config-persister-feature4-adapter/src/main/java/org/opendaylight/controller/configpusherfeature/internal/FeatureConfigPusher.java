@@ -118,7 +118,7 @@ public class FeatureConfigPusher {
 
                 LOG.info("Karaf Feature Service has not yet finished installing feature {}/{} (retry {})",
                     feature.getName(), feature.getVersion(), retries);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
             }
 

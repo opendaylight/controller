@@ -19,14 +19,14 @@ public class ConfigPusherFeatureActivator implements BundleActivator {
     ConfigPusherCustomizer cpc = null;
     ServiceTracker<ConfigPusher,ConfigPusher> cpst = null;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         bc = context;
         cpc = new ConfigPusherCustomizer();
         cpst = new ServiceTracker<>(bc, ConfigPusher.class.getName(), cpc);
         cpst.open();
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         if(cpst != null) {
             cpst.close();
             cpst = null;
