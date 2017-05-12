@@ -71,7 +71,7 @@ public class GlobalEventExecutorModuleTest extends AbstractConfigTest {
         try {
             createInstance(transaction, instanceName + "x");
             fail();
-        }catch(IllegalArgumentException e){
+        }catch(final IllegalArgumentException e){
             assertTrue(e.getMessage() + " failure", e.getMessage().contains("only allowed name is singleton"));
         }
     }
@@ -93,7 +93,7 @@ public class GlobalEventExecutorModuleTest extends AbstractConfigTest {
         assertStatus(status, 0, 0, 1);
     }
 
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName)
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         transaction.newMXBeanProxy(nameCreated, GlobalEventExecutorModuleMXBean.class);

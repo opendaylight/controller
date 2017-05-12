@@ -15,12 +15,12 @@ import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseable
 @Deprecated
 public final class ImmediateEventExecutorModule extends org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractImmediateEventExecutorModule {
 
-    public ImmediateEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public ImmediateEventExecutorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public ImmediateEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-                                        ImmediateEventExecutorModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public ImmediateEventExecutorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+                                        final ImmediateEventExecutorModule oldModule, final java.lang.AutoCloseable oldInstance) {
 
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }

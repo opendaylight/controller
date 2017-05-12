@@ -30,14 +30,14 @@ public final class GlobalEventExecutorModule extends
         org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractGlobalEventExecutorModule {
     private BundleContext bundleContext;
 
-    public GlobalEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public GlobalEventExecutorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public GlobalEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            GlobalEventExecutorModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public GlobalEventExecutorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final GlobalEventExecutorModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

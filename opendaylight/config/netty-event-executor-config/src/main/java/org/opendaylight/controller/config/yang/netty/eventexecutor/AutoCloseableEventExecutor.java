@@ -22,7 +22,7 @@ public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable
         public static final int DEFAULT_SHUTDOWN_SECONDS = 1;
         private final EventExecutor eventExecutor;
 
-        public CloseableEventExecutorMixin(EventExecutor eventExecutor) {
+        public CloseableEventExecutorMixin(final EventExecutor eventExecutor) {
             this.eventExecutor = eventExecutor;
         }
 
@@ -36,7 +36,7 @@ public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable
                 final CloseableEventExecutorMixin closeableEventExecutorMixin) {
             return Reflection.newProxy(AutoCloseableEventExecutor.class, new AbstractInvocationHandler() {
                 @Override
-                protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+                protected Object handleInvocation(final Object proxy, final Method method, final Object[] args) throws Throwable {
                     if (method.getName().equals("close")) {
                         closeableEventExecutorMixin.close();
                         return null;
