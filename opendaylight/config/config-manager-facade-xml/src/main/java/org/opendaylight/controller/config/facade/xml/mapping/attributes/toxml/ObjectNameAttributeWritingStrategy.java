@@ -25,13 +25,13 @@ public class ObjectNameAttributeWritingStrategy implements AttributeWritingStrat
      * @param document
      * @param key
      */
-    public ObjectNameAttributeWritingStrategy(Document document, String key) {
+    public ObjectNameAttributeWritingStrategy(final Document document, final String key) {
         this.document = document;
         this.key = key;
     }
 
     @Override
-    public void writeElement(Element parentElement, String namespace, Object value) {
+    public void writeElement(final Element parentElement, final String namespace, final Object value) {
         Util.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
         Element innerNode = XmlUtil.createElement(document, key, Optional.of(namespace));
 

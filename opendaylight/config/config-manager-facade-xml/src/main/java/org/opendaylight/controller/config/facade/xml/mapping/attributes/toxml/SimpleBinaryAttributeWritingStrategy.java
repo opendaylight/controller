@@ -20,12 +20,12 @@ public class SimpleBinaryAttributeWritingStrategy extends SimpleAttributeWriting
      * @param document
      * @param key
      */
-    public SimpleBinaryAttributeWritingStrategy(Document document, String key) {
+    public SimpleBinaryAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
     @Override
-    protected Object preprocess(Object value) {
+    protected Object preprocess(final Object value) {
         Util.checkType(value, List.class);
         BaseEncoding en = BaseEncoding.base64();
 

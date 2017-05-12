@@ -17,12 +17,12 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 
 final class UnionCompositeAttributeResolvingStrategy extends CompositeAttributeResolvingStrategy {
 
-    UnionCompositeAttributeResolvingStrategy(Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
-                                        CompositeType openType, Map<String, String> yangToJavaAttrMapping) {
+    UnionCompositeAttributeResolvingStrategy(final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
+                                        final CompositeType openType, final Map<String, String> yangToJavaAttrMapping) {
         super(innerTypes, openType, yangToJavaAttrMapping);
     }
 
-    protected Map<String, Object> preprocessValueMap(Map<?, ?> valueMap) {
+    protected Map<String, Object> preprocessValueMap(final Map<?, ?> valueMap) {
         CompositeType openType = getOpenType();
 
         Preconditions.checkArgument(

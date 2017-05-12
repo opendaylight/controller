@@ -18,12 +18,12 @@ public class RunningDatastoreQueryStrategy implements DatastoreQueryStrategy {
 
     private final TransactionProvider transactionProvider;
 
-    public RunningDatastoreQueryStrategy(TransactionProvider transactionProvider) {
+    public RunningDatastoreQueryStrategy(final TransactionProvider transactionProvider) {
         this.transactionProvider = transactionProvider;
     }
 
     @Override
-    public Set<ObjectName> queryInstances(ConfigRegistryClient configRegistryClient) {
+    public Set<ObjectName> queryInstances(final ConfigRegistryClient configRegistryClient) {
         ObjectName on = transactionProvider.getOrCreateReadTransaction();
         ConfigTransactionClient proxy = configRegistryClient.getConfigTransactionClient(on);
         return proxy.lookupConfigBeans();

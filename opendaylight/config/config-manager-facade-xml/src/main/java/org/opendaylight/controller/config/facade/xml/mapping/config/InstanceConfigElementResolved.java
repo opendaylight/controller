@@ -24,20 +24,20 @@ public class InstanceConfigElementResolved {
     private final EditStrategyType editStrategy;
     private final Map<String, AttributeConfigElement> configuration;
 
-    public InstanceConfigElementResolved(String currentStrategy, Map<String, AttributeConfigElement> configuration,
-                                         EditStrategyType defaultStrategy)
+    public InstanceConfigElementResolved(final String currentStrategy, final Map<String, AttributeConfigElement> configuration,
+                                         final EditStrategyType defaultStrategy)
             throws DocumentedException {
         this.editStrategy = parseStrategy(currentStrategy, defaultStrategy);
         this.configuration = configuration;
     }
 
-    public InstanceConfigElementResolved(Map<String, AttributeConfigElement> configuration, EditStrategyType defaultStrategy) {
+    public InstanceConfigElementResolved(final Map<String, AttributeConfigElement> configuration, final EditStrategyType defaultStrategy) {
         editStrategy = defaultStrategy;
         this.configuration = configuration;
     }
 
 
-    static EditStrategyType parseStrategy(String currentStrategy, EditStrategyType defaultStrategy) throws OperationNotPermittedException {
+    static EditStrategyType parseStrategy(final String currentStrategy, final EditStrategyType defaultStrategy) throws OperationNotPermittedException {
         EditStrategyType parsedStrategy = EditStrategyType.valueOf(currentStrategy);
         EditStrategyType.compareParsedStrategyToDefaultEnforcing(parsedStrategy,defaultStrategy);
         return parsedStrategy;

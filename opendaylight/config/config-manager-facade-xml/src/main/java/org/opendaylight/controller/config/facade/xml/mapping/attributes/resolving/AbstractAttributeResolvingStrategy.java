@@ -13,7 +13,7 @@ import javax.management.openmbean.OpenType;
 abstract class AbstractAttributeResolvingStrategy<T, O extends OpenType<?>> implements AttributeResolvingStrategy<T, O> {
     private O openType;
 
-    public AbstractAttributeResolvingStrategy(O openType) {
+    public AbstractAttributeResolvingStrategy(final O openType) {
         this.openType = openType;
     }
 

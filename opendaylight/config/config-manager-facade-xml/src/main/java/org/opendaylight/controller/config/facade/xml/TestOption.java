@@ -13,7 +13,7 @@ import java.util.Arrays;
 public enum TestOption {
     testOnly, set, testThenSet;
 
-    public static TestOption getFromXmlName(String testOptionXmlName) {
+    public static TestOption getFromXmlName(final String testOptionXmlName) {
         switch (testOptionXmlName) {
         case "test-only":
             return testOnly;

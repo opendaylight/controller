@@ -17,13 +17,13 @@ public class SimpleUnionAttributeReadingStrategy extends SimpleAttributeReadingS
 
     private final String key;
 
-    public SimpleUnionAttributeReadingStrategy(String nullableDefault, String key) {
+    public SimpleUnionAttributeReadingStrategy(final String nullableDefault, final String key) {
         super(nullableDefault);
         this.key = key;
     }
 
     @Override
-    protected Object postprocessParsedValue(String textContent) {
+    protected Object postprocessParsedValue(final String textContent) {
         char[] charArray = textContent.toCharArray();
         List<String> chars = Lists.newArrayListWithCapacity(charArray.length);
 
@@ -37,7 +37,7 @@ public class SimpleUnionAttributeReadingStrategy extends SimpleAttributeReadingS
     }
 
     @Override
-    protected Object postprocessNullableDefault(String nullableDefault) {
+    protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault == null ? null : postprocessParsedValue(nullableDefault);
     }
 }

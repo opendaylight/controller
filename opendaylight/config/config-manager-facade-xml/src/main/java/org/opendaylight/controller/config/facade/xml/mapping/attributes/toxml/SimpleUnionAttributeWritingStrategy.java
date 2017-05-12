@@ -20,11 +20,11 @@ public class SimpleUnionAttributeWritingStrategy extends SimpleAttributeWritingS
      * @param document
      * @param key
      */
-    public SimpleUnionAttributeWritingStrategy(Document document, String key) {
+    public SimpleUnionAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
-    protected Object preprocess(Object value) {
+    protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
         Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
         Object listOfStrings = ((Map<?, ?>) value).values().iterator().next();

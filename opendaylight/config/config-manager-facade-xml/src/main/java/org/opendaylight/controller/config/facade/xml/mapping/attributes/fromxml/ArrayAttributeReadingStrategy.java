@@ -18,13 +18,13 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
 
     private final AttributeReadingStrategy innerStrategy;
 
-    public ArrayAttributeReadingStrategy(String nullableDefault, AttributeReadingStrategy innerStrategy) {
+    public ArrayAttributeReadingStrategy(final String nullableDefault, final AttributeReadingStrategy innerStrategy) {
         super(nullableDefault);
         this.innerStrategy = innerStrategy;
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws DocumentedException {
+    AttributeConfigElement readElementHook(final List<XmlElement> configNodes) throws DocumentedException {
         List<Object> innerList = Lists.newArrayList();
         EditStrategyType innerEditStrategy= null;
         for (XmlElement configNode : configNodes) {

@@ -29,8 +29,8 @@ class CompositeAttributeResolvingStrategy extends
 
     private static final Logger LOG = LoggerFactory.getLogger(CompositeAttributeResolvingStrategy.class);
 
-    CompositeAttributeResolvingStrategy(Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
-            CompositeType openType, Map<String, String> yangToJavaAttrMapping) {
+    CompositeAttributeResolvingStrategy(final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
+            final CompositeType openType, final Map<String, String> yangToJavaAttrMapping) {
         super(openType);
         this.innerTypes = innerTypes;
         this.yangToJavaAttrMapping = yangToJavaAttrMapping;
@@ -42,7 +42,7 @@ class CompositeAttributeResolvingStrategy extends
     }
 
     @Override
-    public Optional<CompositeDataSupport> parseAttribute(String attrName, Object value) throws DocumentedException {
+    public Optional<CompositeDataSupport> parseAttribute(final String attrName, final Object value) throws DocumentedException {
 
         if (value == null) {
             return Optional.absent();
@@ -96,7 +96,7 @@ class CompositeAttributeResolvingStrategy extends
             setOpenType(new CompositeType(getOpenType().getTypeName(), getOpenType().getDescription(), names, descriptions, itemTypes));
             LOG.debug("Attribute {}. Open type reconstructed to {}", attrName, getOpenType(), getOpenType());
             parsedValue = new CompositeDataSupport(getOpenType(), items);
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             throw new IllegalStateException("An error occurred during restoration of composite type " + this
                     + " for attribute " + attrName + " from value " + value, e);
         }
@@ -107,7 +107,7 @@ class CompositeAttributeResolvingStrategy extends
     }
 
 
-    protected Map<?, ?> preprocessValueMap(Map<?, ?> valueMap) {
+    protected Map<?, ?> preprocessValueMap(final Map<?, ?> valueMap) {
         return valueMap;
     }
 

@@ -28,7 +28,7 @@ public class ConfigExecution {
     private final Config configResolver;
     private final XmlElement configElement;
 
-    public ConfigExecution(Config configResolver, XmlElement configElement, TestOption testOption, EditStrategyType defaultStrategy) throws DocumentedException {
+    public ConfigExecution(final Config configResolver, final XmlElement configElement, final TestOption testOption, final EditStrategyType defaultStrategy) throws DocumentedException {
         Config.checkUnrecognisedChildren(configElement);
         this.configResolver = configResolver;
         this.configElement = configElement;
@@ -45,16 +45,18 @@ public class ConfigExecution {
         return testOption == TestOption.set || testOption == TestOption.testThenSet;
     }
 
-    public Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements(ServiceReferenceReadableRegistry serviceRegistry) throws DocumentedException {
+    public Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements(
+            final ServiceReferenceReadableRegistry serviceRegistry) throws DocumentedException {
         return configResolver.fromXmlModulesResolved(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
     }
 
-    public ServiceRegistryWrapper getServiceRegistryWrapper(ServiceReferenceReadableRegistry serviceRegistry) {
+    public ServiceRegistryWrapper getServiceRegistryWrapper(final ServiceReferenceReadableRegistry serviceRegistry) {
         // TODO cache service registry
         return new ServiceRegistryWrapper(serviceRegistry);
     }
 
-    public Map<String, Multimap<String,ModuleElementDefinition>> getModulesDefinition(ServiceReferenceReadableRegistry serviceRegistry) throws DocumentedException {
+    public Map<String, Multimap<String,ModuleElementDefinition>> getModulesDefinition(
+            final ServiceReferenceReadableRegistry serviceRegistry) throws DocumentedException {
         return configResolver.fromXmlModulesMap(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
     }
 

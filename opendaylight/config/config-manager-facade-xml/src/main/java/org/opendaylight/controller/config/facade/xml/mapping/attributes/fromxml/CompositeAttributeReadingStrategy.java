@@ -24,14 +24,14 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
 
     private final Map<String, AttributeReadingStrategy> innerStrategies;
 
-    public CompositeAttributeReadingStrategy(String nullableDefault,
-            Map<String, AttributeReadingStrategy> innerStrategies) {
+    public CompositeAttributeReadingStrategy(final String nullableDefault,
+            final Map<String, AttributeReadingStrategy> innerStrategies) {
         super(nullableDefault);
         this.innerStrategies = innerStrategies;
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws DocumentedException {
+    AttributeConfigElement readElementHook(final List<XmlElement> configNodes) throws DocumentedException {
 
         Preconditions.checkState(configNodes.size() == 1, "This element should be present only once %s", configNodes);
 

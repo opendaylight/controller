@@ -29,12 +29,12 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     private final ServiceRegistryWrapper serviceTracker;
     private EnumResolver enumResolver;
 
-    public ObjectResolver(ServiceRegistryWrapper serviceTracker) {
+    public ObjectResolver(final ServiceRegistryWrapper serviceTracker) {
         this.serviceTracker = serviceTracker;
     }
 
     public Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> prepareResolving(
-            Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
+            final Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
         this.enumResolver = enumResolver;
 
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> strategies = Maps.newHashMap();
@@ -47,11 +47,11 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         return strategies;
     }
 
-    private AttributeResolvingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
+    private AttributeResolvingStrategy<?, ? extends OpenType<?>> prepareStrategy(final AttributeIfc attributeIfc) {
         return switchAttribute(attributeIfc);
     }
 
-    private Map<String, String> createYangToJmxMapping(TOAttribute attributeIfc) {
+    private Map<String, String> createYangToJmxMapping(final TOAttribute attributeIfc) {
         Map<String, String> retVal = Maps.newHashMap();
         for (Entry<String, AttributeIfc> entry : attributeIfc.getYangPropertiesToTypesMap().entrySet()) {
             retVal.put(entry.getKey(), (entry.getValue()).getLowerCaseCammelCase());
@@ -65,12 +65,12 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaSimpleAttribute(SimpleType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaSimpleAttribute(final SimpleType<?> openType) {
         return new SimpleAttributeResolvingStrategy(openType);
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaArrayAttribute(ArrayType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaArrayAttribute(final ArrayType<?> openType) {
 
         SimpleType<?> innerType = (SimpleType<?>) openType.getElementOpenType();
         AttributeResolvingStrategy<?, ? extends OpenType<?>> strat = new SimpleAttributeResolvingStrategy(innerType);
@@ -78,7 +78,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaCompositeAttribute(CompositeType openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaCompositeAttribute(final CompositeType openType) {
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap = Maps.newHashMap();
         Map<String, String> yangToJmxMapping = Maps.newHashMap();
 
@@ -86,7 +86,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         return new CompositeAttributeResolvingStrategy(innerMap, openType, yangToJmxMapping);
     }
 
-    private void fillMappingForComposite(CompositeType openType, Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap, Map<String, String> yangToJmxMapping) {
+    private void fillMappingForComposite(final CompositeType openType, final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap, final Map<String, String> yangToJmxMapping) {
         for (String innerAttributeKey : openType.keySet()) {
             innerMap.put(innerAttributeKey, caseJavaAttribute(openType.getType(innerAttributeKey)));
             yangToJmxMapping.put(innerAttributeKey, innerAttributeKey);
@@ -94,7 +94,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaUnionAttribute(OpenType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaUnionAttribute(final OpenType<?> openType) {
 
         Preconditions.checkState(openType instanceof CompositeType, "Unexpected open type, expected %s but was %s");
         CompositeType compositeType = (CompositeType) openType;
@@ -108,12 +108,12 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
 
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
-            SimpleType<?> openType) {
+            final SimpleType<?> openType) {
         return new ObjectNameAttributeResolvingStrategy(serviceTracker);
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseTOAttribute(CompositeType openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseTOAttribute(final CompositeType openType) {
         Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
         TOAttribute toAttribute = (TOAttribute) getLastAttribute();
 
@@ -129,14 +129,14 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListAttribute(ArrayType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListAttribute(final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
         AttributeIfc innerAttribute = ((ListAttribute) getLastAttribute()).getInnerAttribute();
         return new ArrayAttributeResolvingStrategy(prepareStrategy(innerAttribute), openType);
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(ArrayType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         return new ArrayAttributeResolvingStrategy(caseDependencyAttribute(SimpleType.OBJECTNAME), openType);
     }

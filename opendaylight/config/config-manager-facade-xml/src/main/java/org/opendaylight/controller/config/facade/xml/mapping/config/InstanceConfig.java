@@ -49,8 +49,8 @@ public final class InstanceConfig {
     private final Map<String, AttributeIfc> jmxToAttrConfig;
     private final BeanReader configRegistryClient;
 
-    public InstanceConfig(BeanReader configRegistryClient, Map<String, AttributeIfc> yangNamesToAttributes,
-                          String nullableDummyContainerName) {
+    public InstanceConfig(final BeanReader configRegistryClient, final Map<String, AttributeIfc> yangNamesToAttributes,
+                          final String nullableDummyContainerName) {
 
         this.yangToAttrConfig = yangNamesToAttributes;
         this.nullableDummyContainerName = nullableDummyContainerName;
@@ -58,7 +58,7 @@ public final class InstanceConfig {
         this.configRegistryClient = configRegistryClient;
     }
 
-    private Map<String, Object> getMappedConfiguration(ObjectName on, final EnumResolver enumResolver) {
+    private Map<String, Object> getMappedConfiguration(final ObjectName on, final EnumResolver enumResolver) {
 
         // TODO make field, mappingStrategies can be instantiated only once
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> mappingStrategies = new ObjectMapper()
@@ -80,7 +80,7 @@ public final class InstanceConfig {
                     continue;
                 }
                 toXml.put(configDefEntry.getValue().getAttributeYangName(), a.get());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new IllegalStateException("Unable to map value " + value + " to attribute "
                         + configDefEntry.getKey(), e);
             }
@@ -88,7 +88,7 @@ public final class InstanceConfig {
         return toXml;
     }
 
-    public Element toXml(ObjectName on, String namespace, Document document, Element rootElement, final EnumResolver enumResolver) {
+    public Element toXml(final ObjectName on, final String namespace, final Document document, final Element rootElement, final EnumResolver enumResolver) {
         Map<String, AttributeWritingStrategy> strats = new ObjectXmlWriter().prepareWriting(yangToAttrConfig, document);
         Map<String, Object> mappedConfig = getMappedConfiguration(on, enumResolver);
         Element parentElement;
@@ -102,7 +102,7 @@ public final class InstanceConfig {
         for (Entry<String, ?> mappingEntry : mappedConfig.entrySet()) {
             try {
                 strats.get(mappingEntry.getKey()).writeElement(parentElement, namespace, mappingEntry.getValue());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new IllegalStateException("Unable to write value " + mappingEntry.getValue() + " for attribute "
                         + mappingEntry.getValue(), e);
             }
@@ -110,7 +110,7 @@ public final class InstanceConfig {
         return rootElement;
     }
 
-    private void resolveConfiguration(InstanceConfigElementResolved mappedConfig, ServiceRegistryWrapper depTracker, final EnumResolver enumResolver) {
+    private void resolveConfiguration(final InstanceConfigElementResolved mappedConfig, final ServiceRegistryWrapper depTracker, final EnumResolver enumResolver) {
 
         // TODO make field, resolvingStrategies can be instantiated only once
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> resolvingStrategies = new ObjectResolver(
@@ -127,16 +127,16 @@ public final class InstanceConfig {
                 value.resolveValue(attributeResolvingStrategy, attributeName);
                 value.setJmxName(
                         yangToAttrConfig.get(attributeName).getUpperCaseCammelCase());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new IllegalStateException("Unable to resolve value " + value
                         + " to attribute " + attributeName, e);
             }
         }
     }
 
-    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
-                                                 EditStrategyType defaultStrategy,
-                                                 Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) throws DocumentedException {
+    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, final ServiceRegistryWrapper services, final String moduleNamespace,
+                                                 final EditStrategyType defaultStrategy,
+                                                 final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) throws DocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
@@ -159,7 +159,7 @@ public final class InstanceConfig {
             if (size == expectedChildNodes) {
                 try {
                     moduleElement = moduleElement.getOnlyChildElement(nullableDummyContainerName, moduleNamespace);
-                } catch (DocumentedException e) {
+                } catch (final DocumentedException e) {
                     throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
                             nameElement.getTextContent() + " - Expected child node with name " + nullableDummyContainerName +
                             "." + e.getMessage());
@@ -177,7 +177,7 @@ public final class InstanceConfig {
         recognisedChildren.addAll(typeAndNameElements);
         try {
             moduleElement.checkUnrecognisedElements(recognisedChildren);
-        } catch (DocumentedException e) {
+        } catch (final DocumentedException e) {
             throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
                     nameElement.getTextContent() + " - " +
                     e.getMessage(), e.getErrorType(), e.getErrorTag(),e.getErrorSeverity(),e.getErrorInfo());
@@ -193,8 +193,8 @@ public final class InstanceConfig {
         return instanceConfigElementResolved;
     }
 
-    private List<XmlElement> getConfigNodes(XmlElement moduleElement, String moduleNamespace, String name,
-            List<XmlElement> recognisedChildren, List<XmlElement> typeAndName) throws DocumentedException {
+    private List<XmlElement> getConfigNodes(final XmlElement moduleElement, final String moduleNamespace, final String name,
+            final List<XmlElement> recognisedChildren, final List<XmlElement> typeAndName) throws DocumentedException {
         List<XmlElement> foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name, moduleNamespace);
         if (foundConfigNodes.isEmpty()) {
             LOG.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
@@ -225,7 +225,7 @@ public final class InstanceConfig {
         return foundConfigNodes;
     }
 
-    private static Map<String, AttributeIfc> reverseMap(Map<String, AttributeIfc> yangNameToAttr) {
+    private static Map<String, AttributeIfc> reverseMap(final Map<String, AttributeIfc> yangNameToAttr) {
         Map<String, AttributeIfc> reversednameToAtr = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> entry : yangNameToAttr.entrySet()) {

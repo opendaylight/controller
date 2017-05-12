@@ -22,13 +22,13 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
     private final ServiceRegistryWrapper serviceTracker;
     private static final Logger LOG = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
 
-    ObjectNameAttributeResolvingStrategy(ServiceRegistryWrapper serviceTracker) {
+    ObjectNameAttributeResolvingStrategy(final ServiceRegistryWrapper serviceTracker) {
         super(SimpleType.OBJECTNAME);
         this.serviceTracker = serviceTracker;
     }
 
     @Override
-    public Optional<ObjectName> parseAttribute(String attrName, Object value) {
+    public Optional<ObjectName> parseAttribute(final String attrName, final Object value) {
         if (value == null) {
             return Optional.absent();
         }

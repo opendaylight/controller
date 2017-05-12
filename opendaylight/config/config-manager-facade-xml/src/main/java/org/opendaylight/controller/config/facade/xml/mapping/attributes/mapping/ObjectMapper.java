@@ -29,7 +29,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     private EnumResolver enumResolver;
 
     public Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> prepareMapping(
-            Map<String, AttributeIfc> configDefinition, EnumResolver enumResolver) {
+            final Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
         this.enumResolver = Preconditions.checkNotNull(enumResolver);
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> strategies = Maps.newHashMap();
 
@@ -40,7 +40,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         return strategies;
     }
 
-    public AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
+    public AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(final AttributeIfc attributeIfc) {
 
         if(attributeIfc instanceof DependencyAttribute) {
             namespaceOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
@@ -51,7 +51,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         return switchAttribute(attributeIfc);
     }
 
-    private Map<String, String> createJmxToYangMapping(TOAttribute attributeIfc) {
+    private Map<String, String> createJmxToYangMapping(final TOAttribute attributeIfc) {
         Map<String, String> retVal = Maps.newHashMap();
         for (Entry<String, AttributeIfc> entry : attributeIfc.getJmxPropertiesToTypesMap().entrySet()) {
             retVal.put(entry.getKey(), (entry.getValue()).getAttributeYangName());
@@ -60,7 +60,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaSimpleAttribute(SimpleType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaSimpleAttribute(final SimpleType<?> openType) {
         return new SimpleAttributeMappingStrategy(openType);
     }
 
@@ -70,7 +70,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaArrayAttribute(ArrayType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaArrayAttribute(final ArrayType<?> openType) {
 
         AttributeMappingStrategy<?, ? extends OpenType<?>> innerStrategy = new SimpleAttributeMappingStrategy(
                 (SimpleType<?>) openType.getElementOpenType());
@@ -78,7 +78,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaCompositeAttribute(CompositeType openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaCompositeAttribute(final CompositeType openType) {
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
 
         Map<String, String> attributeMapping = Maps.newHashMap();
@@ -93,7 +93,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaUnionAttribute(OpenType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaUnionAttribute(final OpenType<?> openType) {
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
 
         Map<String, String> attributeMapping = Maps.newHashMap();
@@ -112,12 +112,12 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
 
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
-            SimpleType<?> openType) {
+            final SimpleType<?> openType) {
         return new ObjectNameAttributeMappingStrategy(openType, namespaceOfDepAttr);
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseTOAttribute(CompositeType openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseTOAttribute(final CompositeType openType) {
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
 
         Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
@@ -132,14 +132,14 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListAttribute(ArrayType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListAttribute(final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
         return new ArrayAttributeMappingStrategy(openType,
                 prepareStrategy(((ListAttribute) getLastAttribute()).getInnerAttribute()));
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(ArrayType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         return new ArrayAttributeMappingStrategy(openType, caseDependencyAttribute(SimpleType.OBJECTNAME));
     }

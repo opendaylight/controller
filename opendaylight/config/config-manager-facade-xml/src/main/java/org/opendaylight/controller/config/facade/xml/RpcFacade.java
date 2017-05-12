@@ -145,7 +145,7 @@ public class RpcFacade {
         return configRegistryClient.invokeMethod(execution.on, execution.operationName, params, signature);
     }
 
-    public Element toXml(Document doc, Object result, OperationExecution execution) throws DocumentedException {
+    public Element toXml(final Document doc, final Object result, final OperationExecution execution) throws DocumentedException {
         AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper().prepareStrategy(execution.getReturnType());
         Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
         Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, execution.getReturnType().getOpenType());

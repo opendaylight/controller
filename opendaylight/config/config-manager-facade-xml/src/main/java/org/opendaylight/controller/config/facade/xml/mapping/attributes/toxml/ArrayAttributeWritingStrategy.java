@@ -16,12 +16,12 @@ public class ArrayAttributeWritingStrategy implements AttributeWritingStrategy {
 
     private final AttributeWritingStrategy innnerStrategy;
 
-    public ArrayAttributeWritingStrategy(AttributeWritingStrategy innerStrategy) {
+    public ArrayAttributeWritingStrategy(final AttributeWritingStrategy innerStrategy) {
         this.innnerStrategy = innerStrategy;
     }
 
     @Override
-    public void writeElement(Element parentElement, String namespace, Object value) {
+    public void writeElement(final Element parentElement, final String namespace, final Object value) {
         Util.checkType(value, List.class);
 
         for (Object innerObject : ((List<?>) value)) {

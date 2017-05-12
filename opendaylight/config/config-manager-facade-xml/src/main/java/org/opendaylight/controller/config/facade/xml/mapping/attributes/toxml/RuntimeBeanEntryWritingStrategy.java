@@ -18,13 +18,13 @@ import org.w3c.dom.Element;
 
 public class RuntimeBeanEntryWritingStrategy extends CompositeAttributeWritingStrategy {
 
-    public RuntimeBeanEntryWritingStrategy(Document document, String key,
-            Map<String, AttributeWritingStrategy> innerStrats) {
+    public RuntimeBeanEntryWritingStrategy(final Document document, final String key,
+            final Map<String, AttributeWritingStrategy> innerStrats) {
         super(document, key, innerStrats);
     }
 
     @Override
-    public void writeElement(Element parentElement, String namespace, Object value) {
+    public void writeElement(final Element parentElement, final String namespace, final Object value) {
         Util.checkType(value, Map.class);
 
         Element innerNode = XmlUtil.createElement(getDocument(), getKey(), Optional.<String>absent());

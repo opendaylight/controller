@@ -31,7 +31,7 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     private String key;
     private Map<String, Map<Date, IdentityMapping>> identityMap;
 
-    public Map<String, AttributeReadingStrategy> prepareReading(Map<String, AttributeIfc> yangToAttrConfig, Map<String, Map<Date, IdentityMapping>> identityMap) {
+    public Map<String, AttributeReadingStrategy> prepareReading(final Map<String, AttributeIfc> yangToAttrConfig, final Map<String, Map<Date, IdentityMapping>> identityMap) {
         Map<String, AttributeReadingStrategy> strategies = Maps.newHashMap();
         this.identityMap = identityMap;
 
@@ -42,42 +42,42 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
         return strategies;
     }
 
-    private AttributeReadingStrategy prepareReadingStrategy(String key, AttributeIfc attributeIfc) {
+    private AttributeReadingStrategy prepareReadingStrategy(final String key, final AttributeIfc attributeIfc) {
         this.key = key;
         return switchAttribute(attributeIfc);
     }
 
     @Override
-    protected AttributeReadingStrategy caseJavaBinaryAttribute(OpenType<?> openType) {
+    protected AttributeReadingStrategy caseJavaBinaryAttribute(final OpenType<?> openType) {
         return new SimpleBinaryAttributeReadingStrategy(getLastAttribute().getNullableDefault());
     }
 
     @Override
-    protected AttributeReadingStrategy caseJavaUnionAttribute(OpenType<?> openType) {
+    protected AttributeReadingStrategy caseJavaUnionAttribute(final OpenType<?> openType) {
         String mappingKey = JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION;
         return new SimpleUnionAttributeReadingStrategy(getLastAttribute().getNullableDefault(), mappingKey);
     }
 
     @Override
-    public AttributeReadingStrategy caseJavaSimpleAttribute(SimpleType<?> openType) {
+    public AttributeReadingStrategy caseJavaSimpleAttribute(final SimpleType<?> openType) {
         return new SimpleAttributeReadingStrategy(getLastAttribute().getNullableDefault());
     }
 
     @Override
-    public AttributeReadingStrategy caseJavaArrayAttribute(ArrayType<?> openType) {
+    public AttributeReadingStrategy caseJavaArrayAttribute(final ArrayType<?> openType) {
         SimpleAttributeReadingStrategy innerStrategy = new SimpleAttributeReadingStrategy(getLastAttribute().getNullableDefault());
         return new ArrayAttributeReadingStrategy(getLastAttribute().getNullableDefault(), innerStrategy);
     }
 
     @Override
-    public AttributeReadingStrategy caseJavaCompositeAttribute(CompositeType openType) {
+    public AttributeReadingStrategy caseJavaCompositeAttribute(final CompositeType openType) {
         Preconditions.checkState(openType.keySet().size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
         String mappingKey = openType.keySet().iterator().next();
         return new SimpleCompositeAttributeReadingStrategy(getLastAttribute().getNullableDefault(), mappingKey);
     }
 
     @Override
-    protected AttributeReadingStrategy caseJavaIdentityRefAttribute(OpenType<?> openType) {
+    protected AttributeReadingStrategy caseJavaIdentityRefAttribute(final OpenType<?> openType) {
         Preconditions.checkState(openType instanceof CompositeType);
         Set<String> keys = ((CompositeType) openType).keySet();
         Preconditions.checkState(keys.size() == 1, "Unexpected number of elements for open type %s, should be 1", openType);
@@ -86,12 +86,12 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     }
 
     @Override
-    protected AttributeReadingStrategy caseDependencyAttribute(SimpleType<?> openType) {
+    protected AttributeReadingStrategy caseDependencyAttribute(final SimpleType<?> openType) {
         return new ObjectNameAttributeReadingStrategy(getLastAttribute().getNullableDefault());
     }
 
     @Override
-    protected AttributeReadingStrategy caseTOAttribute(CompositeType openType) {
+    protected AttributeReadingStrategy caseTOAttribute(final CompositeType openType) {
         AttributeIfc lastAttribute = getLastAttribute();
         Preconditions.checkState(lastAttribute instanceof TOAttribute);
         Map<String, AttributeIfc> inner = ((TOAttribute)lastAttribute).getYangPropertiesToTypesMap();
@@ -108,7 +108,7 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     }
 
     @Override
-    protected AttributeReadingStrategy caseListAttribute(ArrayType<?> openType) {
+    protected AttributeReadingStrategy caseListAttribute(final ArrayType<?> openType) {
         AttributeIfc lastAttribute = getLastAttribute();
         Preconditions.checkState(lastAttribute instanceof ListAttribute);
         AttributeReadingStrategy innerStrategy = prepareReadingStrategy(key, ((ListAttribute) lastAttribute).getInnerAttribute());
@@ -116,7 +116,7 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     }
 
     @Override
-    protected AttributeReadingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
+    protected AttributeReadingStrategy caseListDependeciesAttribute(final ArrayType<?> openType) {
         AttributeIfc lastAttribute = getLastAttribute();
         Preconditions.checkState(lastAttribute instanceof ListDependenciesAttribute);
         AttributeReadingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
