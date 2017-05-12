@@ -17,17 +17,17 @@ public class PropertiesProviderBaseImpl implements PropertiesProvider {
     private static final Logger LOG = LoggerFactory.getLogger(PropertiesProviderBaseImpl.class);
     private final BundleContext bundleContext;
 
-    public PropertiesProviderBaseImpl(BundleContext bundleContext) {
+    public PropertiesProviderBaseImpl(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
     @Override
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         String fullKey = getFullKeyForReporting(key);
         return getPropertyWithoutPrefix(fullKey);
     }
 
-    public String getPropertyWithoutPrefix(String fullKey){
+    public String getPropertyWithoutPrefix(final String fullKey){
         LOG.trace("Full key {}", fullKey);
         return bundleContext.getProperty(fullKey);
     }
@@ -37,7 +37,7 @@ public class PropertiesProviderBaseImpl implements PropertiesProvider {
     }
 
     @Override
-    public String getFullKeyForReporting(String key) {
+    public String getFullKeyForReporting(final String key) {
         return getPrefix() + "." + key;
     }
 }

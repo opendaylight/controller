@@ -22,13 +22,13 @@ public class NoOpStorageAdapter implements StorageAdapter, Persister {
     private static final Logger LOG = LoggerFactory.getLogger(NoOpStorageAdapter.class);
 
     @Override
-    public Persister instantiate(PropertiesProvider propertiesProvider) {
+    public Persister instantiate(final PropertiesProvider propertiesProvider) {
         LOG.debug("instantiate called with {}", propertiesProvider);
         return this;
     }
 
     @Override
-    public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
+    public void persistConfig(final ConfigSnapshotHolder holder) throws IOException {
         LOG.debug("persistConfig called with {}", holder);
     }
 

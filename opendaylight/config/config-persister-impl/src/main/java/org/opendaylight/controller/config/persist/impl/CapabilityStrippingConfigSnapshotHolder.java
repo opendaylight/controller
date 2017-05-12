@@ -33,7 +33,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
     private final String configSnapshot;
     private final StripCapabilitiesResult stripCapabilitiesResult;
 
-    public CapabilityStrippingConfigSnapshotHolder(Element snapshot, Set<String> capabilities) {
+    public CapabilityStrippingConfigSnapshotHolder(final Element snapshot, final Set<String> capabilities) {
         final XmlElement configElement = XmlElement.fromDomElement(snapshot);
         configSnapshot = XmlUtil.toString(configElement.getDomElement());
         stripCapabilitiesResult = stripCapabilities(configElement, capabilities);
@@ -43,7 +43,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
         private final SortedSet<String> requiredCapabilities;
         private final SortedSet<String> obsoleteCapabilities;
 
-        private StripCapabilitiesResult(SortedSet<String> requiredCapabilities, SortedSet<String> obsoleteCapabilities) {
+        private StripCapabilitiesResult(final SortedSet<String> requiredCapabilities, final SortedSet<String> obsoleteCapabilities) {
             this.requiredCapabilities = Collections.unmodifiableSortedSet(requiredCapabilities);
             this.obsoleteCapabilities = Collections.unmodifiableSortedSet(obsoleteCapabilities);
         }
@@ -51,7 +51,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
 
 
     @VisibleForTesting
-    static StripCapabilitiesResult stripCapabilities(XmlElement configElement, Set<String> allCapabilitiesFromHello) {
+    static StripCapabilitiesResult stripCapabilities(final XmlElement configElement, final Set<String> allCapabilitiesFromHello) {
         // collect all namespaces
         Set<String> foundNamespacesInXML = getNamespaces(configElement);
         LOG.trace("All capabilities {}\nFound namespaces in XML {}", allCapabilitiesFromHello, foundNamespacesInXML);
@@ -74,7 +74,7 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
         return new StripCapabilitiesResult(requiredCapabilities, obsoleteCapabilities);
     }
 
-    static Set<String> getNamespaces(XmlElement element){
+    static Set<String> getNamespaces(final XmlElement element){
         Set<String> result = new HashSet<>();
         for (Entry<String,Attr> attribute : element.getAttributes().entrySet()) {
             if  (attribute.getKey().startsWith("xmlns")){

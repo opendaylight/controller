@@ -20,7 +20,7 @@ public class DummyAdapter implements StorageAdapter, Persister {
     static int persist = 0;
 
     @Override
-    public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
+    public void persistConfig(final ConfigSnapshotHolder holder) throws IOException {
         persist++;
     }
 
@@ -35,7 +35,7 @@ public class DummyAdapter implements StorageAdapter, Persister {
     static int props = 0;
 
     @Override
-    public Persister instantiate(PropertiesProvider propertiesProvider) {
+    public Persister instantiate(final PropertiesProvider propertiesProvider) {
         props++;
         return this;
     }

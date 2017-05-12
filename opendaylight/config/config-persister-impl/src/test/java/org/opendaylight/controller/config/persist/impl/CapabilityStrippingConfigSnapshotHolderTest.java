@@ -36,11 +36,11 @@ public class CapabilityStrippingConfigSnapshotHolderTest {
         assertEquals(obsoleteCapabilities, tested.getObsoleteCapabilities());
     }
 
-    private Set<String> readLines(String fileName) throws IOException {
+    private Set<String> readLines(final String fileName) throws IOException {
         return new HashSet<>(Resources.readLines(getClass().getResource(fileName), StandardCharsets.UTF_8));
     }
 
-    private String readToString(String fileName) throws IOException {
+    private String readToString(final String fileName) throws IOException {
         return Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8);
     }
 

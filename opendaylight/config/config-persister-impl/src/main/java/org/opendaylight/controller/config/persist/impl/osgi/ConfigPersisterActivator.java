@@ -65,7 +65,7 @@ public class ConfigPersisterActivator implements BundleActivator {
         ServiceTrackerCustomizer<ConfigSubsystemFacadeFactory, ConfigSubsystemFacadeFactory> schemaServiceTrackerCustomizer = new ServiceTrackerCustomizer<ConfigSubsystemFacadeFactory, ConfigSubsystemFacadeFactory>() {
 
             @Override
-            public ConfigSubsystemFacadeFactory addingService(ServiceReference<ConfigSubsystemFacadeFactory> reference) {
+            public ConfigSubsystemFacadeFactory addingService(final ServiceReference<ConfigSubsystemFacadeFactory> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event");
                 // Yang store service should not be registered multiple times
                 ConfigSubsystemFacadeFactory configSubsystemFacadeFactory = reference.getBundle().getBundleContext().getService(reference);
@@ -74,12 +74,12 @@ public class ConfigPersisterActivator implements BundleActivator {
             }
 
             @Override
-            public void modifiedService(ServiceReference<ConfigSubsystemFacadeFactory> reference, ConfigSubsystemFacadeFactory service) {
+            public void modifiedService(final ServiceReference<ConfigSubsystemFacadeFactory> reference, final ConfigSubsystemFacadeFactory service) {
                 LOG.warn("Config manager facade was modified unexpectedly");
             }
 
             @Override
-            public void removedService(ServiceReference<ConfigSubsystemFacadeFactory> reference, ConfigSubsystemFacadeFactory service) {
+            public void removedService(final ServiceReference<ConfigSubsystemFacadeFactory> reference, final ConfigSubsystemFacadeFactory service) {
                 LOG.warn("Config manager facade was removed unexpectedly");
             }
         };
@@ -89,18 +89,18 @@ public class ConfigPersisterActivator implements BundleActivator {
         schemaContextProviderServiceTracker.open();
     }
 
-    private long getConflictingVersionTimeoutMillis(PropertiesProviderBaseImpl propertiesProvider) {
+    private long getConflictingVersionTimeoutMillis(final PropertiesProviderBaseImpl propertiesProvider) {
         String timeoutProperty = propertiesProvider.getProperty(CONFLICTING_VERSION_TIMEOUT_MILLIS_PROPERTY);
         return timeoutProperty == null ? CONFLICTING_VERSION_TIMEOUT_MILLIS_DEFAULT : Long.valueOf(timeoutProperty);
     }
 
-    private long getMaxWaitForCapabilitiesMillis(PropertiesProviderBaseImpl propertiesProvider) {
+    private long getMaxWaitForCapabilitiesMillis(final PropertiesProviderBaseImpl propertiesProvider) {
         String timeoutProperty = propertiesProvider.getProperty(MAX_WAIT_FOR_CAPABILITIES_MILLIS_PROPERTY);
         return timeoutProperty == null ? MAX_WAIT_FOR_CAPABILITIES_MILLIS_DEFAULT : Long.valueOf(timeoutProperty);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         synchronized(autoCloseables) {
             CloseableUtil.closeAll(autoCloseables);
             autoCloseables.clear();
@@ -132,7 +132,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                         } else {
                             LOG.warn("Unable to process configs as BundleContext is null");
                         }
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         LOG.info("ConfigPusher thread stopped");
                     }
                     LOG.info("Configuration Persister initialization completed.");

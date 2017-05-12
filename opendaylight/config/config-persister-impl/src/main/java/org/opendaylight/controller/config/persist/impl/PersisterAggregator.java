@@ -63,7 +63,7 @@ public final class PersisterAggregator implements Persister {
         private final Persister storage;
         private final boolean readOnly;
 
-        public PersisterWithConfiguration(Persister storage, boolean readOnly) {
+        public PersisterWithConfiguration(final Persister storage, final boolean readOnly) {
             this.storage = storage;
             this.readOnly = readOnly;
         }
@@ -92,7 +92,7 @@ public final class PersisterAggregator implements Persister {
      */
     private final List<PersisterWithConfiguration> persisterWithConfigurations;
 
-    public PersisterAggregator(List<PersisterWithConfiguration> persisterWithConfigurations) {
+    public PersisterAggregator(final List<PersisterWithConfiguration> persisterWithConfigurations) {
         this.persisterWithConfigurations = persisterWithConfigurations;
     }
 
@@ -126,7 +126,7 @@ public final class PersisterAggregator implements Persister {
         }
     }
 
-    public static PersisterAggregator createFromProperties(PropertiesProvider propertiesProvider) {
+    public static PersisterAggregator createFromProperties(final PropertiesProvider propertiesProvider) {
         List<PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
         String prefixes = propertiesProvider.getProperty("active");
         if (prefixes!=null && !prefixes.isEmpty()) {
@@ -140,7 +140,7 @@ public final class PersisterAggregator implements Persister {
     }
 
     @Override
-    public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
+    public void persistConfig(final ConfigSnapshotHolder holder) throws IOException {
         for (PersisterWithConfiguration persisterWithConfiguration: persisterWithConfigurations){
             if (!persisterWithConfiguration.readOnly){
                 LOG.debug("Calling {}.persistConfig", persisterWithConfiguration.getStorage());
@@ -161,7 +161,7 @@ public final class PersisterAggregator implements Persister {
             List<ConfigSnapshotHolder> configs = null;
             try {
                 configs = persisterWithConfiguration.storage.loadLastConfigs();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException("Error while calling loadLastConfig on " +  persisterWithConfiguration, e);
             }
             if (!configs.isEmpty()) {
@@ -185,7 +185,7 @@ public final class PersisterAggregator implements Persister {
         for (PersisterWithConfiguration persisterWithConfiguration: persisterWithConfigurations){
             try{
                 persisterWithConfiguration.storage.close();
-            }catch(RuntimeException e) {
+            }catch(final RuntimeException e) {
                 LOG.error("Error while closing {}", persisterWithConfiguration.storage, e);
                 if (lastException == null){
                     lastException = e;
