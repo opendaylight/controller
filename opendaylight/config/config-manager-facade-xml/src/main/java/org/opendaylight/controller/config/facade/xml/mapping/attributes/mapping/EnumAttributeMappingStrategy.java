@@ -16,13 +16,13 @@ public class EnumAttributeMappingStrategy extends AbstractAttributeMappingStrate
 
     private final EnumResolver enumResolver;
 
-    public EnumAttributeMappingStrategy(CompositeType openType, final EnumResolver enumResolver) {
+    public EnumAttributeMappingStrategy(final CompositeType openType, final EnumResolver enumResolver) {
         super(openType);
         this.enumResolver = enumResolver;
     }
 
     @Override
-    public Optional<String> mapAttribute(Object value) {
+    public Optional<String> mapAttribute(final Object value) {
         if (value == null){
             return Optional.absent();
         }

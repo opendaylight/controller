@@ -20,14 +20,14 @@ public class ArrayAttributeMappingStrategy extends AbstractAttributeMappingStrat
 
     private final AttributeMappingStrategy<?, ? extends OpenType<?>> innerElementStrategy;
 
-    public ArrayAttributeMappingStrategy(ArrayType<?> arrayType,
-            AttributeMappingStrategy<?, ? extends OpenType<?>> innerElementStrategy) {
+    public ArrayAttributeMappingStrategy(final ArrayType<?> arrayType,
+            final AttributeMappingStrategy<?, ? extends OpenType<?>> innerElementStrategy) {
         super(arrayType);
         this.innerElementStrategy = innerElementStrategy;
     }
 
     @Override
-    public Optional<List<Object>> mapAttribute(Object value) {
+    public Optional<List<Object>> mapAttribute(final Object value) {
         if (value == null){
             return Optional.absent();
         }

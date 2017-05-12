@@ -27,7 +27,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
 
     private static final Logger LOG = LoggerFactory.getLogger(SimpleAttributeResolvingStrategy.class);
 
-    SimpleAttributeResolvingStrategy(SimpleType<?> simpleType) {
+    SimpleAttributeResolvingStrategy(final SimpleType<?> simpleType) {
         super(simpleType);
     }
 
@@ -37,7 +37,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     }
 
     @Override
-    public Optional<Object> parseAttribute(String attrName, Object value) throws DocumentedException {
+    public Optional<Object> parseAttribute(final String attrName, final Object value) throws DocumentedException {
         if (value == null) {
             return Optional.absent();
         }
@@ -45,7 +45,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         Class<?> cls;
         try {
             cls = Class.forName(getOpenType().getClassName());
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new RuntimeException("Unable to locate class for " + getOpenType().getClassName(), e);
         }
 
@@ -78,10 +78,10 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class DefaultResolver implements Resolver {
 
         @Override
-        public Object resolveObject(Class<?> type, String attrName, String value) throws DocumentedException {
+        public Object resolveObject(final Class<?> type, final String attrName, final String value) throws DocumentedException {
             try {
                 return parseObject(type, value);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new DocumentedException("Unable to resolve attribute " + attrName + " from " + value,
                         DocumentedException.ErrorType.APPLICATION,
                         DocumentedException.ErrorTag.OPERATION_FAILED,
@@ -89,7 +89,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             }
         }
 
-        protected Object parseObject(Class<?> type, String value) throws DocumentedException {
+        protected Object parseObject(final Class<?> type, final String value) throws DocumentedException {
             Method method = null;
             try {
                 method = type.getMethod("valueOf", String.class);
@@ -107,7 +107,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class StringResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) {
+        protected Object parseObject(final Class<?> type, final String value) {
             return value;
         }
     }
@@ -115,7 +115,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class BigIntegerResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) {
+        protected Object parseObject(final Class<?> type, final String value) {
             return new BigInteger(value);
         }
     }
@@ -123,7 +123,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class BigDecimalResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value) {
+        protected Object parseObject(final Class<?> type, final String value) {
             return new BigDecimal(value);
         }
     }
@@ -131,17 +131,17 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class CharResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(Class<?> type, String value)  {
+        protected Object parseObject(final Class<?> type, final String value)  {
             return value.charAt(0);
         }
     }
 
     static class DateResolver extends DefaultResolver {
         @Override
-        protected Object parseObject(Class<?> type, String value) throws DocumentedException {
+        protected Object parseObject(final Class<?> type, final String value) throws DocumentedException {
             try {
                 return Util.readDate(value);
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 LOG.trace("Unable parse value {} due to ",value, e);
                 throw new DocumentedException("Unable to parse value "+value+" as date.",
                         DocumentedException.ErrorType.APPLICATION,

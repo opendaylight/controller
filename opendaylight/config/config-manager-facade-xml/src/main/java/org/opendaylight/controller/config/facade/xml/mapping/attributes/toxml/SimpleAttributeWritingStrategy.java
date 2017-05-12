@@ -23,26 +23,26 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
      * @param document
      * @param key
      */
-    public SimpleAttributeWritingStrategy(Document document, String key) {
+    public SimpleAttributeWritingStrategy(final Document document, final String key) {
         this.document = document;
         this.key = key;
     }
 
     @Override
-    public void writeElement(Element parentElement, String namespace, Object value) {
+    public void writeElement(final Element parentElement, final String namespace, Object value) {
         value = preprocess(value);
         Util.checkType(value, String.class);
         Element innerNode = createElement(document, key, (String) value, Optional.of(namespace));
         parentElement.appendChild(innerNode);
     }
 
-    protected Element createElement(Document document, String key, String value, Optional<String> namespace) {
+    protected Element createElement(final Document document, final String key, final String value, final Optional<String> namespace) {
         Element typeElement = XmlUtil.createElement(document, key, namespace);
 
         typeElement.appendChild(document.createTextNode(value));
         return typeElement;
     }
-    protected Object preprocess(Object value) {
+    protected Object preprocess(final Object value) {
         return value;
     }
 

@@ -28,12 +28,12 @@ public class ModuleConfig {
     private final String moduleName;
     private final InstanceConfig instanceConfig;
 
-    public ModuleConfig(String moduleName, InstanceConfig mbeanMapping) {
+    public ModuleConfig(final String moduleName, final InstanceConfig mbeanMapping) {
         this.moduleName = moduleName;
         this.instanceConfig = mbeanMapping;
     }
 
-    public Element toXml(ObjectName instanceON, Document document, String namespace, final EnumResolver enumResolver) {
+    public Element toXml(final ObjectName instanceON, final Document document, final String namespace, final EnumResolver enumResolver) {
         final Optional<String> configNs =
                 Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         Element root = XmlUtil.createElement(document, XmlMappingConstants.MODULE_KEY, configNs);
@@ -55,8 +55,8 @@ public class ModuleConfig {
         return root;
     }
 
-    public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
-                                         String moduleNamespace, EditStrategyType defaultStrategy, Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) throws DocumentedException {
+    public ModuleElementResolved fromXml(final XmlElement moduleElement, final ServiceRegistryWrapper depTracker, final String instanceName,
+                                         final String moduleNamespace, final EditStrategyType defaultStrategy, final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) throws DocumentedException {
 
         InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, identityMap, enumResolver);
         return new ModuleElementResolved(instanceName, ice);

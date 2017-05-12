@@ -22,15 +22,15 @@ public class CompositeAttributeWritingStrategy implements AttributeWritingStrate
     private final Document document;
     private final Map<String, AttributeWritingStrategy> innerStrats;
 
-    public CompositeAttributeWritingStrategy(Document document, String key,
-            Map<String, AttributeWritingStrategy> innerStrats) {
+    public CompositeAttributeWritingStrategy(final Document document, final String key,
+            final Map<String, AttributeWritingStrategy> innerStrats) {
         this.document = document;
         this.key = key;
         this.innerStrats = innerStrats;
     }
 
     @Override
-    public void writeElement(Element parentElement, String namespace, Object value) {
+    public void writeElement(final Element parentElement, final String namespace, final Object value) {
         Util.checkType(value, Map.class);
 
         Element innerNode = XmlUtil.createElement(document, key, Optional.of(namespace));

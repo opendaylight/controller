@@ -14,12 +14,12 @@ import java.util.List;
 
 public class SimpleBinaryAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
 
-    public SimpleBinaryAttributeReadingStrategy(String nullableDefault) {
+    public SimpleBinaryAttributeReadingStrategy(final String nullableDefault) {
         super(nullableDefault);
     }
 
     @Override
-    protected Object postprocessParsedValue(String textContent) {
+    protected Object postprocessParsedValue(final String textContent) {
         BaseEncoding en = BaseEncoding.base64();
         byte[] decode = en.decode(textContent);
         List<String> parsed = Lists.newArrayListWithCapacity(decode.length);
@@ -30,7 +30,7 @@ public class SimpleBinaryAttributeReadingStrategy extends SimpleAttributeReading
     }
 
     @Override
-    protected Object postprocessNullableDefault(String nullableDefault) {
+    protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault == null ? null : postprocessParsedValue(nullableDefault);
     }
 }

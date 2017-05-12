@@ -15,20 +15,20 @@ public class SimpleCompositeAttributeReadingStrategy extends SimpleAttributeRead
 
     private final String key;
 
-    public SimpleCompositeAttributeReadingStrategy(String nullableDefault, String key) {
+    public SimpleCompositeAttributeReadingStrategy(final String nullableDefault, final String key) {
         super(nullableDefault);
         this.key = key;
     }
 
     @Override
-    protected Object postprocessParsedValue(String textContent) {
+    protected Object postprocessParsedValue(final String textContent) {
         HashMap<String,String> map = Maps.newHashMap();
         map.put(key, textContent);
         return map;
     }
 
     @Override
-    protected Object postprocessNullableDefault(String nullableDefault) {
+    protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault == null ? null : postprocessParsedValue(nullableDefault);
     }
 }

@@ -15,7 +15,7 @@ public abstract class AbstractAttributeMappingStrategy<T, O extends OpenType<?>>
 
     private final O attrOpenType;
 
-    public AbstractAttributeMappingStrategy(O attributeIfc) {
+    public AbstractAttributeMappingStrategy(final O attributeIfc) {
         this.attrOpenType = attributeIfc;
     }
 

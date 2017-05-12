@@ -20,13 +20,13 @@ public class IdentityMapping {
         this.identityNameToSchemaNode = Maps.newHashMap();
     }
 
-    public void addIdSchemaNode(IdentitySchemaNode node) {
+    public void addIdSchemaNode(final IdentitySchemaNode node) {
         String name = node.getQName().getLocalName();
         Preconditions.checkState(!identityNameToSchemaNode.containsKey(name));
         identityNameToSchemaNode.put(name, node);
     }
 
-    public boolean containsIdName(String idName) {
+    public boolean containsIdName(final String idName) {
         return identityNameToSchemaNode.containsKey(idName);
     }
 

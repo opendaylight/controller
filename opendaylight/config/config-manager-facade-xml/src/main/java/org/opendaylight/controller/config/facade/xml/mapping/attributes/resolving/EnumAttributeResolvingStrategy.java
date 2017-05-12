@@ -23,7 +23,7 @@ final class EnumAttributeResolvingStrategy extends AbstractAttributeResolvingStr
     private static final Logger LOG = LoggerFactory.getLogger(EnumAttributeResolvingStrategy.class);
     private final EnumResolver enumResolver;
 
-    EnumAttributeResolvingStrategy(CompositeType simpleType, final EnumResolver enumResolver) {
+    EnumAttributeResolvingStrategy(final CompositeType simpleType, final EnumResolver enumResolver) {
         super(simpleType);
         this.enumResolver = enumResolver;
     }
@@ -34,7 +34,7 @@ final class EnumAttributeResolvingStrategy extends AbstractAttributeResolvingStr
     }
 
     @Override
-    public Optional<Object> parseAttribute(String attrName, Object value) throws DocumentedException {
+    public Optional<Object> parseAttribute(final String attrName, final Object value) throws DocumentedException {
         if (value == null) {
             return Optional.absent();
         }

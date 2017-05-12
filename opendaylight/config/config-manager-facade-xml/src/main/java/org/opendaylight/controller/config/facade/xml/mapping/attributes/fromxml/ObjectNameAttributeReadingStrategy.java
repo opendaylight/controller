@@ -19,12 +19,12 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
 
     private static final Object PREFIX_SEPARATOR = ":";
 
-    public ObjectNameAttributeReadingStrategy(String nullableDefault) {
+    public ObjectNameAttributeReadingStrategy(final String nullableDefault) {
         super(nullableDefault);
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws DocumentedException {
+    AttributeConfigElement readElementHook(final List<XmlElement> configNodes) throws DocumentedException {
 
         XmlElement firstChild = configNodes.get(0);
         Preconditions.checkState(configNodes.size() == 1, "This element should be present only once " + firstChild
@@ -34,7 +34,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
         return AttributeConfigElement.create(getNullableDefault(), resolve(firstChild));
     }
 
-    private ObjectNameAttributeMappingStrategy.MappedDependency resolve(XmlElement firstChild) throws DocumentedException{
+    private ObjectNameAttributeMappingStrategy.MappedDependency resolve(final XmlElement firstChild) throws DocumentedException{
         XmlElement typeElement = firstChild.getOnlyChildElementWithSameNamespace(XmlMappingConstants.TYPE_KEY);
         Map.Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
 
@@ -47,7 +47,7 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
                 dependencyName);
     }
 
-    public static String checkPrefixAndExtractServiceName(XmlElement typeElement, Map.Entry<String, String> prefixNamespace) throws DocumentedException {
+    public static String checkPrefixAndExtractServiceName(final XmlElement typeElement, final Map.Entry<String, String> prefixNamespace) throws DocumentedException {
         String serviceName = typeElement.getTextContent();
         Preconditions.checkNotNull(prefixNamespace.getKey(), "Service %s value cannot be linked to namespace",
                 XmlMappingConstants.TYPE_KEY);

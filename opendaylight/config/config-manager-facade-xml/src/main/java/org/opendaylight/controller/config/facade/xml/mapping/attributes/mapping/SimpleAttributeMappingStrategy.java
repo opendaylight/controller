@@ -18,12 +18,12 @@ import org.opendaylight.controller.config.facade.xml.util.Util;
 
 public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStrategy<String, SimpleType<?>> {
 
-    public SimpleAttributeMappingStrategy(SimpleType<?> openType) {
+    public SimpleAttributeMappingStrategy(final SimpleType<?> openType) {
         super(openType);
     }
 
     @Override
-    public Optional<String> mapAttribute(Object value) {
+    public Optional<String> mapAttribute(final Object value) {
         if (value == null){
             return Optional.absent();
         }
@@ -55,7 +55,7 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
     static class DefaultWriterPlugin implements WriterPlugin {
 
         @Override
-        public String writeObject(Object value) {
+        public String writeObject(final Object value) {
             return value.toString();
         }
     }
@@ -63,7 +63,7 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
     static class DatePlugin implements WriterPlugin {
 
         @Override
-        public String writeObject(Object value) {
+        public String writeObject(final Object value) {
             Preconditions.checkArgument(value instanceof Date, "Attribute must be Date");
             return Util.writeDate((Date) value);
         }

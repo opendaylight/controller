@@ -25,14 +25,14 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
     private final String key;
     private final Map<String, Map<Date, IdentityMapping>> identityMap;
 
-    public SimpleIdentityRefAttributeReadingStrategy(String nullableDefault, String key, Map<String, Map<Date, IdentityMapping>> identityMap) {
+    public SimpleIdentityRefAttributeReadingStrategy(final String nullableDefault, final String key, final Map<String, Map<Date, IdentityMapping>> identityMap) {
         super(nullableDefault);
         this.key = key;
         this.identityMap = identityMap;
     }
 
     @Override
-    protected String readElementContent(XmlElement xmlElement) throws DocumentedException {
+    protected String readElementContent(final XmlElement xmlElement) throws DocumentedException {
         Map.Entry<String, String> namespaceOfTextContent = xmlElement.findNamespaceOfTextContent();
         String content = xmlElement.getTextContent();
 
@@ -65,14 +65,14 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
     }
 
     @Override
-    protected Object postprocessParsedValue(String textContent) {
+    protected Object postprocessParsedValue(final String textContent) {
         HashMap<String,String> map = Maps.newHashMap();
         map.put(key, textContent);
         return map;
     }
 
     @Override
-    protected Object postprocessNullableDefault(String nullableDefault) {
+    protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault == null ? null : postprocessParsedValue(nullableDefault);
     }
 }

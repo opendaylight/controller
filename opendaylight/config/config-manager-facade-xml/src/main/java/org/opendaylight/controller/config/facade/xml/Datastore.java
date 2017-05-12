@@ -19,8 +19,8 @@ public enum Datastore {
      * @param transactionProvider
      * @return
      */
-    public static DatastoreQueryStrategy getInstanceQueryStrategy(Datastore source,
-            TransactionProvider transactionProvider) {
+    public static DatastoreQueryStrategy getInstanceQueryStrategy(final Datastore source,
+            final TransactionProvider transactionProvider) {
         switch (source) {
         case running:
             return new RunningDatastoreQueryStrategy(transactionProvider);

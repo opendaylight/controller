@@ -25,11 +25,11 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
      * @param document
      * @param key
      */
-    public SimpleIdentityRefAttributeWritingStrategy(Document document, String key) {
+    public SimpleIdentityRefAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
-    protected Object preprocess(Object value) {
+    protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
         Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
         Object stringValue = ((Map<?, ?>) value).values().iterator().next();
@@ -39,7 +39,7 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
     }
 
     @Override
-    protected Element createElement(Document doc, String key, String value, Optional<String> namespace) {
+    protected Element createElement(final Document doc, final String key, final String value, final Optional<String> namespace) {
         QName qName = QName.create(value);
         String identityValue = qName.getLocalName();
         String identityNamespace = qName.getNamespace().toString();

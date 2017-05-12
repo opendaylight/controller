@@ -21,13 +21,13 @@ public class ObjectNameAttributeMappingStrategy extends
 
     private final String namespace;
 
-    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, String namespace) {
+    public ObjectNameAttributeMappingStrategy(final SimpleType<?> openType, final String namespace) {
         super(openType);
         this.namespace = namespace;
     }
 
     @Override
-    public Optional<MappedDependency> mapAttribute(Object value) {
+    public Optional<MappedDependency> mapAttribute(final Object value) {
         if (value == null){
             return Optional.absent();
         }
@@ -50,7 +50,7 @@ public class ObjectNameAttributeMappingStrategy extends
     public static class MappedDependency {
         private final String namespace, serviceName, refName;
 
-        public MappedDependency(String namespace, String serviceName, String refName) {
+        public MappedDependency(final String namespace, final String serviceName, final String refName) {
             this.serviceName = serviceName;
             this.refName = refName;
             this.namespace = namespace;

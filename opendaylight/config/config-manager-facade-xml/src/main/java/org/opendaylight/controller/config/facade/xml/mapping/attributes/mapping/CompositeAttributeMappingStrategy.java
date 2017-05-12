@@ -24,16 +24,16 @@ public class CompositeAttributeMappingStrategy extends
     private final Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies;
     private final Map<String, String> jmxToJavaNameMapping;
 
-    public CompositeAttributeMappingStrategy(CompositeType compositeType,
-            Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies,
-            Map<String, String> jmxToJavaNameMapping) {
+    public CompositeAttributeMappingStrategy(final CompositeType compositeType,
+            final Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies,
+            final Map<String, String> jmxToJavaNameMapping) {
         super(compositeType);
         this.innerStrategies = innerStrategies;
         this.jmxToJavaNameMapping = jmxToJavaNameMapping;
     }
 
     @Override
-    public Optional<Map<String, Object>> mapAttribute(Object value) {
+    public Optional<Map<String, Object>> mapAttribute(final Object value) {
         if (value == null){
             return Optional.absent();
         }
@@ -62,7 +62,7 @@ public class CompositeAttributeMappingStrategy extends
         return Optional.of(retVal);
     }
 
-    protected Optional<?> mapInnerAttribute(CompositeDataSupport compositeData, String jmxName, String description) {
+    protected Optional<?> mapInnerAttribute(final CompositeDataSupport compositeData, final String jmxName, final String description) {
         Object innerValue = compositeData.get(jmxName);
 
         AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies

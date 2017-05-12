@@ -24,7 +24,7 @@ public abstract class AttributeIfcSwitchStatement<T> {
 
     private AttributeIfc lastAttribute;
 
-    public T switchAttribute(AttributeIfc attributeIfc) {
+    public T switchAttribute(final AttributeIfc attributeIfc) {
 
         this.lastAttribute = attributeIfc;
 
@@ -43,7 +43,7 @@ public abstract class AttributeIfcSwitchStatement<T> {
                 } else {
                     return caseJavaAttribute(openType);
                 }
-            } catch (UnknownOpenTypeException e) {
+            } catch (final UnknownOpenTypeException e) {
                 throw getIllegalArgumentException(attributeIfc);
             }
 
@@ -64,28 +64,28 @@ public abstract class AttributeIfcSwitchStatement<T> {
         return lastAttribute;
     }
 
-    protected T caseJavaIdentityRefAttribute(OpenType<?> openType) {
+    protected T caseJavaIdentityRefAttribute(final OpenType<?> openType) {
         return caseJavaAttribute(openType);
     }
 
-    protected T caseJavaUnionAttribute(OpenType<?> openType) {
+    protected T caseJavaUnionAttribute(final OpenType<?> openType) {
         return caseJavaAttribute(openType);
     }
 
-    protected T caseJavaEnumAttribute(OpenType<?> openType) {
+    protected T caseJavaEnumAttribute(final OpenType<?> openType) {
         return caseJavaAttribute(openType);
     }
 
-    protected T caseJavaBinaryAttribute(OpenType<?> openType) {
+    protected T caseJavaBinaryAttribute(final OpenType<?> openType) {
         return caseJavaAttribute(openType);
     }
 
-    private IllegalArgumentException getIllegalArgumentException(AttributeIfc attributeIfc) {
+    private IllegalArgumentException getIllegalArgumentException(final AttributeIfc attributeIfc) {
         return new IllegalArgumentException("Unknown attribute type " + attributeIfc.getClass() + ", " + attributeIfc
                 + " with open type:" + attributeIfc.getOpenType());
     }
 
-    public final T caseJavaAttribute(OpenType<?> openType) {
+    public final T caseJavaAttribute(final OpenType<?> openType) {
         if (openType instanceof SimpleType<?>) {
             return caseJavaSimpleAttribute((SimpleType<?>) openType);
         } else if (openType instanceof ArrayType<?>) {
@@ -114,7 +114,7 @@ public abstract class AttributeIfcSwitchStatement<T> {
     private static class UnknownOpenTypeException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public UnknownOpenTypeException(String message) {
+        public UnknownOpenTypeException(final String message) {
             super(message);
         }
     }

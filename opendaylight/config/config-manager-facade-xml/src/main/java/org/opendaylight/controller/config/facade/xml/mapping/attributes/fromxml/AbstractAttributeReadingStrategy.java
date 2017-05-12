@@ -16,7 +16,7 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
 
     private final String nullableDefault;
 
-    public AbstractAttributeReadingStrategy(String nullableDefault) {
+    public AbstractAttributeReadingStrategy(final String nullableDefault) {
         this.nullableDefault = nullableDefault;
     }
 
@@ -25,7 +25,7 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
     }
 
     @Override
-    public AttributeConfigElement readElement(List<XmlElement> configNodes) throws DocumentedException {
+    public AttributeConfigElement readElement(final List<XmlElement> configNodes) throws DocumentedException {
         if (configNodes.size() == 0){
             return AttributeConfigElement.createNullValue(postprocessNullableDefault(nullableDefault));
         }
@@ -34,7 +34,7 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
 
     abstract AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws DocumentedException;
 
-    protected Object postprocessNullableDefault(String nullableDefault) {
+    protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault;
     }
 }

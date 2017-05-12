@@ -27,14 +27,14 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
 
     private static final Logger LOG = LoggerFactory.getLogger(ArrayAttributeResolvingStrategy.class);
 
-    public ArrayAttributeResolvingStrategy(AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolved,
-            ArrayType<?> openType) {
+    public ArrayAttributeResolvingStrategy(final AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolved,
+            final ArrayType<?> openType) {
         super(openType);
         this.innerTypeResolvingStrategy = innerTypeResolved;
     }
 
     @Override
-    public Optional<Object> parseAttribute(String attrName, Object value) throws DocumentedException {
+    public Optional<Object> parseAttribute(final String attrName, final Object value) throws DocumentedException {
         if (value == null) {
             return Optional.absent();
         }
@@ -49,7 +49,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
         } else {
             try {
                 innerTypeClass = Class.forName(getOpenType().getElementOpenType().getClassName());
-            } catch (ClassNotFoundException e) {
+            } catch (final ClassNotFoundException e) {
                 throw new IllegalStateException("Unable to locate class for "
                         + getOpenType().getElementOpenType().getClassName(), e);
             }
@@ -80,7 +80,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
                 final ArrayType<?> openType =
                         new ArrayType<>(getOpenType().getDimension(), innerTypeResolvingStrategy.getOpenType());
                 setOpenType(openType);
-            } catch (OpenDataException e) {
+            } catch (final OpenDataException e) {
                 throw new IllegalStateException("An error occurred during restoration of array type " + this
                         + " for attribute " + attrName + " from value " + value, e);
             }
@@ -92,7 +92,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
         return Optional.of(parsedArray);
     }
 
-    private static String toStringArray(Object array) {
+    private static String toStringArray(final Object array) {
         StringBuilder build = new StringBuilder(array.toString());
         build.append(" [");
         for (int i = 0; i < Array.getLength(array); i++) {
@@ -103,10 +103,10 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
         return build.toString();
     }
 
-    private static Class<?> getPrimitiveType(Class<?> innerTypeClass) {
+    private static Class<?> getPrimitiveType(final Class<?> innerTypeClass) {
         try {
             return (Class<?>) innerTypeClass.getField("TYPE").get(null);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalStateException("Unable to determine primitive type to " + innerTypeClass);
         }
     }
