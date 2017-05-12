@@ -111,7 +111,7 @@ public class FeatureConfigPusher {
             // we're fully on Karaf 4 only, as a comment in BUG-6787 indicates that (in Karaf 4) :
             // "the 'installed' Map of FeaturesServiceImpl .. appears to be correctly synchronized/thread-safe".
             // (Or, if it's still NOK, then it could be fixed properly upstream in Karaf once we're on recent.)
-            } catch (ConcurrentModificationException e) {
+            } catch (final ConcurrentModificationException e) {
                 // BUG-6787 experience shows that a LOG.warn (or info) here is very confusing to end-users;
                 // as we have a retry loop anyway, there is no point informing (and confusing) users of this
                 // intermediate state of, so ... NOOP, do not log here.
@@ -119,7 +119,7 @@ public class FeatureConfigPusher {
             }
             try {
                 Thread.sleep(RETRY_PAUSE_MILLIS);
-            } catch (InterruptedException e1) {
+            } catch (final InterruptedException e1) {
                 throw new IllegalStateException(e1);
             }
         }

@@ -88,7 +88,7 @@ public class AbstractFeatureWrapper implements Feature {
         return Optional.absent();
     }
 
-    private static boolean isConfigSnapshot(String fileName) {
+    private static boolean isConfigSnapshot(final String fileName) {
         if(!Files.getFileExtension(fileName).equals(CONFIG_FILE_SUFFIX)) {
             return false;
         }
@@ -110,7 +110,7 @@ public class AbstractFeatureWrapper implements Feature {
 
             Element root = builderFactory.newDocumentBuilder().parse(fis).getDocumentElement();
             return ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME.equals(root.getLocalName());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Could not parse XML file {}", file, e);
             return false;
         }
