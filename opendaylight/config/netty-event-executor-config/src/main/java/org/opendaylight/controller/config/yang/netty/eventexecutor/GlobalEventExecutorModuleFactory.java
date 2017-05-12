@@ -30,7 +30,7 @@ public class GlobalEventExecutorModuleFactory extends org.opendaylight.controlle
 
 
     @Override
-    public GlobalEventExecutorModule instantiateModule(String instanceName, DependencyResolver dependencyResolver, GlobalEventExecutorModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+    public GlobalEventExecutorModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver, final GlobalEventExecutorModule oldModule, final AutoCloseable oldInstance, final BundleContext bundleContext) {
         checkArgument(SINGLETON_NAME.equals(instanceName),"Illegal instance name '" + instanceName + "', only allowed name is " + SINGLETON_NAME);
         GlobalEventExecutorModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule,
                 oldInstance, bundleContext);
@@ -39,7 +39,7 @@ public class GlobalEventExecutorModuleFactory extends org.opendaylight.controlle
     }
 
     @Override
-    public GlobalEventExecutorModule instantiateModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public GlobalEventExecutorModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
         checkArgument(SINGLETON_NAME.equals(instanceName),"Illegal instance name '" + instanceName + "', only allowed name is " + SINGLETON_NAME);
         GlobalEventExecutorModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
         module.setBundleContext(bundleContext);

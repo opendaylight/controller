@@ -61,7 +61,7 @@ public class ImmediateEventExecutorModuleTest extends AbstractConfigTest {
         assertStatus(status, 0, 0, 1);
     }
 
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName)
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         transaction.newMXBeanProxy(nameCreated, ImmediateEventExecutorModuleMXBean.class);
