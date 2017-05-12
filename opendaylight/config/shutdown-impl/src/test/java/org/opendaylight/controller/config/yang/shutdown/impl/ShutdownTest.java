@@ -62,7 +62,7 @@ public class ShutdownTest extends AbstractConfigTest {
         try {
             transaction.createModule(NAME, "foo");
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             assertEquals("Singleton enforcement failed. Expected instance name shutdown", e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public class ShutdownTest extends AbstractConfigTest {
         try {
             runtime.shutdown("foo", 60000L, null);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             assertEquals("Invalid secret", e.getMessage());
         }
         runtime.shutdown("", 60000L, null);
@@ -92,7 +92,7 @@ public class ShutdownTest extends AbstractConfigTest {
         shutdownViaRuntimeJMX(secret);
     }
 
-    private void setSecret(String secret) throws InstanceNotFoundException, ValidationException, ConflictingVersionException {
+    private void setSecret(final String secret) throws InstanceNotFoundException, ValidationException, ConflictingVersionException {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName on = transaction.lookupConfigBean(NAME, NAME);
         ShutdownModuleMXBean proxy = transaction.newMXBeanProxy(on, ShutdownModuleMXBean.class);
@@ -107,18 +107,18 @@ public class ShutdownTest extends AbstractConfigTest {
             ShutdownRuntimeMXBean runtime = JMX.newMXBeanProxy(platformMBeanServer, runtimeON, ShutdownRuntimeMXBean.class);
             runtime.shutdown("foo", 60000L, null);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             assertEquals("Invalid secret", e.getMessage());
         }
     }
 
-    private void shutdownViaRuntimeJMX(String secret) throws Exception {
+    private void shutdownViaRuntimeJMX(final String secret) throws Exception {
         // test JMX rpc
         ShutdownRuntimeMXBean runtime = JMX.newMXBeanProxy(platformMBeanServer, runtimeON, ShutdownRuntimeMXBean.class);
         try {
             runtime.shutdown("", 60000L, null);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             assertEquals("Invalid secret", e.getMessage());
         }
         runtime.shutdown(secret, 60000L, null);

@@ -20,8 +20,8 @@ public class ShutdownServiceImpl implements ShutdownService, AutoCloseable {
     private final ShutdownService impl;
     private final ShutdownRuntimeRegistration registration;
 
-    public ShutdownServiceImpl(String secret, Bundle systemBundle,
-                               ShutdownRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
+    public ShutdownServiceImpl(final String secret, final Bundle systemBundle,
+                               final ShutdownRuntimeRegistrator rootRuntimeBeanRegistratorWrapper) {
         if (secret == null) {
             throw new IllegalArgumentException("Secret cannot be null");
         }
@@ -30,7 +30,7 @@ public class ShutdownServiceImpl implements ShutdownService, AutoCloseable {
     }
 
     @Override
-    public void shutdown(String inputSecret, Long maxWaitTime, Optional<String> reason) {
+    public void shutdown(final String inputSecret, final Long maxWaitTime, final Optional<String> reason) {
         impl.shutdown(inputSecret, maxWaitTime, reason);
     }
 
@@ -45,17 +45,17 @@ class Impl implements ShutdownService {
     private final String secret;
     private final Bundle systemBundle;
 
-    Impl(String secret, Bundle systemBundle) {
+    Impl(final String secret, final Bundle systemBundle) {
         this.secret = secret;
         this.systemBundle = systemBundle;
     }
 
     @Override
-    public void shutdown(String inputSecret, Long maxWaitTime, Optional<String> reason) {
+    public void shutdown(final String inputSecret, final Long maxWaitTime, final Optional<String> reason) {
         LOG.warn("Shutdown issued with secret {} and reason {}", inputSecret, reason);
         try {
             Thread.sleep(1000); // prevent brute force attack
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.warn("Shutdown process interrupted", e);
         }
@@ -83,7 +83,7 @@ class StopSystemBundleThread extends Thread {
     private static final Logger LOG = LoggerFactory.getLogger(StopSystemBundleThread.class);
     private final Bundle systemBundle;
 
-    StopSystemBundleThread(Bundle systemBundle) {
+    StopSystemBundleThread(final Bundle systemBundle) {
         super("stop-system-bundle");
         this.systemBundle = systemBundle;
     }
@@ -95,9 +95,9 @@ class StopSystemBundleThread extends Thread {
             Thread.sleep(1000);
             LOG.debug("Stopping system bundle");
             systemBundle.stop();
-        } catch (BundleException e) {
+        } catch (final BundleException e) {
             LOG.warn("Can not stop OSGi server", e);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.warn("Shutdown process interrupted", e);
         }
     }
@@ -106,7 +106,7 @@ class StopSystemBundleThread extends Thread {
 class CallSystemExitThread extends Thread {
     private static final Logger LOG = LoggerFactory.getLogger(CallSystemExitThread.class);
     private final long maxWaitTime;
-    CallSystemExitThread(long maxWaitTime) {
+    CallSystemExitThread(final long maxWaitTime) {
         super("call-system-exit-daemon");
         setDaemon(true);
         if (maxWaitTime <= 0){
@@ -137,7 +137,7 @@ class CallSystemExitThread extends Thread {
             }
             LOG.warn("Thread dump:{}", sb);
             System.exit(1);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.warn("Interrupted, not going to call System.exit(1)");
         }
     }
@@ -147,12 +147,12 @@ class CallSystemExitThread extends Thread {
 class MXBeanImpl implements ShutdownRuntimeMXBean {
     private final ShutdownService impl;
 
-    MXBeanImpl(ShutdownService impl) {
+    MXBeanImpl(final ShutdownService impl) {
         this.impl = impl;
     }
 
     @Override
-    public void shutdown(String inputSecret, Long maxWaitTime, String nullableReason) {
+    public void shutdown(final String inputSecret, final Long maxWaitTime, final String nullableReason) {
         Optional<String> optionalReason;
         if (nullableReason == null) {
             optionalReason = Optional.absent();
