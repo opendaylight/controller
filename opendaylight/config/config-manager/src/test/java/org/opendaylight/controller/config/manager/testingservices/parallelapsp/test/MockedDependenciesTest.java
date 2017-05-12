@@ -53,7 +53,7 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         int threadCount;
 
         public MockedThreadPoolModule(
-                DynamicMBeanWithInstance dynamicMBeanWithInstance, ModuleIdentifier moduleIdentifier) {
+                final DynamicMBeanWithInstance dynamicMBeanWithInstance, final ModuleIdentifier moduleIdentifier) {
             // no reconfiguration / reuse is supported
             this.moduleIdentifier = moduleIdentifier;
         }
@@ -64,7 +64,7 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         }
 
         @Override
-        public void setThreadCount(int threadCount) {
+        public void setThreadCount(final int threadCount) {
             this.threadCount = threadCount;
         }
 
@@ -74,7 +74,7 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         }
 
         @Override
-        public boolean canReuse(Module oldModule) {
+        public boolean canReuse(final Module oldModule) {
             return false;
         }
 
@@ -93,7 +93,7 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
             Closeable {
         private final int threadCount;
 
-        public MockedThreadPool(int threadCount) {
+        public MockedThreadPool(final int threadCount) {
             this.threadCount = threadCount;
         }
 

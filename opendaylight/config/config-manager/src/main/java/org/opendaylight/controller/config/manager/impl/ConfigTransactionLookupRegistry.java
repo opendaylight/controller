@@ -33,15 +33,15 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
     private final TransactionModuleJMXRegistrator txModuleJMXRegistrator;
     private final Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories;
 
-    ConfigTransactionLookupRegistry(TransactionIdentifier transactionIdentifier,
-                                    TransactionJMXRegistratorFactory factory, Map<String, Entry<ModuleFactory, BundleContext>> allCurrentFactories) {
+    ConfigTransactionLookupRegistry(final TransactionIdentifier transactionIdentifier,
+                                    final TransactionJMXRegistratorFactory factory, final Map<String, Entry<ModuleFactory, BundleContext>> allCurrentFactories) {
         this.transactionIdentifier = transactionIdentifier;
         this.transactionJMXRegistrator = factory.create();
         this.txModuleJMXRegistrator = transactionJMXRegistrator.createTransactionModuleJMXRegistrator();
         this.allCurrentFactories = allCurrentFactories;
     }
 
-    private void checkTransactionName(ObjectName objectName) {
+    private void checkTransactionName(final ObjectName objectName) {
         String foundTransactionName = ObjectNameUtil
                 .getTransactionName(objectName);
         if (!transactionIdentifier.getName().equals(foundTransactionName)) {
@@ -62,7 +62,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName) {
         return lookupConfigBeans(moduleName, "*");
     }
 
@@ -70,7 +70,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
      * {@inheritDoc}
      */
     @Override
-    public ObjectName lookupConfigBean(String moduleName, String instanceName)
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         return LookupBeansUtil.lookupConfigBean(this, moduleName, instanceName);
     }
@@ -79,15 +79,15 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName,
-                                             String instanceName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName,
+                                             final String instanceName) {
         ObjectName namePattern = ObjectNameUtil.createModulePattern(moduleName,
                 instanceName, transactionIdentifier.getName());
         return txModuleJMXRegistrator.queryNames(namePattern, null);
     }
 
     @Override
-    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkConfigBeanExists(final ObjectName objectName) throws InstanceNotFoundException {
         ObjectNameUtil.checkDomain(objectName);
         ObjectNameUtil.checkType(objectName, ObjectNameUtil.TYPE_MODULE);
         checkTransactionName(objectName);
@@ -108,7 +108,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         transactionJMXRegistrator.close();
     }
 
-    public void registerMBean(ConfigTransactionControllerInternal transactionController, ObjectName controllerObjectName) throws InstanceAlreadyExistsException {
+    public void registerMBean(final ConfigTransactionControllerInternal transactionController, final ObjectName controllerObjectName) throws InstanceAlreadyExistsException {
         transactionJMXRegistrator.registerMBean(transactionController, controllerObjectName);
     }
 
@@ -129,8 +129,8 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupRuntimeBeans(String moduleName,
-                                              String instanceName) {
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName,
+                                              final String instanceName) {
         String finalModuleName = moduleName == null ? "*" : moduleName;
         String finalInstanceName = instanceName == null ? "*" : instanceName;
         ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(

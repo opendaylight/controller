@@ -28,7 +28,7 @@ public class TestingScheduledThreadPoolImpl implements TestingThreadPoolIfc,
             .newLinkedList();
 
     public TestingScheduledThreadPoolImpl(
-            RootRuntimeBeanRegistrator runtimeBeanRegistrator, int corePoolSize) {
+            final RootRuntimeBeanRegistrator runtimeBeanRegistrator, final int corePoolSize) {
         this.runtimeBeanRegistrator = runtimeBeanRegistrator;
         executor = new ScheduledThreadPoolExecutor(corePoolSize);
         allExecutors.add(executor);

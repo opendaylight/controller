@@ -150,7 +150,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
                     cachedInstance = response;
                 }
                 return response;
-            } catch(InvocationTargetException e) {
+            } catch(final InvocationTargetException e) {
                 throw e.getCause();
             } finally {
                 if (isGetInstance) {

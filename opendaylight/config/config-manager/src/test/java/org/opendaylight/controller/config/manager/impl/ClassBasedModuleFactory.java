@@ -42,8 +42,8 @@ public class ClassBasedModuleFactory implements ModuleFactory {
      *            This class must implement Module interface and all exported
      *            interfaces.
      */
-    public ClassBasedModuleFactory(String implementationName,
-            Class<? extends Module> configBeanClass) {
+    public ClassBasedModuleFactory(final String implementationName,
+            final Class<? extends Module> configBeanClass) {
         this.implementationName = implementationName;
         this.configBeanClass = configBeanClass;
     }
@@ -54,20 +54,20 @@ public class ClassBasedModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext bundleContext)
+    public Module createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext bundleContext)
             throws Exception {
         Preconditions.checkNotNull(old);
         return constructModule(instanceName, dependencyResolver, old);
     }
 
-    private Module constructModule(String instanceName, DependencyResolver dependencyResolver, DynamicMBeanWithInstance old) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    private Module constructModule(final String instanceName, final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         Preconditions.checkNotNull(dependencyResolver);
         ModuleIdentifier moduleIdentifier = new ModuleIdentifier(implementationName, instanceName);
         Constructor<? extends Module> declaredConstructor;
         try {
             declaredConstructor = configBeanClass.getDeclaredConstructor(DynamicMBeanWithInstance.class, ModuleIdentifier.class);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new IllegalStateException(
                     "Did not find constructor with parameters (DynamicMBeanWithInstance) in "
                             + configBeanClass, e);
@@ -77,8 +77,8 @@ public class ClassBasedModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public Module createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
         try {
             return constructModule(instanceName, dependencyResolver, null);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -88,7 +88,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
 
     @Override
     public boolean isModuleImplementingServiceInterface(
-            Class<? extends AbstractServiceInterface> serviceInterface) {
+            final Class<? extends AbstractServiceInterface> serviceInterface) {
         Class<?>[] classes = configBeanClass.getInterfaces();
         List<Class<?>> ifc = Arrays.asList(classes);
         if (ifc.contains(serviceInterface)) {
@@ -104,7 +104,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
         return new HashSet<>();
     }
 

@@ -230,7 +230,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             try {
                 boolean skipChecks = true;
                 newRegistry.saveServiceReference(refNameEntry.getKey(), currentImplementation, skipChecks);
-            } catch (InstanceNotFoundException e) {
+            } catch (final InstanceNotFoundException e) {
                 LOG.error("Cannot save service reference({}, {})", refNameEntry.getKey(), currentImplementation);
                 throw new IllegalStateException("Possible code error", e);
             }
@@ -304,7 +304,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         ObjectName on;
         try {
             on = lookupRegistry.lookupConfigBean(moduleIdentifier.getFactoryName(), moduleIdentifier.getInstanceName());
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             LOG.error("Cannot find instance {}", moduleIdentifier);
             throw new IllegalStateException("Cannot find instance " + moduleIdentifier, e);
         }
@@ -411,7 +411,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             ServiceReferenceJMXRegistration dummyMXBeanRegistration;
             try {
                 dummyMXBeanRegistration = serviceReferenceRegistrator.registerMBean(dummyMXBean, result);
-            } catch (InstanceAlreadyExistsException e) {
+            } catch (final InstanceAlreadyExistsException e) {
                 throw new IllegalStateException("Possible error in code. Cannot register " + result, e);
             }
             mBeans.put(serviceReference, new SimpleImmutableEntry<>(dummyMXBean, dummyMXBeanRegistration));
@@ -473,7 +473,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         for (ServiceReference serviceReference: mBeans.keySet()) {
             try {
                 removeServiceReference(serviceReference);
-            } catch (InstanceNotFoundException e) {
+            } catch (final InstanceNotFoundException e) {
                 throw new IllegalStateException("Possible error in code", e);
             }
         }

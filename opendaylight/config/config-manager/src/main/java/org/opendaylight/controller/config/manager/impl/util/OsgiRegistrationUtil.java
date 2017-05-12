@@ -64,7 +64,7 @@ public class OsgiRegistrationUtil {
                 AutoCloseable ac = it.previous();
                 try {
                     ac.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.warn("Exception while closing {}", ac, e);
                     if (firstException == null) {
                         firstException = e;

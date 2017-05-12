@@ -57,7 +57,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     @Override
-    public Object addingService(ServiceReference<ModuleFactory> moduleFactoryServiceReference) {
+    public Object addingService(final ServiceReference<ModuleFactory> moduleFactoryServiceReference) {
         blankTransactionAsync();
         return null;
     }
@@ -75,16 +75,16 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
                 CommitStatus commitStatus = blankTransaction.hit();
                 LOG.debug("Committed blank transaction with status {}", commitStatus);
                 return;
-            } catch (ConflictingVersionException e) {
+            } catch (final ConflictingVersionException e) {
                 lastException = e;
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException interruptedException) {
+                } catch (final InterruptedException interruptedException) {
                     Thread.currentThread().interrupt();
                     LOG.debug("blankTransactionSync was interrupted");
                     return;
                 }
-            } catch (ValidationException e) {
+            } catch (final ValidationException e) {
                 LOG.error("Validation exception while running blank transaction indicates programming error", e);
             }
         }
@@ -94,12 +94,12 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     @Override
-    public void modifiedService(ServiceReference <ModuleFactory> moduleFactoryServiceReference, Object o) {
+    public void modifiedService(final ServiceReference <ModuleFactory> moduleFactoryServiceReference, final Object o) {
         blankTransactionAsync();
     }
 
     @Override
-    public void removedService(ServiceReference<ModuleFactory> moduleFactoryServiceReference, Object o) {
+    public void removedService(final ServiceReference<ModuleFactory> moduleFactoryServiceReference, final Object o) {
         blankTransactionAsync();
     }
 

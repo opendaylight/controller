@@ -141,7 +141,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
             platformMBeanServer.invoke(fixed1names, "validate", new Object[0],
                     new String[0]);
             fail();
-        } catch (MBeanException e) {
+        } catch (final MBeanException e) {
             Exception targetException = e.getTargetException();
             assertNotNull(targetException);
             assertEquals(ValidationException.class, targetException.getClass());
@@ -151,7 +151,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         try {
             transaction.validateBean(fixed1names);
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             for (Map.Entry<String, Map<String, ExceptionMessageWithStackTrace>> exception : e
                     .getFailedValidations().entrySet()) {
                 for (Map.Entry<String, ExceptionMessageWithStackTrace> entry : exception
@@ -166,7 +166,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         try {
             transaction.validateConfig();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             for (Map.Entry<String, Map<String, ExceptionMessageWithStackTrace>> exception : e
                     .getFailedValidations().entrySet()) {
                 for (Map.Entry<String, ExceptionMessageWithStackTrace> entry : exception
@@ -179,7 +179,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         }
         try {
             transaction.commit();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             for (Map.Entry<String, Map<String, ExceptionMessageWithStackTrace>> exception : e
                     .getFailedValidations().entrySet()) {
                 for (Map.Entry<String, ExceptionMessageWithStackTrace> entry : exception
@@ -249,7 +249,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         try {
             platformMBeanServer.getMBeanInfo(on);
             fail();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             assertTrue(e instanceof InstanceNotFoundException);
         }
     }
@@ -331,7 +331,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         try {
             platformMBeanServer.getMBeanInfo(transaction.getObjectName());
             fail();
-        }catch(InstanceNotFoundException e){
+        }catch(final InstanceNotFoundException e){
             assertEquals("org.opendaylight.controller:TransactionName=ConfigTransaction-0-1,type=ConfigTransaction", e.getMessage());
         }
     }
@@ -347,7 +347,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         try {
             transaction1.commit();
             fail();
-        } catch (ConflictingVersionException e) {
+        } catch (final ConflictingVersionException e) {
             assertEquals(
                     "Optimistic lock failed. Expected parent version 2, was 0",
                     e.getMessage());
@@ -365,7 +365,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         try {
             configRegistryClient.commitConfig(transaction1.getObjectName());
             fail();
-        } catch (ConflictingVersionException e) {
+        } catch (final ConflictingVersionException e) {
             assertEquals(
                     "Optimistic lock failed. Expected parent version 2, was 0",
                     e.getMessage());

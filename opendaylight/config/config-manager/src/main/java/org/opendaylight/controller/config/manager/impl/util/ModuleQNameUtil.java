@@ -21,9 +21,9 @@ public class ModuleQNameUtil {
     private ModuleQNameUtil() {
     }
 
-    public static Set<String> getQNames(Map<String, Entry<ModuleFactory, BundleContext>> resolved) {
-        Set<String> result = new HashSet<>();
-        for (Entry<ModuleFactory, BundleContext> entry : resolved.values()) {
+    public static Set<String> getQNames(final Map<String, Entry<ModuleFactory, BundleContext>> resolved) {
+        final Set<String> result = new HashSet<>();
+        for (final Entry<ModuleFactory, BundleContext> entry : resolved.values()) {
             Class<?> inspected = entry.getKey().getClass();
             if (inspected.isInterface()) {
                 throw new IllegalArgumentException("Unexpected interface " + inspected);

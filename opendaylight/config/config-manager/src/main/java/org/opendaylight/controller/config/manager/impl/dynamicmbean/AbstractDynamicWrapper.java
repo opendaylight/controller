@@ -133,7 +133,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         try {
             configMBeanServer.addNotificationListener(
                     MBeanServerDelegate.DELEGATE_NAME, listener, null, null);
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             throw new RuntimeException("Could not add notification listener", e);
         }
         return listener;
@@ -201,7 +201,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
                 try {
                     setter = module.getClass().getMethod(method.getName(),
                             method.getParameterTypes());
-                } catch (NoSuchMethodException e) {
+                } catch (final NoSuchMethodException e) {
                     throw new RuntimeException("No such method on "
                             + moduleIdentifier, e);
                 }
@@ -240,7 +240,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         try {
             obj = internalServer
                     .getAttribute(objectNameInternal, attributeName);
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             new MBeanException(e);
         }
 
@@ -315,7 +315,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
                 Object value = getAttribute(attributeName);
                 result.add(new Attribute(attributeName, value));
 
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.debug("Getting attribute {} failed", attributeName, e);
             }
         }
@@ -329,7 +329,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
                 && signature[0].equals(String.class.getName())) {
             try {
                 return getAttribute((String) params[0]);
-            } catch (AttributeNotFoundException e) {
+            } catch (final AttributeNotFoundException e) {
                 throw new MBeanException(e, "Attribute not found on "
                         + moduleIdentifier);
             }

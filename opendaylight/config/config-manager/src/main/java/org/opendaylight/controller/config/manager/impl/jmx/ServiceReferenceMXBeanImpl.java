@@ -13,7 +13,7 @@ import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
 public class ServiceReferenceMXBeanImpl implements ServiceReferenceMXBean {
     private ObjectName currentImplementation;
 
-    public ServiceReferenceMXBeanImpl(ObjectName currentImplementation) {
+    public ServiceReferenceMXBeanImpl(final ObjectName currentImplementation) {
         this.currentImplementation = currentImplementation;
     }
 
@@ -22,7 +22,7 @@ public class ServiceReferenceMXBeanImpl implements ServiceReferenceMXBean {
         return currentImplementation;
     }
 
-    public void setCurrentImplementation(ObjectName currentImplementation) {
+    public void setCurrentImplementation(final ObjectName currentImplementation) {
         this.currentImplementation = currentImplementation;
     }
 }

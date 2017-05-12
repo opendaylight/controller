@@ -23,9 +23,9 @@ public class HierarchicalRuntimeBeanRegistrationImpl implements
     private final Map<String, String> properties;
 
     public HierarchicalRuntimeBeanRegistrationImpl(
-            ModuleIdentifier moduleIdentifier,
-            InternalJMXRegistrator internalJMXRegistrator,
-            Map<String, String> properties) {
+            final ModuleIdentifier moduleIdentifier,
+            final InternalJMXRegistrator internalJMXRegistrator,
+            final Map<String, String> properties) {
         this.moduleIdentifier = moduleIdentifier;
         this.internalJMXRegistrator = internalJMXRegistrator;
         this.properties = properties;
@@ -39,8 +39,8 @@ public class HierarchicalRuntimeBeanRegistrationImpl implements
     }
 
     @Override
-    public HierarchicalRuntimeBeanRegistrationImpl register(String key,
-            String value, RuntimeBean mxBean) {
+    public HierarchicalRuntimeBeanRegistrationImpl register(final String key,
+            final String value, final RuntimeBean mxBean) {
         Map<String, String> currentProperties = new HashMap<>(properties);
         currentProperties.put(key, value);
         ObjectName on = ObjectNameUtil.createRuntimeBeanName(
@@ -49,7 +49,7 @@ public class HierarchicalRuntimeBeanRegistrationImpl implements
         InternalJMXRegistrator child = internalJMXRegistrator.createChild();
         try {
             child.registerMBean(mxBean, on);
-        } catch (InstanceAlreadyExistsException e) {
+        } catch (final InstanceAlreadyExistsException e) {
             throw RootRuntimeBeanRegistratorImpl.sanitize(e, moduleIdentifier,
                     on);
         }

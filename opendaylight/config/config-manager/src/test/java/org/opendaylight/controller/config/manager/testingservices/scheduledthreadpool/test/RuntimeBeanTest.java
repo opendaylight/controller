@@ -85,7 +85,7 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
         try {
             checkRuntimeBean(on);
             fail();
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             // No-op
         }
     }

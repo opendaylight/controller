@@ -83,7 +83,7 @@ public class BundleContextBackedModuleFactoriesResolverTest {
         doReturn(f1).when(bundleContext).getService(s2);
         try {
             resolver.getAllFactories();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             assertThat(e.getMessage(), containsString(f1.getImplementationName()));
             assertThat(e.getMessage(), containsString("unique"));
             return;

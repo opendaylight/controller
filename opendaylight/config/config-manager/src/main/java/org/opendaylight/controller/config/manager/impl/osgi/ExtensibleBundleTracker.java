@@ -80,7 +80,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
                 forEachAdditionalBundle(tracker -> tracker.addingBundle(bundle, event));
                 LOG.trace("AddingBundle for {} and event {} finished successfully",bundle,event);
                 return primaryTrackerRetVal;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Failed to add bundle {}", bundle, e);
                 throw e;
             }
@@ -106,7 +106,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
             primaryTracker.removedBundle(bundle, event, object.get());
             forEachAdditionalBundle(tracker -> tracker.removedBundle(bundle, event, null));
             LOG.trace("Removed bundle event for {} finished successfully.",bundle);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Failed to remove bundle {}", bundle, e);
         }
     }

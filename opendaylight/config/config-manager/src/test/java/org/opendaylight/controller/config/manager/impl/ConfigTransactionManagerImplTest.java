@@ -32,7 +32,7 @@ public class ConfigTransactionManagerImplTest extends
         try {
             configRegistryJMXRegistrator.registerToJMX(mockedRegistry);
             fail();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             assertTrue(e instanceof InstanceAlreadyExistsException);
         }
     }

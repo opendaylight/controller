@@ -27,9 +27,9 @@ public class TestingFixedThreadPoolModule implements
     private int threadCount = 0;
     private boolean triggerNewInstanceCreation;
 
-    TestingFixedThreadPoolModule(ModuleIdentifier name,
-            @Nullable AutoCloseable oldCloseable,
-            @Nullable TestingFixedThreadPool oldInstance) {
+    TestingFixedThreadPoolModule(final ModuleIdentifier name,
+            @Nullable final AutoCloseable oldCloseable,
+            @Nullable final TestingFixedThreadPool oldInstance) {
         this.name = name;
         this.oldCloseable = oldCloseable;
         this.oldInstance = oldInstance;
@@ -38,7 +38,7 @@ public class TestingFixedThreadPoolModule implements
 
     // attributes
     @Override
-    public void setThreadCount(int threadCount) {
+    public void setThreadCount(final int threadCount) {
         this.threadCount = threadCount;
     }
 
@@ -53,7 +53,7 @@ public class TestingFixedThreadPoolModule implements
     }
 
     @Override
-    public void setTriggerNewInstanceCreation(boolean triggerNewInstanceCreation) {
+    public void setTriggerNewInstanceCreation(final boolean triggerNewInstanceCreation) {
         this.triggerNewInstanceCreation = triggerNewInstanceCreation;
     }
 
@@ -88,7 +88,7 @@ public class TestingFixedThreadPoolModule implements
                 if (oldCloseable != null) {
                     try {
                         oldCloseable.close();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw new RuntimeException(e);
                     }
                 }

@@ -25,8 +25,8 @@ public class CommitInfo {
     private final List<DestroyedModule> destroyedFromPreviousTransactions;
     private final Map<ModuleIdentifier, ModuleInternalTransactionalInfo> commitMap;
 
-    public CommitInfo(List<DestroyedModule> destroyedFromPreviousTransactions,
-            Map<ModuleIdentifier, ModuleInternalTransactionalInfo> commitMap) {
+    public CommitInfo(final List<DestroyedModule> destroyedFromPreviousTransactions,
+            final Map<ModuleIdentifier, ModuleInternalTransactionalInfo> commitMap) {
         this.destroyedFromPreviousTransactions = Collections
                 .unmodifiableList(destroyedFromPreviousTransactions);
         this.commitMap = Collections.unmodifiableMap(commitMap);

@@ -30,11 +30,11 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     private final BundleContext bundleContext;
     @Nullable private ModuleInternalInfo maybeOldInternalInfo;
 
-    public ModuleInternalTransactionalInfo(ModuleIdentifier name, Module proxiedModule,
-                                           ModuleFactory moduleFactory,
-                                           ModuleInternalInfo maybeOldInternalInfo,
-                                           TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-                                           boolean isDefaultBean, Module realModule, BundleContext bundleContext) {
+    public ModuleInternalTransactionalInfo(final ModuleIdentifier name, final Module proxiedModule,
+                                           final ModuleFactory moduleFactory,
+                                           final ModuleInternalInfo maybeOldInternalInfo,
+                                           final TransactionModuleJMXRegistration transactionModuleJMXRegistration,
+                                           final boolean isDefaultBean, final Module realModule, final BundleContext bundleContext) {
         this.name = name;
         this.proxiedModule = proxiedModule;
         this.moduleFactory = moduleFactory;

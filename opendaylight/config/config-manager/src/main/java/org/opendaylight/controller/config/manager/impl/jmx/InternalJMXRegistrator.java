@@ -75,9 +75,9 @@ abstract class InternalJMXRegistrator implements AutoCloseable {
             throws InstanceAlreadyExistsException {
         try {
             getMBeanServer().registerMBean(object, on);
-        } catch (NotCompliantMBeanException e) {
+        } catch (final NotCompliantMBeanException e) {
             throw new IllegalArgumentException("Object does not comply to JMX", e);
-        } catch (MBeanRegistrationException e) {
+        } catch (final MBeanRegistrationException e) {
             throw new IllegalStateException("Failed to register " + on, e);
         }
 
@@ -92,9 +92,9 @@ abstract class InternalJMXRegistrator implements AutoCloseable {
 
         try {
             getMBeanServer().unregisterMBean(on);
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             LOG.warn("MBean {} not found on server", on, e);
-        } catch (MBeanRegistrationException e) {
+        } catch (final MBeanRegistrationException e) {
             throw new IllegalStateException("Failed to unregister MBean " + on, e);
         }
     }
@@ -159,7 +159,7 @@ abstract class InternalJMXRegistrator implements AutoCloseable {
         for (ObjectName on : registeredObjectNames) {
             try {
                 getMBeanServer().unregisterMBean(on);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("Ignoring error while unregistering {}", on, e);
             }
         }

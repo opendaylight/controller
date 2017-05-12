@@ -22,7 +22,7 @@ public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
     protected abstract String getThreadPoolImplementationName();
 
     protected ObjectName createParallelAPSP(
-            ConfigTransactionJMXClient transaction, ObjectName threadPoolON)
+            final ConfigTransactionJMXClient transaction, final ObjectName threadPoolON)
             throws InstanceAlreadyExistsException {
         ObjectName apspName = transaction.createModule(
                 TestingParallelAPSPModuleFactory.NAME, apsp1);
@@ -33,8 +33,8 @@ public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
         return apspName;
     }
 
-    protected ObjectName createFixed1(ConfigTransactionJMXClient transaction,
-            int numberOfThreads) throws InstanceAlreadyExistsException {
+    protected ObjectName createFixed1(final ConfigTransactionJMXClient transaction,
+            final int numberOfThreads) throws InstanceAlreadyExistsException {
 
         ObjectName name = transaction.createModule(
                 getThreadPoolImplementationName(), fixed1);

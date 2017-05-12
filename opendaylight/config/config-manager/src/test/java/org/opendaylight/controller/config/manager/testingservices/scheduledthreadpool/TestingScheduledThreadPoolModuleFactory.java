@@ -53,7 +53,7 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
         TestingScheduledThreadPoolImpl oldInstance;
         try {
             oldInstance = (TestingScheduledThreadPoolImpl) old.getInstance();
-        } catch (ClassCastException e) {// happens after OSGi update
+        } catch (final ClassCastException e) {// happens after OSGi update
             oldInstance = null;
         }
 

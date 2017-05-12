@@ -13,7 +13,7 @@ public class TransactionIdentifier implements Identifier {
     private static final long serialVersionUID = 1L;
     private final String name;
 
-    public TransactionIdentifier(String name) {
+    public TransactionIdentifier(final String name) {
         this.name = name;
     }
 
@@ -27,7 +27,7 @@ public class TransactionIdentifier implements Identifier {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

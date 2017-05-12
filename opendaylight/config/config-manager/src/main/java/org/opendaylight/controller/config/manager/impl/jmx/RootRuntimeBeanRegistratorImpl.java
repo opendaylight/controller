@@ -36,7 +36,7 @@ public class RootRuntimeBeanRegistratorImpl implements
     public HierarchicalRuntimeBeanRegistrationImpl registerRoot(final RuntimeBean mxBean) {
         try {
             internalJMXRegistrator.registerMBean(mxBean, defaultRuntimeON);
-        } catch (InstanceAlreadyExistsException e) {
+        } catch (final InstanceAlreadyExistsException e) {
             throw sanitize(e, moduleIdentifier, defaultRuntimeON);
         }
         return new HierarchicalRuntimeBeanRegistrationImpl(moduleIdentifier,

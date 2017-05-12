@@ -24,7 +24,7 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
     class ServiceReferenceJMXRegistration implements AutoCloseable {
         private final InternalJMXRegistration registration;
 
-        ServiceReferenceJMXRegistration(InternalJMXRegistration registration) {
+        ServiceReferenceJMXRegistration(final InternalJMXRegistration registration) {
             this.registration = registration;
         }
 
@@ -42,7 +42,7 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
         private final InternalJMXRegistrator currentJMXRegistrator;
         private final String nullableTransactionName;
 
-        public ServiceReferenceRegistratorImpl(NestableJMXRegistrator parentRegistrator, String nullableTransactionName){
+        public ServiceReferenceRegistratorImpl(final NestableJMXRegistrator parentRegistrator, final String nullableTransactionName){
             currentJMXRegistrator = parentRegistrator.createChild();
             this.nullableTransactionName = nullableTransactionName;
         }
@@ -54,8 +54,8 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
 
 
         @Override
-        public ServiceReferenceJMXRegistration registerMBean(ServiceReferenceMXBeanImpl object,
-                                                             ObjectName on) throws InstanceAlreadyExistsException {
+        public ServiceReferenceJMXRegistration registerMBean(final ServiceReferenceMXBeanImpl object,
+                                                             final ObjectName on) throws InstanceAlreadyExistsException {
             String actualTransactionName = ObjectNameUtil.getTransactionName(on);
             boolean broken = false;
             broken |= (nullableTransactionName == null) != (actualTransactionName == null);
@@ -85,13 +85,13 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
         private final NestableJMXRegistrator parentRegistrator;
         private final String nullableTransactionName;
 
-        public ServiceReferenceTransactionRegistratorFactoryImpl(TransactionModuleJMXRegistrator parentRegistrator,
-                                                             String nullableTransactionName) {
+        public ServiceReferenceTransactionRegistratorFactoryImpl(final TransactionModuleJMXRegistrator parentRegistrator,
+                                                             final String nullableTransactionName) {
             this.parentRegistrator = parentRegistrator;
             this.nullableTransactionName = nullableTransactionName;
         }
 
-        public ServiceReferenceTransactionRegistratorFactoryImpl(BaseJMXRegistrator baseJMXRegistrator) {
+        public ServiceReferenceTransactionRegistratorFactoryImpl(final BaseJMXRegistrator baseJMXRegistrator) {
             this.parentRegistrator = baseJMXRegistrator;
             this.nullableTransactionName = null;
         }

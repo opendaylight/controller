@@ -65,7 +65,7 @@ public class RuntimeBeanRegistratorImplTest extends
         try {
             platformMBeanServer.getMBeanInfo(on);
             fail();
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
 
         }
     }
@@ -137,7 +137,7 @@ public class RuntimeBeanRegistratorImplTest extends
         try {
             createRoot();
             fail();
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             assertThat(e.getMessage(), containsString(rootRegistration
                     .getObjectName().toString()));
             assertThat(e.getMessage(),

@@ -32,20 +32,20 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public TestingParallelAPSPModule createModule(String instanceName,
-            DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public TestingParallelAPSPModule createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
         return new TestingParallelAPSPModule(new ModuleIdentifier(NAME,
                 instanceName), dependencyResolver, null, null);
     }
 
     @Override
-    public TestingParallelAPSPModule createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext context)
+    public TestingParallelAPSPModule createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext context)
             throws Exception {
         TestingParallelAPSPImpl oldInstance;
         try {
             oldInstance = (TestingParallelAPSPImpl) old.getInstance();
-        } catch (ClassCastException e) {
+        } catch (final ClassCastException e) {
             oldInstance = null;
         }
         TestingParallelAPSPModule result = new TestingParallelAPSPModule(
@@ -61,12 +61,12 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
 
     @Override
     public boolean isModuleImplementingServiceInterface(
-            Class<? extends AbstractServiceInterface> serviceInterface) {
+            final Class<? extends AbstractServiceInterface> serviceInterface) {
         return false;
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext context) {
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext context) {
         return new HashSet<>();
     }
 

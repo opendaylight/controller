@@ -46,7 +46,7 @@ public class AnnotationsHelper {
                 // we need to go deeper
                 inspectedClass = inspectedClass.getSuperclass();
                 // no need to go further
-            } catch (NoSuchMethodException e) {
+            } catch (final NoSuchMethodException e) {
                 inspectedClass = Object.class;
             }
         } while (!inspectedClass.equals(Object.class));
@@ -63,7 +63,7 @@ public class AnnotationsHelper {
                 if (annotation != null) {
                     result.add(annotation);
                 }
-            } catch (NoSuchMethodException e) {
+            } catch (final NoSuchMethodException e) {
 
             }
         }

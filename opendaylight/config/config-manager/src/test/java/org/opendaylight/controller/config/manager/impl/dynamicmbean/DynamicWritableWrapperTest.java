@@ -33,8 +33,8 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
             atomicBoolean);
 
     @Override
-    protected AbstractDynamicWrapper getDynamicWrapper(Module module,
-            ModuleIdentifier moduleIdentifier) {
+    protected AbstractDynamicWrapper getDynamicWrapper(final Module module,
+            final ModuleIdentifier moduleIdentifier) {
         return new DynamicWritableWrapper(module, moduleIdentifier,
                 "transaction-1",
                 readOnlyAtomicBoolean, MBeanServerFactory.createMBeanServer(),
@@ -103,7 +103,7 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
         }
     }
 
-    private void setNumberOfThreads(int numberOfThreads) throws Exception {
+    private void setNumberOfThreads(final int numberOfThreads) throws Exception {
         DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer,
                 threadPoolDynamicWrapperON, DynamicMBean.class);
 
@@ -118,7 +118,7 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
         try {
             setNumberOfThreads(newThreadCount);
             fail();
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             assertEquals("Operation is not allowed now", e.getMessage());
         } finally {
             atomicBoolean.set(false);
