@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_62693b8b",
+        "filename": "opendaylight/md-sal/mdsal-trace/features/features-mdsal-trace/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-05-12T12:35:24Z",
+      "side": 1,
+      "message": "I think this should be just finalname\u003d\"etc/mdsal-trace-config.xml\"",
+      "revId": "408ff176ce8b6627687612394e6e321eba533f93",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
