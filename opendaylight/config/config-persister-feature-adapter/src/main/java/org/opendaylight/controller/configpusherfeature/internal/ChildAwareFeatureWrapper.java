@@ -31,7 +31,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
     private static final Logger LOG = LoggerFactory.getLogger(ChildAwareFeatureWrapper.class);
     private FeaturesService featuresService= null;
 
-    protected ChildAwareFeatureWrapper(Feature f) {
+    protected ChildAwareFeatureWrapper(final Feature f) {
         // Don't use without a feature service
     }
 
@@ -39,7 +39,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
      * @param f Feature to wrap
      * @param s FeaturesService to look up dependencies
      */
-    ChildAwareFeatureWrapper(Feature f, FeaturesService s) throws Exception {
+    ChildAwareFeatureWrapper(final Feature f, final FeaturesService s) throws Exception {
         super(s.getFeature(f.getName(), f.getVersion()));
         Preconditions.checkNotNull(s, "FeatureWrapper requires non-null FeatureService in constructor");
         this.featuresService = s;
@@ -87,7 +87,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
         return snapShotHolders;
     }
 
-    protected Feature extractFeatureFromDependency(Dependency dependency) throws Exception {
+    protected Feature extractFeatureFromDependency(final Dependency dependency) throws Exception {
         Feature[] features = featuresService.listFeatures();
         VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
                 ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
