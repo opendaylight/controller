@@ -33,11 +33,11 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
 {
     private BundleContext bundleContext;
 
-    public NettyThreadgroupModule(org.opendaylight.controller.config.api.ModuleIdentifier name, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public NettyThreadgroupModule(final org.opendaylight.controller.config.api.ModuleIdentifier name, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(name, dependencyResolver);
     }
 
-    public NettyThreadgroupModule(org.opendaylight.controller.config.api.ModuleIdentifier name, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, NettyThreadgroupModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public NettyThreadgroupModule(final org.opendaylight.controller.config.api.ModuleIdentifier name, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final NettyThreadgroupModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(name, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -59,7 +59,7 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
 
         return Reflection.newProxy(AutoCloseableEventLoopGroupInterface.class, new AbstractInvocationHandler() {
             @Override
-            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+            protected Object handleInvocation(final Object proxy, final Method method, final Object[] args) throws Throwable {
                 if (method.getName().equals("close")) {
                     tracker.close();
                     return null;
@@ -70,7 +70,7 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
         });
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 

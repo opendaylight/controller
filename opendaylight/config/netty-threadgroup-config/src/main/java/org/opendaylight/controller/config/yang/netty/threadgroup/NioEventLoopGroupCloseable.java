@@ -11,7 +11,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import java.util.concurrent.TimeUnit;
 
 public class NioEventLoopGroupCloseable extends NioEventLoopGroup implements AutoCloseable {
-    private NioEventLoopGroupCloseable(int threadCount) {
+    private NioEventLoopGroupCloseable(final int threadCount) {
         super(threadCount);
     }
 
@@ -24,7 +24,7 @@ public class NioEventLoopGroupCloseable extends NioEventLoopGroup implements Aut
         shutdownGracefully(0, 1, TimeUnit.SECONDS);
     }
 
-    public static NioEventLoopGroupCloseable newInstance(Integer threadCount) {
+    public static NioEventLoopGroupCloseable newInstance(final Integer threadCount) {
         if(threadCount == null || threadCount <= 0) {
             return new NioEventLoopGroupCloseable();
         }

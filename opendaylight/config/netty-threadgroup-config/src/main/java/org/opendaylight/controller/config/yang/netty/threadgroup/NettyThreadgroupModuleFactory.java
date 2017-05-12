@@ -26,16 +26,16 @@ import org.osgi.framework.BundleContext;
 @Deprecated
 public class NettyThreadgroupModuleFactory extends AbstractNettyThreadgroupModuleFactory {
     @Override
-    public NettyThreadgroupModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            NettyThreadgroupModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+    public NettyThreadgroupModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final NettyThreadgroupModule oldModule, final AutoCloseable oldInstance, final BundleContext bundleContext) {
         NettyThreadgroupModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule, oldInstance, bundleContext);
         module.setBundleContext(bundleContext);
         return module;
     }
 
     @Override
-    public NettyThreadgroupModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            BundleContext bundleContext) {
+    public NettyThreadgroupModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final BundleContext bundleContext) {
         NettyThreadgroupModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
         module.setBundleContext(bundleContext);
         return module;
