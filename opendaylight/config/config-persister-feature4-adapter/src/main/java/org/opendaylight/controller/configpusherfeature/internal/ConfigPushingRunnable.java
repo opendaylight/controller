@@ -25,7 +25,7 @@ public class ConfigPushingRunnable implements Runnable {
     private static final int POLL_TIME = 1;
     private BlockingQueue<FeatureEvent> queue;
     private FeatureConfigPusher configPusher;
-    public ConfigPushingRunnable(ConfigPusher p, FeaturesService f,BlockingQueue<FeatureEvent> q) {
+    public ConfigPushingRunnable(final ConfigPusher p, final FeaturesService f, final BlockingQueue<FeatureEvent> q) {
         queue = q;
         configPusher = new FeatureConfigPusher(p, f);
     }
@@ -50,16 +50,16 @@ public class ConfigPushingRunnable implements Runnable {
                     LOG.error("ConfigPushingRunnable - exiting");
                     return;
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 LOG.error("ConfigPushingRunnable - interupted");
                 interuppted = true;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Exception while processing features {} event {}", toInstall, event, e);
             }
         }
     }
 
-    protected void processFeatureEvent(FeatureEvent event, List<Feature> toInstall) throws Exception {
+    protected void processFeatureEvent(final FeatureEvent event, final List<Feature> toInstall) throws Exception {
         if(event.getType() == EventType.FeatureInstalled) {
             toInstall.add(event.getFeature());
             LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> result = configPusher.pushConfigs(toInstall);
@@ -69,7 +69,7 @@ public class ConfigPushingRunnable implements Runnable {
         }
     }
 
-    protected void logPushResult(LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> results) {
+    protected void logPushResult(final LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> results) {
         for(Feature f:results.keySet()) {
             LOG.info("Pushed configs for feature {} {}",f,results.get(f));
         }

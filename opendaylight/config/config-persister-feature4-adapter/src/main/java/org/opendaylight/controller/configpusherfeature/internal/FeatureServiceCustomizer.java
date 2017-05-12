@@ -30,12 +30,12 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
     private ConfigPusher configPusher = null;
     private ServiceRegistration<?> registration;
 
-    FeatureServiceCustomizer(ConfigPusher c) {
+    FeatureServiceCustomizer(final ConfigPusher c) {
         configPusher = c;
     }
 
     @Override
-    public FeaturesService addingService(ServiceReference<FeaturesService> reference) {
+    public FeaturesService addingService(final ServiceReference<FeaturesService> reference) {
         BundleContext bc = reference.getBundle().getBundleContext();
         final FeaturesService featureService = bc.getService(reference);
         final Optional<XmlFileStorageAdapter> currentPersister = XmlFileStorageAdapter.getInstance();
@@ -46,7 +46,7 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
                 for (final Feature installedFeature : featureService.listInstalledFeatures()) {
                     installedFeatureIds.add(installedFeature.getId());
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Error listing installed features", e);
             }
 
@@ -63,14 +63,14 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
     }
 
     @Override
-    public void modifiedService(ServiceReference<FeaturesService> reference,
-                                FeaturesService service) {
+    public void modifiedService(final ServiceReference<FeaturesService> reference,
+                                final FeaturesService service) {
         // we don't care if the properties change
     }
 
     @Override
-    public void removedService(ServiceReference<FeaturesService> reference,
-                               FeaturesService service) {
+    public void removedService(final ServiceReference<FeaturesService> reference,
+                               final FeaturesService service) {
         close();
     }
 

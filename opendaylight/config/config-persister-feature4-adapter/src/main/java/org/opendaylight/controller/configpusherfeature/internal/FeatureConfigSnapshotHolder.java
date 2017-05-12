@@ -93,7 +93,7 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
      * We really care most about the underlying ConfigShapshot, so compute equality on that
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
