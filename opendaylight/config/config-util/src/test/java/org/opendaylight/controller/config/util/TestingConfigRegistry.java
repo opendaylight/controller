@@ -76,7 +76,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public CommitStatus commitConfig(ObjectName transactonControllerON)
+    public CommitStatus commitConfig(final ObjectName transactonControllerON)
             throws ConflictingVersionException, ValidationException {
         if (transactonControllerON == null) {
             Exception e = new RuntimeException("message");
@@ -107,7 +107,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName) {
         if (moduleName.equals(moduleName1)) {
             return Sets.newHashSet(conf1, conf2);
         } else if (moduleName.equals(moduleName2)) {
@@ -118,8 +118,8 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName,
-            String instanceName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName,
+            final String instanceName) {
         if (moduleName.equals(moduleName1) && instanceName.equals(instName1)) {
             return Sets.newHashSet(conf2);
         } else if (moduleName.equals(moduleName2)
@@ -131,7 +131,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public ObjectName lookupConfigBean(String moduleName, String instanceName)
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         if (moduleName.equals(InstanceNotFoundException.class.getSimpleName())) {
             throw new InstanceNotFoundException();
@@ -145,8 +145,8 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public Set<ObjectName> lookupRuntimeBeans(String moduleName,
-            String instanceName) {
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName,
+            final String instanceName) {
         if (moduleName.equals(moduleName1) && instanceName.equals(instName1)) {
             return Sets.<ObjectName> newHashSet(run2);
         } else if (moduleName.equals(moduleName2)
@@ -158,7 +158,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkConfigBeanExists(final ObjectName objectName) throws InstanceNotFoundException {
         Set<ObjectName> configBeans = Sets.<ObjectName> newHashSet(run1, run2, run3);
         if(configBeans.size()>0){
             checkBool = true;
@@ -166,7 +166,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+    public ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
         if (serviceInterfaceQName.equals(serviceQName1) && refName.equals(refName1)) {
             return conf1;
         }
@@ -181,7 +181,7 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
 
         if(serviceInterfaceQName.equals(serviceQName1)){
             map.put("conf1", conf1);
@@ -196,12 +196,12 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+    public Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
         return Sets.<String> newHashSet(serviceQName1, serviceQName2);
     }
 
     @Override
-    public String getServiceInterfaceName(String namespace, String localName) {
+    public String getServiceInterfaceName(final String namespace, final String localName) {
         return null;
     }
 
@@ -211,12 +211,12 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
     }
 
     @Override
-    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
         return conf1;
     }
 
     @Override
-    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         throw new UnsupportedOperationException();
     }
 }

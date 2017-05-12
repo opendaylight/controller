@@ -31,9 +31,9 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     private final MBeanServer configMBeanServer;
 
     public ConfigTransactionJMXClient(
-            ConfigRegistryMXBean configRegistryMXBeanProxy,
-            ObjectName configTransactionControllerON,
-            MBeanServer configMBeanServer) {
+            final ConfigRegistryMXBean configRegistryMXBeanProxy,
+            final ObjectName configTransactionControllerON,
+            final MBeanServer configMBeanServer) {
         this.configMBeanServer = configMBeanServer;
         this.configRegistryMXBeanProxy = configRegistryMXBeanProxy;
         this.configTransactionControllerON = configTransactionControllerON;
@@ -42,7 +42,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
                 ConfigTransactionControllerMXBean.class);
     }
 
-    public <T> T newMXBeanProxy(ObjectName on, Class<T> clazz) {
+    public <T> T newMXBeanProxy(final ObjectName on, final Class<T> clazz) {
         ObjectName onName = on;
         // if on is without transaction, add it. Reason is that when using getters on MXBeans the transaction name is stripped
         onName = ObjectNameUtil.withTransactionName(onName, getTransactionName());
@@ -59,7 +59,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
      * This method will be removed soon.
      */
     @Deprecated
-    public <T> T newMBeanProxy(ObjectName on, Class<T> clazz) {
+    public <T> T newMBeanProxy(final ObjectName on, final Class<T> clazz) {
         return JMX.newMBeanProxy(configMBeanServer, on, clazz);
     }
 
@@ -71,8 +71,8 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public void assertVersion(int expectedParentVersion,
-            int expectedCurrentVersion) {
+    public void assertVersion(final int expectedParentVersion,
+            final int expectedCurrentVersion) {
         if (expectedParentVersion != getParentVersion()) {
             throw new IllegalStateException();
         }
@@ -83,18 +83,18 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
     // proxy around ConfigManagerMXBean
     @Override
-    public ObjectName createModule(String moduleName, String instanceName)
+    public ObjectName createModule(final String moduleName, final String instanceName)
             throws InstanceAlreadyExistsException {
         return configTransactionControllerMXBeanProxy.createModule(moduleName, instanceName);
     }
 
     @Override
-    public void reCreateModule(ObjectName objectName) throws InstanceNotFoundException {
+    public void reCreateModule(final ObjectName objectName) throws InstanceNotFoundException {
         configTransactionControllerMXBeanProxy.reCreateModule(objectName);
     }
 
     @Override
-    public void destroyModule(ObjectName objectName)
+    public void destroyModule(final ObjectName objectName)
             throws InstanceNotFoundException {
         configTransactionControllerMXBeanProxy.destroyModule(objectName);
     }
@@ -104,14 +104,14 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     /**
      * {@inheritDoc}
      */
-    public void destroyConfigBean(String moduleName, String instanceName)
+    public void destroyConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         destroyModule(ObjectNameUtil.createTransactionModuleON(
                 getTransactionName(), moduleName, instanceName));
     }
 
     @Override
-    public void destroyModule(String moduleName, String instanceName)
+    public void destroyModule(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         destroyModule(ObjectNameUtil.createTransactionModuleON(
                 getTransactionName(), moduleName, instanceName));
@@ -132,7 +132,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
         try {
             return (Long) configMBeanServer.getAttribute(
                     configTransactionControllerON, "ParentVersion");
-        } catch (JMException e) {
+        } catch (final JMException e) {
             throw new RuntimeException(e);
         }
     }
@@ -142,7 +142,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
         try {
             return (Long) configMBeanServer.getAttribute(
                     configTransactionControllerON, "Version");
-        } catch (JMException e) {
+        } catch (final JMException e) {
             throw new RuntimeException(e);
         }
     }
@@ -168,35 +168,35 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName) {
         return configTransactionControllerMXBeanProxy.lookupConfigBeans(moduleName);
     }
 
     @Override
-    public ObjectName lookupConfigBean(String moduleName, String instanceName)
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         return configTransactionControllerMXBeanProxy.lookupConfigBean(moduleName, instanceName);
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName,
-            String instanceName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName,
+            final String instanceName) {
         return configTransactionControllerMXBeanProxy
                 .lookupConfigBeans(moduleName, instanceName);
     }
 
     @Override
-    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkConfigBeanExists(final ObjectName objectName) throws InstanceNotFoundException {
         configTransactionControllerMXBeanProxy.checkConfigBeanExists(objectName);
     }
 
     @Override
-    public ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException {
+    public ObjectName saveServiceReference(final String serviceInterfaceName, final String refName, final ObjectName moduleON) throws InstanceNotFoundException {
         return configTransactionControllerMXBeanProxy.saveServiceReference(serviceInterfaceName,refName, moduleON);
     }
 
     @Override
-    public void removeServiceReference(String serviceInterfaceName, String refName) throws InstanceNotFoundException{
+    public void removeServiceReference(final String serviceInterfaceName, final String refName) throws InstanceNotFoundException{
         configTransactionControllerMXBeanProxy.removeServiceReference(serviceInterfaceName, refName);
     }
 
@@ -206,7 +206,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+    public ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
         return configTransactionControllerMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
@@ -216,37 +216,37 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
         return configTransactionControllerMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
-    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+    public Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
         return configTransactionControllerMXBeanProxy.lookupServiceInterfaceNames(objectName);
     }
 
     @Override
-    public String getServiceInterfaceName(String namespace, String localName) {
+    public String getServiceInterfaceName(final String namespace, final String localName) {
         return configTransactionControllerMXBeanProxy.getServiceInterfaceName(namespace, localName);
     }
 
     @Override
-    public boolean removeServiceReferences(ObjectName objectName) throws InstanceNotFoundException {
+    public boolean removeServiceReferences(final ObjectName objectName) throws InstanceNotFoundException {
         return configTransactionControllerMXBeanProxy.removeServiceReferences(objectName);
     }
 
     @Override
-    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
         return configTransactionControllerMXBeanProxy.getServiceReference(serviceInterfaceQName, refName);
     }
 
     @Override
-    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         configTransactionControllerMXBeanProxy.checkServiceReferenceExists(objectName);
     }
 
     @Override
-    public Attribute getAttribute(ObjectName on, String attrName) {
+    public Attribute getAttribute(final ObjectName on, final String attrName) {
         if (ObjectNameUtil.getTransactionName(on) == null) {
             throw new IllegalArgumentException("Not in transaction instance "
                     + on + ", no transaction name present");
@@ -254,36 +254,36 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
         try {
             return new Attribute(attrName, configMBeanServer.getAttribute(on,attrName));
-        } catch (JMException e) {
+        } catch (final JMException e) {
             throw new IllegalStateException("Unable to get attribute "
                     + attrName + " for " + on, e);
         }
     }
 
     @Override
-    public Object getAttributeCurrentValue(ObjectName on, String attrName) {
+    public Object getAttributeCurrentValue(final ObjectName on, final String attrName) {
         return getAttribute(on, attrName).getValue();
     }
 
     @Override
-    public void validateBean(ObjectName configBeanON)
+    public void validateBean(final ObjectName configBeanON)
             throws ValidationException {
         try {
             configMBeanServer.invoke(configBeanON, "validate", null, null);
-        } catch (MBeanException e) {
+        } catch (final MBeanException e) {
             Exception targetException = e.getTargetException();
             if (targetException instanceof ValidationException){
                 throw (ValidationException) targetException;
             } else {
                 throw new RuntimeException(e);
             }
-        } catch (JMException e) {
+        } catch (final JMException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void setAttribute(ObjectName on, String attrName, Attribute attribute) {
+    public void setAttribute(final ObjectName on, final String attrName, final Attribute attribute) {
         if (ObjectNameUtil.getTransactionName(on) == null) {
             throw new IllegalArgumentException("Not in transaction instance "
                     + on + ", no transaction name present");
@@ -291,7 +291,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
 
         try {
             configMBeanServer.setAttribute(on, attribute);
-        } catch (JMException e) {
+        } catch (final JMException e) {
             throw new IllegalStateException("Unable to set attribute "
                     + attrName + " for " + on, e);
         }

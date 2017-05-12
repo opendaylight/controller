@@ -65,7 +65,7 @@ public class ConfigTransactionClientsTest {
     }
 
     private Set<ObjectName> testClientLookupConfigBeans(
-            ConfigTransactionClient client) {
+            final ConfigTransactionClient client) {
         Set<ObjectName> beans = client.lookupConfigBeans();
         for (ObjectName on : beans) {
             assertEquals("Module", on.getKeyProperty("type"));
@@ -80,7 +80,7 @@ public class ConfigTransactionClientsTest {
         assertEquals(testClientGetObjectName(jmxTransactionClient), true);
     }
 
-    private boolean testClientGetObjectName(ConfigTransactionClient client) {
+    private boolean testClientGetObjectName(final ConfigTransactionClient client) {
         return transactionControllerON.equals(client.getObjectName());
     }
 
@@ -91,7 +91,7 @@ public class ConfigTransactionClientsTest {
     }
 
     private Set<String> testClientGetAvailableModuleNames(
-            ConfigTransactionClient client) {
+            final ConfigTransactionClient client) {
         return client.getAvailableModuleNames();
     }
 
@@ -101,7 +101,7 @@ public class ConfigTransactionClientsTest {
         assertEquals("transactionName", jmxTN);
     }
 
-    private String testClientGetTransactionName(ConfigTransactionClient client) {
+    private String testClientGetTransactionName(final ConfigTransactionClient client) {
         return client.getTransactionName();
     }
 
@@ -145,7 +145,7 @@ public class ConfigTransactionClientsTest {
         Assert.assertNotNull(on);
     }
 
-    private ObjectName testClientCreateModule(ConfigTransactionClient client)
+    private ObjectName testClientCreateModule(final ConfigTransactionClient client)
             throws Exception {
         return client.createModule("testModuleName", "testInstanceName");
     }
@@ -169,7 +169,7 @@ public class ConfigTransactionClientsTest {
     }
 
     private Set<ObjectName> testClientLookupConfigBeans2(
-            ConfigTransactionClient client, String moduleName) {
+            final ConfigTransactionClient client, final String moduleName) {
         Set<ObjectName> beans = client.lookupConfigBeans(moduleName);
         assertEquals(1, beans.size());
         return beans;
@@ -183,8 +183,8 @@ public class ConfigTransactionClientsTest {
     }
 
     private Set<ObjectName> testClientLookupConfigBean(
-            ConfigTransactionClient client, String moduleName,
-            String instanceName) {
+            final ConfigTransactionClient client, final String moduleName,
+            final String instanceName) {
         Set<ObjectName> beans = client.lookupConfigBeans(moduleName,
                 instanceName);
         assertEquals(1, beans.size());
@@ -199,8 +199,8 @@ public class ConfigTransactionClientsTest {
     }
 
     private Set<ObjectName> testClientLookupConfigBeans3(
-            ConfigTransactionClient client, String moduleName,
-            String instanceName) {
+            final ConfigTransactionClient client, final String moduleName,
+            final String instanceName) {
         Set<ObjectName> beans = client.lookupConfigBeans(moduleName,
                 instanceName);
         assertEquals(1, beans.size());

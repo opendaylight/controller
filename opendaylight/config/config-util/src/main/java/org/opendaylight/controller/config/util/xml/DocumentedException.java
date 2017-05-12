@@ -55,7 +55,7 @@ public class DocumentedException extends Exception {
             BUILDER_FACTORY.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             BUILDER_FACTORY.setXIncludeAware(false);
             BUILDER_FACTORY.setExpandEntityReferences(false);
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             throw new ExceptionInInitializerError(e);
         }
         BUILDER_FACTORY.setNamespaceAware(true);
@@ -72,7 +72,7 @@ public class DocumentedException extends Exception {
 
         private final String typeValue;
 
-        ErrorType(String typeValue) {
+        ErrorType(final String typeValue) {
             this.typeValue = Preconditions.checkNotNull(typeValue);
         }
 
@@ -88,7 +88,7 @@ public class DocumentedException extends Exception {
             return this.typeValue;
         }
 
-        public static ErrorType from(String text) {
+        public static ErrorType from(final String text) {
             for (ErrorType e : values()) {
                if (e.getTypeValue().equalsIgnoreCase(text)) {
                    return e;
@@ -130,7 +130,7 @@ public class DocumentedException extends Exception {
             return this.tagValue;
         }
 
-        public static ErrorTag from( String text ) {
+        public static ErrorTag from( final String text ) {
             for( ErrorTag e: values() )
             {
                 if( e.getTagValue().equals( text ) ) {
@@ -148,7 +148,7 @@ public class DocumentedException extends Exception {
 
         private final String severityValue;
 
-        ErrorSeverity(String severityValue) {
+        ErrorSeverity(final String severityValue) {
             this.severityValue = Preconditions.checkNotNull(severityValue);
         }
 
@@ -164,7 +164,7 @@ public class DocumentedException extends Exception {
             return this.severityValue;
         }
 
-        public static ErrorSeverity from(String text) {
+        public static ErrorSeverity from(final String text) {
             for (ErrorSeverity e : values()) {
                 if (e.getSeverityValue().equalsIgnoreCase(text)) {
                     return e;
@@ -180,7 +180,7 @@ public class DocumentedException extends Exception {
     private final ErrorSeverity errorSeverity;
     private final Map<String, String> errorInfo;
 
-    public DocumentedException(String message) {
+    public DocumentedException(final String message) {
         this(message,
                 DocumentedException.ErrorType.APPLICATION,
                 DocumentedException.ErrorTag.INVALID_VALUE,
@@ -216,27 +216,27 @@ public class DocumentedException extends Exception {
         this.errorInfo = errorInfo;
     }
 
-    public static <E extends Exception> DocumentedException wrap(E exception) throws DocumentedException {
+    public static <E extends Exception> DocumentedException wrap(final E exception) throws DocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
         errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Exception thrown");
         throw new DocumentedException(exception.getMessage(), exception, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
                 ErrorSeverity.ERROR, errorInfo);
     }
-    public static DocumentedException wrap(ValidationException e) throws DocumentedException {
+    public static DocumentedException wrap(final ValidationException e) throws DocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
         errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Validation failed");
         throw new DocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
                 ErrorSeverity.ERROR, errorInfo);
     }
 
-    public static DocumentedException wrap(ConflictingVersionException e) throws DocumentedException {
+    public static DocumentedException wrap(final ConflictingVersionException e) throws DocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
         errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Optimistic lock failed");
         throw new DocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
                 ErrorSeverity.ERROR, errorInfo);
     }
 
-    public static DocumentedException fromXMLDocument( Document fromDoc ) {
+    public static DocumentedException fromXMLDocument( final Document fromDoc ) {
 
         ErrorType errorType = ErrorType.APPLICATION;
         ErrorTag errorTag = ErrorTag.OPERATION_FAILED;
@@ -281,7 +281,7 @@ public class DocumentedException extends Exception {
         return new DocumentedException( errorMessage, errorType, errorTag, errorSeverity, errorInfo );
     }
 
-    private static Map<String, String> parseErrorInfo( Node node ) {
+    private static Map<String, String> parseErrorInfo( final Node node ) {
         Map<String, String> infoMap = new HashMap<>();
         NodeList children = node.getChildNodes();
         for( int i = 0; i < children.getLength(); i++ ) {
@@ -344,7 +344,7 @@ public class DocumentedException extends Exception {
                 }
             }
         }
-        catch( ParserConfigurationException e ) {
+        catch( final ParserConfigurationException e ) {
             // this shouldn't happen
             LOG.error("Error outputting to XML document", e);
         }
@@ -352,7 +352,7 @@ public class DocumentedException extends Exception {
         return doc;
     }
 
-    private Node createTextNode( Document doc, String tag, String textContent ) {
+    private Node createTextNode( final Document doc, final String tag, final String textContent ) {
         Node node = doc.createElementNS( URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, tag );
         node.setTextContent( textContent );
         return node;

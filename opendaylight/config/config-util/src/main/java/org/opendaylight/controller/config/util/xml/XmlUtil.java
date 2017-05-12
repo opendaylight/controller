@@ -57,7 +57,7 @@ public final class XmlUtil {
             // Performance improvement for messages with size <10k according to
             // https://xerces.apache.org/xerces2-j/faq-performance.html
             factory.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-        } catch (ParserConfigurationException e) {
+        } catch (final ParserConfigurationException e) {
             throw new ExceptionInInitializerError(e);
         }
         factory.setNamespaceAware(true);
@@ -72,13 +72,13 @@ public final class XmlUtil {
         protected DocumentBuilder initialValue() {
             try {
                 return BUILDER_FACTORY.newDocumentBuilder();
-            } catch (ParserConfigurationException e) {
+            } catch (final ParserConfigurationException e) {
                 throw new IllegalStateException("Failed to create threadLocal dom builder", e);
             }
         }
 
         @Override
-        public void set(DocumentBuilder value) {
+        public void set(final DocumentBuilder value) {
             throw new UnsupportedOperationException();
         }
     };
@@ -199,7 +199,7 @@ public final class XmlUtil {
 
         try {
             return SCHEMA_FACTORY.newSchema(sources);
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             throw new IllegalStateException("Failed to instantiate XML schema", e);
         }
     }
@@ -207,7 +207,7 @@ public final class XmlUtil {
     public static Object evaluateXPath(final XPathExpression expr, final Object rootNode, final QName returnType) {
         try {
             return expr.evaluate(rootNode, returnType);
-        } catch (XPathExpressionException e) {
+        } catch (final XPathExpressionException e) {
             throw new IllegalStateException("Error while evaluating xpath expression " + expr, e);
         }
     }

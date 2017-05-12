@@ -54,7 +54,7 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public ObjectName createModule(String moduleName, String instanceName)
+    public ObjectName createModule(final String moduleName, final String instanceName)
             throws InstanceAlreadyExistsException {
         //return null;
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
@@ -63,11 +63,11 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public void reCreateModule(ObjectName objectName) {
+    public void reCreateModule(final ObjectName objectName) {
     }
 
     @Override
-    public void destroyModule(ObjectName objectName)
+    public void destroyModule(final ObjectName objectName)
             throws InstanceNotFoundException {
         if(objectName != null){
             conf4 = null;
@@ -99,7 +99,7 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName) {
         if (moduleName.equals(moduleName1)) {
             return Sets.newHashSet(conf1, conf2);
         } else if (moduleName.equals(moduleName2)) {
@@ -110,7 +110,7 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public ObjectName lookupConfigBean(String moduleName, String instanceName)
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         if (moduleName.equals(InstanceNotFoundException.class.getSimpleName())) {
             throw new InstanceNotFoundException();
@@ -119,8 +119,8 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName,
-            String instanceName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName,
+            final String instanceName) {
         if (moduleName.equals(moduleName1) && instanceName.equals(instName1)) {
             return Sets.newHashSet(conf2);
         } else if (moduleName.equals(moduleName2)
@@ -132,17 +132,17 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkConfigBeanExists(final ObjectName objectName) throws InstanceNotFoundException {
         check = "configBeanExists";
     }
 
     @Override
-    public ObjectName saveServiceReference(String serviceInterfaceName, String refName, ObjectName moduleON) throws InstanceNotFoundException {
+    public ObjectName saveServiceReference(final String serviceInterfaceName, final String refName, final ObjectName moduleON) throws InstanceNotFoundException {
         return moduleON;
     }
 
     @Override
-    public void removeServiceReference(String serviceInterfaceName, String refName) {
+    public void removeServiceReference(final String serviceInterfaceName, final String refName) {
         check = refName;
     }
 
@@ -152,7 +152,7 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+    public ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
         return conf3;
     }
 
@@ -164,23 +164,23 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
         mapSub.put("A",conf2);
         return mapSub;
     }
 
     @Override
-    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+    public Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
         return Sets.newHashSet("setA");
     }
 
     @Override
-    public String getServiceInterfaceName(String namespace, String localName) {
+    public String getServiceInterfaceName(final String namespace, final String localName) {
         return check=namespace+localName;
     }
 
     @Override
-    public boolean removeServiceReferences(ObjectName objectName) throws InstanceNotFoundException {
+    public boolean removeServiceReferences(final ObjectName objectName) throws InstanceNotFoundException {
         return true;
     }
 
@@ -200,12 +200,12 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
-    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
         return conf3;
     }
 
     @Override
-    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         check = "referenceExist";
     }
 }
