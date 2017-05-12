@@ -58,21 +58,21 @@ public class ConfigPusherImpl implements ConfigPusher {
     private final ConfigSubsystemFacadeFactory facade;
     private ConfigPersisterNotificationHandler jmxNotificationHandler;
 
-    public ConfigPusherImpl(ConfigSubsystemFacadeFactory facade, long maxWaitForCapabilitiesMillis,
-                        long conflictingVersionTimeoutMillis) {
+    public ConfigPusherImpl(final ConfigSubsystemFacadeFactory facade, final long maxWaitForCapabilitiesMillis,
+                        final long conflictingVersionTimeoutMillis) {
         this.maxWaitForCapabilitiesMillis = maxWaitForCapabilitiesMillis;
         this.conflictingVersionTimeoutMillis = conflictingVersionTimeoutMillis;
         this.facade = facade;
     }
 
-    public void process(List<AutoCloseable> autoCloseables, MBeanServerConnection platformMBeanServer,
-            Persister persisterAggregator, boolean propagateExceptions) throws InterruptedException {
+    public void process(final List<AutoCloseable> autoCloseables, final MBeanServerConnection platformMBeanServer,
+            final Persister persisterAggregator, final boolean propagateExceptions) throws InterruptedException {
         while(processSingle(autoCloseables, platformMBeanServer, persisterAggregator, propagateExceptions)) {
         }
     }
 
     boolean processSingle(final List<AutoCloseable> autoCloseables, final MBeanServerConnection platformMBeanServer,
-            final Persister persisterAggregator, boolean propagateExceptions) throws InterruptedException {
+            final Persister persisterAggregator, final boolean propagateExceptions) throws InterruptedException {
         final List<? extends ConfigSnapshotHolder> configs = queue.take();
         try {
             internalPushConfigs(configs);
@@ -87,7 +87,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             }
 
             LOG.debug("ConfigPusher has pushed configs {}", configs);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Exceptions are logged to error downstream
             LOG.debug("Failed to push some of configs: {}", configs, e);
 
@@ -106,12 +106,12 @@ public class ConfigPusherImpl implements ConfigPusher {
     }
 
     @Override
-    public void pushConfigs(List<? extends ConfigSnapshotHolder> configs) throws InterruptedException {
+    public void pushConfigs(final List<? extends ConfigSnapshotHolder> configs) throws InterruptedException {
         LOG.debug("Requested to push configs {}", configs);
         this.queue.put(configs);
     }
 
-    private LinkedHashMap<? extends ConfigSnapshotHolder, Boolean> internalPushConfigs(List<? extends ConfigSnapshotHolder> configs)
+    private LinkedHashMap<? extends ConfigSnapshotHolder, Boolean> internalPushConfigs(final List<? extends ConfigSnapshotHolder> configs)
             throws DocumentedException {
         LOG.debug("Last config snapshots to be pushed to netconf: {}", configs);
         LinkedHashMap<ConfigSnapshotHolder, Boolean> result = new LinkedHashMap<>();
@@ -122,11 +122,11 @@ public class ConfigPusherImpl implements ConfigPusher {
                 boolean pushResult = false;
                 try {
                     pushResult = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
-                } catch (ConfigSnapshotFailureException e) {
+                } catch (final ConfigSnapshotFailureException e) {
                     LOG.error("Failed to apply configuration snapshot: {}. Config snapshot is not semantically correct and will be IGNORED. " +
                             "for detailed information see enclosed exception.", e.getConfigIdForReporting(), e);
                     throw new IllegalStateException("Failed to apply configuration snapshot " + e.getConfigIdForReporting(), e);
-                }  catch (Exception e) {
+                }  catch (final Exception e) {
                     String msg = String.format("Failed to apply configuration snapshot: %s", configSnapshotHolder);
                     LOG.error(msg, e);
                     throw new IllegalStateException(msg, e);
@@ -140,7 +140,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         return result;
     }
 
-    private synchronized boolean pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws ConfigSnapshotFailureException {
+    private synchronized boolean pushConfigWithConflictingVersionRetries(final ConfigSnapshotHolder configSnapshotHolder) throws ConfigSnapshotFailureException {
         ConflictingVersionException lastException;
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         do {
@@ -157,7 +157,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                     stopwatch.start();
                 }
                 return pushConfig(configSnapshotHolder);
-            } catch (ConflictingVersionException e) {
+            } catch (final ConflictingVersionException e) {
                 lastException = e;
                 LOG.info("Conflicting version detected, will retry after timeout");
                 sleep();
@@ -167,7 +167,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                 lastException);
     }
 
-    private void waitForCapabilities(Set<String> expectedCapabilities, String idForReporting) {
+    private void waitForCapabilities(final Set<String> expectedCapabilities, final String idForReporting) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         ConfigPusherException lastException;
         do {
@@ -184,7 +184,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                     throw new NotEnoughCapabilitiesException(
                             "Not enough capabilities for " + idForReporting + ". Expected but not found: " + notFoundCapabilities, notFoundCapabilities);
                 }
-            } catch (ConfigPusherException e) {
+            } catch (final ConfigPusherException e) {
                 LOG.debug("Not enough capabilities: {}", e.toString());
                 lastException = e;
                 sleep();
@@ -204,7 +204,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                 + ((NotEnoughCapabilitiesException) lastException).getMissingCaps(), lastException);
     }
 
-    private static Set<String> computeNotFoundCapabilities(Set<String> expectedCapabilities, Set<Capability> currentCapabilities) {
+    private static Set<String> computeNotFoundCapabilities(final Set<String> expectedCapabilities, final Set<Capability> currentCapabilities) {
         Collection<String> actual = transformCapabilities(currentCapabilities);
         Set<String> allNotFound = new HashSet<>(expectedCapabilities);
         allNotFound.removeAll(actual);
@@ -235,7 +235,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         private static final long serialVersionUID = 1L;
         private final Set<String> missingCaps;
 
-        NotEnoughCapabilitiesException(String message, Set<String> missingCaps) {
+        NotEnoughCapabilitiesException(final String message, final Set<String> missingCaps) {
             super(message);
             this.missingCaps = missingCaps;
         }
@@ -262,13 +262,13 @@ public class ConfigPusherImpl implements ConfigPusher {
     private void sleep() {
         try {
             Thread.sleep(100);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
     }
 
-    private synchronized boolean pushConfig(ConfigSnapshotHolder configSnapshotHolder) throws ConfigSnapshotFailureException, ConflictingVersionException {
+    private synchronized boolean pushConfig(final ConfigSnapshotHolder configSnapshotHolder) throws ConfigSnapshotFailureException, ConflictingVersionException {
         Element xmlToBePersisted;
         try {
             xmlToBePersisted = XmlUtil.readXmlToElement(configSnapshotHolder.getConfigSnapshot());
@@ -299,7 +299,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         return true;
     }
 
-    private void executeWithMissingModuleFactoryRetries(ConfigSubsystemFacade facade, ConfigExecution configExecution)
+    private void executeWithMissingModuleFactoryRetries(final ConfigSubsystemFacade facade, final ConfigExecution configExecution)
             throws DocumentedException, ValidationException, ModuleFactoryNotFoundException {
         Stopwatch stopwatch = Stopwatch.createStarted();
         ModuleFactoryNotFoundException lastException = null;
@@ -307,7 +307,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             try {
                 facade.executeConfigExecution(configExecution);
                 return;
-            } catch (ModuleFactoryNotFoundException e) {
+            } catch (final ModuleFactoryNotFoundException e) {
                 LOG.debug("{} - will retry after timeout", e.toString());
                 lastException = e;
                 sleep();
@@ -317,7 +317,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         throw lastException;
     }
 
-    private ConfigExecution createConfigExecution(Element xmlToBePersisted, final ConfigSubsystemFacade currentFacade) throws DocumentedException {
+    private ConfigExecution createConfigExecution(final Element xmlToBePersisted, final ConfigSubsystemFacade currentFacade) throws DocumentedException {
         final Config configMapping = currentFacade.getConfigMapping();
         return currentFacade.getConfigExecution(configMapping, xmlToBePersisted);
     }

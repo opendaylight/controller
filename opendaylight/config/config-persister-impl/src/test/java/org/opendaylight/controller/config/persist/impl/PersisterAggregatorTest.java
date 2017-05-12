@@ -38,33 +38,33 @@ public class PersisterAggregatorTest {
 
         private final Properties prop;
 
-        public TestingPropertiesProvider(Properties prop) {
+        public TestingPropertiesProvider(final Properties prop) {
             super(null);
             this.prop = prop;
         }
 
-        public static TestingPropertiesProvider loadFile(String fileName) {
+        public static TestingPropertiesProvider loadFile(final String fileName) {
             Properties prop = new Properties();
             try {
                 prop.load(TestingPropertiesProvider.class.getClassLoader().getResourceAsStream(fileName));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
             return new TestingPropertiesProvider(prop);
         }
 
         @Override
-        public String getFullKeyForReporting(String key) {
+        public String getFullKeyForReporting(final String key) {
             return ConfigPersisterActivator.NETCONF_CONFIG_PERSISTER + "." + key;
         }
 
         @Override
-        public String getProperty(String key) {
+        public String getProperty(final String key) {
             return prop.getProperty(getFullKeyForReporting(key));
         }
 
         @Override
-        public String getPropertyWithoutPrefix(String fullKey){
+        public String getPropertyWithoutPrefix(final String fullKey){
             return prop.getProperty(fullKey);
         }
     }
@@ -127,20 +127,20 @@ public class PersisterAggregatorTest {
         try {
             PersisterAggregator.createFromProperties(TestingPropertiesProvider.loadFile("test3.properties"));
             fail();
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             assertThat(
                     e.getMessage(),
                     containsString("numberOfBackups property should be either set to positive value, or ommited. Can not be set to 0."));
         }
     }
 
-    private ConfigSnapshotHolder mockHolder(String name){
+    private ConfigSnapshotHolder mockHolder(final String name){
         ConfigSnapshotHolder result = mock(ConfigSnapshotHolder.class);
         doReturn("mock:" + name).when(result).toString();
         return result;
     }
 
-    private Persister mockPersister(String name){
+    private Persister mockPersister(final String name){
         Persister result = mock(Persister.class);
         doReturn("mock:" + name).when(result).toString();
         doNothing().when(result).close();

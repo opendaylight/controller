@@ -93,7 +93,7 @@ public class ConfigPusherImplTest {
         try {
             configPusher.process(Lists.<AutoCloseable>newArrayList(), ManagementFactory.getPlatformMBeanServer(),
                     mockedAggregator, true);
-        } catch(IllegalStateException e) {
+        } catch(final IllegalStateException e) {
             Throwable cause = Throwables.getRootCause(e);
             assertTrue(cause instanceof ConfigPusherImpl.NotEnoughCapabilitiesException);
             final Set<String> missingCaps = ((ConfigPusherImpl.NotEnoughCapabilitiesException) cause).getMissingCaps();
@@ -145,7 +145,7 @@ public class ConfigPusherImplTest {
         configPusher.pushConfigs(Collections.singletonList(mockedConfigSnapshot));
         try {
             configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator, true);
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             Throwable cause = Throwables.getRootCause(e);
             assertTrue(cause instanceof ConflictingVersionException);
             return;

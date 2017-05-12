@@ -13,13 +13,13 @@ public class PropertiesProviderAdapterImpl implements PropertiesProvider {
     private final PropertiesProvider inner;
     private final String index;
 
-    public PropertiesProviderAdapterImpl(PropertiesProvider inner, String index) {
+    public PropertiesProviderAdapterImpl(final PropertiesProvider inner, final String index) {
         this.inner = inner;
         this.index = index;
     }
 
     @Override
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         String fullKey = getFullKeyForReporting(key);
         return inner.getPropertyWithoutPrefix(fullKey);
     }
@@ -29,13 +29,13 @@ public class PropertiesProviderAdapterImpl implements PropertiesProvider {
     }
 
     @Override
-    public String getPropertyWithoutPrefix(String fullKey) {
+    public String getPropertyWithoutPrefix(final String fullKey) {
         return inner.getPropertyWithoutPrefix(fullKey);
     }
 
 
     @Override
-    public String getFullKeyForReporting(String key) {
+    public String getFullKeyForReporting(final String key) {
         return getPrefix()  + "." + key;
     }
 }
