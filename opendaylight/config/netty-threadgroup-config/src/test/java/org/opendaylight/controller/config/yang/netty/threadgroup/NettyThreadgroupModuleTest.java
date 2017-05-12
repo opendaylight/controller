@@ -99,7 +99,7 @@ public class NettyThreadgroupModuleTest extends AbstractConfigTest {
         assertStatus(status, 0, 1, 0);
     }
 
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName, Integer threads)
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName, final Integer threads)
             throws InstanceAlreadyExistsException {
         ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
         NettyThreadgroupModuleMXBean mxBean = transaction.newMBeanProxy(nameCreated, NettyThreadgroupModuleMXBean.class);
