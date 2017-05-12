@@ -26,15 +26,15 @@ import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 */
 public final class LogbackModule extends org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule {
 
-    public LogbackModule(org.opendaylight.controller.config.api.ModuleIdentifier name,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public LogbackModule(final org.opendaylight.controller.config.api.ModuleIdentifier name,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(name, dependencyResolver);
     }
 
-    public LogbackModule(org.opendaylight.controller.config.api.ModuleIdentifier name,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule oldModule,
-            java.lang.AutoCloseable oldInstance) {
+    public LogbackModule(final org.opendaylight.controller.config.api.ModuleIdentifier name,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final org.opendaylight.controller.config.yang.logback.config.AbstractLogbackModule oldModule,
+            final java.lang.AutoCloseable oldInstance) {
         super(name, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -48,7 +48,7 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
         validateLoggersObjects(appenderNames);
     }
 
-    private void validateLoggersObjects(Set<String> appenderNames) {
+    private void validateLoggersObjects(final Set<String> appenderNames) {
         JmxAttributeValidationException.checkNotNull(getLoggerTO(), loggersJmxAttribute);
 
         for (LoggerTO loggerToValidate : getLoggerTO()) {
@@ -71,7 +71,7 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
         }
     }
 
-    private void validateConsoleObjects(Set<String> appenderNames) {
+    private void validateConsoleObjects(final Set<String> appenderNames) {
 
         JmxAttributeValidationException.checkNotNull(getConsoleAppenderTO(), consoleAppendersJmxAttribute);
         for (ConsoleAppenderTO object : getConsoleAppenderTO()) {
@@ -85,7 +85,7 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
         }
     }
 
-    private void validateFileObjects(Set<String> appenderNames) {
+    private void validateFileObjects(final Set<String> appenderNames) {
         JmxAttributeValidationException.checkNotNull(getFileAppenderTO(), fileAppendersJmxAttribute);
         for (FileAppenderTO object : getFileAppenderTO()) {
             JmxAttributeValidationException.checkNotNull(object.getEncoderPattern(), "EncoderPattern is null",
@@ -103,7 +103,7 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
         }
     }
 
-    private void validateRollingObjects(Set<String> appenderNames) {
+    private void validateRollingObjects(final Set<String> appenderNames) {
 
         JmxAttributeValidationException.checkNotNull(getRollingFileAppenderTO(), rollingAppendersJmxAttribute);
         for (RollingFileAppenderTO object : getRollingFileAppenderTO()) {
@@ -147,7 +147,7 @@ public final class LogbackModule extends org.opendaylight.controller.config.yang
         }
     }
 
-    private void validateAppenderName(Set<String> appenderNames, String appenderName, JmxAttribute jmxAttribute) {
+    private void validateAppenderName(final Set<String> appenderNames, final String appenderName, final JmxAttribute jmxAttribute) {
         JmxAttributeValidationException.checkNotNull(appenderName, "Name is null", jmxAttribute);
         JmxAttributeValidationException.checkCondition(appenderNames.contains(appenderName) == false,
                 "Duplicate appender name " + appenderName, jmxAttribute);

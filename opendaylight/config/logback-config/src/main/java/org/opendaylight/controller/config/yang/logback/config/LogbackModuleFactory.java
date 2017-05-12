@@ -258,7 +258,7 @@ public class LogbackModuleFactory extends
     }
 
     @VisibleForTesting
-    static FileSize getMaxFileSize(SizeBasedTriggeringPolicy<?> policy) {
+    static FileSize getMaxFileSize(final SizeBasedTriggeringPolicy<?> policy) {
         try {
             return (FileSize) MAX_FILE_SIZE_FIELD.get(policy);
         } catch (IllegalArgumentException | IllegalAccessException e) {

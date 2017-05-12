@@ -103,7 +103,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy",
                     0, "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("FileName is null"));
         }
     }
@@ -114,7 +114,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
             createBeans(true, "target/rollingApp", null, "30MB", 1, 5, "target/%i.log", "rolling", "consoleName",
                     "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("EncoderPattern is null"));
         }
     }
@@ -126,7 +126,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy",
                     0, "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("MaxFileSize is null"));
         }
     }
@@ -138,7 +138,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     "rolling", "consoleName", "ALL", "logger1", "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender")
                     .commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("FileName needs to be set"));
         }
     }
@@ -151,7 +151,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                 true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1",
                     "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("EncoderPattern needs to be set"));
         }
     }
@@ -163,7 +163,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     "target/%i.log", "rolling", "consoleName", "ALL", null, "DEBUG", "FixedWindowRollingPolicy", 0,
                     "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("LoggerName is null"));
         }
     }
@@ -175,7 +175,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     "target/%i.log", "rolling", "consoleName", "ALL", "", "DEBUG", "FixedWindowRollingPolicy", 0,
                     "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("LoggerName needs to be set"));
         }
     }
@@ -187,7 +187,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG",
                     "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("MinIndex is null"));
         }
     }
@@ -199,7 +199,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG",
                     "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("MaxIndex is null"));
         }
     }
@@ -211,7 +211,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", null, 1, "FileAppender")
                     .commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("RollingPolicyType is null"));
         }
     }
@@ -223,7 +223,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "", 1, "FileAppender")
                     .commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("RollingPolicyType is not set"));
         }
     }
@@ -235,7 +235,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
                     null, "target/%i.log", "rolling", "consoleName", "ALL", "logger1", "DEBUG", "RollingPolicy", 1,
                     "FileAppender").commit();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertThat(e.getFailedValidations().toString(), containsString("RollingPolicyType is not supported"));
         }
     }
@@ -247,10 +247,10 @@ public class LogbackModuleTest extends AbstractConfigTest {
                 1, "FileAppender").commit();
     }
 
-    private ConfigTransactionJMXClient createBeans(Boolean isAppend, String rollingFileName, String encoderPattern,
-            String maxFileSize, Integer minIndex, Integer maxIndex, String fileNamePattern, String rollingName,
-            String consoleName, String thresholdFilter, String loggerName, String level, String rollingPolicyType,
-            int maxHistory, String fileAppName) throws Exception {
+    private ConfigTransactionJMXClient createBeans(final Boolean isAppend, final String rollingFileName, final String encoderPattern,
+            final String maxFileSize, final Integer minIndex, final Integer maxIndex, final String fileNamePattern, final String rollingName,
+            final String consoleName, final String thresholdFilter, final String loggerName, final String level, final String rollingPolicyType,
+            final int maxHistory, final String fileAppName) throws Exception {
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
         ObjectName nameRetrieved = transaction.lookupConfigBean(factory.getImplementationName(), INSTANCE_NAME);
         LogbackModuleMXBean bean = transaction.newMXBeanProxy(nameRetrieved, LogbackModuleMXBean.class);
