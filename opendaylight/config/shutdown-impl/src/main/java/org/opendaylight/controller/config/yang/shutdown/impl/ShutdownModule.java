@@ -24,34 +24,34 @@ import org.osgi.framework.Bundle;
 public final class ShutdownModule extends AbstractShutdownModule {
     private final Bundle systemBundle;
 
-    public ShutdownModule(ModuleIdentifier identifier, Bundle systemBundle) {
+    public ShutdownModule(final ModuleIdentifier identifier, final Bundle systemBundle) {
         super(identifier, null);
         singletonCheck(identifier);
         this.systemBundle = systemBundle;
     }
 
-    public ShutdownModule(ModuleIdentifier identifier, ShutdownModule oldModule, java.lang.AutoCloseable oldInstance,
-                          Bundle systemBundle) {
+    public ShutdownModule(final ModuleIdentifier identifier, final ShutdownModule oldModule, final java.lang.AutoCloseable oldInstance,
+                          final Bundle systemBundle) {
         super(identifier, null, oldModule, oldInstance);
         singletonCheck(identifier);
         this.systemBundle = systemBundle;
     }
 
-    private static void singletonCheck(ModuleIdentifier identifier) {
+    private static void singletonCheck(final ModuleIdentifier identifier) {
         if (AbstractShutdownModuleFactory.NAME.equals(identifier.getInstanceName()) == false) {
             throw new IllegalArgumentException("Singleton enforcement failed. Expected instance name " + AbstractShutdownModuleFactory.NAME);
         }
     }
 
     @Deprecated // needed for generated code
-    public ShutdownModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver, ShutdownModule oldModule,
-                          AutoCloseable oldInstance) {
+    public ShutdownModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver, final ShutdownModule oldModule,
+                          final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
         throw new UnsupportedOperationException();
     }
 
     @Deprecated // needed for generated code
-    public ShutdownModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
+    public ShutdownModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
         throw new UnsupportedOperationException();
     }

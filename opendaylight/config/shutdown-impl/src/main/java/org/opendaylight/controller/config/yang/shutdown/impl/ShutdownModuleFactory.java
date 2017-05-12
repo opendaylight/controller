@@ -17,22 +17,22 @@ import org.osgi.framework.BundleContext;
 
 public class ShutdownModuleFactory extends AbstractShutdownModuleFactory {
 
-    public ShutdownModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-                                            ShutdownModule oldModule, AutoCloseable oldInstance,
-                                            BundleContext bundleContext) {
+    public ShutdownModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+                                            final ShutdownModule oldModule, final AutoCloseable oldInstance,
+                                            final BundleContext bundleContext) {
         Bundle systemBundle = bundleContext.getBundle(0);
         return new ShutdownModule(new ModuleIdentifier(NAME, instanceName), oldModule, oldInstance, systemBundle);
     }
 
 
-    public ShutdownModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-                                            BundleContext bundleContext) {
+    public ShutdownModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+                                            final BundleContext bundleContext) {
         Bundle systemBundle = bundleContext.getBundle(0);
         return new ShutdownModule(new ModuleIdentifier(NAME, instanceName), systemBundle);
     }
 
     @Override
-    public Set<ShutdownModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
+    public Set<ShutdownModule> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
         ModuleIdentifier id = new ModuleIdentifier(NAME, NAME);
         DependencyResolver dependencyResolver = dependencyResolverFactory.createDependencyResolver(id);
         ShutdownModule shutdownModule = instantiateModule(NAME, dependencyResolver, bundleContext);
