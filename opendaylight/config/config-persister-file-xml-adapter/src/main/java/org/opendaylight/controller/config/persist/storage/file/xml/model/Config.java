@@ -33,7 +33,7 @@ public final class Config {
 
     private List<ConfigSnapshot> snapshots;
 
-    Config(List<ConfigSnapshot> snapshots) {
+    Config(final List<ConfigSnapshot> snapshots) {
         this.snapshots = snapshots;
     }
 
@@ -47,11 +47,11 @@ public final class Config {
         return snapshots;
     }
 
-    public void setSnapshots(List<ConfigSnapshot> snapshots) {
+    public void setSnapshots(final List<ConfigSnapshot> snapshots) {
         this.snapshots = snapshots;
     }
 
-    public void toXml(File to) {
+    public void toXml(final File to) {
         try {
 
             // TODO Moxy has to be used instead of default jaxb impl due to a bug
@@ -63,12 +63,12 @@ public final class Config {
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
             marshaller.marshal(this, to);
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             throw new PersistException("Unable to persist configuration", e);
         }
     }
 
-    public static Config fromXml(File from) {
+    public static Config fromXml(final File from) {
         if(isEmpty(from)) {
             return new Config();
         }
@@ -86,14 +86,14 @@ public final class Config {
         }
     }
 
-    private static boolean isEmpty(File from) {
+    private static boolean isEmpty(final File from) {
         return from.length() == 0 || isBlank(from);
     }
 
-    private static boolean isBlank(File from) {
+    private static boolean isBlank(final File from) {
         try {
             return StringUtils.isBlank(Files.toString(from, StandardCharsets.UTF_8));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Unexpected error reading file" + from, e);
         }
     }
@@ -103,14 +103,14 @@ public final class Config {
         return last == null ? Optional.<ConfigSnapshot>absent() : Optional.of(last);
     }
 
-    public void addConfigSnapshot(ConfigSnapshot snap, int numberOfStoredBackups) {
+    public void addConfigSnapshot(final ConfigSnapshot snap, final int numberOfStoredBackups) {
         if (shouldReplaceLast(numberOfStoredBackups) && !snapshots.isEmpty()) {
             snapshots.remove(0);
         }
         snapshots.add(snap);
     }
 
-    private boolean shouldReplaceLast(int numberOfStoredBackups) {
+    private boolean shouldReplaceLast(final int numberOfStoredBackups) {
         return numberOfStoredBackups == snapshots.size();
     }
 }

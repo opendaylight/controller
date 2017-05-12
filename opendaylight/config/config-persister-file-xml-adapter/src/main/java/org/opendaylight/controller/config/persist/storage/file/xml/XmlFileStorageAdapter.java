@@ -51,7 +51,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     }
 
     @Override
-    public Persister instantiate(PropertiesProvider propertiesProvider) {
+    public Persister instantiate(final PropertiesProvider propertiesProvider) {
         if(instance != null) {
             return instance;
         }
@@ -71,7 +71,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
                 if (!result) {
                     throw new RuntimeException("Unable to create storage file " + localStorage);
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException("Unable to create storage file " + localStorage, e);
             }
         }
@@ -98,16 +98,16 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     }
 
     @VisibleForTesting
-    public void setFileStorage(File storage) {
+    public void setFileStorage(final File storage) {
         this.storage = storage;
     }
 
     @VisibleForTesting
-    public void setNumberOfBackups(Integer numberOfBackups) {
+    public void setNumberOfBackups(final Integer numberOfBackups) {
         numberOfStoredBackups = numberOfBackups;
     }
 
-    private static File extractStorageFileFromProperties(PropertiesProvider propertiesProvider) {
+    private static File extractStorageFileFromProperties(final PropertiesProvider propertiesProvider) {
         String fileStorageProperty = propertiesProvider.getProperty(FILE_STORAGE_PROP);
         Preconditions.checkNotNull(fileStorageProperty, "Unable to find " + propertiesProvider.getFullKeyForReporting(FILE_STORAGE_PROP));
         File result = new File(fileStorageProperty);
@@ -122,7 +122,7 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     }
 
     @Override
-    public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
+    public void persistConfig(final ConfigSnapshotHolder holder) throws IOException {
         Preconditions.checkNotNull(storage, "Storage file is null");
 
         Set<String> installedFeatureIds = Collections.emptySet();
