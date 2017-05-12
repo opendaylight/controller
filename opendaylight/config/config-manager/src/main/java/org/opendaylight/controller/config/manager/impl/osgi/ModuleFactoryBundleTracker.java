@@ -33,12 +33,12 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
     private final BlankTransactionServiceTracker blankTransactionServiceTracker;
     private static final Logger LOG = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
 
-    public ModuleFactoryBundleTracker(BlankTransactionServiceTracker blankTransactionServiceTracker) {
+    public ModuleFactoryBundleTracker(final BlankTransactionServiceTracker blankTransactionServiceTracker) {
         this.blankTransactionServiceTracker = blankTransactionServiceTracker;
     }
 
     @Override
-    public Boolean addingBundle(Bundle bundle, BundleEvent event) {
+    public Boolean addingBundle(final Bundle bundle, final BundleEvent event) {
         URL resource = bundle.getEntry("META-INF/services/" + ModuleFactory.class.getName());
         LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}",
                 bundle, resource, event);
@@ -49,7 +49,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
                 }
 
                 return Boolean.TRUE;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error("Error while reading {}", resource, e);
                 throw new RuntimeException(e);
             }
@@ -59,12 +59,12 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Boolean hasFactory) {
+    public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Boolean hasFactory) {
         // NOOP
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Boolean hasFactory) {
+    public void removedBundle(final Bundle bundle, final BundleEvent event, final Boolean hasFactory) {
         if(hasFactory) {
             // workaround for service tracker not getting removed service event
             blankTransactionServiceTracker.blankTransactionSync();
@@ -72,7 +72,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
     }
 
     @VisibleForTesting
-    protected static ServiceRegistration<?> registerFactory(String factoryClassName, Bundle bundle) {
+    protected static ServiceRegistration<?> registerFactory(final String factoryClassName, final Bundle bundle) {
         String errorMessage;
         Exception ex = null;
         try {
@@ -84,12 +84,12 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
                     return bundle.getBundleContext().registerService(
                             ModuleFactory.class.getName(), clazz.newInstance(),
                             null);
-                } catch (InstantiationException e) {
+                } catch (final InstantiationException e) {
                     errorMessage = logMessage(
                             "Could not instantiate {} in bundle {}, reason {}",
                             factoryClassName, bundle, e);
                     ex = e;
-                } catch (IllegalAccessException e) {
+                } catch (final IllegalAccessException e) {
                     errorMessage = logMessage(
                             "Illegal access during instantiation of class {} in bundle {}, reason {}",
                             factoryClassName, bundle, e);
@@ -100,7 +100,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
                         "Class {} does not implement {} in bundle {}", clazz,
                         ModuleFactory.class, bundle);
             }
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             errorMessage = logMessage(
                     "Could not find class {} in bundle {}, reason {}",
                     factoryClassName, bundle, e);
@@ -110,7 +110,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
         throw ex == null ? new IllegalStateException(errorMessage) : new IllegalStateException(errorMessage, ex);
     }
 
-    public static String logMessage(String slfMessage, Object... params) {
+    public static String logMessage(final String slfMessage, final Object... params) {
         LOG.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
         return String.format(formatMessage, params);

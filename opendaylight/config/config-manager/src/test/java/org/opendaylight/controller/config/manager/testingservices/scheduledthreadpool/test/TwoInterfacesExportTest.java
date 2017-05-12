@@ -64,14 +64,14 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
             try {
                 transaction.lookupConfigBean(moduleName, instanceName);
                 fail();
-            } catch (InstanceNotFoundException e) {
+            } catch (final InstanceNotFoundException e) {
 
             }
         } else {
             try {
                 configRegistryClient.lookupConfigBean(moduleName, instanceName);
                 fail();
-            } catch (InstanceNotFoundException e) {
+            } catch (final InstanceNotFoundException e) {
 
             }
         }
@@ -139,7 +139,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
             transaction.createModule(
                     TestingScheduledThreadPoolModuleFactory.NAME, scheduled1);
             fail();
-        } catch (InstanceAlreadyExistsException e) {
+        } catch (final InstanceAlreadyExistsException e) {
             assertThat(
                     e.getMessage(),
                     containsString("There is an instance registered with name ModuleIdentifier{factoryName='scheduled', instanceName='scheduled1'}"));

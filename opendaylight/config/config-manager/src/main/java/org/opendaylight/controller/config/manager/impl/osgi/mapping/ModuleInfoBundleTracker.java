@@ -90,9 +90,9 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
             if(!starting) {
                 moduleInfoRegistry.updateService();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("Error while reading {} from bundle {}", resource, bundle, e);
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             LOG.error("Failed to process {} for bundle {}", resource, bundle, e);
         }
 
@@ -115,7 +115,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         for (ObjectRegistration<YangModuleInfo> reg : regs) {
             try {
                 reg.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Unable to unregister YangModuleInfo {}", reg.getInstance(), e);
             }
         }
@@ -134,10 +134,10 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         try {
             Object instanceObj = clazz.newInstance();
             instance = YangModelBindingProvider.class.cast(instanceObj);
-        } catch (InstantiationException e) {
+        } catch (final InstantiationException e) {
             errorMessage = logMessage("Could not instantiate {} in bundle {}, reason {}", moduleInfoClass, bundle, e);
             throw new IllegalStateException(errorMessage, e);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             errorMessage = logMessage("Illegal access during instantiation of class {} in bundle {}, reason {}",
                     moduleInfoClass, bundle, e);
             throw new IllegalStateException(errorMessage, e);
@@ -153,7 +153,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     private static Class<?> loadClass(final String moduleInfoClass, final Bundle bundle) {
         try {
             return bundle.loadClass(moduleInfoClass);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             String errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", moduleInfoClass,
                 bundle, e);
             throw new IllegalStateException(errorMessage);

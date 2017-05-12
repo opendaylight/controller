@@ -17,8 +17,8 @@ public class LookupBeansUtil {
     private LookupBeansUtil() {
     }
 
-    public static ObjectName lookupConfigBean(LookupRegistry lookupRegistry,
-            String moduleName, String instanceName)
+    public static ObjectName lookupConfigBean(final LookupRegistry lookupRegistry,
+            final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         Set<ObjectName> objectNames = lookupRegistry.lookupConfigBeans(
                 moduleName, instanceName);

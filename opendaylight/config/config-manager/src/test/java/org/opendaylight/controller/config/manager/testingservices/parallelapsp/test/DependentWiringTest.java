@@ -69,7 +69,7 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
             try {
                 transaction.validateConfig();
                 fail();
-            } catch (ValidationException e) {
+            } catch (final ValidationException e) {
                 for (Map.Entry<String, Map<String, ExceptionMessageWithStackTrace>> exception : e
                         .getFailedValidations().entrySet()) {
                     for (Map.Entry<String, ExceptionMessageWithStackTrace> entry : exception
@@ -85,7 +85,7 @@ public class DependentWiringTest extends AbstractParallelAPSPTest {
             try {
                 transaction.commit();
                 fail();
-            } catch (ValidationException e) {
+            } catch (final ValidationException e) {
                 for (Map.Entry<String, Map<String, ExceptionMessageWithStackTrace>> exception : e
                         .getFailedValidations().entrySet()) {
                     for (Map.Entry<String, ExceptionMessageWithStackTrace> entry : exception

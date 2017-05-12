@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceRegistration;
 public class HardcodedModuleFactoriesResolver implements ModuleFactoriesResolver {
     private Map<String, Map.Entry<ModuleFactory, BundleContext>> factories;
 
-    public HardcodedModuleFactoriesResolver(BundleContext bundleContext, ModuleFactory... list) {
+    public HardcodedModuleFactoriesResolver(final BundleContext bundleContext, final ModuleFactory... list) {
         List<ModuleFactory> factoryList = Arrays.asList(list);
         this.factories = new HashMap<>(factoryList.size());
         for (ModuleFactory moduleFactory : list) {

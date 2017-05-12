@@ -71,7 +71,7 @@ public class ModuleFactoryBundleTrackerTest {
     public void testRegisterFactoryInstantiateEx() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory(WrongConstructorTestingFactory.class.getName(), bundle);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             verifyZeroInteractions(context);
             assertNotNull(e.getCause());
             assertEquals(InstantiationException.class, e.getCause().getClass());
@@ -85,7 +85,7 @@ public class ModuleFactoryBundleTrackerTest {
     public void testRegisterFactoryInstantiateExAccess() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory(NoAccessConstructorTestingFactory.class.getName(), bundle);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             verifyZeroInteractions(context);
             assertNotNull(e.getCause());
             assertEquals(IllegalAccessException.class, e.getCause().getClass());
@@ -99,7 +99,7 @@ public class ModuleFactoryBundleTrackerTest {
     public void testRegisterFactoryNotExtending() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory(NotExtendingTestingFactory.class.getName(), bundle);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             verifyZeroInteractions(context);
             return;
         }
@@ -111,7 +111,7 @@ public class ModuleFactoryBundleTrackerTest {
     public void testRegisterFactoryNotExisting() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory("Unknown class", bundle);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             verifyZeroInteractions(context);
             assertNotNull(e.getCause());
             assertEquals(ClassNotFoundException.class, e.getCause().getClass());
@@ -138,7 +138,7 @@ public class ModuleFactoryBundleTrackerTest {
         doReturn(getClass().getResource("/module-factories/module-factory-fail")).when(bundle).getEntry(anyString());
         try {
             tracker.addingBundle(bundle, mock(BundleEvent.class));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             verifyZeroInteractions(context);
             return;
         }

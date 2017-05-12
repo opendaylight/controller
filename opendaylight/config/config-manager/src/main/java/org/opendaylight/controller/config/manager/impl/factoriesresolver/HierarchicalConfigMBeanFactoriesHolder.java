@@ -35,7 +35,7 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      *             if unique constraint on module names is violated
      */
     public HierarchicalConfigMBeanFactoriesHolder(
-            Map<String, Map.Entry<ModuleFactory, BundleContext>> factoriesMap) {
+            final Map<String, Map.Entry<ModuleFactory, BundleContext>> factoriesMap) {
         this.moduleNamesToConfigBeanFactories = Collections
                 .unmodifiableMap(factoriesMap);
         moduleNames = Collections.unmodifiableSet(new TreeSet<>(
@@ -54,7 +54,7 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      * @throws IllegalArgumentException
      *             if factory is not found
      */
-    public ModuleFactory findByModuleName(String moduleName) {
+    public ModuleFactory findByModuleName(final String moduleName) {
         Map.Entry<ModuleFactory, BundleContext> result = moduleNamesToConfigBeanFactories.get(moduleName);
         if (result == null) {
             throw new ModuleFactoryNotFoundException(moduleName);

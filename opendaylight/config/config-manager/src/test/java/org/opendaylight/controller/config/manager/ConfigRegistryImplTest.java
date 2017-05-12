@@ -43,7 +43,7 @@ public class ConfigRegistryImplTest extends
 
             configRegistry.beginConfig();
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             assertTrue(
                     e.getMessage(),
                     e.getMessage()
@@ -53,7 +53,7 @@ public class ConfigRegistryImplTest extends
         } finally {
             try {
                 configRegistry.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
                 LOG.warn("Ignoring exception", e);
             }

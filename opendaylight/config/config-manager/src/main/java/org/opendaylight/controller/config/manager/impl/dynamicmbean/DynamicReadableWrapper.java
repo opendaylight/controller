@@ -33,9 +33,9 @@ public class DynamicReadableWrapper extends AbstractDynamicWrapper implements
      *            for recreating Module.
      *
      */
-    public DynamicReadableWrapper(Module module, AutoCloseable instance,
-            ModuleIdentifier moduleIdentifier, MBeanServer internalServer,
-            MBeanServer configMBeanServer) {
+    public DynamicReadableWrapper(final Module module, final AutoCloseable instance,
+            final ModuleIdentifier moduleIdentifier, final MBeanServer internalServer,
+            final MBeanServer configMBeanServer) {
         super(module, false, moduleIdentifier, ObjectNameUtil
                 .createReadOnlyModuleON(moduleIdentifier),
                 getEmptyOperations(), internalServer, configMBeanServer);
@@ -53,7 +53,7 @@ public class DynamicReadableWrapper extends AbstractDynamicWrapper implements
     }
 
     @Override
-    public Object invoke(String actionName, Object[] params, String[] signature)
+    public Object invoke(final String actionName, final Object[] params, final String[] signature)
             throws MBeanException, ReflectionException {
         if ("getInstance".equals(actionName)
                 && (params == null || params.length == 0)
@@ -64,7 +64,7 @@ public class DynamicReadableWrapper extends AbstractDynamicWrapper implements
     }
 
     @Override
-    public Object getAttribute(String attributeName)
+    public Object getAttribute(final String attributeName)
             throws AttributeNotFoundException, MBeanException,
             ReflectionException {
         if ("getInstance".equals(attributeName)) {
@@ -74,7 +74,7 @@ public class DynamicReadableWrapper extends AbstractDynamicWrapper implements
     }
 
     @Override
-    public void setAttribute(Attribute attribute)
+    public void setAttribute(final Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException,
             MBeanException, ReflectionException {
         throw new UnsupportedOperationException(
@@ -82,7 +82,7 @@ public class DynamicReadableWrapper extends AbstractDynamicWrapper implements
     }
 
     @Override
-    public AttributeList setAttributes(AttributeList attributes) {
+    public AttributeList setAttributes(final AttributeList attributes) {
         throw new UnsupportedOperationException(
                 "setAttributes is not supported on " + moduleIdentifier);
     }

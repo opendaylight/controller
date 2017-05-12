@@ -36,7 +36,7 @@ public class BundleContextBackedModuleFactoriesResolver implements ModuleFactori
         Collection<ServiceReference<ModuleFactory>> serviceReferences;
         try {
             serviceReferences = bundleContext.getServiceReferences(ModuleFactory.class, null);
-        } catch (InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
             throw new IllegalStateException(e);
         }
         Map<String, Map.Entry<ModuleFactory, BundleContext>> result = new HashMap<>(serviceReferences.size());

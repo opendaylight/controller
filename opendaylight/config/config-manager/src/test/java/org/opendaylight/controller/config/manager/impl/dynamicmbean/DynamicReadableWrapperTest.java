@@ -14,8 +14,8 @@ import org.opendaylight.controller.config.spi.Module;
 public class DynamicReadableWrapperTest extends AbstractDynamicWrapperTest {
 
     @Override
-    protected AbstractDynamicWrapper getDynamicWrapper(Module module,
-            ModuleIdentifier moduleIdentifier) {
+    protected AbstractDynamicWrapper getDynamicWrapper(final Module module,
+            final ModuleIdentifier moduleIdentifier) {
         return new DynamicReadableWrapper(module, null, moduleIdentifier,
                 internalServer, ManagementFactory.getPlatformMBeanServer());
     }

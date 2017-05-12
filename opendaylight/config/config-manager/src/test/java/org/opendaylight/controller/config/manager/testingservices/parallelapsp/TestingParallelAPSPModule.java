@@ -43,10 +43,10 @@ public class TestingParallelAPSPModule implements Module,
     private TestingParallelAPSPImpl instance;
     private String someParam;
 
-    public TestingParallelAPSPModule(ModuleIdentifier identifier,
-            DependencyResolver dependencyResolver,
-            @Nullable AutoCloseable oldCloseable,
-            @Nullable TestingParallelAPSPImpl oldInstance) {
+    public TestingParallelAPSPModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver,
+            @Nullable final AutoCloseable oldCloseable,
+            @Nullable final TestingParallelAPSPImpl oldInstance) {
         this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldCloseable = oldCloseable;
@@ -60,7 +60,7 @@ public class TestingParallelAPSPModule implements Module,
 
     @RequireInterface(TestingThreadPoolServiceInterface.class)
     @Override
-    public void setThreadPool(ObjectName threadPoolName) {
+    public void setThreadPool(final ObjectName threadPoolName) {
         this.threadPoolON = threadPoolName;
     }
 
@@ -70,7 +70,7 @@ public class TestingParallelAPSPModule implements Module,
     }
 
     @Override
-    public void setSomeParam(String someParam) {
+    public void setSomeParam(final String someParam) {
         this.someParam = someParam;
     }
 
@@ -98,7 +98,7 @@ public class TestingParallelAPSPModule implements Module,
             dependencyResolver.resolveInstance(TestingThreadPoolIfc.class,
                     threadPoolON, threadPoolONJMXAttribute);
             throw new RuntimeException("fail");
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             checkState("Commit was not triggered".equals(e.getMessage()),
                     e.getMessage());
         }
@@ -107,7 +107,7 @@ public class TestingParallelAPSPModule implements Module,
         int threadCount;
         try {
             threadCount = (Integer)dependencyResolver.getAttribute(threadPoolON, "ThreadCount");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
         checkState(threadCount > 0);
@@ -135,7 +135,7 @@ public class TestingParallelAPSPModule implements Module,
                 if (oldCloseable != null) {
                     try {
                         oldCloseable.close();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw new RuntimeException(e);
                     }
                 }

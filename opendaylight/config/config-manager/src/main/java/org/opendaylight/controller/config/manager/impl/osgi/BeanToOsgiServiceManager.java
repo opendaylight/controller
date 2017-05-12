@@ -34,9 +34,9 @@ public class BeanToOsgiServiceManager {
      * It is expected that before using this method OSGi service registry will
      * be cleaned from previous registrations.
      */
-    public OsgiRegistration registerToOsgi(AutoCloseable instance, ModuleIdentifier moduleIdentifier,
-                                           BundleContext bundleContext,
-                                           Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
+    public OsgiRegistration registerToOsgi(final AutoCloseable instance, final ModuleIdentifier moduleIdentifier,
+                                           final BundleContext bundleContext,
+                                           final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
         return new OsgiRegistration(instance, moduleIdentifier, bundleContext, serviceNamesToAnnotations);
     }
 
@@ -51,17 +51,17 @@ public class BeanToOsgiServiceManager {
         @GuardedBy("this")
         private final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations;
 
-        public OsgiRegistration(AutoCloseable instance, ModuleIdentifier moduleIdentifier,
-                                BundleContext bundleContext,
-                                Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
+        public OsgiRegistration(final AutoCloseable instance, final ModuleIdentifier moduleIdentifier,
+                                final BundleContext bundleContext,
+                                final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
             this.instance = instance;
             this.moduleIdentifier = moduleIdentifier;
             this.serviceNamesToAnnotations = serviceNamesToAnnotations;
             this.serviceRegistrations = registerToSR(instance, bundleContext, serviceNamesToAnnotations);
         }
 
-        private static Set<ServiceRegistration<?>> registerToSR(AutoCloseable instance, BundleContext bundleContext,
-                                                                Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
+        private static Set<ServiceRegistration<?>> registerToSR(final AutoCloseable instance, final BundleContext bundleContext,
+                                                                final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
             Set<ServiceRegistration<?>> serviceRegistrations = new HashSet<>();
             for (Entry<ServiceInterfaceAnnotation, String /* service ref name */> entry : serviceNamesToAnnotations.entrySet()) {
                 ServiceInterfaceAnnotation annotation = entry.getKey();
@@ -87,15 +87,15 @@ public class BeanToOsgiServiceManager {
             for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
                 try {
                     serviceRegistration.unregister();
-                } catch(IllegalStateException e) {
+                } catch(final IllegalStateException e) {
                     LOG.trace("Cannot unregister {}", serviceRegistration, e);
                 }
             }
             serviceRegistrations.clear();
         }
 
-        public synchronized void updateRegistrations(Map<ServiceInterfaceAnnotation, String /* service ref name */> newAnnotationMapping,
-                                                     BundleContext bundleContext, AutoCloseable newInstance) {
+        public synchronized void updateRegistrations(final Map<ServiceInterfaceAnnotation, String /* service ref name */> newAnnotationMapping,
+                                                     final BundleContext bundleContext, final AutoCloseable newInstance) {
             boolean notEquals = !this.instance.equals(newInstance);
             notEquals |= !newAnnotationMapping.equals(serviceNamesToAnnotations);
             if (notEquals) {
@@ -110,7 +110,7 @@ public class BeanToOsgiServiceManager {
             }
         }
 
-        private static Dictionary<String, String> createProps(String serviceName) {
+        private static Dictionary<String, String> createProps(final String serviceName) {
             Hashtable<String, String> result = new Hashtable<>();
             result.put(SERVICE_NAME_OSGI_PROP, serviceName);
             return result;

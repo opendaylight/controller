@@ -50,7 +50,7 @@ public class AnnotationsTest {
         Method setter;
         try {
             setter = clazz.getMethod(methodName, new Class[] { ObjectName.class });
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw Throwables.propagate(e);
         }
         return setter;
@@ -175,7 +175,7 @@ public class AnnotationsTest {
             assertRequireInterfaceAnnotationHasCorrectValue(SubClassWithAnnotation.class, setSomethingString,
                 emptySetOfInterfaces(), SubSI2.class);
             fail();
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             assertTrue(e.getMessage(),
                 e.getMessage().startsWith("Error finding @RequireInterface. More than one value specified"));
         }

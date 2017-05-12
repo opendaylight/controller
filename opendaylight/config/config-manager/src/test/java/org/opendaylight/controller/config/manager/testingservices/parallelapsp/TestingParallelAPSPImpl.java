@@ -21,8 +21,8 @@ public class TestingParallelAPSPImpl implements TestingAPSP, Closeable {
     private TestingThreadPoolIfc threadPool;
     private String someParam;
 
-    public TestingParallelAPSPImpl(TestingThreadPoolIfc threadPool,
-            String someParam) {
+    public TestingParallelAPSPImpl(final TestingThreadPoolIfc threadPool,
+            final String someParam) {
         checkArgument(
                 threadPool.getMaxNumberOfThreads() >= MINIMAL_NUMBER_OF_THREADS,
                 "Parameter 'threadPool' has not enough threads");
@@ -46,7 +46,7 @@ public class TestingParallelAPSPImpl implements TestingAPSP, Closeable {
         return threadPool;
     }
 
-    void setSomeParam(String s) {
+    void setSomeParam(final String s) {
         checkArgument(Strings.isNullOrEmpty(someParam) == false,
                 "Parameter 'someParam' is blank");
         this.someParam = s;

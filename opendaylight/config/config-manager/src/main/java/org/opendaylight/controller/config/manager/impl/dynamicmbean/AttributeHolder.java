@@ -38,10 +38,10 @@ class AttributeHolder {
         PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(List.class);
     }
 
-    public AttributeHolder(String name, Object object, String returnType,
-                           boolean writable,
-                           @Nullable RequireInterface requireInterfaceAnnotation,
-                           String description) {
+    public AttributeHolder(final String name, final Object object, final String returnType,
+                           final boolean writable,
+                           @Nullable final RequireInterface requireInterfaceAnnotation,
+                           final String description) {
         if (name == null) {
             throw new NullPointerException();
         }
@@ -98,7 +98,7 @@ class AttributeHolder {
      * @return empty string if no annotation is found, or list of descriptions
      * separated by newline
      */
-    static String findDescription(Method setter, Set<Class<?>> jmxInterfaces) {
+    static String findDescription(final Method setter, final Set<Class<?>> jmxInterfaces) {
         List<Description> descriptions = AnnotationsHelper
                 .findMethodAnnotationInSuperClassesAndIfcs(setter, Description.class, jmxInterfaces);
         return AnnotationsHelper.aggregateDescriptions(descriptions);
@@ -115,7 +115,7 @@ class AttributeHolder {
      * @throws IllegalArgumentException if set of exported interfaces contains non interface type
      */
     static RequireInterface findRequireInterfaceAnnotation(final Method setter,
-                                                           Set<Class<?>> inspectedInterfaces) {
+                                                           final Set<Class<?>> inspectedInterfaces) {
 
         // only allow setX(ObjectName y) or setX(ObjectName[] y) or setX(List<ObjectName> y) to continue
 

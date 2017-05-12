@@ -36,7 +36,7 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
     public static final List<ThreadPoolExecutor> allExecutors = Collections
             .synchronizedList(Lists.<ThreadPoolExecutor>newLinkedList());
 
-    public TestingFixedThreadPool(int threadCount, String uniqueName) {
+    public TestingFixedThreadPool(final int threadCount, final String uniqueName) {
         checkNotNull(uniqueName);
         this.uniqueName = uniqueName;
         executorService = (ThreadPoolExecutor) Executors
@@ -66,7 +66,7 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
     }
 
     @Override
-    public void setMaximumNumberOfThreads(int activeCount) {
+    public void setMaximumNumberOfThreads(final int activeCount) {
         checkArgument(activeCount > 0);
         executorService.setMaximumPoolSize(activeCount);
     }

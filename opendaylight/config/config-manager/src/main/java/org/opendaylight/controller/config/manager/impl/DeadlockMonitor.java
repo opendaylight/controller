@@ -29,13 +29,13 @@ public class DeadlockMonitor implements AutoCloseable {
     @GuardedBy("this")
     private ModuleIdentifierWithNanos top = ModuleIdentifierWithNanos.empty;
 
-    public DeadlockMonitor(TransactionIdentifier transactionIdentifier) {
+    public DeadlockMonitor(final TransactionIdentifier transactionIdentifier) {
         this.transactionIdentifier = transactionIdentifier;
         thread = new DeadlockMonitorRunnable();
         thread.start();
     }
 
-    public synchronized void setCurrentlyInstantiatedModule(ModuleIdentifier currentlyInstantiatedModule) {
+    public synchronized void setCurrentlyInstantiatedModule(final ModuleIdentifier currentlyInstantiatedModule) {
 
         boolean popping = currentlyInstantiatedModule == null;
         if (popping) {
@@ -95,7 +95,7 @@ public class DeadlockMonitor implements AutoCloseable {
                 }
                 try {
                     sleep(WARN_AFTER_MILLIS);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     interrupt();
                 }
             }
@@ -119,18 +119,18 @@ public class DeadlockMonitor implements AutoCloseable {
             this((ModuleIdentifier)null);
         }
 
-        private ModuleIdentifierWithNanos(ModuleIdentifier moduleIdentifier) {
+        private ModuleIdentifierWithNanos(final ModuleIdentifier moduleIdentifier) {
             this.moduleIdentifier = moduleIdentifier;
             nanoTime = System.nanoTime();
         }
 
-        private ModuleIdentifierWithNanos(ModuleIdentifierWithNanos copy) {
+        private ModuleIdentifierWithNanos(final ModuleIdentifierWithNanos copy) {
             moduleIdentifier = copy.moduleIdentifier;
             nanoTime = copy.nanoTime;
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }

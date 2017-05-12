@@ -18,13 +18,13 @@ public abstract class AbstractMockedModule implements Module {
 
     protected abstract AutoCloseable prepareMockedInstance() throws Exception;
 
-    public AbstractMockedModule(DynamicMBeanWithInstance old, ModuleIdentifier id) {
+    public AbstractMockedModule(final DynamicMBeanWithInstance old, final ModuleIdentifier id) {
         if(old!=null)
             instance = old.getInstance();
         else
             try {
                 instance = prepareMockedInstance();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
 
@@ -33,7 +33,7 @@ public abstract class AbstractMockedModule implements Module {
 
 
     @Override
-    public boolean canReuse(Module oldModule) {
+    public boolean canReuse(final Module oldModule) {
         return instance!=null;
     }
 
