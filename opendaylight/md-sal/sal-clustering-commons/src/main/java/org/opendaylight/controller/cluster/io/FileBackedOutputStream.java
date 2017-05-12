@@ -16,11 +16,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -100,7 +99,7 @@ public class FileBackedOutputStream extends OutputStream {
                 public InputStream openStream() throws IOException {
                     synchronized (FileBackedOutputStream.this) {
                         if (file != null) {
-                            return new FileInputStream(file);
+                            return Files.newInputStream(file.toPath());
                         } else {
                             return new ByteArrayInputStream(memory.getBuffer(), 0, memory.getCount());
                         }
@@ -201,15 +200,16 @@ public class FileBackedOutputStream extends OutputStream {
         }
 
         if (file == null && memory.getCount() + len > fileThreshold) {
-            File temp = File.createTempFile("FileBackedOutputStream", null, new File(fileDirectory));
+            File temp = File.createTempFile("FileBackedOutputStream", null,
+                    fileDirectory == null ? null : new File(fileDirectory));
             temp.deleteOnExit();
 
             LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", memory.getCount() + len,
                     fileThreshold, temp);
 
-            FileOutputStream transfer = null;
+            OutputStream transfer = null;
             try {
-                transfer = new FileOutputStream(temp);
+                transfer = Files.newOutputStream(temp.toPath());
                 transfer.write(memory.getBuffer(), 0, memory.getCount());
                 transfer.flush();
 
