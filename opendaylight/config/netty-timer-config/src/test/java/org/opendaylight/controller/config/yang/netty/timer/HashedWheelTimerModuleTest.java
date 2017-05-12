@@ -61,7 +61,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
             createInstance(transaction, instanceName, 0L, 10, true);
             transaction.validateConfig();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertTrue(e.getMessage().contains("TickDuration value must be greater than 0"));
         }
     }
@@ -72,7 +72,7 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
             createInstance(transaction, instanceName, 500L, 0, true);
             transaction.validateConfig();
             fail();
-        } catch (ValidationException e) {
+        } catch (final ValidationException e) {
             assertTrue(e.getMessage().contains("TicksPerWheel value must be greater than 0"));
         }
     }

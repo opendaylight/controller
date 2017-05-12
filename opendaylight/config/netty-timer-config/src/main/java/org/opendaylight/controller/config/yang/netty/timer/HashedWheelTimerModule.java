@@ -33,14 +33,14 @@ public final class HashedWheelTimerModule extends
         org.opendaylight.controller.config.yang.netty.timer.AbstractHashedWheelTimerModule {
     private BundleContext bundleContext;
 
-    public HashedWheelTimerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public HashedWheelTimerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public HashedWheelTimerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            HashedWheelTimerModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public HashedWheelTimerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final HashedWheelTimerModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -66,7 +66,7 @@ public final class HashedWheelTimerModule extends
 
         return Reflection.newProxy(AutoCloseableTimerInterface.class, new AbstractInvocationHandler() {
             @Override
-            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+            protected Object handleInvocation(final Object proxy, final Method method, final Object[] args) throws Throwable {
                 if (method.getName().equals("close")) {
                     tracker.close();
                     return null;
@@ -77,7 +77,7 @@ public final class HashedWheelTimerModule extends
         });
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
