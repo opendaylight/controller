@@ -15,7 +15,7 @@ public class ConfigSnapshotHolderImpl implements ConfigSnapshotHolder {
     private final SortedSet<String> caps;
     private final String fileName;
 
-    public ConfigSnapshotHolderImpl(String configSnapshot, SortedSet<String> capabilities, String fileName) {
+    public ConfigSnapshotHolderImpl(final String configSnapshot, final SortedSet<String> capabilities, final String fileName) {
         this.snapshot = configSnapshot;
         this.caps = capabilities;
         this.fileName = fileName;

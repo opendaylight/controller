@@ -14,16 +14,16 @@ import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 public class PropertiesProviderTest implements PropertiesProvider {
     private final Map<String,String> properties = new HashMap<>();
 
-    public void addProperty(String key,String value){
+    public void addProperty(final String key, final String value){
         properties.put(key,value);
     }
     @Override
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         return properties.get(key);
     }
 
     @Override
-    public String getFullKeyForReporting(String key) {
+    public String getFullKeyForReporting(final String key) {
         return null;
     }
 
@@ -33,7 +33,7 @@ public class PropertiesProviderTest implements PropertiesProvider {
     }
 
     @Override
-    public String getPropertyWithoutPrefix(String fullKey) {
+    public String getPropertyWithoutPrefix(final String fullKey) {
         return null;
     }
 }
