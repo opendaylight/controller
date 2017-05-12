@@ -67,7 +67,7 @@ public class DirectoryStorageAdapterTest {
                 }
             });
             fail();
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
 
         }
     }
