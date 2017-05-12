@@ -33,11 +33,11 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     private final ObjectName configRegistryON;
     private final MBeanServer configMBeanServer;
 
-    public ConfigRegistryJMXClient(MBeanServer configMBeanServer) {
+    public ConfigRegistryJMXClient(final MBeanServer configMBeanServer) {
         this(configMBeanServer, OBJECT_NAME);
     }
 
-    private ConfigRegistryJMXClient(MBeanServer configMBeanServer, ObjectName configRegistryON) {
+    private ConfigRegistryJMXClient(final MBeanServer configMBeanServer, final ObjectName configRegistryON) {
         this.configMBeanServer = configMBeanServer;
         this.configRegistryON = configRegistryON;
         Set<ObjectInstance> searchResult = configMBeanServer.queryMBeans(configRegistryON, null);
@@ -48,7 +48,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
                 false);
     }
 
-    public static ConfigRegistryJMXClient createWithoutNotifications(MBeanServer configMBeanServer) {
+    public static ConfigRegistryJMXClient createWithoutNotifications(final MBeanServer configMBeanServer) {
         return new ConfigRegistryJMXClient(configMBeanServer, ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS);
     }
 
@@ -60,7 +60,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
 
     @Override
     public ConfigTransactionJMXClient getConfigTransactionClient(
-            String transactionName) {
+            final String transactionName) {
         ObjectName objectName = ObjectNameUtil
                 .createTransactionControllerON(transactionName);
         return getConfigTransactionClient(objectName);
@@ -68,7 +68,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
 
     @Override
     public ConfigTransactionJMXClient getConfigTransactionClient(
-            ObjectName objectName) {
+            final ObjectName objectName) {
         return new ConfigTransactionJMXClient(configRegistryMXBeanProxy, objectName,
                 configMBeanServer);
     }
@@ -80,12 +80,12 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
      * This method will be removed soon.
      */
     @Deprecated
-    public <T> T newMBeanProxy(ObjectName on, Class<T> clazz) {
+    public <T> T newMBeanProxy(final ObjectName on, final Class<T> clazz) {
         ObjectName onObj = translateServiceRefIfPossible(on, clazz, configMBeanServer);
         return JMX.newMBeanProxy(configMBeanServer, onObj, clazz);
     }
 
-    static  ObjectName translateServiceRefIfPossible(ObjectName on, Class<?> clazz, MBeanServer configMBeanServer) {
+    static  ObjectName translateServiceRefIfPossible(final ObjectName on, final Class<?> clazz, final MBeanServer configMBeanServer) {
         ObjectName onObj = on;
         if (ObjectNameUtil.isServiceReference(onObj) && !clazz.equals(ServiceReferenceMXBean.class)) {
             ServiceReferenceMXBean proxy = JMX.newMXBeanProxy(configMBeanServer, onObj, ServiceReferenceMXBean.class);
@@ -95,7 +95,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
 
-    public <T> T newMXBeanProxy(ObjectName on, Class<T> clazz) {
+    public <T> T newMXBeanProxy(final ObjectName on, final Class<T> clazz) {
         return JMX.newMXBeanProxy(configMBeanServer, on, clazz);
     }
 
@@ -105,7 +105,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public CommitStatus commitConfig(ObjectName transactionControllerON)
+    public CommitStatus commitConfig(final ObjectName transactionControllerON)
             throws ConflictingVersionException, ValidationException {
         return configRegistryMXBeanProxy.commitConfig(transactionControllerON);
     }
@@ -120,7 +120,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
         try {
             return (Long) configMBeanServer.getAttribute(configRegistryON,
                     "Version");
-        } catch (JMException e) {
+        } catch (final JMException e) {
             throw new RuntimeException(e);
         }
     }
@@ -141,18 +141,18 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName) {
         return configRegistryMXBeanProxy.lookupConfigBeans(moduleName);
     }
 
     @Override
-    public Set<ObjectName> lookupConfigBeans(String moduleName,
-            String instanceName) {
+    public Set<ObjectName> lookupConfigBeans(final String moduleName,
+            final String instanceName) {
         return configRegistryMXBeanProxy.lookupConfigBeans(moduleName, instanceName);
     }
 
     @Override
-    public ObjectName lookupConfigBean(String moduleName, String instanceName)
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         return configRegistryMXBeanProxy.lookupConfigBean(moduleName, instanceName);
     }
@@ -163,18 +163,18 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public Set<ObjectName> lookupRuntimeBeans(String ifcName,
-            String instanceName) {
+    public Set<ObjectName> lookupRuntimeBeans(final String ifcName,
+            final String instanceName) {
         return configRegistryMXBeanProxy.lookupRuntimeBeans(ifcName, instanceName);
     }
 
     @Override
-    public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkConfigBeanExists(final ObjectName objectName) throws InstanceNotFoundException {
         configRegistryMXBeanProxy.checkConfigBeanExists(objectName);
     }
 
     @Override
-    public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
+    public ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
         return configRegistryMXBeanProxy.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
@@ -184,23 +184,23 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
+    public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
         return configRegistryMXBeanProxy.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
-    public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
+    public Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
         return configRegistryMXBeanProxy.lookupServiceInterfaceNames(objectName);
     }
 
     @Override
-    public String getServiceInterfaceName(String namespace, String localName) {
+    public String getServiceInterfaceName(final String namespace, final String localName) {
         return configRegistryMXBeanProxy.getServiceInterfaceName(namespace, localName);
     }
 
     @Override
-    public Object invokeMethod(ObjectName on, String name, Object[] params,
-            String[] signature) {
+    public Object invokeMethod(final ObjectName on, final String name, final Object[] params,
+            final String[] signature) {
         try {
             return configMBeanServer.invoke(on, name, params, signature);
         } catch (InstanceNotFoundException | ReflectionException
@@ -213,7 +213,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public Object getAttributeCurrentValue(ObjectName on, String attributeName) {
+    public Object getAttributeCurrentValue(final ObjectName on, final String attributeName) {
         try {
             return configMBeanServer.getAttribute(on, attributeName);
         } catch (AttributeNotFoundException | InstanceNotFoundException
@@ -229,12 +229,12 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     }
 
     @Override
-    public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
         return configRegistryMXBeanProxy.getServiceReference(serviceInterfaceQName, refName);
     }
 
     @Override
-    public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
+    public void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         configRegistryMXBeanProxy.checkServiceReferenceExists(objectName);
     }
 }

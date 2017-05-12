@@ -14,8 +14,8 @@ public class AttributeEntry {
     private final String type;
     private final boolean rw;
 
-    public AttributeEntry(String key, String description, Object value,
-            String type, boolean rw) {
+    public AttributeEntry(final String key, final String description, final Object value,
+            final String type, final boolean rw) {
         this.key = key;
         this.description = description;
         this.value = value;

@@ -104,7 +104,7 @@ public class LookupTest {
         test(method, args);
     }
 
-    private void test(Method method, Object[] args) throws Exception {
+    private void test(final Method method, final Object[] args) throws Exception {
         for (Entry<LookupRegistry, ? extends Set<? extends LookupRegistry>> entry : lookupProvidersToClients
                 .entrySet()) {
             Object expected = method.invoke(entry.getKey(), args);
@@ -125,7 +125,7 @@ public class LookupTest {
                     client.lookupConfigBean(
                             InstanceNotFoundException.class.getSimpleName(), "");
                     fail(client.toString());
-                } catch (InstanceNotFoundException e) {
+                } catch (final InstanceNotFoundException e) {
 
                 }
             }

@@ -13,12 +13,12 @@ public class CloseableUtil {
     private CloseableUtil() {
     }
 
-    public static void closeAll(Iterable<? extends AutoCloseable> autoCloseables) throws Exception {
+    public static void closeAll(final Iterable<? extends AutoCloseable> autoCloseables) throws Exception {
         Exception lastException = null;
         for (AutoCloseable autoCloseable : autoCloseables) {
             try {
                 autoCloseable.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 if (lastException == null) {
                     lastException = e;
                 } else {

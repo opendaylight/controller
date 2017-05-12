@@ -38,19 +38,19 @@ public final class XmlElement {
     private final Element element;
     private static final Logger LOG = LoggerFactory.getLogger(XmlElement.class);
 
-    private XmlElement(Element element) {
+    private XmlElement(final Element element) {
         this.element = element;
     }
 
-    public static XmlElement fromDomElement(Element e) {
+    public static XmlElement fromDomElement(final Element e) {
         return new XmlElement(e);
     }
 
-    public static XmlElement fromDomDocument(Document xml) {
+    public static XmlElement fromDomDocument(final Document xml) {
         return new XmlElement(xml.getDocumentElement());
     }
 
-    public static XmlElement fromString(String s) throws DocumentedException {
+    public static XmlElement fromString(final String s) throws DocumentedException {
         try {
             return new XmlElement(XmlUtil.readXmlToElement(s));
         } catch (IOException | SAXException e) {
@@ -58,13 +58,13 @@ public final class XmlElement {
         }
     }
 
-    public static XmlElement fromDomElementWithExpected(Element element, String expectedName) throws DocumentedException {
+    public static XmlElement fromDomElementWithExpected(final Element element, final String expectedName) throws DocumentedException {
         XmlElement xmlElement = XmlElement.fromDomElement(element);
         xmlElement.checkName(expectedName);
         return xmlElement;
     }
 
-    public static XmlElement fromDomElementWithExpected(Element element, String expectedName, String expectedNamespace) throws DocumentedException {
+    public static XmlElement fromDomElementWithExpected(final Element element, final String expectedName, final String expectedNamespace) throws DocumentedException {
         XmlElement xmlElement = XmlElement.fromDomElementWithExpected(element, expectedName);
         xmlElement.checkNamespace(expectedNamespace);
         return xmlElement;
@@ -104,7 +104,7 @@ public final class XmlElement {
         return namespaces;
     }
 
-    public void checkName(String expectedName) throws UnexpectedElementException {
+    public void checkName(final String expectedName) throws UnexpectedElementException {
         if (!getName().equals(expectedName)){
             throw new UnexpectedElementException(String.format("Expected %s xml element but was %s", expectedName,
                     getName()),
@@ -114,7 +114,7 @@ public final class XmlElement {
         }
     }
 
-    public void checkNamespaceAttribute(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
+    public void checkNamespaceAttribute(final String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
         if (!getNamespaceAttribute().equals(expectedNamespace))
         {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
@@ -126,7 +126,7 @@ public final class XmlElement {
         }
     }
 
-    public void checkNamespace(String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
+    public void checkNamespace(final String expectedNamespace) throws UnexpectedNamespaceException, MissingNameSpaceException {
         if (!getNamespace().equals(expectedNamespace))
         {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
@@ -146,19 +146,19 @@ public final class XmlElement {
         return element.getTagName();
     }
 
-    public String getAttribute(String attributeName) {
+    public String getAttribute(final String attributeName) {
         return element.getAttribute(attributeName);
     }
 
-    public String getAttribute(String attributeName, String namespace) {
+    public String getAttribute(final String attributeName, final String namespace) {
         return element.getAttributeNS(namespace, attributeName);
     }
 
-    public NodeList getElementsByTagName(String name) {
+    public NodeList getElementsByTagName(final String name) {
         return element.getElementsByTagName(name);
     }
 
-    public void appendChild(Element element) {
+    public void appendChild(final Element element) {
         this.element.appendChild(element);
     }
 
@@ -182,7 +182,7 @@ public final class XmlElement {
     /**
      * Non recursive
      */
-    private List<XmlElement> getChildElementsInternal(ElementFilteringStrategy strat) {
+    private List<XmlElement> getChildElementsInternal(final ElementFilteringStrategy strat) {
         NodeList childNodes = element.getChildNodes();
         final List<XmlElement> result = new ArrayList<>();
         for (int i = 0; i < childNodes.getLength(); i++) {
@@ -201,17 +201,17 @@ public final class XmlElement {
     public List<XmlElement> getChildElements() {
         return getChildElementsInternal(new ElementFilteringStrategy() {
             @Override
-            public boolean accept(Element e) {
+            public boolean accept(final Element e) {
                 return true;
             }
         });
     }
 
-    public List<XmlElement> getChildElementsWithinNamespace(final String childName, String namespace) {
+    public List<XmlElement> getChildElementsWithinNamespace(final String childName, final String namespace) {
         return Lists.newArrayList(Collections2.filter(getChildElementsWithinNamespace(namespace),
                 new Predicate<XmlElement>() {
                     @Override
-                    public boolean apply(XmlElement xmlElement) {
+                    public boolean apply(final XmlElement xmlElement) {
                         return xmlElement.getName().equals(childName);
                     }
                 }));
@@ -220,10 +220,10 @@ public final class XmlElement {
     public List<XmlElement> getChildElementsWithinNamespace(final String namespace) {
         return getChildElementsInternal(new ElementFilteringStrategy() {
             @Override
-            public boolean accept(Element e) {
+            public boolean accept(final Element e) {
                 try {
                     return XmlElement.fromDomElement(e).getNamespace().equals(namespace);
-                } catch (MissingNameSpaceException e1) {
+                } catch (final MissingNameSpaceException e1) {
                     return false;
                 }
             }
@@ -239,14 +239,14 @@ public final class XmlElement {
     public List<XmlElement> getChildElements(final String tagName) {
         return getChildElementsInternal(new ElementFilteringStrategy() {
             @Override
-            public boolean accept(Element e) {
+            public boolean accept(final Element e) {
                 // localName returns pure localName without prefix
                 return e.getLocalName().equals(tagName);
             }
         });
     }
 
-    public XmlElement getOnlyChildElement(String childName) throws DocumentedException {
+    public XmlElement getOnlyChildElement(final String childName) throws DocumentedException {
         List<XmlElement> nameElements = getChildElements(childName);
         if (nameElements.size() != 1){
             throw new DocumentedException("One element " + childName + " expected in " + toString(),
@@ -257,7 +257,7 @@ public final class XmlElement {
         return nameElements.get(0);
     }
 
-    public Optional<XmlElement> getOnlyChildElementOptionally(String childName) {
+    public Optional<XmlElement> getOnlyChildElementOptionally(final String childName) {
         List<XmlElement> nameElements = getChildElements(childName);
         if (nameElements.size() != 1) {
             return Optional.absent();
@@ -269,7 +269,7 @@ public final class XmlElement {
         List<XmlElement> children = getChildElementsWithinNamespace(namespace);
         children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
-            public boolean apply(XmlElement xmlElement) {
+            public boolean apply(final XmlElement xmlElement) {
                 return xmlElement.getName().equals(childName);
             }
         }));
@@ -279,7 +279,7 @@ public final class XmlElement {
         return Optional.of(children.get(0));
     }
 
-    public XmlElement getOnlyChildElementWithSameNamespace(String childName) throws  DocumentedException {
+    public XmlElement getOnlyChildElementWithSameNamespace(final String childName) throws  DocumentedException {
         return getOnlyChildElement(childName, getNamespace());
     }
 
@@ -289,7 +289,7 @@ public final class XmlElement {
             List<XmlElement> children = getChildElementsWithinNamespace(namespace.get());
             children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
                 @Override
-                public boolean apply(XmlElement xmlElement) {
+                public boolean apply(final XmlElement xmlElement) {
                     return xmlElement.getName().equals(childName);
                 }
             }));
@@ -318,11 +318,11 @@ public final class XmlElement {
         return Optional.absent();
     }
 
-    public XmlElement getOnlyChildElement(final String childName, String namespace) throws DocumentedException {
+    public XmlElement getOnlyChildElement(final String childName, final String namespace) throws DocumentedException {
         List<XmlElement> children = getChildElementsWithinNamespace(namespace);
         children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
-            public boolean apply(XmlElement xmlElement) {
+            public boolean apply(final XmlElement xmlElement) {
                 return xmlElement.getName().equals(childName);
             }
         }));
@@ -434,7 +434,7 @@ public final class XmlElement {
         if (element.getNamespaceURI() != null) {
             try {
                 sb.append(", namespace='").append(getNamespace()).append('\'');
-            } catch (MissingNameSpaceException e) {
+            } catch (final MissingNameSpaceException e) {
                 LOG.trace("Missing namespace for element.");
             }
         }
@@ -476,14 +476,14 @@ public final class XmlElement {
         List<XmlElement> children = getChildElementsWithinNamespace(getNamespace());
         return Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
             @Override
-            public boolean apply(XmlElement xmlElement) {
+            public boolean apply(final XmlElement xmlElement) {
                 return xmlElement.getName().equals(childName);
             }
         }));
     }
 
-    public void checkUnrecognisedElements(List<XmlElement> recognisedElements,
-                                          XmlElement... additionalRecognisedElements) throws DocumentedException {
+    public void checkUnrecognisedElements(final List<XmlElement> recognisedElements,
+                                          final XmlElement... additionalRecognisedElements) throws DocumentedException {
         List<XmlElement> childElements = getChildElements();
         childElements.removeAll(recognisedElements);
         for (XmlElement additionalRecognisedElement : additionalRecognisedElements) {
@@ -497,12 +497,12 @@ public final class XmlElement {
         }
     }
 
-    public void checkUnrecognisedElements(XmlElement... additionalRecognisedElements) throws DocumentedException {
+    public void checkUnrecognisedElements(final XmlElement... additionalRecognisedElements) throws DocumentedException {
         checkUnrecognisedElements(Collections.<XmlElement>emptyList(), additionalRecognisedElements);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
