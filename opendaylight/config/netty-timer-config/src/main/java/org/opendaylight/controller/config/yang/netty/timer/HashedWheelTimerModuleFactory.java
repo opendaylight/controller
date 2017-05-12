@@ -26,8 +26,8 @@ import org.osgi.framework.BundleContext;
 @Deprecated
 public class HashedWheelTimerModuleFactory extends AbstractHashedWheelTimerModuleFactory {
     @Override
-    public HashedWheelTimerModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            HashedWheelTimerModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+    public HashedWheelTimerModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final HashedWheelTimerModule oldModule, final AutoCloseable oldInstance, final BundleContext bundleContext) {
         HashedWheelTimerModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule,
                 oldInstance, bundleContext);
         module.setBundleContext(bundleContext);
@@ -35,8 +35,8 @@ public class HashedWheelTimerModuleFactory extends AbstractHashedWheelTimerModul
     }
 
     @Override
-    public HashedWheelTimerModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            BundleContext bundleContext) {
+    public HashedWheelTimerModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final BundleContext bundleContext) {
         HashedWheelTimerModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
         module.setBundleContext(bundleContext);
         return module;

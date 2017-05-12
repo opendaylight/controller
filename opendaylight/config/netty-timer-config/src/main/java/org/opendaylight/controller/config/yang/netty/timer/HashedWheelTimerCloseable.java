@@ -20,7 +20,7 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
 
     private final Timer timer;
 
-    private HashedWheelTimerCloseable(Timer timer) {
+    private HashedWheelTimerCloseable(final Timer timer) {
         this.timer = timer;
     }
 
@@ -30,7 +30,7 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
     }
 
     @Override
-    public Timeout newTimeout(TimerTask task, long delay, TimeUnit unit) {
+    public Timeout newTimeout(final TimerTask task, final long delay, final TimeUnit unit) {
         return this.timer.newTimeout(task, delay, unit);
     }
 
@@ -39,8 +39,8 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
         return this.timer.stop();
     }
 
-    public static HashedWheelTimerCloseable newInstance(@Nullable ThreadFactory threadFactory,
-            @Nullable Long duration, @Nullable Integer ticksPerWheel) {
+    public static HashedWheelTimerCloseable newInstance(@Nullable final ThreadFactory threadFactory,
+            @Nullable final Long duration, @Nullable final Integer ticksPerWheel) {
         TimeUnit unit = TimeUnit.MILLISECONDS;
         if(!nullOrNonPositive(duration) && threadFactory == null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(duration, unit));
@@ -67,7 +67,7 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
         return new HashedWheelTimerCloseable(new HashedWheelTimer());
     }
 
-    private static boolean nullOrNonPositive(Number n) {
+    private static boolean nullOrNonPositive(final Number n) {
         return n == null || n.longValue() <= 0;
     }
 }
