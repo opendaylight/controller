@@ -21,11 +21,11 @@ public class ServiceRegistryWrapper {
 
     private final ServiceReferenceReadableRegistry configServiceRefRegistry;
 
-    public ServiceRegistryWrapper(ServiceReferenceReadableRegistry configServiceRefRegistry) {
+    public ServiceRegistryWrapper(final ServiceReferenceReadableRegistry configServiceRefRegistry) {
         this.configServiceRefRegistry = configServiceRefRegistry;
     }
 
-    public ObjectName getByServiceAndRefName(String namespace, String serviceType, String refName) {
+    public ObjectName getByServiceAndRefName(final String namespace, final String serviceType, final String refName) {
         Map<String, Map<String, Map<String, String>>> mappedServices = getMappedServices();
         Map<String, Map<String, String>> serviceNameToRefNameToInstance = mappedServices.get(namespace);
 
@@ -56,7 +56,7 @@ public class ServiceRegistryWrapper {
             */
             return ObjectNameUtil.withoutTransactionName(
                     configServiceRefRegistry.getServiceReference(qNameOfService, refName));
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             throw new IllegalArgumentException("No serviceInstance mapped to " + refName
                     + " under service name " + serviceType + " , " + refNameToInstance.keySet(), e);
 

@@ -25,7 +25,7 @@ public class ModuleElementDefinition {
     private final EditStrategyType editStrategy;
     private static final Logger LOG = LoggerFactory.getLogger(ModuleElementDefinition.class);
 
-    public ModuleElementDefinition(String instanceName, String currentStrategy, EditStrategyType defaultStrategy) {
+    public ModuleElementDefinition(final String instanceName, final String currentStrategy, final EditStrategyType defaultStrategy) {
         this.instanceName = instanceName;
         if (currentStrategy == null || currentStrategy.isEmpty()) {
             this.editStrategy = defaultStrategy;
@@ -33,7 +33,7 @@ public class ModuleElementDefinition {
             EditStrategyType _edStrategy = null;
             try {
                 _edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
-            } catch (OperationNotPermittedException e) {
+            } catch (final OperationNotPermittedException e) {
                 _edStrategy = defaultStrategy;
                 LOG.warn("Operation not permitted on current strategy {} while default strategy is {}. Element definition strategy set to default.",
                         currentStrategy,

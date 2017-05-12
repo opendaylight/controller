@@ -34,13 +34,13 @@ public final class InstanceRuntimeRpc {
     private final Rpc rpc;
     private final EnumResolver enumResolver;
 
-    public InstanceRuntimeRpc(Rpc rpc, final EnumResolver enumResolver) {
+    public InstanceRuntimeRpc(final Rpc rpc, final EnumResolver enumResolver) {
         this.enumResolver = enumResolver;
         this.yangToAttrConfig = map(rpc.getParameters());
         this.rpc = rpc;
     }
 
-    private Map<String, AttributeIfc> map(List<JavaAttribute> parameters) {
+    private Map<String, AttributeIfc> map(final List<JavaAttribute> parameters) {
         Map<String, AttributeIfc> mapped = Maps.newHashMap();
         for (JavaAttribute javaAttribute : parameters) {
             mapped.put(javaAttribute.getAttributeYangName(), javaAttribute);
@@ -48,7 +48,7 @@ public final class InstanceRuntimeRpc {
         return mapped;
     }
 
-    private void resolveConfiguration(Map<String, AttributeConfigElement> mappedConfig) {
+    private void resolveConfiguration(final Map<String, AttributeConfigElement> mappedConfig) {
 
         // TODO make field, resolvingStrategies can be instantiated only once
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> resolvingStrategies = new ObjectResolver(null)
@@ -63,14 +63,14 @@ public final class InstanceRuntimeRpc {
                 configDefEntry.getValue().resolveValue(attributeResolvingStrategy, configDefEntry.getKey());
                 configDefEntry.getValue().setJmxName(
                         yangToAttrConfig.get(configDefEntry.getKey()).getUpperCaseCammelCase());
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new IllegalStateException("Unable to resolve value " + configDefEntry.getValue()
                         + " to attribute " + configDefEntry.getKey(), e);
             }
         }
     }
 
-    public Map<String, AttributeConfigElement> fromXml(XmlElement configRootNode) throws DocumentedException {
+    public Map<String, AttributeConfigElement> fromXml(final XmlElement configRootNode) throws DocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         // FIXME add identity map to runtime data

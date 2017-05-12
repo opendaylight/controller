@@ -14,12 +14,12 @@ import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.config.util.xml.XmlElement;
 
 public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
-    public SimpleAttributeReadingStrategy(String nullableDefault) {
+    public SimpleAttributeReadingStrategy(final String nullableDefault) {
         super(nullableDefault);
     }
 
     @Override
-    AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws DocumentedException {
+    AttributeConfigElement readElementHook(final List<XmlElement> configNodes) throws DocumentedException {
         XmlElement xmlElement = configNodes.get(0);
         Preconditions.checkState(configNodes.size() == 1, "This element should be present only once " + xmlElement
                 + " but was " + configNodes.size());
@@ -29,16 +29,16 @@ public class SimpleAttributeReadingStrategy extends AbstractAttributeReadingStra
                 postprocessParsedValue(textContent));
     }
 
-    protected String readElementContent(XmlElement xmlElement) throws DocumentedException {
+    protected String readElementContent(final XmlElement xmlElement) throws DocumentedException {
         return xmlElement.getTextContent();
     }
 
     @Override
-    protected Object postprocessNullableDefault(String nullableDefault) {
+    protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault;
     }
 
-    protected Object postprocessParsedValue(String textContent) {
+    protected Object postprocessParsedValue(final String textContent) {
         return textContent;
     }
 

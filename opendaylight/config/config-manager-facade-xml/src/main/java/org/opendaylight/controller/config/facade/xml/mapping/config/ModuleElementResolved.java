@@ -13,7 +13,7 @@ public class ModuleElementResolved {
     private final String instanceName;
     private final InstanceConfigElementResolved instanceConfigElementResolved;
 
-    public ModuleElementResolved(String instanceName, InstanceConfigElementResolved instanceConfigElementResolved) {
+    public ModuleElementResolved(final String instanceName, final InstanceConfigElementResolved instanceConfigElementResolved) {
         this.instanceName = instanceName;
         this.instanceConfigElementResolved = instanceConfigElementResolved;
     }

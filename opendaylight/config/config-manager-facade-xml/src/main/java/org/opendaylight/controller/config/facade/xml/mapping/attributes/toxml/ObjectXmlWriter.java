@@ -28,8 +28,8 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     private Document document;
     private String key;
 
-    public Map<String, AttributeWritingStrategy> prepareWriting(Map<String, AttributeIfc> yangToAttrConfig,
-            Document document) {
+    public Map<String, AttributeWritingStrategy> prepareWriting(final Map<String, AttributeIfc> yangToAttrConfig,
+            final Document document) {
 
         Map<String, AttributeWritingStrategy> preparedWriting = Maps.newHashMap();
 
@@ -43,7 +43,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
         return preparedWriting;
     }
 
-    public AttributeWritingStrategy prepareWritingStrategy(String key, AttributeIfc expectedAttr, Document document) {
+    public AttributeWritingStrategy prepareWritingStrategy(final String key, final AttributeIfc expectedAttr, final Document document) {
         Preconditions.checkNotNull(expectedAttr, "Mbean attributes mismatch, unable to find expected attribute for %s",
                 key);
         this.document = document;
@@ -52,7 +52,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaBinaryAttribute(OpenType<?> openType) {
+    protected AttributeWritingStrategy caseJavaBinaryAttribute(final OpenType<?> openType) {
         return new SimpleBinaryAttributeWritingStrategy(document, key);
     }
 
@@ -62,38 +62,38 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaSimpleAttribute(SimpleType<?> openType) {
+    protected AttributeWritingStrategy caseJavaSimpleAttribute(final SimpleType<?> openType) {
         return new SimpleAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaArrayAttribute(ArrayType<?> openType) {
+    protected AttributeWritingStrategy caseJavaArrayAttribute(final ArrayType<?> openType) {
         AttributeWritingStrategy innerStrategy = new SimpleAttributeWritingStrategy(document, key);
         return new ArrayAttributeWritingStrategy(innerStrategy);
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaIdentityRefAttribute(OpenType<?> openType) {
+    protected AttributeWritingStrategy caseJavaIdentityRefAttribute(final OpenType<?> openType) {
         return new SimpleIdentityRefAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaCompositeAttribute(CompositeType openType) {
+    protected AttributeWritingStrategy caseJavaCompositeAttribute(final CompositeType openType) {
         return new SimpleCompositeAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseJavaUnionAttribute(OpenType<?> openType) {
+    protected AttributeWritingStrategy caseJavaUnionAttribute(final OpenType<?> openType) {
         return new SimpleUnionAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseDependencyAttribute(SimpleType<?> openType) {
+    protected AttributeWritingStrategy caseDependencyAttribute(final SimpleType<?> openType) {
         return new ObjectNameAttributeWritingStrategy(document, key);
     }
 
     @Override
-    protected AttributeWritingStrategy caseTOAttribute(CompositeType openType) {
+    protected AttributeWritingStrategy caseTOAttribute(final CompositeType openType) {
         Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
 
         Map<String, AttributeWritingStrategy> innerStrats = Maps.newHashMap();
@@ -109,7 +109,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
-    protected AttributeWritingStrategy caseListAttribute(ArrayType<?> openType) {
+    protected AttributeWritingStrategy caseListAttribute(final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListAttribute);
         AttributeIfc innerAttribute = ((ListAttribute) getLastAttribute()).getInnerAttribute();
 
@@ -118,7 +118,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
-    protected AttributeWritingStrategy caseListDependeciesAttribute(ArrayType<?> openType) {
+    protected AttributeWritingStrategy caseListDependeciesAttribute(final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         AttributeWritingStrategy innerStrategy = caseDependencyAttribute(SimpleType.OBJECTNAME);
         return new ArrayAttributeWritingStrategy(innerStrategy);

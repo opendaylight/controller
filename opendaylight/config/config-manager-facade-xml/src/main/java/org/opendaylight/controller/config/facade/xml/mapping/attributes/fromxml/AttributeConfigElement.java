@@ -27,13 +27,13 @@ public class AttributeConfigElement {
     private Object resolvedDefaultValue;
     private String jmxName;
 
-    public AttributeConfigElement(Object defaultValue, Object value, final EditStrategyType editStrategyType) {
+    public AttributeConfigElement(final Object defaultValue, final Object value, final EditStrategyType editStrategyType) {
         this.defaultValue = defaultValue;
         this.value = value;
         this.editStrategy = Optional.fromNullable(editStrategyType);
     }
 
-    public void setJmxName(String jmxName) {
+    public void setJmxName(final String jmxName) {
         this.jmxName = jmxName;
     }
 
@@ -41,8 +41,8 @@ public class AttributeConfigElement {
         return jmxName;
     }
 
-    public void resolveValue(AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy,
-            String attrName) throws DocumentedException {
+    public void resolveValue(final AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy,
+            final String attrName) throws DocumentedException {
         resolvedValue = attributeResolvingStrategy.parseAttribute(attrName, value);
         Optional<?> resolvedDefault = attributeResolvingStrategy.parseAttribute(attrName, defaultValue);
         resolvedDefaultValue = resolvedDefault.isPresent() ? resolvedDefault.get() : null;
@@ -52,11 +52,11 @@ public class AttributeConfigElement {
         return editStrategy;
     }
 
-    public static AttributeConfigElement create(Object nullableDefault, Object value) {
+    public static AttributeConfigElement create(final Object nullableDefault, final Object value) {
         return new AttributeConfigElement(nullableDefault, value, null);
     }
 
-    public static AttributeConfigElement createNullValue(Object nullableDefault) {
+    public static AttributeConfigElement createNullValue(final Object nullableDefault) {
         return new AttributeConfigElement(nullableDefault, null, null);
     }
 

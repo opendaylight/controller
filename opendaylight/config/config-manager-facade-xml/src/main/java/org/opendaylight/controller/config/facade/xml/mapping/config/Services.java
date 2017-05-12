@@ -46,7 +46,7 @@ public final class Services {
         return namespaceToServiceNameToRefNameToInstance;
     }
 
-    private static Services resolveServices(Map<String, Map<String, Map<String, String>>> mappedServices) {
+    private static Services resolveServices(final Map<String, Map<String, Map<String, String>>> mappedServices) {
         Services tracker = new Services();
 
         for (Entry<String, Map<String, Map<String, String>>> namespaceEntry : mappedServices.entrySet()) {
@@ -85,7 +85,7 @@ public final class Services {
 
     // TODO support edit strategies on services
 
-    public static Services fromXml(XmlElement xml) throws DocumentedException {
+    public static Services fromXml(final XmlElement xml) throws DocumentedException {
         Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
 
         List<XmlElement> services = xml.getChildElements(SERVICE_KEY);
@@ -141,7 +141,7 @@ public final class Services {
         return resolveServices(retVal);
     }
 
-    public static Element toXml(ServiceRegistryWrapper serviceRegistryWrapper, Document document) {
+    public static Element toXml(final ServiceRegistryWrapper serviceRegistryWrapper, final Document document) {
         final Optional<String> configNs = Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         Element root = XmlUtil.createElement(document, XmlMappingConstants.SERVICES_KEY, configNs);
 
@@ -183,7 +183,7 @@ public final class Services {
     public static final class ServiceInstance {
         public static final ServiceInstance EMPTY_SERVICE_INSTANCE = new ServiceInstance("", "");
 
-        public ServiceInstance(String moduleName, String instanceName) {
+        public ServiceInstance(final String moduleName, final String instanceName) {
             this.moduleName = moduleName;
             this.instanceName = instanceName;
         }
@@ -210,7 +210,7 @@ public final class Services {
             return serviceName;
         }
 
-        public void setServiceName(String serviceName) {
+        public void setServiceName(final String serviceName) {
             this.serviceName = serviceName;
         }
 
@@ -258,7 +258,7 @@ public final class Services {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj){
                 return true;
             }
@@ -286,11 +286,11 @@ public final class Services {
             return true;
         }
 
-        public ObjectName getObjectName(String transactionName) {
+        public ObjectName getObjectName(final String transactionName) {
             return ObjectNameUtil.createTransactionModuleON(transactionName, moduleName, instanceName);
         }
 
-        public static ServiceInstance fromObjectName(ObjectName on) {
+        public static ServiceInstance fromObjectName(final ObjectName on) {
             return new ServiceInstance(ObjectNameUtil.getFactoryName(on), ObjectNameUtil.getInstanceName(on));
         }
     }

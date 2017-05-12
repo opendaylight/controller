@@ -35,7 +35,7 @@ public class TransactionProvider implements AutoCloseable {
     private final List<ObjectName> allOpenedTransactions = new ArrayList<>();
     private static final String NO_TRANSACTION_FOUND_FOR_SESSION = "No transaction found for session ";
 
-    public TransactionProvider(ConfigRegistryClient configRegistryClient, String sessionIdForReporting) {
+    public TransactionProvider(final ConfigRegistryClient configRegistryClient, final String sessionIdForReporting) {
         this.configRegistryClient = configRegistryClient;
         this.sessionIdForReporting = sessionIdForReporting;
     }
@@ -47,7 +47,7 @@ public class TransactionProvider implements AutoCloseable {
                 if (isStillOpenTransaction(tx)) {
                     configRegistryClient.getConfigTransactionClient(tx).abortConfig();
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.debug("Ignoring exception while closing transaction {}", tx, e);
             }
         }
@@ -84,7 +84,7 @@ public class TransactionProvider implements AutoCloseable {
         return Optional.of(readTx);
     }
 
-    private boolean isStillOpenTransaction(ObjectName transaction) {
+    private boolean isStillOpenTransaction(final ObjectName transaction) {
         return configRegistryClient.getOpenConfigs().contains(transaction);
     }
 
@@ -144,11 +144,11 @@ public class TransactionProvider implements AutoCloseable {
             allOpenedTransactions.remove(candidateTx);
             candidateTx = null;
             return status;
-        } catch (ValidationException validationException) {
+        } catch (final ValidationException validationException) {
             // no clean up: user can reconfigure and recover this transaction
             LOG.warn("Transaction {} failed on {}", taON, validationException.toString());
             throw validationException;
-        } catch (ConflictingVersionException e) {
+        } catch (final ConflictingVersionException e) {
             LOG.debug("Exception while commit of {}, aborting transaction", taON, e);
             // clean up
             abortTransaction();
@@ -178,7 +178,7 @@ public class TransactionProvider implements AutoCloseable {
         readTx = null;
     }
 
-    public synchronized void abortTestTransaction(ObjectName testTx) {
+    public synchronized void abortTestTransaction(final ObjectName testTx) {
         LOG.debug("Aborting transaction {}", testTx);
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(testTx);
         allOpenedTransactions.remove(testTx);
@@ -193,19 +193,19 @@ public class TransactionProvider implements AutoCloseable {
         transactionClient.validateConfig();
     }
 
-    public void validateTestTransaction(ObjectName taON) throws ValidationException {
+    public void validateTestTransaction(final ObjectName taON) throws ValidationException {
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON);
         transactionClient.validateConfig();
     }
 
-    public void wipeTestTransaction(ObjectName taON) {
+    public void wipeTestTransaction(final ObjectName taON) {
         wipeInternal(taON, true);
     }
 
     /**
      * Wiping means removing all module instances keeping the transaction open + service references.
      */
-    synchronized void wipeInternal(ObjectName taON, boolean isTest) {
+    synchronized void wipeInternal(final ObjectName taON, final boolean isTest) {
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON);
 
         Set<ObjectName> lookupConfigBeans = transactionClient.lookupConfigBeans();
@@ -213,7 +213,7 @@ public class TransactionProvider implements AutoCloseable {
         for (ObjectName instance : lookupConfigBeans) {
             try {
                 transactionClient.destroyModule(instance);
-            } catch (InstanceNotFoundException e) {
+            } catch (final InstanceNotFoundException e) {
                 if (isTest){
                     LOG.debug("Unable to clean configuration in transactiom {}", taON, e);
                 } else {

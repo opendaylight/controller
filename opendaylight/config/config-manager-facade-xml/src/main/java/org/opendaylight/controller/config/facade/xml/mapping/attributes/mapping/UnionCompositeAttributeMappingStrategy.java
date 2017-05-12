@@ -19,12 +19,12 @@ public class UnionCompositeAttributeMappingStrategy extends
         CompositeAttributeMappingStrategy {
 
 
-    public UnionCompositeAttributeMappingStrategy(CompositeType compositeType, Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies, Map<String, String> jmxToJavaNameMapping) {
+    public UnionCompositeAttributeMappingStrategy(final CompositeType compositeType, final Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies, final Map<String, String> jmxToJavaNameMapping) {
         super(compositeType, innerStrategies, jmxToJavaNameMapping);
     }
 
     @Override
-    protected Optional<?> mapInnerAttribute(CompositeDataSupport compositeData, String jmxName, String description) {
+    protected Optional<?> mapInnerAttribute(final CompositeDataSupport compositeData, final String jmxName, final String description) {
         if(!description.equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION)){
             return Optional.absent();
         }
