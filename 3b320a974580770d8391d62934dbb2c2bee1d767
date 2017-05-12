@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ba068154_e4e7f43e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/io/FileBackedOutputStreamFactory.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-12T16:21:33Z",
+      "side": 1,
+      "message": "Note that newInstance() isn’t static, it’s not intended to construct the factory but to construct new streams.",
+      "parentUuid": "ba068154_0132eaa6",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 10
+      },
+      "revId": "3b320a974580770d8391d62934dbb2c2bee1d767",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba068154_a125dec3",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlice.java",
         "patchSetId": 15
