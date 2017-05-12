@@ -92,7 +92,7 @@ public class XmlDirectoryPersister implements Persister {
     private Optional<ConfigSnapshotHolder> fromXmlSnapshot(final File file) {
         try {
             return Optional.of(loadLastConfig(file));
-        } catch (JAXBException e) {
+        } catch (final JAXBException e) {
             // In case of parse error, issue a warning, ignore and continue
             LOG.warn(
                     "Unable to parse configuration snapshot from {}. Initial config from {} will be IGNORED in this run. ",
