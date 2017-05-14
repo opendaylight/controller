@@ -181,10 +181,10 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             final RequestEnvelope envelope, final long now) throws RequestException {
         checkRequestSequence(envelope);
 
-        try {
-            final LocalHistoryIdentifier lhId = request.getTarget().getHistoryId();
-            final AbstractFrontendHistory history;
+        final LocalHistoryIdentifier lhId = request.getTarget().getHistoryId();
+        final AbstractFrontendHistory history;
 
+        try {
             if (lhId.getHistoryId() != 0) {
                 history = localHistories.get(lhId);
                 if (history == null) {
