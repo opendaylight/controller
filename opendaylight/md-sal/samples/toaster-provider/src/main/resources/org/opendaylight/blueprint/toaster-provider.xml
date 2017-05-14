@@ -53,7 +53,7 @@
   <bean id="toaster" class="org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster"
           init-method="register" destroy-method="unregister">
     <argument ref="toasterAppConfig"/>
-    <property name="dataProvider" ref="dataBroker"/>
+    <property name="dataBroker" ref="dataBroker"/>
     <property name="notificationProvider" ref="notificationService"/>
   </bean>
 
