@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransact
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
@@ -128,6 +129,10 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             // No-op
         } else if (request instanceof TransactionPurgeRequest) {
             enqueuePurge(enqueuedTicks);
+        } else if (request instanceof IncrementTransactionSequenceRequest) {
+            // Local transactions do not have non-replayable requests which would be visible to the backend,
+            // hence we can skip sequence increments.
+            LOG.debug("Not replaying {}", request);
         } else {
             throw new IllegalArgumentException("Unhandled request " + request);
         }
