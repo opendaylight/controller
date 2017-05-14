@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.Queue;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
+import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceSuccess;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
@@ -121,6 +123,14 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     // Request order has already been checked by caller and replaySequence()
     final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
+        if (request instanceof IncrementTransactionSequenceRequest) {
+            final IncrementTransactionSequenceRequest incr = (IncrementTransactionSequenceRequest) request;
+            expectedSequence += incr.getIncrement();
+
+            return recordSuccess(incr.getSequence(), new IncrementTransactionSequenceSuccess(incr.getTarget(),
+                incr.getSequence()));
+        }
+
         if (previousFailure != null) {
             LOG.debug("{}: Rejecting request {} due to previous failure", persistenceId(), request, previousFailure);
             throw previousFailure;
