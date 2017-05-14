@@ -181,24 +181,20 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             final RequestEnvelope envelope, final long now) throws RequestException {
         checkRequestSequence(envelope);
 
-        try {
-            final LocalHistoryIdentifier lhId = request.getTarget().getHistoryId();
-            final AbstractFrontendHistory history;
+        final LocalHistoryIdentifier lhId = request.getTarget().getHistoryId();
+        final AbstractFrontendHistory history;
 
-            if (lhId.getHistoryId() != 0) {
-                history = localHistories.get(lhId);
-                if (history == null) {
-                    LOG.debug("{}: rejecting unknown history request {}", persistenceId, request);
-                    throw new UnknownHistoryException(lastSeenHistory);
-                }
-            } else {
-                history = standaloneHistory;
+        if (lhId.getHistoryId() != 0) {
+            history = localHistories.get(lhId);
+            if (history == null) {
+                LOG.debug("{}: rejecting unknown history request {}", persistenceId, request);
+                throw new UnknownHistoryException(lastSeenHistory);
             }
-
-            return history.handleTransactionRequest(request, envelope, now);
-        } finally {
-            expectNextRequest();
+        } else {
+            history = standaloneHistory;
         }
+
+        return history.handleTransactionRequest(request, envelope, now);
     }
 
     void reconnect() {

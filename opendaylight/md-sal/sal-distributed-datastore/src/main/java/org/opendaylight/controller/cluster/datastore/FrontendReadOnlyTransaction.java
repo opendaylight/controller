@@ -51,7 +51,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
 
     // Sequence has already been checked
     @Override
-    @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
+    @Nullable TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
         if (request instanceof ExistsTransactionRequest) {
             return handleExistsTransaction((ExistsTransactionRequest) request);
