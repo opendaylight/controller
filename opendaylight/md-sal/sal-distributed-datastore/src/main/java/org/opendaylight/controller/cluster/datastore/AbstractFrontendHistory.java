@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.access.commands.AbstractReadTransacti
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
+import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
@@ -44,7 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
-    private static final OutOfOrderRequestException UNSEQUENCED_START = new OutOfOrderRequestException(0);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
     private final RangeSet<UnsignedLong> purgedTransactions;
@@ -137,12 +137,12 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             // The transaction does not exist and we are about to create it, check sequence number
             if (request.getSequence() != 0) {
                 LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
-                throw UNSEQUENCED_START;
+                throw new OutOfOrderRequestException(0);
             }
 
             tx = createTransaction(request, id);
             transactions.put(id, tx);
-        } else {
+        } else if (!(request instanceof IncrementTransactionSequenceRequest)) {
             final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
             if (maybeReplay.isPresent()) {
                 final TransactionSuccess<?> replay = maybeReplay.get();

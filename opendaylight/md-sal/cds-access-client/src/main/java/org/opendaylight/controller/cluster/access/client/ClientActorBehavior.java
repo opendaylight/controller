@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
+import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -172,6 +173,17 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 return this;
             } else if (conn != null) {
                 LOG.info("{}: connection {} indicated no leadership, reconnecting it", persistenceId(), conn, cause);
+                return conn.reconnect(this);
+            }
+        }
+        if (cause instanceof OutOfOrderRequestException) {
+            final AbstractClientConnection<T> conn = getConnection(command);
+            if (conn instanceof ReconnectingClientConnection) {
+                // Already reconnecting, do not churn the logs
+                return this;
+            } else if (conn != null) {
+                LOG.info("{}: connection {} indicated no sequencing mismatch on {} sequence {}, reconnecting it",
+                    persistenceId(), conn, failure.getTarget(), failure.getSequence(), cause);
                 return conn.reconnect(this);
             }
         }
