@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Optional;
 import java.util.concurrent.Future;
 import org.junit.Ignore;
@@ -32,63 +33,56 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class OpenDaylightToasterTest extends AbstractDataBrokerTest {
 
-    private static InstanceIdentifier<Toaster> TOASTER_IID =
-                        InstanceIdentifier.builder( Toaster.class ).build();
+    private static InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
     OpendaylightToaster toaster;
 
     @Override
     protected void setupWithDataBroker(DataBroker dataBroker) {
         toaster = new OpendaylightToaster();
-        toaster.setDataProvider( dataBroker );
+        toaster.setDataBroker(dataBroker);
 
         /**
          * Doesn't look like we have support for the NotificationProviderService yet, so mock it
          * for now.
          */
-        NotificationPublishService mockNotification = mock( NotificationPublishService.class );
-        toaster.setNotificationProvider( mockNotification );
+        NotificationPublishService mockNotification = mock(NotificationPublishService.class);
+        toaster.setNotificationProvider(mockNotification);
     }
 
     @Test
     public void testToasterInitOnStartUp() throws Exception {
         DataBroker broker = getDataBroker();
 
-        ReadOnlyTransaction rTx = broker.newReadOnlyTransaction();
-        Optional<Toaster> optional = rTx.read( LogicalDatastoreType.OPERATIONAL, TOASTER_IID ).get();
-        assertNotNull( optional );
-        assertTrue( "Operational toaster not present", optional.isPresent() );
+        ReadOnlyTransaction readTx = broker.newReadOnlyTransaction();
+        Optional<Toaster> optional = readTx.read(LogicalDatastoreType.OPERATIONAL, TOASTER_IID).get();
+        assertNotNull(optional);
+        assertTrue("Operational toaster not present", optional.isPresent());
 
-        Toaster toaster = optional.get();
+        Toaster toasterData = optional.get();
 
-        assertEquals( Toaster.ToasterStatus.Up, toaster.getToasterStatus() );
-        assertEquals( new DisplayString("Opendaylight"),
-                      toaster.getToasterManufacturer() );
-        assertEquals( new DisplayString("Model 1 - Binding Aware"),
-                      toaster.getToasterModelNumber() );
+        assertEquals(Toaster.ToasterStatus.Up, toasterData.getToasterStatus());
+        assertEquals(new DisplayString("Opendaylight"), toasterData.getToasterManufacturer());
+        assertEquals(new DisplayString("Model 1 - Binding Aware"), toasterData.getToasterModelNumber());
 
-        Optional<Toaster> configToaster =
-                            rTx.read( LogicalDatastoreType.CONFIGURATION, TOASTER_IID ).get();
-        assertFalse( "Didn't expect config data for toaster.",
-                     configToaster.isPresent() );
+        Optional<Toaster> configToaster = readTx.read(LogicalDatastoreType.CONFIGURATION, TOASTER_IID).get();
+        assertFalse("Didn't expect config data for toaster.", configToaster.isPresent());
     }
 
     @Test
-    @Ignore //ignored because it is not an e test right now. Illustrative purposes only.
-    public void testSomething() throws Exception{
-        MakeToastInput toastInput = new MakeToastInputBuilder()
-                                        .setToasterDoneness( 1L )
-                                        .setToasterToastType( WheatBread.class )
-                                        .build();
+    @Ignore //ignored because it is not a test right now. Illustrative purposes only.
+    public void testSomething() throws Exception {
+        MakeToastInput toastInput = new MakeToastInputBuilder().setToasterDoneness(1L)
+                .setToasterToastType(WheatBread.class).build();
 
-        //NOTE: In a real test we would want to override the Thread.sleep() to prevent our junit test
-        //for sleeping for a second...
-        Future<RpcResult<Void>> makeToast = toaster.makeToast( toastInput );
+        // NOTE: In a real test we would want to override the Thread.sleep() to
+        // prevent our junit test
+        // for sleeping for a second...
+        Future<RpcResult<Void>> makeToast = toaster.makeToast(toastInput);
 
         RpcResult<Void> rpcResult = makeToast.get();
 
-        assertNotNull( rpcResult );
-        assertTrue( rpcResult.isSuccessful() );
-         //etc
+        assertNotNull(rpcResult);
+        assertTrue(rpcResult.isSuccessful());
+        // etc
     }
-
 }
