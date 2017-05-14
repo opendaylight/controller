@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.sample.toaster.provider;
 
+import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.DELETE;
+import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.WRITE;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICATION;
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.DELETE;
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.WRITE;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -69,7 +69,7 @@ public class OpendaylightToaster extends AbstractMXBean
     private static final DisplayString TOASTER_MANUFACTURER = new DisplayString("Opendaylight");
     private static final DisplayString TOASTER_MODEL_NUMBER = new DisplayString("Model 1 - Binding Aware");
 
-    private DataBroker dataProvider;
+    private DataBroker dataBroker;
     private NotificationPublishService notificationProvider;
     private ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
 
@@ -79,9 +79,9 @@ public class OpendaylightToaster extends AbstractMXBean
     private final AtomicReference<Future<?>> currentMakeToastTask = new AtomicReference<>();
 
     // Thread safe holders
-    private final AtomicLong amountOfBreadInStock = new AtomicLong( 100 );
+    private final AtomicLong amountOfBreadInStock = new AtomicLong(100);
     private final AtomicLong toastsMade = new AtomicLong(0);
-    private final AtomicLong darknessFactor = new AtomicLong( 1000 );
+    private final AtomicLong darknessFactor = new AtomicLong(1000);
 
     private final ToasterAppConfig toasterAppConfig;
 
@@ -100,9 +100,9 @@ public class OpendaylightToaster extends AbstractMXBean
         this.notificationProvider = notificationPublishService;
     }
 
-    public void setDataProvider(final DataBroker salDataProvider) {
-        this.dataProvider = salDataProvider;
-        dataProvider.registerDataTreeChangeListener(new DataTreeIdentifier<>(CONFIGURATION, TOASTER_IID), this);
+    public void setDataBroker(final DataBroker dataBroker) {
+        this.dataBroker = dataBroker;
+        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(CONFIGURATION, TOASTER_IID), this);
         setToasterStatusUp(null);
     }
 
@@ -114,33 +114,31 @@ public class OpendaylightToaster extends AbstractMXBean
         // When we close this service we need to shutdown our executor!
         executor.shutdown();
 
-        if (dataProvider != null) {
+        if (dataBroker != null) {
             dataTreeChangeListenerRegistration.close();
 
-            WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
+            WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
             tx.delete(OPERATIONAL,TOASTER_IID);
-            Futures.addCallback( tx.submit(), new FutureCallback<Void>() {
+            Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
                 @Override
-                public void onSuccess( final Void result ) {
-                    LOG.debug( "Delete Toaster commit result: " + result );
+                public void onSuccess(final Void result) {
+                    LOG.debug("Delete Toaster commit result: " + result);
                 }
 
                 @Override
-                public void onFailure( final Throwable t ) {
-                    LOG.error( "Delete of Toaster failed", t );
+                public void onFailure(final Throwable failure) {
+                    LOG.error("Delete of Toaster failed", failure);
                 }
-            } );
+            });
         }
     }
 
-    private Toaster buildToaster( final ToasterStatus status ) {
+    private Toaster buildToaster(final ToasterStatus status) {
         // note - we are simulating a device whose manufacture and model are
         // fixed (embedded) into the hardware.
         // This is why the manufacture and model number are hardcoded.
-        return new ToasterBuilder().setToasterManufacturer( toasterAppConfig.getManufacturer() )
-                                   .setToasterModelNumber( toasterAppConfig.getModelNumber() )
-                                   .setToasterStatus( status )
-                                   .build();
+        return new ToasterBuilder().setToasterManufacturer(toasterAppConfig.getManufacturer())
+                .setToasterModelNumber(toasterAppConfig.getModelNumber()).setToasterStatus(status).build();
     }
 
     /**
@@ -148,19 +146,20 @@ public class OpendaylightToaster extends AbstractMXBean
      */
     @Override
     public void onDataTreeChanged(Collection<DataTreeModification<Toaster>> changes) {
-        for(DataTreeModification<Toaster> change: changes) {
+        for (DataTreeModification<Toaster> change: changes) {
             DataObjectModification<Toaster> rootNode = change.getRootNode();
-            if(rootNode.getModificationType() == WRITE) {
+            if (rootNode.getModificationType() == WRITE) {
                 Toaster oldToaster = rootNode.getDataBefore();
                 Toaster newToaster = rootNode.getDataAfter();
-                LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: old Toaster: {}, new Toaster: {}",
-                        change.getRootPath().getRootIdentifier(), oldToaster, newToaster);
+                LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: "
+                        + "old Toaster: {}, new Toaster: {}", change.getRootPath().getRootIdentifier(),
+                        oldToaster, newToaster);
 
                 Long darkness = newToaster.getDarknessFactor();
-                if(darkness != null) {
+                if (darkness != null) {
                     darknessFactor.set(darkness);
                 }
-            } else if(rootNode.getModificationType() == DELETE) {
+            } else if (rootNode.getModificationType() == DELETE) {
                 LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
                         change.getRootPath().getRootIdentifier(), rootNode.getDataBefore());
             }
@@ -172,13 +171,13 @@ public class OpendaylightToaster extends AbstractMXBean
      */
     @Override
     public Future<RpcResult<Void>> cancelToast() {
-        Future<?> current = currentMakeToastTask.getAndSet( null );
-        if( current != null ) {
-            current.cancel( true );
+        Future<?> current = currentMakeToastTask.getAndSet(null);
+        if (current != null) {
+            current.cancel(true);
         }
 
         // Always return success from the cancel toast call
-        return Futures.immediateFuture( RpcResultBuilder.<Void> success().build() );
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     /**
@@ -190,106 +189,98 @@ public class OpendaylightToaster extends AbstractMXBean
 
         final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
 
-        checkStatusAndMakeToast( input, futureResult, toasterAppConfig.getMaxMakeToastTries() );
+        checkStatusAndMakeToast(input, futureResult, toasterAppConfig.getMaxMakeToastTries());
 
         return futureResult;
     }
 
     private RpcError makeToasterOutOfBreadError() {
-        return RpcResultBuilder.newError( APPLICATION, "resource-denied",
-                "Toaster is out of bread", "out-of-stock", null, null );
+        return RpcResultBuilder.newError(APPLICATION, "resource-denied", "Toaster is out of bread", "out-of-stock",
+                null, null);
     }
 
     private RpcError makeToasterInUseError() {
-        return RpcResultBuilder.newWarning( APPLICATION, "in-use",
-                "Toaster is busy", null, null, null );
+        return RpcResultBuilder.newWarning(APPLICATION, "in-use", "Toaster is busy", null, null, null);
     }
 
-    private void checkStatusAndMakeToast( final MakeToastInput input,
-                                          final SettableFuture<RpcResult<Void>> futureResult,
-                                          final int tries ) {
-
+    private void checkStatusAndMakeToast(final MakeToastInput input, final SettableFuture<RpcResult<Void>> futureResult,
+            final int tries) {
         // Read the ToasterStatus and, if currently Up, try to write the status to Down.
         // If that succeeds, then we essentially have an exclusive lock and can proceed
         // to make toast.
-
-        final ReadWriteTransaction tx = dataProvider.newReadWriteTransaction();
+        final ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         ListenableFuture<Optional<Toaster>> readFuture = tx.read(OPERATIONAL, TOASTER_IID);
 
         final ListenableFuture<Void> commitFuture =
-            Futures.transform( readFuture, (AsyncFunction<Optional<Toaster>, Void>) toasterData -> {
+            Futures.transform(readFuture, (AsyncFunction<Optional<Toaster>, Void>) toasterData -> {
+                ToasterStatus toasterStatus = ToasterStatus.Up;
+                if (toasterData.isPresent()) {
+                    toasterStatus = toasterData.get().getToasterStatus();
+                }
 
-                    ToasterStatus toasterStatus = ToasterStatus.Up;
-                    if( toasterData.isPresent() ) {
-                        toasterStatus = toasterData.get().getToasterStatus();
+                LOG.debug("Read toaster status: {}", toasterStatus);
+
+                if (toasterStatus == ToasterStatus.Up) {
+
+                    if (outOfBread()) {
+                        LOG.debug("Toaster is out of bread");
+                        return Futures.immediateFailedCheckedFuture(
+                                new TransactionCommitFailedException("", makeToasterOutOfBreadError()));
                     }
 
-                    LOG.debug( "Read toaster status: {}", toasterStatus );
+                    LOG.debug("Setting Toaster status to Down");
 
-                    if( toasterStatus == ToasterStatus.Up ) {
+                    // We're not currently making toast - try to update the status to Down
+                    // to indicate we're going to make toast. This acts as a lock to prevent
+                    // concurrent toasting.
+                    tx.put(OPERATIONAL, TOASTER_IID, buildToaster(ToasterStatus.Down));
+                    return tx.submit();
+                }
 
-                        if( outOfBread() ) {
-                            LOG.debug( "Toaster is out of bread" );
+                LOG.debug("Oops - already making toast!");
 
-                            return Futures.immediateFailedCheckedFuture(
-                                    new TransactionCommitFailedException( "", makeToasterOutOfBreadError() ) );
-                        }
+                // Return an error since we are already making toast. This will get
+                // propagated to the commitFuture below which will interpret the null
+                // TransactionStatus in the RpcResult as an error condition.
+                return Futures.immediateFailedCheckedFuture(
+                        new TransactionCommitFailedException("", makeToasterInUseError()));
+            });
 
-                        LOG.debug( "Setting Toaster status to Down" );
-
-                        // We're not currently making toast - try to update the status to Down
-                        // to indicate we're going to make toast. This acts as a lock to prevent
-                        // concurrent toasting.
-                        tx.put( OPERATIONAL, TOASTER_IID,
-                                buildToaster( ToasterStatus.Down ) );
-                        return tx.submit();
-                    }
-
-                    LOG.debug( "Oops - already making toast!" );
-
-                    // Return an error since we are already making toast. This will get
-                    // propagated to the commitFuture below which will interpret the null
-                    // TransactionStatus in the RpcResult as an error condition.
-                    return Futures.immediateFailedCheckedFuture(
-                            new TransactionCommitFailedException( "", makeToasterInUseError() ) );
-        } );
-
-        Futures.addCallback( commitFuture, new FutureCallback<Void>() {
+        Futures.addCallback(commitFuture, new FutureCallback<Void>() {
             @Override
-            public void onSuccess( final Void result ) {
+            public void onSuccess(final Void result) {
                 // OK to make toast
-                currentMakeToastTask.set( executor.submit( new MakeToastTask( input, futureResult ) ) );
+                currentMakeToastTask.set(executor.submit(new MakeToastTask(input, futureResult)));
             }
 
             @Override
-            public void onFailure( final Throwable ex ) {
-                if( ex instanceof OptimisticLockFailedException ) {
+            public void onFailure(final Throwable ex) {
+                if (ex instanceof OptimisticLockFailedException) {
 
                     // Another thread is likely trying to make toast simultaneously and updated the
                     // status before us. Try reading the status again - if another make toast is
                     // now in progress, we should get ToasterStatus.Down and fail.
 
-                    if( ( tries - 1 ) > 0 ) {
-                        LOG.debug( "Got OptimisticLockFailedException - trying again" );
-
-                        checkStatusAndMakeToast( input, futureResult, tries - 1 );
+                    if (tries - 1 > 0) {
+                        LOG.debug("Got OptimisticLockFailedException - trying again");
+                        checkStatusAndMakeToast(input, futureResult, tries - 1);
+                    } else {
+                        futureResult.set(RpcResultBuilder.<Void>failed()
+                                .withError(ErrorType.APPLICATION, ex.getMessage()).build());
                     }
-                    else {
-                        futureResult.set( RpcResultBuilder.<Void> failed()
-                                .withError( ErrorType.APPLICATION, ex.getMessage() ).build() );
-                    }
-
-                } else {
-
-                    LOG.debug( "Failed to commit Toaster status", ex );
+                } else if (ex instanceof TransactionCommitFailedException) {
+                    LOG.debug("Failed to commit Toaster status", ex);
 
                     // Probably already making toast.
-                    futureResult.set( RpcResultBuilder.<Void> failed()
-                            .withRpcErrors( ((TransactionCommitFailedException)ex).getErrorList() )
-                            .build() );
+                    futureResult.set(RpcResultBuilder.<Void>failed()
+                            .withRpcErrors(((TransactionCommitFailedException)ex).getErrorList()).build());
+                } else {
+                    LOG.debug("Unexpected error committing Toaster status", ex);
+                    futureResult.set(RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
+                            "Unexpected error committing Toaster status", ex).build());
                 }
             }
-        } );
+        });
     }
 
     /**
@@ -299,17 +290,17 @@ public class OpendaylightToaster extends AbstractMXBean
      */
     @Override
     public Future<RpcResult<java.lang.Void>> restockToaster(final RestockToasterInput input) {
-        LOG.info( "restockToaster: " + input );
+        LOG.info("restockToaster: " + input);
 
-        amountOfBreadInStock.set( input.getAmountOfBreadToStock() );
+        amountOfBreadInStock.set(input.getAmountOfBreadToStock());
 
-        if( amountOfBreadInStock.get() > 0 ) {
+        if (amountOfBreadInStock.get() > 0) {
             ToasterRestocked reStockedNotification = new ToasterRestockedBuilder()
-                .setAmountOfBread( input.getAmountOfBreadToStock() ).build();
-            notificationProvider.offerNotification( reStockedNotification );
+                    .setAmountOfBread(input.getAmountOfBreadToStock()).build();
+            notificationProvider.offerNotification(reStockedNotification);
         }
 
-        return Futures.immediateFuture( RpcResultBuilder.<Void> success().build() );
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     /**
@@ -317,8 +308,8 @@ public class OpendaylightToaster extends AbstractMXBean
      */
     @Override
     public void clearToastsMade() {
-        LOG.info( "clearToastsMade" );
-        toastsMade.set( 0 );
+        LOG.info("clearToastsMade");
+        toastsMade.set(0);
     }
 
     /**
@@ -329,35 +320,34 @@ public class OpendaylightToaster extends AbstractMXBean
         return toastsMade.get();
     }
 
-    private void setToasterStatusUp( final Function<Boolean,Void> resultCallback ) {
-        WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-        tx.put( OPERATIONAL,TOASTER_IID, buildToaster( ToasterStatus.Up ) );
+    private void setToasterStatusUp(final Function<Boolean,Void> resultCallback) {
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.put(OPERATIONAL,TOASTER_IID, buildToaster(ToasterStatus.Up));
 
-        Futures.addCallback( tx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
-            public void onSuccess( final Void result ) {
-                notifyCallback( true );
+            public void onSuccess(final Void result) {
+                notifyCallback(true);
             }
 
             @Override
-            public void onFailure( final Throwable t ) {
+            public void onFailure(final Throwable failure) {
                 // We shouldn't get an OptimisticLockFailedException (or any ex) as no
                 // other component should be updating the operational state.
-                LOG.error( "Failed to update toaster status", t );
+                LOG.error("Failed to update toaster status", failure);
 
-                notifyCallback( false );
+                notifyCallback(false);
             }
 
-            void notifyCallback( final boolean result ) {
-                if( resultCallback != null ) {
-                    resultCallback.apply( result );
+            void notifyCallback(final boolean result) {
+                if (resultCallback != null) {
+                    resultCallback.apply(result);
                 }
             }
-        } );
+        });
     }
 
-    private boolean outOfBread()
-    {
+    private boolean outOfBread() {
         return amountOfBreadInStock.get() == 0;
     }
 
@@ -366,48 +356,40 @@ public class OpendaylightToaster extends AbstractMXBean
         final MakeToastInput toastRequest;
         final SettableFuture<RpcResult<Void>> futureResult;
 
-        public MakeToastTask( final MakeToastInput toastRequest,
-                              final SettableFuture<RpcResult<Void>> futureResult ) {
+        MakeToastTask(final MakeToastInput toastRequest, final SettableFuture<RpcResult<Void>> futureResult) {
             this.toastRequest = toastRequest;
             this.futureResult = futureResult;
         }
 
         @Override
         public Void call() {
-            try
-            {
+            try {
                 // make toast just sleeps for n seconds per doneness level.
-                long darknessFactor = OpendaylightToaster.this.darknessFactor.get();
-                Thread.sleep(darknessFactor * toastRequest.getToasterDoneness());
+                Thread.sleep(OpendaylightToaster.this.darknessFactor.get() * toastRequest.getToasterDoneness());
 
-            }
-            catch( InterruptedException e ) {
-                LOG.info( "Interrupted while making the toast" );
+            } catch (InterruptedException e) {
+                LOG.info("Interrupted while making the toast");
             }
 
             toastsMade.incrementAndGet();
 
             amountOfBreadInStock.getAndDecrement();
-            if( outOfBread() ) {
-                LOG.info( "Toaster is out of bread!" );
+            if (outOfBread()) {
+                LOG.info("Toaster is out of bread!");
 
-                notificationProvider.offerNotification( new ToasterOutOfBreadBuilder().build() );
+                notificationProvider.offerNotification(new ToasterOutOfBreadBuilder().build());
             }
 
             // Set the Toaster status back to up - this essentially releases the toasting lock.
             // We can't clear the current toast task nor set the Future result until the
             // update has been committed so we pass a callback to be notified on completion.
 
-            setToasterStatusUp( result -> {
-
-                    currentMakeToastTask.set( null );
-
-                    LOG.debug("Toast done");
-
-                    futureResult.set( RpcResultBuilder.<Void>success().build() );
-
-                    return null;
-            } );
+            setToasterStatusUp(result -> {
+                currentMakeToastTask.set(null);
+                LOG.debug("Toast done");
+                futureResult.set(RpcResultBuilder.<Void>success().build());
+                return null;
+            });
 
             return null;
         }
