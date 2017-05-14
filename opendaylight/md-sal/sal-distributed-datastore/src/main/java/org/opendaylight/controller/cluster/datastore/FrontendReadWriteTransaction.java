@@ -44,6 +44,7 @@ import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestExc
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private ReadWriteShardDataTreeTransaction openTransaction;
     private DataTreeModification sealedModification;
     private ShardDataTreeCohort readyCohort;
+
+    private RequestException previousFailure;
 
     private FrontendReadWriteTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id,
             final ReadWriteShardDataTreeTransaction transaction) {
@@ -84,8 +87,13 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     // Sequence has already been checked
     @Override
-    @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
+    @Nullable TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
+        if (previousFailure != null) {
+            LOG.debug("{}: Transaction {} already failed, rejecting request {}", persistenceId(), request);
+            throw previousFailure;
+        }
+
         if (request instanceof ModifyTransactionRequest) {
             return handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
         } else if (request instanceof CommitLocalTransactionRequest) {
@@ -290,14 +298,22 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         if (!mods.isEmpty()) {
             final DataTreeModification modification = openTransaction.getSnapshot();
             for (TransactionModification m : mods) {
-                if (m instanceof TransactionDelete) {
-                    modification.delete(m.getPath());
-                } else if (m instanceof TransactionWrite) {
-                    modification.write(m.getPath(), ((TransactionWrite) m).getData());
-                } else if (m instanceof TransactionMerge) {
-                    modification.merge(m.getPath(), ((TransactionMerge) m).getData());
-                } else {
-                    LOG.warn("{}: ignoring unhandled modification {}", history().persistenceId(), m);
+                try {
+                    if (m instanceof TransactionDelete) {
+                        modification.delete(m.getPath());
+                    } else if (m instanceof TransactionWrite) {
+                        modification.write(m.getPath(), ((TransactionWrite) m).getData());
+                    } else if (m instanceof TransactionMerge) {
+                        modification.merge(m.getPath(), ((TransactionMerge) m).getData());
+                    } else {
+                        LOG.warn("{}: Transaction {} ignoring unhandled modification {}", persistenceId(),
+                            getIdentifier(), m);
+                    }
+                } catch (SchemaValidationFailedException e) {
+                    LOG.debug("{}: Transaction {} failed to apply {}", persistenceId(), getIdentifier(), m, e);
+                    previousFailure = new RuntimeRequestException("Failed to apply modification " + m, e);
+                    // FIXME: this should be recorded
+                    throw previousFailure;
                 }
             }
         }
@@ -324,7 +340,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 coordinatedCommit(envelope, now);
                 return null;
             default:
-                LOG.warn("{}: rejecting unsupported protocol {}", history().persistenceId(), maybeProto.get());
+                LOG.warn("{}: rejecting unsupported protocol {}", persistenceId(), maybeProto.get());
                 throw new UnsupportedRequestException(request);
         }
     }
@@ -334,7 +350,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         // only once.
         if (readyCohort == null) {
             readyCohort = openTransaction.ready();
-            LOG.debug("{}: transitioned {} to ready", history().persistenceId(), openTransaction.getIdentifier());
+            LOG.debug("{}: transitioned {} to ready", persistenceId(), openTransaction.getIdentifier());
             openTransaction = null;
         }
     }
