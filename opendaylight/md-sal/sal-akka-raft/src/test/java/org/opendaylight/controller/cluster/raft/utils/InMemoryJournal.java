@@ -195,8 +195,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
         synchronized (journal) {
             long highest = -1;
             for (Long seqNr : journal.keySet()) {
-                if (seqNr.longValue() >= fromSequenceNr && seqNr.longValue() > highest) {
-                    highest = seqNr.longValue();
+                if (seqNr >= fromSequenceNr && seqNr > highest) {
+                    highest = seqNr;
                 }
             }
 

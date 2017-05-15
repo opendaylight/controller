@@ -25,7 +25,7 @@ public final class UnknownHistoryException extends RequestException {
     }
 
     private static String historyToString(final Long history) {
-        return history == null ? "null" : Long.toUnsignedString(history.longValue());
+        return history == null ? "null" : Long.toUnsignedString(history);
     }
 
     @Override

@@ -70,7 +70,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         WritableObjects.writeLongs(out, closedTransactions.size(), purgedRanges.size());
         for (Entry<UnsignedLong, Boolean> e : closedTransactions.entrySet()) {
             WritableObjects.writeLong(out, e.getKey().longValue());
-            out.writeBoolean(e.getValue().booleanValue());
+            out.writeBoolean(e.getValue());
         }
         for (Range<UnsignedLong> r : purgedRanges) {
             WritableObjects.writeLongs(out, r.lowerEndpoint().longValue(), r.upperEndpoint().longValue());

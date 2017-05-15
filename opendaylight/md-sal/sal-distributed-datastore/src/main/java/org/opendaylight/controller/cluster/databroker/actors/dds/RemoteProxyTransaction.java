@@ -176,7 +176,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private void sendModification(final TransactionRequest<?> request, final Optional<Long> enqueuedTicks) {
         if (enqueuedTicks.isPresent()) {
-            enqueueRequest(request, response -> completeModify(request, response), enqueuedTicks.get().longValue());
+            enqueueRequest(request, response -> completeModify(request, response), enqueuedTicks.get());
         } else {
             sendRequest(request, response -> completeModify(request, response));
         }

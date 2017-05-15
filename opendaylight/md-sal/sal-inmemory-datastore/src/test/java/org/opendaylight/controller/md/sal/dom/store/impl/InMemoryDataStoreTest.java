@@ -339,7 +339,7 @@ public class InMemoryDataStoreTest {
 
         DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
-        assertTrue(cohort.canCommit().get().booleanValue());
+        assertTrue(cohort.canCommit().get());
         cohort.preCommit().get();
         cohort.abort().get();
 
@@ -449,7 +449,7 @@ public class InMemoryDataStoreTest {
 
     private static void assertThreePhaseCommit(final DOMStoreThreePhaseCommitCohort cohort)
             throws InterruptedException, ExecutionException {
-        assertTrue(cohort.canCommit().get().booleanValue());
+        assertTrue(cohort.canCommit().get());
         cohort.preCommit().get();
         cohort.commit().get();
     }

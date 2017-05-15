@@ -134,7 +134,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         // end up resurrecting a purged history.
         if (purgedHistories.contains(UnsignedLong.fromLongBits(id.getHistoryId()))) {
             LOG.debug("{}: rejecting purged request {}", persistenceId, request);
-            throw new DeadHistoryException(lastSeenHistory.longValue());
+            throw new DeadHistoryException(lastSeenHistory);
         }
 
         // Update last history we have seen

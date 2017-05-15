@@ -86,7 +86,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     Gossiper(final RemoteRpcProviderConfig config, final Boolean autoStartGossipTicks) {
         this.config = Preconditions.checkNotNull(config);
-        this.autoStartGossipTicks = autoStartGossipTicks.booleanValue();
+        this.autoStartGossipTicks = autoStartGossipTicks;
     }
 
     Gossiper(final RemoteRpcProviderConfig config) {

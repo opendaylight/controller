@@ -70,7 +70,7 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         }
 
         // Sanity check: if we have purged sequences, this has to be newer
-        if (lastPurgedSequence != null && Long.compareUnsigned(lastPurgedSequence.longValue(), sequence) >= 0) {
+        if (lastPurgedSequence != null && Long.compareUnsigned(lastPurgedSequence, sequence) >= 0) {
             // Client has sent a request sequence, which has already been purged. This is a hard error, which should
             // never occur. Throwing an IllegalArgumentException will cause it to be wrapped in a
             // RuntimeRequestException (which is not retriable) and report it back to the client.
