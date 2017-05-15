@@ -14,6 +14,7 @@ import com.google.common.primitives.UnsignedLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -107,8 +108,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
 
             LOG.debug("Shard {} failed to resolve", shardName, failure);
             if (failure instanceof NoShardLeaderException) {
-                // FIXME: this actually is an exception we can retry on
-                future.completeExceptionally(failure);
+                future.completeExceptionally(wrap("Shard has no current leader", failure));
             } else if (failure instanceof NotInitializedException) {
                 // FIXME: this actually is an exception we can retry on
                 LOG.info("Shard {} has not initialized yet", shardName);
@@ -122,6 +122,12 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         });
 
         return new ShardState(future);
+    }
+
+    private static TimeoutException wrap(final String message, final Throwable cause) {
+        final TimeoutException ret = new TimeoutException(message);
+        ret.initCause(Preconditions.checkNotNull(cause));
+        return ret;
     }
 
     private void connectShard(final String shardName, final long cookie, final PrimaryShardInfo info,
