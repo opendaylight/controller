@@ -22,7 +22,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -102,15 +101,24 @@ public class OpendaylightToaster extends AbstractMXBean
 
     public void setDataBroker(final DataBroker dataBroker) {
         this.dataBroker = dataBroker;
+    }
+
+    public void init() {
         dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(CONFIGURATION, TOASTER_IID), this);
         setToasterStatusUp(null);
+
+        // Register our MXBean.
+        register();
     }
 
     /**
      * Implemented from the AutoCloseable interface.
      */
     @Override
-    public void close() throws ExecutionException, InterruptedException {
+    public void close() {
+        // Unregister our MXBean.
+        unregister();
+
         // When we close this service we need to shutdown our executor!
         executor.shutdown();
 
