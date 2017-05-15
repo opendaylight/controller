@@ -22,7 +22,7 @@ public class AveragingProgressTrackerTest {
     private static final long CHECKER = TimeUnit.MILLISECONDS.toNanos(500);
     private static final long TICKER_STEP = 100;
 
-    private static FakeTicker ticker;
+    private FakeTicker ticker;
 
     private AveragingProgressTracker averagingProgressTracker;
 
