@@ -71,11 +71,8 @@ public class AbstractDataBrokerTestTest extends AbstractConcurrentDataBrokerTest
     }
 
     private boolean isTopInDataStore() throws ReadFailedException {
-        ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
-        try {
+        try (ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction()) {
             return readTx.read(LogicalDatastoreType.OPERATIONAL, TOP_PATH).checkedGet().isPresent();
-        } finally {
-            readTx.close();
         }
     }
 
