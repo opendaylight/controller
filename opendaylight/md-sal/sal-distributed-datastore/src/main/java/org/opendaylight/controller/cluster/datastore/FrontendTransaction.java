@@ -11,7 +11,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import java.util.ArrayDeque;
-import java.util.Iterator;
+import java.util.Optional;
 import java.util.Queue;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -83,16 +83,14 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         // machinery is asynchronous, hence a reply may be in the works and not available.
 
         long replaySequence = firstReplaySequence;
-        final Iterator<?> it = replayQueue.iterator();
-        while (it.hasNext()) {
-            final Object replay = it.next();
+        for (Object replay : replayQueue) {
             if (replaySequence == sequence) {
                 if (replay instanceof RequestException) {
                     throw (RequestException) replay;
                 }
 
                 Verify.verify(replay instanceof TransactionSuccess);
-                return java.util.Optional.of((TransactionSuccess<?>) replay);
+                return Optional.of((TransactionSuccess<?>) replay);
             }
 
             replaySequence++;

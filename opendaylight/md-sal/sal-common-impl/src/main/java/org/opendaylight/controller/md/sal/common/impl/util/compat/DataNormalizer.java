@@ -56,10 +56,9 @@ public class DataNormalizer {
 
     public DataNormalizationOperation<?> getOperation(final YangInstanceIdentifier legacy) throws DataNormalizationException {
         DataNormalizationOperation<?> currentOp = operation;
-        Iterator<PathArgument> arguments = legacy.getPathArguments().iterator();
 
-        while (arguments.hasNext()) {
-            currentOp = currentOp.getChild(arguments.next());
+        for (PathArgument pathArgument : legacy.getPathArguments()) {
+            currentOp = currentOp.getChild(pathArgument);
         }
         return currentOp;
     }
