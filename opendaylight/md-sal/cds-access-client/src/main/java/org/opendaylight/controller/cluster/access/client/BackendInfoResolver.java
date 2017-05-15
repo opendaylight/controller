@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
  * If the completion stage returned by this interface's methods fails with a
  * {@link org.opendaylight.controller.cluster.access.concepts.RequestException}, it will be forwarded to all
  * outstanding requests towards the leader. If it fails with a {@link java.util.concurrent.TimeoutException},
- * resolution process will be retries. If it fails with any other cause, it will we wrapped as a
+ * resolution process will be retried. If it fails with any other cause, it will we wrapped as a
  * {@link org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException} wrapping that cause.
  *
  * @author Robert Varga
