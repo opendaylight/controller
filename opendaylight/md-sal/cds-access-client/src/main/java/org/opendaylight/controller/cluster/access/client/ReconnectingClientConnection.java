@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +22,29 @@ import org.slf4j.LoggerFactory;
 public final class ReconnectingClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
     private static final Logger LOG = LoggerFactory.getLogger(ReconnectingClientConnection.class);
 
-    ReconnectingClientConnection(final ConnectedClientConnection<T> oldConnection) {
+    private RequestException cause;
+
+    ReconnectingClientConnection(final ConnectedClientConnection<T> oldConnection, final RequestException cause) {
         super(oldConnection);
+        this.cause = Preconditions.checkNotNull(cause);
     }
 
     @Override
-    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current) {
-        // Intentional no-op
+    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
+        this.cause = Preconditions.checkNotNull(cause);
         LOG.debug("Skipping reconnect of already-reconnecting connection {}", this);
         return current;
     }
+
+    @Override
+    RequestException enrichPoison(final RequestException ex) {
+        if (ex.getCause() != null) {
+            ex.addSuppressed(cause);
+        } else {
+            ex.initCause(cause);
+        }
+
+        return ex;
+    }
+
 }
