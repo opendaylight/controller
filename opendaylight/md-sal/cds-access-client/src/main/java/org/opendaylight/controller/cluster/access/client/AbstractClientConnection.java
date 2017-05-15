@@ -15,6 +15,7 @@ import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -25,6 +26,7 @@ import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -172,7 +174,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     @GuardedBy("lock")
-    abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current);
+    abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current,
+            RequestException runtimeRequestException);
 
     final long enqueueEntry(final ConnectionEntry entry, final long now) {
         lock.lock();
@@ -192,10 +195,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
     }
 
-    final ClientActorBehavior<T> reconnect(final ClientActorBehavior<T> current) {
+    final ClientActorBehavior<T> reconnect(final ClientActorBehavior<T> current, final RequestException cause) {
         lock.lock();
         try {
-            return lockedReconnect(current);
+            return lockedReconnect(current, cause);
         } finally {
             lock.unlock();
         }
@@ -260,7 +263,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             delay = lockedCheckTimeout(now);
             if (delay == null) {
                 // We have timed out. There is no point in scheduling a timer
-                return lockedReconnect(current);
+                return lockedReconnect(current, new RuntimeRequestException("Backend connection timed out",
+                    new TimeoutException()));
             }
 
             if (delay.isPresent()) {
@@ -338,8 +342,12 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     @GuardedBy("lock")
     private void lockedPoison(final RequestException cause) {
-        poisoned = cause;
+        poisoned = enrichPoison(cause);
         queue.poison(cause);
+    }
+
+    RequestException enrichPoison(final RequestException ex) {
+        return ex;
     }
 
     @VisibleForTesting
