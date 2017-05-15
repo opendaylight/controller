@@ -16,12 +16,13 @@ import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Optional;
 import java.util.concurrent.Future;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
@@ -31,20 +32,18 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-public class OpenDaylightToasterTest extends AbstractDataBrokerTest {
+public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
 
     private static InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
-    OpendaylightToaster toaster;
+    private OpendaylightToaster toaster;
 
-    @Override
-    protected void setupWithDataBroker(DataBroker dataBroker) {
+    @Before
+    public void setupToaster() {
         toaster = new OpendaylightToaster();
-        toaster.setDataBroker(dataBroker);
+        toaster.setDataBroker(getDataBroker());
+        toaster.init();
 
-        /**
-         * Doesn't look like we have support for the NotificationProviderService yet, so mock it
-         * for now.
-         */
+        // We'll mock the NotificationProviderService.
         NotificationPublishService mockNotification = mock(NotificationPublishService.class);
         toaster.setNotificationProvider(mockNotification);
     }

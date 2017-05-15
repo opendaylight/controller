@@ -51,7 +51,7 @@
 
   <!-- Create the OpendaylightToaster instance and inject its dependencies -->
   <bean id="toaster" class="org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster"
-          init-method="register" destroy-method="unregister">
+          init-method="init" destroy-method="close">
     <argument ref="toasterAppConfig"/>
     <property name="dataBroker" ref="dataBroker"/>
     <property name="notificationProvider" ref="notificationService"/>
