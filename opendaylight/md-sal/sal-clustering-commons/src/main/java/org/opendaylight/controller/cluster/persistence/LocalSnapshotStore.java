@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -281,7 +282,9 @@ public class LocalSnapshotStore extends SnapshotStore {
         }
 
         try {
-            String persistenceId = name.substring(PERSISTENCE_ID_START_INDEX, persistenceIdEndIndex);
+            // Since the persistenceId is url encoded in the filename, we need
+            // to decode relevant filename's part to obtain persistenceId back
+            String persistenceId = decode(name.substring(PERSISTENCE_ID_START_INDEX, persistenceIdEndIndex));
             long sequenceNumber = Long.parseLong(name.substring(persistenceIdEndIndex + 1, sequenceNumberEndIndex));
             long timestamp = Long.parseLong(name.substring(sequenceNumberEndIndex + 1));
             return new SnapshotMetadata(persistenceId, sequenceNumber, timestamp);
@@ -308,6 +311,16 @@ public class LocalSnapshotStore extends SnapshotStore {
         } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.warn("Error encoding {}", str, e);
+            return str;
+        }
+    }
+
+    private static String decode(final String str) {
+        try {
+            return URLDecoder.decode(str, StandardCharsets.UTF_8.name());
+        } catch (final UnsupportedEncodingException e) {
+            // Shouldn't happen
+            LOG.warn("Error decoding {}", str, e);
             return str;
         }
     }
