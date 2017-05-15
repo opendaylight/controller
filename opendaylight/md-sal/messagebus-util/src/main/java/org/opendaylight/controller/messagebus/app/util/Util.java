@@ -52,7 +52,7 @@ public final class Util {
      * @return
      */
     public static String wildcardToRegex(final String wildcard){
-        final StringBuffer s = new StringBuffer(wildcard.length());
+        final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         for (final char c : wildcard.toCharArray()) {
             switch(c) {

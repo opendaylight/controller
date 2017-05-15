@@ -20,9 +20,7 @@ public class CommitJMXNotification extends ConfigJMXNotification {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("CommitJMXNotification{");
-        sb.append('}');
-        return sb.toString();
+        return "CommitJMXNotification{}";
     }
 
     /**
