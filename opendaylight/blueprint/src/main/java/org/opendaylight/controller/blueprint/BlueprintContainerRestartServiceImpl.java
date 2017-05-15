@@ -236,14 +236,13 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
             return;
         }
 
-        ConfigSubsystemFacade configFacade = configFacadeFactory.createFacade("BlueprintContainerRestartService");
-        try {
+        try (ConfigSubsystemFacade configFacade = configFacadeFactory.createFacade(
+                "BlueprintContainerRestartService")) {
             restartConfigModules(configModules, configFacade);
         } catch (ParserConfigurationException | DocumentedException | ValidationException
                 | ConflictingVersionException e) {
             LOG.error("Error restarting config modules", e);
         } finally {
-            configFacade.close();
             bundleContext.ungetService(configFacadeFactoryRef);
         }
 
