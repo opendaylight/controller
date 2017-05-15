@@ -33,6 +33,9 @@ import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.After;
@@ -51,6 +54,7 @@ import scala.Option;
  */
 public class LocalSnapshotStoreTest {
     private static final String PERSISTENCE_ID = "member-1-shard-default-config";
+    private static final String PREFIX_BASED_SHARD_PERSISTENCE_ID = "member-1-shard-id-ints!-config";
 
     private static ActorSystem system;
     private static ActorRef snapshotStore;
@@ -86,6 +90,10 @@ public class LocalSnapshotStoreTest {
         createSnapshotFile(PERSISTENCE_ID, "two", 1, 2000);
         createSnapshotFile(PERSISTENCE_ID, "three", 1, 3000);
 
+        createSnapshotFile(PREFIX_BASED_SHARD_PERSISTENCE_ID, "foo", 0, 1000);
+        createSnapshotFile(PREFIX_BASED_SHARD_PERSISTENCE_ID, "bar", 1, 2000);
+        createSnapshotFile(PREFIX_BASED_SHARD_PERSISTENCE_ID, "foobar", 1, 3000);
+
         createSnapshotFile("member-1-shard-default-oper", "foo", 0, 1000);
         createSnapshotFile("member-1-shard-toaster-oper", "foo", 0, 1000);
         new File(SNAPSHOT_DIR, "other").createNewFile();
@@ -102,6 +110,17 @@ public class LocalSnapshotStoreTest {
         assertEquals("SelectedSnapshot present", TRUE, possibleSnapshot.nonEmpty());
         assertEquals("SelectedSnapshot metadata", metadata3, possibleSnapshot.get().metadata());
         assertEquals("SelectedSnapshot snapshot", "three", possibleSnapshot.get().snapshot());
+
+        snapshotStore.tell(new LoadSnapshot(PREFIX_BASED_SHARD_PERSISTENCE_ID,
+                SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
+        result = probe.expectMsgClass(LoadSnapshotResult.class);
+        possibleSnapshot = result.snapshot();
+
+        SnapshotMetadata prefixBasedShardMetada3 = new SnapshotMetadata(PREFIX_BASED_SHARD_PERSISTENCE_ID, 1, 3000);
+
+        assertEquals("SelectedSnapshot present", TRUE, possibleSnapshot.nonEmpty());
+        assertEquals("SelectedSnapshot metadata", prefixBasedShardMetada3, possibleSnapshot.get().metadata());
+        assertEquals("SelectedSnapshot snapshot", "foobar", possibleSnapshot.get().snapshot());
     }
 
     @Test
@@ -175,7 +194,9 @@ public class LocalSnapshotStoreTest {
         }
     }
 
-    private static String toSnapshotName(String persistenceId, int seqNr, int timestamp) {
-        return "snapshot-" + persistenceId + "-" + seqNr + "-" + timestamp;
+    private static String toSnapshotName(String persistenceId, int seqNr, int timestamp)
+            throws UnsupportedEncodingException {
+        final String encodedPersistenceId = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8.name());
+        return "snapshot-" + encodedPersistenceId + "-" + seqNr + "-" + timestamp;
     }
 }
