@@ -191,7 +191,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                     sendCanCommitTransaction(iterator.next(), this);
                 } else {
                     LOG.debug("Tx {}: canCommit returning result: {}", transactionId, result);
-                    returnFuture.set(Boolean.valueOf(result));
+                    returnFuture.set(result);
                 }
 
             }

@@ -516,7 +516,7 @@ public class ShardTest extends AbstractShardTest {
 
         // Add some ModificationPayload entries
         for (int i = 1; i <= nListEntries; i++) {
-            listEntryKeys.add(Integer.valueOf(i));
+            listEntryKeys.add(i);
 
             final YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
