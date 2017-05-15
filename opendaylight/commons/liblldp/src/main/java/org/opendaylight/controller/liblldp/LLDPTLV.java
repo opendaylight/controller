@@ -103,7 +103,7 @@ public class LLDPTLV extends Packet {
      */
     public int getLength() {
         return (int) BitBufferHelper.toNumber(fieldValues.get(LENGTH),
-                fieldCoordinates.get(LENGTH).getRight().intValue());
+                fieldCoordinates.get(LENGTH).getRight());
     }
 
     /**
@@ -189,7 +189,7 @@ public class LLDPTLV extends Packet {
         if (fieldName.equals(VALUE)) {
             return (NetUtils.NumBitsInAByte * BitBufferHelper.getShort(
                     fieldValues.get(LENGTH), fieldCoordinates.get(LENGTH)
-                    .getRight().intValue()));
+                            .getRight()));
         }
         return fieldCoordinates.get(fieldName).getRight();
     }

@@ -191,7 +191,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
                 incarnation = 0;
             }
 
-            this.localBucket = new LocalBucket<>(incarnation.intValue(), initialData);
+            this.localBucket = new LocalBucket<>(incarnation, initialData);
             initialData = null;
             LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
             persisting = true;
@@ -321,7 +321,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             // update only if remote version is newer
             final long remoteVersion = receivedBucket.getVersion();
             final Long localVersion = versions.get(addr);
-            if (localVersion != null && remoteVersion <= localVersion.longValue()) {
+            if (localVersion != null && remoteVersion <= localVersion) {
                 LOG.debug("Ignoring down-versioned bucket from {} ({} local {} remote)", addr, localVersion,
                     remoteVersion);
                 continue;

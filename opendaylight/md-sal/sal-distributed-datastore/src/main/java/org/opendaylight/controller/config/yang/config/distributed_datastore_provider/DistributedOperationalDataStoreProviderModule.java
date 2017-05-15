@@ -86,7 +86,7 @@ public class DistributedOperationalDataStoreProviderModule
                         props.getShardTransactionCommitTimeoutInSeconds().getValue().intValue())
                 .shardTransactionCommitQueueCapacity(
                         props.getShardTransactionCommitQueueCapacity().getValue().intValue())
-                .persistent(props.getPersistent().booleanValue())
+                .persistent(props.getPersistent())
                 .shardIsolatedLeaderCheckIntervalInMillis(
                         props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())

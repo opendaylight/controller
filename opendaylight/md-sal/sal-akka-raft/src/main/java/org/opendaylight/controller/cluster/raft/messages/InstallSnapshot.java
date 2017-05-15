@@ -132,7 +132,7 @@ public class InstallSnapshot extends AbstractRaftRPC {
 
             out.writeByte(installSnapshot.lastChunkHashCode.isPresent() ? 1 : 0);
             if (installSnapshot.lastChunkHashCode.isPresent()) {
-                out.writeInt(installSnapshot.lastChunkHashCode.get().intValue());
+                out.writeInt(installSnapshot.lastChunkHashCode.get());
             }
 
             out.writeByte(installSnapshot.serverConfig.isPresent() ? 1 : 0);

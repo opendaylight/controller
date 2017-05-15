@@ -126,7 +126,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         }
         final Boolean closed = closedTransactions.get(ul);
         if (closed != null) {
-            final boolean successful = closed.booleanValue();
+            final boolean successful = closed;
             LOG.debug("{}: Request {} refers to a {} transaction", persistenceId, request, successful ? "successful"
                     : "failed");
             throw new ClosedTransactionException(successful);

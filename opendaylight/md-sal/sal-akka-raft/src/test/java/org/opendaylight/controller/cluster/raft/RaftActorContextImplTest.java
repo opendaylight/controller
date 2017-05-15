@@ -124,7 +124,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         PeerInfo peerInfo = context.getPeerInfo(peerId);
         if (voting != null) {
             assertNotNull("Expected peer " + peerId, peerInfo);
-            assertEquals("getVotingState for " + peerId, voting.booleanValue()
+            assertEquals("getVotingState for " + peerId, voting
                     ? VotingState.VOTING : VotingState.NON_VOTING, peerInfo.getVotingState());
         } else {
             assertNull("Unexpected peer " + peerId, peerInfo);
