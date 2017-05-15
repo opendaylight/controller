@@ -29,32 +29,20 @@ public class HardcodedModuleFactoriesResolver implements ModuleFactoriesResolver
     private Map<String, Map.Entry<ModuleFactory, BundleContext>> factories;
 
     public HardcodedModuleFactoriesResolver(final BundleContext bundleContext, final ModuleFactory... list) {
-        List<ModuleFactory> factoryList = Arrays.asList(list);
-        this.factories = new HashMap<>(factoryList.size());
+        this.factories = new HashMap<>(list.length);
         for (ModuleFactory moduleFactory : list) {
-            StringBuffer errors = new StringBuffer();
             String moduleName = moduleFactory.getImplementationName();
             if (moduleName == null || moduleName.isEmpty()) {
                 throw new IllegalStateException(
                         "Invalid implementation name for " + moduleFactory);
             }
-            String error = null;
             Map.Entry<ModuleFactory, BundleContext> conflicting = factories.get(moduleName);
-            if (conflicting != null) {
-                error = String
-                        .format("Module name is not unique. Found two conflicting factories with same name '%s': " +
-                                "\n\t%s\n\t%s\n", moduleName, conflicting.getKey(), moduleFactory);
-
-            }
-
-            if (error == null) {
-                factories.put(moduleName, new AbstractMap.SimpleEntry<>(moduleFactory,
-                        bundleContext));
+            if (conflicting == null) {
+                factories.put(moduleName, new AbstractMap.SimpleEntry<>(moduleFactory, bundleContext));
             } else {
-                errors.append(error);
-            }
-            if (errors.length() > 0) {
-                throw new IllegalArgumentException(errors.toString());
+                throw new IllegalArgumentException(String.format(
+                        "Module name is not unique. Found two conflicting factories with same name '%s':\n\t%s\n\t%s\n",
+                        moduleName, conflicting.getKey(), moduleFactory));
             }
         }
     }
