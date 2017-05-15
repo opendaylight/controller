@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 public class ConnectedClientConnectionTest
         extends AbstractClientConnectionTest<ConnectedClientConnection<BackendInfo>, BackendInfo> {
@@ -28,7 +29,7 @@ public class ConnectedClientConnectionTest
     @Test
     public void testReconnectConnection() throws Exception {
         final ClientActorBehavior<BackendInfo> behavior = mock(ClientActorBehavior.class);
-        connection.lockedReconnect(behavior);
+        connection.lockedReconnect(behavior, mock(RequestException.class));
         verify(behavior).reconnectConnection(same(connection), any(ReconnectingClientConnection.class));
     }
 

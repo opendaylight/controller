@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
 import java.util.Optional;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 @Beta
 public final class ConnectingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
@@ -30,7 +31,7 @@ public final class ConnectingClientConnection<T extends BackendInfo> extends Abs
     }
 
     @Override
-    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current) {
-        throw new UnsupportedOperationException("Attempted to reconnect a connecting connection");
+    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
+        throw new UnsupportedOperationException("Attempted to reconnect a connecting connection", cause);
     }
 }

@@ -174,7 +174,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 return this;
             } else if (conn != null) {
                 LOG.info("{}: connection {} indicated no leadership, reconnecting it", persistenceId(), conn, cause);
-                return conn.reconnect(this);
+                return conn.reconnect(this, cause);
             }
         }
         if (cause instanceof OutOfSequenceEnvelopeException) {
@@ -185,7 +185,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             } else if (conn != null) {
                 LOG.info("{}: connection {} indicated no sequencing mismatch on {} sequence {}, reconnecting it",
                     persistenceId(), conn, failure.getTarget(), failure.getSequence(), cause);
-                return conn.reconnect(this);
+                return conn.reconnect(this, cause);
             }
         }
 

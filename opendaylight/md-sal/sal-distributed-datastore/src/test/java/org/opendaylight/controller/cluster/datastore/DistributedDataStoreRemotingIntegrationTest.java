@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.junit.Assume;
@@ -1024,6 +1025,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             final String msg = "Unexpected exception: " + Throwables.getStackTraceAsString(e.getCause());
             assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException
                     || e.getCause() instanceof ShardLeaderNotRespondingException);
+            assertEquals(DistributedDataStore.class, testParameter);
+        } catch (final TimeoutException e) {
+            // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
+            assertEquals(ClientBackedDataStore.class, testParameter);
         }
     }
 
@@ -1058,6 +1063,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             final String msg = "Expected instance of NoShardLeaderException, actual: \n"
                     + Throwables.getStackTraceAsString(e.getCause());
             assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException);
+            assertEquals(DistributedDataStore.class, testParameter);
+        } catch (TimeoutException e) {
+            // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
+            assertEquals(ClientBackedDataStore.class, testParameter);
         }
     }
 
