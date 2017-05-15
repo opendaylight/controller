@@ -430,7 +430,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         @Override
         public String toString() {
-            final StringBuffer sb = new StringBuffer();
+            final StringBuilder sb = new StringBuilder();
             sb.append(type).append(' ');
             sb.append(name).append('(');
 
@@ -458,10 +458,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         @Override
         public String toString() {
-            final StringBuffer sb = new StringBuffer();
-            sb.append(type).append(' ');
-            sb.append(name);
-            return sb.toString();
+            return type + " " + name;
         }
     }
 }
