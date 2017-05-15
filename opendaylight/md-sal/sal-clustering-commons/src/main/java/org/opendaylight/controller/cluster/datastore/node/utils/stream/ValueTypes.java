@@ -41,16 +41,16 @@ final class ValueTypes {
     static {
         final Builder<Class<?>, Byte> b = ImmutableMap.builder();
 
-        b.put(String.class, Byte.valueOf(STRING_TYPE));
-        b.put(Byte.class, Byte.valueOf(BYTE_TYPE));
-        b.put(Integer.class, Byte.valueOf(INT_TYPE));
-        b.put(Long.class, Byte.valueOf(LONG_TYPE));
-        b.put(Boolean.class, Byte.valueOf(BOOL_TYPE));
-        b.put(QName.class, Byte.valueOf(QNAME_TYPE));
-        b.put(Short.class, Byte.valueOf(SHORT_TYPE));
-        b.put(BigInteger.class, Byte.valueOf(BIG_INTEGER_TYPE));
-        b.put(BigDecimal.class, Byte.valueOf(BIG_DECIMAL_TYPE));
-        b.put(byte[].class, Byte.valueOf(BINARY_TYPE));
+        b.put(String.class, STRING_TYPE);
+        b.put(Byte.class, BYTE_TYPE);
+        b.put(Integer.class, INT_TYPE);
+        b.put(Long.class, LONG_TYPE);
+        b.put(Boolean.class, BOOL_TYPE);
+        b.put(QName.class, QNAME_TYPE);
+        b.put(Short.class, SHORT_TYPE);
+        b.put(BigInteger.class, BIG_INTEGER_TYPE);
+        b.put(BigDecimal.class, BIG_DECIMAL_TYPE);
+        b.put(byte[].class, BINARY_TYPE);
 
         TYPES = b.build();
     }

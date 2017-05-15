@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 final class SimpleDataStoreClientBehavior extends AbstractDataStoreClientBehavior {
     // Pre-boxed instance
-    private static final Long ZERO = Long.valueOf(0);
+    private static final Long ZERO = 0L;
 
     private SimpleDataStoreClientBehavior(final ClientActorContext context,
             final SimpleShardBackendResolver resolver) {

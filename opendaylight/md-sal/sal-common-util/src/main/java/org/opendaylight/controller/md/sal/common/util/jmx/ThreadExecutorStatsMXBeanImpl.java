@@ -111,7 +111,7 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
     public Long getLargestQueueSize() {
         BlockingQueue<Runnable> queue = executor.getQueue();
         if(queue instanceof TrackingLinkedBlockingQueue) {
-            return Long.valueOf(((TrackingLinkedBlockingQueue<?>)queue).getLargestQueueSize());
+            return ((TrackingLinkedBlockingQueue<?>) queue).getLargestQueueSize();
         }
 
         return null;
@@ -142,8 +142,8 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
     public Long getRejectedTaskCount() {
         RejectedExecutionHandler rejectedHandler = executor.getRejectedExecutionHandler();
         if(rejectedHandler instanceof CountingRejectedExecutionHandler) {
-            return Long.valueOf(((CountingRejectedExecutionHandler)rejectedHandler)
-                                                                     .getRejectedTaskCount());
+            return ((CountingRejectedExecutionHandler) rejectedHandler)
+                    .getRejectedTaskCount();
         }
 
         return null;

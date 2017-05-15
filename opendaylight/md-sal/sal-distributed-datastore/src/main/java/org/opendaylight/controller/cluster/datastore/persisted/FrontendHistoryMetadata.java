@@ -95,7 +95,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         final Map<UnsignedLong, Boolean> closedTransactions = new HashMap<>(csize);
         for (int i = 0; i < csize; ++i) {
             final UnsignedLong key = UnsignedLong.fromLongBits(WritableObjects.readLong(in));
-            final Boolean value = Boolean.valueOf(in.readBoolean());
+            final Boolean value = in.readBoolean();
             closedTransactions.put(key, value);
         }
         final RangeSet<UnsignedLong> purgedTransactions = TreeRangeSet.create();

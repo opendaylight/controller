@@ -393,7 +393,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private void replayLocalCommitRequest(final CommitLocalTransactionRequest request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         final DataTreeModification mod = request.getModification();
-        final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
+        final Optional<Long> optTicks = Optional.of(enqueuedTicks);
 
         mod.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
@@ -419,7 +419,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     void handleReplayedRemoteRequest(final TransactionRequest<?> request,
             final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         final Consumer<Response<?, ?>> cb = callback != null ? callback : resp -> { };
-        final Optional<Long> optTicks = Optional.of(Long.valueOf(enqueuedTicks));
+        final Optional<Long> optTicks = Optional.of(enqueuedTicks);
 
         if (request instanceof ModifyTransactionRequest) {
             final ModifyTransactionRequest req = (ModifyTransactionRequest) request;
