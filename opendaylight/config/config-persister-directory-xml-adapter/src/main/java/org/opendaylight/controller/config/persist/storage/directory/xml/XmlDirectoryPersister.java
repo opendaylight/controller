@@ -158,9 +158,6 @@ public class XmlDirectoryPersister implements Persister {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("XmlDirectoryPersister{");
-        sb.append("storage=").append(storage);
-        sb.append('}');
-        return sb.toString();
+        return "XmlDirectoryPersister{storage=" + storage + "}";
     }
 }
