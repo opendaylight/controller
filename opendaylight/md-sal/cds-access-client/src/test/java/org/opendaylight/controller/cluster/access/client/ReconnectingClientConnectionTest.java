@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
@@ -34,14 +35,14 @@ public class ReconnectingClientConnectionTest
 
         final ConnectedClientConnection<BackendInfo> oldConnection =
                 new ConnectedClientConnection<>(context, 0L, backend);
-        return new ReconnectingClientConnection<>(oldConnection);
+        return new ReconnectingClientConnection<>(oldConnection, mock(RequestException.class));
     }
 
     @Override
     @Test
     public void testReconnectConnection() throws Exception {
         final ClientActorBehavior<BackendInfo> behavior = mock(ClientActorBehavior.class);
-        Assert.assertSame(behavior, connection.lockedReconnect(behavior));
+        Assert.assertSame(behavior, connection.lockedReconnect(behavior, mock(RequestException.class)));
     }
 
     @Override
