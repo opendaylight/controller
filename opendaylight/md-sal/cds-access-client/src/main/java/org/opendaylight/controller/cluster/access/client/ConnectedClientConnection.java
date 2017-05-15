@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 @Beta
 @NotThreadSafe
@@ -18,8 +19,8 @@ public final class ConnectedClientConnection<T extends BackendInfo> extends Abst
     }
 
     @Override
-    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current) {
-        final ReconnectingClientConnection<T> next = new ReconnectingClientConnection<>(this);
+    ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
+        final ReconnectingClientConnection<T> next = new ReconnectingClientConnection<>(this, cause);
         setForwarder(new SimpleReconnectForwarder(next));
         current.reconnectConnection(this, next);
         return current;
