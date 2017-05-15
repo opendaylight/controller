@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
@@ -708,7 +709,11 @@ public class DistributedDataStoreIntegrationTest {
                             txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
                             fail("Expected NoShardLeaderException");
                         } catch (final ExecutionException e) {
-                            Throwables.propagate(Throwables.getRootCause(e));
+                            assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
+                            assertEquals(DistributedDataStore.class, testParameter);
+                        } catch (TimeoutException e) {
+                            //ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
+                            assertEquals(ClientBackedDataStore.class, testParameter);
                         }
                     }
                 }
@@ -716,13 +721,13 @@ public class DistributedDataStoreIntegrationTest {
         };
     }
 
-    @Test(expected = NoShardLeaderException.class)
+    @Test
     public void testWriteOnlyTransactionCommitFailureWithNoShardLeader() throws Exception {
         datastoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
         testTransactionCommitFailureWithNoShardLeader(true, "testWriteOnlyTransactionCommitFailureWithNoShardLeader");
     }
 
-    @Test(expected = NoShardLeaderException.class)
+    @Test
     public void testReadWriteTransactionCommitFailureWithNoShardLeader() throws Exception {
         testTransactionCommitFailureWithNoShardLeader(false, "testReadWriteTransactionCommitFailureWithNoShardLeader");
     }
