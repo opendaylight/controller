@@ -15,6 +15,7 @@ import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICAT
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -22,7 +23,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -102,32 +102,49 @@ public class OpendaylightToaster extends AbstractMXBean
 
     public void setDataBroker(final DataBroker dataBroker) {
         this.dataBroker = dataBroker;
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(CONFIGURATION, TOASTER_IID), this);
+    }
+
+    public void init() {
+        LOG.info("Initializing...");
+
+        Preconditions.checkNotNull(dataBroker, "dataBroker must be set");
+        dataTreeChangeListenerRegistration = dataBroker.registerDataTreeChangeListener(
+                new DataTreeIdentifier<>(CONFIGURATION, TOASTER_IID), this);
         setToasterStatusUp(null);
+
+        // Register our MXBean.
+        register();
     }
 
     /**
      * Implemented from the AutoCloseable interface.
      */
     @Override
-    public void close() throws ExecutionException, InterruptedException {
+    public void close() {
+        LOG.info("Closing...");
+
+        // Unregister our MXBean.
+        unregister();
+
         // When we close this service we need to shutdown our executor!
         executor.shutdown();
 
-        if (dataBroker != null) {
+        if (dataTreeChangeListenerRegistration != null) {
             dataTreeChangeListenerRegistration.close();
+        }
 
+        if (dataBroker != null) {
             WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
             tx.delete(OPERATIONAL,TOASTER_IID);
             Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
                 @Override
                 public void onSuccess(final Void result) {
-                    LOG.debug("Delete Toaster commit result: " + result);
+                    LOG.debug("Successfully deleted the operational Toaster");
                 }
 
                 @Override
                 public void onFailure(final Throwable failure) {
-                    LOG.error("Delete of Toaster failed", failure);
+                    LOG.error("Delete of the operational Toaster failed", failure);
                 }
             });
         }
@@ -327,6 +344,7 @@ public class OpendaylightToaster extends AbstractMXBean
         Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
+                LOG.info("Successfully set ToasterStatus to Up");
                 notifyCallback(true);
             }
 
