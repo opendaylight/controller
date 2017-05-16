@@ -141,7 +141,7 @@ abstract class TransmitQueue {
             }
 
             LOG.debug("Transmitting entry {}", e);
-            transmit(e, now);
+            inflight.addLast(transmit(e, now));
             toSend--;
         }
 
