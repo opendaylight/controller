@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_aa6c8a9d",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-05-16T16:27:26Z",
+      "side": 0,
+      "message": "This was scheduling a too large timer so used BACKEND_ALIVE_TIMEOUT_NANOS - beenOpen but maybe there is a better timer to schedule. The current solution should schedule a timer right after the request times out.",
+      "range": {
+        "startLine": 277,
+        "startChar": 48,
+        "endLine": 277,
+        "endChar": 80
+      },
+      "revId": "0bf09a40113960a31e0b4fc66f60cabc6eb6929a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
