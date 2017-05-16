@@ -25,11 +25,6 @@ public abstract class AbstractDataTransaction {
             Futures.immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
 
     public static ListenableFuture<RpcResult<TransactionStatus>> convertToLegacyCommitFuture(final CheckedFuture<Void,TransactionCommitFailedException> from) {
-        return Futures.transform(from, new AsyncFunction<Void, RpcResult<TransactionStatus>>() {
-            @Override
-            public ListenableFuture<RpcResult<TransactionStatus>> apply(final Void input) {
-                return SUCCESS_FUTURE;
-            }
-        });
+        return Futures.transform(from, (AsyncFunction<Void, RpcResult<TransactionStatus>>) input -> SUCCESS_FUTURE);
     }
 }
