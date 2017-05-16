@@ -122,12 +122,9 @@ public final class DomInmemoryDataBrokerModule extends
             mBeans.add(commitFutureStatsMXBean);
         }
 
-        sdb.setCloseable(new AutoCloseable() {
-            @Override
-            public void close() {
-                for(AbstractMXBean mBean: mBeans) {
-                    mBean.unregisterMBean();
-                }
+        sdb.setCloseable(() -> {
+            for (AbstractMXBean mBean : mBeans) {
+                mBean.unregisterMBean();
             }
         });
 
