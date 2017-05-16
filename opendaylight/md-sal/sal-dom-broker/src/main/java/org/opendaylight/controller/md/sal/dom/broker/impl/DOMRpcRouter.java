@@ -127,7 +127,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         b.add(ret);
         listeners = b.build();
 
-        listenerNotifier.execute(() -> ret.initialTable());
+        listenerNotifier.execute(ret::initialTable);
         return ret;
     }
 

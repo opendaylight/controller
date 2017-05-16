@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,7 +73,7 @@ abstract class AbstractDOMRpcRoutingTableEntry {
 
                 // New implementation is at the end, this will move it to be the last among implementations
                 // with equal cost -- relying on sort() being stable.
-                i.sort((a, b) -> Long.compare(a.invocationCost(), b.invocationCost()));
+                i.sort(Comparator.comparingLong(DOMRpcImplementation::invocationCost));
                 vb.put(ve.getKey(), i);
             } else {
                 vb.put(ve);

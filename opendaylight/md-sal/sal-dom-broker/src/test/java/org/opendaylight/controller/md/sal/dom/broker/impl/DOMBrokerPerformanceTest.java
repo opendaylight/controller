@@ -85,198 +85,142 @@ public class DOMBrokerPerformanceTest {
 
     @Test
     public void testPerformance() throws Exception {
-        measure("Test Suite (all tests)", new Callable<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                smallTestSuite(10, 1000);
-                //smallTestSuite(10, 100);
-                smallTestSuite(100, 100);
-                //smallTestSuite(100, 100);
-                //smallTestSuite(1000, 10);
-                smallTestSuite(1000, 10);
-                //smallTestSuite(1000, 1000);
-                return null;
-            }
+        measure("Test Suite (all tests)", (Callable<Void>) () -> {
+            smallTestSuite(10, 1000);
+            //smallTestSuite(10, 100);
+            smallTestSuite(100, 100);
+            //smallTestSuite(100, 100);
+            //smallTestSuite(1000, 10);
+            smallTestSuite(1000, 10);
+            //smallTestSuite(1000, 1000);
+            return null;
         });
     }
 
     private void smallTestSuite(final int txNum, final int innerListWriteNum) throws Exception {
-        measure("TestSuite (Txs:" + txNum + " innerWrites:" + innerListWriteNum + ")", new Callable<Void>() {
-
-            @Override
-            public Void call() throws Exception {
-                measureOneTransactionTopContainer();
-                measureSeparateWritesOneLevel(txNum, innerListWriteNum);
-                return null;
-            }
+        measure("TestSuite (Txs:" + txNum + " innerWrites:" + innerListWriteNum + ")", (Callable<Void>) () -> {
+            measureOneTransactionTopContainer();
+            measureSeparateWritesOneLevel(txNum, innerListWriteNum);
+            return null;
         });
     }
 
     private void measureSeparateWritesOneLevel(final int txNum, final int innerNum) throws Exception {
         final List<DOMDataReadWriteTransaction> transactions = measure("Txs:"+ txNum + " Allocate",
-                new Callable<List<DOMDataReadWriteTransaction>>() {
-                    @Override
-                    public List<DOMDataReadWriteTransaction> call() throws Exception {
-                        List<DOMDataReadWriteTransaction> builder = new ArrayList<>(txNum);
-                        for (int i = 0; i < txNum; i++) {
-                            DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
-                            builder.add(writeTx);
-                        }
-                        return builder;
+                () -> {
+                    List<DOMDataReadWriteTransaction> builder = new ArrayList<>(txNum);
+                    for (int i = 0; i < txNum; i++) {
+                        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+                        builder.add(writeTx);
                     }
+                    return builder;
                 });
         assertEquals(txNum, transactions.size());
-        measure("Txs:"+ txNum + " Writes:1", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                int i = 0;
-                for (DOMDataReadWriteTransaction writeTx :transactions) {
-                    // Writes /test/outer-list/i in writeTx
-                    writeTx.put(OPERATIONAL, outerListPath(i), outerList(i));
-                    i++;
+        measure("Txs:"+ txNum + " Writes:1", (Callable<Void>) () -> {
+            int i = 0;
+            for (DOMDataReadWriteTransaction writeTx :transactions) {
+                // Writes /test/outer-list/i in writeTx
+                writeTx.put(OPERATIONAL, outerListPath(i), outerList(i));
+                i++;
+            }
+            return null;
+        });
+
+        measure("Txs:"+ txNum +  " Writes:" + innerNum, (Callable<Void>) () -> {
+            int i = 0;
+            for (DOMDataReadWriteTransaction writeTx :transactions) {
+                // Writes /test/outer-list/i in writeTx
+                YangInstanceIdentifier path = YangInstanceIdentifier.builder(outerListPath(i))
+                        .node(TestModel.INNER_LIST_QNAME).build();
+                writeTx.put(OPERATIONAL, path, ImmutableNodes.mapNodeBuilder(TestModel.INNER_LIST_QNAME).build());
+                for (int j = 0; j < innerNum; j++) {
+                    YangInstanceIdentifier innerPath = YangInstanceIdentifier.builder(path)
+                            .nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, String.valueOf(j))
+                            .build();
+                    writeTx.put(
+                            OPERATIONAL,
+                            innerPath,
+                            ImmutableNodes.mapEntry(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME,
+                                    String.valueOf(j)));
                 }
-                return null;
+                i++;
             }
+            return null;
         });
 
-        measure("Txs:"+ txNum +  " Writes:" + innerNum, new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                int i = 0;
-                for (DOMDataReadWriteTransaction writeTx :transactions) {
-                    // Writes /test/outer-list/i in writeTx
-                    YangInstanceIdentifier path = YangInstanceIdentifier.builder(outerListPath(i))
-                            .node(TestModel.INNER_LIST_QNAME).build();
-                    writeTx.put(OPERATIONAL, path, ImmutableNodes.mapNodeBuilder(TestModel.INNER_LIST_QNAME).build());
-                    for (int j = 0; j < innerNum; j++) {
-                        YangInstanceIdentifier innerPath = YangInstanceIdentifier.builder(path)
-                                .nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, String.valueOf(j))
-                                .build();
-                        writeTx.put(
-                                OPERATIONAL,
-                                innerPath,
-                                ImmutableNodes.mapEntry(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME,
-                                        String.valueOf(j)));
-                    }
-                    i++;
+        measure("Txs:" + txNum + " Submit, Finish", (Callable<Void>) () -> {
+            List<ListenableFuture<?>> allFutures = measure(txNum + " Submits",
+                    () -> {
+                        List<ListenableFuture<?>> builder = new ArrayList<>(txNum);
+                        for (DOMDataReadWriteTransaction tx :transactions) {
+                            builder.add(tx.submit());
+                        }
+                        return builder;
+                    });
+            Futures.allAsList(allFutures).get();
+            return null;
+        });
+
+        final DOMDataReadTransaction readTx = measure("Txs:1 (ro), Allocate",
+                (Callable<DOMDataReadTransaction>) () -> domBroker.newReadOnlyTransaction());
+
+
+        measure("Txs:1 (ro) Reads:" + txNum + " (1-level)" , (Callable<Void>) () -> {
+            for (int i = 0; i < txNum; i++) {
+                ListenableFuture<Optional<NormalizedNode<?, ?>>> potential = readTx.read(OPERATIONAL,
+                        outerListPath(i));
+                assertTrue("outerList/" + i, potential.get().isPresent());
+            }
+            return null;
+        });
+
+        measure("Txs:1 (ro) Reads:" + txNum * innerNum + " (2-level)", (Callable<Void>) () -> {
+            for (int i = 0; i < txNum; i++) {
+                for (int j = 0; j < innerNum; j++) {
+                    YangInstanceIdentifier path = YangInstanceIdentifier
+                            .builder(outerListPath(i))
+                            //
+                            .node(TestModel.INNER_LIST_QNAME)
+                            .nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, String.valueOf(j))
+                            .build();
+                    ListenableFuture<Optional<NormalizedNode<?, ?>>> potential = readTx.read(OPERATIONAL, path);
+                    assertTrue("outer-list/" + i + "/inner-list/" + j, potential.get().isPresent());
                 }
-                return null;
             }
-        });
-
-        measure("Txs:" + txNum + " Submit, Finish", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                List<ListenableFuture<?>> allFutures = measure(txNum + " Submits",
-                        new Callable<List<ListenableFuture<?>>>() {
-                            @Override
-                            public List<ListenableFuture<?>> call() throws Exception {
-                                List<ListenableFuture<?>> builder = new ArrayList<>(txNum);
-                                for (DOMDataReadWriteTransaction tx :transactions) {
-                                    builder.add(tx.submit());
-                                }
-                                return builder;
-                            }
-                        });
-                Futures.allAsList(allFutures).get();
-                return null;
-            }
-        });
-
-        final DOMDataReadTransaction readTx = measure("Txs:1 (ro), Allocate", new Callable<DOMDataReadTransaction>() {
-            @Override
-            public DOMDataReadTransaction call() throws Exception {
-                return domBroker.newReadOnlyTransaction();
-
-            }
-        });
-
-
-        measure("Txs:1 (ro) Reads:" + txNum + " (1-level)" , new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                for (int i = 0; i < txNum; i++) {
-                    ListenableFuture<Optional<NormalizedNode<?, ?>>> potential = readTx.read(OPERATIONAL,
-                            outerListPath(i));
-                    assertTrue("outerList/" + i, potential.get().isPresent());
-                }
-                return null;
-            }
-        });
-
-        measure("Txs:1 (ro) Reads:" + txNum * innerNum + " (2-level)", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                for (int i = 0; i < txNum; i++) {
-                    for (int j = 0; j < innerNum; j++) {
-                        YangInstanceIdentifier path = YangInstanceIdentifier
-                                .builder(outerListPath(i))
-                                //
-                                .node(TestModel.INNER_LIST_QNAME)
-                                .nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, String.valueOf(j))
-                                .build();
-                        ListenableFuture<Optional<NormalizedNode<?, ?>>> potential = readTx.read(OPERATIONAL, path);
-                        assertTrue("outer-list/" + i + "/inner-list/" + j, potential.get().isPresent());
-                    }
-                }
-                return null;
-            }
+            return null;
         });
     }
 
     private void measureOneTransactionTopContainer() throws Exception {
 
-        final DOMDataReadWriteTransaction writeTx = measure("Txs:1 Allocate", new Callable<DOMDataReadWriteTransaction>() {
-            @Override
-            public DOMDataReadWriteTransaction call() throws Exception {
-                return domBroker.newReadWriteTransaction();
-            }
+        final DOMDataReadWriteTransaction writeTx = measure("Txs:1 Allocate", () -> domBroker.newReadWriteTransaction());
+
+        measure("Txs:1 Write", (Callable<Void>) () -> {
+            writeTx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            writeTx.put(OPERATIONAL, TestModel.OUTER_LIST_PATH,
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+            return null;
         });
 
-        measure("Txs:1 Write", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                writeTx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-                writeTx.put(OPERATIONAL, TestModel.OUTER_LIST_PATH,
-                        ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
-                return null;
-            }
+        measure("Txs:1 Reads:1", (Callable<Void>) () -> {
+            // Reads /test in writeTx
+            ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(OPERATIONAL,
+                    TestModel.TEST_PATH);
+            assertTrue(writeTxContainer.get().isPresent());
+            return null;
         });
 
-        measure("Txs:1 Reads:1", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                // Reads /test in writeTx
-                ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(OPERATIONAL,
-                        TestModel.TEST_PATH);
-                assertTrue(writeTxContainer.get().isPresent());
-                return null;
-            }
+        measure("Txs:1 Reads:1", (Callable<Void>) () -> {
+            // Reads /test in writeTx
+            ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(OPERATIONAL,
+                    TestModel.TEST_PATH);
+            assertTrue(writeTxContainer.get().isPresent());
+            return null;
         });
 
-        measure("Txs:1 Reads:1", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                // Reads /test in writeTx
-                ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx.read(OPERATIONAL,
-                        TestModel.TEST_PATH);
-                assertTrue(writeTxContainer.get().isPresent());
-                return null;
-            }
-        });
-
-        measure("Txs:1 Submit, Finish", new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                measure("Txs:1 Submit", new Callable<ListenableFuture<?>>() {
-                    @Override
-                    public ListenableFuture<?> call() throws Exception {
-                        return writeTx.submit();
-                    }
-                }).get();
-                return null;
-            }
+        measure("Txs:1 Submit, Finish", (Callable<Void>) () -> {
+            measure("Txs:1 Submit", (Callable<ListenableFuture<?>>) () -> writeTx.submit()).get();
+            return null;
         });
     }
 }

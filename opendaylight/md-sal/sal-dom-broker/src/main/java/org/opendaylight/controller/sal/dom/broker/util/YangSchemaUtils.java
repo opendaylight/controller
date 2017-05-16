@@ -39,15 +39,11 @@ import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
 public final class YangSchemaUtils {
 
-    private static final Function<PathArgument, QName> QNAME_FROM_PATH_ARGUMENT = new Function<PathArgument, QName>(){
-
-        @Override
-        public QName apply(final PathArgument input) {
-            if(input == null) {
-                return null;
-            }
-            return input.getNodeType();
+    private static final Function<PathArgument, QName> QNAME_FROM_PATH_ARGUMENT = input -> {
+        if (input == null) {
+            return null;
         }
+        return input.getNodeType();
     };
 
     private YangSchemaUtils() {

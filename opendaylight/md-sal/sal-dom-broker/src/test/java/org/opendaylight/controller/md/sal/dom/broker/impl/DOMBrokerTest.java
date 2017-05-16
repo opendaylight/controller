@@ -316,18 +316,13 @@ public class DOMBrokerTest {
 
     AtomicReference<Throwable> submitTxAsync( final DOMDataWriteTransaction writeTx ) {
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
-        new Thread() {
-            @Override
-            public void run() {
-
-                try {
-                    writeTx.submit();
-                } catch( Throwable e ) {
-                    caughtEx.set( e );
-                }
+        new Thread(() -> {
+            try {
+                writeTx.submit();
+            } catch (Throwable e) {
+                caughtEx.set(e);
             }
-
-        }.start();
+        }).start();
 
         return caughtEx;
     }
