@@ -29,7 +29,7 @@ public class MeteredBoundedMailboxTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        config = new CommonConfig.Builder<>("testsystem").withConfigReader(() -> ConfigFactory.load()).build();
+        config = new CommonConfig.Builder<>("testsystem").withConfigReader(ConfigFactory::load).build();
         actorSystem = ActorSystem.create("testsystem", config.get());
     }
 
