@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
@@ -39,19 +37,16 @@ public class FilterValve extends ValveBase {
             throw new IllegalStateException("Initialization error");
         }
 
-        FilterChain nextValveFilterChain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
-                boolean reqEquals = Objects.equals(request, req);
-                boolean respEquals = Objects.equals(response, resp);
-                if (reqEquals == false || respEquals == false) {
-                    logger.error("Illegal change was detected by valve - request {} or " +
-                            "response {} was replaced by a filter. This is not supported by this valve",
-                            reqEquals, respEquals);
-                    throw new IllegalStateException("Request or response was replaced in a filter");
-                }
-                getNext().invoke(request, response);
+        FilterChain nextValveFilterChain = (req, resp) -> {
+            boolean reqEquals = Objects.equals(request, req);
+            boolean respEquals = Objects.equals(response, resp);
+            if (reqEquals == false || respEquals == false) {
+                logger.error("Illegal change was detected by valve - request {} or " +
+                        "response {} was replaced by a filter. This is not supported by this valve",
+                        reqEquals, respEquals);
+                throw new IllegalStateException("Request or response was replaced in a filter");
             }
+            getNext().invoke(request, response);
         };
         filterProcessor.process(request, response, nextValveFilterChain);
     }

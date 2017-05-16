@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.ListIterator;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.opendaylight.controller.filtervalve.cors.jaxb.Context;
@@ -51,15 +49,12 @@ public class FilterProcessor {
             while (it.hasPrevious()) {
                 final Filter currentFilter = it.previous();
                 final FilterChain copy = fromLast;
-                fromLast = new FilterChain() {
-                    @Override
-                    public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-                        if (trace) {
-                            logger.trace("Applying {}", currentFilter);
-                        }
-                        javax.servlet.Filter actualFilter = currentFilter.getActualFilter();
-                        actualFilter.doFilter(request, response, copy);
+                fromLast = (request1, response1) -> {
+                    if (trace) {
+                        logger.trace("Applying {}", currentFilter);
                     }
+                    javax.servlet.Filter actualFilter = currentFilter.getActualFilter();
+                    actualFilter.doFilter(request1, response1, copy);
                 };
             }
             // call first filter
