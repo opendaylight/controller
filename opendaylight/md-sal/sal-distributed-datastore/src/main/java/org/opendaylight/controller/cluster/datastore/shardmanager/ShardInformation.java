@@ -209,6 +209,10 @@ final class ShardInformation {
         notifyOnShardInitializedCallbacks();
     }
 
+    String getRole() {
+        return role;
+    }
+
     void setFollowerSyncStatus(boolean syncStatus) {
         this.followerSyncStatus = syncStatus;
     }

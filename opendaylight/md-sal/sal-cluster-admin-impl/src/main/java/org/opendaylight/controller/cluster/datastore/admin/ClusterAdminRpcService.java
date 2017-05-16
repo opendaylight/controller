@@ -37,12 +37,15 @@ import org.opendaylight.controller.cluster.datastore.messages.AddPrefixShardRepl
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.FlipShardMembersVotingStatus;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardRole;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
 import org.opendaylight.controller.cluster.datastore.messages.RemovePrefixShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaInput;
@@ -58,6 +61,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
@@ -423,6 +432,95 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return waitForShardResults(shardResultData, shardResults ->
                 new FlipMemberVotingStatesForAllShardsOutputBuilder().setShardResult(shardResults).build(),
                 "Failed to change member voting states");
+    }
+
+    @Override
+    public Future<RpcResult<GetShardRoleOutput>> getShardRole(final GetShardRoleInput input) {
+        final String shardName = input.getShardName();
+        if (Strings.isNullOrEmpty(shardName)) {
+            return newFailedRpcResultFuture("A valid shard name must be specified");
+        }
+
+        DataStoreType dataStoreType = input.getDataStoreType();
+        if (dataStoreType == null) {
+            return newFailedRpcResultFuture("A valid DataStoreType must be specified");
+        }
+
+        LOG.info("Getting role for shard {}, datastore type {}", shardName, dataStoreType);
+
+        final SettableFuture<RpcResult<GetShardRoleOutput>> returnFuture = SettableFuture.create();
+        ListenableFuture<GetShardRoleReply> future = sendMessageToShardManager(dataStoreType,
+                new GetShardRole(shardName));
+        Futures.addCallback(future, new FutureCallback<GetShardRoleReply>() {
+            @Override
+            public void onSuccess(final GetShardRoleReply reply) {
+                if (reply == null) {
+                    returnFuture.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
+                            "No Shard role present. Please retry..").build());
+                    return;
+                }
+                LOG.info("Successfully received role:{} for shard {}", reply.getRole(), shardName);
+                final GetShardRoleOutputBuilder builder = new GetShardRoleOutputBuilder();
+                if (reply.getRole() != null) {
+                    builder.setRole(reply.getRole());
+                }
+                returnFuture.set(newSuccessfulResult(builder.build()));
+            }
+
+            @Override
+            public void onFailure(final Throwable failure) {
+                returnFuture.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
+                        "Failed to get shard role.", failure).build());
+            }
+        });
+
+        return returnFuture;
+    }
+
+    @Override
+    public Future<RpcResult<GetPrefixShardRoleOutput>> getPrefixShardRole(final GetPrefixShardRoleInput input) {
+        final InstanceIdentifier<?> identifier = input.getShardPrefix();
+        if (identifier == null) {
+            return newFailedRpcResultFuture("A valid shard identifier must be specified");
+        }
+
+        final DataStoreType dataStoreType = input.getDataStoreType();
+        if (dataStoreType == null) {
+            return newFailedRpcResultFuture("A valid DataStoreType must be specified");
+        }
+
+        LOG.info("Getting prefix shard role for shard: {}, datastore type {}", identifier, dataStoreType);
+
+        final YangInstanceIdentifier prefix = serializer.toYangInstanceIdentifier(identifier);
+        final String shardName = ClusterUtils.getCleanShardName(prefix);
+        final SettableFuture<RpcResult<GetPrefixShardRoleOutput>> returnFuture = SettableFuture.create();
+        ListenableFuture<GetShardRoleReply> future = sendMessageToShardManager(dataStoreType,
+                new GetShardRole(shardName));
+        Futures.addCallback(future, new FutureCallback<GetShardRoleReply>() {
+            @Override
+            public void onSuccess(final GetShardRoleReply reply) {
+                if (reply == null) {
+                    returnFuture.set(ClusterAdminRpcService.<GetPrefixShardRoleOutput>newFailedRpcResultBuilder(
+                            "No Shard role present. Please retry..").build());
+                    return;
+                }
+
+                LOG.info("Successfully received role:{} for shard {}", reply.getRole(), shardName);
+                final GetPrefixShardRoleOutputBuilder builder = new GetPrefixShardRoleOutputBuilder();
+                if (reply.getRole() != null) {
+                    builder.setRole(reply.getRole());
+                }
+                returnFuture.set(newSuccessfulResult(builder.build()));
+            }
+
+            @Override
+            public void onFailure(final Throwable failure) {
+                returnFuture.set(ClusterAdminRpcService.<GetPrefixShardRoleOutput>newFailedRpcResultBuilder(
+                        "Failed to get shard role.", failure).build());
+            }
+        });
+
+        return returnFuture;
     }
 
     @Override

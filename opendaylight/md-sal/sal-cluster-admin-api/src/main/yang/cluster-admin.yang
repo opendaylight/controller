@@ -260,4 +260,53 @@ module cluster-admin {
 
         description "Creates a backup file of the datastore state";
     }
+
+    rpc get-shard-role {
+        input {
+            leaf shard-name {
+                mandatory true;
+                type string;
+                description "The name of the shard for which to create a replica.";
+            }
+
+            leaf data-store-type {
+                mandatory true;
+                type data-store-type;
+                description "The type of the data store to which the replica belongs";
+            }
+        }
+
+        output {
+            leaf role {
+                type string;
+                description "Current role for the given shard, if not present the shard currently doesn't have a role";
+            }
+        }
+
+        description "Returns the current role for the requested module shard.";
+    }
+
+    rpc get-prefix-shard-role {
+        input {
+            leaf shard-prefix {
+                mandatory true;
+                type instance-identifier;
+            }
+
+            leaf data-store-type {
+                mandatory true;
+                type data-store-type;
+                description "The type of the data store to which the replica belongs";
+            }
+        }
+
+        output {
+            leaf role {
+                type string;
+                description "Current role for the given shard, if not present the shard currently doesn't have a role";
+            }
+        }
+
+        description "Returns the current role for the requested module shard.";
+    }
 }
