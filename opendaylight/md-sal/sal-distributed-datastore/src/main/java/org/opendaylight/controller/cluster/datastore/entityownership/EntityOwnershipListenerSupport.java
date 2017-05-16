@@ -119,8 +119,8 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
         try {
             Collection<DOMEntityOwnershipListener> listeners = entityTypeListenerMap.get(entity.getType());
             if (!listeners.isEmpty()) {
-                notifyListeners(entity, wasOwner, isOwner, hasOwner, listeners.stream().map(
-                    listener -> listenerActorMap.get(listener)).collect(Collectors.toList()));
+                notifyListeners(entity, wasOwner, isOwner, hasOwner,
+                        listeners.stream().map(listenerActorMap::get).collect(Collectors.toList()));
             }
         } finally {
             listenerLock.readLock().unlock();

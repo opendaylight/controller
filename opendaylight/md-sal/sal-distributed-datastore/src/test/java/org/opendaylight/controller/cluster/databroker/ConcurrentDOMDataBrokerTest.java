@@ -116,14 +116,11 @@ public class ConcurrentDOMDataBrokerTest {
         Answer<ListenableFuture<Boolean>> asyncCanCommit = invocation -> {
             final SettableFuture<Boolean> future = SettableFuture.create();
             if (doAsync) {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        Uninterruptibles.awaitUninterruptibly(asyncCanCommitContinue,
-                                10, TimeUnit.SECONDS);
-                        future.set(true);
-                    }
-                }.start();
+                new Thread(() -> {
+                    Uninterruptibles.awaitUninterruptibly(asyncCanCommitContinue,
+                            10, TimeUnit.SECONDS);
+                    future.set(true);
+                }).start();
             } else {
                 future.set(true);
             }

@@ -198,14 +198,11 @@ public class ShardTest extends AbstractShardTest {
                             // original ElectionTimeout message to proceed with the election.
                             firstElectionTimeout = false;
                             final ActorRef self = getSelf();
-                            new Thread() {
-                                @Override
-                                public void run() {
-                                    Uninterruptibles.awaitUninterruptibly(
-                                            onChangeListenerRegistered, 5, TimeUnit.SECONDS);
-                                    self.tell(message, self);
-                                }
-                            }.start();
+                            new Thread(() -> {
+                                Uninterruptibles.awaitUninterruptibly(
+                                        onChangeListenerRegistered, 5, TimeUnit.SECONDS);
+                                self.tell(message, self);
+                            }).start();
 
                             onFirstElectionTimeout.countDown();
                         } else {
@@ -307,14 +304,11 @@ public class ShardTest extends AbstractShardTest {
                         if (message instanceof ElectionTimeout && firstElectionTimeout) {
                             firstElectionTimeout = false;
                             final ActorRef self = getSelf();
-                            new Thread() {
-                                @Override
-                                public void run() {
-                                    Uninterruptibles.awaitUninterruptibly(
-                                            onChangeListenerRegistered, 5, TimeUnit.SECONDS);
-                                    self.tell(message, self);
-                                }
-                            }.start();
+                            new Thread(() -> {
+                                Uninterruptibles.awaitUninterruptibly(
+                                        onChangeListenerRegistered, 5, TimeUnit.SECONDS);
+                                self.tell(message, self);
+                            }).start();
 
                             onFirstElectionTimeout.countDown();
                         } else {

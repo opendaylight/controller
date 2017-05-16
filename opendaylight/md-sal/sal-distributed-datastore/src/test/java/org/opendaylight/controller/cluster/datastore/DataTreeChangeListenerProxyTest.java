@@ -60,13 +60,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
                         actorContext, mockListener, path);
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init("shard-1");
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init("shard-1")).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
@@ -119,13 +113,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 final DataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> proxy =
                         new DataTreeChangeListenerProxy<>(actorContext, mockClusteredListener, path);
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init("shard-1");
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init("shard-1")).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
@@ -154,13 +142,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
                         actorContext, mockListener, path);
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init("shard-1");
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init("shard-1")).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
@@ -186,13 +168,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
                         actorContext, mockListener, path);
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init("shard-1");
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init("shard-1")).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);

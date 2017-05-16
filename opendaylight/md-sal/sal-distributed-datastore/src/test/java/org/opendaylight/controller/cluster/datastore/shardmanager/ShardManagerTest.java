@@ -1328,7 +1328,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         assertEquals("getType", shardMrgIDSuffix, datastoreSnapshot.getType());
         assertNull("Expected null ShardManagerSnapshot", datastoreSnapshot.getShardManagerSnapshot());
 
-        Function<ShardSnapshot, String> shardNameTransformer = s -> s.getName();
+        Function<ShardSnapshot, String> shardNameTransformer = ShardSnapshot::getName;
 
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2"), Sets.newHashSet(
                 Lists.transform(datastoreSnapshot.getShardSnapshots(), shardNameTransformer)));

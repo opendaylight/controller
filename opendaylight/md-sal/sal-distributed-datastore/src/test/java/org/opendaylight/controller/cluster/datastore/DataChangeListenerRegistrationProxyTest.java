@@ -81,13 +81,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
                 final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
                 final DataChangeScope scope = AsyncDataBroker.DataChangeScope.ONE;
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init(path, scope);
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init(path, scope)).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
@@ -141,13 +135,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
                 final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
                 final DataChangeScope scope = AsyncDataBroker.DataChangeScope.ONE;
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init(path, scope);
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init(path, scope)).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
@@ -198,13 +186,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
                 final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
                 final DataChangeScope scope = AsyncDataBroker.DataChangeScope.ONE;
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init(path, scope);
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init(path, scope)).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
@@ -231,13 +213,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
                 final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
                 final DataChangeScope scope = AsyncDataBroker.DataChangeScope.ONE;
-                new Thread() {
-                    @Override
-                    public void run() {
-                        proxy.init(path, scope);
-                    }
-
-                }.start();
+                new Thread(() -> proxy.init(path, scope)).start();
 
                 FiniteDuration timeout = duration("5 seconds");
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
