@@ -92,15 +92,12 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         services.putInstance(DOMMountPointService.class, mountService);
 
         BrokerImpl broker = new BrokerImpl(domRpcService, domRpcProvider, services);
-        broker.setDeactivator(new AutoCloseable() {
-            @Override
-            public void close() {
-                for(AutoCloseable ac: closeables) {
-                    try {
-                        ac.close();
-                    } catch(Exception e) {
-                        LOG.warn("Exception while closing {}", ac, e);
-                    }
+        broker.setDeactivator(() -> {
+            for (AutoCloseable ac : closeables) {
+                try {
+                    ac.close();
+                } catch (Exception e) {
+                    LOG.warn("Exception while closing {}", ac, e);
                 }
             }
         });
