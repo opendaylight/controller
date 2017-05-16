@@ -322,7 +322,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.info("Adding replicas for all shards");
 
         final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
-        Function<String, Object> messageSupplier = shardName -> new AddShardReplica(shardName);
+        Function<String, Object> messageSupplier = AddShardReplica::new;
 
         sendMessageToManagerForConfiguredShards(DataStoreType.Config, shardResultData, messageSupplier);
         sendMessageToManagerForConfiguredShards(DataStoreType.Operational, shardResultData, messageSupplier);
@@ -421,8 +421,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     @Override
     public Future<RpcResult<FlipMemberVotingStatesForAllShardsOutput>> flipMemberVotingStatesForAllShards() {
         final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
-        Function<String, Object> messageSupplier = shardName ->
-                new FlipShardMembersVotingStatus(shardName);
+        Function<String, Object> messageSupplier = FlipShardMembersVotingStatus::new;
 
         LOG.info("Flip member voting states for all shards");
 
