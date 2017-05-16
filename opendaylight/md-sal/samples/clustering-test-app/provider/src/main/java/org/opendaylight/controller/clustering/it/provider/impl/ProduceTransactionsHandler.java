@@ -143,8 +143,8 @@ public class ProduceTransactionsHandler implements Runnable {
         cursor.close();
 
         try {
-            tx.submit().checkedGet();
-        } catch (final TransactionCommitFailedException e) {
+            tx.submit().checkedGet(125, TimeUnit.SECONDS);
+        } catch (final TransactionCommitFailedException | TimeoutException e) {
             LOG.warn("Unable to fill the initial item list.", e);
             settableFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
@@ -192,7 +192,8 @@ public class ProduceTransactionsHandler implements Runnable {
             final ListenableFuture<List<Void>> allFutures = Futures.allAsList(futures);
 
             try {
-                allFutures.get(30, TimeUnit.SECONDS);
+                // Timeout from cds should be 2 minutes so leave some leeway.
+                allFutures.get(125, TimeUnit.SECONDS);
 
                 LOG.debug("All futures completed successfully.");
 
