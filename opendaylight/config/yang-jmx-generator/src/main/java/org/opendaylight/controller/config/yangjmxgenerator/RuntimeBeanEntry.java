@@ -64,19 +64,10 @@ import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
  */
 public class RuntimeBeanEntry {
 
-    private static final Function<SchemaNode, QName> QNAME_FROM_NODE = new Function<SchemaNode, QName>() {
-        @Override
-        public QName apply(final SchemaNode input) {
-            return input.getQName();
-        }
-    };
+    private static final Function<SchemaNode, QName> QNAME_FROM_NODE = SchemaNode::getQName;
 
-    private static final Function<UnknownSchemaNode, String> UNKNOWN_NODE_TO_STRING = new Function<UnknownSchemaNode, String>() {
-        @Override
-        public String apply(final UnknownSchemaNode input) {
-            return input.getQName().getLocalName() + input.getNodeParameter();
-        }
-    };
+    private static final Function<UnknownSchemaNode, String> UNKNOWN_NODE_TO_STRING =
+            input -> input.getQName().getLocalName() + input.getNodeParameter();
 
     private final String packageName;
     private final String yangName, javaNamePrefix;
@@ -348,12 +339,8 @@ public class RuntimeBeanEntry {
     }
 
     private static Collection<DataSchemaNode> sortAttributes(final Collection<DataSchemaNode> childNodes) {
-        final TreeSet<DataSchemaNode> dataSchemaNodes = new TreeSet<>(new Comparator<DataSchemaNode>() {
-            @Override
-            public int compare(final DataSchemaNode o1, final DataSchemaNode o2) {
-                return o1.getQName().getLocalName().compareTo(o2.getQName().getLocalName());
-            }
-        });
+        final TreeSet<DataSchemaNode> dataSchemaNodes =
+                new TreeSet<>(Comparator.comparing(o -> o.getQName().getLocalName()));
         dataSchemaNodes.addAll(childNodes);
         return dataSchemaNodes;
     }
