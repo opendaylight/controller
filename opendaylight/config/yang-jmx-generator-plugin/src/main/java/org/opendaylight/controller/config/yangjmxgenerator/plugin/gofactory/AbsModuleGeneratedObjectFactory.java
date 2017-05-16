@@ -45,12 +45,8 @@ import org.slf4j.LoggerFactory;
 
 public class AbsModuleGeneratedObjectFactory {
 
-    private static final Function<String, FullyQualifiedName> FULLY_QUALIFIED_NAME_FUNCTION = new Function<String, FullyQualifiedName>() {
-        @Override
-        public FullyQualifiedName apply(final String input) {
-            return FullyQualifiedName.fromString(input);
-        }
-    };
+    private static final Function<String, FullyQualifiedName> FULLY_QUALIFIED_NAME_FUNCTION =
+            FullyQualifiedName::fromString;
 
     public GeneratedObject toGeneratedObject(ModuleMXBeanEntry mbe, Optional<String> copyright) {
         FullyQualifiedName abstractFQN = new FullyQualifiedName(mbe.getPackageName(), mbe.getAbstractModuleName());
