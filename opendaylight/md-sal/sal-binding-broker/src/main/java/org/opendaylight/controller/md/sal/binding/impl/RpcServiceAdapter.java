@@ -131,19 +131,16 @@ class RpcServiceAdapter implements InvocationHandler {
 
     private static ListenableFuture<RpcResult<?>> transformFuture(final SchemaPath rpc,
             final ListenableFuture<DOMRpcResult> domFuture, final BindingNormalizedNodeSerializer codec) {
-        return Futures.transform(domFuture, new Function<DOMRpcResult, RpcResult<?>>() {
-            @Override
-            public RpcResult<?> apply(final DOMRpcResult input) {
-                final NormalizedNode<?, ?> domData = input.getResult();
-                final DataObject bindingResult;
-                if (domData != null) {
-                    final SchemaPath rpcOutput = rpc.createChild(QName.create(rpc.getLastComponent(), "output"));
-                    bindingResult = codec.fromNormalizedNodeRpcData(rpcOutput, (ContainerNode) domData);
-                } else {
-                    bindingResult = null;
-                }
-                return RpcResult.class.cast(RpcResultBuilder.success(bindingResult).build());
+        return Futures.transform(domFuture, (Function<DOMRpcResult, RpcResult<?>>) input -> {
+            final NormalizedNode<?, ?> domData = input.getResult();
+            final DataObject bindingResult;
+            if (domData != null) {
+                final SchemaPath rpcOutput = rpc.createChild(QName.create(rpc.getLastComponent(), "output"));
+                bindingResult = codec.fromNormalizedNodeRpcData(rpcOutput, (ContainerNode) domData);
+            } else {
+                bindingResult = null;
             }
+            return RpcResult.class.cast(RpcResultBuilder.success(bindingResult).build());
         });
     }
 

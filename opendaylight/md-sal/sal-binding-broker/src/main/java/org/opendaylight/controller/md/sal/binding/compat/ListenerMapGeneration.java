@@ -12,15 +12,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
-import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 /**
@@ -93,14 +92,8 @@ final class ListenerMapGeneration {
 
     private static Iterable<Class<?>> getNotificationTypes(final Class<?> cls) {
         final Class<?>[] ifaces = cls.getInterfaces();
-        return Iterables.filter(Arrays.asList(ifaces), new Predicate<Class<?>>() {
-            @Override
-            public boolean apply(final Class<?> input) {
-                if (Notification.class.equals(input)) {
-                    return false;
-                }
-                return Notification.class.isAssignableFrom(input);
-            }
-        });
+        return Arrays.stream(ifaces)
+                .filter(input -> !Notification.class.equals(input) && Notification.class.isAssignableFrom(input))
+                .collect(Collectors.toList());
     }
 }

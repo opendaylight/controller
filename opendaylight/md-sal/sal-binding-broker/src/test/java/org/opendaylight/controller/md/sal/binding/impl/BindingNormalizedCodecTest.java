@@ -96,18 +96,15 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         final CountDownLatch done = new CountDownLatch(1);
         final AtomicReference<YangInstanceIdentifier> yangId = new AtomicReference<>();
         final AtomicReference<RuntimeException> error = new AtomicReference<>();
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    yangId.set(BindingNormalizedCodecTest.this.codec.toYangInstanceIdentifierBlocking(BA_TOP_LEVEL_LIST));
-                } catch(final RuntimeException e) {
-                    error.set(e);
-                } finally {
-                    done.countDown();
-                }
+        new Thread(() -> {
+            try {
+                yangId.set(BindingNormalizedCodecTest.this.codec.toYangInstanceIdentifierBlocking(BA_TOP_LEVEL_LIST));
+            } catch(final RuntimeException e) {
+                error.set(e);
+            } finally {
+                done.countDown();
             }
-        }.start();
+        }).start();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         this.codec.onGlobalContextUpdated(this.context);
@@ -136,18 +133,15 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         final CountDownLatch done = new CountDownLatch(1);
         final AtomicReference<ImmutableBiMap<Method, SchemaPath>> retMap = new AtomicReference<>();
         final AtomicReference<RuntimeException> error = new AtomicReference<>();
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    retMap.set(BindingNormalizedCodecTest.this.codec.getRpcMethodToSchemaPath(OpendaylightTestRpcServiceService.class));
-                } catch(final RuntimeException e) {
-                    error.set(e);
-                } finally {
-                    done.countDown();
-                }
+        new Thread(() -> {
+            try {
+                retMap.set(BindingNormalizedCodecTest.this.codec.getRpcMethodToSchemaPath(OpendaylightTestRpcServiceService.class));
+            } catch(final RuntimeException e) {
+                error.set(e);
+            } finally {
+                done.countDown();
             }
-        }.start();
+        }).start();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         this.codec.onGlobalContextUpdated(this.context);
