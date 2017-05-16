@@ -30,12 +30,8 @@ public class TransactionCommitDeadlockException extends TransactionCommitFailedE
             "result must be obtained asynchronously, e.g. via Futures#addCallback, to avoid deadlock.";
     private static final RpcError DEADLOCK_RPCERROR = RpcResultBuilder.newError(ErrorType.APPLICATION, "lock-denied", DEADLOCK_MESSAGE);
 
-    public static final Supplier<Exception> DEADLOCK_EXCEPTION_SUPPLIER = new Supplier<Exception>() {
-        @Override
-        public Exception get() {
-            return new TransactionCommitDeadlockException(DEADLOCK_MESSAGE, DEADLOCK_RPCERROR);
-        }
-    };
+    public static final Supplier<Exception> DEADLOCK_EXCEPTION_SUPPLIER =
+            () -> new TransactionCommitDeadlockException(DEADLOCK_MESSAGE, DEADLOCK_RPCERROR);
 
     public TransactionCommitDeadlockException(final String message, final RpcError... errors) {
         super(message, errors);
