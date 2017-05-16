@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.util.xml;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -199,35 +198,21 @@ public final class XmlElement {
     }
 
     public List<XmlElement> getChildElements() {
-        return getChildElementsInternal(new ElementFilteringStrategy() {
-            @Override
-            public boolean accept(final Element e) {
-                return true;
-            }
-        });
+        return getChildElementsInternal(e -> true);
     }
 
     public List<XmlElement> getChildElementsWithinNamespace(final String childName, final String namespace) {
         return Lists.newArrayList(Collections2.filter(getChildElementsWithinNamespace(namespace),
-                new Predicate<XmlElement>() {
-                    @Override
-                    public boolean apply(final XmlElement xmlElement) {
-                        return xmlElement.getName().equals(childName);
-                    }
-                }));
+                xmlElement -> xmlElement.getName().equals(childName)));
     }
 
     public List<XmlElement> getChildElementsWithinNamespace(final String namespace) {
-        return getChildElementsInternal(new ElementFilteringStrategy() {
-            @Override
-            public boolean accept(final Element e) {
-                try {
-                    return XmlElement.fromDomElement(e).getNamespace().equals(namespace);
-                } catch (final MissingNameSpaceException e1) {
-                    return false;
-                }
+        return getChildElementsInternal(e -> {
+            try {
+                return XmlElement.fromDomElement(e).getNamespace().equals(namespace);
+            } catch (final MissingNameSpaceException e1) {
+                return false;
             }
-
         });
     }
 
@@ -237,12 +222,9 @@ public final class XmlElement {
      * @return List of child elements
      */
     public List<XmlElement> getChildElements(final String tagName) {
-        return getChildElementsInternal(new ElementFilteringStrategy() {
-            @Override
-            public boolean accept(final Element e) {
-                // localName returns pure localName without prefix
-                return e.getLocalName().equals(tagName);
-            }
+        return getChildElementsInternal(e -> {
+            // localName returns pure localName without prefix
+            return e.getLocalName().equals(tagName);
         });
     }
 
@@ -267,12 +249,8 @@ public final class XmlElement {
 
     public Optional<XmlElement> getOnlyChildElementOptionally(final String childName, final String namespace) {
         List<XmlElement> children = getChildElementsWithinNamespace(namespace);
-        children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
-            @Override
-            public boolean apply(final XmlElement xmlElement) {
-                return xmlElement.getName().equals(childName);
-            }
-        }));
+        children = Lists.newArrayList(Collections2.filter(children,
+                xmlElement -> xmlElement.getName().equals(childName)));
         if (children.size() != 1){
             return Optional.absent();
         }
@@ -287,12 +265,8 @@ public final class XmlElement {
         Optional<String> namespace = getNamespaceOptionally();
         if (namespace.isPresent()) {
             List<XmlElement> children = getChildElementsWithinNamespace(namespace.get());
-            children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
-                @Override
-                public boolean apply(final XmlElement xmlElement) {
-                    return xmlElement.getName().equals(childName);
-                }
-            }));
+            children = Lists.newArrayList(Collections2.filter(children,
+                    xmlElement -> xmlElement.getName().equals(childName)));
             if (children.size() != 1){
                 return Optional.absent();
             }
@@ -320,12 +294,8 @@ public final class XmlElement {
 
     public XmlElement getOnlyChildElement(final String childName, final String namespace) throws DocumentedException {
         List<XmlElement> children = getChildElementsWithinNamespace(namespace);
-        children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
-            @Override
-            public boolean apply(final XmlElement xmlElement) {
-                return xmlElement.getName().equals(childName);
-            }
-        }));
+        children = Lists.newArrayList(Collections2.filter(children,
+                xmlElement -> xmlElement.getName().equals(childName)));
         if (children.size() != 1){
             throw new DocumentedException(String.format("One element %s:%s expected in %s but was %s", namespace,
                     childName, toString(), children.size()),
@@ -474,12 +444,7 @@ public final class XmlElement {
 
     public List<XmlElement> getChildElementsWithSameNamespace(final String childName) throws MissingNameSpaceException {
         List<XmlElement> children = getChildElementsWithinNamespace(getNamespace());
-        return Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
-            @Override
-            public boolean apply(final XmlElement xmlElement) {
-                return xmlElement.getName().equals(childName);
-            }
-        }));
+        return Lists.newArrayList(Collections2.filter(children, xmlElement -> xmlElement.getName().equals(childName)));
     }
 
     public void checkUnrecognisedElements(final List<XmlElement> recognisedElements,
