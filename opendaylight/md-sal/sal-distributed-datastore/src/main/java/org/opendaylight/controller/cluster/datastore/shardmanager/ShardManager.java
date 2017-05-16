@@ -73,6 +73,8 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.FlipShardMembersVotingStatus;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardRole;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
@@ -296,6 +298,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onShutDown();
         } else if (message instanceof GetLocalShardIds) {
             onGetLocalShardIds();
+        } else if (message instanceof GetShardRole) {
+            onGetShardRole((GetShardRole) message);
         } else if (message instanceof RunnableMessage) {
             ((RunnableMessage)message).run();
         } else if (message instanceof DeleteSnapshotsFailure) {
@@ -310,6 +314,23 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         } else {
             unknownMessage(message);
         }
+    }
+
+    private void onGetShardRole(final GetShardRole message) {
+        LOG.debug("{}: onGetShardRole for shard: {}", persistenceId(), message.getName());
+
+        final String name = message.getName();
+
+        final ShardInformation shardInformation = localShards.get(name);
+
+        if (shardInformation == null) {
+            LOG.info("{}: no shard information for {} found", persistenceId(), name);
+            getSender().tell(new Status.Failure(
+                    new IllegalArgumentException("Shard with name " + name + " not present.")), ActorRef.noSender());
+            return;
+        }
+
+        getSender().tell(new GetShardRoleReply(shardInformation.getRole()), ActorRef.noSender());
     }
 
     private void onInitConfigListener() {
