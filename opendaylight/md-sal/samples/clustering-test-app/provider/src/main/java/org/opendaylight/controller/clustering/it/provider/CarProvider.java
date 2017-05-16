@@ -150,53 +150,50 @@ public class CarProvider implements CarService {
         stopThread = false;
         final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / inputRate;
         final Stopwatch sw = Stopwatch.createUnstarted();
-        testThread = new Thread() {
-            @Override
-            public void run() {
-                sw.start();
-                AtomicLong count = new AtomicLong();
-                while(!stopThread) {
-                    long id = count.incrementAndGet();
-                    WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-                    CarEntry car = new CarEntryBuilder().setId(new CarId("car"+id)).build();
-                    tx.put(LogicalDatastoreType.CONFIGURATION,
-                            InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.getKey()).build(),
-                            car);
-                    CheckedFuture<Void, TransactionCommitFailedException> future =  tx.submit();
-                    Futures.addCallback(future, new FutureCallback<Void>() {
+        testThread = new Thread(() -> {
+            sw.start();
+            AtomicLong count = new AtomicLong();
+            while(!stopThread) {
+                long id = count.incrementAndGet();
+                WriteTransaction tx1 = dataProvider.newWriteOnlyTransaction();
+                CarEntry car = new CarEntryBuilder().setId(new CarId("car"+id)).build();
+                tx1.put(LogicalDatastoreType.CONFIGURATION,
+                        InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.getKey()).build(),
+                        car);
+                CheckedFuture<Void, TransactionCommitFailedException> future = tx1.submit();
+                Futures.addCallback(future, new FutureCallback<Void>() {
 
-                        @Override
-                        public void onSuccess(final Void result) {
-                            // Transaction succeeded
-                            succcessCounter.getAndIncrement();
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable t) {
-                            // Transaction failed
-                            failureCounter.getAndIncrement();
-                            LOG.error("Put Cars failed", t);
-                        }
-                    });
-                    try {
-                        TimeUnit.NANOSECONDS.sleep(sleep);
-                    } catch (InterruptedException e) {
-                        break;
+                    @Override
+                    public void onSuccess(final Void result) {
+                        // Transaction succeeded
+                        succcessCounter.getAndIncrement();
                     }
 
-                    if(count.get() % 1000 == 0) {
-                        log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
+                    @Override
+                    public void onFailure(final Throwable t) {
+                        // Transaction failed
+                        failureCounter.getAndIncrement();
+                        LOG.error("Put Cars failed", t);
                     }
-
-                    // Check if a count is specified in input and we have created that many cars.
-                    if (inputCount != 0 && count.get() >= inputCount) {
-                        stopThread = true;
-                    }
+                });
+                try {
+                    TimeUnit.NANOSECONDS.sleep(sleep);
+                } catch (InterruptedException e) {
+                    break;
                 }
 
-                log.info("Stress test thread stopping after creating {} cars.", count.get());
+                if(count.get() % 1000 == 0) {
+                    log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
+                }
+
+                // Check if a count is specified in input and we have created that many cars.
+                if (inputCount != 0 && count.get() >= inputCount) {
+                    stopThread = true;
+                }
             }
-        };
+
+            log.info("Stress test thread stopping after creating {} cars.", count.get());
+        });
         testThread.start();
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
