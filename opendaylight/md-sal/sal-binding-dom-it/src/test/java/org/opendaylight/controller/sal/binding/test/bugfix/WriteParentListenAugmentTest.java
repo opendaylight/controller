@@ -48,13 +48,7 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
 
         ListenerRegistration<DataChangeListener> dclRegistration = baDataService.registerDataChangeListener(
-                AUGMENT_WILDCARDED_PATH, new DataChangeListener() {
-
-                    @Override
-                    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-                        event.set(change);
-                    }
-                });
+                AUGMENT_WILDCARDED_PATH, event::set);
 
         DataModificationTransaction modification = baDataService.beginTransaction();
 
