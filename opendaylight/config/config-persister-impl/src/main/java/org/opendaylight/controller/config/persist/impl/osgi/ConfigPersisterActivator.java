@@ -119,32 +119,24 @@ public class ConfigPersisterActivator implements BundleActivator {
         LOG.debug("Configuration Persister got {}", service);
         LOG.debug("Context was {}", context);
         LOG.debug("Registration was {}", registration);
-        final Thread pushingThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if(configs != null && !configs.isEmpty()) {
-                            configPusher.pushConfigs(configs);
-                        }
-                        if(context != null) {
-                            registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
-                            configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator, false);
-                        } else {
-                            LOG.warn("Unable to process configs as BundleContext is null");
-                        }
-                    } catch (final InterruptedException e) {
-                        LOG.info("ConfigPusher thread stopped");
-                    }
-                    LOG.info("Configuration Persister initialization completed.");
+        final Thread pushingThread = new Thread(() -> {
+            try {
+                if(configs != null && !configs.isEmpty()) {
+                    configPusher.pushConfigs(configs);
                 }
-            }, "config-pusher");
+                if(context != null) {
+                    registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
+                    configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator, false);
+                } else {
+                    LOG.warn("Unable to process configs as BundleContext is null");
+                }
+            } catch (final InterruptedException e) {
+                LOG.info("ConfigPusher thread stopped");
+            }
+            LOG.info("Configuration Persister initialization completed.");
+        }, "config-pusher");
         synchronized (autoCloseables) {
-            autoCloseables.add(new AutoCloseable() {
-                @Override
-                public void close() {
-                    pushingThread.interrupt();
-                }
-            });
+            autoCloseables.add(() -> pushingThread.interrupt());
         }
         pushingThread.setDaemon(true);
         pushingThread.start();
