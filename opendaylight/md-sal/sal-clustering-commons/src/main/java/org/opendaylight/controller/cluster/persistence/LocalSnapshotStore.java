@@ -220,7 +220,7 @@ public class LocalSnapshotStore extends SnapshotStore {
 
         LOG.debug("Deleting files: {}", files);
 
-        files.forEach(file -> file.delete());
+        files.forEach(File::delete);
         return null;
     }
 
@@ -229,7 +229,7 @@ public class LocalSnapshotStore extends SnapshotStore {
 
         LOG.debug("Deleting files: {}", files);
 
-        files.forEach(file -> file.delete());
+        files.forEach(File::delete);
         return null;
     }
 
@@ -265,7 +265,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     private Collection<SnapshotMetadata> getSnapshotMetadatas(final String persistenceId,
             final SnapshotSelectionCriteria criteria) {
         return getSnapshotFiles(persistenceId).stream().flatMap(file -> toStream(extractMetadata(file)))
-                .filter(md -> criteria.matches(md)).collect(Collectors.toList());
+                .filter(criteria::matches).collect(Collectors.toList());
     }
 
     private static Stream<SnapshotMetadata> toStream(@Nullable final SnapshotMetadata md) {

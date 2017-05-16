@@ -73,7 +73,7 @@ public class MeteredBoundedMailbox implements MailboxType,
     }
 
     private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue) {
-        return () -> monitoredQueue.size();
+        return monitoredQueue::size;
     }
 
     private void registerQueueSizeMetric(String metricName, Gauge<Integer> metric) {
