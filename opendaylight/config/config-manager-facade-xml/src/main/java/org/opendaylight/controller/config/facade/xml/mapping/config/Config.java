@@ -145,17 +145,16 @@ public class Config {
 
         Map<String, Multimap<String, ModuleElementResolved>> retVal = Maps.newHashMap();
 
-        for (XmlElement moduleElement : moduleElements) {
-            ResolvingStrategy<ModuleElementResolved> resolvingStrategy = new ResolvingStrategy<ModuleElementResolved>() {
-                @Override
-                public ModuleElementResolved resolveElement(final ModuleConfig moduleMapping, final XmlElement moduleElement, final ServiceRegistryWrapper serviceTracker, final String instanceName, final String moduleNamespace, final EditStrategyType defaultStrategy) throws DocumentedException {
-                    return moduleMapping.fromXml(moduleElement, serviceTracker,
-                            instanceName, moduleNamespace, defaultStrategy, identityMap, enumResolver);
-                }
-            };
+        ResolvingStrategy<ModuleElementResolved> resolvingStrategy =
+                (moduleMapping, moduleElement, serviceTracker1, instanceName, moduleNamespace, defaultStrategy) ->
+                        moduleMapping.fromXml(
+                                moduleElement, serviceTracker1, instanceName, moduleNamespace, defaultStrategy,
+                                identityMap, enumResolver);
 
+        for (XmlElement moduleElement : moduleElements) {
             resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType, resolvingStrategy);
         }
+
         return retVal;
     }
 
@@ -169,22 +168,18 @@ public class Config {
 
         Map<String, Multimap<String, ModuleElementDefinition>> retVal = Maps.newHashMap();
 
-        for (XmlElement moduleElement : moduleElements) {
-            ResolvingStrategy<ModuleElementDefinition> resolvingStrategy = new ResolvingStrategy<ModuleElementDefinition>() {
-                @Override
-                public ModuleElementDefinition resolveElement(final ModuleConfig moduleMapping, final XmlElement moduleElement,
-                        final ServiceRegistryWrapper serviceTracker, final String instanceName, final String moduleNamespace,
-                        final EditStrategyType defaultStrategy) {
-                    // TODO: add check for conflicts between global and local
-                    // edit strategy
+        ResolvingStrategy<ModuleElementDefinition> resolvingStrategy =
+                (moduleMapping, moduleElement, serviceTracker1, instanceName, moduleNamespace, defaultStrategy) -> {
+                    // TODO: add check for conflicts between global and local edit strategy
                     String perInstanceEditStrategy = moduleElement.getAttribute(XmlMappingConstants.OPERATION_ATTR_KEY,
                             XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
                     return new ModuleElementDefinition(instanceName, perInstanceEditStrategy, defaultStrategy);
-                }
-            };
+                };
 
+        for (XmlElement moduleElement : moduleElements) {
             resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType, resolvingStrategy);
         }
+
         return retVal;
     }
 

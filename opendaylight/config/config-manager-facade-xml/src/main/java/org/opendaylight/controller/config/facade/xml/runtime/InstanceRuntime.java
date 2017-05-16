@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.facade.xml.runtime;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import java.util.Map;
@@ -47,24 +46,20 @@ public class InstanceRuntime {
     private Set<ObjectName> findChildren(ObjectName innerRootBean, Set<ObjectName> childRbeOns) {
         final Map<String, String> wantedProperties = innerRootBean.getKeyPropertyList();
 
-        return Sets.newHashSet(Collections2.filter(childRbeOns, new Predicate<ObjectName>() {
-
-            @Override
-            public boolean apply(ObjectName on) {
-                Map<String, String> localProperties = on.getKeyPropertyList();
-                for (Entry<String, String> propertyEntry : wantedProperties.entrySet()) {
-                    if (!localProperties.containsKey(propertyEntry.getKey())){
-                        return false;
-                    }
-                    if (!localProperties.get(propertyEntry.getKey()).equals(propertyEntry.getValue())){
-                        return false;
-                    }
-                    if (localProperties.size() <= wantedProperties.size()){
-                        return false;
-                    }
+        return Sets.newHashSet(Collections2.filter(childRbeOns, on -> {
+            Map<String, String> localProperties = on.getKeyPropertyList();
+            for (Entry<String, String> propertyEntry : wantedProperties.entrySet()) {
+                if (!localProperties.containsKey(propertyEntry.getKey())){
+                    return false;
                 }
-                return true;
+                if (!localProperties.get(propertyEntry.getKey()).equals(propertyEntry.getValue())){
+                    return false;
+                }
+                if (localProperties.size() <= wantedProperties.size()){
+                    return false;
+                }
             }
+            return true;
         }));
     }
 
@@ -73,15 +68,11 @@ public class InstanceRuntime {
      * as current root + one additional
      */
     private Set<ObjectName> getRootBeans(Set<ObjectName> childRbeOns, final String string, final int keyListSize) {
-        return Sets.newHashSet(Collections2.filter(childRbeOns, new Predicate<ObjectName>() {
-
-            @Override
-            public boolean apply(ObjectName on) {
-                if (on.getKeyPropertyList().size() != keyListSize + 1){
-                    return false;
-                }
-                return on.getKeyPropertyList().containsKey(string);
+        return Sets.newHashSet(Collections2.filter(childRbeOns, on -> {
+            if (on.getKeyPropertyList().size() != keyListSize + 1){
+                return false;
             }
+            return on.getKeyPropertyList().containsKey(string);
         }));
     }
 
