@@ -10,7 +10,6 @@ package org.opendaylight.protocol.framework;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -129,16 +128,13 @@ public final class TimedReconnectStrategy implements ReconnectStrategy {
         this.scheduled = true;
 
         // Schedule a task for the right time. It will also clear the flag.
-        return this.executor.schedule(new Callable<Void>() {
-            @Override
-            public Void call() throws TimeoutException {
-                synchronized (lock) {
-                    Preconditions.checkState(TimedReconnectStrategy.this.scheduled);
-                    TimedReconnectStrategy.this.scheduled = false;
-                }
-
-                return null;
+        return this.executor.schedule(() -> {
+            synchronized (lock) {
+                Preconditions.checkState(TimedReconnectStrategy.this.scheduled);
+                TimedReconnectStrategy.this.scheduled = false;
             }
+
+            return null;
         }, this.lastSleep, TimeUnit.MILLISECONDS);
     }
 
