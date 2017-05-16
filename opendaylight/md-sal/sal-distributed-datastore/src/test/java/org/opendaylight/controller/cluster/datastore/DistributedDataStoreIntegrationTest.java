@@ -363,28 +363,25 @@ public class DistributedDataStoreIntegrationTest {
                     final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
                     final AtomicReference<Exception> caughtEx = new AtomicReference<>();
                     final CountDownLatch txReady = new CountDownLatch(1);
-                    final Thread txThread = new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    final Thread txThread = new Thread(() -> {
+                        try {
+                            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-                                writeTx.merge(TestModel.OUTER_LIST_PATH,
-                                        ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+                            writeTx.merge(TestModel.OUTER_LIST_PATH,
+                                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
-                                writeTx.write(listEntryPath,
-                                        ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
+                            writeTx.write(listEntryPath,
+                                    ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
 
-                                writeTx.delete(listEntryPath);
+                            writeTx.delete(listEntryPath);
 
-                                txCohort.set(writeTx.ready());
-                            } catch (Exception e) {
-                                caughtEx.set(e);
-                            } finally {
-                                txReady.countDown();
-                            }
+                            txCohort.set(writeTx.ready());
+                        } catch (Exception e) {
+                            caughtEx.set(e);
+                        } finally {
+                            txReady.countDown();
                         }
-                    };
+                    });
 
                     txThread.start();
 
@@ -460,23 +457,20 @@ public class DistributedDataStoreIntegrationTest {
                             txReadFuture = new AtomicReference<>();
                     final AtomicReference<Exception> caughtEx = new AtomicReference<>();
                     final CountDownLatch txReadsDone = new CountDownLatch(1);
-                    final Thread txThread = new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                readWriteTx.write(TestModel.TEST_PATH,
-                                        ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    final Thread txThread = new Thread(() -> {
+                        try {
+                            readWriteTx.write(TestModel.TEST_PATH,
+                                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-                                txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
+                            txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
 
-                                txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
-                            } catch (Exception e) {
-                                caughtEx.set(e);
-                            } finally {
-                                txReadsDone.countDown();
-                            }
+                            txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
+                        } catch (Exception e) {
+                            caughtEx.set(e);
+                        } finally {
+                            txReadsDone.countDown();
                         }
-                    };
+                    });
 
                     txThread.start();
 

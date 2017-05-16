@@ -152,18 +152,15 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             final AtomicReference<Exception> caughtEx = new AtomicReference<>();
             final CountDownLatch write2Complete = new CountDownLatch(1);
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        writeTx2.write(TestModel.OUTER_LIST_PATH, writeNode2);
-                    } catch (Exception e) {
-                        caughtEx.set(e);
-                    } finally {
-                        write2Complete.countDown();
-                    }
+            new Thread(() -> {
+                try {
+                    writeTx2.write(TestModel.OUTER_LIST_PATH, writeNode2);
+                } catch (Exception e) {
+                    caughtEx.set(e);
+                } finally {
+                    write2Complete.countDown();
                 }
-            }.start();
+            }).start();
 
             assertEquals("Tx 2 write should've completed", true, write2Complete.await(5, TimeUnit.SECONDS));
 
@@ -224,18 +221,15 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             final AtomicReference<Exception> caughtEx = new AtomicReference<>();
             final CountDownLatch write2Complete = new CountDownLatch(1);
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        writeTx2.write(TestModel.OUTER_LIST_PATH, writeNode2);
-                    } catch (Exception e) {
-                        caughtEx.set(e);
-                    } finally {
-                        write2Complete.countDown();
-                    }
+            new Thread(() -> {
+                try {
+                    writeTx2.write(TestModel.OUTER_LIST_PATH, writeNode2);
+                } catch (Exception e) {
+                    caughtEx.set(e);
+                } finally {
+                    write2Complete.countDown();
                 }
-            }.start();
+            }).start();
 
             assertEquals("Tx 2 write should've completed", true, write2Complete.await(5, TimeUnit.SECONDS));
 

@@ -224,7 +224,7 @@ class CompositeDataTreeCohort {
 
         final Iterable<Object> results;
         try {
-            results = Await.result(Futures.sequence(Lists.transform(futures, e -> e.getValue()),
+            results = Await.result(Futures.sequence(Lists.transform(futures, Entry::getValue),
                 ExecutionContexts.global()), timeout.duration());
         } catch (TimeoutException e) {
             successfulFromPrevious = null;

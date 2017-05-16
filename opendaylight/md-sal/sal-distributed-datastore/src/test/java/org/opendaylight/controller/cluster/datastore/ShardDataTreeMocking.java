@@ -127,33 +127,25 @@ public final class ShardDataTreeMocking {
 
     @SuppressWarnings("unchecked")
     public static ShardDataTreeCohort failedCanCommit(final ShardDataTreeCohort mock) {
-        doAnswer(invocation -> {
-            return invokeFailure(invocation);
-        }).when(mock).canCommit(any(FutureCallback.class));
+        doAnswer(ShardDataTreeMocking::invokeFailure).when(mock).canCommit(any(FutureCallback.class));
         return mock;
     }
 
     @SuppressWarnings("unchecked")
     public static ShardDataTreeCohort failedPreCommit(final ShardDataTreeCohort mock) {
-        doAnswer(invocation -> {
-            return invokeFailure(invocation);
-        }).when(mock).preCommit(any(FutureCallback.class));
+        doAnswer(ShardDataTreeMocking::invokeFailure).when(mock).preCommit(any(FutureCallback.class));
         return mock;
     }
 
     @SuppressWarnings("unchecked")
     public static ShardDataTreeCohort failedCommit(final ShardDataTreeCohort mock) {
-        doAnswer(invocation -> {
-            return invokeFailure(invocation);
-        }).when(mock).commit(any(FutureCallback.class));
+        doAnswer(ShardDataTreeMocking::invokeFailure).when(mock).commit(any(FutureCallback.class));
         return mock;
     }
 
     @SuppressWarnings("unchecked")
     public static ShardDataTreeCohort successfulCanCommit(final ShardDataTreeCohort mock) {
-        doAnswer(invocation -> {
-            return invokeSuccess(invocation, null);
-        }).when(mock).canCommit(any(FutureCallback.class));
+        doAnswer(invocation -> invokeSuccess(invocation, null)).when(mock).canCommit(any(FutureCallback.class));
 
         return mock;
     }
@@ -165,9 +157,7 @@ public final class ShardDataTreeMocking {
     @SuppressWarnings("unchecked")
     public static ShardDataTreeCohort successfulPreCommit(final ShardDataTreeCohort mock,
             final DataTreeCandidate candidate) {
-        doAnswer(invocation -> {
-            return invokeSuccess(invocation, candidate);
-        }).when(mock).preCommit(any(FutureCallback.class));
+        doAnswer(invocation -> invokeSuccess(invocation, candidate)).when(mock).preCommit(any(FutureCallback.class));
 
         return mock;
     }
@@ -178,9 +168,7 @@ public final class ShardDataTreeMocking {
 
     @SuppressWarnings("unchecked")
     public static ShardDataTreeCohort successfulCommit(final ShardDataTreeCohort mock, final UnsignedLong index) {
-        doAnswer(invocation -> {
-            return invokeSuccess(invocation, index);
-        }).when(mock).commit(any(FutureCallback.class));
+        doAnswer(invocation -> invokeSuccess(invocation, index)).when(mock).commit(any(FutureCallback.class));
 
         return mock;
     }

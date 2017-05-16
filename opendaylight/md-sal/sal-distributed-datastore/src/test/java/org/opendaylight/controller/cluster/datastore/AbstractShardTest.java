@@ -206,9 +206,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             return null;
         }).when(mock).validate(any(DataTreeModification.class));
 
-        doAnswer(invocation -> {
-            return actual.prepare(invocation.getArgumentAt(0, DataTreeModification.class));
-        }).when(mock).prepare(any(DataTreeModification.class));
+        doAnswer(invocation -> actual.prepare(invocation.getArgumentAt(0, DataTreeModification.class))).when(
+                mock).prepare(any(DataTreeModification.class));
 
         doAnswer(invocation -> {
             actual.commit(invocation.getArgumentAt(0, DataTreeCandidate.class));
@@ -220,13 +219,9 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             return null;
         }).when(mock).setSchemaContext(any(SchemaContext.class));
 
-        doAnswer(invocation -> {
-            return actual.takeSnapshot();
-        }).when(mock).takeSnapshot();
+        doAnswer(invocation -> actual.takeSnapshot()).when(mock).takeSnapshot();
 
-        doAnswer(invocation -> {
-            return actual.getRootPath();
-        }).when(mock).getRootPath();
+        doAnswer(invocation -> actual.getRootPath()).when(mock).getRootPath();
 
         return mock;
     }

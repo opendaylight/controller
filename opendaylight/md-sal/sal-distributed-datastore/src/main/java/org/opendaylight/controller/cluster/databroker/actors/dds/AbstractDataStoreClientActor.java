@@ -24,7 +24,7 @@ import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
 public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
-    private static final Function1<ActorRef, ?> GET_CLIENT_FACTORY = ExplicitAsk.toScala(t -> new GetClientRequest(t));
+    private static final Function1<ActorRef, ?> GET_CLIENT_FACTORY = ExplicitAsk.toScala(GetClientRequest::new);
 
     private final ActorContext actorContext;
 

@@ -246,12 +246,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         final CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
                 futures.toArray(new CompletableFuture[futures.size()]));
 
-        combinedFuture.thenRun(() -> {
-            sender.tell(new Status.Success(null), noSender());
-        }).exceptionally(throwable -> {
-            sender.tell(new Status.Failure(throwable), self());
-            return null;
-        });
+        combinedFuture
+                .thenRun(() -> sender.tell(new Success(null), noSender()))
+                .exceptionally(throwable -> {
+                    sender.tell(new Status.Failure(throwable), self());
+                    return null;
+                });
     }
 
     private void onNotifyProducerCreated(final NotifyProducerCreated message) {

@@ -87,9 +87,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     final void doAbort() {
-        sendAbort(new AbortLocalTransactionRequest(identifier, localActor()), response -> {
-            LOG.debug("Transaction {} abort completed with {}", identifier, response);
-        });
+        sendAbort(new AbortLocalTransactionRequest(identifier, localActor()),
+            response -> LOG.debug("Transaction {} abort completed with {}", identifier, response));
     }
 
     @Override

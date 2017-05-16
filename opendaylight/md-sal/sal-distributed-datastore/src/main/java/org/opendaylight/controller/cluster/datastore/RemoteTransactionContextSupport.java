@@ -187,7 +187,7 @@ final class RemoteTransactionContextSupport {
 
                 getActorContext().getActorSystem().scheduler().scheduleOnce(
                     FiniteDuration.create(scheduleInterval, TimeUnit.MILLISECONDS),
-                    () -> tryFindPrimaryShard(), getActorContext().getClientDispatcher());
+                        this::tryFindPrimaryShard, getActorContext().getClientDispatcher());
                 return;
             }
         }
