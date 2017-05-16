@@ -27,13 +27,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
         @Override
         public BindingAwareBroker addingService(ServiceReference<BindingAwareBroker> reference) {
             broker = context.getService(reference);
-            mdActivationPool.execute(new Runnable() {
-
-                @Override
-                public void run() {
-                    onBrokerAvailable(broker, context);
-                }
-            });
+            mdActivationPool.execute(() -> onBrokerAvailable(broker, context));
             return broker;
         }
 
@@ -46,13 +40,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
             broker = context.getService(reference);
-            mdActivationPool.execute(new Runnable() {
-
-                @Override
-                public void run() {
-                    onBrokerRemoved(broker, context);
-                }
-            });
+            mdActivationPool.execute(() -> onBrokerRemoved(broker, context));
         }
 
     };
