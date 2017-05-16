@@ -16,7 +16,6 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
-import org.opendaylight.controller.config.persist.storage.file.xml.FeatureListProvider;
 import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -50,12 +49,7 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
                 LOG.error("Error listing installed features", e);
             }
 
-            currentPersister.get().setFeaturesService(new FeatureListProvider() {
-                @Override
-                public Set<String> listFeatures() {
-                    return installedFeatureIds;
-                }
-            });
+            currentPersister.get().setFeaturesService(() -> installedFeatureIds);
         }
         ConfigFeaturesListener configFeaturesListener = new ConfigFeaturesListener(configPusher, featureService);
         registration = bc.registerService(FeaturesListener.class.getCanonicalName(), configFeaturesListener, null);
