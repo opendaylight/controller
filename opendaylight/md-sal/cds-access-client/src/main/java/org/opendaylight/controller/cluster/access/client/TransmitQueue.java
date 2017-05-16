@@ -133,19 +133,34 @@ abstract class TransmitQueue {
         tracker.closeTask(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
 
         // We have freed up a slot, try to transmit something
-        int toSend = canTransmitCount(inflight.size());
-        while (toSend > 0) {
-            final ConnectionEntry e = pending.poll();
-            if (e == null) {
-                break;
-            }
-
-            LOG.debug("Transmitting entry {}", e);
-            transmit(e, now);
-            toSend--;
+        final int toSend = canTransmitCount(inflight.size());
+        if (toSend > 0 && !pending.isEmpty()) {
+            transmitEntries(toSend, now);
         }
 
         return Optional.of(entry);
+    }
+
+    private void transmitEntries(final int maxTransmit, final long now) {
+        for (int i = 0; i < maxTransmit; ++i) {
+            final ConnectionEntry e = pending.poll();
+            if (e == null) {
+                LOG.debug("Queue {} transmitted {} requests", this, i);
+                return;
+            }
+
+            transmitEntry(e, now);
+        }
+
+        LOG.debug("Queue {} transmitted {} requests", this, maxTransmit);
+    }
+
+    private void transmitEntry(final ConnectionEntry entry, final long now) {
+        LOG.debug("Queue {} transmitting entry {}", entry);
+        // We are not thread-safe and are supposed to be externally-guarded,
+        // hence send-before-record should be fine.
+        // This needs to be revisited if the external guards are lowered.
+        inflight.addLast(transmit(entry, now));
     }
 
     /**
@@ -164,16 +179,25 @@ abstract class TransmitQueue {
 
         // Reserve an entry before we do anything that can fail
         final long delay = tracker.openTask(now);
-        if (canTransmitCount(inflight.size()) <= 0) {
+
+        /*
+         * This is defensive to make sure we do not do the wrong thing here and reorder messages if we ever happen
+         * to have available send slots and non-empty pending queue.
+         */
+        final int toSend = canTransmitCount(inflight.size());
+        if (toSend < 0) {
             LOG.trace("Queue is at capacity, delayed sending of request {}", entry.getRequest());
-            pending.add(entry);
-        } else {
-            // We are not thread-safe and are supposed to be externally-guarded,
-            // hence send-before-record should be fine.
-            // This needs to be revisited if the external guards are lowered.
-            inflight.offer(transmit(entry, now));
-            LOG.debug("Sent request {} on queue {}", entry.getRequest(), this);
+            pending.addLast(entry);
+            return delay;
         }
+
+        if (pending.isEmpty()) {
+            transmitEntry(entry, now);
+            return delay;
+        }
+
+        pending.addLast(entry);
+        transmitEntries(toSend, now);
         return delay;
     }
 
