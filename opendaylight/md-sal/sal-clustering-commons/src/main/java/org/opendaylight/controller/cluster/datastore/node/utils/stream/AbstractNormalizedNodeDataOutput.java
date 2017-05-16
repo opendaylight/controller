@@ -211,7 +211,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
 
-        LOG.debug("Starting a new container node");
+        LOG.trace("Starting a new container node");
 
         startNode(name.getNodeType(), NodeTypes.CONTAINER_NODE);
     }
@@ -268,7 +268,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     public void startOrderedMapNode(final NodeIdentifier name, final int childSizeHint)
             throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new ordered map node");
+        LOG.trace("Starting a new ordered map node");
 
         startNode(name.getNodeType(), NodeTypes.ORDERED_MAP_NODE);
     }
