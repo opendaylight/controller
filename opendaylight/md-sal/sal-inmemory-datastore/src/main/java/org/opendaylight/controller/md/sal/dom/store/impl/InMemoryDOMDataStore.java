@@ -60,14 +60,10 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
 
     private static final Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> DCL_NOTIFICATION_MGR_INVOKER =
-            new Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent>() {
-                @Override
-                public void invokeListener(final DataChangeListenerRegistration<?> listener,
-                                           final DOMImmutableDataChangeEvent notification ) {
-                    final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> inst = listener.getInstance();
-                    if (inst != null) {
-                        inst.onDataChanged(notification);
-                    }
+            (listener, notification) -> {
+                final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> inst = listener.getInstance();
+                if (inst != null) {
+                    inst.onDataChanged(notification);
                 }
             };
 

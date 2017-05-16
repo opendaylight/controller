@@ -29,14 +29,11 @@ import org.slf4j.LoggerFactory;
 
 final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChangePublisher {
     private static final Invoker<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> MANAGER_INVOKER =
-            new Invoker<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate>() {
-                @Override
-                public void invokeListener(final AbstractDOMDataTreeChangeListenerRegistration<?> listener, final DataTreeCandidate notification) {
-                    // FIXME: this is inefficient, as we could grab the entire queue for the listener and post it
-                    final DOMDataTreeChangeListener inst = listener.getInstance();
-                    if (inst != null) {
-                        inst.onDataTreeChanged(Collections.singletonList(notification));
-                    }
+            (listener, notification) -> {
+                // FIXME: this is inefficient, as we could grab the entire queue for the listener and post it
+                final DOMDataTreeChangeListener inst = listener.getInstance();
+                if (inst != null) {
+                    inst.onDataTreeChanged(Collections.singletonList(notification));
                 }
             };
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMStoreTreeChangePublisher.class);

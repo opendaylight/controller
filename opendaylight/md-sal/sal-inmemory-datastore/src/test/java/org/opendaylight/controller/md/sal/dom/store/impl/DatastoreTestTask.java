@@ -169,32 +169,15 @@ public class DatastoreTestTask {
 
     public static final WriteTransactionCustomizer simpleWrite(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
-        return new WriteTransactionCustomizer() {
-
-            @Override
-            public void customize(final DOMStoreReadWriteTransaction tx) {
-                tx.write(path, data);
-            }
-        };
+        return tx -> tx.write(path, data);
     }
 
     public static final WriteTransactionCustomizer simpleMerge(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
-        return new WriteTransactionCustomizer() {
-
-            @Override
-            public void customize(final DOMStoreReadWriteTransaction tx) {
-                tx.merge(path, data);
-            }
-        };
+        return tx -> tx.merge(path, data);
     }
 
     public static final WriteTransactionCustomizer simpleDelete(final YangInstanceIdentifier path) {
-        return new WriteTransactionCustomizer() {
-            @Override
-            public void customize(final DOMStoreReadWriteTransaction tx) {
-                tx.delete(path);
-            }
-        };
+        return tx -> tx.delete(path);
     }
 }

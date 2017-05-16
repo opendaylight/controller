@@ -10,8 +10,6 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.WriteTransactionCustomizer;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 
 /**
  * Base template for a test suite for testing DataChangeListener functionality.
@@ -39,12 +37,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
     @Test
     public final void existingTopWriteSibling() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO)).test(
-                new WriteTransactionCustomizer() {
-                    @Override
-                    public void customize(final DOMStoreReadWriteTransaction tx) {
-                        tx.write(path(FOO_SIBLING), topLevelList(FOO_SIBLING).build());
-                    }
-                });
+                tx -> tx.write(path(FOO_SIBLING), topLevelList(FOO_SIBLING).build()));
         customizeTask(task);
         task.run();
         existingTopWriteSibling(task);
@@ -56,12 +49,9 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
     @Test
     public final void existingTopWriteTwoNested() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO)).test(
-                new WriteTransactionCustomizer() {
-                    @Override
-                    public void customize(final DOMStoreReadWriteTransaction tx) {
-                        tx.write(path(FOO,BAR), nestedList(BAR).build());
-                        tx.write(path(FOO,BAZ), nestedList(BAZ).build());
-                    }
+                tx -> {
+                    tx.write(path(FOO,BAR), nestedList(BAR).build());
+                    tx.write(path(FOO,BAZ), nestedList(BAZ).build());
                 });
         customizeTask(task);
         task.run();
@@ -74,12 +64,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
     @Test
     public final void existingOneNestedWriteAdditionalNested() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO, BAR)).test(
-                new WriteTransactionCustomizer() {
-                    @Override
-                    public void customize(final DOMStoreReadWriteTransaction tx) {
-                        tx.write(path(FOO,BAZ), nestedList(BAZ).build());
-                    }
-                });
+                tx -> tx.write(path(FOO,BAZ), nestedList(BAZ).build()));
         customizeTask(task);
         task.run();
         existingOneNestedWriteAdditionalNested(task);
