@@ -142,12 +142,9 @@ public class XmlDirectoryPersister implements Persister {
     private static FilenameFilter getFilter(final Set<String>fileExtensions) {
         checkArgument(fileExtensions.isEmpty() == false, "No file extension provided", fileExtensions);
 
-        return new FilenameFilter() {
-            @Override
-            public boolean accept(final File dir, final String name) {
-                String ext = Files.getFileExtension(name);
-                return fileExtensions.contains(ext);
-            }
+        return (dir, name) -> {
+            String ext = Files.getFileExtension(name);
+            return fileExtensions.contains(ext);
         };
     }
 
