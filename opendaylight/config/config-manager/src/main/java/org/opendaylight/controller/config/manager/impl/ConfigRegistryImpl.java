@@ -47,7 +47,6 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleF
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
-import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
@@ -196,12 +195,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         versionCounter++;
         final String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
 
-        TransactionJMXRegistratorFactory factory = new TransactionJMXRegistratorFactory() {
-            @Override
-            public TransactionJMXRegistrator create() {
-                return baseJMXRegistrator.createTransactionJMXRegistrator(transactionName);
-            }
-        };
+        TransactionJMXRegistratorFactory factory =
+                () -> baseJMXRegistrator.createTransactionJMXRegistrator(transactionName);
 
         Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = new HashMap<>(
                 resolver.getAllFactories());
