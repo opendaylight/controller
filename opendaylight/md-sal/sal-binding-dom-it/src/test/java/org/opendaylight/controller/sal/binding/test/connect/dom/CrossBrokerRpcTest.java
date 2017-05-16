@@ -12,16 +12,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -44,7 +41,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class CrossBrokerRpcTest {
@@ -119,13 +115,9 @@ public class CrossBrokerRpcTest {
         builder.setAnswer("open");
         final KnockKnockOutput output = builder.build();
 
-        provisionRegistry.registerRpcImplementation(new DOMRpcImplementation() {
-
-            @Override
-            public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
-                ContainerNode result = testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(output);
-                return Futures.<DOMRpcResult, DOMRpcException>immediateCheckedFuture(new DefaultDOMRpcResult(result));
-            }
+        provisionRegistry.registerRpcImplementation((rpc, input) -> {
+            ContainerNode result = testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(output);
+            return Futures.immediateCheckedFuture(new DefaultDOMRpcResult(result));
         }, DOMRpcIdentifier.create(KNOCK_KNOCK_PATH, BI_NODE_C_ID));
 
         OpendaylightOfMigrationTestModelService baKnockInvoker =
