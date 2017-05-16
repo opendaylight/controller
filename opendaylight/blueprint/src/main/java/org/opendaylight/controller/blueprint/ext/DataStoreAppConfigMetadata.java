@@ -150,7 +150,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         DataTreeIdentifier<DataObject> dataTreeId = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
                 bindingContext.appConfigPath);
         appConfigChangeListenerReg = dataBroker.registerDataTreeChangeListener(dataTreeId,
-                (ClusteredDataTreeChangeListener<DataObject>) changes -> onAppConfigChanged(changes));
+                (ClusteredDataTreeChangeListener<DataObject>) this::onAppConfigChanged);
 
         readInitialAppConfig(dataBroker);
     }
