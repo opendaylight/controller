@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
@@ -64,13 +63,10 @@ public class NotificationIT extends AbstractIT {
 
         LOG.info("The registration of the Consumer 1. It retrieves Notification Service "
                 + "from MD-SAL and registers OpendaylightTestNotificationListener as notification listener");
-        BindingAwareConsumer consumer1 = new BindingAwareConsumer() {
-            @Override
-            public void onSessionInitialized(ConsumerContext session) {
-                NotificationService notificationService = session.getSALService(NotificationService.class);
-                assertNotNull(notificationService);
-                listener1Reg = notificationService.registerNotificationListener(listener1);
-            }
+        BindingAwareConsumer consumer1 = session -> {
+            NotificationService notificationService = session.getSALService(NotificationService.class);
+            assertNotNull(notificationService);
+            listener1Reg = notificationService.registerNotificationListener(listener1);
         };
         // registerConsumer method calls onSessionInitialized method above
         broker.registerConsumer(consumer1);
@@ -93,14 +89,8 @@ public class NotificationIT extends AbstractIT {
 
         LOG.info("The registration of the Consumer 2. SalFlowListener is registered "
                 + "registered as notification listener.");
-        BindingAwareProvider provider = new BindingAwareProvider() {
-
-            @Override
-            public void onSessionInitiated(ProviderContext session) {
-                listener2Reg = session.getSALService(NotificationProviderService.class).registerNotificationListener(
-                        listener2);
-            }
-        };
+        BindingAwareProvider provider = session -> listener2Reg = session.getSALService(NotificationProviderService.class).registerNotificationListener(
+                listener2);
 
         // registerConsumer method calls onSessionInitialized method above
         broker.registerProvider(provider);
