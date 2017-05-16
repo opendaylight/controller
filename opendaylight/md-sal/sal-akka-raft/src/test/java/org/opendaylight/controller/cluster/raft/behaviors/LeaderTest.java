@@ -741,7 +741,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().removeFrom(0);
 
         AtomicReference<java.util.Optional<OutputStream>> installSnapshotStream = new AtomicReference<>();
-        actorContext.setCreateSnapshotProcedure(out -> installSnapshotStream.set(out));
+        actorContext.setCreateSnapshotProcedure(installSnapshotStream::set);
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
