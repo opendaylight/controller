@@ -151,14 +151,14 @@ public class Config {
 
         Map<String, Multimap<String, ModuleElementResolved>> retVal = Maps.newHashMap();
 
-        for (XmlElement moduleElement : moduleElements) {
-            ResolvingStrategy<ModuleElementResolved> resolvingStrategy = (moduleMapping, moduleElement1,
-                    serviceTracker1, instanceName, moduleNamespace,
-                    defaultStrategy) -> moduleMapping.fromXml(moduleElement1, serviceTracker1, instanceName,
-                            moduleNamespace, defaultStrategy, identityMap, enumResolver);
+        ResolvingStrategy<ModuleElementResolved> resolvingStrategy = (moduleMapping, moduleElement, serviceTracker1,
+                instanceName, moduleNamespace, defaultStrategy) -> moduleMapping.fromXml(moduleElement, serviceTracker1,
+                        instanceName, moduleNamespace, defaultStrategy, identityMap, enumResolver);
 
+        for (XmlElement moduleElement : moduleElements) {
             resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType, resolvingStrategy);
         }
+
         return retVal;
     }
 
@@ -174,18 +174,19 @@ public class Config {
 
         Map<String, Multimap<String, ModuleElementDefinition>> retVal = Maps.newHashMap();
 
-        for (XmlElement moduleElement : moduleElements) {
-            ResolvingStrategy<ModuleElementDefinition> resolvingStrategy = (moduleMapping, moduleElement1,
-                    serviceTracker1, instanceName, moduleNamespace, defaultStrategy) -> {
-                // TODO: add check for conflicts between global and local
-                // edit strategy
-                String perInstanceEditStrategy = moduleElement1.getAttribute(XmlMappingConstants.OPERATION_ATTR_KEY,
-                        XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-                return new ModuleElementDefinition(instanceName, perInstanceEditStrategy, defaultStrategy);
-            };
+        ResolvingStrategy<ModuleElementDefinition> resolvingStrategy = (moduleMapping, moduleElement, serviceTracker1,
+                instanceName, moduleNamespace, defaultStrategy) -> {
+            // TODO: add check for conflicts between global and local edit
+            // strategy
+            String perInstanceEditStrategy = moduleElement.getAttribute(XmlMappingConstants.OPERATION_ATTR_KEY,
+                    XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+            return new ModuleElementDefinition(instanceName, perInstanceEditStrategy, defaultStrategy);
+        };
 
+        for (XmlElement moduleElement : moduleElements) {
             resolveModule(retVal, serviceTracker, moduleElement, defaultEditStrategyType, resolvingStrategy);
         }
+
         return retVal;
     }
 
