@@ -126,26 +126,12 @@ public class ObjectNameUtilTest {
     public void testChecks() throws Exception {
         final ObjectName on = ObjectNameUtil.createON("customDomain", ObjectNameUtil.TYPE_KEY, ObjectNameUtil.TYPE_MODULE);
 
-        assertFailure(new Runnable() {
-            @Override
-            public void run() {
-                ObjectNameUtil.checkTypeOneOf(on, ObjectNameUtil.TYPE_RUNTIME_BEAN, ObjectNameUtil.TYPE_CONFIG_TRANSACTION);
-            }
-        }, IllegalArgumentException.class);
+        assertFailure(
+                () -> ObjectNameUtil.checkTypeOneOf(on, ObjectNameUtil.TYPE_RUNTIME_BEAN, ObjectNameUtil.TYPE_CONFIG_TRANSACTION), IllegalArgumentException.class);
 
-        assertFailure(new Runnable() {
-            @Override
-            public void run() {
-                ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_RUNTIME_BEAN);
-            }
-        }, IllegalArgumentException.class);
+        assertFailure(() -> ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_RUNTIME_BEAN), IllegalArgumentException.class);
 
-        assertFailure(new Runnable() {
-            @Override
-            public void run() {
-                ObjectNameUtil.checkDomain(on);
-            }
-        }, IllegalArgumentException.class);
+        assertFailure(() -> ObjectNameUtil.checkDomain(on), IllegalArgumentException.class);
     }
 
     private void assertFailure(final Runnable test, final Class<? extends Exception> ex) {
