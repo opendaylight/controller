@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.persist.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Collections2;
 import java.io.IOException;
@@ -23,7 +22,6 @@ import java.util.SortedSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 import javax.management.MBeanServerConnection;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -212,12 +210,7 @@ public class ConfigPusherImpl implements ConfigPusher {
     }
 
     static Set<String> transformCapabilities(final Set<Capability> currentCapabilities) {
-        return new HashSet<>(Collections2.transform(currentCapabilities, new Function<Capability, String>() {
-            @Override
-            public String apply(@Nonnull final Capability input) {
-                return input.getCapabilityUri();
-            }
-        }));
+        return new HashSet<>(Collections2.transform(currentCapabilities, Capability::getCapabilityUri));
     }
 
     static class ConfigPusherException extends Exception {
