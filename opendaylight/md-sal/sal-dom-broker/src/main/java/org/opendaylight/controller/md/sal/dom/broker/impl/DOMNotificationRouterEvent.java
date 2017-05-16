@@ -24,12 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 final class DOMNotificationRouterEvent {
     private static final Logger LOG = LoggerFactory.getLogger(DOMNotificationRouterEvent.class);
-    public static final EventFactory<DOMNotificationRouterEvent> FACTORY = new EventFactory<DOMNotificationRouterEvent>() {
-        @Override
-        public DOMNotificationRouterEvent newInstance() {
-            return new DOMNotificationRouterEvent();
-        }
-    };
+    public static final EventFactory<DOMNotificationRouterEvent> FACTORY = DOMNotificationRouterEvent::new;
 
     private Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers;
     private DOMNotification notification;
