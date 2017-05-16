@@ -8,7 +8,6 @@
 package org.opendaylight.protocol.framework;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -61,15 +60,12 @@ public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSes
      */
     protected final void sendMessage(final M msg) {
         this.channel.writeAndFlush(msg).addListener(
-                new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(final ChannelFuture f) {
-                        if (!f.isSuccess()) {
-                            LOG.info("Failed to send message {}", msg, f.cause());
-                            negotiationFailed(f.cause());
-                        } else {
-                            LOG.trace("Message {} sent to socket", msg);
-                        }
+                (ChannelFutureListener) f -> {
+                    if (!f.isSuccess()) {
+                        LOG.info("Failed to send message {}", msg, f.cause());
+                        negotiationFailed(f.cause());
+                    } else {
+                        LOG.trace("Message {} sent to socket", msg);
                     }
                 });
     }

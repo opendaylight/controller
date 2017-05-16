@@ -11,12 +11,10 @@ import com.google.common.base.Preconditions;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,24 +44,18 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
         final ReconnectStrategy cs = this.strategyFactory.createReconnectStrategy();
 
         // Set up a client with pre-configured bootstrap, but add a closed channel handler into the pipeline to support reconnect attempts
-        pending = this.dispatcher.createClient(this.address, cs, b, new AbstractDispatcher.PipelineInitializer<S>() {
-            @Override
-            public void initializeChannel(final SocketChannel channel, final Promise<S> promise) {
-                initializer.initializeChannel(channel, promise);
-                // add closed channel handler
-                // This handler has to be added as last channel handler and the channel inactive event has to be caught by it
-                // Handlers in front of it can react to channelInactive event, but have to forward the event or the reconnect will not work
-                // This handler is last so all handlers in front of it can handle channel inactive (to e.g. resource cleanup) before a new connection is started
-                channel.pipeline().addLast(new ClosedChannelHandler(ReconnectPromise.this));
-            }
+        pending = this.dispatcher.createClient(this.address, cs, b, (channel, promise) -> {
+            initializer.initializeChannel(channel, promise);
+            // add closed channel handler
+            // This handler has to be added as last channel handler and the channel inactive event has to be caught by it
+            // Handlers in front of it can react to channelInactive event, but have to forward the event or the reconnect will not work
+            // This handler is last so all handlers in front of it can handle channel inactive (to e.g. resource cleanup) before a new connection is started
+            channel.pipeline().addLast(new ClosedChannelHandler(ReconnectPromise.this));
         });
 
-        pending.addListener(new GenericFutureListener<Future<Object>>() {
-            @Override
-            public void operationComplete(final Future<Object> future) throws Exception {
-                if (!future.isSuccess()) {
-                    ReconnectPromise.this.setFailure(future.cause());
-                }
+        pending.addListener((GenericFutureListener<Future<Object>>) future -> {
+            if (!future.isSuccess()) {
+                ReconnectPromise.this.setFailure(future.cause());
             }
         });
     }

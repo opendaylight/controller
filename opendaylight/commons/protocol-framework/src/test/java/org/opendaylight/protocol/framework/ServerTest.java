@@ -17,7 +17,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.DefaultPromise;
@@ -76,13 +75,7 @@ public class ServerTest {
 
         final ReconnectStrategy mockReconnectStrategy = getMockedReconnectStrategy();
 
-        this.clientDispatcher.createClient(this.serverAddress,
-                mockReconnectStrategy, new SessionListenerFactory<SimpleSessionListener>() {
-                    @Override
-                    public SimpleSessionListener getSessionListener() {
-                        return new SimpleSessionListener();
-                    }
-                });
+        this.clientDispatcher.createClient(this.serverAddress, mockReconnectStrategy, SimpleSessionListener::new);
 
         Mockito.verify(mockReconnectStrategy, timeout(5000).atLeast(2)).scheduleReconnect(any(Throwable.class));
     }
@@ -93,25 +86,14 @@ public class ServerTest {
 
         final ReconnectStrategy mockReconnectStrategy = getMockedReconnectStrategy();
 
-        this.clientDispatcher.createClient(this.serverAddress,
-                mockReconnectStrategy, new SessionListenerFactory<SimpleSessionListener>() {
-                    @Override
-                    public SimpleSessionListener getSessionListener() {
-                        return new SimpleSessionListener();
-                    }
-                });
+        this.clientDispatcher.createClient(this.serverAddress, mockReconnectStrategy, SimpleSessionListener::new);
 
         Mockito.verify(mockReconnectStrategy, timeout(5000).atLeast(2)).scheduleReconnect(any(Throwable.class));
 
         final Promise<Boolean> p = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
         this.dispatcher = getServerDispatcher(p);
 
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+        this.server = this.dispatcher.createServer(this.serverAddress, SimpleSessionListener::new);
 
         this.server.get();
 
@@ -124,12 +106,7 @@ public class ServerTest {
 
         this.dispatcher = getServerDispatcher(p);
 
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+        this.server = this.dispatcher.createServer(this.serverAddress, SimpleSessionListener::new);
 
         this.server.get();
 
@@ -137,12 +114,7 @@ public class ServerTest {
 
         final ReconnectStrategy reconnectStrategy = getMockedReconnectStrategy();
         this.session = this.clientDispatcher.createClient(this.serverAddress,
-                reconnectStrategy, new SessionListenerFactory<SimpleSessionListener>() {
-                    @Override
-                    public SimpleSessionListener getSessionListener() {
-                        return new SimpleSessionListener();
-                    }
-                }).get(6, TimeUnit.SECONDS);
+                reconnectStrategy, SimpleSessionListener::new).get(6, TimeUnit.SECONDS);
 
         assertEquals(true, p.get(3, TimeUnit.SECONDS));
 
@@ -158,12 +130,7 @@ public class ServerTest {
 
         this.dispatcher = getServerDispatcher(p);
 
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+        this.server = this.dispatcher.createServer(this.serverAddress, SimpleSessionListener::new);
 
         this.server.get();
 
@@ -174,12 +141,7 @@ public class ServerTest {
         doReturn(reconnectStrategy).when(reconnectStrategyFactory).createReconnectStrategy();
 
         this.clientDispatcher.createReconnectingClient(this.serverAddress,
-                reconnectStrategyFactory, new SessionListenerFactory<SimpleSessionListener>() {
-                    @Override
-                    public SimpleSessionListener getSessionListener() {
-                        return new SimpleSessionListener();
-                    }
-                });
+                reconnectStrategyFactory, SimpleSessionListener::new);
 
         assertEquals(true, p.get(3, TimeUnit.SECONDS));
         shutdownServer();
@@ -193,24 +155,15 @@ public class ServerTest {
 
         this.dispatcher = getServerDispatcher(p);
 
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+        this.server = this.dispatcher.createServer(this.serverAddress, SimpleSessionListener::new);
 
         this.server.get();
 
         this.clientDispatcher = getClientDispatcher();
 
         this.session = this.clientDispatcher.createClient(this.serverAddress,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000), new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        }).get(6, TimeUnit.SECONDS);
+                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000), SimpleSessionListener::new).get(6,
+                TimeUnit.SECONDS);
 
         assertEquals(true, p.get(3, TimeUnit.SECONDS));
     }
@@ -221,32 +174,18 @@ public class ServerTest {
 
         this.dispatcher = getServerDispatcher(p);
 
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+        this.server = this.dispatcher.createServer(this.serverAddress, SimpleSessionListener::new);
 
         this.server.get();
 
         this.clientDispatcher = getClientDispatcher();
 
         this.session = this.clientDispatcher.createClient(this.serverAddress,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000), new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        }).get(6, TimeUnit.SECONDS);
+                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000), SimpleSessionListener::new).get(6,
+                TimeUnit.SECONDS);
 
         final Future<?> session = this.clientDispatcher.createClient(this.serverAddress,
-                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000), new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+                new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000), SimpleSessionListener::new);
         assertFalse(session.isSuccess());
     }
 
@@ -256,40 +195,24 @@ public class ServerTest {
 
         this.dispatcher = getServerDispatcher(p);
 
-        this.server = this.dispatcher.createServer(this.serverAddress, new SessionListenerFactory<SimpleSessionListener>() {
-            @Override
-            public SimpleSessionListener getSessionListener() {
-                return new SimpleSessionListener();
-            }
-        });
+        this.server = this.dispatcher.createServer(this.serverAddress, SimpleSessionListener::new);
 
         this.server.get();
 
-        this.clientDispatcher = new SimpleDispatcher(new SessionNegotiatorFactory<SimpleMessage, SimpleSession, SimpleSessionListener>() {
-            @Override
-            public SessionNegotiator<SimpleSession> getSessionNegotiator(final SessionListenerFactory<SimpleSessionListener> factory,
-                                                                         final Channel channel, final Promise<SimpleSession> promise) {
-
-                return new SimpleSessionNegotiator(promise, channel) {
+        this.clientDispatcher = new SimpleDispatcher(
+                (factory, channel, promise) -> new SimpleSessionNegotiator(promise, channel) {
                     @Override
                     protected void startNegotiation() throws Exception {
                         negotiationFailed(new IllegalStateException("Negotiation failed"));
                     }
-                };
-            }
-        }, new DefaultPromise<>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
+                }, new DefaultPromise<>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
 
         final ReconnectStrategyFactory reconnectStrategyFactory = mock(ReconnectStrategyFactory.class);
         final ReconnectStrategy reconnectStrategy = getMockedReconnectStrategy();
         doReturn(reconnectStrategy).when(reconnectStrategyFactory).createReconnectStrategy();
 
         this.clientDispatcher.createReconnectingClient(this.serverAddress,
-                reconnectStrategyFactory, new SessionListenerFactory<SimpleSessionListener>() {
-                    @Override
-                    public SimpleSessionListener getSessionListener() {
-                        return new SimpleSessionListener();
-                    }
-                });
+                reconnectStrategyFactory, SimpleSessionListener::new);
 
 
         // Reconnect strategy should be consulted at least twice, for initial connect and reconnect attempts after drop
@@ -297,13 +220,7 @@ public class ServerTest {
     }
 
     private SimpleDispatcher getClientDispatcher() {
-        return new SimpleDispatcher(new SessionNegotiatorFactory<SimpleMessage, SimpleSession, SimpleSessionListener>() {
-            @Override
-            public SessionNegotiator<SimpleSession> getSessionNegotiator(final SessionListenerFactory<SimpleSessionListener> factory,
-                                                                         final Channel channel, final Promise<SimpleSession> promise) {
-                return new SimpleSessionNegotiator(promise, channel);
-            }
-        }, new DefaultPromise<>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
+        return new SimpleDispatcher((factory, channel, promise) -> new SimpleSessionNegotiator(promise, channel), new DefaultPromise<>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
     }
 
     private ReconnectStrategy getMockedReconnectStrategy() throws Exception {
@@ -324,14 +241,9 @@ public class ServerTest {
     }
 
     private SimpleDispatcher getServerDispatcher(final Promise<Boolean> p) {
-        return new SimpleDispatcher(new SessionNegotiatorFactory<SimpleMessage, SimpleSession, SimpleSessionListener>() {
-
-            @Override
-            public SessionNegotiator<SimpleSession> getSessionNegotiator(final SessionListenerFactory<SimpleSessionListener> factory,
-                                                                         final Channel channel, final Promise<SimpleSession> promise) {
-                p.setSuccess(true);
-                return new SimpleSessionNegotiator(promise, channel);
-            }
+        return new SimpleDispatcher((factory, channel, promise) -> {
+            p.setSuccess(true);
+            return new SimpleSessionNegotiator(promise, channel);
         }, null, serverLoopGroup);
     }
 
