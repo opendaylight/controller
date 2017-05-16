@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNull;
 import java.util.concurrent.Future;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -42,13 +41,7 @@ public class DataServiceIT extends AbstractIT {
      */
     @Test
     public void test() throws Exception {
-        BindingAwareConsumer consumer = new BindingAwareConsumer() {
-
-            @Override
-            public void onSessionInitialized(final ConsumerContext session) {
-                consumerDataService = session.getSALService(DataBrokerService.class);
-            }
-        };
+        BindingAwareConsumer consumer = session -> consumerDataService = session.getSALService(DataBrokerService.class);
 
         broker.registerConsumer(consumer);
 
