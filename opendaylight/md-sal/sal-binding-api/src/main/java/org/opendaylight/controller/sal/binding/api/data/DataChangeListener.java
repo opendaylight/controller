@@ -21,5 +21,5 @@ public interface DataChangeListener extends
         org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<InstanceIdentifier<? extends DataObject>, DataObject> {
 
     @Override
-    void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change);
+    void onDataChanged(DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> change);
 }
