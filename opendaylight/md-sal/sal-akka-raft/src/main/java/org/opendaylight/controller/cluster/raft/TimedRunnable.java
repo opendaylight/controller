@@ -30,7 +30,7 @@ abstract class TimedRunnable implements Runnable {
         Preconditions.checkNotNull(timeout);
         Preconditions.checkNotNull(actor);
         cancelTimer = actor.getContext().system().scheduler().scheduleOnce(timeout, actor.self(),
-                (Runnable) () -> cancel(), actor.getContext().system().dispatcher(), actor.self());
+                (Runnable) this::cancel, actor.getContext().system().dispatcher(), actor.self());
     }
 
     @Override
