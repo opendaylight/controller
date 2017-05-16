@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
@@ -86,12 +85,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         DataProviderService dataBroker = testContext.getBindingDataBroker();
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
-        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
-                eventFuture.set(dataChangeEvent);
-            }
-        });
+        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, eventFuture::set);
 
         DataModificationTransaction transaction = dataBroker.beginTransaction();
         transaction.putOperationalData(NODE_0_CWU_PATH, CWU);
@@ -110,12 +104,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         DataProviderService dataBroker = testContext.getBindingDataBroker();
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
-        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
-                eventFuture.set(dataChangeEvent);
-            }
-        });
+        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, eventFuture::set);
 
         DataModificationTransaction cwuTx = dataBroker.beginTransaction();
         cwuTx.putOperationalData(NODE_0_CWU_PATH, CWU);
@@ -147,13 +136,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
         // We registered DataChangeListener
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
-        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
-                eventFuture.set(dataChangeEvent);
-            }
-        });
+        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, eventFuture::set);
         assertFalse(eventFuture.isDone());
 
         DataModificationTransaction secondTx = dataBroker.beginTransaction();
