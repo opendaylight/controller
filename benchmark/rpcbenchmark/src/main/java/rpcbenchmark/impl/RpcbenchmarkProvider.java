@@ -105,12 +105,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
         try {
             ExecutorService executor = Executors.newFixedThreadPool(input.getNumClients().intValue());
 
-            final Runnable testRun = new Runnable() {
-                @Override
-                public void run() {
-                    client.runTest(input.getIterations().intValue());
-                }
-            };
+            final Runnable testRun = () -> client.runTest(input.getIterations().intValue());
 
             LOG.info("Test Started");
             long startTime = System.nanoTime();
