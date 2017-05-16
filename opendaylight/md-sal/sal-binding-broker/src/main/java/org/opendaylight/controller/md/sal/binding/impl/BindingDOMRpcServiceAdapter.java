@@ -23,14 +23,7 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
 public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
 
-    protected static final Factory<RpcConsumerRegistry> BUILDER_FACTORY = new Factory<RpcConsumerRegistry>() {
-
-        @Override
-        public BindingDOMAdapterBuilder<RpcConsumerRegistry> newBuilder() {
-            return new Builder();
-        }
-
-    };
+    protected static final Factory<RpcConsumerRegistry> BUILDER_FACTORY = Builder::new;
 
     private final LoadingCache<Class<? extends RpcService>, RpcServiceAdapter> proxies = CacheBuilder.newBuilder()
             .weakKeys()

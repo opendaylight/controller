@@ -20,7 +20,7 @@ public class ConstantSchemaAbstractDataBrokerTest extends AbstractConcurrentData
 
     @Override
     protected SchemaContext getSchemaContext() throws Exception {
-        return SchemaContextSingleton.getSchemaContext(() -> super.getSchemaContext());
+        return SchemaContextSingleton.getSchemaContext(super::getSchemaContext);
     }
 
 }

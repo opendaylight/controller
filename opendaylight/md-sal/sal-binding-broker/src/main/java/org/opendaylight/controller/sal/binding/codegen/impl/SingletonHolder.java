@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -89,17 +88,14 @@ public class SingletonHolder {
 
             final ThreadPoolExecutor executor = new ThreadPoolExecutor(CORE_NOTIFICATION_THREADS, MAX_NOTIFICATION_THREADS,
                     NOTIFICATION_THREAD_LIFE, TimeUnit.SECONDS, queue, factory,
-                    new RejectedExecutionHandler() {
-                // if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
-                @Override
-                public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
-                    try {
-                        executor.getQueue().put(r);
-                    } catch (final InterruptedException e) {
-                        throw new RejectedExecutionException("Interrupted while waiting on the queue", e);
-                    }
-                }
-            });
+                    // if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
+                    (r, executor1) -> {
+                        try {
+                            executor1.getQueue().put(r);
+                        } catch (final InterruptedException e) {
+                            throw new RejectedExecutionException("Interrupted while waiting on the queue", e);
+                        }
+                    });
 
             NOTIFICATION_EXECUTOR = MoreExecutors.listeningDecorator(executor);
         }
