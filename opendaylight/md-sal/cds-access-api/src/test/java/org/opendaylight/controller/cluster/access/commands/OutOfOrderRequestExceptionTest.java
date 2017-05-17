@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -19,7 +20,7 @@ public class OutOfOrderRequestExceptionTest extends RequestExceptionTest<OutOfOr
 
     @Override
     protected void isRetriable() {
-        assertTrue(OBJECT.isRetriable());
+        assertFalse(OBJECT.isRetriable());
     }
 
     @Override

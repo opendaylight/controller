@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
-    private static final OutOfOrderRequestException UNSEQUENCED_START = new OutOfOrderRequestException(0);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
     private final RangeSet<UnsignedLong> purgedTransactions;
@@ -137,7 +136,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             // The transaction does not exist and we are about to create it, check sequence number
             if (request.getSequence() != 0) {
                 LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
-                throw UNSEQUENCED_START;
+                throw new OutOfOrderRequestException(0);
             }
 
             tx = createTransaction(request, id);
