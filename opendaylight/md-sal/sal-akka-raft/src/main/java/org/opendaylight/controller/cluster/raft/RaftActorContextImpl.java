@@ -29,7 +29,7 @@ import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -404,8 +404,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public FileBackedOutputStream newFileBackedOutputStream() {
-        return new FileBackedOutputStream(configParams.getFileBackedStreamingThreshold(),
+    public SharedFileBackedOutputStream newFileBackedOutputStream() {
+        return new SharedFileBackedOutputStream(configParams.getFileBackedStreamingThreshold(),
                 configParams.getTempFileDirectory());
     }
 

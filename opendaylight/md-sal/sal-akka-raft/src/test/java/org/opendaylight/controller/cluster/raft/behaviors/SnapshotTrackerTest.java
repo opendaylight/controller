@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class SnapshotTrackerTest {
         chunk2 = getNextChunk(byteString, 10, 10);
         chunk3 = getNextChunk(byteString, 20, byteString.size());
 
-        fbos = spy(new FileBackedOutputStream(100000000, "target"));
+        fbos = spy(new SharedFileBackedOutputStream(100000000, "target"));
         doReturn(fbos).when(mockContext).newFileBackedOutputStream();
     }
 
