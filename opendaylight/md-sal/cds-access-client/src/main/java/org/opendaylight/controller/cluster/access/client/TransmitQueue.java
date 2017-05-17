@@ -234,20 +234,11 @@ abstract class TransmitQueue {
 
     final void setForwarder(final ReconnectForwarder forwarder, final long now) {
         Verify.verify(successor == null, "Successor {} already set on connection {}", successor, this);
+        Verify.verify(inflight.isEmpty(), "In-flight requests after replay: %s", inflight);
+        Verify.verify(pending.isEmpty(), "Pending requests after replay: %s", pending);
+
         successor = Preconditions.checkNotNull(forwarder);
-        LOG.debug("Connection {} superseded by {}, splicing queue", this, successor);
-
-        ConnectionEntry entry = inflight.poll();
-        while (entry != null) {
-            successor.forwardEntry(entry, now);
-            entry = inflight.poll();
-        }
-
-        entry = pending.poll();
-        while (entry != null) {
-            successor.forwardEntry(entry, now);
-            entry = pending.poll();
-        }
+        LOG.debug("Connection {} superseded by {}", this, successor);
     }
 
     final void remove(final long now) {
