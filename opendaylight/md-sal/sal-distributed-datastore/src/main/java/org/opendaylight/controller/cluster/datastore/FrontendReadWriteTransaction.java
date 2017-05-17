@@ -84,7 +84,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     // Sequence has already been checked
     @Override
-    @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
+    @Nullable TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
         if (request instanceof ModifyTransactionRequest) {
             return handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
@@ -297,7 +297,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 } else if (m instanceof TransactionMerge) {
                     modification.merge(m.getPath(), ((TransactionMerge) m).getData());
                 } else {
-                    LOG.warn("{}: ignoring unhandled modification {}", history().persistenceId(), m);
+                    LOG.warn("{}: ignoring unhandled modification {}", persistenceId(), m);
                 }
             }
         }
@@ -324,7 +324,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 coordinatedCommit(envelope, now);
                 return null;
             default:
-                LOG.warn("{}: rejecting unsupported protocol {}", history().persistenceId(), maybeProto.get());
+                LOG.warn("{}: rejecting unsupported protocol {}", persistenceId(), maybeProto.get());
                 throw new UnsupportedRequestException(request);
         }
     }
@@ -334,7 +334,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         // only once.
         if (readyCohort == null) {
             readyCohort = openTransaction.ready();
-            LOG.debug("{}: transitioned {} to ready", history().persistenceId(), openTransaction.getIdentifier());
+            LOG.debug("{}: transitioned {} to ready", persistenceId(), openTransaction.getIdentifier());
             openTransaction = null;
         }
     }
