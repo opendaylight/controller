@@ -39,8 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.messaging.MessageSlice;
+import org.opendaylight.controller.cluster.messaging.MessageSliceReply;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -70,6 +73,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -160,7 +164,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long term, long index) {
-        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("foo");
+        return sendReplicate(actorContext, term, index, new MockRaftActorContext.MockPayload("foo"));
+    }
+
+    private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long term, long index, Payload payload) {
         SimpleReplicatedLogEntry newEntry = new SimpleReplicatedLogEntry(index, term, payload);
         actorContext.getReplicatedLog().append(newEntry);
         return leader.handleMessage(leaderActor, new Replicate(null, null, newEntry, true));
@@ -2228,6 +2235,95 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         verify(mockTransferCohort).abortTransfer();
         verify(mockTransferCohort, never()).transferComplete();
         MessageCollectorActor.assertNoneMatching(followerActor, ElectionTimeout.class, 100);
+    }
+
+    @Test
+    public void testReplicationWithPayloadSizeThatExceedsThreshold() {
+        logStart("testReplicationWithPayloadSizeThatExceedsThreshold");
+
+        final int serializedSize = SerializationUtils.serialize(new AppendEntries(1, LEADER_ID, -1, -1,
+                Arrays.asList(new SimpleReplicatedLogEntry(0, 1,
+                        new MockRaftActorContext.MockPayload("large"))), 0, -1, (short)0)).length;
+        final MockRaftActorContext.MockPayload largePayload =
+                new MockRaftActorContext.MockPayload("large", serializedSize);
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower();
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(300, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnapshotChunkSize(serializedSize - 50);
+        leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+        leaderActorContext.setCommitIndex(-1);
+        leaderActorContext.setLastApplied(-1);
+
+        leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
+
+        // Send initial heartbeat reply so follower is marked active
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        leader.handleMessage(followerActor, new AppendEntriesReply(FOLLOWER_ID, -1, true, -1, -1, (short)0));
+        MessageCollectorActor.clearMessages(followerActor);
+
+        // Send normal payload first to prime commit index.
+        final long term = leaderActorContext.getTermInformation().getCurrentTerm();
+        sendReplicate(leaderActorContext, term, 0);
+
+        AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        assertEquals("Entries size", 1, appendEntries.getEntries().size());
+        assertEquals("Entry getIndex", 0, appendEntries.getEntries().get(0).getIndex());
+
+        leader.handleMessage(followerActor, new AppendEntriesReply(FOLLOWER_ID, term, true, 0, term, (short)0));
+        assertEquals("getCommitIndex", 0, leaderActorContext.getCommitIndex());
+        MessageCollectorActor.clearMessages(followerActor);
+
+        // Now send a large payload that exceeds the maximum size for a single AppendEntries - it should be sliced.
+        sendReplicate(leaderActorContext, term, 1, largePayload);
+
+        MessageSlice messageSlice = MessageCollectorActor.expectFirstMatching(followerActor, MessageSlice.class);
+        assertEquals("getSliceIndex", 1, messageSlice.getSliceIndex());
+        assertEquals("getTotalSlices", 2, messageSlice.getTotalSlices());
+
+        final Identifier slicingId = messageSlice.getIdentifier();
+
+        appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
+        assertEquals("getPrevLogTerm", term, appendEntries.getPrevLogTerm());
+        assertEquals("getLeaderCommit", -1, appendEntries.getLeaderCommit());
+        assertEquals("Entries size", 0, appendEntries.getEntries().size());
+        MessageCollectorActor.clearMessages(followerActor);
+
+        // Initiate a heartbeat - it should send an empty AppendEntries since slicing is in progress.
+
+        // Sleep for the heartbeat interval so AppendEntries is sent.
+        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
+                .getHeartBeatInterval().toMillis(), TimeUnit.MILLISECONDS);
+
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
+
+        appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        assertEquals("getLeaderCommit", -1, appendEntries.getLeaderCommit());
+        assertEquals("Entries size", 0, appendEntries.getEntries().size());
+        MessageCollectorActor.clearMessages(followerActor);
+
+        // Simulate the MessageSliceReply's and AppendEntriesReply from the follower.
+
+        leader.handleMessage(followerActor, MessageSliceReply.success(slicingId, 1, followerActor));
+        messageSlice = MessageCollectorActor.expectFirstMatching(followerActor, MessageSlice.class);
+        assertEquals("getSliceIndex", 2, messageSlice.getSliceIndex());
+
+        leader.handleMessage(followerActor, MessageSliceReply.success(slicingId, 2, followerActor));
+
+        leader.handleMessage(followerActor, new AppendEntriesReply(FOLLOWER_ID, term, true, 1, term, (short)0));
+
+        MessageCollectorActor.clearMessages(followerActor);
+
+        // Send another normal payload.
+
+        sendReplicate(leaderActorContext, term, 2);
+
+        appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        assertEquals("Entries size", 1, appendEntries.getEntries().size());
+        assertEquals("Entry getIndex", 2, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("getLeaderCommit", 1, appendEntries.getLeaderCommit());
     }
 
     @Override

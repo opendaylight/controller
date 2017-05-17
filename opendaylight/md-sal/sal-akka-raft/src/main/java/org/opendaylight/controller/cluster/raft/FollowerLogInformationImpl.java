@@ -22,6 +22,8 @@ import org.opendaylight.controller.cluster.raft.behaviors.LeaderInstallSnapshotS
  * @author Thomas Pantelis
  */
 public class FollowerLogInformationImpl implements FollowerLogInformation {
+    private static final long NO_INDEX = -1;
+
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
     private final RaftActorContext context;
@@ -45,6 +47,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     private final PeerInfo peerInfo;
 
     private LeaderInstallSnapshotState installSnapshotState;
+
+    private long slicedLogEntryIndex = NO_INDEX;
 
     /**
      * Constructs an instance.
@@ -92,6 +96,12 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean setMatchIndex(long matchIndex) {
+        // If the new match index is the index of the entry currently being sliced, then we know slicing is complete
+        // and the follower received the entry and responded so clear the slicedLogEntryIndex
+        if (isLogEntrySlicingInProgress() && slicedLogEntryIndex == matchIndex) {
+            slicedLogEntryIndex = NO_INDEX;
+        }
+
         if (this.matchIndex != matchIndex) {
             this.matchIndex = matchIndex;
             return true;
@@ -208,6 +218,16 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         Preconditions.checkState(installSnapshotState != null);
         installSnapshotState.close();
         installSnapshotState = null;
+    }
+
+    @Override
+    public void setSlicedLogEntryIndex(long index) {
+        slicedLogEntryIndex  = index;
+    }
+
+    @Override
+    public boolean isLogEntrySlicingInProgress() {
+        return slicedLogEntryIndex != NO_INDEX;
     }
 
     @Override
