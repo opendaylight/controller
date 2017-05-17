@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.access.commands.DeadHistoryException;
 import org.opendaylight.controller.cluster.access.commands.DestroyLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
-import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
+import org.opendaylight.controller.cluster.access.commands.OutOfSequenceEnvelopeException;
 import org.opendaylight.controller.cluster.access.commands.PurgeLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
@@ -91,9 +91,9 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         return clientId;
     }
 
-    private void checkRequestSequence(final RequestEnvelope envelope) throws OutOfOrderRequestException {
+    private void checkRequestSequence(final RequestEnvelope envelope) throws OutOfSequenceEnvelopeException {
         if (expectedTxSequence != envelope.getTxSequence()) {
-            throw new OutOfOrderRequestException(expectedTxSequence);
+            throw new OutOfSequenceEnvelopeException(expectedTxSequence);
         }
     }
 
