@@ -23,6 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Frontend common transaction state as observed by the shard leader.
@@ -31,6 +33,8 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  */
 @NotThreadSafe
 abstract class FrontendTransaction implements Identifiable<TransactionIdentifier> {
+    private static final Logger LOG = LoggerFactory.getLogger(FrontendTransaction.class);
+
     private final AbstractFrontendHistory history;
     private final TransactionIdentifier id;
 
@@ -44,6 +48,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     private Long lastPurgedSequence;
     private long expectedSequence;
 
+    private RequestException previousFailure;
+
     FrontendTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id) {
         this.history = Preconditions.checkNotNull(history);
         this.id = Preconditions.checkNotNull(id);
@@ -56,6 +62,10 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
 
     final AbstractFrontendHistory history() {
         return history;
+    }
+
+    final String persistenceId() {
+        return history().persistenceId();
     }
 
     final java.util.Optional<TransactionSuccess<?>> replaySequence(final long sequence) throws RequestException {
@@ -108,9 +118,30 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         lastPurgedSequence = sequence;
     }
 
-    // Sequence has already been checked
-    abstract @Nullable TransactionSuccess<?> handleRequest(TransactionRequest<?> request,
-            RequestEnvelope envelope, long now) throws RequestException;
+    // Request order has already been checked by caller and replaySequence()
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
+        if (previousFailure != null) {
+            LOG.debug("{}: Rejecting request {} due to previous failure", persistenceId(), request, previousFailure);
+            throw previousFailure;
+        }
+
+        try {
+            return doHandleRequest(request, envelope, now);
+        } catch (RuntimeException e) {
+            /*
+             * The request failed to process, we should not attempt to every apply it again. Furthermore we cannot
+             * we cannot any further requests from this connection, simply because the transaction state is undefined.
+             */
+            LOG.debug("{}: Request {} failed to process", persistenceId(), request, e);
+            previousFailure = new RuntimeRequestException("Request " + request + " failed to process", e);
+            throw previousFailure;
+        }
+    }
+
+    abstract @Nullable TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
+            long now) throws RequestException;
 
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {
