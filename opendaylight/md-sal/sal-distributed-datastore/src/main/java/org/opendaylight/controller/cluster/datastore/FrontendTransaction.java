@@ -44,6 +44,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     private Long lastPurgedSequence;
     private long expectedSequence;
 
+    private RequestException previousFailure;
+
     FrontendTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id) {
         this.history = Preconditions.checkNotNull(history);
         this.id = Preconditions.checkNotNull(id);
@@ -56,6 +58,10 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
 
     final AbstractFrontendHistory history() {
         return history;
+    }
+
+    final String persistenceId() {
+        return history().persistenceId();
     }
 
     final java.util.Optional<TransactionSuccess<?>> replaySequence(final long sequence) throws RequestException {
@@ -108,9 +114,26 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         lastPurgedSequence = sequence;
     }
 
-    // Sequence has already been checked
-    abstract @Nullable TransactionSuccess<?> handleRequest(TransactionRequest<?> request,
-            RequestEnvelope envelope, long now) throws RequestException;
+    // Request order has already been checked by caller and replaySequence()
+    final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
+        try {
+            return doHandleRequest(request, envelope, now);
+        } catch (RuntimeException e) {
+            /*
+             * The request failed to process, we should not attempt to every apply it again. Furthermore we cannot
+             * we cannot any further requests from this connection, simply because the transaction state is undefined.
+             */
+            final RequestException re = new RuntimeRequestException("Request " + request + " failed to process", e);
+
+
+            // FIXME: this is not right
+            return null;
+        }
+    }
+
+    abstract @Nullable TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
+            long now) throws RequestException;
 
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {

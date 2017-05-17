@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
@@ -36,6 +37,11 @@ public abstract class TransactionModification {
 
     public final YangInstanceIdentifier getPath() {
         return path;
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("path", path).toString();
     }
 
     abstract byte getType();
