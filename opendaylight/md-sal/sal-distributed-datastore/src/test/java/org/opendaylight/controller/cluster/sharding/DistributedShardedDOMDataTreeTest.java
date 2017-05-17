@@ -26,6 +26,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
+import akka.actor.Props;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,11 +52,16 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
+import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
+import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
+import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.dom.api.CDSDataTreeProducer;
 import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
@@ -202,7 +209,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void testSingleNodeWrites() throws Exception {
+    public void testSingleNodeWritesAndRead() throws Exception {
         initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration = waitOnAsyncTask(
@@ -248,6 +255,28 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         assertEquals(expected, dataAfter.get());
 
         verifyNoMoreInteractions(mockedDataTreeListener);
+
+        final String shardName = ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier());
+        LOG.debug("Creating distributed datastore client for shard {}", shardName);
+
+        final ActorContext actorContext = leaderDistributedDataStore.getActorContext();
+        final Props distributedDataStoreClientProps =
+                SimpleDataStoreClientActor.props(actorContext.getCurrentMemberName(),
+                        "Shard-" + shardName, actorContext, shardName);
+
+        final ActorRef clientActor = leaderSystem.actorOf(distributedDataStoreClientProps);
+        final DataStoreClient distributedDataStoreClient = SimpleDataStoreClientActor
+                    .getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
+
+        final ClientLocalHistory localHistory = distributedDataStoreClient.createLocalHistory();
+        final ClientTransaction tx2 = localHistory.createTransaction();
+        final CheckedFuture<Optional<NormalizedNode<?, ?>>,
+                org.opendaylight.mdsal.common.api.ReadFailedException> read =
+                tx2.read(YangInstanceIdentifier.EMPTY);
+
+        final Optional<NormalizedNode<?, ?>> optional = read.checkedGet();
+        tx2.abort();
+        localHistory.close();
 
         shardRegistration.close().toCompletableFuture().get();
 

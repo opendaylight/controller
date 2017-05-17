@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -20,6 +18,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import com.google.common.collect.Iterables;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.After;
@@ -145,10 +144,10 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         connection.sendRequest(request2, callback);
         final Iterable<ConnectionEntry> entries = connection.startReplay();
         Assert.assertThat(entries, hasItems(entryWithRequest(request1), entryWithRequest(request2)));
+        Assert.assertEquals(2, Iterables.size(entries));
+        Iterables.removeIf(entries, e -> true);
         final ReconnectForwarder forwarder = mock(ReconnectForwarder.class);
         connection.finishReplay(forwarder);
-        verify(forwarder).forwardEntry(argThat(entryWithRequest(request1)), anyLong());
-        verify(forwarder).forwardEntry(argThat(entryWithRequest(request2)), anyLong());
     }
 
     @After
