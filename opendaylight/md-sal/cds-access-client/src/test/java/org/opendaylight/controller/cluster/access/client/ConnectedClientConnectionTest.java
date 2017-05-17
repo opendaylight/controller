@@ -19,7 +19,7 @@ public class ConnectedClientConnectionTest
         extends AbstractClientConnectionTest<ConnectedClientConnection<BackendInfo>, BackendInfo> {
 
     @Override
-    protected ConnectedClientConnection createConnection() {
+    protected ConnectedClientConnection<BackendInfo> createConnection() {
         final BackendInfo backend = new BackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON, 10);
         return new ConnectedClientConnection<>(context, 0L, backend);
     }
