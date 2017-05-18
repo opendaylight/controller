@@ -22,6 +22,30 @@
       "revId": "8377a1435b9070537793243cdc1e86aef7c38f37",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_08f95480",
+        "filename": "opendaylight/md-sal/sal-dom-broker-config/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/DomInmemoryDataBrokerModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-18T07:46:19Z",
+      "side": 1,
+      "message": "Done; I hadn’t started on the loops, there are no doubt many other places we could do this ;-).",
+      "parentUuid": "ba068154_ebce9582",
+      "range": {
+        "startLine": 125,
+        "startChar": 31,
+        "endLine": 128,
+        "endChar": 13
+      },
+      "revId": "8377a1435b9070537793243cdc1e86aef7c38f37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
