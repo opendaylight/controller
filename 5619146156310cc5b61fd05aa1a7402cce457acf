@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba068154_b4869d11",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/AbortSlicing.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-18T14:39:41Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "ba068154_f4466520",
+      "range": {
+        "startLine": 28,
+        "startChar": 24,
+        "endLine": 28,
+        "endChar": 37
+      },
+      "revId": "5619146156310cc5b61fd05aa1a7402cce457acf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba068154_b45cddee",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
         "patchSetId": 22
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ba068154_5477713a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-18T14:39:41Z",
+      "side": 1,
+      "message": "I did that in the MessageSlicer but probably better here.",
+      "parentUuid": "ba068154_b45cddee",
+      "range": {
+        "startLine": 315,
+        "startChar": 12,
+        "endLine": 315,
+        "endChar": 56
+      },
+      "revId": "5619146156310cc5b61fd05aa1a7402cce457acf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba068154_546db197",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
         "patchSetId": 22
@@ -59,6 +107,30 @@
       "writtenOn": "2017-05-18T14:27:03Z",
       "side": 1,
       "message": "should enforce !\u003d null",
+      "range": {
+        "startLine": 355,
+        "startChar": 12,
+        "endLine": 355,
+        "endChar": 44
+      },
+      "revId": "5619146156310cc5b61fd05aa1a7402cce457acf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_147de91c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-18T14:39:41Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "ba068154_546db197",
       "range": {
         "startLine": 355,
         "startChar": 12,
