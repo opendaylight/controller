@@ -229,12 +229,10 @@ public class NormalizedNodeStreamReaderWriterTest {
     }
 
     private static String largeString(final int pow) {
-        String str = "X";
+        StringBuilder sb = new StringBuilder("X");
         for (int i = 0; i < pow; i++) {
-            StringBuilder buf = new StringBuilder();
-            buf.append(str).append(str);
-            str = buf.toString();
+            sb.append(sb);
         }
-        return str;
+        return sb.toString();
     }
 }

@@ -138,11 +138,11 @@ public class AbsModuleGeneratedObjectFactory {
     }
 
     private static String getMethods(List<? extends Method>  methods) {
-        String result = "\n// getters and setters\n";
-        for(Method method: methods) {
-            result += method.toString()+"\n";
+        StringBuilder result = new StringBuilder("\n// getters and setters\n");
+        for (Method method : methods) {
+            result.append(method).append("\n");
         }
-        return result;
+        return result.toString();
     }
 
     private static String getEqualsAndHashCode(FullyQualifiedName abstractFQN) {
@@ -162,55 +162,59 @@ public class AbsModuleGeneratedObjectFactory {
     }
 
     private static String getReuseLogic(List<ModuleField> moduleFields, FullyQualifiedName abstractFQN) {
-        String result = "\n"+
-            format("public boolean canReuseInstance(%s oldModule){\n", abstractFQN.getTypeName())+
-                "// allow reusing of old instance if no parameters was changed\n"+
-                "return isSame(oldModule);\n"+
-            "}\n"+
-            "\n"+
-            format("public %s reuseInstance(%1$s oldInstance){\n", AutoCloseable.class.getCanonicalName())+
-                "// implement if instance reuse should be supported. Override canReuseInstance to change the criteria.\n"+
-                "return oldInstance;\n"+
-            "}\n";
+        StringBuilder result = new StringBuilder("\n" +
+                format("public boolean canReuseInstance(%s oldModule){\n", abstractFQN.getTypeName()) +
+                "// allow reusing of old instance if no parameters was changed\n" +
+                "return isSame(oldModule);\n" +
+                "}\n" +
+                "\n" +
+                format("public %s reuseInstance(%1$s oldInstance){\n", AutoCloseable.class.getCanonicalName()) +
+                "// implement if instance reuse should be supported." +
+                "Override canReuseInstance to change the criteria.\n" +
+                "return oldInstance;\n" +
+                "}\n");
         // isSame method that detects changed fields
-        result += "\n"+
-            format("public boolean isSame(%s other) {\n", abstractFQN.getTypeName())+
-                "if (other == null) {\n"+
-                    "throw new IllegalArgumentException(\"Parameter 'other' is null\");\n"+
-                "}\n";
-        // loop through fields, do deep equals on each field
+        result.append("\n")
+                .append(format("public boolean isSame(%s other) {\n", abstractFQN.getTypeName()))
+                .append("if (other == null) {\n")
+                .append("throw new IllegalArgumentException(\"Parameter 'other' is null\");\n")
+                .append("}\n");
 
+        // loop through fields, do deep equals on each field
         for (ModuleField moduleField : moduleFields) {
-            result += format(
-                "if (!java.util.Objects.deepEquals(%s, other.%1$s)) {\n"+
-                    "return false;\n"+
-                "}\n", moduleField.getName());
+            result.append(format(
+                    "if (!java.util.Objects.deepEquals(%s, other.%1$s)) {\n" +
+                            "return false;\n" +
+                            "}\n", moduleField.getName()));
 
             if (moduleField.isListOfDependencies()) {
-                result += format(
-                        "for (int idx = 0; idx < %1$s.size(); idx++) {\n"+
-                            "if (!dependencyResolver.canReuseDependency(%1$s.get(idx), %1$sJmxAttribute)) {\n"+
-                                "return false;\n"+
-                            "}\n"+
-                        "}\n" , moduleField.getName());
-            } else if (moduleField.isDependent()) {
-                result += format(
-                        // If a reference is null (ie optional reference) it makes no sens to call canReuse on it
-                        // In such case we continue in the isSame method because if we have null here, the previous value was null as well
-                        // If the previous value was not null and current is or vice verse, the deepEquals comparison would return false
-                        "if(%1$s!= null) {\n" +
-                            "if (!dependencyResolver.canReuseDependency(%1$s, %1$sJmxAttribute)) { // reference to dependency must be reusable as well\n" +
+                result.append(format(
+                        "for (int idx = 0; idx < %1$s.size(); idx++) {\n" +
+                                "if (!dependencyResolver.canReuseDependency(%1$s.get(idx), %1$sJmxAttribute)) {\n" +
                                 "return false;\n" +
-                            "}\n" +
-                        "}\n", moduleField.getName());
+                                "}\n" +
+                                "}\n", moduleField.getName()));
+            } else if (moduleField.isDependent()) {
+                result.append(format(
+                        // If a reference is null (ie optional reference) it makes no sens to call canReuse on it
+                        // In such case we continue in the isSame method because if we have null here, the previous
+                        // value was null as well
+                        // If the previous value was not null and current is or vice verse, the deepEquals comparison
+                        // would return false
+                        "if(%1$s!= null) {\n" +
+                                "// reference to dependency must be reusable as well\n" +
+                                "if (!dependencyResolver.canReuseDependency(%1$s, %1$sJmxAttribute)) {\n" +
+                                "return false;\n" +
+                                "}\n" +
+                                "}\n", moduleField.getName()));
             }
         }
 
-        result += "\n"+
-                "return true;\n"+
-            "}\n";
+        result.append("\n" +
+                "return true;\n" +
+                "}\n");
 
-        return result;
+        return result.toString();
     }
 
     private static String getResolveDependencies(final List<ModuleField> moduleFields) {
@@ -235,46 +239,46 @@ public class AbsModuleGeneratedObjectFactory {
             }
         }
 
-        String result = "\n"
-                + "protected final void resolveDependencies() {\n";
+        StringBuilder result = new StringBuilder("\n" +
+                "protected final void resolveDependencies() {\n");
         // wrap each field resolvation statement with if !=null when dependency is not mandatory
         for (Map.Entry<ModuleField, String> entry : resolveDependenciesMap.entrySet()) {
-            if (entry.getKey().getDependency().isMandatory() == false) {
+            if (!entry.getKey().getDependency().isMandatory()) {
                 checkState(entry.getValue().endsWith(";\n"));
-                result += format("if (%s!=null) {\n%s}\n", entry.getKey().getName(), entry.getValue());
+                result.append(format("if (%s!=null) {\n%s}\n", entry.getKey().getName(), entry.getValue()));
             } else {
-                result += entry.getValue();
+                result.append(entry.getValue());
             }
         }
 
         // add code to inject dependency resolver to fields that support it
         for(ModuleField moduleField: moduleFields) {
             if (moduleField.isNeedsDepResolver()) {
-                result += format("if (%s!=null){\n", moduleField.getName());
+                result.append(format("if (%s!=null){\n", moduleField.getName()));
                 if (moduleField.isList()) {
-                    result += format(
-                            "for(%s candidate : %s) {\n"+
-                                    "candidate.injectDependencyResolver(dependencyResolver);\n"+
-                                    "}\n", moduleField.getGenericInnerType(), moduleField.getName());
+                    result.append(format(
+                            "for(%s candidate : %s) {\n" +
+                                    "candidate.injectDependencyResolver(dependencyResolver);\n" +
+                                    "}\n", moduleField.getGenericInnerType(), moduleField.getName()));
                 } else {
-                    result += format("%s.injectDependencyResolver(dependencyResolver);\n", moduleField.getName());
+                    result.append(format("%s.injectDependencyResolver(dependencyResolver);\n", moduleField.getName()));
                 }
-                result += "}\n";
+                result.append("}\n");
             }
         }
 
         // identity refs need to be injected with dependencyResolver and base class
         for (ModuleField moduleField : moduleFields) {
             if (moduleField.isIdentityRef()) {
-                result += format("if (%s!=null) {", moduleField.getName());
-                result += format("set%s(%s.resolveIdentity(dependencyResolver, %s.class));",
+                result.append(format("if (%s!=null) {", moduleField.getName()));
+                result.append(format("set%s(%s.resolveIdentity(dependencyResolver, %s.class));",
                         moduleField.getAttributeName(), moduleField.getName(),
-                        ((IdentityRefModuleField)moduleField).getIdentityBaseClass());
-                result += "}\n";
+                        ((IdentityRefModuleField) moduleField).getIdentityBaseClass()));
+                result.append("}\n");
             }
         }
-        result += "}\n";
-        return result;
+        result.append("}\n");
+        return result.toString();
     }
 
     private static String getCachesOfResolvedIdentityRefs(List<ModuleField> moduleFields) {
@@ -333,37 +337,39 @@ public class AbsModuleGeneratedObjectFactory {
     }
 
     private static String getValidationMethods(List<ModuleField> moduleFields) {
-        String result = "\n"+
-            "@Override\n"+
-            "public void validate() {\n";
+        StringBuilder result = new StringBuilder("\n" +
+                "@Override\n" +
+                "public void validate() {\n");
         // validate each mandatory dependency
-        for(ModuleField moduleField: moduleFields) {
+        for (ModuleField moduleField : moduleFields) {
             if (moduleField.isDependent()) {
                 if (moduleField.isList()) {
-                    result += "" +
-                            format("for(javax.management.ObjectName dep : %s) {\n", moduleField.getName()) +
-                            format("    dependencyResolver.validateDependency(%s.class, dep, %sJmxAttribute);\n",
-                                    moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName()) +
-                            "}\n";
+                    result.append(format("for(javax.management.ObjectName dep : %s) {\n", moduleField.getName()))
+                            .append(format("    dependencyResolver.validateDependency(%s.class, dep, %sJmxAttribute);" +
+                                                    "\n",
+                                            moduleField.getDependency().getSie().getFullyQualifiedName(),
+                                            moduleField.getName()))
+                            .append("}\n");
                 } else {
-                    if(moduleField.getDependency().isMandatory() == false) {
-                        result += format("if(%s != null) {\n", moduleField.getName());
+                    if (!moduleField.getDependency().isMandatory()) {
+                        result.append(format("if(%s != null) {\n", moduleField.getName()));
                     }
-                    result += format("dependencyResolver.validateDependency(%s.class, %s, %sJmxAttribute);\n",
-                            moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName(), moduleField.getName());
-                    if(moduleField.getDependency().isMandatory() == false) {
-                        result += "}\n";
+                    result.append(format("dependencyResolver.validateDependency(%s.class, %s, %sJmxAttribute);\n",
+                            moduleField.getDependency().getSie().getFullyQualifiedName(), moduleField.getName(),
+                            moduleField.getName()));
+                    if (!moduleField.getDependency().isMandatory()) {
+                        result.append("}\n");
                     }
                 }
             }
         }
-        result += "\n"+
-                "customValidation();\n"+
-            "}\n"+
-            "\n"+
-            "protected void customValidation() {\n"+
-            "}\n";
-        return result;
+        result.append("\n" +
+                "customValidation();\n" +
+                "}\n" +
+                "\n" +
+                "protected void customValidation() {\n" +
+                "}\n");
+        return result.toString();
     }
 
     private static String getLoggerDefinition(FullyQualifiedName fqn) {

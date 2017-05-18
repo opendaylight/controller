@@ -22,12 +22,10 @@ public class ValueTypesTest {
 
     private static String largeString(int minSize) {
         final int pow = (int) (Math.log(minSize * 2) / Math.log(2));
-        String str = "X";
+        StringBuilder sb = new StringBuilder("X");
         for (int i = 0; i < pow; i++) {
-            StringBuilder buf = new StringBuilder();
-            buf.append(str).append(str);
-            str = buf.toString();
+            sb.append(sb);
         }
-        return str;
+        return sb.toString();
     }
 }

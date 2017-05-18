@@ -63,7 +63,7 @@ public class CommonConfig extends AbstractConfig {
             return cachedMailBoxCapacity;
         }
 
-        final String PATH = new StringBuilder(TAG_MAILBOX).append(".").append(TAG_MAILBOX_CAPACITY).toString();
+        final String PATH = TAG_MAILBOX + "." + TAG_MAILBOX_CAPACITY;
         cachedMailBoxCapacity = get().hasPath(PATH)
                 ? get().getInt(PATH)
                 : DEFAULT_MAILBOX_CAPACITY;
@@ -77,7 +77,7 @@ public class CommonConfig extends AbstractConfig {
             return cachedMailBoxPushTimeout;
         }
 
-        final String PATH = new StringBuilder(TAG_MAILBOX).append(".").append(TAG_MAILBOX_PUSH_TIMEOUT).toString();
+        final String PATH = TAG_MAILBOX + "." + TAG_MAILBOX_PUSH_TIMEOUT;
 
         long timeout = get().hasPath(PATH)
                 ? get().getDuration(PATH, TimeUnit.NANOSECONDS)
