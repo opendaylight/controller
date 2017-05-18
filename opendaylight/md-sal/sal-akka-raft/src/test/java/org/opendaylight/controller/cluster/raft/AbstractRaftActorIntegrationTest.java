@@ -215,6 +215,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected long currentTerm;
 
     protected int snapshotBatchCount = 4;
+    protected int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
     protected List<MockPayload> expSnapshotState = new ArrayList<>();
 
@@ -232,7 +233,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         configParams.setSnapshotBatchCount(snapshotBatchCount);
         configParams.setSnapshotDataThresholdPercentage(70);
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
-        configParams.setSnapshotChunkSize(SNAPSHOT_CHUNK_SIZE);
+        configParams.setSnapshotChunkSize(snapshotChunkSize);
         return configParams;
     }
 

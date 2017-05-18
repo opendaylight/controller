@@ -29,7 +29,7 @@ import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -89,6 +89,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final Consumer<ApplyState> applyStateConsumer;
 
+    private final FileBackedOutputStreamFactory fileBackedOutputStreamFactory;
+
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
@@ -106,6 +108,9 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.persistenceProvider = Preconditions.checkNotNull(persistenceProvider);
         this.log = Preconditions.checkNotNull(logger);
         this.applyStateConsumer = Preconditions.checkNotNull(applyStateConsumer);
+
+        fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
+                configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
 
         for (Map.Entry<String, String> e: Preconditions.checkNotNull(peerAddresses).entrySet()) {
             peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
@@ -404,9 +409,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public FileBackedOutputStream newFileBackedOutputStream() {
-        return new FileBackedOutputStream(configParams.getFileBackedStreamingThreshold(),
-                configParams.getTempFileDirectory());
+    public FileBackedOutputStreamFactory getFileBackedOutputStreamFactory() {
+        return fileBackedOutputStreamFactory;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
