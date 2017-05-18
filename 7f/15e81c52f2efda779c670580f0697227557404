@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Tom Pantelis <tompantelis@gmail.com>
+Code-Review+1: A H <an.ho@huawei.com>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Thu, 18 May 2017 15:12:34 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/57028
+Project: controller
+Branch: refs/heads/stable/carbon
