@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -27,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +60,9 @@ public class SnapshotTrackerTest {
         chunk3 = getNextChunk(byteString, 20, byteString.size());
 
         fbos = spy(new FileBackedOutputStream(100000000, "target"));
-        doReturn(fbos).when(mockContext).newFileBackedOutputStream();
+        FileBackedOutputStreamFactory mockFactory = mock(FileBackedOutputStreamFactory.class);
+        doReturn(fbos).when(mockFactory).newInstance();
+        doReturn(mockFactory).when(mockContext).getFileBackedOutputStreamFactory();
     }
 
     @Test
