@@ -130,7 +130,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             }
 
             if (message instanceof SetPeerAddress) {
-                setPeerAddress(((SetPeerAddress) message).getPeerId().toString(),
+                setPeerAddress(((SetPeerAddress) message).getPeerId(),
                         ((SetPeerAddress) message).getPeerAddress());
                 return;
             }

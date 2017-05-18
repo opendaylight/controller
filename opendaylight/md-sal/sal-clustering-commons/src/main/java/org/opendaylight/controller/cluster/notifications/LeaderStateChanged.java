@@ -42,9 +42,8 @@ public class LeaderStateChanged {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LeaderStateChanged [memberId=").append(memberId).append(", leaderId=").append(leaderId)
-                .append(", leaderPayloadVersion=").append(leaderPayloadVersion).append("]");
-        return builder.toString();
+        return "LeaderStateChanged [memberId=" + memberId
+                + ", leaderId=" + leaderId
+                + ", leaderPayloadVersion=" + leaderPayloadVersion + "]";
     }
 }

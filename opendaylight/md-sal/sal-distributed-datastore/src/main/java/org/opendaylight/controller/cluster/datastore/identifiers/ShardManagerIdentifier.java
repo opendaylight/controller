@@ -39,9 +39,7 @@ public class ShardManagerIdentifier {
     }
 
     @Override public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("shardmanager-").append(type);
-        return builder.toString();
+        return "shardmanager-" + type;
     }
 
     public static Builder builder() {

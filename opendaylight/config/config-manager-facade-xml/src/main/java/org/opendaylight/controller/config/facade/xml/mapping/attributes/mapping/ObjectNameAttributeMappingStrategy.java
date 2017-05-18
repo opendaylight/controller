@@ -70,12 +70,11 @@ public class ObjectNameAttributeMappingStrategy extends
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("MappedDependency{");
-            sb.append("namespace='").append(namespace).append('\'');
-            sb.append(", serviceName='").append(serviceName).append('\'');
-            sb.append(", refName='").append(refName).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "MappedDependency{"
+                    + "namespace='" + namespace + '\''
+                    + ", serviceName='" + serviceName + '\''
+                    + ", refName='" + refName + '\''
+                    + '}';
         }
     }
 

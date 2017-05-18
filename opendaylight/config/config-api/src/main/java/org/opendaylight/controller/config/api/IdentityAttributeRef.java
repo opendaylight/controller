@@ -38,10 +38,7 @@ public final class IdentityAttributeRef {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("IdentityAttributeRef{");
-        sb.append("qNameOfIdentity='").append(qNameOfIdentity).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "IdentityAttributeRef{" + "qNameOfIdentity='" + qNameOfIdentity + "'}";
     }
 
     @Override

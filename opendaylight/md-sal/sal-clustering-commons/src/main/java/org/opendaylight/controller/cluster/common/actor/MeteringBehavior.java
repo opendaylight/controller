@@ -61,8 +61,8 @@ public class MeteringBehavior implements Procedure<Object> {
     }
 
     private void init(final String actorName) {
-        actorQualifiedName = new StringBuilder(meteredActor.getSelf().path().parent().toStringWithoutAddress())
-                .append("/").append(actorName).toString();
+        actorQualifiedName = meteredActor.getSelf().path().parent().toStringWithoutAddress()
+                + "/" + actorName;
 
         final String msgProcessingTime = MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE);
         msgProcessingTimer = metricRegistry.timer(msgProcessingTime);
