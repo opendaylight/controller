@@ -117,10 +117,6 @@ public final class Entity implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Entity{");
-        sb.append("type='").append(type).append('\'');
-        sb.append(", id=").append(id);
-        sb.append('}');
-        return sb.toString();
+        return "Entity{" + "type='" + type + '\'' + ", id=" + id + '}';
     }
 }

@@ -54,10 +54,9 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("CreateTransactionReply [transactionPath=").append(transactionPath).append(", transactionId=")
-                .append(transactionId).append(", version=").append(getVersion()).append("]");
-        return builder.toString();
+        return "CreateTransactionReply [transactionPath=" + transactionPath +
+                ", transactionId=" + transactionId +
+                ", version=" + getVersion() + "]";
     }
 
     public static CreateTransactionReply fromSerializable(Object serializable) {

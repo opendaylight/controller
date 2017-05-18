@@ -43,10 +43,10 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("InstallSnapshotReply [term=").append(getTerm()).append(", followerId=").append(followerId)
-                .append(", chunkIndex=").append(chunkIndex).append(", success=").append(success).append("]");
-        return builder.toString();
+        return "InstallSnapshotReply [term=" + getTerm() +
+                ", followerId=" + followerId +
+                ", chunkIndex=" + chunkIndex +
+                ", success=" + success + "]";
     }
 
     private Object writeReplace() {

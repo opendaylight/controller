@@ -61,9 +61,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
         Set<String> routedRpc = new HashSet<>(table.getRoutes().size());
         for (DOMRpcIdentifier route : table.getRoutes()) {
             if (!route.getContextReference().isEmpty()) {
-                StringBuilder builder = new StringBuilder(ROUTE_CONSTANT);
-                builder.append(route.getContextReference().toString()).append(NAME_CONSTANT).append(route.getType());
-                routedRpc.add(builder.toString());
+                routedRpc.add(ROUTE_CONSTANT + route.getContextReference() + NAME_CONSTANT + route.getType());
             }
         }
 
@@ -114,9 +112,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
             if (!route.getContextReference().isEmpty()) {
                 String routeString = route.getContextReference().toString();
                 if (routeString.contains(routeName)) {
-                    StringBuilder builder = new StringBuilder(ROUTE_CONSTANT);
-                    builder.append(routeString).append(NAME_CONSTANT).append(route.getType());
-                    rpcMap.put(builder.toString(), address);
+                    rpcMap.put(ROUTE_CONSTANT + routeString + NAME_CONSTANT + route.getType(), address);
                 }
             }
         }
@@ -134,9 +130,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
             if (!route.getContextReference().isEmpty()) {
                 String type = route.getType().toString();
                 if (type.contains(name)) {
-                    StringBuilder builder = new StringBuilder(ROUTE_CONSTANT);
-                    builder.append(route.getContextReference()).append(NAME_CONSTANT).append(type);
-                    rpcMap.put(builder.toString(), address);
+                    rpcMap.put(ROUTE_CONSTANT + route.getContextReference() + NAME_CONSTANT + type, address);
                 }
             }
         }

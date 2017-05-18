@@ -106,19 +106,17 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                     .getFullyQualifiedName(rootRB.getPackageName(), rootRB.getJavaNameOfRuntimeMXBean());
             String childRegistratorFQN = rootFtlFile.getFullyQualifiedName();
             Field rbParameter = new Field(fullyQualifiedNameOfMXBean, "rb");
-            StringBuilder registerBody = new StringBuilder();
-            registerBody.append(format("%s %s = this.%s.registerRoot(%s);\n",
-                    HierarchicalRuntimeBeanRegistration.class
-                            .getCanonicalName(), hierachicalRegistration
-                            .getName(), rootRuntimeBeanRegistratorField
-                            .getName(), rbParameter.getName()));
-            registerBody.append(format("return new %s(%s);\n",
-                    rootFtlFile.getFullyQualifiedName(),
-                    hierachicalRegistration.getName()));
+            String registerBody = format("%s %s = this.%s.registerRoot(%s);\n" +
+                            "return new %s(%2$s);\n",
+                    HierarchicalRuntimeBeanRegistration.class.getCanonicalName(),
+                    hierachicalRegistration.getName(),
+                    rootRuntimeBeanRegistratorField.getName(),
+                    rbParameter.getName(),
+                    rootFtlFile.getFullyQualifiedName());
 
             MethodDefinition registerMethod = new MethodDefinition(
                     childRegistratorFQN, "register",
-                    Collections.singletonList(rbParameter), registerBody.toString());
+                    Collections.singletonList(rbParameter), registerBody);
             methods.add(registerMethod);
         }
 

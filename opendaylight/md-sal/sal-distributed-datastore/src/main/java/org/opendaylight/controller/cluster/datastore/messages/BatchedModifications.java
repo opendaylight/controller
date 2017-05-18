@@ -84,10 +84,9 @@ public class BatchedModifications extends MutableCompositeModification {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("BatchedModifications [transactionId=").append(transactionId).append(", ready=").append(ready)
-            .append(", totalMessagesSent=").append(totalMessagesSent).append(", modifications size=")
-            .append(getModifications().size()).append("]");
-        return builder.toString();
+        return "BatchedModifications [transactionId=" + transactionId +
+                ", ready=" + ready +
+                ", totalMessagesSent=" + totalMessagesSent +
+                ", modifications size=" + getModifications().size() + "]";
     }
 }

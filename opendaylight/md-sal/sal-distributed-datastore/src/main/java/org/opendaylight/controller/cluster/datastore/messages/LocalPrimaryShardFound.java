@@ -37,9 +37,7 @@ public class LocalPrimaryShardFound {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LocalPrimaryShardFound [primaryPath=").append(primaryPath).append(", localShardDataTree=")
-                .append(ObjectUtils.identityToString(localShardDataTree)).append("]");
-        return builder.toString();
+        return "LocalPrimaryShardFound [primaryPath=" + primaryPath +
+                ", localShardDataTree=" + ObjectUtils.identityToString(localShardDataTree) + "]";
     }
 }

@@ -87,12 +87,13 @@ public class AppendEntries extends AbstractRaftRPC {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("AppendEntries [leaderId=").append(leaderId).append(", prevLogIndex=").append(prevLogIndex)
-                .append(", prevLogTerm=").append(prevLogTerm).append(", leaderCommit=").append(leaderCommit)
-                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", payloadVersion=")
-                .append(payloadVersion).append(", entries=").append(entries).append("]");
-        return builder.toString();
+        return "AppendEntries [leaderId=" + leaderId +
+                ", prevLogIndex=" + prevLogIndex +
+                ", prevLogTerm=" + prevLogTerm +
+                ", leaderCommit=" + leaderCommit +
+                ", replicatedToAllIndex=" + replicatedToAllIndex +
+                ", payloadVersion=" + payloadVersion +
+                ", entries=" + entries + "]";
     }
 
     private Object writeReplace() {

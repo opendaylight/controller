@@ -38,9 +38,7 @@ public class FindPrimary implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(getClass().getName()).append(" [shardName=").append(shardName).append(", waitUntilReady=")
-               .append(waitUntilReady).append("]");
-        return builder.toString();
+        return getClass().getName() + " [shardName=" + shardName +
+                ", waitUntilReady=" + waitUntilReady + "]";
     }
 }

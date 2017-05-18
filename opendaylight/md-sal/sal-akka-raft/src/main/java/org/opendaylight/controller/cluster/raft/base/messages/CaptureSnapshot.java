@@ -64,14 +64,14 @@ public class CaptureSnapshot {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("CaptureSnapshot [lastAppliedIndex=").append(lastAppliedIndex).append(", lastAppliedTerm=")
-                .append(lastAppliedTerm).append(", lastIndex=").append(lastIndex).append(", lastTerm=")
-                .append(lastTerm).append(", installSnapshotInitiated=")
-                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", replicatedToAllTerm=")
-                .append(replicatedToAllTerm).append(", unAppliedEntries size=")
-                .append(unAppliedEntries.size()).append("]");
-        return builder.toString();
+        return "CaptureSnapshot [lastAppliedIndex=" + lastAppliedIndex +
+                ", lastAppliedTerm=" + lastAppliedTerm +
+                ", lastIndex=" + lastIndex +
+                ", lastTerm=" + lastTerm +
+                ", installSnapshotInitiated=" +
+                ", replicatedToAllIndex=" + replicatedToAllIndex +
+                ", replicatedToAllTerm=" + replicatedToAllTerm +
+                ", unAppliedEntries size=" + unAppliedEntries.size() + "]";
     }
 
 
