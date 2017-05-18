@@ -22,6 +22,30 @@
       "revId": "f4f709575181ecc6a9b846f9e9d7fecb716cf76c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_a81008a9",
+        "filename": "opendaylight/config/yang-jmx-generator/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/RuntimeBeanEntry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-18T07:53:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba068154_4bbec1d5",
+      "range": {
+        "startLine": 67,
+        "startChar": 4,
+        "endLine": 67,
+        "endChar": 92
+      },
+      "revId": "f4f709575181ecc6a9b846f9e9d7fecb716cf76c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
