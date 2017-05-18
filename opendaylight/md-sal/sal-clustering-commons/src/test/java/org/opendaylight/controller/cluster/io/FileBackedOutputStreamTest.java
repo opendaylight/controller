@@ -40,27 +40,24 @@ public class FileBackedOutputStreamTest {
 
     @BeforeClass
     public static void staticSetup() {
-        File dir = new File(TEMP_DIR);
-        if (!dir.exists() && !dir.mkdirs()) {
-            throw new RuntimeException("Failed to create temp dir " + TEMP_DIR);
-        }
+        createDir(TEMP_DIR);
     }
 
     @AfterClass
     public static void staticCleanup() {
-        deleteTempFiles();
+        deleteTempFiles(TEMP_DIR);
         deleteFile(TEMP_DIR);
     }
 
     @Before
     public void setup() {
-        deleteTempFiles();
+        deleteTempFiles(TEMP_DIR);
         FileBackedOutputStream.REFERENCE_CACHE.clear();
     }
 
     @After
     public void cleanup() {
-        deleteTempFiles();
+        deleteTempFiles(TEMP_DIR);
     }
 
     @Test
@@ -72,7 +69,7 @@ public class FileBackedOutputStreamTest {
             fbos.write(bytes, 1, bytes.length - 1);
 
             assertEquals("getCount", bytes.length, fbos.getCount());
-            assertNull("Found unexpected temp file", findTempFileName());
+            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
 
             // Read bytes twice.
@@ -95,13 +92,13 @@ public class FileBackedOutputStreamTest {
             fbos.write(bytes[0]);
             fbos.write(bytes, 1, 11);
 
-            String tempFileName = findTempFileName();
+            String tempFileName = findTempFileName(TEMP_DIR);
             assertNotNull("Expected temp file created", tempFileName);
 
             fbos.write(bytes[12]);
             fbos.write(bytes, 13, bytes.length - 13);
 
-            assertEquals("Temp file", tempFileName, findTempFileName());
+            assertEquals("Temp file", tempFileName, findTempFileName(TEMP_DIR));
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
 
             InputStream inputStream = fbos.asByteSource().openStream();
@@ -121,7 +118,7 @@ public class FileBackedOutputStreamTest {
 
             assertEquals("Reference cache size", 0, FileBackedOutputStream.REFERENCE_CACHE.size());
 
-            assertNull("Found unexpected temp file", findTempFileName());
+            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
         }
 
         LOG.info("testFileThresholdReachedWithWriteBytes ending");
@@ -135,12 +132,12 @@ public class FileBackedOutputStreamTest {
             fbos.write(bytes[0]);
             fbos.write(bytes[1]);
 
-            assertNull("Found unexpected temp file", findTempFileName());
+            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
 
             fbos.write(bytes[2]);
             fbos.flush();
 
-            assertNotNull("Expected temp file created", findTempFileName());
+            assertNotNull("Expected temp file created", findTempFileName(TEMP_DIR));
 
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
             assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
@@ -156,7 +153,7 @@ public class FileBackedOutputStreamTest {
             byte[] bytes = new byte[]{0, 1, 2};
             fbos.write(bytes);
 
-            assertNull("Found unexpected temp file", findTempFileName());
+            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
 
             // Should throw IOException after call to asByteSource.
@@ -172,7 +169,7 @@ public class FileBackedOutputStreamTest {
         try {
             fbos = new FileBackedOutputStream(1, TEMP_DIR);
             fbos.write(new byte[] {0, 1});
-            assertNotNull("Expected temp file created", findTempFileName());
+            assertNotNull("Expected temp file created", findTempFileName(TEMP_DIR));
         } finally {
             if (fbos != null) {
                 fbos.close();
@@ -183,7 +180,7 @@ public class FileBackedOutputStreamTest {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 20) {
             System.gc();
-            if (findTempFileName() == null) {
+            if (findTempFileName(TEMP_DIR) == null) {
                 return;
             }
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -192,23 +189,30 @@ public class FileBackedOutputStreamTest {
         fail("Temp file was not deleted");
     }
 
-    private static String findTempFileName() {
-        String[] files = new File(TEMP_DIR).list();
+    static String findTempFileName(String dirPath) {
+        String[] files = new File(dirPath).list();
         assertNotNull(files);
         assertTrue("Found more than one temp file: " + Arrays.toString(files), files.length < 2);
         return files.length == 1 ? files[0] : null;
     }
 
-    private static boolean deleteFile(String file) {
+    static boolean deleteFile(String file) {
         return new File(file).delete();
     }
 
-    private static void deleteTempFiles() {
-        String[] files = new File(TEMP_DIR).list();
+    static void deleteTempFiles(String path) {
+        String[] files = new File(path).list();
         if (files != null) {
             for (String file: files) {
-                deleteFile(TEMP_DIR + File.separator + file);
+                deleteFile(path + File.separator + file);
             }
+        }
+    }
+
+    static void createDir(String path) {
+        File dir = new File(path);
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new RuntimeException("Failed to create temp dir " + path);
         }
     }
 }

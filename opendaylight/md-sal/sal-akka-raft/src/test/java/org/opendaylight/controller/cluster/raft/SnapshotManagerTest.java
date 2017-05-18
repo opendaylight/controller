@@ -38,7 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.LastAppliedTermInformationReader;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -97,7 +97,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(5L).when(mockElectionTerm).getCurrentTerm();
         doReturn("member5").when(mockElectionTerm).getVotedFor();
 
-        doReturn(new FileBackedOutputStream(10000000, "target")).when(mockRaftActorContext).newFileBackedOutputStream();
+        doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
+                .when(mockRaftActorContext).getFileBackedOutputStreamFactory();
 
         snapshotManager = new SnapshotManager(mockRaftActorContext, LoggerFactory.getLogger(this.getClass()));
         factory = new TestActorFactory(getSystem());

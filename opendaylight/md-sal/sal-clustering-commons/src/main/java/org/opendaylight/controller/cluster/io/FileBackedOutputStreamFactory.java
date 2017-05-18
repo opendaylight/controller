@@ -39,4 +39,13 @@ public class FileBackedOutputStreamFactory {
     public FileBackedOutputStream newInstance() {
         return new FileBackedOutputStream(fileThreshold, fileDirectory);
     }
+
+    /**
+     * Creates a new {@link SharedFileBackedOutputStream} with the settings configured for this factory.
+     *
+     * @return a {@link SharedFileBackedOutputStream} instance
+     */
+    public SharedFileBackedOutputStream newSharedInstance() {
+        return new SharedFileBackedOutputStream(fileThreshold, fileDirectory);
+    }
 }
