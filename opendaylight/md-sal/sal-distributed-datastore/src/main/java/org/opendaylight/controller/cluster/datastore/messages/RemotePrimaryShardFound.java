@@ -34,9 +34,7 @@ public class RemotePrimaryShardFound implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("RemotePrimaryShardFound [primaryPath=").append(primaryPath).append(", primaryVersion=")
-                .append(primaryVersion).append("]");
-        return builder.toString();
+        return "RemotePrimaryShardFound [primaryPath=" + primaryPath
+                + ", primaryVersion=" + primaryVersion + "]";
     }
 }
