@@ -73,11 +73,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             ConfigObjectWrapper wrapper = new ConfigObjectWrapper(o);
 
             String moduleName = wrapper.stringValue("name");
-            ModuleConfig.Builder builder = moduleConfigMap.get(moduleName);
-            if (builder == null) {
-                builder = ModuleConfig.builder(moduleName);
-                moduleConfigMap.put(moduleName, builder);
-            }
+            ModuleConfig.Builder builder = moduleConfigMap.computeIfAbsent(moduleName, ModuleConfig::builder);
 
             builder.nameSpace(wrapper.stringValue("namespace"));
             builder.shardStrategy(ShardStrategyFactory.newShardStrategyInstance(moduleName,

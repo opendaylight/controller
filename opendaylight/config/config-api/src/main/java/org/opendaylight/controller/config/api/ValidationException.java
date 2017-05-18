@@ -43,11 +43,7 @@ public class ValidationException extends Exception {
                     String instanceName = innerEntry.getKey();
                     ExceptionMessageWithStackTrace ex = innerEntry.getValue();
                     Map<String, ExceptionMessageWithStackTrace> instanceToExMap = failedValidations
-                            .get(moduleName);
-                    if (instanceToExMap == null) {
-                        instanceToExMap = new HashMap<>();
-                        failedValidations.put(moduleName, instanceToExMap);
-                    }
+                            .computeIfAbsent(moduleName, k -> new HashMap<>());
                     if (instanceToExMap.containsKey(instanceName)) {
                         throw new IllegalArgumentException(
                                 "Cannot merge with same module name "

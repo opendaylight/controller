@@ -9,7 +9,7 @@
 package org.opendaylight.controller.config.facade.xml.rpc;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.config.facade.xml.osgi.EnumResolver;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
@@ -17,8 +17,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 
 public final class ModuleRpcs {
 
-    private final Map<String, String> yangToJavaNames = Maps.newHashMap();
-    private final Map<String, Map<String, InstanceRuntimeRpc>> rpcMapping = Maps.newHashMap();
+    private final Map<String, String> yangToJavaNames = new HashMap<>();
+    private final Map<String, Map<String, InstanceRuntimeRpc>> rpcMapping = new HashMap<>();
     private final EnumResolver enumResolver;
 
     public ModuleRpcs(final EnumResolver enumResolver) {
@@ -34,11 +34,7 @@ public final class ModuleRpcs {
 
     public void addRpc(RuntimeBeanEntry runtimeEntry, Rpc rpc) {
         String yangName = runtimeEntry.getYangName();
-        Map<String, InstanceRuntimeRpc> map = rpcMapping.get(yangName);
-        if (map == null) {
-            map = Maps.newHashMap();
-            rpcMapping.put(yangName, map);
-        }
+        Map<String, InstanceRuntimeRpc> map = rpcMapping.computeIfAbsent(yangName, k -> new HashMap<>());
 
         Preconditions.checkState(!map.containsKey(rpc.getYangName()), "Rpc %s for runtime bean %s added twice",
                 rpc.getYangName(), yangName);

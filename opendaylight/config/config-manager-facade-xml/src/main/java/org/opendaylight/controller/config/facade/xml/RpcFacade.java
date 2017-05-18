@@ -10,7 +10,8 @@ package org.opendaylight.controller.config.facade.xml;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
@@ -48,23 +49,17 @@ public class RpcFacade {
 
     public Rpcs mapRpcs() {
 
-        final Map<String, Map<String, ModuleRpcs>> map = Maps.newHashMap();
+        final Map<String, Map<String, ModuleRpcs>> map = new HashMap<>();
 
         for (final Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : yangStoreService.getModuleMXBeanEntryMap().entrySet()) {
 
-            Map<String, ModuleRpcs> namespaceToModules = map.get(namespaceToModuleEntry.getKey());
-            if (namespaceToModules == null) {
-                namespaceToModules = Maps.newHashMap();
-                map.put(namespaceToModuleEntry.getKey(), namespaceToModules);
-            }
+            Map<String, ModuleRpcs> namespaceToModules =
+                    map.computeIfAbsent(namespaceToModuleEntry.getKey(), k -> new HashMap<>());
 
             for (final Map.Entry<String, ModuleMXBeanEntry> moduleEntry : namespaceToModuleEntry.getValue().entrySet()) {
 
-                ModuleRpcs rpcMapping = namespaceToModules.get(moduleEntry.getKey());
-                if (rpcMapping == null) {
-                    rpcMapping = new ModuleRpcs(yangStoreService.getEnumResolver());
-                    namespaceToModules.put(moduleEntry.getKey(), rpcMapping);
-                }
+                ModuleRpcs rpcMapping = namespaceToModules.computeIfAbsent(moduleEntry.getKey(),
+                        k -> new ModuleRpcs(yangStoreService.getEnumResolver()));
 
                 final ModuleMXBeanEntry entry = moduleEntry.getValue();
 
@@ -108,7 +103,7 @@ public class RpcFacade {
 
     private Map<String, AttributeConfigElement> sortAttributes(
             final Map<String, AttributeConfigElement> attributes, final XmlElement xml) {
-        final Map<String, AttributeConfigElement> sorted = Maps.newLinkedHashMap();
+        final Map<String, AttributeConfigElement> sorted = new LinkedHashMap<>();
 
         for (XmlElement xmlElement : xml.getChildElements()) {
             final String name = xmlElement.getName();

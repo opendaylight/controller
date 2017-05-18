@@ -108,11 +108,8 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
                     continue;
                 }
 
-                SubshardProducerSpecification spec = affectedSubshards.get(maybeAffected.getPrefix());
-                if (spec == null) {
-                    spec = new SubshardProducerSpecification(maybeAffected);
-                    affectedSubshards.put(maybeAffected.getPrefix(), spec);
-                }
+                SubshardProducerSpecification spec = affectedSubshards.computeIfAbsent(maybeAffected.getPrefix(),
+                    k -> new SubshardProducerSpecification(maybeAffected));
                 spec.addPrefix(bindPath);
             }
         }
