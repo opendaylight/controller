@@ -11,7 +11,7 @@ package org.opendaylight.controller.config.facade.xml.mapping.config;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,8 +36,8 @@ public final class Services {
     public static final String TYPE_KEY = "type";
     public static final String SERVICE_KEY = "service";
 
-    private final Map<String /*Namespace*/, Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = Maps
-            .newHashMap();
+    private final Map<String /*Namespace*/, Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>>>
+            namespaceToServiceNameToRefNameToInstance = new HashMap<>();
 
     /**
      *
@@ -57,18 +57,12 @@ public final class Services {
                 String serviceName = serviceEntry.getKey();
                 for (Entry<String, String> refEntry : serviceEntry.getValue().entrySet()) {
 
-                    Map<String, Map<String, ServiceInstance>> namespaceToServices = tracker.namespaceToServiceNameToRefNameToInstance.get(namespace);
-                    if (namespaceToServices == null) {
-                        namespaceToServices = Maps.newHashMap();
-                        tracker.namespaceToServiceNameToRefNameToInstance.put(namespace, namespaceToServices);
-                    }
+                    Map<String, Map<String, ServiceInstance>> namespaceToServices =
+                            tracker.namespaceToServiceNameToRefNameToInstance.computeIfAbsent(namespace,
+                                    k -> new HashMap<>());
 
                     Map<String, ServiceInstance> refNameToInstance = namespaceToServices
-                            .get(serviceName);
-                    if (refNameToInstance == null) {
-                        refNameToInstance = Maps.newHashMap();
-                        namespaceToServices.put(serviceName, refNameToInstance);
-                    }
+                            .computeIfAbsent(serviceName, k -> new HashMap<>());
 
                     String refName = refEntry.getKey();
                     //we want to compare reference not value of the provider
@@ -86,7 +80,7 @@ public final class Services {
     // TODO support edit strategies on services
 
     public static Services fromXml(final XmlElement xml) throws DocumentedException {
-        Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
+        Map<String, Map<String, Map<String, String>>> retVal = new HashMap<>();
 
         List<XmlElement> services = xml.getChildElements(SERVICE_KEY);
         xml.checkUnrecognisedElements(services);
@@ -98,20 +92,13 @@ public final class Services {
 
             Preconditions.checkState(prefixNamespace.getKey()!=null && !prefixNamespace.getKey().equals(""), "Type attribute was not prefixed");
 
-            Map<String, Map<String, String>> namespaceToServices = retVal.get(prefixNamespace.getValue());
-            if(namespaceToServices == null) {
-                namespaceToServices = Maps.newHashMap();
-                retVal.put(prefixNamespace.getValue(), namespaceToServices);
-            }
+            Map<String, Map<String, String>> namespaceToServices =
+                    retVal.computeIfAbsent(prefixNamespace.getValue(), k -> new HashMap<>());
 
             String serviceName =  ObjectNameAttributeReadingStrategy
                 .checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
 
-            Map<String, String> innerMap = namespaceToServices.get(serviceName);
-            if (innerMap == null) {
-                innerMap = Maps.newHashMap();
-                namespaceToServices.put(serviceName, innerMap);
-            }
+            Map<String, String> innerMap = namespaceToServices.computeIfAbsent(serviceName, k -> new HashMap<>());
 
             List<XmlElement> instances = service.getChildElements(XmlMappingConstants.INSTANCE_KEY);
             service.checkUnrecognisedElements(instances, typeElement);

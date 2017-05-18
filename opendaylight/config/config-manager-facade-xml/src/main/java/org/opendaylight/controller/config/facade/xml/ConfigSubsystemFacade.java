@@ -9,10 +9,10 @@
 package org.opendaylight.controller.config.facade.xml;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import java.io.Closeable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -263,22 +263,16 @@ public class ConfigSubsystemFacade implements Closeable {
     }
 
     private static Map<String, Map<Date, IdentityMapping>> transformIdentities(final Set<Module> modules) {
-        Map<String, Map<Date, IdentityMapping>> mappedIds = Maps.newHashMap();
+        Map<String, Map<Date, IdentityMapping>> mappedIds = new HashMap<>();
         for (Module module : modules) {
             String namespace = module.getNamespace().toString();
-            Map<Date, IdentityMapping> revisionsByNamespace = mappedIds.get(namespace);
-            if (revisionsByNamespace == null) {
-                revisionsByNamespace = Maps.newHashMap();
-                mappedIds.put(namespace, revisionsByNamespace);
-            }
+            Map<Date, IdentityMapping> revisionsByNamespace =
+                    mappedIds.computeIfAbsent(namespace, k -> new HashMap<>());
 
             Date revision = module.getRevision();
 
-            IdentityMapping identityMapping = revisionsByNamespace.get(revision);
-            if (identityMapping == null) {
-                identityMapping = new IdentityMapping();
-                revisionsByNamespace.put(revision, identityMapping);
-            }
+            IdentityMapping identityMapping =
+                    revisionsByNamespace.computeIfAbsent(revision, k -> new IdentityMapping());
 
             for (IdentitySchemaNode identitySchemaNode : module.getIdentities()) {
                 identityMapping.addIdSchemaNode(identitySchemaNode);
@@ -302,7 +296,7 @@ public class ConfigSubsystemFacade implements Closeable {
                                                                                                              final Map<String/* Namespace from yang file */,
                                                                                                                      Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
 
-        Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = Maps.newHashMap();
+        Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = new HashMap<>();
 
         for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleToMbe : mBeanEntries.entrySet()) {
             for (Map.Entry<String, ModuleMXBeanEntry> moduleNameToMbe : namespaceToModuleToMbe.getValue().entrySet()) {
@@ -312,11 +306,9 @@ public class ConfigSubsystemFacade implements Closeable {
                 ModuleConfig moduleConfig = new ModuleConfig(moduleName,
                         new InstanceConfig(reader, moduleMXBeanEntry.getAttributes(), moduleMXBeanEntry.getNullableDummyContainerName()));
 
-                Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespaceToModuleToMbe.getKey());
-                if (moduleNameToModuleConfig == null) {
-                    moduleNameToModuleConfig = Maps.newHashMap();
-                    namespaceToModuleNameToModuleConfig.put(namespaceToModuleToMbe.getKey(), moduleNameToModuleConfig);
-                }
+                Map<String, ModuleConfig> moduleNameToModuleConfig =
+                        namespaceToModuleNameToModuleConfig.computeIfAbsent(namespaceToModuleToMbe.getKey(),
+                                k -> new HashMap<>());
 
                 moduleNameToModuleConfig.put(moduleName, moduleConfig);
             }
@@ -331,17 +323,17 @@ public class ConfigSubsystemFacade implements Closeable {
 
     private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(final ConfigRegistryClient configRegistryClient,
                                                                          final Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
-        Map<String, Map<String, ModuleRuntime>> retVal = Maps.newHashMap();
+        Map<String, Map<String, ModuleRuntime>> retVal = new HashMap<>();
 
         for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : mBeanEntries.entrySet()) {
 
-            Map<String, ModuleRuntime> innerMap = Maps.newHashMap();
+            Map<String, ModuleRuntime> innerMap = new HashMap<>();
             Map<String, ModuleMXBeanEntry> entriesFromNamespace = namespaceToModuleEntry.getValue();
             for (Map.Entry<String, ModuleMXBeanEntry> moduleToMXEntry : entriesFromNamespace.entrySet()) {
 
                 ModuleMXBeanEntry mbe = moduleToMXEntry.getValue();
 
-                Map<RuntimeBeanEntry, InstanceConfig> cache = Maps.newHashMap();
+                Map<RuntimeBeanEntry, InstanceConfig> cache = new HashMap<>();
                 RuntimeBeanEntry root = null;
                 for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
                     cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap(), mbe.getNullableDummyContainerName()));
@@ -365,7 +357,7 @@ public class ConfigSubsystemFacade implements Closeable {
     }
 
     private InstanceRuntime createInstanceRuntime(final RuntimeBeanEntry root, final Map<RuntimeBeanEntry, InstanceConfig> cache) {
-        Map<String, InstanceRuntime> children = Maps.newHashMap();
+        Map<String, InstanceRuntime> children = new HashMap<>();
         for (RuntimeBeanEntry child : root.getChildren()) {
             children.put(child.getJavaNamePrefix(), createInstanceRuntime(child, cache));
         }
@@ -374,7 +366,7 @@ public class ConfigSubsystemFacade implements Closeable {
     }
 
     private Map<String, String> createJmxToYangMap(final List<RuntimeBeanEntry> children) {
-        Map<String, String> jmxToYangNamesForChildRbe = Maps.newHashMap();
+        Map<String, String> jmxToYangNamesForChildRbe = new HashMap<>();
         for (RuntimeBeanEntry rbe : children) {
             jmxToYangNamesForChildRbe.put(rbe.getJavaNamePrefix(), rbe.getYangName());
         }

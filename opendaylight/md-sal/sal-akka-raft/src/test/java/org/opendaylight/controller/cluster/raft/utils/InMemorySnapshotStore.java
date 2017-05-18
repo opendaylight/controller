@@ -42,12 +42,7 @@ public class InMemorySnapshotStore extends SnapshotStore {
     private static Map<String, List<StoredSnapshot>> snapshots = new ConcurrentHashMap<>();
 
     public static void addSnapshot(String persistentId, Object snapshot) {
-        List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
-
-        if (snapshotList == null) {
-            snapshotList = new ArrayList<>();
-            snapshots.put(persistentId, snapshotList);
-        }
+        List<StoredSnapshot> snapshotList = snapshots.computeIfAbsent(persistentId, k -> new ArrayList<>());
 
         synchronized (snapshotList) {
             snapshotList.add(new StoredSnapshot(new SnapshotMetadata(persistentId, snapshotList.size(),

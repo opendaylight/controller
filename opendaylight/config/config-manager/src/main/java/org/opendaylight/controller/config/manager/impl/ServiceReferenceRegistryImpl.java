@@ -89,11 +89,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         Map<String /* namespace */, Map<String /* localName */, ServiceInterfaceAnnotation>> modifiableNamespacesToAnnotations = new HashMap<>();
         Map<String /* service qName*/, ServiceInterfaceAnnotation> modifiableServiceQNamesToAnnotations = new HashMap<>();
         for (ServiceInterfaceAnnotation sia : allAnnotations) {
-            Map<String, ServiceInterfaceAnnotation> ofNamespace = modifiableNamespacesToAnnotations.get(sia.namespace());
-            if (ofNamespace == null) {
-                ofNamespace = new HashMap<>();
-                modifiableNamespacesToAnnotations.put(sia.namespace(), ofNamespace);
-            }
+            Map<String, ServiceInterfaceAnnotation> ofNamespace =
+                    modifiableNamespacesToAnnotations.computeIfAbsent(sia.namespace(), k -> new HashMap<>());
             if (ofNamespace.containsKey(sia.localName())) {
                 LOG.error(
                         "Cannot construct namespacesToAnnotations map, conflict between local names in {}, offending local name: {}, map so far {}",
@@ -290,11 +287,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         Map<String /* serviceInterfaceName */, Map<String/* refName */, ObjectName>> result = new HashMap<>();
         for (Entry<ServiceReference, ModuleIdentifier> entry: refNames.entrySet()) {
             String qName = entry.getKey().getServiceInterfaceQName();
-            Map<String /* refName */, ObjectName> innerMap = result.get(qName);
-            if (innerMap == null) {
-                innerMap = new HashMap<>();
-                result.put(qName, innerMap);
-            }
+            Map<String /* refName */, ObjectName> innerMap = result.computeIfAbsent(qName, k -> new HashMap<>());
             innerMap.put(entry.getKey().getRefName(), getObjectName(entry.getValue()));
         }
         return result;
@@ -421,11 +414,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         }
         // save to refNames
         refNames.put(serviceReference, moduleIdentifier);
-        Map<ServiceInterfaceAnnotation, String /* service ref name */> refNamesToAnnotations = modulesToServiceRef.get(moduleIdentifier);
-        if (refNamesToAnnotations == null){
-            refNamesToAnnotations = new HashMap<>();
-            modulesToServiceRef.put(moduleIdentifier, refNamesToAnnotations);
-        }
+        Map<ServiceInterfaceAnnotation, String /* service ref name */> refNamesToAnnotations =
+                modulesToServiceRef.computeIfAbsent(moduleIdentifier, k -> new HashMap<>());
 
         ServiceInterfaceAnnotation annotation = serviceQNamesToAnnotations.get(serviceReference.getServiceInterfaceQName());
         Preconditions.checkNotNull(annotation, "Possible error in code, cannot find annotation for " + serviceReference);

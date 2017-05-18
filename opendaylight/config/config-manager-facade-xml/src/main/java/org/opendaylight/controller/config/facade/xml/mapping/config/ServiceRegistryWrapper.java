@@ -9,7 +9,7 @@
 package org.opendaylight.controller.config.facade.xml.mapping.config;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
@@ -64,7 +64,7 @@ public class ServiceRegistryWrapper {
     }
 
     public Map<String, Map<String, Map<String, String>>> getMappedServices() {
-        Map<String, Map<String, Map<String, String>>> retVal = Maps.newHashMap();
+        Map<String, Map<String, Map<String, String>>> retVal = new HashMap<>();
 
         Map<String, Map<String, ObjectName>> serviceMapping = configServiceRefRegistry.getServiceMapping();
         for (Map.Entry<String, Map<String, ObjectName>> qNameToRefNameEntry : serviceMapping.entrySet()){
@@ -75,18 +75,11 @@ public class ServiceRegistryWrapper {
 
                 QName qname = QName.create(qNameToRefNameEntry.getKey());
                 String namespace = qname.getNamespace().toString();
-                Map<String, Map<String, String>> serviceToRefs = retVal.get(namespace);
-                if(serviceToRefs==null) {
-                    serviceToRefs = Maps.newHashMap();
-                    retVal.put(namespace, serviceToRefs);
-                }
+                Map<String, Map<String, String>> serviceToRefs =
+                        retVal.computeIfAbsent(namespace, k -> new HashMap<>());
 
                 String localName = qname.getLocalName();
-                Map<String, String> refsToSis = serviceToRefs.get(localName);
-                if(refsToSis==null) {
-                    refsToSis = Maps.newHashMap();
-                    serviceToRefs.put(localName, refsToSis);
-                }
+                Map<String, String> refsToSis = serviceToRefs.computeIfAbsent(localName, k -> new HashMap<>());
 
                 Preconditions.checkState(!refsToSis.containsKey(refName),
                         "Duplicate reference name %s for service %s:%s, now for instance %s", refName, namespace,
