@@ -36,7 +36,7 @@ class SnapshotTracker implements AutoCloseable {
         this.log = log;
         this.totalChunks = totalChunks;
         this.leaderId = Preconditions.checkNotNull(leaderId);
-        fileBackedStream = context.newFileBackedOutputStream();
+        fileBackedStream = context.getFileBackedOutputStreamFactory().newInstance();
         bufferedStream = new BufferedOutputStream(fileBackedStream);
     }
 
