@@ -54,22 +54,69 @@ import org.slf4j.LoggerFactory;
  */
 @NotThreadSafe
 final class FrontendReadWriteTransaction extends FrontendTransaction {
+    private static abstract class State {
+
+    }
+
+    private static final class Failed extends State {
+        private final RequestException cause;
+
+        Failed(final RequestException cause) {
+            this.cause = Preconditions.checkNotNull(cause);
+        }
+    }
+
+    private static final class Open extends State {
+        private final ReadWriteShardDataTreeTransaction openTransaction;
+
+        Open(final ReadWriteShardDataTreeTransaction openTransaction) {
+            this.openTransaction = Preconditions.checkNotNull(openTransaction);
+        }
+    }
+
+    private static final class Sealed extends State {
+        final DataTreeModification sealedModification;
+
+        Sealed(final DataTreeModification sealedModification) {
+            this.sealedModification = Preconditions.checkNotNull(sealedModification);
+        }
+    }
+
+    private static final class Ready extends State {
+        final ShardDataTreeCohort readyCohort;
+
+        Ready(final ShardDataTreeCohort readyCohort) {
+            this.readyCohort = Preconditions.checkNotNull(readyCohort);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(FrontendReadWriteTransaction.class);
 
-    private ReadWriteShardDataTreeTransaction openTransaction;
-    private DataTreeModification sealedModification;
-    private ShardDataTreeCohort readyCohort;
+    private static final State ABORTED = new State() {
+        @Override
+        public String toString() {
+            return "ABORTED";
+        }
+    };
+    private static final State COMMITTED = new State() {
+        @Override
+        public String toString() {
+            return "COMMITTED";
+        }
+    };
+
+    private State state;
 
     private FrontendReadWriteTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id,
             final ReadWriteShardDataTreeTransaction transaction) {
         super(history, id);
-        this.openTransaction = Preconditions.checkNotNull(transaction);
+        this.state = new Open(transaction);
     }
 
     private FrontendReadWriteTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id,
             final DataTreeModification mod) {
         super(history, id);
-        this.sealedModification = Preconditions.checkNotNull(mod);
+        this.state = new Sealed(mod);
     }
 
     static FrontendReadWriteTransaction createOpen(final AbstractFrontendHistory history,
@@ -118,16 +165,20 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
             @Override
             public void onSuccess(final DataTreeCandidate result) {
-                recordAndSendSuccess(envelope, now, new TransactionPreCommitSuccess(readyCohort.getIdentifier(),
+                recordAndSendSuccess(envelope, now, new TransactionPreCommitSuccess(getIdentifier(),
                     request.getSequence()));
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                recordAndSendFailure(envelope, now, new RuntimeRequestException("Precommit failed", failure));
-                readyCohort = null;
+                failTransaction(envelope, now, new RuntimeRequestException("Precommit failed", failure));
             }
         });
+    }
+
+    private void failTransaction(final RequestEnvelope envelope, final long now, final RuntimeRequestException cause) {
+        recordAndSendFailure(envelope, now, cause);
+        state = new Failed(cause);
     }
 
     private void handleTransactionDoCommit(final TransactionDoCommitRequest request, final RequestEnvelope envelope,
@@ -140,22 +191,19 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
             @Override
             public void onFailure(final Throwable failure) {
-                recordAndSendFailure(envelope, now, new RuntimeRequestException("Commit failed", failure));
-                readyCohort = null;
+                failTransaction(envelope, now, new RuntimeRequestException("Commit failed", failure));
             }
         });
     }
 
     private void handleLocalTransactionAbort(final long sequence, final RequestEnvelope envelope, final long now) {
-        Preconditions.checkState(readyCohort == null, "Transaction {} encountered local abort with commit underway",
-                getIdentifier());
-        openTransaction.abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
+        checkOpen().abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
             sequence)));
     }
 
     private void handleTransactionAbort(final long sequence, final RequestEnvelope envelope, final long now) {
-        if (readyCohort == null) {
-            openTransaction.abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
+        if (state instanceof Open) {
+            checkOpen().abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
                 sequence)));
             return;
         }
@@ -163,16 +211,16 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         readyCohort.abort(new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
-                readyCohort = null;
                 recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(), sequence));
                 LOG.debug("Transaction {} aborted", getIdentifier());
+                state = ABORTED;
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                readyCohort = null;
                 LOG.warn("Transaction {} abort failed", getIdentifier(), failure);
                 recordAndSendFailure(envelope, now, new RuntimeRequestException("Abort failed", failure));
+                state = ABORTED;
             }
         });
     }
@@ -181,14 +229,13 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         readyCohort.canCommit(new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
-                recordAndSendSuccess(envelope, now, new TransactionCanCommitSuccess(readyCohort.getIdentifier(),
+                recordAndSendSuccess(envelope, now, new TransactionCanCommitSuccess(getIdentifier(),
                     envelope.getMessage().getSequence()));
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                recordAndSendFailure(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
-                readyCohort = null;
+                failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
             }
         });
     }
@@ -202,14 +249,13 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
             @Override
             public void onFailure(final Throwable failure) {
-                recordAndSendFailure(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
-                readyCohort = null;
+                failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
             }
         });
     }
 
     void successfulDirectCanCommit(final RequestEnvelope envelope, final long startTime) {
-        readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
+        checkReady().preCommit(new FutureCallback<DataTreeCandidate>() {
             @Override
             public void onSuccess(final DataTreeCandidate result) {
                 successfulDirectPreCommit(envelope, startTime);
@@ -217,14 +263,13 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
             @Override
             public void onFailure(final Throwable failure) {
-                recordAndSendFailure(envelope, startTime, new RuntimeRequestException("PreCommit failed", failure));
-                readyCohort = null;
+                failTransaction(envelope, startTime, new RuntimeRequestException("PreCommit failed", failure));
             }
         });
     }
 
     void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
-        readyCohort.commit(new FutureCallback<UnsignedLong>() {
+        checkReady().commit(new FutureCallback<UnsignedLong>() {
             @Override
             public void onSuccess(final UnsignedLong result) {
                 successfulCommit(envelope, startTime);
@@ -232,20 +277,20 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
             @Override
             public void onFailure(final Throwable failure) {
-                recordAndSendFailure(envelope, startTime, new RuntimeRequestException("DoCommit failed", failure));
-                readyCohort = null;
+                failTransaction(envelope, startTime, new RuntimeRequestException("DoCommit failed", failure));
             }
         });
     }
 
     void successfulCommit(final RequestEnvelope envelope, final long startTime) {
-        recordAndSendSuccess(envelope, startTime, new TransactionCommitSuccess(readyCohort.getIdentifier(),
+        recordAndSendSuccess(envelope, startTime, new TransactionCommitSuccess(getIdentifier(),
             envelope.getMessage().getSequence()));
-        readyCohort = null;
+        state = COMMITTED;
     }
 
     private void handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
+        final DataTreeModification sealedModification = checkSealed();
         if (!sealedModification.equals(request.getModification())) {
             LOG.warn("Expecting modification {}, commit request has {}", sealedModification, request.getModification());
             throw new UnsupportedRequestException(request);
@@ -253,9 +298,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final java.util.Optional<Exception> optFailure = request.getDelayedFailure();
         if (optFailure.isPresent()) {
-            readyCohort = history().createFailedCohort(getIdentifier(), sealedModification, optFailure.get());
+            state = new Ready(history().createFailedCohort(getIdentifier(), sealedModification, optFailure.get()));
         } else {
-            readyCohort = history().createReadyCohort(getIdentifier(), sealedModification);
+            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification));
         }
 
         if (request.isCoordinated()) {
@@ -267,14 +312,14 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request)
             throws RequestException {
-        final Optional<NormalizedNode<?, ?>> data = openTransaction.getSnapshot().readNode(request.getPath());
+        final Optional<NormalizedNode<?, ?>> data = checkOpen().getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ExistsTransactionSuccess(getIdentifier(), request.getSequence(),
             data.isPresent()));
     }
 
     private ReadTransactionSuccess handleReadTransaction(final ReadTransactionRequest request)
             throws RequestException {
-        final Optional<NormalizedNode<?, ?>> data = openTransaction.getSnapshot().readNode(request.getPath());
+        final Optional<NormalizedNode<?, ?>> data = checkOpen().getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ReadTransactionSuccess(getIdentifier(), request.getSequence(),
             data));
     }
@@ -288,7 +333,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final Collection<TransactionModification> mods = request.getModifications();
         if (!mods.isEmpty()) {
-            final DataTreeModification modification = openTransaction.getSnapshot();
+            final DataTreeModification modification = checkOpen().getSnapshot();
             for (TransactionModification m : mods) {
                 if (m instanceof TransactionDelete) {
                     modification.delete(m.getPath());
@@ -309,8 +354,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         switch (maybeProto.get()) {
             case ABORT:
-                openTransaction.abort(() -> replyModifySuccess(request.getSequence()));
-                openTransaction = null;
+                checkOpen().abort(() -> replyModifySuccess(request.getSequence()));
+                state = ABORTED;
                 return null;
             case READY:
                 ensureReady();
@@ -332,10 +377,30 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private void ensureReady() {
         // We may have a combination of READY + SIMPLE/THREE_PHASE , in which case we want to ready the transaction
         // only once.
-        if (readyCohort == null) {
-            readyCohort = openTransaction.ready();
-            LOG.debug("{}: transitioned {} to ready", persistenceId(), openTransaction.getIdentifier());
-            openTransaction = null;
+        if (state instanceof Ready) {
+            LOG.debug("{}: {} is already in state {}", persistenceId(), getIdentifier(), state);
+            return;
         }
+
+        state = new Ready(checkOpen().ready());
+        LOG.debug("{}: transitioned {} to ready", persistenceId(), getIdentifier());
+    }
+
+    private ReadWriteShardDataTreeTransaction checkOpen() {
+        Preconditions.checkState(state instanceof Open, "%s expect to be open, is in state %s", getIdentifier(),
+            state);
+        return ((Open) state).openTransaction;
+    }
+
+    private ShardDataTreeCohort checkReady() {
+        Preconditions.checkState(state instanceof Ready, "%s expect to be ready, is in state %s", getIdentifier(),
+            state);
+        return ((Ready) state).readyCohort;
+    }
+
+    private DataTreeModification checkSealed() {
+        Preconditions.checkState(state instanceof Sealed, "%s expect to be sealed, is in state %s", getIdentifier(),
+            state);
+        return ((Sealed) state).sealedModification;
     }
 }
