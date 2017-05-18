@@ -108,6 +108,29 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     }
 
     @Override
+    public int hashCode() {
+        return serverConfig.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        ServerConfigurationPayload other = (ServerConfigurationPayload) obj;
+        return serverConfig.equals(other.serverConfig);
+    }
+
+    @Override
     public String toString() {
         return "ServerConfigurationPayload [serverConfig=" + serverConfig + "]";
     }
