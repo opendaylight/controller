@@ -45,11 +45,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
 
     @GuardedBy("this")
     private void storeShard(final DOMDataTreeIdentifier prefix, final ShardRegistration<?> reg) {
-        ShardingTableEntry t = shardingTables.get(prefix.getDatastoreType());
-        if (t == null) {
-            t = new ShardingTableEntry();
-            shardingTables.put(prefix.getDatastoreType(), t);
-        }
+        ShardingTableEntry t = shardingTables.computeIfAbsent(prefix.getDatastoreType(), k -> new ShardingTableEntry());
 
         t.store(prefix.getRootIdentifier(), reg);
     }

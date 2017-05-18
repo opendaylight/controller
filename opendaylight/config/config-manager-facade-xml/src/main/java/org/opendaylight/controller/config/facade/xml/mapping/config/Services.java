@@ -57,18 +57,12 @@ public final class Services {
                 String serviceName = serviceEntry.getKey();
                 for (Entry<String, String> refEntry : serviceEntry.getValue().entrySet()) {
 
-                    Map<String, Map<String, ServiceInstance>> namespaceToServices = tracker.namespaceToServiceNameToRefNameToInstance.get(namespace);
-                    if (namespaceToServices == null) {
-                        namespaceToServices = Maps.newHashMap();
-                        tracker.namespaceToServiceNameToRefNameToInstance.put(namespace, namespaceToServices);
-                    }
+                    Map<String, Map<String, ServiceInstance>> namespaceToServices =
+                            tracker.namespaceToServiceNameToRefNameToInstance.computeIfAbsent(namespace,
+                                    k -> Maps.newHashMap());
 
                     Map<String, ServiceInstance> refNameToInstance = namespaceToServices
-                            .get(serviceName);
-                    if (refNameToInstance == null) {
-                        refNameToInstance = Maps.newHashMap();
-                        namespaceToServices.put(serviceName, refNameToInstance);
-                    }
+                            .computeIfAbsent(serviceName, k -> Maps.newHashMap());
 
                     String refName = refEntry.getKey();
                     //we want to compare reference not value of the provider
@@ -98,20 +92,13 @@ public final class Services {
 
             Preconditions.checkState(prefixNamespace.getKey()!=null && !prefixNamespace.getKey().equals(""), "Type attribute was not prefixed");
 
-            Map<String, Map<String, String>> namespaceToServices = retVal.get(prefixNamespace.getValue());
-            if(namespaceToServices == null) {
-                namespaceToServices = Maps.newHashMap();
-                retVal.put(prefixNamespace.getValue(), namespaceToServices);
-            }
+            Map<String, Map<String, String>> namespaceToServices =
+                    retVal.computeIfAbsent(prefixNamespace.getValue(), k -> Maps.newHashMap());
 
             String serviceName =  ObjectNameAttributeReadingStrategy
                 .checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
 
-            Map<String, String> innerMap = namespaceToServices.get(serviceName);
-            if (innerMap == null) {
-                innerMap = Maps.newHashMap();
-                namespaceToServices.put(serviceName, innerMap);
-            }
+            Map<String, String> innerMap = namespaceToServices.computeIfAbsent(serviceName, k -> Maps.newHashMap());
 
             List<XmlElement> instances = service.getChildElements(XmlMappingConstants.INSTANCE_KEY);
             service.checkUnrecognisedElements(instances, typeElement);

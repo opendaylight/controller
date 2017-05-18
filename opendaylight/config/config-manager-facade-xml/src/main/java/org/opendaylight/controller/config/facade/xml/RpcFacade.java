@@ -52,19 +52,13 @@ public class RpcFacade {
 
         for (final Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : yangStoreService.getModuleMXBeanEntryMap().entrySet()) {
 
-            Map<String, ModuleRpcs> namespaceToModules = map.get(namespaceToModuleEntry.getKey());
-            if (namespaceToModules == null) {
-                namespaceToModules = Maps.newHashMap();
-                map.put(namespaceToModuleEntry.getKey(), namespaceToModules);
-            }
+            Map<String, ModuleRpcs> namespaceToModules =
+                    map.computeIfAbsent(namespaceToModuleEntry.getKey(), k -> Maps.newHashMap());
 
             for (final Map.Entry<String, ModuleMXBeanEntry> moduleEntry : namespaceToModuleEntry.getValue().entrySet()) {
 
-                ModuleRpcs rpcMapping = namespaceToModules.get(moduleEntry.getKey());
-                if (rpcMapping == null) {
-                    rpcMapping = new ModuleRpcs(yangStoreService.getEnumResolver());
-                    namespaceToModules.put(moduleEntry.getKey(), rpcMapping);
-                }
+                ModuleRpcs rpcMapping = namespaceToModules.computeIfAbsent(moduleEntry.getKey(),
+                        k -> new ModuleRpcs(yangStoreService.getEnumResolver()));
 
                 final ModuleMXBeanEntry entry = moduleEntry.getValue();
 

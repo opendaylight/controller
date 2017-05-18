@@ -220,11 +220,7 @@ public class Config {
 
         ModuleConfig moduleMapping = getModuleMapping(moduleNamespace, instanceName, factoryName);
 
-        Multimap<String, T> innerMap = retVal.get(moduleNamespace);
-        if (innerMap == null) {
-            innerMap = HashMultimap.create();
-            retVal.put(moduleNamespace, innerMap);
-        }
+        Multimap<String, T> innerMap = retVal.computeIfAbsent(moduleNamespace, k -> HashMultimap.create());
 
         T resolvedElement = resolvingStrategy.resolveElement(moduleMapping, moduleElement, serviceTracker,
                 instanceName, moduleNamespace, defaultStrategy);

@@ -75,18 +75,11 @@ public class ServiceRegistryWrapper {
 
                 QName qname = QName.create(qNameToRefNameEntry.getKey());
                 String namespace = qname.getNamespace().toString();
-                Map<String, Map<String, String>> serviceToRefs = retVal.get(namespace);
-                if(serviceToRefs==null) {
-                    serviceToRefs = Maps.newHashMap();
-                    retVal.put(namespace, serviceToRefs);
-                }
+                Map<String, Map<String, String>> serviceToRefs =
+                        retVal.computeIfAbsent(namespace, k -> Maps.newHashMap());
 
                 String localName = qname.getLocalName();
-                Map<String, String> refsToSis = serviceToRefs.get(localName);
-                if(refsToSis==null) {
-                    refsToSis = Maps.newHashMap();
-                    serviceToRefs.put(localName, refsToSis);
-                }
+                Map<String, String> refsToSis = serviceToRefs.computeIfAbsent(localName, k -> Maps.newHashMap());
 
                 Preconditions.checkState(!refsToSis.containsKey(refName),
                         "Duplicate reference name %s for service %s:%s, now for instance %s", refName, namespace,

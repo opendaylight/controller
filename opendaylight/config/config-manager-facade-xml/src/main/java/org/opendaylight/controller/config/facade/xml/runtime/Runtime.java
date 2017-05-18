@@ -46,11 +46,7 @@ public class Runtime {
         for (ObjectName objectName : instancesToMap) {
             String moduleName = ObjectNameUtil.getFactoryName(objectName);
 
-            Multimap<String, ObjectName> multimap = retVal.get(moduleName);
-            if (multimap == null) {
-                multimap = HashMultimap.create();
-                retVal.put(moduleName, multimap);
-            }
+            Multimap<String, ObjectName> multimap = retVal.computeIfAbsent(moduleName, k -> HashMultimap.create());
 
             String instanceName = ObjectNameUtil.getInstanceName(objectName);
 

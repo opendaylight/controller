@@ -80,10 +80,9 @@ public class ClusterUtils {
             builder.append(p.getNodeType().getLocalName());
             if (p instanceof NodeIdentifierWithPredicates) {
                 builder.append("-key_");
-                final Map<QName, Object> key = ((NodeIdentifierWithPredicates) p).getKeyValues();
-                key.entrySet().forEach(e -> {
-                    builder.append(e.getKey().getLocalName());
-                    builder.append(e.getValue());
+                ((NodeIdentifierWithPredicates) p).getKeyValues().forEach((key, value) -> {
+                    builder.append(key.getLocalName());
+                    builder.append(value);
                     builder.append("-");
                 });
                 builder.append("_");

@@ -266,19 +266,13 @@ public class ConfigSubsystemFacade implements Closeable {
         Map<String, Map<Date, IdentityMapping>> mappedIds = Maps.newHashMap();
         for (Module module : modules) {
             String namespace = module.getNamespace().toString();
-            Map<Date, IdentityMapping> revisionsByNamespace = mappedIds.get(namespace);
-            if (revisionsByNamespace == null) {
-                revisionsByNamespace = Maps.newHashMap();
-                mappedIds.put(namespace, revisionsByNamespace);
-            }
+            Map<Date, IdentityMapping> revisionsByNamespace =
+                    mappedIds.computeIfAbsent(namespace, k -> Maps.newHashMap());
 
             Date revision = module.getRevision();
 
-            IdentityMapping identityMapping = revisionsByNamespace.get(revision);
-            if (identityMapping == null) {
-                identityMapping = new IdentityMapping();
-                revisionsByNamespace.put(revision, identityMapping);
-            }
+            IdentityMapping identityMapping =
+                    revisionsByNamespace.computeIfAbsent(revision, k -> new IdentityMapping());
 
             for (IdentitySchemaNode identitySchemaNode : module.getIdentities()) {
                 identityMapping.addIdSchemaNode(identitySchemaNode);
@@ -312,11 +306,9 @@ public class ConfigSubsystemFacade implements Closeable {
                 ModuleConfig moduleConfig = new ModuleConfig(moduleName,
                         new InstanceConfig(reader, moduleMXBeanEntry.getAttributes(), moduleMXBeanEntry.getNullableDummyContainerName()));
 
-                Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig.get(namespaceToModuleToMbe.getKey());
-                if (moduleNameToModuleConfig == null) {
-                    moduleNameToModuleConfig = Maps.newHashMap();
-                    namespaceToModuleNameToModuleConfig.put(namespaceToModuleToMbe.getKey(), moduleNameToModuleConfig);
-                }
+                Map<String, ModuleConfig> moduleNameToModuleConfig =
+                        namespaceToModuleNameToModuleConfig.computeIfAbsent(namespaceToModuleToMbe.getKey(),
+                                k -> Maps.newHashMap());
 
                 moduleNameToModuleConfig.put(moduleName, moduleConfig);
             }
