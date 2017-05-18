@@ -49,7 +49,7 @@ class MbeASTVisitor extends SieASTVisitor {
             if (parent instanceof MethodDeclaration) {
                 // remember only top level description annotation
                 String reqVal = expr.getPairs().get(0).toString();
-                requireIfc.put(((MethodDeclaration) parent).getName().toString(), reqVal);
+                requireIfc.put(((MethodDeclaration) parent).getName(), reqVal);
             }
         }
     }

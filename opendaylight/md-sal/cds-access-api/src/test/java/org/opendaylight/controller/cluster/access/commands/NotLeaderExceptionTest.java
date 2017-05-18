@@ -30,8 +30,7 @@ public class NotLeaderExceptionTest extends RequestExceptionTest<NotLeaderExcept
     @Override
     protected void checkMessage() {
         final String message = OBJECT.getMessage();
-        final String checkMessage = new StringBuilder("Actor ").append(ACTOR.toString())
-                .append(" is not the current leader").toString();
+        final String checkMessage = "Actor " + ACTOR + " is not the current leader";
         assertTrue(checkMessage.equals(message));
         assertNull(OBJECT.getCause());
     }

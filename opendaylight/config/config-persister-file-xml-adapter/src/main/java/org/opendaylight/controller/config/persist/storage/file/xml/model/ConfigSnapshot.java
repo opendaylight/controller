@@ -82,12 +82,11 @@ public class ConfigSnapshot {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ConfigSnapshot{");
-        sb.append("configSnapshot='").append(configXml).append('\'');
-        sb.append(", capabilities=").append(capabilities);
-        sb.append(", features=").append(features);
-        sb.append('}');
-        return sb.toString();
+        return "ConfigSnapshot{"
+                + "configSnapshot='" + configXml + '\''
+                + ", capabilities=" + capabilities
+                + ", features=" + features +
+                '}';
     }
 }
 
