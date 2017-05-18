@@ -38,11 +38,10 @@ final class SwitchShardBehavior {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SwitchShardBehavior{");
-        sb.append("shardId='").append(shardId).append('\'');
-        sb.append(", newState='").append(newState).append('\'');
-        sb.append(", term=").append(term);
-        sb.append('}');
-        return sb.toString();
+        return "SwitchShardBehavior{"
+                + "shardId='" + shardId + '\''
+                + ", newState='" + newState + '\''
+                + ", term=" + term
+                + '}';
     }
 }
