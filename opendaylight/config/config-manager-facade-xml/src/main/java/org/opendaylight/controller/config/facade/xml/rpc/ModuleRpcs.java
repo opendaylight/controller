@@ -34,11 +34,7 @@ public final class ModuleRpcs {
 
     public void addRpc(RuntimeBeanEntry runtimeEntry, Rpc rpc) {
         String yangName = runtimeEntry.getYangName();
-        Map<String, InstanceRuntimeRpc> map = rpcMapping.get(yangName);
-        if (map == null) {
-            map = Maps.newHashMap();
-            rpcMapping.put(yangName, map);
-        }
+        Map<String, InstanceRuntimeRpc> map = rpcMapping.computeIfAbsent(yangName, k -> Maps.newHashMap());
 
         Preconditions.checkState(!map.containsKey(rpc.getYangName()), "Rpc %s for runtime bean %s added twice",
                 rpc.getYangName(), yangName);

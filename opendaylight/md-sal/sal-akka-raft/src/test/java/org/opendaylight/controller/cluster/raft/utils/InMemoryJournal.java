@@ -62,11 +62,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     public static void addEntry(String persistenceId, long sequenceNr, Object data) {
-        Map<Long, Object> journal = JOURNALS.get(persistenceId);
-        if (journal == null) {
-            journal = Maps.newLinkedHashMap();
-            JOURNALS.put(persistenceId, journal);
-        }
+        Map<Long, Object> journal = JOURNALS.computeIfAbsent(persistenceId, k -> Maps.newLinkedHashMap());
 
         synchronized (journal) {
             journal.put(sequenceNr, data instanceof Serializable
