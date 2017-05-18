@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_b9afb893",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshot.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-18T13:32:13Z",
+      "side": 1,
+      "message": "Is there any point in keeping this?",
+      "revId": "26db78aff26a794b97b231dd8428a5bdea5eb733",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
