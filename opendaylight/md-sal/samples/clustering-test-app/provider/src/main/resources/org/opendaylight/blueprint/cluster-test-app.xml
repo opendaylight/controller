@@ -17,6 +17,10 @@
   <reference id="notificationListenerService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService" />
   <reference id="domDataTreeService" interface="org.opendaylight.mdsal.dom.api.DOMDataTreeService"/>
   <reference id="distributedShardFactory" interface="org.opendaylight.controller.cluster.sharding.DistributedShardFactory"/>
+  <reference id="configDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface"
+             odl:type="distributed-config"/>
+  <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
+
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <property name="notificationProvider" ref="notificationService"/>
@@ -61,6 +65,8 @@
     <argument ref="domDataBroker"/>
     <argument ref="domDataTreeService"/>
     <argument ref="distributedShardFactory"/>
+    <argument ref="configDatastore"/>
+    <argument ref="actorSystemProvider"/>
   </bean>
 
 </blueprint>
