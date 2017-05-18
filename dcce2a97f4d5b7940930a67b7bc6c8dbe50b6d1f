@@ -22,6 +22,30 @@
       "revId": "dcce2a97f4d5b7940930a67b7bc6c8dbe50b6d1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_a85e4874",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/gofactory/AbsModuleGeneratedObjectFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-18T07:55:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba068154_4ba521b4",
+      "range": {
+        "startLine": 48,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 25
+      },
+      "revId": "dcce2a97f4d5b7940930a67b7bc6c8dbe50b6d1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
