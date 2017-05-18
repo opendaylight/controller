@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.LeaderInstallSnapshotS
  * The state of the followers log as known by the Leader.
  */
 public interface FollowerLogInformation {
+    long NO_INDEX = -1;
 
     /**
      * Increments the value of the follower's next index.
@@ -160,4 +161,19 @@ public interface FollowerLogInformation {
      * Clears the LeaderInstallSnapshotState when an install snapshot is complete.
      */
     void clearLeaderInstallSnapshotState();
+
+    /**
+     * Sets the index of the log entry whose payload size exceeds the maximum size for a single message and thus
+     * needs to be sliced into smaller chunks.
+     *
+     * @param index the log entry index or NO_INDEX to clear it
+     */
+    void setSlicedLogEntryIndex(long index);
+
+    /**
+     * Return whether or not log entry slicing is currently in progress.
+     *
+     * @return true if slicing is currently in progress, false otherwise
+     */
+    boolean isLogEntrySlicingInProgress();
 }
