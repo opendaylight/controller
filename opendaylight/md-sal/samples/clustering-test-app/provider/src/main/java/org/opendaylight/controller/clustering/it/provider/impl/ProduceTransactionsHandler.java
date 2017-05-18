@@ -57,7 +57,7 @@ public class ProduceTransactionsHandler implements Runnable {
 
     static final QName ID_INTS =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints");
-    static final QName ID_INT =
+    public static final QName ID_INT =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int");
     static final QName ID =
             QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id");
