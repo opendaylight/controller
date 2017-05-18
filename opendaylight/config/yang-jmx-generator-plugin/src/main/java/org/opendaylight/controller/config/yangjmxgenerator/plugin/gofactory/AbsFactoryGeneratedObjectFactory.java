@@ -148,65 +148,70 @@ public class AbsFactoryGeneratedObjectFactory {
     }
 
     private static String getCreateModule(FullyQualifiedName moduleFQN, List<Field> moduleFields) {
-        String result = "\n"+
-            "@Override\n"+
-            format("public %s createModule(String instanceName, %s dependencyResolver, %s old, %s bundleContext) throws Exception {\n",
-                                Module.class.getCanonicalName(), DependencyResolver.class.getCanonicalName(),
-                                DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT)+
-                format("%s oldModule;\n",moduleFQN)+
-                "try {\n"+
-                    format("oldModule = (%s) old.getModule();\n", moduleFQN)+
-                "} catch(Exception e) {\n"+
-                    "return handleChangedClass(dependencyResolver, old, bundleContext);\n"+
-                "}\n"+
-            format("%s module = instantiateModule(instanceName, dependencyResolver, oldModule, old.getInstance(), bundleContext);\n", moduleFQN);
+        StringBuilder result = new StringBuilder("\n" +
+                "@Override\n");
+        result.append(
+                format("public %s createModule(String instanceName, %s dependencyResolver, %s old, %s bundleContext) "
+                                + "throws Exception {\n",
+                        Module.class.getCanonicalName(), DependencyResolver.class.getCanonicalName(),
+                        DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT))
+                .append(format("%s oldModule;\n", moduleFQN))
+                .append("try {\n")
+                .append(format("oldModule = (%s) old.getModule();\n", moduleFQN))
+                .append("} catch(Exception e) {\n"
+                        + "return handleChangedClass(dependencyResolver, old, bundleContext);\n"
+                        + "}\n")
+                .append(format("%s module = instantiateModule(instanceName, dependencyResolver, oldModule, old"
+                                + ".getInstance(), bundleContext);\n",
+                        moduleFQN));
 
-        for(Field field: moduleFields) {
-            result += format("module.set%s(oldModule.get%1$s());\n", field.getName());
+        for (Field field : moduleFields) {
+            result.append(format("module.set%s(oldModule.get%1$s());\n", field.getName()));
         }
 
-        result += "\n"+
-                "return module;\n"+
-            "}\n";
-        return result;
+        result.append("\n"
+                + "return module;\n"
+                + "}\n");
+        return result.toString();
     }
 
     private static String getServiceIfcsInitialization(List<FullyQualifiedName> providedServices) {
         String generic = format("Class<? extends %s>", AbstractServiceInterface.class.getCanonicalName());
 
-        String result = "static {\n";
+        StringBuilder result = new StringBuilder("static {\n");
         if (!providedServices.isEmpty()) {
-            result += format("java.util.Set<%1$s> serviceIfcs2 = new java.util.HashSet<>();\n", generic);
+            result.append(format("java.util.Set<%1$s> serviceIfcs2 = new java.util.HashSet<>();\n", generic));
 
-            for(FullyQualifiedName fqn: providedServices) {
-                result += format("serviceIfcs2.add(%s.class);\n", fqn);
+            for (FullyQualifiedName fqn : providedServices) {
+                result.append(format("serviceIfcs2.add(%s.class);\n", fqn));
             }
 
-            result += "serviceIfcs = java.util.Collections.unmodifiableSet(serviceIfcs2);\n";
+            result.append("serviceIfcs = java.util.Collections.unmodifiableSet(serviceIfcs2);\n");
         } else {
-            result += "serviceIfcs = java.util.Collections.emptySet();\n";
+            result.append("serviceIfcs = java.util.Collections.emptySet();\n");
         }
-        result += "}\n";
+        result.append("}\n");
 
         // add isModuleImplementingServiceInterface and getImplementedServiceIntefaces methods
 
-        result += format("\n"+
-            "@Override\n"+
-            "public final boolean isModuleImplementingServiceInterface(Class<? extends %1$s> serviceInterface) {\n"+
-                "for (Class<?> ifc: serviceIfcs) {\n"+
-                    "if (serviceInterface.isAssignableFrom(ifc)){\n"+
-                        "return true;\n"+
-                    "}\n"+
-                "}\n"+
-                "return false;\n"+
-            "}\n"+
-            "\n"+
-            "@Override\n"+
-            "public java.util.Set<Class<? extends %1$s>> getImplementedServiceIntefaces() {\n"+
-                "return serviceIfcs;\n"+
-            "}\n", AbstractServiceInterface.class.getCanonicalName());
+        result.append(format("\n"
+                + "@Override\n"
+                + "public final boolean isModuleImplementingServiceInterface(Class<? extends %1$s> serviceInterface) "
+                + "{\n"
+                + "for (Class<?> ifc: serviceIfcs) {\n"
+                + "if (serviceInterface.isAssignableFrom(ifc)){\n"
+                + "return true;\n"
+                + "}\n"
+                + "}\n"
+                + "return false;\n"
+                + "}\n"
+                + "\n"
+                + "@Override\n"
+                + "public java.util.Set<Class<? extends %1$s>> getImplementedServiceIntefaces() {\n"
+                + "return serviceIfcs;\n"
+                + "}\n", AbstractServiceInterface.class.getCanonicalName()));
 
-        return result;
+        return result.toString();
     }
 
 }

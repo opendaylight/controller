@@ -559,10 +559,7 @@ class ConfigTransactionControllerImpl implements
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("transactionName=");
-        sb.append(getTransactionName());
-        return sb.toString();
+        return "transactionName=" + getTransactionName();
     }
 
     // @VisibleForTesting

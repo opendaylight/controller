@@ -49,11 +49,11 @@ public class RequestVote extends AbstractRaftRPC {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("RequestVote [term=").append(getTerm()).append(", candidateId=").append(candidateId)
-                .append(", lastLogIndex=").append(lastLogIndex).append(", lastLogTerm=").append(lastLogTerm)
-                .append("]");
-        return builder.toString();
+        return "RequestVote [term=" + getTerm()
+                + ", candidateId=" + candidateId
+                + ", lastLogIndex=" + lastLogIndex
+                + ", lastLogTerm=" + lastLogTerm
+                + "]";
     }
 
     private Object writeReplace() {
