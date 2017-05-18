@@ -22,6 +22,30 @@
       "revId": "45a3a1cf0771d3abd1932b6258691c20347bb0e7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_68baa0c1",
+        "filename": "opendaylight/config/config-persister-impl/src/main/java/org/opendaylight/controller/config/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-18T07:36:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba068154_abe80db5",
+      "range": {
+        "startLine": 213,
+        "startChar": 72,
+        "endLine": 213,
+        "endChar": 106
+      },
+      "revId": "45a3a1cf0771d3abd1932b6258691c20347bb0e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
