@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba068154_3468ed86",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-18T14:25:21Z",
+      "side": 1,
+      "message": "Why 4 sec? default is 1.",
+      "revId": "ddca99e6e3a6977b3d25be60fd7e57509a580469",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba068154_54bf71fb",
         "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
         "patchSetId": 1
