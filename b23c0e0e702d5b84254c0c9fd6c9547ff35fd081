@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba068154_7e6256ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 724,
+      "author": {
+        "id": 5460
+      },
+      "writtenOn": "2017-05-18T11:35:49Z",
+      "side": 1,
+      "message": "Not sure, if this close is really needed here. In TransactionProxy implementation it throws an Exception, because close() is called after ready(). In ClientBackedTransaction it works.",
+      "range": {
+        "startLine": 724,
+        "startChar": 32,
+        "endLine": 724,
+        "endChar": 55
+      },
+      "revId": "b23c0e0e702d5b84254c0c9fd6c9547ff35fd081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
