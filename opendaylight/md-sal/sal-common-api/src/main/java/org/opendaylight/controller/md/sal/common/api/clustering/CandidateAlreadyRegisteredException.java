@@ -14,7 +14,10 @@ import javax.annotation.Nonnull;
 /**
  * Thrown when a Candidate has already been registered for a given Entity. This could be due to a component doing a
  * duplicate registration or two different components within the same process trying to register a Candidate.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.common.api.clustering.CandidateAlreadyRegisteredException} instead
  */
+@Deprecated
 public class CandidateAlreadyRegisteredException extends Exception {
     private static final long serialVersionUID = 1L;
 
@@ -27,6 +30,7 @@ public class CandidateAlreadyRegisteredException extends Exception {
     }
 
     /**
+     * Returns the entity for which a Candidate has already been registered in the current process.
      *
      * @return the entity for which a Candidate has already been registered in the current process
      */

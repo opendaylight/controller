@@ -14,7 +14,11 @@ import javax.annotation.Nonnull;
  * A DTO that encapsulates an ownership change for an entity.
  *
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.clustering.EntityOwnershipChange} or
+ *             {@link org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipChange} instead
  */
+@Deprecated
 public class EntityOwnershipChange {
     private final Entity entity;
     private final boolean wasOwner;
