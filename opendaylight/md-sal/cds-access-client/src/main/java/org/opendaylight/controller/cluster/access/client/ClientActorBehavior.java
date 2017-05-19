@@ -295,16 +295,30 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             conn.finishReplay(forwarder);
 
             // Make sure new lookups pick up the new connection
-            connections.replace(shard, conn, newConn);
-            LOG.info("{}: replaced connection {} with {}", persistenceId(), conn, newConn);
+            if (!connections.replace(shard, conn, newConn)) {
+                final AbstractClientConnection<T> existing = connections.get(conn.cookie());
+                LOG.warn("{}: old connection {} does not match existing {}, new connection {} in limbo",
+                    persistenceId(), conn, existing, newConn);
+            } else {
+                LOG.info("{}: replaced connection {} with {}", persistenceId(), conn, newConn);
+            }
         } finally {
             connectionsLock.unlockWrite(stamp);
         }
     }
 
     void removeConnection(final AbstractClientConnection<?> conn) {
-        connections.remove(conn.cookie(), conn);
-        LOG.debug("{}: removed connection {}", persistenceId(), conn);
+        if (!connections.remove(conn.cookie(), conn)) {
+            final AbstractClientConnection<T> existing = connections.get(conn.cookie());
+            if (existing != null) {
+                LOG.warn("{}: failed to remove connection {}, as it was superseded by {}", persistenceId(), conn,
+                    existing);
+            } else {
+                LOG.warn("{}: failed to remove connection {}, as it was not tracked", persistenceId(), conn);
+            }
+        } else {
+            LOG.info("{}: removed connection {}", persistenceId(), conn);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -316,8 +330,12 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         final boolean replaced = connections.replace(oldConn.cookie(), (AbstractClientConnection<T>)oldConn, conn);
         if (!replaced) {
             final AbstractClientConnection<T> existing = connections.get(oldConn.cookie());
-            LOG.warn("{}: old connection {} does not match existing {}, new connection {} in limbo", persistenceId(),
-                oldConn, existing, newConn);
+            if (existing != null) {
+                LOG.warn("{}: failed to replace connection {}, as it was superseded by {}", persistenceId(), conn,
+                    existing);
+            } else {
+                LOG.warn("{}: failed to replace connection {}, as it was not tracked", persistenceId(), conn);
+            }
         }
 
         final Long shard = oldConn.cookie();
