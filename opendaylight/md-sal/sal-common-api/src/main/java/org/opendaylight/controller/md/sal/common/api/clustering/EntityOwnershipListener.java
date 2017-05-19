@@ -9,13 +9,18 @@
 package org.opendaylight.controller.md.sal.common.api.clustering;
 
 /**
- * An EntityOwnershipListener is a component that represents a listener for entity ownership changes
+ * An EntityOwnershipListener is a component that represents a listener for entity ownership changes.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.clustering.EntityOwnershipListener} or
+ *             {@link org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipListener} instead
  */
+@Deprecated
 public interface EntityOwnershipListener {
 
     /**
      * A notification that is generated when the ownership status of an entity changes.
      *
+     * <p>
      * The following outlines valid combinations of the ownership status flags in the EntityOwnershipChange
      * parameter and their meanings:
      * <ul>
