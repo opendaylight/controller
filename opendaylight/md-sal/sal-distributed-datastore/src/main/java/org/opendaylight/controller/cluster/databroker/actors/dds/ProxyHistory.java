@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -212,7 +213,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @GuardedBy("lock")
         @Override
-        void replayRequests(final Iterable<ConnectionEntry> previousEntries) {
+        void replayRequests(final Collection<ConnectionEntry> previousEntries) {
             // First look for our Create message
             Iterator<ConnectionEntry> it = previousEntries.iterator();
             while (it.hasNext()) {

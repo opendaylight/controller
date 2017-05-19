@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import java.util.Collection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 
 /**
@@ -18,7 +19,7 @@ import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 abstract class HistoryReconnectCohort implements AutoCloseable {
     abstract ProxyReconnectCohort getProxy();
 
-    abstract void replayRequests(Iterable<ConnectionEntry> previousEntries);
+    abstract void replayRequests(Collection<ConnectionEntry> previousEntries);
 
     @Override
     public abstract void close();

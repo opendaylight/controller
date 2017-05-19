@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -306,7 +307,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
             }
 
             @Override
-            void replayRequests(final Iterable<ConnectionEntry> previousEntries) {
+            void replayRequests(final Collection<ConnectionEntry> previousEntries) {
                 proxy.replayRequests(previousEntries);
             }
 

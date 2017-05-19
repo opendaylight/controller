@@ -19,7 +19,6 @@ import static org.opendaylight.controller.cluster.access.client.ConnectionEntryM
 import com.google.common.base.Ticker;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.testing.FakeTicker;
 import java.util.Arrays;
 import java.util.Collection;
@@ -111,8 +110,8 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
             probe.expectMsgClass(RequestEnvelope.class);
         }
         probe.expectNoMsg();
-        final Iterable<ConnectionEntry> entries = queue.asIterable();
-        assertEquals(sentMessages, Iterables.size(entries));
+        final Collection<ConnectionEntry> entries = queue.drain();
+        assertEquals(sentMessages, entries.size());
         assertThat(entries, everyItem(entryWithRequest(request)));
     }
 
@@ -143,7 +142,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final ConnectionEntry entry = new ConnectionEntry(request, callback, ticker.read());
         final ReconnectForwarder forwarder = mock(ReconnectForwarder.class);
-        queue.setForwarder(forwarder);
+        queue.setForwarder(forwarder, ticker.read());
         final long secondEnqueueNow = ticker.read();
         queue.enqueue(entry, secondEnqueueNow);
         verify(forwarder).forwardEntry(entry, secondEnqueueNow);

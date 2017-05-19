@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
@@ -18,7 +19,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 
 abstract class ProxyReconnectCohort implements Identifiable<LocalHistoryIdentifier> {
 
-    abstract void replayRequests(Iterable<ConnectionEntry> previousEntries);
+    abstract void replayRequests(Collection<ConnectionEntry> previousEntries);
 
     abstract ProxyHistory finishReconnect();
 

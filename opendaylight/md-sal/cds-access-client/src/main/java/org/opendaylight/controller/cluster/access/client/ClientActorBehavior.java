@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +55,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
          * @param enqueuedEntries Previously-enqueued entries
          * @return A {@link ReconnectForwarder} to handle any straggler messages which arrive after this method returns.
          */
-        @Nonnull ReconnectForwarder finishReconnect(@Nonnull Iterable<ConnectionEntry> enqueuedEntries);
+        @Nonnull ReconnectForwarder finishReconnect(@Nonnull Collection<ConnectionEntry> enqueuedEntries);
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
@@ -286,7 +287,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             final ConnectionConnectCohort cohort = Verify.verifyNotNull(connectionUp(newConn));
 
             // Lock the old connection and get a reference to its entries
-            final Iterable<ConnectionEntry> replayIterable = conn.startReplay();
+            final Collection<ConnectionEntry> replayIterable = conn.startReplay();
 
             // Finish the connection attempt
             final ReconnectForwarder forwarder = Verify.verifyNotNull(cohort.finishReconnect(replayIterable));
