@@ -22,6 +22,30 @@
       "revId": "50e9926d2b26252289937b45f127181613d9529c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_619c6fc1",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/RpcFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-05-19T15:15:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba068154_7a453f6f",
+      "range": {
+        "startLine": 56,
+        "startChar": 78,
+        "endLine": 56,
+        "endChar": 95
+      },
+      "revId": "50e9926d2b26252289937b45f127181613d9529c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
