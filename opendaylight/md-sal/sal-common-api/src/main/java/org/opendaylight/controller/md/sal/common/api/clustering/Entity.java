@@ -34,7 +34,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * <p>
  * Note that an entity identifier must conform to a valid yang schema. If there is no existing yang schema to
  * represent an entity, the general-entity yang model can be used.
+ *
+ * @deprecated Use org.opendaylight.mdsal.binding.api.clustering.Entity or
+ *             org.opendaylight.mdsal.eos.dom.api.DOMEntity instead
  */
+@Deprecated
 public final class Entity implements Serializable {
     private static final long serialVersionUID = 1L;
 
