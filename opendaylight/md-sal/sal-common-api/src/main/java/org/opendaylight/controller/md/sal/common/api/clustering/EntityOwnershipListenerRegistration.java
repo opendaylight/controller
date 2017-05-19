@@ -15,16 +15,20 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
  * An EntityOwnershipListenerRegistration records a request to register a ownership status change listener for a
  * given Entity. Calling close on the registration will unregister listeners and future ownership changes will not
  * be delivered to the listener.
+ *
+ * @deprecated Use org.opendaylight.mdsal.binding.api.clustering.EntityOwnershipListenerRegistration or
+ *             org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipListenerRegistration instead
  */
+@Deprecated
 public interface EntityOwnershipListenerRegistration extends ObjectRegistration<EntityOwnershipListener> {
 
     /**
-     * Return the entity type that the listener was registered for
+     * Return the entity type that the listener was registered for.
      */
     @Nonnull String getEntityType();
 
     /**
-     * Unregister the listener
+     * Unregister the listener.
      */
     @Override
     void close();

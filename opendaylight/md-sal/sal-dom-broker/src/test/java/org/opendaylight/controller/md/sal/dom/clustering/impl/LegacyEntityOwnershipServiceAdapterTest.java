@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class LegacyEntityOwnershipServiceAdapterTest {
     static Entity LEGACY_ENTITY = new Entity("foo", "bar");
     static DOMEntity DOM_ENTITY = new DOMEntity("foo", LEGACY_ENTITY.getId());

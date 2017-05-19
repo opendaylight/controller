@@ -14,11 +14,16 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
  * An EntityOwnershipCandidateRegistration records a request to register a Candidate for a given Entity. Calling
  * close on the EntityOwnershipCandidateRegistration will remove the Candidate from any future ownership considerations
  * for that Entity.
+ *
+ * @deprecated Use org.opendaylight.mdsal.binding.api.clustering.EntityOwnershipCandidateRegistration
+ *             or org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipCandidateRegistration instead
  */
+@Deprecated
 public interface EntityOwnershipCandidateRegistration extends ObjectRegistration<Entity> {
-   /**
-    * Unregister the candidate
-    */
-   @Override
-   void close();
+
+    /**
+     * Unregister the candidate.
+     */
+    @Override
+    void close();
 }

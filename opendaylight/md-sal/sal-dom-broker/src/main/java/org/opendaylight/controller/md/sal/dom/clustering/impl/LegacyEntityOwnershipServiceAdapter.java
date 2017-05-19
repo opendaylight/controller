@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipService, AutoCloseable {
     private final DOMEntityOwnershipService domService;
 
