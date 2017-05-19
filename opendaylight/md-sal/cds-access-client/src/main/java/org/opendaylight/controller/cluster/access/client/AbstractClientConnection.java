@@ -13,7 +13,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -158,28 +158,20 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     public abstract Optional<T> getBackendInfo();
 
-    final Iterable<ConnectionEntry> startReplay() {
+    final Collection<ConnectionEntry> startReplay() {
         lock.lock();
-        return queue.asIterable();
+        return queue.drain();
     }
 
     @GuardedBy("lock")
     final void finishReplay(final ReconnectForwarder forwarder) {
-        queue.setForwarder(forwarder);
+        setForwarder(forwarder);
         lock.unlock();
     }
 
     @GuardedBy("lock")
     final void setForwarder(final ReconnectForwarder forwarder) {
-        final long now = currentTime();
-        final Iterator<ConnectionEntry> it = queue.asIterable().iterator();
-        while (it.hasNext()) {
-            final ConnectionEntry e = it.next();
-            forwarder.forwardEntry(e, now);
-            it.remove();
-        }
-
-        queue.setForwarder(forwarder);
+        queue.setForwarder(forwarder, currentTime());
     }
 
     @GuardedBy("lock")
