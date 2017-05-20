@@ -18,7 +18,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
-import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,15 +29,20 @@ import org.slf4j.LoggerFactory;
  */
 public final class NormalizedNodeXMLOutput {
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeXMLOutput.class);
+    private static final XMLOutputFactory XOF;
+
+    static {
+        final XMLOutputFactory f = XMLOutputFactory.newFactory();
+        f.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
+        XOF = f;
+    }
 
     private NormalizedNodeXMLOutput() {
     }
 
     public static void toStream(OutputStream outStream, NormalizedNode<?, ?> node)
             throws XMLStreamException, IOException {
-        XMLOutputFactory xmlFactory = XMLOutputFactory.newFactory();
-        xmlFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
-        XMLStreamWriter xmlWriter = xmlFactory.createXMLStreamWriter(outStream);
+        XMLStreamWriter xmlWriter = XOF.createXMLStreamWriter(outStream);
 
         IndentingXMLStreamWriter indenting = new IndentingXMLStreamWriter(xmlWriter);
         try (NormalizedNodeStreamWriter streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(
