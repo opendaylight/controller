@@ -14,6 +14,7 @@ import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,22 @@ import org.slf4j.LoggerFactory;
 public class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
 
+    /**
+     * Create a data store instance.
+     *
+     * @deprecated Use {@link #createInstance(DOMSchemaService, DatastoreContext, DatastoreSnapshotRestore,
+     *                        ActorSystemProvider, BundleContext)} instead.
+     */
+    @Deprecated
     public static AbstractDataStore createInstance(final SchemaService schemaService,
+            final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
+
+        return createInstance((DOMSchemaService) schemaService, initialDatastoreContext, datastoreSnapshotRestore,
+            actorSystemProvider, bundleContext);
+    }
+
+    public static AbstractDataStore createInstance(final DOMSchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
 
