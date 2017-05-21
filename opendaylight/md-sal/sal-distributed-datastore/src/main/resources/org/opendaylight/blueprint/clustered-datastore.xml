@@ -10,7 +10,7 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <odl:static-reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
+  <odl:static-reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
 
   <!-- ActorSystemProvider -->
 

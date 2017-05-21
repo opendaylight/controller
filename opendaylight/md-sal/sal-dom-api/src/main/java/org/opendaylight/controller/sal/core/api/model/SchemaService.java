@@ -8,16 +8,17 @@
 package org.opendaylight.controller.sal.core.api.model;
 
 import org.opendaylight.controller.sal.core.api.BrokerService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 /**
- * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMSchemaService} instead.
+ * @deprecated Use {@link DOMSchemaService} instead.
  */
 @Deprecated
-public interface SchemaService extends BrokerService {
+public interface SchemaService extends BrokerService, DOMSchemaService {
 
     /**
      * Registers a YANG module to session and global context
@@ -32,11 +33,13 @@ public interface SchemaService extends BrokerService {
     /**
      * Returns session specific YANG schema context
      */
+    @Override
     SchemaContext getSessionContext();
 
     /**
      * Returns global schema context
      */
+    @Override
     SchemaContext getGlobalContext();
 
     /**
@@ -45,5 +48,6 @@ public interface SchemaService extends BrokerService {
      * @param listener Listener which should be registered
      * @return Listener registration handle
      */
+    @Override
     ListenerRegistration<SchemaContextListener> registerSchemaContextListener(SchemaContextListener listener);
 }
