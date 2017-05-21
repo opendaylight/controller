@@ -64,7 +64,8 @@ public class IntegrationTestKit extends ShardTestKit {
         this(actorSystem, datastoreContextBuilder, 7);
     }
 
-    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder, final int commitTimeout) {
+    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder,
+            final int commitTimeout) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
         this.commitTimeout = commitTimeout;
