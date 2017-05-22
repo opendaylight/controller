@@ -11,11 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import com.google.common.collect.ImmutableRangeSet;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
 public class DeadHistoryExceptionTest extends RequestExceptionTest<DeadHistoryException> {
 
-    private static final DeadHistoryException OBJECT = new DeadHistoryException(100);
+    private static final DeadHistoryException OBJECT = new DeadHistoryException(ImmutableRangeSet.of());
 
     @Override
     protected void isRetriable() {
@@ -25,7 +26,7 @@ public class DeadHistoryExceptionTest extends RequestExceptionTest<DeadHistoryEx
     @Override
     protected void checkMessage() {
         final String message = OBJECT.getMessage();
-        assertEquals("Histories up to 100 are accounted for", message);
+        assertEquals("Histories [] have been purged", message);
         assertNull(OBJECT.getCause());
     }
 
