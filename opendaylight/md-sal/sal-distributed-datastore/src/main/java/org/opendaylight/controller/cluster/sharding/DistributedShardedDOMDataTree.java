@@ -409,9 +409,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final DistributedShardFrontend shard =
                     new DistributedShardFrontend(distributedDataStore, entry.getKey(), prefix);
 
-            @SuppressWarnings("unchecked")
             final DOMDataTreeShardRegistration<DOMDataTreeShard> reg =
-                    (DOMDataTreeShardRegistration) shardedDOMDataTree.registerDataTreeShard(prefix, shard, producer);
+                    shardedDOMDataTree.registerDataTreeShard(prefix, shard, producer);
 
             synchronized (shards) {
                 shards.store(prefix, reg);
