@@ -28,7 +28,7 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     private static final ABIVersion MAX_VERSION = ABIVersion.TEST_FUTURE_VERSION;
 
     private static final ConnectClientRequest OBJECT = new ConnectClientRequest(
-            CLIENT_IDENTIFIER, 0, ACTOR_REF, MIN_VERSION, MAX_VERSION);
+            CLIENT_IDENTIFIER, 0, ACTOR_REF, MIN_VERSION, MAX_VERSION, 5L);
 
     @Override
     protected ConnectClientRequest object() {

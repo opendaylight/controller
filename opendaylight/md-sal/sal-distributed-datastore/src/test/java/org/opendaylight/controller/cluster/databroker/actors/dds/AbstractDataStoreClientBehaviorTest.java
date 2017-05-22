@@ -152,7 +152,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         final long sequence = 0L;
         Assert.assertEquals(sequence, connectClientRequest.getSequence());
         actorContextProbe.reply(new ConnectClientSuccess(CLIENT_ID, sequence, backendProbe.ref(),
-                Collections.emptyList(), dataTree, 3));
+                Collections.emptyList(), 2, dataTree, 3));
         Assert.assertEquals(clientActorProbe.ref(), connection.localActor());
         //capture and execute command passed to client context
         final InternalCommand<ShardBackendInfo> command = clientActorProbe.expectMsgClass(InternalCommand.class);
