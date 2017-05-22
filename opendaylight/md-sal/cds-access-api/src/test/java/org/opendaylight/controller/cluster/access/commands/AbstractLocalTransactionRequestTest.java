@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
-public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLocalTransactionRequest<?>>
+public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLocalTransactionRequest<T>>
         extends AbstractTransactionRequestTest<T> {
     @Override
     protected abstract T object();

@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractTransactionSuccessTest<T extends TransactionSuccess<?>>
+public abstract class AbstractTransactionSuccessTest<T extends TransactionSuccess<T>>
         extends AbstractRequestSuccessTest<T> {
 
     protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(

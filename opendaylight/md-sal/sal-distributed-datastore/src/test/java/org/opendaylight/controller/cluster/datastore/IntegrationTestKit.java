@@ -64,7 +64,8 @@ public class IntegrationTestKit extends ShardTestKit {
         this(actorSystem, datastoreContextBuilder, 7);
     }
 
-    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder, int commitTimeout) {
+    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder,
+            final int commitTimeout) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
         this.commitTimeout = commitTimeout;
@@ -139,8 +140,8 @@ public class IntegrationTestKit extends ShardTestKit {
                 ActorSystem.class, ClusterWrapper.class, Configuration.class,
                 DatastoreContextFactory.class, DatastoreSnapshot.class);
 
-        final AbstractDataStore dataStore = constructor.newInstance(
-                getSystem(), cluster, config, mockContextFactory, restoreFromSnapshot);
+        final AbstractDataStore dataStore = constructor.newInstance(getSystem(), cluster, config, mockContextFactory,
+            restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);
 
@@ -152,7 +153,7 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
-    private void setDataStoreName(String typeName) {
+    private void setDataStoreName(final String typeName) {
         if ("config".equals(typeName)) {
             datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.CONFIGURATION);
         } else if ("operational".equals(typeName)) {

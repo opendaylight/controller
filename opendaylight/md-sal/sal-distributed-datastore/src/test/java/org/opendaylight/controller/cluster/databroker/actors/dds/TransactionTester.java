@@ -55,7 +55,7 @@ class TransactionTester<T extends AbstractProxyTransaction> {
         return (TransactionRequest<?>) envelope.getMessage();
     }
 
-    <R extends TransactionRequest<?>> R expectTransactionRequest(final Class<R> expected) {
+    <R extends TransactionRequest<R>> R expectTransactionRequest(final Class<R> expected) {
         envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
         final Class<?> actual = envelope.getMessage().getClass();
         final String errorMsg = String.format("Expected instance of %s, received %s", expected, actual);
