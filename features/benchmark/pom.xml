@@ -11,12 +11,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-lite</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.0-Carbon</version>
         <relativePath/>
     </parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-mdsal-benchmark-aggregator</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0-Carbon</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
 

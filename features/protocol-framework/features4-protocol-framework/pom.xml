@@ -14,20 +14,20 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>feature-repo-parent</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.0-Carbon</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features4-protocol-framework</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.0-Carbon</version>
     <packaging>feature</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-protocol-framework</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
+            <version>0.9.0-Carbon</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

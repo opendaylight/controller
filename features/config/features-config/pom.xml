@@ -4,20 +4,20 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.8.0-SNAPSHOT</version>
+    <version>1.8.0-Carbon</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-config</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.6.0-Carbon</version>
   <packaging>jar</packaging>
 
   <properties>
-    <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
-    <mdsal.version>2.2.0-SNAPSHOT</mdsal.version>
-    <config.version>0.6.0-SNAPSHOT</config.version>
-    <odlparent.version>1.8.0-SNAPSHOT</odlparent.version>
+    <yangtools.version>1.1.0-Carbon</yangtools.version>
+    <mdsal.version>2.2.0-Carbon</mdsal.version>
+    <config.version>0.6.0-Carbon</config.version>
+    <odlparent.version>1.8.0-Carbon</odlparent.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
   </properties>
@@ -28,7 +28,7 @@
        <dependency>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-artifacts</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.0-Carbon</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>

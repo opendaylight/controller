@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0-Carbon</version>
     <relativePath>../../config/config-parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.5.0-Carbon</version>
   <artifactId>sal-dom-xsql</artifactId>
   <packaging>bundle</packaging>
   <name>sal-dom-xsql</name>
@@ -20,7 +20,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.5.0-Carbon</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

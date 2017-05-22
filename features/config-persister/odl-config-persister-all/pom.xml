@@ -14,13 +14,13 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.0-Carbon</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-config-persister-all</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0-Carbon</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Config Persister:: All</name>
