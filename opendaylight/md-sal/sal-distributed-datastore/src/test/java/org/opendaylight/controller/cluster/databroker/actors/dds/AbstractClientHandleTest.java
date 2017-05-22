@@ -85,7 +85,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final long sequence = 0L;
         contextProbe.reply(new ConnectClientSuccess(CLIENT_ID, sequence, backendProbe.ref(),
-                Collections.emptyList(), dataTree, 3));
+                Collections.emptyList(), 2, dataTree, 3));
         final InternalCommand command = clientContextProbe.expectMsgClass(InternalCommand.class);
         command.execute(client);
         //data tree mock

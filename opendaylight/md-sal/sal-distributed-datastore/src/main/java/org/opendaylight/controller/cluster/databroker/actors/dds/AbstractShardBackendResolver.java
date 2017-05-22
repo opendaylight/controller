@@ -89,7 +89,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
     AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.BORON,
-            ABIVersion.current()));
+            ABIVersion.current(), nextSessionId.getAndIncrement()));
     }
 
     protected final void flushCache(final String shardName) {

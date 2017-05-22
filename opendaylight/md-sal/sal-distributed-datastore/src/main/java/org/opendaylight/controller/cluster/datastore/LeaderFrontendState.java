@@ -92,6 +92,9 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     }
 
     private void checkRequestSequence(final RequestEnvelope envelope) throws OutOfSequenceEnvelopeException {
+
+
+
         if (expectedTxSequence != envelope.getTxSequence()) {
             throw new OutOfSequenceEnvelopeException(expectedTxSequence);
         }
