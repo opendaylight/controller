@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractTransactionRequestTest<T extends TransactionRequest<?>>
+public abstract class AbstractTransactionRequestTest<T extends TransactionRequest<T>>
         extends AbstractRequestTest<T> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));

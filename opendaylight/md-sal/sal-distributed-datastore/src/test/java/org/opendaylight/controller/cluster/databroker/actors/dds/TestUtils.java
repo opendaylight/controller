@@ -79,7 +79,7 @@ class TestUtils {
             if (!e.getClass().equals(expectedException)) {
                 throw e;
             }
-            return (T) e;
+            return expectedException.cast(e);
         }
     }
 

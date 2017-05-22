@@ -170,7 +170,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
      * @param <R>                  expected request type
      * @return request message
      */
-    protected <R extends Request<?, ?>> R backendRespondToRequest(final Class<R> expectedRequestClass,
+    protected <R extends Request<?, R>> R backendRespondToRequest(final Class<R> expectedRequestClass,
                                                             final Response<?, ?> response) {
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
         Assert.assertEquals(expectedRequestClass, envelope.getMessage().getClass());

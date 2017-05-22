@@ -147,7 +147,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     public void testFlushState() throws Exception {
         final TransactionTester<RemoteProxyTransaction> transactionTester = createRemoteProxyTransactionTester();
         final RemoteProxyTransaction successor = transactionTester.getTransaction();
-        doAnswer(this::applyToCursorAnswer).when(modification).applyToCursor(any());
+        doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
         transaction.doSeal();
         transaction.flushState(successor);
         verify(modification).applyToCursor(any());

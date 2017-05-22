@@ -144,7 +144,7 @@ public class ActorBehaviorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private ClientActorBehavior<BackendInfo> createInitialBehaviorMock() throws Exception {
+    private static ClientActorBehavior<BackendInfo> createInitialBehaviorMock() throws Exception {
         final ClientActorBehavior<BackendInfo> initialBehavior = mock(ClientActorBehavior.class);
         //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
         //use reflection to work around this
@@ -173,13 +173,13 @@ public class ActorBehaviorTest {
 
     private static class MockedActor extends AbstractClientActor {
 
-        private final ClientActorBehavior initialBehavior;
+        private final ClientActorBehavior<?> initialBehavior;
 
-        private static Props props(final FrontendIdentifier frontendId, final ClientActorBehavior initialBehavior) {
+        private static Props props(final FrontendIdentifier frontendId, final ClientActorBehavior<?> initialBehavior) {
             return Props.create(MockedActor.class, () -> new MockedActor(frontendId, initialBehavior));
         }
 
-        private MockedActor(final FrontendIdentifier frontendId, final ClientActorBehavior initialBehavior) {
+        private MockedActor(final FrontendIdentifier frontendId, final ClientActorBehavior<?> initialBehavior) {
             super(frontendId);
             this.initialBehavior = initialBehavior;
         }
