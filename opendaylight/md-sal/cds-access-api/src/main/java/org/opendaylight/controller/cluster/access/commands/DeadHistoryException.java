@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.RangeSet;
+import com.google.common.primitives.UnsignedLong;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -20,8 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 public final class DeadHistoryException extends RequestException {
     private static final long serialVersionUID = 1L;
 
-    public DeadHistoryException(final long lastSeenHistory) {
-        super("Histories up to " + Long.toUnsignedString(lastSeenHistory) + " are accounted for");
+    public DeadHistoryException(final RangeSet<UnsignedLong> purgedHistories) {
+        super("Histories " + purgedHistories + " have been purged");
     }
 
     @Override
