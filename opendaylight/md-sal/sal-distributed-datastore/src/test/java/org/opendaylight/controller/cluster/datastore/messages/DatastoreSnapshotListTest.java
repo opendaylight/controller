@@ -84,10 +84,10 @@ public class DatastoreSnapshotListTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void assertDatastoreSnapshotEquals(DatastoreSnapshot legacy,
-            org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot actual,
-            org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot expShardMgrSnapshot,
-            Optional<NormalizedNode<?, ?>>... shardRoots) throws IOException {
+    private static void assertDatastoreSnapshotEquals(final DatastoreSnapshot legacy,
+            final org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot actual,
+            final org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot expShardMgrSnapshot,
+            final Optional<NormalizedNode<?, ?>>... shardRoots) throws IOException {
         assertEquals("Type", legacy.getType(), actual.getType());
 
         if (legacy.getShardManagerSnapshot() == null) {
@@ -112,8 +112,8 @@ public class DatastoreSnapshotListTest {
         }
     }
 
-    private static void assertSnapshotEquals(Snapshot expected, Optional<NormalizedNode<?, ?>> expRoot,
-            org.opendaylight.controller.cluster.raft.persisted.Snapshot actual) throws IOException {
+    private static void assertSnapshotEquals(final Snapshot expected, final Optional<NormalizedNode<?, ?>> expRoot,
+            final org.opendaylight.controller.cluster.raft.persisted.Snapshot actual) throws IOException {
         assertEquals("lastIndex", expected.getLastIndex(), actual.getLastIndex());
         assertEquals("lastTerm", expected.getLastTerm(), actual.getLastTerm());
         assertEquals("lastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
@@ -132,16 +132,16 @@ public class DatastoreSnapshotListTest {
         }
     }
 
-    private static ShardManagerSnapshot newLegacyShardManagerSnapshot(String... shards) {
+    private static ShardManagerSnapshot newLegacyShardManagerSnapshot(final String... shards) {
         return ShardManagerSnapshot.forShardList(Arrays.asList(shards));
     }
 
-    private static DatastoreSnapshot.ShardSnapshot newLegacyShardSnapshot(String name,
-            org.opendaylight.controller.cluster.raft.Snapshot snapshot) {
+    private static DatastoreSnapshot.ShardSnapshot newLegacyShardSnapshot(final String name,
+            final org.opendaylight.controller.cluster.raft.Snapshot snapshot) {
         return new DatastoreSnapshot.ShardSnapshot(name, SerializationUtils.serialize(snapshot));
     }
 
-    private static Snapshot newLegacySnapshot(NormalizedNode<?, ?> root)
+    private static Snapshot newLegacySnapshot(final NormalizedNode<?, ?> root)
             throws Exception {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (root != null) {
@@ -158,7 +158,7 @@ public class DatastoreSnapshotListTest {
                 "member-1", null);
     }
 
-    private static NormalizedNode<?, ?> toRootNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node)
+    private static NormalizedNode<?, ?> toRootNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
             throws DataValidationFailedException {
         DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(SchemaContextHelper.full());

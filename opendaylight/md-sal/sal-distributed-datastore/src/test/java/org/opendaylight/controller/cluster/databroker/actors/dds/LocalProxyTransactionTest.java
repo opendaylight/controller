@@ -114,7 +114,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
         final CommitLocalTransactionRequest request =
                 new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), modification, null, true);
-        doAnswer(this::applyToCursorAnswer).when(modification).applyToCursor(any());
+        doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
         verify(modification).applyToCursor(any());
         Assert.assertTrue(modifyRequest.getPersistenceProtocol().isPresent());
@@ -136,8 +136,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         testForwardToLocal(request, TransactionPurgeRequest.class);
     }
 
-    protected <T extends TransactionRequest<?>> T testForwardToLocal(final TransactionRequest<?> toForward,
-                                                                  final Class<T> expectedMessageClass) {
+    protected <R extends TransactionRequest<R>> R testForwardToLocal(final TransactionRequest<?> toForward,
+                                                                  final Class<R> expectedMessageClass) {
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         final TransactionTester<LocalReadWriteProxyTransaction> transactionTester = createLocalProxy();
         final LocalReadWriteProxyTransaction successor = transactionTester.getTransaction();
@@ -152,7 +152,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
      * @param invocation invocation
      * @return void - always null
      */
-    protected Answer<?> applyToCursorAnswer(final InvocationOnMock invocation) {
+    protected static final <T> Answer<T> applyToCursorAnswer(final InvocationOnMock invocation) {
         final DataTreeModificationCursor cursor =
                 invocation.getArgumentAt(0, DataTreeModificationCursor.class);
         cursor.write(PATH_1.getLastPathArgument(), DATA_1);

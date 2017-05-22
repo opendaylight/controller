@@ -36,7 +36,7 @@ public class HaltedTransmitQueueTest extends AbstractTransmitQueueTest<TransmitQ
     @Test(expected = UnsupportedOperationException.class)
     @Override
     public void testTransmit() throws Exception {
-        final Request request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
         final ConnectionEntry entry = new ConnectionEntry(request, callback, now);
