@@ -220,10 +220,9 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         Assert.assertThat(modifications, hasItem(both(isA(TransactionDelete.class)).and(hasPath(PATH_3))));
     }
 
-    protected void testRequestResponse(final Consumer<VotingFuture<Void>> consumer,
-            final Class<? extends TransactionRequest<?>> expectedRequest,
-                    final BiFunction<TransactionIdentifier, Long, TransactionSuccess<?>> replySupplier)
-            throws Exception {
+    protected <R extends TransactionRequest<R>> void testRequestResponse(final Consumer<VotingFuture<Void>> consumer,
+            final Class<R> expectedRequest,
+            final BiFunction<TransactionIdentifier, Long, TransactionSuccess<?>> replySupplier) throws Exception {
         final TransactionTester<T> tester = getTester();
         final VotingFuture<Void> future = mock(VotingFuture.class);
         transaction.seal();
@@ -233,18 +232,18 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         verify(future).voteYes();
     }
 
-    protected <T extends TransactionRequest<?>> T testHandleForwardedRemoteRequest(final T request) throws Exception {
+    protected <R extends TransactionRequest<R>> R testHandleForwardedRemoteRequest(final R request) throws Exception {
         transaction.handleReplayedRemoteRequest(request, createCallbackMock(), Ticker.systemTicker().read());
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
-        final T received = (T) envelope.getMessage();
+        final R received = (R) envelope.getMessage();
         Assert.assertTrue(received.getClass().equals(request.getClass()));
         Assert.assertEquals(TRANSACTION_ID, received.getTarget());
         Assert.assertEquals(clientContextProbe.ref(), received.getReplyTo());
         return received;
     }
 
-    protected <T extends TransactionRequest<?>> T testForwardToRemote(final TransactionRequest<?> toForward,
-                                                                   final Class<T> expectedMessageClass) {
+    protected <R extends TransactionRequest<R>> R testForwardToRemote(final TransactionRequest<?> toForward,
+            final Class<R> expectedMessageClass) {
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         final TransactionTester<RemoteProxyTransaction> transactionTester = createRemoteProxyTransactionTester();
         final RemoteProxyTransaction successor = transactionTester.getTransaction();

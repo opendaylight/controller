@@ -161,7 +161,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         createPrefixConfigShard(distributedOperDatastore);
     }
 
-    private void createPrefixConfigShard(final AbstractDataStore dataStore) {
+    private static void createPrefixConfigShard(final AbstractDataStore dataStore) {
         Configuration configuration = dataStore.getActorContext().getConfiguration();
         Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShardMessage =
@@ -451,12 +451,12 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable final Void result) {
                 LOG.debug("{} - Succesfuly removed shard for {}", memberName, prefix);
             }
 
             @Override
-            public void onFailure(Throwable throwable) {
+            public void onFailure(final Throwable throwable) {
                 LOG.error("Removal of shard {} from configuration failed.", prefix, throwable);
             }
         });

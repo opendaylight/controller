@@ -88,7 +88,7 @@ class PrefixedShardConfigWriter {
         submitBlocking(cohort);
     }
 
-    private void submitBlocking(final DOMStoreThreePhaseCommitCohort cohort) {
+    private static void submitBlocking(final DOMStoreThreePhaseCommitCohort cohort) {
         try {
             doSubmit(cohort).get();
         } catch (final InterruptedException | ExecutionException e) {
@@ -96,7 +96,7 @@ class PrefixedShardConfigWriter {
         }
     }
 
-    private ListenableFuture<Void> doSubmit(final DOMStoreThreePhaseCommitCohort cohort) {
+    private static ListenableFuture<Void> doSubmit(final DOMStoreThreePhaseCommitCohort cohort) {
         final AsyncFunction<Boolean, Void> validateFunction = input -> cohort.preCommit();
         final AsyncFunction<Void, Void> prepareFunction = input -> cohort.commit();
 

@@ -16,7 +16,7 @@ import org.opendaylight.controller.cluster.access.concepts.Request;
  */
 class ConnectionEntryMatcher extends BaseMatcher<ConnectionEntry> {
 
-    private final Request request;
+    private final Request<?, ?> request;
 
     /**
      * Creates a matcher that matches if the examined {@link ConnectionEntry} contains specified request.
@@ -28,7 +28,7 @@ class ConnectionEntryMatcher extends BaseMatcher<ConnectionEntry> {
         return new ConnectionEntryMatcher(request);
     }
 
-    private ConnectionEntryMatcher(final Request request) {
+    private ConnectionEntryMatcher(final Request<?, ?> request) {
         this.request = request;
     }
 

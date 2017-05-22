@@ -18,7 +18,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class AbstractRequestTest<T extends Request<?, ?>> {
+public abstract class AbstractRequestTest<T extends Request<?, T>> {
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
     protected static final ActorRef ACTOR_REF = TestProbe.apply(SYSTEM).ref();
 

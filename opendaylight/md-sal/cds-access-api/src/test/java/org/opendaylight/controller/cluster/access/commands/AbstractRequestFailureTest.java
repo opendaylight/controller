@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, ?>> {
+public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("member"), FrontendType.forName("frontend"));
 
