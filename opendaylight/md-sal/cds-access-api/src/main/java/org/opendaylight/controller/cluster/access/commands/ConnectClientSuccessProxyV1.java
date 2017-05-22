@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.AbstractSuccessProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Externalizable proxy for use with {@link ConnectClientSuccess}. It implements the initial (Boron) serialization
@@ -33,6 +34,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
     private List<ActorSelection> alternates;
     private ActorRef backend;
     private int maxMessages;
+    private long sessionId;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
     // be able to create instances via reflection.
@@ -46,6 +48,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
         this.alternates = success.getAlternates();
         this.backend = success.getBackend();
         this.maxMessages = success.getMaxMessages();
+        this.sessionId = success.getSessionId();
         // We are ignoring the DataTree, it is not serializable anyway
     }
 
@@ -54,6 +57,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
         super.writeExternal(out);
 
         out.writeObject(Serialization.serializedActorPath(backend));
+        WritableObjects.writeLong(out, sessionId);
         out.writeInt(maxMessages);
 
         out.writeInt(alternates.size());
@@ -67,6 +71,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
         super.readExternal(in);
 
         backend = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
+        sessionId = WritableObjects.readLong(in);
         maxMessages = in.readInt();
 
         final int alternatesSize = in.readInt();
@@ -78,7 +83,8 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
 
     @Override
     protected ConnectClientSuccess createSuccess(final ClientIdentifier target, final long sequence) {
-        return new ConnectClientSuccess(target, sequence, backend, alternates, Optional.empty(), maxMessages);
+        return new ConnectClientSuccess(target, sequence, backend, alternates, sessionId, Optional.empty(),
+            maxMessages);
     }
 
     @Override
