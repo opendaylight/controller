@@ -53,6 +53,10 @@ public class IdIntsListener implements DOMDataTreeChangeListener {
         });
     }
 
+    public boolean hasTriggered() {
+        return localCopy != null;
+    }
+
     public boolean checkEqual(final NormalizedNode<?, ?> expected) {
         return localCopy.equals(expected);
     }

@@ -437,7 +437,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         if (flappingSingletonService != null) {
             final RpcError error = RpcResultBuilder.newError(
-                    ErrorType.RPC, "Registration present.", "flappin-singleton already registered");
+                    ErrorType.RPC, "Registration present.", "flapping-singleton already registered");
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
         }
 
@@ -456,15 +456,19 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed().withRpcError(error).build());
         }
 
+        dtclReg.close();
+        dtclReg = null;
+
+        if (!idIntsListener.hasTriggered()) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.APPLICATION, "No notification received.", "id-ints listener has not received" +
+                            "any notifications.");
+            return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
+                    .withRpcError(error).build());
+        }
+
         final DOMDataReadOnlyTransaction rTx = domDataBroker.newReadOnlyTransaction();
         try {
-            if (dtclReg != null) {
-                dtclReg.close();
-                dtclReg = null;
-            }
-
-
-
             final Optional<NormalizedNode<?, ?>> readResult =
                     rTx.read(CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID).checkedGet();
 
@@ -598,6 +602,14 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         ddtlReg.close();
         ddtlReg = null;
+
+        if (!idIntsDdtl.hasTriggered()) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.APPLICATION, "No notification received.", "id-ints listener has not received" +
+                            "any notifications.");
+            return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDdtlOutput>failed()
+                    .withRpcError(error).build());
+        }
 
         final String shardName = ClusterUtils.getCleanShardName(ProduceTransactionsHandler.ID_INTS_YID);
         LOG.debug("Creating distributed datastore client for shard {}", shardName);
