@@ -35,7 +35,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     private static final List<ActorSelection> ALTERNATES = ImmutableList.of(ACTOR_SELECTION);
     private static final int MAX_MESSAGES = 10;
     private static final ConnectClientSuccess OBJECT = new ConnectClientSuccess(
-            CLIENT_IDENTIFIER, 0, ACTOR_REF, ALTERNATES, TREE, MAX_MESSAGES);
+            CLIENT_IDENTIFIER, 0, ACTOR_REF, ALTERNATES, 2, TREE, MAX_MESSAGES);
 
     @Override
     protected ConnectClientSuccess object() {

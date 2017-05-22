@@ -97,7 +97,7 @@ public class ModuleShardBackendResolverTest {
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final TestProbe backendProbe = new TestProbe(system, "backend");
         final ConnectClientSuccess msg = new ConnectClientSuccess(CLIENT_ID, 0L, backendProbe.ref(),
-                Collections.emptyList(), dataTree, 3);
+                Collections.emptyList(), 2, dataTree, 3);
         contextProbe.reply(msg);
         final CompletionStage<ShardBackendInfo> stage = moduleShardBackendResolver.getBackendInfo(0L);
         final ShardBackendInfo shardBackendInfo = TestUtils.getWithTimeout(stage.toCompletableFuture());
@@ -127,7 +127,7 @@ public class ModuleShardBackendResolverTest {
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final TestProbe staleBackendProbe = new TestProbe(system, "staleBackend");
         final ConnectClientSuccess msg = new ConnectClientSuccess(CLIENT_ID, 0L, staleBackendProbe.ref(),
-                Collections.emptyList(), dataTree, 3);
+                Collections.emptyList(), 2L, dataTree, 3);
         contextProbe.reply(msg);
         //get backend info
         final ShardBackendInfo staleBackendInfo = TestUtils.getWithTimeout(backendInfo.toCompletableFuture());
@@ -138,7 +138,7 @@ public class ModuleShardBackendResolverTest {
         contextProbe.expectMsgClass(ConnectClientRequest.class);
         final TestProbe refreshedBackendProbe = new TestProbe(system, "refreshedBackend");
         final ConnectClientSuccess msg2 = new ConnectClientSuccess(CLIENT_ID, 1L, refreshedBackendProbe.ref(),
-                Collections.emptyList(), dataTree, 3);
+                Collections.emptyList(), 2L, dataTree, 3);
         contextProbe.reply(msg2);
         final ShardBackendInfo refreshedBackendInfo = TestUtils.getWithTimeout(refreshed.toCompletableFuture());
         Assert.assertEquals(staleBackendInfo.getCookie(), refreshedBackendInfo.getCookie());

@@ -42,21 +42,24 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     private final DataTree dataTree;
     private final ActorRef backend;
     private final int maxMessages;
+    private final long sessionId;
 
     ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
-        final List<ActorSelection> alternates, final Optional<DataTree> dataTree, final int maxMessages) {
+        final List<ActorSelection> alternates, final long sessionId, final Optional<DataTree> dataTree,
+        final int maxMessages) {
         super(target, sequence);
         this.backend = Preconditions.checkNotNull(backend);
         this.alternates = ImmutableList.copyOf(alternates);
         this.dataTree = dataTree.orElse(null);
         Preconditions.checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
         this.maxMessages = maxMessages;
+        this.sessionId = sessionId;
     }
 
     public ConnectClientSuccess(@Nonnull final ClientIdentifier target, final long sequence,
             @Nonnull final ActorRef backend, @Nonnull final List<ActorSelection> alternates,
-            @Nonnull final DataTree dataTree, final int maxMessages) {
-        this(target, sequence, backend, alternates, Optional.of(dataTree), maxMessages);
+            final long sessionId, @Nonnull final DataTree dataTree, final int maxMessages) {
+        this(target, sequence, backend, alternates, sessionId, Optional.of(dataTree), maxMessages);
     }
 
     /**
@@ -82,6 +85,10 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
         return maxMessages;
     }
 
+    public long getSessionId() {
+        return sessionId;
+    }
+
     @Override
     protected ConnectClientSuccessProxyV1 externalizableProxy(final ABIVersion version) {
         return new ConnectClientSuccessProxyV1(this);
@@ -94,7 +101,7 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("alternates", alternates)
+        return super.addToStringAttributes(toStringHelper).add("alternates", alternates).add("sessionId", sessionId)
                 .add("dataTree present", getDataTree().isPresent()).add("maxMessages", maxMessages);
     }
 }
