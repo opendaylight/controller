@@ -134,7 +134,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         // end up resurrecting a purged history.
         if (purgedHistories.contains(UnsignedLong.fromLongBits(id.getHistoryId()))) {
             LOG.debug("{}: rejecting purged request {}", persistenceId, request);
-            throw new DeadHistoryException(lastSeenHistory.longValue());
+            throw new DeadHistoryException(purgedHistories);
         }
 
         // Update last history we have seen
@@ -188,7 +188,12 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             if (lhId.getHistoryId() != 0) {
                 history = localHistories.get(lhId);
                 if (history == null) {
-                    LOG.debug("{}: rejecting unknown history request {}", persistenceId, request);
+                    if (purgedHistories.contains(UnsignedLong.fromLongBits(lhId.getHistoryId()))) {
+                        LOG.warn("{}: rejecting request {} to purged history", persistenceId, request);
+                        throw new DeadHistoryException(purgedHistories);
+                    }
+
+                    LOG.warn("{}: rejecting unknown history request {}", persistenceId, request);
                     throw new UnknownHistoryException(lastSeenHistory);
                 }
             } else {
