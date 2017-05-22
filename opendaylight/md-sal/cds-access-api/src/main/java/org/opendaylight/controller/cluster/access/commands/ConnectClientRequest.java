@@ -35,23 +35,26 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     private final ABIVersion minVersion;
     private final ABIVersion maxVersion;
+    private final long sessionId;
 
     ConnectClientRequest(final ClientIdentifier identifier, final long txSequence, final ActorRef replyTo,
-            final ABIVersion minVersion, final ABIVersion maxVersion) {
+            final ABIVersion minVersion, final ABIVersion maxVersion, final long sessionId) {
         super(identifier, txSequence, replyTo);
         this.minVersion = Preconditions.checkNotNull(minVersion);
         this.maxVersion = Preconditions.checkNotNull(maxVersion);
+        this.sessionId = sessionId;
     }
 
     public ConnectClientRequest(final ClientIdentifier identifier, final ActorRef replyTo, final ABIVersion minVersion,
-            final ABIVersion maxVersion) {
-        this(identifier, 0, replyTo, minVersion, maxVersion);
+            final ABIVersion maxVersion, final long sessionId) {
+        this(identifier, 0, replyTo, minVersion, maxVersion, sessionId);
     }
 
     private ConnectClientRequest(final ConnectClientRequest request, final ABIVersion version) {
         super(request, version);
         this.minVersion = request.minVersion;
         this.maxVersion = request.maxVersion;
+        this.sessionId = request.sessionId;
     }
 
     public ABIVersion getMinVersion() {
@@ -60,6 +63,15 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     public ABIVersion getMaxVersion() {
         return maxVersion;
+    }
+
+    /**
+     * Proposed session ID, unsigned bits.
+     *
+     * @return Unsigned long session ID.
+     */
+    public long getSessionId() {
+        return sessionId;
     }
 
     @Override
@@ -81,6 +93,7 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
     @Override
     @Nonnull
     protected ToStringHelper addToStringAttributes(@Nonnull final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("minVersion", minVersion).add("maxVersion", maxVersion);
+        return super.addToStringAttributes(toStringHelper).add("minVersion", minVersion).add("maxVersion", maxVersion)
+                .add("sessionId", sessionId);
     }
 }

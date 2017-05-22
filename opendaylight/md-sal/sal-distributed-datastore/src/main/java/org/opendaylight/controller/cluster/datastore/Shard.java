@@ -439,8 +439,8 @@ public class Shard extends RaftActor {
             final LeaderFrontendState frontend = getFrontend(message.getTarget());
             frontend.reconnect();
             message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), getSelf(),
-                ImmutableList.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion),
-                ActorRef.noSender());
+                ImmutableList.of(), message.getSessionId(), store.getDataTree(), CLIENT_MAX_MESSAGES)
+                .toVersion(selectedVersion), ActorRef.noSender());
         } catch (RequestException | RuntimeException e) {
             message.getReplyTo().tell(new Failure(e), ActorRef.noSender());
         }
