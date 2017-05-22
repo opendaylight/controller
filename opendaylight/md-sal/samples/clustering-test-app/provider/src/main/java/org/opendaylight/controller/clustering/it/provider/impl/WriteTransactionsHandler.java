@@ -107,9 +107,9 @@ public class WriteTransactionsHandler implements Runnable {
     public void run() {
         final long current = System.nanoTime();
 
-        futures.add(execWrite());
-
         maybeFinish(current);
+
+        futures.add(execWrite());
     }
 
     public void start(final SettableFuture<RpcResult<WriteTransactionsOutput>> settableFuture) {
@@ -143,12 +143,12 @@ public class WriteTransactionsHandler implements Runnable {
         // write only the top list
         tx.merge(LogicalDatastoreType.CONFIGURATION, ID_INTS_YID, containerNode);
         try {
-            tx.submit().checkedGet();
+            tx.submit().checkedGet(125, TimeUnit.SECONDS);
         } catch (final OptimisticLockFailedException e) {
             // when multiple write-transactions are executed concurrently we need to ignore this.
             // If we get optimistic lock here it means id-ints already exists and we can continue.
             LOG.debug("Got an optimistic lock when writing initial top level list element.", e);
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException | TimeoutException e) {
             LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
             settableFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
@@ -164,8 +164,8 @@ public class WriteTransactionsHandler implements Runnable {
         tx.merge(LogicalDatastoreType.CONFIGURATION, idListWithKey, entry);
 
         try {
-            tx.submit().checkedGet();
-        } catch (final TransactionCommitFailedException e) {
+            tx.submit().checkedGet(125, TimeUnit.SECONDS);
+        } catch (final TransactionCommitFailedException | TimeoutException e) {
             LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
             settableFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());

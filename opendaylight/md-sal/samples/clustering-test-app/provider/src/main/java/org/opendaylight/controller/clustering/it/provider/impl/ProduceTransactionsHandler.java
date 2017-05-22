@@ -104,9 +104,9 @@ public class ProduceTransactionsHandler implements Runnable {
     public void run() {
         final long current = System.nanoTime();
 
-        futures.add(execWrite());
-
         maybeFinish(current);
+
+        futures.add(execWrite());
     }
 
     public void start(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
