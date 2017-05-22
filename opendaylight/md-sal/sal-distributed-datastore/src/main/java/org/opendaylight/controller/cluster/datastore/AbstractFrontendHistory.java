@@ -136,7 +136,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         if (tx == null) {
             // The transaction does not exist and we are about to create it, check sequence number
             if (request.getSequence() != 0) {
-                LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
+                LOG.warn("{}: no transaction state present, unexpected request {}", persistenceId(), request);
                 throw new OutOfOrderRequestException(0);
             }
 
