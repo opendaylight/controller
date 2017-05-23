@@ -117,6 +117,8 @@ class PrefixedShardConfigWriter {
         } catch (final ReadFailedException e) {
             LOG.error("Presence check of default shard in configuration failed.", e);
             return false;
+        } finally {
+            snapshot.abort();
         }
     }
 
