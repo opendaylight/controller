@@ -497,7 +497,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final IncrementTransactionSequenceRequest req = (IncrementTransactionSequenceRequest) request;
             ensureFlushedBuider(optTicks);
             enqueueRequest(new IncrementTransactionSequenceRequest(getIdentifier(), nextSequence(), localActor(),
-                req.getIncrement()), callback, enqueuedTicks);
+                snapshotOnly, req.getIncrement()), callback, enqueuedTicks);
             incrementSequence(req.getIncrement());
         } else {
             throw new IllegalArgumentException("Unhandled request {}" + request);

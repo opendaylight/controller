@@ -17,7 +17,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *
  * @author Robert Varga
  */
-final class ExistsTransactionRequestProxyV1 extends AbstractReadTransactionRequestProxyV1<ExistsTransactionRequest> {
+final class ExistsTransactionRequestProxyV1 extends
+        AbstractReadPathTransactionRequestProxyV1<ExistsTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -32,7 +33,7 @@ final class ExistsTransactionRequestProxyV1 extends AbstractReadTransactionReque
     }
 
     @Override
-    ExistsTransactionRequest createReadRequest(final TransactionIdentifier target, final long sequence,
+    ExistsTransactionRequest createReadPathRequest(final TransactionIdentifier target, final long sequence,
             final ActorRef replyTo, final YangInstanceIdentifier path, final boolean snapshotOnly) {
         return new ExistsTransactionRequest(target, sequence, replyTo, path, snapshotOnly);
     }
