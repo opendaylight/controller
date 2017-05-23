@@ -78,7 +78,7 @@ public class RaftActorLeadershipTransferCohort {
         final long electionTimeout = raftActor.getRaftActorContext().getConfigParams()
                 .getElectionTimeOutInterval().toMillis();
         final int variance = raftActor.getRaftActorContext().getConfigParams().getElectionTimeVariance();
-        newLeaderTimeoutInMillis = electionTimeout + variance * 2;
+        newLeaderTimeoutInMillis = 2 * (electionTimeout + variance);
     }
 
     void init() {
