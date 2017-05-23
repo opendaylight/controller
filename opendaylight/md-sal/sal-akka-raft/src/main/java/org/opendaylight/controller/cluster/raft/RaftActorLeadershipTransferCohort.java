@@ -157,7 +157,7 @@ public class RaftActorLeadershipTransferCohort {
         newLeaderTimer = raftActor.getContext().system().scheduler().scheduleOnce(timeout, raftActor.self(),
             (Runnable) () -> {
                 LOG.debug("{}: leader not elected in time", raftActor.persistenceId());
-                finish(true);
+                finish(false);
             }, raftActor.getContext().system().dispatcher(), raftActor.self());
     }
 
