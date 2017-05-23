@@ -292,6 +292,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // sanity check
                 if (!requestedFollowerId.equals(getLeaderId())) {
                     onFailure(raftActorRef);
+                    return;
                 }
 
                 LOG.debug("{}: Leadership transferred successfully to {}", persistenceId(), requestedFollowerId);
