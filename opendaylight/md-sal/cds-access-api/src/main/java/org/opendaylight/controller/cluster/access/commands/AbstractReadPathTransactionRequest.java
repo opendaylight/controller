@@ -10,11 +10,15 @@ package org.opendaylight.controller.cluster.access.commands;
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.common.base.Preconditions;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * Abstract base class for {@link TransactionRequest}s accessing transaction state without modifying it.
+ * Abstract base class for {@link TransactionRequest}s accessing data as visible in the isolated context of a particular
+ * transaction. The path of the data being accessed is returned via {@link #getPath()}.
  *
  * <p>
  * This class is visible outside of this package for the purpose of allowing common instanceof checks
@@ -25,30 +29,30 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @param <T> Message type
  */
 @Beta
-public abstract class AbstractReadTransactionRequest<T extends AbstractReadTransactionRequest<T>>
-        extends TransactionRequest<T> {
+public abstract class AbstractReadPathTransactionRequest<T extends AbstractReadPathTransactionRequest<T>>
+        extends AbstractReadTransactionRequest<T> {
     private static final long serialVersionUID = 1L;
+    private final YangInstanceIdentifier path;
 
-    private final boolean snapshotOnly;
-
-    AbstractReadTransactionRequest(final TransactionIdentifier identifier, final long sequence, final ActorRef replyTo,
-        final boolean snapshotOnly) {
-        super(identifier, sequence, replyTo);
-        this.snapshotOnly = snapshotOnly;
+    AbstractReadPathTransactionRequest(final TransactionIdentifier identifier, final long sequence,
+        final ActorRef replyTo, final YangInstanceIdentifier path, final boolean snapshotOnly) {
+        super(identifier, sequence, replyTo, snapshotOnly);
+        this.path = Preconditions.checkNotNull(path);
     }
 
-    AbstractReadTransactionRequest(final T request, final ABIVersion version) {
+    AbstractReadPathTransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
-        this.snapshotOnly = request.isSnapshotOnly();
+        this.path = request.getPath();
     }
 
-    public final boolean isSnapshotOnly() {
-        return snapshotOnly;
+    @Nonnull
+    public final YangInstanceIdentifier getPath() {
+        return path;
     }
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("snapshotOnly", snapshotOnly);
+        return super.addToStringAttributes(toStringHelper).add("path", path);
     }
 
     @Override
