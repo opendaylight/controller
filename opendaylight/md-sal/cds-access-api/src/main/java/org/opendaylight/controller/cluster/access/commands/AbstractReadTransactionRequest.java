@@ -10,15 +10,11 @@ package org.opendaylight.controller.cluster.access.commands;
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * Abstract base class for {@link TransactionRequest}s accessing data as visible in the isolated context of a particular
- * transaction. The path of the data being accessed is returned via {@link #getPath()}.
+ * Abstract base class for {@link TransactionRequest}s accessing transaction state without modifying it.
  *
  * <p>
  * This class is visible outside of this package for the purpose of allowing common instanceof checks
@@ -32,25 +28,18 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public abstract class AbstractReadTransactionRequest<T extends AbstractReadTransactionRequest<T>>
         extends TransactionRequest<T> {
     private static final long serialVersionUID = 1L;
-    private final YangInstanceIdentifier path;
+
     private final boolean snapshotOnly;
 
     AbstractReadTransactionRequest(final TransactionIdentifier identifier, final long sequence, final ActorRef replyTo,
-        final YangInstanceIdentifier path, final boolean snapshotOnly) {
+        final boolean snapshotOnly) {
         super(identifier, sequence, replyTo);
-        this.path = Preconditions.checkNotNull(path);
         this.snapshotOnly = snapshotOnly;
     }
 
     AbstractReadTransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
-        this.path = request.getPath();
         this.snapshotOnly = request.isSnapshotOnly();
-    }
-
-    @Nonnull
-    public final YangInstanceIdentifier getPath() {
-        return path;
     }
 
     public final boolean isSnapshotOnly() {
@@ -59,7 +48,7 @@ public abstract class AbstractReadTransactionRequest<T extends AbstractReadTrans
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("path", path);
+        return super.addToStringAttributes(toStringHelper).add("snapshotOnly", snapshotOnly);
     }
 
     @Override

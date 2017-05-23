@@ -19,16 +19,26 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @author Robert Varga
  */
-public final class IncrementTransactionSequenceRequest extends TransactionRequest<IncrementTransactionSequenceRequest> {
+public final class IncrementTransactionSequenceRequest extends
+        AbstractReadTransactionRequest<IncrementTransactionSequenceRequest> {
     private static final long serialVersionUID = 1L;
 
     private final long increment;
 
     public IncrementTransactionSequenceRequest(final TransactionIdentifier identifier, final long sequence,
-            final ActorRef replyTo, final long increment) {
-        super(identifier, sequence, replyTo);
+            final ActorRef replyTo, final boolean snapshotOnly, final long increment) {
+        super(identifier, sequence, replyTo, snapshotOnly);
         Preconditions.checkArgument(increment >= 0);
         this.increment = increment;
+    }
+
+    /**
+     * Return the sequence increment beyond this request's sequence.
+     *
+     * @return Sequence increment, guaranteed to be non-negative.
+     */
+    public long getIncrement() {
+        return increment;
     }
 
     @Override
@@ -39,14 +49,5 @@ public final class IncrementTransactionSequenceRequest extends TransactionReques
     @Override
     protected IncrementTransactionSequenceRequest cloneAsVersion(final ABIVersion targetVersion) {
         return this;
-    }
-
-    /**
-     * Return the sequence increment beyond this request's sequence.
-     *
-     * @return Sequence increment, guaranteed to be non-negative.
-     */
-    public long getIncrement() {
-        return increment;
     }
 }

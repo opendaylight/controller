@@ -537,7 +537,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     Verify.verify(obj instanceof IncrementSequence);
                     final IncrementSequence increment = (IncrementSequence) obj;
                     successor.replayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
-                        increment.getSequence(), localActor(), increment.getDelta()), resp -> { }, now);
+                        increment.getSequence(), localActor(), isSnapshotOnly(), increment.getDelta()), resp -> { },
+                        now);
                     LOG.debug("Incrementing sequence {} to successor {}", obj, successor);
                 }
             }
