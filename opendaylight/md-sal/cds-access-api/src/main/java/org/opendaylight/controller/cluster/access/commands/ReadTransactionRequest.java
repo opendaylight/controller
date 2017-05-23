@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * @author Robert Varga
  */
 @Beta
-public final class ReadTransactionRequest extends AbstractReadTransactionRequest<ReadTransactionRequest> {
+public final class ReadTransactionRequest extends AbstractReadPathTransactionRequest<ReadTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
     public ReadTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,

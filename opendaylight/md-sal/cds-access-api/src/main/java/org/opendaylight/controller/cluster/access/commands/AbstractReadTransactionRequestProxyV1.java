@@ -12,9 +12,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * Abstract base class for serialization proxies associated with {@link AbstractReadTransactionRequest}s. It implements
@@ -27,7 +24,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTransactionRequest<T>>
         extends AbstractTransactionRequestProxy<T> {
     private static final long serialVersionUID = 1L;
-    private YangInstanceIdentifier path;
     private boolean snapshotOnly;
 
     protected AbstractReadTransactionRequestProxyV1() {
@@ -36,31 +32,25 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
 
     AbstractReadTransactionRequestProxyV1(final T request) {
         super(request);
-        path = request.getPath();
         snapshotOnly = request.isSnapshotOnly();
     }
 
     @Override
-    public final void writeExternal(final ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out)) {
-            nnout.writeYangInstanceIdentifier(path);
-        }
         out.writeBoolean(snapshotOnly);
     }
 
     @Override
-    public final void readExternal(final ObjectInput in) throws ClassNotFoundException, IOException {
+    public void readExternal(final ObjectInput in) throws ClassNotFoundException, IOException {
         super.readExternal(in);
-        path = NormalizedNodeInputOutput.newDataInput(in).readYangInstanceIdentifier();
         snapshotOnly = in.readBoolean();
     }
 
     @Override
     protected final T createRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
-        return createReadRequest(target, sequence, replyTo, path, snapshotOnly);
+        return createReadRequest(target, sequence, replyTo, snapshotOnly);
     }
 
-    abstract T createReadRequest(TransactionIdentifier target, long sequence, ActorRef replyTo,
-            YangInstanceIdentifier requestPath, boolean snapshotOnly);
+    abstract T createReadRequest(TransactionIdentifier target, long sequence, ActorRef replyTo, boolean snapshotOnly);
 }

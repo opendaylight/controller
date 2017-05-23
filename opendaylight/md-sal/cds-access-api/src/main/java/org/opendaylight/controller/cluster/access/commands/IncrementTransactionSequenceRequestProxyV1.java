@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 final class IncrementTransactionSequenceRequestProxyV1
-        extends AbstractTransactionRequestProxy<IncrementTransactionSequenceRequest> {
+        extends AbstractReadTransactionRequestProxyV1<IncrementTransactionSequenceRequest> {
     private long increment;
 
     // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
@@ -43,8 +43,8 @@ final class IncrementTransactionSequenceRequestProxyV1
     }
 
     @Override
-    protected IncrementTransactionSequenceRequest createRequest(final TransactionIdentifier target, final long sequence,
-            final ActorRef replyToActor) {
-        return new IncrementTransactionSequenceRequest(target, sequence, replyToActor, increment);
+    IncrementTransactionSequenceRequest createReadRequest(final TransactionIdentifier target, final long sequence,
+            final ActorRef replyToActor, final boolean snapshotOnly) {
+        return new IncrementTransactionSequenceRequest(target, sequence, replyToActor, snapshotOnly, increment);
     }
 }
