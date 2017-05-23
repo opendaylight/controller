@@ -289,6 +289,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
     }
 
+    long backendSilentTicks(final long now) {
+        return now - lastReceivedTicks;
+    }
+
     /*
      * We are using tri-state return here to indicate one of three conditions:
      * - if there is no timeout to schedule, return Optional.empty()
@@ -303,7 +307,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             return Optional.empty();
         }
 
-        final long backendSilentTicks = now - lastReceivedTicks;
+        final long backendSilentTicks = backendSilentTicks(now);
         if (backendSilentTicks >= BACKEND_ALIVE_TIMEOUT_NANOS) {
             LOG.debug("Connection {} has not seen activity from backend for {} nanoseconds, timing out", this,
                 backendSilentTicks);
