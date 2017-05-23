@@ -31,6 +31,12 @@ public final class ConnectingClientConnection<T extends BackendInfo> extends Abs
     }
 
     @Override
+    long backendSilentTicks(final long now) {
+        // We are still connecting and do not want the timer to attempt a reconnect
+        return 0;
+    }
+
+    @Override
     ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
         throw new UnsupportedOperationException("Attempted to reconnect a connecting connection", cause);
     }
