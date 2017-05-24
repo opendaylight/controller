@@ -105,15 +105,21 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     private boolean handleReadRequest(final TransactionRequest<?> request,
             final @Nullable Consumer<Response<?, ?>> callback) {
+        // Note we delay completion of read requests to limit the scope at which the client can run, as they have
+        // listeners, which we do not want to execute while we are reconnecting.
         if (request instanceof ReadTransactionRequest) {
             final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
             final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);
-            callback.accept(new ReadTransactionSuccess(request.getTarget(), request.getSequence(), result));
+
+            executeInActor(() -> callback.accept(new ReadTransactionSuccess(request.getTarget(), request.getSequence(),
+                result)));
             return true;
         } else if (request instanceof ExistsTransactionRequest) {
             final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
             final boolean result = readOnlyView().readNode(path).isPresent();
-            callback.accept(new ExistsTransactionSuccess(request.getTarget(), request.getSequence(), result));
+
+            executeInActor(() -> callback.accept(new ExistsTransactionSuccess(request.getTarget(),
+                request.getSequence(), result)));
             return true;
         } else {
             return false;

@@ -80,6 +80,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     void applyModifyTransactionRequest(final ModifyTransactionRequest request,
             final Consumer<Response<?, ?>> callback) {
         commonModifyTransactionRequest(request, callback);
+        // FIXME: BUG-8538: this is touching cohorts
         abort();
     }
 
@@ -88,6 +89,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         commonModifyTransactionRequest(request, callback);
         // FIXME: this should go through the enqueueRequest() path
+        // FIXME: BUG-8538: this is touching cohorts
         abort();
     }
 
