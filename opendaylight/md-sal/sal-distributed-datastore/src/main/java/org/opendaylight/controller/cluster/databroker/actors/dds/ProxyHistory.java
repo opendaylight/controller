@@ -23,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
+import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
@@ -336,6 +337,10 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     @Override
     public LocalHistoryIdentifier getIdentifier() {
         return identifier;
+    }
+
+    final ClientActorContext context() {
+        return connection.context();
     }
 
     final long currentTime() {
