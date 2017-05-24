@@ -138,13 +138,6 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             isSnapshotOnly()), t -> completeRead(future, t), future);
     }
 
-    @Override
-    void doAbort() {
-        ensureInitializedBuilder();
-        builder.setAbort();
-        flushBuilder();
-    }
-
     private void ensureInitializedBuilder() {
         if (!builderBusy) {
             builder.setSequence(nextSequence());
@@ -256,7 +249,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         recordFinishedRequest(response);
     }
 
-    private ModifyTransactionRequest abortRequest() {
+    @Override
+    ModifyTransactionRequest abortRequest() {
         ensureInitializedBuilder();
         builder.setAbort();
         final ModifyTransactionRequest ret = builder.build();

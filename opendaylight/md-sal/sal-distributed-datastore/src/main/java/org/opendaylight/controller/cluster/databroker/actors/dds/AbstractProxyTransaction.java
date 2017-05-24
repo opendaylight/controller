@@ -330,8 +330,12 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      */
     final void abort() {
         checkNotSealed();
-        doAbort();
         parent.abortTransaction(this);
+
+        sendRequest(abortRequest(), resp -> {
+            LOG.debug("Transaction {} abort completed with {}", getIdentifier(), resp);
+            sendPurge();
+        });
     }
 
     final void abort(final VotingFuture<Void> ret) {
@@ -645,10 +649,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract void doSeal();
 
-    abstract void doAbort();
-
     @GuardedBy("this")
     abstract void flushState(AbstractProxyTransaction successor);
+
+    abstract TransactionRequest<?> abortRequest();
 
     abstract TransactionRequest<?> commitRequest(boolean coordinated);
 
