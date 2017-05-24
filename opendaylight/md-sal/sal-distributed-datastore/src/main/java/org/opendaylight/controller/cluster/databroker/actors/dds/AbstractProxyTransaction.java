@@ -197,6 +197,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         this.parent = Preconditions.checkNotNull(parent);
     }
 
+    final void executeInActor(final Runnable command) {
+        parent.context().executeInActor(behavior -> {
+            command.run();
+            return behavior;
+        });
+    }
+
     final ActorRef localActor() {
         return parent.localActor();
     }
