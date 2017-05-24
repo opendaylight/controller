@@ -14,7 +14,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -181,8 +180,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return logContext;
     }
 
-    final Ticker ticker() {
-        return shard.ticker();
+    final long readTime() {
+        return shard.ticker().read();
     }
 
     public TipProducingDataTree getDataTree() {
@@ -743,7 +742,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 tip.validate(modification);
                 LOG.debug("{}: Transaction {} validated", logContext, cohort.getIdentifier());
                 cohort.successfulCanCommit();
-                entry.lastAccess = ticker().read();
+                entry.lastAccess = readTime();
                 return;
             } catch (ConflictingModificationAppliedException e) {
                 LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.getIdentifier(),
@@ -843,7 +842,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         // Set the tip of the data tree.
         tip = Verify.verifyNotNull(candidate);
 
-        entry.lastAccess = ticker().read();
+        entry.lastAccess = readTime();
 
         pendingTransactions.remove();
         pendingCommits.add(entry);
@@ -958,7 +957,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
         SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort.DeadOnArrival(this, mod, txId, failure);
-        pendingTransactions.add(new CommitEntry(cohort, ticker().read()));
+        pendingTransactions.add(new CommitEntry(cohort, readTime()));
         return cohort;
     }
 
@@ -967,7 +966,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final DataTreeModification mod) {
         SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort.Normal(this, mod, txId,
                 cohortRegistry.createCohort(schemaContext, txId, COMMIT_STEP_TIMEOUT));
-        pendingTransactions.add(new CommitEntry(cohort, ticker().read()));
+        pendingTransactions.add(new CommitEntry(cohort, readTime()));
         return cohort;
     }
 
@@ -984,7 +983,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
     void checkForExpiredTransactions(final long transactionCommitTimeoutMillis) {
         final long timeout = TimeUnit.MILLISECONDS.toNanos(transactionCommitTimeoutMillis);
-        final long now = ticker().read();
+        final long now = readTime();
 
         final Queue<CommitEntry> currentQueue = !pendingFinishCommits.isEmpty() ? pendingFinishCommits :
             !pendingCommits.isEmpty() ? pendingCommits : pendingTransactions;
