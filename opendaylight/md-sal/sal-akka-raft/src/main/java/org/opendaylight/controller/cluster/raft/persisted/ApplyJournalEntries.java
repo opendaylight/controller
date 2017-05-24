@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import akka.dispatch.ControlMessage;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -21,7 +22,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class ApplyJournalEntries implements Serializable, MigratedSerializable {
+public class ApplyJournalEntries implements Serializable, MigratedSerializable, ControlMessage {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 

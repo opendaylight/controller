@@ -8,10 +8,12 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import akka.dispatch.ControlMessage;
+
 /**
  * This messages is sent via a schedule to the Leader to prompt it to send a heart beat to its followers.
  */
-public final class SendHeartBeat {
+public final class SendHeartBeat implements ControlMessage {
     public static final SendHeartBeat INSTANCE = new SendHeartBeat();
 
     private SendHeartBeat() {

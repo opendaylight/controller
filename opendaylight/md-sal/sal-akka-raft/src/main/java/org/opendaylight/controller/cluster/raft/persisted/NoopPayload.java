@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import akka.dispatch.ControlMessage;
 import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
@@ -16,14 +17,13 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
  *
  * @author Thomas Pantelis
  */
-public final class NoopPayload extends Payload implements Serializable {
+public final class NoopPayload extends Payload implements Serializable, ControlMessage {
     public static final NoopPayload INSTANCE = new NoopPayload();
 
     // There is no need for Externalizable
     private static final class Proxy implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        @SuppressWarnings("static-method")
         private Object readResolve() {
             return INSTANCE;
         }
@@ -40,7 +40,6 @@ public final class NoopPayload extends Payload implements Serializable {
         return 0;
     }
 
-    @SuppressWarnings("static-method")
     private Object writeReplace() {
         return PROXY;
     }
