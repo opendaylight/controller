@@ -11,16 +11,13 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
-import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IdIntsListener implements DOMDataTreeChangeListener {
+public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(IdIntsListener.class);
 
