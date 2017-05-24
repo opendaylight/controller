@@ -146,7 +146,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         // We have to send the response only after persistence has completed
         final ShardDataTreeTransactionChain chain = tree.ensureTransactionChain(historyId, () -> {
             LOG.debug("{}: persisted history {}", persistenceId, historyId);
-            envelope.sendSuccess(new LocalHistorySuccess(historyId, request.getSequence()), tree.ticker().read() - now);
+            envelope.sendSuccess(new LocalHistorySuccess(historyId, request.getSequence()), tree.readTime() - now);
         });
 
         localHistories.put(historyId, LocalFrontendHistory.create(persistenceId, tree, chain));
