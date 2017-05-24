@@ -70,7 +70,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     abstract DataTreeSnapshot readOnlyView();
 
-    abstract void applyModifyTransactionRequest(ModifyTransactionRequest request,
+    abstract void applyForwardedModifyTransactionRequest(ModifyTransactionRequest request,
             @Nullable Consumer<Response<?, ?>> callback);
 
     abstract void replayModifyTransactionRequest(ModifyTransactionRequest request,
@@ -87,9 +87,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    final void doAbort() {
-        sendAbort(new AbortLocalTransactionRequest(identifier, localActor()),
-            response -> LOG.debug("Transaction {} abort completed with {}", identifier, response));
+    final AbortLocalTransactionRequest abortRequest() {
+        return new AbortLocalTransactionRequest(identifier, localActor());
     }
 
     @Override
@@ -139,7 +138,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (handleReadRequest(request, callback)) {
             // No-op
         } else if (request instanceof TransactionPurgeRequest) {
-            enqueuePurge(enqueuedTicks);
+            enqueuePurge(callback, enqueuedTicks);
         } else if (request instanceof IncrementTransactionSequenceRequest) {
             // Local transactions do not have non-replayable requests which would be visible to the backend,
             // hence we can skip sequence increments.
@@ -159,11 +158,11 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
      */
     void handleForwardedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         if (request instanceof ModifyTransactionRequest) {
-            applyModifyTransactionRequest((ModifyTransactionRequest) request, callback);
+            applyForwardedModifyTransactionRequest((ModifyTransactionRequest) request, callback);
         } else if (handleReadRequest(request, callback)) {
             // No-op
         } else if (request instanceof TransactionPurgeRequest) {
-            sendPurge();
+            sendPurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request " + request);
         }
@@ -203,7 +202,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             successor.abort();
         } else if (request instanceof TransactionPurgeRequest) {
             LOG.debug("Forwarding purge {} to successor {}", request, successor);
-            successor.sendPurge();
+            successor.sendPurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }
@@ -215,7 +214,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         if (request instanceof AbortLocalTransactionRequest) {
             successor.sendAbort(request, callback);
         } else if (request instanceof TransactionPurgeRequest) {
-            successor.sendPurge();
+            successor.sendPurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }
