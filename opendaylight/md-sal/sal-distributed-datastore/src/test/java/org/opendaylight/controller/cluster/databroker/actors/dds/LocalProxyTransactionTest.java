@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
+import org.opendaylight.controller.cluster.access.client.InternalCommand;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
@@ -58,12 +60,22 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
+    @SuppressWarnings("unchecked")
+    private void setupExecuteInActor() {
+        doAnswer(inv -> {
+            inv.getArgumentAt(0, InternalCommand.class).execute(mock(ClientActorBehavior.class));
+            return null;
+        }).when(context).executeInActor(any(InternalCommand.class));
+    }
+
     @Test
     public void testHandleForwardedRemoteReadRequest() throws Exception {
         final TestProbe probe = createProbe();
         final ReadTransactionRequest request =
                 new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
+        setupExecuteInActor();
+
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
@@ -80,6 +92,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final ExistsTransactionRequest request =
                 new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
+        setupExecuteInActor();
+
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());

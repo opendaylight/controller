@@ -93,6 +93,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     private TestProbe backendProbe;
     private TestProbe clientContextProbe;
     private TransactionTester<T> tester;
+    protected ClientActorContext context;
     protected T transaction;
 
     @Before
@@ -101,8 +102,8 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         system = ActorSystem.apply();
         clientContextProbe = new TestProbe(system, "clientContext");
         backendProbe = new TestProbe(system, "backend");
-        final ClientActorContext context =
-                AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
+        context = AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID,
+                PERSISTENCE_ID);
         final ShardBackendInfo backend = new ShardBackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON,
                 "default", UnsignedLong.ZERO, Optional.empty(), 3);
         final AbstractClientConnection<ShardBackendInfo> connection =
