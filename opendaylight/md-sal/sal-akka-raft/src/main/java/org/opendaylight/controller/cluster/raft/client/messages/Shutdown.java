@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.raft.base.messages.EmptyExternalizableProxy;
 
 /**
  * Message sent to a raft actor to shutdown gracefully. If it's the leader it will transfer leadership to a
@@ -24,7 +25,18 @@ public final class Shutdown implements Serializable {
         // Hidden on purpose
     }
 
-    private Object readResolve() {
-        return INSTANCE;
+    private Object writeReplace() {
+        return new Proxy();
+    }
+
+    private static class Proxy extends EmptyExternalizableProxy {
+        private static final long serialVersionUID = 1L;
+
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
+        public Proxy() {
+            super(INSTANCE);
+        }
     }
 }
