@@ -330,14 +330,18 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      */
     final void abort() {
         checkNotSealed();
-        doAbort();
         parent.abortTransaction(this);
+
+        sendRequest(abortRequest(), resp -> {
+            LOG.debug("Transaction {} abort completed with {}", getIdentifier(), resp);
+            sendPurge();
+        });
     }
 
     final void abort(final VotingFuture<Void> ret) {
         checkSealed();
 
-        sendAbort(t -> {
+        sendDoAbort(t -> {
             if (t instanceof TransactionAbortSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -353,11 +357,24 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void enqueueAbort(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        checkNotSealed();
+        parent.abortTransaction(this);
+
+        enqueueRequest(abortRequest(), resp -> {
+            LOG.debug("Transaction {} abort completed with {}", getIdentifier(), resp);
+            // Purge will be sent by the predecessor's callback
+            if (callback != null) {
+                callback.accept(resp);
+            }
+        }, enqueuedTicks);
+    }
+
+    final void enqueueDoAbort(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         enqueueRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), callback,
             enqueuedTicks);
     }
 
-    final void sendAbort(final Consumer<Response<?, ?>> callback) {
+    final void sendDoAbort(final Consumer<Response<?, ?>> callback) {
         sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), callback);
     }
 
@@ -484,24 +501,29 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
-    final void sendPurge() {
-        successfulRequests.clear();
-
-        final TransactionRequest<?> req = new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
-        sendRequest(req, t -> {
-            LOG.debug("Transaction {} purge completed", this);
-            parent.completeTransaction(this);
-        });
+    private void sendPurge() {
+        sendPurge(null);
     }
 
-    final void enqueuePurge(final long enqueuedTicks) {
-        successfulRequests.clear();
+    final void sendPurge(final Consumer<Response<?, ?>> callback) {
+        sendRequest(purgeRequest(), resp -> completePurge(resp, callback));
+    }
 
-        final TransactionRequest<?> req = new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
-        enqueueRequest(req, t -> {
-            LOG.debug("Transaction {} purge completed", this);
-            parent.completeTransaction(this);
-        }, enqueuedTicks);
+    final void enqueuePurge(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+        enqueueRequest(purgeRequest(), resp -> completePurge(resp, callback), enqueuedTicks);
+    }
+
+    private TransactionPurgeRequest purgeRequest() {
+        successfulRequests.clear();
+        return new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
+    }
+
+    private void completePurge(final Response<?, ?> resp, final Consumer<Response<?, ?>> callback) {
+        LOG.debug("Transaction {} purge completed", this);
+        parent.completeTransaction(this);
+        if (callback != null) {
+            callback.accept(resp);
+        }
     }
 
     // Called with the connection unlocked
@@ -645,10 +667,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract void doSeal();
 
-    abstract void doAbort();
-
     @GuardedBy("this")
     abstract void flushState(AbstractProxyTransaction successor);
+
+    abstract TransactionRequest<?> abortRequest();
 
     abstract TransactionRequest<?> commitRequest(boolean coordinated);
 

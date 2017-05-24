@@ -138,13 +138,6 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             isSnapshotOnly()), t -> completeRead(future, t), future);
     }
 
-    @Override
-    void doAbort() {
-        ensureInitializedBuilder();
-        builder.setAbort();
-        flushBuilder();
-    }
-
     private void ensureInitializedBuilder() {
         if (!builderBusy) {
             builder.setSequence(nextSequence());
@@ -256,7 +249,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         recordFinishedRequest(response);
     }
 
-    private ModifyTransactionRequest abortRequest() {
+    @Override
+    ModifyTransactionRequest abortRequest() {
         ensureInitializedBuilder();
         builder.setAbort();
         final ModifyTransactionRequest ret = builder.build();
@@ -365,9 +359,9 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
         } else if (request instanceof TransactionAbortRequest) {
             ensureFlushedBuider();
-            sendAbort(callback);
+            sendDoAbort(callback);
         } else if (request instanceof TransactionPurgeRequest) {
-            sendPurge();
+            sendPurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request {}" + request);
         }
@@ -490,9 +484,9 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
                 enqueuedTicks);
         } else if (request instanceof TransactionAbortRequest) {
             ensureFlushedBuider(optTicks);
-            enqueueAbort(callback, enqueuedTicks);
+            enqueueDoAbort(callback, enqueuedTicks);
         } else if (request instanceof TransactionPurgeRequest) {
-            enqueuePurge(enqueuedTicks);
+            enqueuePurge(callback, enqueuedTicks);
         } else if (request instanceof IncrementTransactionSequenceRequest) {
             final IncrementTransactionSequenceRequest req = (IncrementTransactionSequenceRequest) request;
             ensureFlushedBuider(optTicks);
