@@ -70,7 +70,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     final long readTime() {
-        return tree.ticker().read();
+        return tree.readTime();
     }
 
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
