@@ -36,9 +36,8 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     }
 
     static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
-            final LocalHistoryIdentifier historyId) {
-        return new LocalFrontendHistory(persistenceId, tree, tree.ensureTransactionChain(historyId), ImmutableMap.of(),
-            TreeRangeSet.create());
+            final ShardDataTreeTransactionChain chain) {
+        return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), TreeRangeSet.create());
     }
 
     static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
