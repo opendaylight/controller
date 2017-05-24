@@ -203,7 +203,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void applyModifyTransactionRequest(final ModifyTransactionRequest request,
+    void applyForwardedModifyTransactionRequest(final ModifyTransactionRequest request,
             final @Nullable Consumer<Response<?, ?>> callback) {
         commonModifyTransactionRequest(request, callback, this::sendRequest);
     }
@@ -275,7 +275,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
                 enqueuedTicks);
         } else if (request instanceof TransactionAbortRequest) {
-            enqueueAbort(callback, enqueuedTicks);
+            enqueueDoAbort(callback, enqueuedTicks);
         } else {
             super.handleReplayedRemoteRequest(request, callback, enqueuedTicks);
         }
@@ -290,7 +290,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         } else if (request instanceof TransactionDoCommitRequest) {
             sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
         } else if (request instanceof TransactionAbortRequest) {
-            sendAbort(callback);
+            sendDoAbort(callback);
         } else {
             super.handleForwardedRemoteRequest(request, callback);
         }
