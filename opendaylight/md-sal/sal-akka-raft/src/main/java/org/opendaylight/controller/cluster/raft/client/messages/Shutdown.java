@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
+import akka.dispatch.ControlMessage;
 import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.base.messages.EmptyExternalizableProxy;
 
@@ -17,7 +18,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.EmptyExternalizabl
  *
  * @author Thomas Pantelis
  */
-public final class Shutdown implements Serializable {
+public final class Shutdown implements Serializable, ControlMessage {
     private static final long serialVersionUID = 1L;
     public static final Shutdown INSTANCE = new Shutdown();
 

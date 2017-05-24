@@ -9,13 +9,14 @@
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 import akka.actor.ActorRef;
+import akka.dispatch.ControlMessage;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Local message sent by a RaftActor to itself to signal state has been applied to the state machine.
  */
-public class ApplyState {
+public class ApplyState implements ControlMessage {
     private final ActorRef clientActor;
     private final Identifier identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
