@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import akka.dispatch.ControlMessage;
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -15,7 +16,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 /**
  * Internal message, issued by follower to its actor.
  */
-public class ApplySnapshot {
+public class ApplySnapshot implements ControlMessage {
     private static final Callback NOOP_CALLBACK = new Callback() {
         @Override
         public void onSuccess() {

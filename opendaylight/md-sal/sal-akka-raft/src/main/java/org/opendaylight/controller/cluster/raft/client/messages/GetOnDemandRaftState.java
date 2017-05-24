@@ -7,13 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
+import akka.dispatch.ControlMessage;
+
 /**
  * Local message sent to a RaftActor to obtain a snapshot of statistical information. Returns an
  * OnDemandRaftState instance.
  *
  * @author Thomas Pantelis
  */
-public class GetOnDemandRaftState {
+public class GetOnDemandRaftState implements ControlMessage {
     public static final GetOnDemandRaftState INSTANCE = new GetOnDemandRaftState();
 
     private GetOnDemandRaftState() {

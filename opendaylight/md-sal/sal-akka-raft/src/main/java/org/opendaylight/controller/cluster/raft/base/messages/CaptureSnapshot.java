@@ -8,11 +8,12 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import akka.dispatch.ControlMessage;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
-public class CaptureSnapshot {
+public class CaptureSnapshot implements ControlMessage {
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
     private final long lastIndex;

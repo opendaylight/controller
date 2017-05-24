@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import akka.dispatch.ControlMessage;
+
 /**
  * Internal message sent when a snapshot capture is complete.
  *
  * @author Thomas Pantelis
  */
-public class SnapshotComplete {
+public class SnapshotComplete implements ControlMessage {
     public static final SnapshotComplete INSTANCE = new SnapshotComplete();
 
     private SnapshotComplete() {
