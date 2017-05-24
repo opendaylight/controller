@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.mockito.Mockito.spy;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import java.util.function.Consumer;
@@ -22,7 +24,7 @@ public class AccessClientUtil {
 
     public static ClientActorContext createClientActorContext(final ActorSystem system, final ActorRef actor,
                                                               final ClientIdentifier id, final String persistenceId) {
-        return new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id);
+        return spy(new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id));
     }
 
     public static <T extends BackendInfo> ConnectedClientConnection<T> createConnectedConnection(
