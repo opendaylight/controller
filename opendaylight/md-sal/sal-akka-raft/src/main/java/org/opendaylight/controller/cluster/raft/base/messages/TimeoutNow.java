@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import akka.dispatch.ControlMessage;
 import java.io.Serializable;
 
 /**
@@ -14,7 +15,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public final class TimeoutNow implements Serializable {
+public final class TimeoutNow implements Serializable, ControlMessage {
     private static final long serialVersionUID = 1L;
     public static final TimeoutNow INSTANCE = new TimeoutNow();
 
