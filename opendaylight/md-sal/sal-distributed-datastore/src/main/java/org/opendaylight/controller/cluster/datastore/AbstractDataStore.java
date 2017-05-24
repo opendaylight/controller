@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTreeChangePublisher;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
@@ -315,7 +316,10 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 delegate,shardLookup, shardName, insideShard);
 
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorContext, delegate::onDataTreeChanged, insideShard);
+                new DataTreeChangeListenerProxy<>(actorContext,
+                        // wrap this in the ClusteredDOMDataTreeChangeLister interface
+                        // since we always want clustered registration
+                        (ClusteredDOMDataTreeChangeListener) delegate::onDataTreeChanged, insideShard);
         listenerRegistrationProxy.init(shardName);
 
         return (ListenerRegistration<L>) listenerRegistrationProxy;
