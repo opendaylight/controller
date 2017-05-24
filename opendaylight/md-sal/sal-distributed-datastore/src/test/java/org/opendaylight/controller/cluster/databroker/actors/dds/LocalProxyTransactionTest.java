@@ -53,8 +53,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     @Test
-    public void testDoAbort() throws Exception {
-        transaction.doAbort();
+    public void testAbort() throws Exception {
+        transaction.abort();
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
