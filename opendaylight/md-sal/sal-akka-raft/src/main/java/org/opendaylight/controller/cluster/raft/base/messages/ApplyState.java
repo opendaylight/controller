@@ -9,12 +9,13 @@
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 import akka.actor.ActorRef;
-import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
 
-public class ApplyState implements Serializable {
-    private static final long serialVersionUID = 1L;
+/**
+ * Local message sent by a RaftActor to itself to signal state has been applied to the state machine.
+ */
+public class ApplyState {
     private final ActorRef clientActor;
     private final Identifier identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
