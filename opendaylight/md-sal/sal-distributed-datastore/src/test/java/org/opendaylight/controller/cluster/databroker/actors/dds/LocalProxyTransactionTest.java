@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
+import org.opendaylight.controller.cluster.access.client.InternalCommand;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
@@ -58,16 +60,26 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
 
+    private void executeInternal() {
+        doAnswer(inv -> {
+            inv.getArgumentAt(0, InternalCommand.class).execute(mock(ClientActorBehavior.class));
+            return null;
+        }).when(context).executeInActor(any(InternalCommand.class));
+    }
+
     @Test
     public void testHandleForwardedRemoteReadRequest() throws Exception {
         final TestProbe probe = createProbe();
         final ReadTransactionRequest request =
                 new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
+        executeInternal();
+
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
+
         verify(callback).accept(captor.capture());
-        final Response value = captor.getValue();
+        final Response<?, ?> value = captor.getValue();
         Assert.assertTrue(value instanceof ReadTransactionSuccess);
         final ReadTransactionSuccess success = (ReadTransactionSuccess) value;
         Assert.assertTrue(success.getData().isPresent());
@@ -80,10 +92,14 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         final ExistsTransactionRequest request =
                 new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
         final Consumer<Response<?, ?>> callback = createCallbackMock();
+        executeInternal();
+
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
         final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
-        final Response value = captor.getValue();
+
+        final Response<?, ?> value = captor.getValue();
+
         Assert.assertTrue(value instanceof ExistsTransactionSuccess);
         final ExistsTransactionSuccess success = (ExistsTransactionSuccess) value;
         Assert.assertTrue(success.getExists());
@@ -152,7 +168,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
      * @param invocation invocation
      * @return void - always null
      */
-    protected Answer applyToCursorAnswer(final InvocationOnMock invocation) {
+    protected Answer<?> applyToCursorAnswer(final InvocationOnMock invocation) {
         final DataTreeModificationCursor cursor =
                 invocation.getArgumentAt(0, DataTreeModificationCursor.class);
         cursor.write(PATH_1.getLastPathArgument(), DATA_1);
