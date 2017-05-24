@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import java.util.function.Consumer;
@@ -20,9 +25,14 @@ import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
  */
 public class AccessClientUtil {
 
+    @SuppressWarnings("unchecked")
     public static ClientActorContext createClientActorContext(final ActorSystem system, final ActorRef actor,
                                                               final ClientIdentifier id, final String persistenceId) {
-        return new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id);
+        final ClientActorContext ret = spy(new ClientActorContext(actor, system.scheduler(), system.dispatcher(),
+            persistenceId, id));
+        doAnswer(inv -> inv.getArgumentAt(0, InternalCommand.class).execute(mock(ClientActorBehavior.class)))
+        .when(ret).executeInActor(any(InternalCommand.class));
+        return ret;
     }
 
     public static <T extends BackendInfo> ConnectedClientConnection<T> createConnectedConnection(
