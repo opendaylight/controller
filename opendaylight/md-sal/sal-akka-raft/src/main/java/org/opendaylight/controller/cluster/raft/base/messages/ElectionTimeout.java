@@ -8,10 +8,12 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import akka.dispatch.ControlMessage;
+
 /**
  * Local message sent to indicate the current election term has timed out.
  */
-public final class ElectionTimeout {
+public final class ElectionTimeout implements ControlMessage {
     public static final ElectionTimeout INSTANCE = new ElectionTimeout();
 
     private ElectionTimeout() {
