@@ -16,6 +16,7 @@ import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
+import akka.dispatch.Mailboxes;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
@@ -261,7 +262,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         InvalidActorNameException lastEx = null;
         for (int i = 0; i < 10; i++) {
             try {
-                return factory.createTestActor(builder.props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+                return factory.createTestActor(builder.props().withDispatcher(Dispatchers.DefaultDispatcherId())
+                        .withMailbox(Mailboxes.DefaultMailboxId()), id);
             } catch (InvalidActorNameException e) {
                 lastEx = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
