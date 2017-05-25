@@ -334,7 +334,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
         sendRequest(abortRequest(), resp -> {
             LOG.debug("Transaction {} abort completed with {}", getIdentifier(), resp);
-            sendPurge();
+            enqueuePurge();
         });
     }
 
@@ -352,7 +352,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
             // This is a terminal request, hence we do not need to record it
             LOG.debug("Transaction {} abort completed", this);
-            sendPurge();
+            enqueuePurge();
         });
     }
 
@@ -403,7 +403,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
                     // This is a terminal request, hence we do not need to record it
                     LOG.debug("Transaction {} directCommit completed", this);
-                    sendPurge();
+                    enqueuePurge();
                 });
 
                 return ret;
@@ -497,33 +497,32 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             }
 
             LOG.debug("Transaction {} doCommit completed", this);
-            sendPurge();
+            enqueuePurge();
         });
     }
 
-    private void sendPurge() {
-        sendPurge(null);
+    private void enqueuePurge() {
+        enqueuePurge(null);
     }
 
-    final void sendPurge(final Consumer<Response<?, ?>> callback) {
-        sendRequest(purgeRequest(), resp -> completePurge(resp, callback));
+    final void enqueuePurge(final Consumer<Response<?, ?>> callback) {
+        // Purge request are dispatched internally, hence should not wait
+        enqueuePurge(callback, parent.currentTime());
     }
 
     final void enqueuePurge(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        enqueueRequest(purgeRequest(), resp -> completePurge(resp, callback), enqueuedTicks);
+        enqueueRequest(purgeRequest(), resp -> {
+            LOG.debug("Transaction {} purge completed", this);
+            parent.completeTransaction(this);
+            if (callback != null) {
+                callback.accept(resp);
+            }
+        }, enqueuedTicks);
     }
 
     private TransactionPurgeRequest purgeRequest() {
         successfulRequests.clear();
         return new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
-    }
-
-    private void completePurge(final Response<?, ?> resp, final Consumer<Response<?, ?>> callback) {
-        LOG.debug("Transaction {} purge completed", this);
-        parent.completeTransaction(this);
-        if (callback != null) {
-            callback.accept(resp);
-        }
     }
 
     // Called with the connection unlocked

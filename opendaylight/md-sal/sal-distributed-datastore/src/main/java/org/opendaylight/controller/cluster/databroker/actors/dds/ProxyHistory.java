@@ -223,7 +223,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 if (identifier.equals(req.getTarget())) {
                     Verify.verify(req instanceof LocalHistoryRequest);
                     if (req instanceof CreateLocalHistoryRequest) {
-                        successor.connection.sendRequest(req, e.getCallback());
+                        successor.connection.enqueueRequest(req, e.getCallback(), e.getEnqueuedTicks());
                         it.remove();
                         break;
                     }
@@ -246,7 +246,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 if (identifier.equals(req.getTarget())) {
                     Verify.verify(req instanceof LocalHistoryRequest);
                     if (req instanceof DestroyLocalHistoryRequest) {
-                        successor.connection.sendRequest(req, e.getCallback());
+                        successor.connection.enqueueRequest(req, e.getCallback(), e.getEnqueuedTicks());
                         it.remove();
                         break;
                     }
