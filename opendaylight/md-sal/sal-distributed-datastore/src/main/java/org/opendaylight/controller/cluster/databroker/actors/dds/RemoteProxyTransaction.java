@@ -361,7 +361,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             ensureFlushedBuider();
             sendDoAbort(callback);
         } else if (request instanceof TransactionPurgeRequest) {
-            sendPurge(callback);
+            enqueuePurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request {}" + request);
         }
