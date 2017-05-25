@@ -16,6 +16,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.dispatch.Dispatchers;
+import akka.dispatch.Mailboxes;
 import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
@@ -56,7 +57,8 @@ public class AbstractLeaderElectionScenarioTest {
         CountDownLatch behaviorStateChangeLatch;
 
         public static Props props() {
-            return Props.create(MemberActor.class).withDispatcher(Dispatchers.DefaultDispatcherId());
+            return Props.create(MemberActor.class).withDispatcher(Dispatchers.DefaultDispatcherId())
+                    .withMailbox(Mailboxes.DefaultMailboxId());
         }
 
         @Override
