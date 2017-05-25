@@ -14,13 +14,13 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>feature-repo-parent</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features4-mdsal-benchmark</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.1-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <dependencies>

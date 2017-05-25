@@ -14,19 +14,19 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-jolokia</artifactId>
-    <version>1.8.0-SNAPSHOT</version>
+    <version>1.8.1-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>Jolokia JMX/HTTP bridge</name>
 
     <properties>
-        <odl-jolokia-osgi.version>0.5.0-SNAPSHOT</odl-jolokia-osgi.version>
+        <odl-jolokia-osgi.version>0.5.1-SNAPSHOT</odl-jolokia-osgi.version>
     </properties>
 
     <dependencies>
