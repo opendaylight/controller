@@ -15,7 +15,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.Status;
+import akka.dispatch.ControlMessage;
 import akka.dispatch.Dispatchers;
+import akka.dispatch.Mailboxes;
 import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
@@ -56,7 +58,8 @@ public class AbstractLeaderElectionScenarioTest {
         CountDownLatch behaviorStateChangeLatch;
 
         public static Props props() {
-            return Props.create(MemberActor.class).withDispatcher(Dispatchers.DefaultDispatcherId());
+            return Props.create(MemberActor.class).withDispatcher(Dispatchers.DefaultDispatcherId())
+                    .withMailbox(Mailboxes.DefaultMailboxId());
         }
 
         @Override
@@ -175,21 +178,21 @@ public class AbstractLeaderElectionScenarioTest {
         }
     }
 
-    static class SendImmediateHeartBeat {
+    static class SendImmediateHeartBeat implements ControlMessage {
         public static final SendImmediateHeartBeat INSTANCE = new SendImmediateHeartBeat();
 
         private SendImmediateHeartBeat() {
         }
     }
 
-    static class GetBehaviorState {
+    static class GetBehaviorState implements ControlMessage {
         public static final GetBehaviorState INSTANCE = new GetBehaviorState();
 
         private GetBehaviorState() {
         }
     }
 
-    static class SetBehavior {
+    static class SetBehavior implements ControlMessage {
         RaftActorBehavior behavior;
         MockRaftActorContext context;
 
