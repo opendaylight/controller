@@ -162,7 +162,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (handleReadRequest(request, callback)) {
             // No-op
         } else if (request instanceof TransactionPurgeRequest) {
-            sendPurge(callback);
+            enqueuePurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request " + request);
         }
@@ -202,7 +202,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             successor.abort();
         } else if (request instanceof TransactionPurgeRequest) {
             LOG.debug("Forwarding purge {} to successor {}", request, successor);
-            successor.sendPurge(callback);
+            successor.enqueuePurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }
@@ -214,7 +214,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         if (request instanceof AbortLocalTransactionRequest) {
             successor.sendAbort(request, callback);
         } else if (request instanceof TransactionPurgeRequest) {
-            successor.sendPurge(callback);
+            successor.enqueuePurge(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }

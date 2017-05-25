@@ -69,6 +69,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @VisibleForTesting
     static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
 
+    // Emit a debug entry if we sleep for more that this amount
+    private static final long DEBUG_DELAY_NANOS = TimeUnit.MILLISECONDS.toNanos(100);
+
     private final Lock lock = new ReentrantLock();
     private final ClientActorContext context;
     @GuardedBy("lock")
@@ -132,6 +135,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         final long now = currentTime();
         final long delay = enqueueEntry(new ConnectionEntry(request, callback, now), now);
         try {
+            if (delay >= DEBUG_DELAY_NANOS && LOG.isDebugEnabled()) {
+                LOG.debug("Sleeping for {}ms", TimeUnit.NANOSECONDS.toMillis(delay));
+            }
             TimeUnit.NANOSECONDS.sleep(delay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
