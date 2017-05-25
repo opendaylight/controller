@@ -14,6 +14,7 @@ import akka.dispatch.BoundedDequeBasedMailbox;
 import akka.dispatch.MailboxType;
 import akka.dispatch.ProducesMessageQueue;
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.typesafe.config.Config;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
@@ -28,16 +29,12 @@ public class MeteredBoundedMailbox implements MailboxType,
 
     private final Integer capacity;
     private final FiniteDuration pushTimeOut;
-    private final MetricRegistry registry;
 
     public MeteredBoundedMailbox(ActorSystem.Settings settings, Config config) {
 
         CommonConfig commonConfig = new CommonConfig(settings.config());
         this.capacity = commonConfig.getMailBoxCapacity();
         this.pushTimeOut = commonConfig.getMailBoxPushTimeout();
-
-        MetricsReporter reporter = MetricsReporter.getInstance(MeteringBehavior.DOMAIN);
-        registry = reporter.getMetricsRegistry();
     }
 
 
@@ -49,38 +46,42 @@ public class MeteredBoundedMailbox implements MailboxType,
     }
 
     private void monitorQueueSize(scala.Option<ActorRef> owner, final MeteredMessageQueue monitoredQueue) {
-        if (owner.isEmpty()) {
-            return; //there's no actor to monitor
-        }
-        String actorName = owner.get().path().toStringWithoutAddress();
-        String metricName = MetricRegistry.name(actorName, QUEUE_SIZE);
-
-        if (registry.getMetrics().containsKey(metricName)) {
-            return; //already registered
-        }
-
-        Gauge<Integer> queueSize = getQueueSizeGuage(monitoredQueue);
-        registerQueueSizeMetric(metricName, queueSize);
+        registerMetric(owner, QUEUE_SIZE, getQueueSizeGuage(monitoredQueue));
     }
 
+    private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue) {
+        return monitoredQueue::size;
+    }
+
+    static <T extends Metric> void registerMetric(scala.Option<ActorRef> owner, String metricName, T metric) {
+        if (owner.isEmpty()) {
+           // there's no actor to monitor
+            return;
+        }
+
+        String actorName = owner.get().path().toStringWithoutAddress();
+        String fullName = MetricRegistry.name(actorName, metricName);
+
+        MetricRegistry registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
+
+        if (registry.getMetrics().containsKey(fullName)) {
+            // already registered
+            return;
+        }
+
+        try {
+            registry.register(fullName, metric);
+        } catch (IllegalArgumentException e) {
+            // already registered - shouldn't happen here since we check above...
+            LOG.debug("Unable to register '{}' in metrics registry: {}", e);
+        }
+    }
 
     public static class MeteredMessageQueue extends BoundedDequeBasedMailbox.MessageQueue {
         private static final long serialVersionUID = 1L;
 
         public MeteredMessageQueue(int capacity, FiniteDuration pushTimeOut) {
             super(capacity, pushTimeOut);
-        }
-    }
-
-    private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue) {
-        return () -> monitoredQueue.size();
-    }
-
-    private void registerQueueSizeMetric(String metricName, Gauge<Integer> metric) {
-        try {
-            registry.register(metricName,metric);
-        } catch (IllegalArgumentException e) {
-            LOG.warn("Unable to register queue size in metrics registry. Failed with exception {}. ", e);
         }
     }
 }
