@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0">
+
+  <!-- ClusterAdminRpcService -->
+
+  <reference id="configDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface"
+      odl:type="distributed-config"/>
+
+  <reference id="operationalDatastore" interface="org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface"
+      odl:type="distributed-operational"/>
+
+  <bean id="clusterAdminService" class="org.opendaylight.controller.cluster.datastore.admin.ClusterAdminRpcService">
+    <argument ref="configDatastore"/>
+    <argument ref="operationalDatastore"/>
+  </bean>
+
+  <odl:rpc-implementation ref="clusterAdminService"/>
+
+</blueprint>

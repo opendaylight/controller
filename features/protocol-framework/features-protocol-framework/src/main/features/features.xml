@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-protocol-framework-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.controller/features-config/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-config-netty/{{VERSION}}/xml/features</repository>
+  <feature name='odl-protocol-framework' version='${project.version}' description="OpenDaylight :: Protocol Framework">
+    <feature version='${config.version}'>odl-config-api</feature>
+    <feature version='${config.version}'>odl-config-netty-config-api</feature>
+    <bundle>mvn:org.opendaylight.controller/protocol-framework/{{VERSION}}</bundle>
+  </feature>
+</features>

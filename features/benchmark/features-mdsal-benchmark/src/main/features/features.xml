@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright (c) 2015 Cisco Systems
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-dsbenchmark-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+
+    <feature name='odl-benchmark-api' version='${project.version}' description='OpenDaylight :: dsbenchmark :: api '>
+    <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+    <bundle>mvn:org.opendaylight.controller/benchmark-api/{{VERSION}}</bundle>
+  </feature>
+  <feature name='odl-dsbenchmark' version='${project.version}' description='OpenDaylight :: dsbenchmark :: '>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-benchmark-api</feature>
+    <bundle>mvn:org.opendaylight.controller/dsbenchmark/{{VERSION}}</bundle>
+    <configfile finalname="dsbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/dsbenchmark/{{VERSION}}/xml/config</configfile>
+  </feature>
+  <feature name='odl-ntfbenchmark' version='${project.version}' description='OpenDaylight :: ntfbenchmark :: '>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-benchmark-api</feature>
+    <bundle>mvn:org.opendaylight.controller/ntfbenchmark/{{VERSION}}</bundle>
+    <configfile finalname="ntfbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/ntfbenchmark/{{VERSION}}/xml/config</configfile>
+  </feature>
+  <feature name='odl-mdsal-benchmark' version='${project.version}' description='OpenDaylight :: dsbenchmark :: '>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-benchmark-api</feature>
+    <bundle>mvn:org.opendaylight.controller/benchmark-api/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/dsbenchmark/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/ntfbenchmark/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/rpcbenchmark/{{VERSION}}</bundle>
+    <configfile finalname="dsbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/dsbenchmark/{{VERSION}}/xml/config</configfile>
+    <configfile finalname="ntfbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/ntfbenchmark/{{VERSION}}/xml/config</configfile>
+    <configfile finalname="rpcbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/rpcbenchmark/{{VERSION}}/xml/config</configfile>
+  </feature>
+</features>

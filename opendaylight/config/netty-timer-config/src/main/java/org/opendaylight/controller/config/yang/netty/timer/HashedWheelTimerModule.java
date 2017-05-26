@@ -17,21 +17,21 @@
  */
 package org.opendaylight.controller.config.yang.netty.timer;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
+import com.google.common.reflect.AbstractInvocationHandler;
+import com.google.common.reflect.Reflection;
 import io.netty.util.Timer;
-import io.netty.util.TimerTask;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import java.lang.reflect.Method;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.osgi.framework.BundleContext;
 
 /**
-*
-*/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class HashedWheelTimerModule extends
         org.opendaylight.controller.config.yang.netty.timer.AbstractHashedWheelTimerModule {
+    private BundleContext bundleContext;
 
     public HashedWheelTimerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -58,50 +58,29 @@ public final class HashedWheelTimerModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        TimeUnit unit = TimeUnit.MILLISECONDS;
-        if (getTickDuration() != null && getThreadFactoryDependency() == null && getTicksPerWheel() == null) {
-            return new HashedWheelTimerCloseable(new HashedWheelTimer(getTickDuration(), unit));
-        }
-        if (getTickDuration() != null && getThreadFactoryDependency() == null && getTicksPerWheel() != null) {
-            return new HashedWheelTimerCloseable(new HashedWheelTimer(getTickDuration(), unit, getTicksPerWheel()));
-        }
-        if (getTickDuration() == null && getThreadFactoryDependency() != null && getTicksPerWheel() == null) {
-            return new HashedWheelTimerCloseable(new HashedWheelTimer(getThreadFactoryDependency()));
-        }
-        if (getTickDuration() != null && getThreadFactoryDependency() != null && getTicksPerWheel() == null) {
-            return new HashedWheelTimerCloseable(new HashedWheelTimer(getThreadFactoryDependency(), getTickDuration(),
-                    unit));
-        }
-        if (getTickDuration() != null && getThreadFactoryDependency() != null && getTicksPerWheel() != null) {
-            return new HashedWheelTimerCloseable(new HashedWheelTimer(getThreadFactoryDependency(), getTickDuration(),
-                    unit, getTicksPerWheel()));
-        }
-        return new HashedWheelTimerCloseable(new HashedWheelTimer());
+    public AutoCloseable createInstance() {
+        // The service is provided via blueprint so wait for and return it here for backwards compatibility.
+        final WaitingServiceTracker<Timer> tracker = WaitingServiceTracker.create(
+                Timer.class, bundleContext, "(type=global-timer)");
+        final Timer timer = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        return Reflection.newProxy(AutoCloseableTimerInterface.class, new AbstractInvocationHandler() {
+            @Override
+            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("close")) {
+                    tracker.close();
+                    return null;
+                } else {
+                    return method.invoke(timer, args);
+                }
+            }
+        });
     }
 
-    static final private class HashedWheelTimerCloseable implements AutoCloseable, Timer {
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
-        private final Timer timer;
-
-        public HashedWheelTimerCloseable(Timer timer) {
-            this.timer = timer;
-        }
-
-        @Override
-        public void close() throws Exception {
-            stop();
-        }
-
-        @Override
-        public Timeout newTimeout(TimerTask task, long delay, TimeUnit unit) {
-            return this.timer.newTimeout(task, delay, unit);
-        }
-
-        @Override
-        public Set<Timeout> stop() {
-            return this.timer.stop();
-        }
-
+    private interface AutoCloseableTimerInterface extends Timer, AutoCloseable {
     }
 }

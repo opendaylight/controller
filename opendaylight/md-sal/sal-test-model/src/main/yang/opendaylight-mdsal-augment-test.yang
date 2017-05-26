@@ -1,0 +1,93 @@
+module opendaylight-mdsal-augment-test {
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:augment";
+    prefix aug-test;
+
+    import opendaylight-mdsal-list-test {
+        prefix test;
+    }
+    import yang-ext {
+        prefix ext;
+    }
+
+    description
+        "This module contains a collection of YANG augmentations used for
+        some test cases.";
+
+    revision 2014-07-09 {
+        description
+        "Test model for testing data broker with nested lists.";
+    }
+
+    grouping leaf-from-grouping {
+        leaf leaf-from-grouping {
+            type string;
+        }
+    }
+
+    grouping complex-from-grouping {
+        container container-with-uses {
+            uses leaf-from-grouping;
+        }
+        list list-via-uses {
+            key "name";
+            leaf name {
+                type string;
+            }
+        }
+    
+    }
+
+    augment "/test:top/test:top-level-list" {
+        ext:augment-identifier tree-leaf-only-uses-augment;
+        uses leaf-from-grouping;
+    }
+
+    augment "/test:put-top/test:input/test:top-level-list" {
+        ext:augment-identifier rpc-leaf-only-uses-augment;
+        uses leaf-from-grouping;
+    }
+
+    augment "/test:top/test:top-level-list" {
+        ext:augment-identifier tree-complex-uses-augment;
+        uses complex-from-grouping;
+    }
+
+    augment "/test:put-top/test:input/test:top-level-list" {
+        ext:augment-identifier rpc-complex-uses-augment;
+        uses complex-from-grouping;
+    }
+
+    augment "/test:top/test:top-level-list" {
+        ext:augment-identifier tree-leaf-only-augment;
+
+        leaf simple-value {
+            type string;
+        }
+    }
+    
+    augment "/test:top/test:top-level-list" {
+        ext:augment-identifier tree-second-leaf-only-augment;
+
+        leaf second-simple-value {
+            type string;
+        }
+    }
+
+    augment "/test:put-top/test:input/test:top-level-list" {
+        ext:augment-identifier rpc-leaf-only-augment;
+
+        leaf simple-value {
+            type string;
+        }
+    }
+
+    augment "/test:put-top/test:input/test:top-level-list" {
+        ext:augment-identifier rpc-second-leaf-only-augment;
+
+        leaf second-simple-value {
+            type string;
+        }
+    }
+
+}

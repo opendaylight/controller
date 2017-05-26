@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
+import java.util.Map;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
-import java.util.Map;
-
 /**
- * {@link org.opendaylight.controller.config.manager.impl.ConfigTransactionControllerImpl}
+ * org.opendaylight.controller.config.manager.impl.ConfigTransactionControllerImpl
  * receives list of factories using this interface. For testing, this could be
  * implemented as hard coded list of objects, for OSGi this would look for all
  * services in OSGi Service Registry are registered under

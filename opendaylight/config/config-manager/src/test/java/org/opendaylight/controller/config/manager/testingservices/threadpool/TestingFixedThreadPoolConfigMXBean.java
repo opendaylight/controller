@@ -10,10 +10,10 @@ package org.opendaylight.controller.config.manager.testingservices.threadpool;
 public interface TestingFixedThreadPoolConfigMXBean extends
         TestingThreadPoolConfigMXBean {
 
-    public void setThreadCount(int threadCount);
+    void setThreadCount(int threadCount);
 
-    public boolean isTriggerNewInstanceCreation();
+    boolean isTriggerNewInstanceCreation();
 
-    public void setTriggerNewInstanceCreation(boolean boolTest);
+    void setTriggerNewInstanceCreation(boolean boolTest);
 
 }

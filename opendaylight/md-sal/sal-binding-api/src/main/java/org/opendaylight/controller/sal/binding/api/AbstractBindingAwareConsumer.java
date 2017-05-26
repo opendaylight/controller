@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
+@Deprecated
 public abstract class AbstractBindingAwareConsumer extends AbstractBrokerAwareActivator implements BindingAwareConsumer {
 
     @Override

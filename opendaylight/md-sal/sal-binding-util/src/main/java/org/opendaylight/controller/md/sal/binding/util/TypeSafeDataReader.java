@@ -11,6 +11,14 @@ import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+/**
+ *
+ *
+ * @deprecated Use
+ *             {@link org.opendaylight.controller.md.sal.binding.api.ReadTransaction#read(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, InstanceIdentifier)}
+ *             instead.
+ */
+@Deprecated
 public final class TypeSafeDataReader {
 
     private final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate;
@@ -19,21 +27,25 @@ public final class TypeSafeDataReader {
         return delegate;
     }
 
-    public TypeSafeDataReader(DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
+    public TypeSafeDataReader(
+            final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
         this.delegate = delegate;
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends DataObject> D readConfigurationData(InstanceIdentifier<D> path) {
+    public <D extends DataObject> D readConfigurationData(
+            final InstanceIdentifier<D> path) {
         return (D) delegate.readConfigurationData(path);
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends DataObject> D readOperationalData(InstanceIdentifier<D> path) {
+    public <D extends DataObject> D readOperationalData(
+            final InstanceIdentifier<D> path) {
         return (D) delegate.readOperationalData(path);
     }
 
-    public static TypeSafeDataReader forReader(DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
+    public static TypeSafeDataReader forReader(
+            final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> delegate) {
         return new TypeSafeDataReader(delegate);
     }
 }

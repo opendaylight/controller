@@ -13,13 +13,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-
 import org.opendaylight.controller.config.threadpool.ThreadPool;
 
 /**
  * Implementation of {@link ThreadPool} using fixed number of threads wraps
  * {@link ExecutorService}.
  */
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class FixedThreadPoolWrapper implements ThreadPool, Closeable {
 
     private final ThreadPoolExecutor executor;

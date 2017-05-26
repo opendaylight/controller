@@ -8,20 +8,21 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.LookupRegistry;
 
 public class LookupBeansUtil {
+
+    private LookupBeansUtil() {
+    }
 
     public static ObjectName lookupConfigBean(LookupRegistry lookupRegistry,
             String moduleName, String instanceName)
             throws InstanceNotFoundException {
         Set<ObjectName> objectNames = lookupRegistry.lookupConfigBeans(
                 moduleName, instanceName);
-        if (objectNames.size() == 0) {
+        if (objectNames.isEmpty()) {
             throw new InstanceNotFoundException("No instance found");
         } else if (objectNames.size() > 1) {
             throw new InstanceNotFoundException("Too many instances found");

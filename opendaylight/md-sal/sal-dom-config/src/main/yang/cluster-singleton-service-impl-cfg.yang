@@ -1,0 +1,26 @@
+module cluster-singleton-service-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:md:sal:config:impl:cluster-singleton-service";
+    prefix "cluster-singleton-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import cluster-singleton-service-spi { prefix spi; revision-date 2016-07-18; }
+
+    description "MD-SAL ClusterSingletonServiceProvider service implementation definition";
+
+    revision 2016-07-18 {
+        description "Initial revision";
+    }
+
+    identity cluster-singleton-service-impl {
+        base config:module-type;
+        config:provided-service spi:cluster-singleton-service;
+        config:java-name-prefix ClusterSingletonServiceProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case cluster-singleton-service-impl {
+            when "/config:modules/config:module/config:type = 'cluster-singleton-service-impl'";
+        }
+    }
+}

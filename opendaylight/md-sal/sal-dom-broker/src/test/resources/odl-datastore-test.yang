@@ -1,0 +1,47 @@
+module odl-datastore-test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test";
+    prefix "store-test";
+    
+    revision "2014-03-13" {
+        description "Initial revision.";
+    }
+
+    container test {
+        presence "needs to be present when empty";
+
+        list outer-list {
+            key id;
+            leaf id {
+                type uint16;
+            }
+            choice outer-choice {
+                case one {
+                    leaf one {
+                        type string;
+                    }
+                }
+                case two-three {
+                    leaf two {
+                        type string;
+                    }
+                    leaf three {
+                        type string;
+                    }
+               }
+           }
+           list inner-list {
+                key name;
+                leaf name {
+                    type string;
+                }
+                leaf value {
+                    type string;
+                }
+            }
+        }
+    }
+
+    container test2 {
+    }
+}

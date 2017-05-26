@@ -1,0 +1,16 @@
+To use this run a real instance of the controller on your laptop.
+Modify the module-shards.conf to replicate modules to member-2 or
+member-2 and member-3 as neccessary.
+
+Then run the dummy datastore.
+
+For example,
+
+   java -jar ./target/sal-dummy-distributed-datastore-1.2.0-SNAPSHOT-allinone.jar -member-name member-2 -cause-trouble -drop-replies -max-delay-millis 500
+
+Runs the dummy datastore as member-2. Will cause failures including dropped replies and when it does reply may cause a random delay of upto
+500 millis
+
+This will start of the dummy datastore which will then spawn dummy shard actors which will listen to the RequestVote
+and AppendEntries messages. For RequestVote messages it will always respond with a positive vote and for AppendEntries
+it will put a sleep for a randomized interval upto the max delay.

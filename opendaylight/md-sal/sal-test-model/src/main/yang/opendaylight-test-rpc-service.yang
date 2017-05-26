@@ -1,0 +1,22 @@
+module opendaylight-test-rpc-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:bi:ba:rpcservice";
+    prefix "rpc";
+
+    description
+        "Test model for testing of registering rpc service on binding independent mount point 
+        and retrieving rpc service via binding aware mount point.";
+
+    revision "2014-07-01" {
+        description
+            "Initial revision";
+    }
+
+    rpc rock-the-house {
+        input {
+            leaf zip-code {
+                type string;
+            }
+        }
+    }
+}

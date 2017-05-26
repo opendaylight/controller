@@ -7,27 +7,24 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import org.junit.Test;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
-import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtomicBoolean.ReadOnlyAtomicBooleanImpl;
-import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
-import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModule;
-import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
-import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
-import org.opendaylight.controller.config.spi.Module;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.DynamicMBean;
 import javax.management.JMX;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtomicBoolean.ReadOnlyAtomicBooleanImpl;
+import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
+import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModule;
+import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolConfigMXBean;
+import org.opendaylight.controller.config.spi.Module;
 
 public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
     private final int newThreadCount = 10;
@@ -39,7 +36,7 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
     protected AbstractDynamicWrapper getDynamicWrapper(Module module,
             ModuleIdentifier moduleIdentifier) {
         return new DynamicWritableWrapper(module, moduleIdentifier,
-                new TransactionIdentifier("transaction-1"),
+                "transaction-1",
                 readOnlyAtomicBoolean, MBeanServerFactory.createMBeanServer(),
                 platformMBeanServer);
     }

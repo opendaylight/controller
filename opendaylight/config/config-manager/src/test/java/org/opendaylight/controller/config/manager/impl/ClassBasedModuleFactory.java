@@ -8,6 +8,12 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import com.google.common.base.Preconditions;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -17,13 +23,6 @@ import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Creates new modules by reflection. Provided class must have this constructor:
@@ -106,7 +105,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
 
     @Override
     public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
-        return new HashSet<Module>();
+        return new HashSet<>();
     }
 
     @Override

@@ -1,0 +1,164 @@
+module odl-datastore-test {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test";
+    prefix "store-test";
+
+    revision "2014-03-13" {
+        description "Initial revision.";
+    }
+
+    identity feature-capability {
+    }
+
+    container test {
+        leaf my-bits {
+            type bits {
+                bit ten-mb-hd;
+                bit ten-mb-fd;
+                bit hundred-mb-hd;
+                bit hundred-mb-fd;
+                bit one-gb-hd;
+                bit one-gb-fd;
+                bit ten-gb-fd;
+                bit forty-gb-fd;
+                bit hundred-gb-fd;
+                bit one-tb-fd;
+                bit other;
+                bit copper;
+                bit fiber;
+                bit autoeng;
+                bit pause;
+                bit pause-asym;
+            }
+        }
+
+        leaf desc {
+            type string;
+        }
+
+        leaf short-leaf {
+            type uint16;
+        }
+
+        leaf biginteger-leaf {
+            type uint64;
+        }
+
+        leaf bigdecimal-leaf {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+
+        leaf boolean-leaf {
+            type boolean;
+        }
+
+        leaf byte-leaf {
+            type uint8;
+        }
+
+        list unkeyed-list {
+            leaf name {
+                type string;
+            }
+        }
+
+        choice outer-choice {
+             case one {
+                leaf one {
+                    type string;
+                }
+             }
+             case two-three {
+                 leaf two {
+                     type string;
+                 }
+                 leaf three {
+                     type string;
+                 }
+             }
+        }
+
+        list ordered-list {
+            key ordered-list-leaf;
+            ordered-by user;
+
+            leaf ordered-list-leaf {
+                type string;
+            }
+        }
+
+        list outer-list {
+            key id;
+            leaf id {
+                type uint16;
+            }
+
+            list inner-list {
+                key name;
+                leaf name {
+                    type string;
+                }
+                leaf value {
+                    type string;
+                }
+
+                container inner-container {
+                }
+            }
+        }
+
+        leaf-list shoe {
+            type string;
+        }
+
+        leaf-list number {
+            type uint8;
+        }
+
+        leaf-list binary_leaf_list {
+            type binary;
+        }
+
+        leaf pointer {
+            type leafref {
+                path "/network-topology/topology/node/termination-point/tp-id";
+            }
+        }
+
+        leaf some-ref {
+            type instance-identifier;
+        }
+
+        leaf myidentity {
+            type identityref {
+                base feature-capability;
+            }
+        }
+
+        container switch-features {
+            leaf-list capability {
+                type identityref {
+                    base feature-capability;
+                }
+
+            }
+        }
+
+        list augmented-list {
+            key id;
+
+            leaf id {
+                type uint8;
+            }
+        }
+
+        leaf some-binary-data {
+            type binary;
+        }
+
+        anyxml any {
+        }
+    }
+}

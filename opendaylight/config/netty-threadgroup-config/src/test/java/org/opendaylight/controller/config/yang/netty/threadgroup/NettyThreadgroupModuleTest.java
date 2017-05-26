@@ -7,6 +7,15 @@
  */
 package org.opendaylight.controller.config.yang.netty.threadgroup;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import io.netty.channel.EventLoopGroup;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -15,20 +24,29 @@ import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 public class NettyThreadgroupModuleTest extends AbstractConfigTest {
 
     private NettyThreadgroupModuleFactory factory;
     private final String instanceName = "netty1";
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         factory = new NettyThreadgroupModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
+
+        Filter mockFilter = mock(Filter.class);
+        doReturn("mock").when(mockFilter).toString();
+        doReturn(mockFilter).when(mockedContext).createFilter(anyString());
+        doNothing().when(mockedContext).addServiceListener(any(ServiceListener.class), anyString());
+        ServiceReference mockServiceRef = mock(ServiceReference.class);
+        doReturn(new ServiceReference[]{mockServiceRef}).when(mockedContext).
+                getServiceReferences(anyString(), anyString());
+        doReturn(mock(EventLoopGroup.class)).when(mockedContext).getService(mockServiceRef);
     }
 
     @Test

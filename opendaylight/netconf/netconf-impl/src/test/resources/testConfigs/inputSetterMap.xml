@@ -1,9 +1,0 @@
-<jmxbean>
-    <mBean>org.opendaylight.controller:type=AppDeployer</mBean>
-    <type>WRITE</type>
-    <attribute>setAtr</attribute>
-    <value>
-        <abc>1</abc>
-        <bcd>2</bcd>
-    </value>
-</jmxbean>

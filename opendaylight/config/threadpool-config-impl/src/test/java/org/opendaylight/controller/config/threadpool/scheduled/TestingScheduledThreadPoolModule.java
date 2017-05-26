@@ -7,7 +7,18 @@
  */
 package org.opendaylight.controller.config.threadpool.scheduled;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.util.concurrent.ListenableFutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.AbstractMockedModule;
@@ -15,18 +26,6 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.threadpool.util.ScheduledThreadPoolWrapper;
 import org.opendaylight.controller.config.yang.threadpool.ScheduledThreadPoolServiceInterface;
 import org.opendaylight.controller.config.yang.threadpool.impl.scheduled.ScheduledThreadPoolModuleMXBean;
-
-import javax.management.ObjectName;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class TestingScheduledThreadPoolModule extends AbstractMockedModule implements
         ScheduledThreadPoolServiceInterface, Module, ScheduledThreadPoolModuleMXBean {

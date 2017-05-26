@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+    odl:use-default-for-reference-types="true">
+
+  <!-- Retrieves the RPC service for the ToasterService interface -->
+  <odl:rpc-service id="toasterService" interface="org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService"/>
+
+  <!-- Create the KitchenServiceImpl instance and inject the RPC service identified by "toasterService" -->
+  <bean id="kitchenService" class="org.opendaylight.controller.sample.kitchen.impl.KitchenServiceImpl"
+          init-method="register" destroy-method="unregister">
+    <argument ref="toasterService"/>
+  </bean>
+
+  <!-- Register the KitchenServiceImpl to receive yang notifications -->
+  <odl:notification-listener ref="kitchenService"/>
+
+  <!-- Advertise the KitchenServiceImpl with the OSGi registry with the type property set to "default" . The
+       type property is optional but can be used to distinguish this implementation from any other potential
+       KitchenService implementations (if there were any). Clients consuming the KitchenService can pick the
+       desired implementation via the particular type.
+  -->
+  <service ref="kitchenService" interface="org.opendaylight.controller.sample.kitchen.api.KitchenService"
+          odl:type="default"/>
+</blueprint>

@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
 public interface BindingAwareRpcRouter extends RpcRouter<String, String, String, byte[]> {
 
     @Override
-    public Future<org.opendaylight.controller.sal.connector.api.RpcRouter.RpcReply<byte[]>> sendRpc(
+    Future<org.opendaylight.controller.sal.connector.api.RpcRouter.RpcReply<byte[]>> sendRpc(
             RpcRequest<String, String, String, byte[]> input);
 
     class BindingAwareRequest implements RpcRequest<String, String, String, byte[]>, Immutable {
@@ -53,8 +53,8 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
 
         /**
          * Java class name of Rpc Context
-         * 
-         * 
+         *
+         *
          */
         @Override
         public String getContext() {
@@ -63,7 +63,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
 
         /**
          * String representation of route e.g. node-id
-         * 
+         *
          */
         @Override
         public String getRoute() {
@@ -72,7 +72,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
 
         /**
          * Java class name of Rpc Type e.g org.opendaylight.AddFlowInput
-         * 
+         *
          */
         @Override
         public String getType() {

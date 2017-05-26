@@ -23,6 +23,7 @@ module threadgroup {
     }
 
     identity netty-threadgroup-fixed {
+        status deprecated;
         base config:module-type;
         config:provided-service netty:netty-threadgroup;
         config:java-name-prefix NettyThreadgroup;
@@ -33,6 +34,7 @@ module threadgroup {
             when "/config:modules/config:module/config:type = 'netty-threadgroup-fixed'";
 
             leaf thread-count {
+                status deprecated;
                 type uint16;
 
                 description "Number of threads to be used by NioEventLoopGroup. This attribute is optional and default value will be 2* Number of CPUs";
@@ -42,11 +44,4 @@ module threadgroup {
 
         }
     }
-
-    augment "/config:modules/config:module/config:state" {
-        case netty-threadgroup-fixed {
-            when "/config:modules/config:module/config:type = 'netty-threadgroup-fixed'";
-        }
-    }
-
 }

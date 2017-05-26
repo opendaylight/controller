@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
-import java.io.File;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
-
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Method;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.TypeDeclaration;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
-
-import com.google.common.collect.Lists;
 
 public abstract class AbstractFtlTemplate implements FtlTemplate {
     private final String packageName;
@@ -45,6 +45,15 @@ public abstract class AbstractFtlTemplate implements FtlTemplate {
     }
 
     @Override
+    public Optional<String> getHeaderString() {
+        if (header == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(header.toString());
+        }
+    }
+
+    @Override
     public String getFullyQualifiedName() {
         return FullyQualifiedNameHelper.getFullyQualifiedName(getPackageName(),
                 getTypeDeclaration().getName());
@@ -60,9 +69,14 @@ public abstract class AbstractFtlTemplate implements FtlTemplate {
         return typeDeclaration;
     }
 
+
     @Override
-    public String getJavadoc() {
-        return javadoc;
+    public Optional<String> getMaybeJavadoc() {
+        if (javadoc == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(javadoc);
+        }
     }
 
     public void setJavadoc(String javadoc) {
@@ -84,15 +98,10 @@ public abstract class AbstractFtlTemplate implements FtlTemplate {
         return methods;
     }
 
-    @Override
-    public File getRelativeFile() {
-        return new File(packageName.replace(".", File.separator),
-                getTypeDeclaration().getName() + ".java");
-    }
 
     @Override
-    public String getFtlTempleteLocation() {
-        return "abstract_ftl_file.ftl";
+    public List<Constructor> getConstructors() {
+        return Collections.emptyList();
     }
 
     @Override

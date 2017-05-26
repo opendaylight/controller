@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+    odl:restart-dependents-on-updates="true" odl:use-default-for-reference-types="true">
+
+  <cm:property-placeholder persistent-id="org.opendaylight.controller.remoterpc" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="enable-metric-capture" value="false"/>
+      <cm:property name="bounded-mailbox-capacity" value="1000"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider" />
+  <reference id="domRpcService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcService"/>
+  <reference id="domRpcRegistry" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
+
+  <bean id="actorSystem" factory-ref="actorSystemProvider" factory-method="getActorSystem"/>
+
+  <bean id="remoteRpcProviderConfig" class="org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig"
+          factory-method="newInstance">
+    <argument>
+      <bean factory-ref="actorSystem" factory-method="name"/>
+    </argument>
+    <argument value="${enable-metric-capture}"/>
+    <argument value="${bounded-mailbox-capacity}"/>
+  </bean>
+
+  <bean id="remoteRpcProvider" class="org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory"
+          factory-method="createInstance" init-method="start" destroy-method="close">
+    <argument ref="domRpcRegistry"/>
+    <argument ref="domRpcService"/>
+    <argument ref="actorSystem"/>
+    <argument ref="remoteRpcProviderConfig"/>
+  </bean>
+
+</blueprint>

@@ -29,6 +29,12 @@ module config {
         argument "name";
     }
 
+    extension disable-osgi-service-registration {
+        description
+            "YANG language extension that can be associated with a Service identity that
+            disables advertising the service instances to the OSGi registry.";
+    }
+
     extension required-identity {
         description
             "YANG language extension which indicates that a particular
@@ -122,7 +128,9 @@ module config {
                  the actual service-type which is actually required.";
 
             mandatory true;
-            type service-type-ref;
+            type leafref {
+                path "/config:services/config:service/config:type";
+            }
         }
 
         leaf name {
@@ -138,7 +146,7 @@ module config {
             "Top level container encapsulating configuration of all modules.";
 
         list module {
-            key "name";
+            key "type name";
             leaf name {
                 description "Unique module instance name";
                 type string;

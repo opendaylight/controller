@@ -7,18 +7,14 @@
  */
 package org.opendaylight.controller.config.yang.test.plugin;
 
+import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 
 /**
  * Add implementation code from stub.txt
@@ -43,57 +39,58 @@ public class ProcessSources extends AbstractMojo{
         }
         File sourceDirectory = new File(directory.getPath() + Util.replaceDots(".org.opendaylight.controller.config.yang.test.impl"));
         if (!sourceDirectory.exists()) {
-            super.getLog().error("Source directory does not exists " + sourceDirectory.getPath());
+            super.getLog().error(String.format("Source directory does not exists %s", sourceDirectory.getPath()));
         }
-        String header = "";
-        try {
-            header = Util.loadHeader();
-        } catch (IOException e) {
-           super.getLog().error("Header.txt not found.");
-        }
+
         File[] sourceFiles = sourceDirectory.listFiles();
         for (File sourceFile: sourceFiles) {
-            if(sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
-                File stubFile = new File(sourceFile.getPath().replace(".java", "Stub.txt"));
-                String stubLines = null;
+            if (sourceFile.getName().endsWith(".java")) {
+                String sourceContent;
                 try {
-                    if (stubFile.exists()) {
-                        stubLines = Util.loadStubFile(stubFile.getPath());
-                    }
-
-                    InputStream javaIn = new FileInputStream(sourceFile.getPath());
-                    BufferedReader javaBuf = new BufferedReader(new InputStreamReader(javaIn));
-                    StringBuffer output = new StringBuffer();
-                    String line = javaBuf.readLine();
-                    boolean writeLine = false;
-                    while ((line = javaBuf.readLine()) != null) {
-                        if(!writeLine && line.contains("*/")) {
-                            line = header;
-                            writeLine = true;
-                        } else {
-                            if (line.contains("TODO")) {
-                                writeLine = false;
-                            } else {
-                                if (stubLines != null && line.contains("throw new")) {
-                                    line = stubLines.toString();
-                                    writeLine = true;
-                                }
-                            }
-                        }
-                        if(writeLine) {
-                            output.append(line).append(System.lineSeparator());
-                        }
-                    }
-                    javaBuf.close();
-
-                    OutputStream javaOut = new FileOutputStream(sourceFile.getPath());
-                    javaOut.write(output.toString().getBytes());
-                    javaOut.close();
+                    sourceContent = Files.toString(sourceFile, StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    getLog().error("Error while reading/writing to files.", e);
+                    getLog().error(String.format("Cannot read %s", sourceFile.getAbsolutePath()), e);
+                    continue;
                 }
+                if (sourceFile.getName().endsWith("Module.java") || sourceFile.getName().endsWith("ModuleFactory.java")) {
+                    File stubFile = new File(sourceFile.getPath().replace(".java", "Stub.txt"));
+                    if (stubFile.exists()) {
+                        String stubContent = null;
+                        try {
+                            stubContent = Files.toString(stubFile, StandardCharsets.UTF_8);
+                        } catch (IOException e) {
+                            getLog().error(String.format("Cannot read %s", stubFile.getAbsolutePath()), e);
+                        }
+                        if (stubContent != null) {
+                            sourceContent = rewriteStub(sourceContent, stubContent);
+                        }
+                    }
+                }
+                // remove copyright headers as they can contain timestamp
+                sourceContent = removeCopyrights(sourceContent);
 
+                // replace the file content
+                try {
+                    Files.write(sourceContent, sourceFile, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    getLog().error(String.format("Cannot write %s", sourceFile.getAbsolutePath()), e);
+                }
             }
+
         }
+    }
+
+    private static Pattern MULTILINE_COMMENT_PATTERN = Pattern.compile("/\\*.*\\*/", Pattern.MULTILINE | Pattern.DOTALL);
+    private static String removeCopyrights(String source) {
+        String target = MULTILINE_COMMENT_PATTERN.matcher(source).replaceAll("\n");
+        //FileUtils.write(sourceFile, target);
+        return target;
+    }
+
+    private static Pattern UNSUPPORTED_OP_PATTERN = Pattern.compile("^.*TODO.*\n.*throw new java.lang.UnsupportedOperationException.*$", Pattern.MULTILINE);
+
+    private static String rewriteStub(String source, String replaceTODOWith) {
+        String target = UNSUPPORTED_OP_PATTERN.matcher(source).replaceFirst(replaceTODOWith);
+        return target;
     }
 }

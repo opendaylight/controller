@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
+import java.util.Set;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -19,20 +21,16 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     public static final String NAME = "scheduled";
 
-    private static Set<Class<? extends AbstractServiceInterface>> ifc = Collections.unmodifiableSet(Sets.newHashSet(
+    private static Set<Class<? extends AbstractServiceInterface>> ifc = ImmutableSet.of(
             (Class<? extends AbstractServiceInterface>) TestingScheduledThreadPoolServiceInterface.class,
-                    TestingThreadPoolServiceInterface.class));
+                    TestingThreadPoolServiceInterface.class);
 
     @Override
     public boolean isModuleImplementingServiceInterface(
-            Class<? extends AbstractServiceInterface> serviceInterface) {
+            final Class<? extends AbstractServiceInterface> serviceInterface) {
         return ifc.contains(serviceInterface);
     }
 
@@ -42,15 +40,15 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public Module createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
         return new TestingScheduledThreadPoolModule(new ModuleIdentifier(NAME,
                 instanceName), null, null);
     }
 
     @Override
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext bundleContext)
+    public Module createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext bundleContext)
             throws Exception {
         TestingScheduledThreadPoolImpl oldInstance;
         try {
@@ -68,8 +66,8 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
-        return new HashSet<Module>();
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
+        return new HashSet<>();
     }
 
     @Override

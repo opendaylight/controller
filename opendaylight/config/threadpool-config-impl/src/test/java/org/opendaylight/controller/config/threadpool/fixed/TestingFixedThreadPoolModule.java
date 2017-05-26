@@ -12,7 +12,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.AbstractMockedModule;
@@ -33,5 +32,4 @@ public class TestingFixedThreadPoolModule extends AbstractMockedModule implement
         doReturn(mock(ExecutorService.class)).when(pool).getExecutor();
         return pool;
     }
-
 }

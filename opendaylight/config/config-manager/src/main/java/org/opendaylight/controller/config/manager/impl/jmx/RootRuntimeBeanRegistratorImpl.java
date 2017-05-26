@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
+import com.google.common.base.Preconditions;
 import java.util.Collections;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
@@ -23,10 +22,9 @@ public class RootRuntimeBeanRegistratorImpl implements
     private final ModuleIdentifier moduleIdentifier;
     private final ObjectName defaultRuntimeON;
 
-    public RootRuntimeBeanRegistratorImpl(
-            InternalJMXRegistrator internalJMXRegistrator,
-            ModuleIdentifier moduleIdentifier) {
-        this.internalJMXRegistrator = internalJMXRegistrator;
+    RootRuntimeBeanRegistratorImpl(final InternalJMXRegistrator internalJMXRegistrator,
+            final ModuleIdentifier moduleIdentifier) {
+        this.internalJMXRegistrator = Preconditions.checkNotNull(internalJMXRegistrator);
         this.moduleIdentifier = moduleIdentifier;
         defaultRuntimeON = ObjectNameUtil.createRuntimeBeanName(
                 moduleIdentifier.getFactoryName(),
@@ -35,8 +33,7 @@ public class RootRuntimeBeanRegistratorImpl implements
     }
 
     @Override
-    public HierarchicalRuntimeBeanRegistrationImpl registerRoot(
-            RuntimeBean mxBean) {
+    public HierarchicalRuntimeBeanRegistrationImpl registerRoot(final RuntimeBean mxBean) {
         try {
             internalJMXRegistrator.registerMBean(mxBean, defaultRuntimeON);
         } catch (InstanceAlreadyExistsException e) {
@@ -51,8 +48,8 @@ public class RootRuntimeBeanRegistratorImpl implements
         internalJMXRegistrator.close();
     }
 
-    static IllegalStateException sanitize(InstanceAlreadyExistsException e,
-            ModuleIdentifier moduleIdentifier, ObjectName on) {
+    static IllegalStateException sanitize(final InstanceAlreadyExistsException e,
+            final ModuleIdentifier moduleIdentifier, final ObjectName on) {
         throw new IllegalStateException("Could not register runtime bean in "
                 + moduleIdentifier + " under name " + on, e);
 

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+    odl:use-default-for-reference-types="true">
+
+  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
+  <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
+  <reference id="entityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"/>
+  <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
+  <reference id="domRpcProviderService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
+  <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
+  <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
+  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
+  <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
+  <reference id="notificationPublishService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService" />
+  <reference id="notificationListenerService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService" />
+
+  <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
+    <property name="notificationProvider" ref="notificationService"/>
+  </bean>
+
+  <odl:routed-rpc-implementation id="carPurchaseRpcReg" ref="purchaseCarProvider"/>
+
+  <bean id="peopleProvider" class="org.opendaylight.controller.clustering.it.provider.PeopleProvider" >
+    <property name="dataProvider" ref="dataBroker"/>
+    <property name="rpcRegistration" ref="carPurchaseRpcReg"/>
+  </bean>
+
+  <bean id="carProvider" class="org.opendaylight.controller.clustering.it.provider.CarProvider"
+       destroy-method="close">
+    <argument ref="dataBroker"/>
+    <argument ref="entityOwnershipService"/>
+    <argument ref="domDataBroker"/>
+  </bean>
+
+  <odl:rpc-implementation ref="carProvider"/>
+  <odl:rpc-implementation ref="peopleProvider"/>
+
+  <bean id="peopleCarListener" class="org.opendaylight.controller.clustering.it.listener.PeopleCarListener" >
+    <property name="dataProvider" ref="dataBroker"/>
+  </bean>
+
+  <odl:notification-listener ref="peopleCarListener"/>
+
+  <bean id="basicTestProvider" class="org.opendaylight.controller.clustering.it.provider.BasicRpcTestProvider">
+    <argument ref="bindingRpcRegistry"/>
+    <argument ref="clusterSingletonService"/>
+  </bean>
+
+  <bean id="lowLevelTestProvider" class="org.opendaylight.controller.clustering.it.provider.MdsalLowLevelTestProvider">
+    <argument ref="bindingRpcRegistry"/>
+    <argument ref="domRpcProviderService"/>
+    <argument ref="clusterSingletonService"/>
+    <argument ref="schemaService"/>
+    <argument ref="normalizedNodeSerializer"/>
+    <argument ref="notificationPublishService"/>
+    <argument ref="notificationListenerService"/>
+    <argument ref="domDataBroker"/>
+  </bean>
+
+</blueprint>

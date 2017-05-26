@@ -7,20 +7,19 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
-import org.opendaylight.yangtools.binding.generator.util.Types;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-
+import java.util.List;
 import javax.management.ObjectName;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-import java.util.List;
+import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
+import org.opendaylight.mdsal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.model.util.Types;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public class ListDependenciesAttribute extends AbstractDependencyAttribute {
 
-    public ListDependenciesAttribute(DataSchemaNode attrNode, ServiceInterfaceEntry sie, boolean mandatory, String nullableDescription) {
+    public ListDependenciesAttribute(final DataSchemaNode attrNode, final ServiceInterfaceEntry sie, final boolean mandatory, final String nullableDescription) {
         super(attrNode, sie, mandatory, nullableDescription);
     }
 
@@ -31,7 +30,7 @@ public class ListDependenciesAttribute extends AbstractDependencyAttribute {
 
     @Override
     public ArrayType<?> getOpenType() {
-        OpenType<?> innerOpenType = SimpleType.OBJECTNAME;
+        final OpenType<?> innerOpenType = SimpleType.OBJECTNAME;
         return ListAttribute.constructArrayType(innerOpenType);
     }
 

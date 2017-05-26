@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.spi;
 
 import javax.annotation.concurrent.NotThreadSafe;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
@@ -20,7 +19,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * ConfigBeans.
  * <p>
  * In order to guide dependency resolution, the setter method should be
- * annotated with {@link RequireInterface}.
+ * annotated with {@link org.opendaylight.controller.config.api.annotations.RequireInterface}.
  * </p>
  * <p>
  * Thread safety note: implementations of this interface are not required to be
@@ -43,10 +42,10 @@ public interface Module extends Identifiable<ModuleIdentifier>{
      * Returns 'live' object that was configured using this object. It is
      * allowed to call this method only after all ConfigBeans were validated. In
      * this method new resources might be opened or old instance might be
-     * modified. Note that when obtaining dependent Module using
-     * {@link org.opendaylight.controller.config.api.DependencyResolver#validateDependency(Class, javax.management.ObjectName, String)}
-     * a proxy will be created that will disallow calling this method before
-     * second commit phase begins.
+     * modified. This method must be implemented so that it returns same
+     * result for a single transaction. Since Module is created per transaction
+     * this means that it must be safe to cache result of first call.
+     *
      *
      * @return closeable instance: After bundle update the factory might be able
      *         to copy old configuration into new one without being able to cast
@@ -54,5 +53,18 @@ public interface Module extends Identifiable<ModuleIdentifier>{
      *         call close().
      */
     AutoCloseable getInstance();
+
+
+    /**
+     * Compare current module with oldModule and if the instance/live object
+     * produced by the old module can be reused in this module as well return true.
+     * Typically true should be returned if the old module had the same configuration.
+     *
+     *
+     * @param oldModule old instance of Module
+     * @return true if the instance produced by oldModule can be reused with current instance as well.
+     */
+    boolean canReuse(Module oldModule);
+
 
 }

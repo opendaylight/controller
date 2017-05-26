@@ -7,101 +7,107 @@
  */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import java.math.BigInteger;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.Map;
-
-import javax.management.Notification;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.md.sal.common.api.data.DataReader;
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.NodeGroupStatistics;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.statistics.rev131111.group.statistics.GroupStatistics;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.top.top.level.list.list1.list1._1.Cont;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 public class CrossBrokerMountPointTest {
 
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
-    private static final QName FLOW_ID_QNAME = QName.create(Flow.QNAME, "id");
-    private static final QName FLOW_NODE_QNAME = QName.create(Flow.QNAME, "node");
-    private static final QName TABLE_ID_QNAME = QName.create(Table.QNAME, "id");
+    private static final QName TLL_NAME_QNAME = QName.create(TopLevelList.QNAME, "name");
+    private static final String TLL_NAME = "foo:1";
 
-    private static final String NODE_ID = "node:1";
+    private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
 
-    private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
+    private static final Map<QName, Object> TLL_KEY_BI = Collections.<QName, Object> singletonMap(TLL_NAME_QNAME,
+            TLL_NAME);
 
-    private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
-            NODE_ID);
+    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
+            .child(TopLevelList.class, TLL_KEY).build();
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
-            .child(Node.class, NODE_KEY).toInstance();
-    private static GroupKey GROUP_KEY = new GroupKey(new GroupId(0L));
+    private static final List1Key LIST1_KEY = new List1Key("foo");
+    private static final List11Key LIST11_KEY = new List11Key(1);
 
-    private static final InstanceIdentifier<GroupStatistics> GROUP_STATISTICS_ID_BA = InstanceIdentifier
-            .builder(NODE_INSTANCE_ID_BA).augmentation(FlowCapableNode.class) //
-            .child(Group.class, GROUP_KEY) //
-            .augmentation(NodeGroupStatistics.class) //
-            .child(GroupStatistics.class) //
-            .toInstance();
+    private static final InstanceIdentifier<Cont> AUG_CONT_ID_BA = TLL_INSTANCE_ID_BA
+            .builder().augmentation(TllComplexAugment.class) //
+            .child(List1.class, LIST1_KEY) //
+            .child(List11.class, LIST11_KEY) //
+            .augmentation(List11SimpleAugment.class) //
+            .child(Cont.class) //
+            .build();
 
-    private static final QName AUGMENTED_GROUP_STATISTICS = QName.create(NodeGroupStatistics.QNAME,
-            GroupStatistics.QNAME.getLocalName());
+    private static final QName AUG_CONT = QName.create(List11.QNAME,
+            Cont.QNAME.getLocalName());
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier NODE_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.InstanceIdentifier.builder() //
-            .node(Nodes.QNAME) //
-            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
-            .toInstance();
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier TLL_INSTANCE_ID_BI = //
+    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
+            .node(Top.QNAME) //
+            .node(TopLevelList.QNAME) //
+            .nodeWithKey(TopLevelList.QNAME, TLL_KEY_BI) //
+            .build();
 
-    private static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier GROUP_STATISTICS_ID_BI = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier GROUP_STATISTICS_ID_BI = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
             //
-            .builder(NODE_INSTANCE_ID_BI)
-            .nodeWithKey(QName.create(FlowCapableNode.QNAME, "group"), QName.create(FlowCapableNode.QNAME, "group-id"),
-                    0L).node(AUGMENTED_GROUP_STATISTICS).toInstance();
-
-    private static final NodeRef NODE_REF = new NodeRef(NODE_INSTANCE_ID_BA);
+            .builder(TLL_INSTANCE_ID_BI)
+            .nodeWithKey(QName.create(TllComplexAugment.QNAME, "list1"), QName.create(TllComplexAugment.QNAME, "attr-str"),
+                    LIST1_KEY.getAttrStr())
+            .nodeWithKey(QName.create(TllComplexAugment.QNAME, "list1-1"), QName.create(TllComplexAugment.QNAME, "attr-int"),
+                    LIST11_KEY.getAttrInt())
+            .node(AUG_CONT).build();
 
     private BindingTestContext testContext;
     private MountProviderService bindingMountPointService;
-    private MountProvisionService domMountPointService;
+    private DOMMountPointService domMountPointService;
 
     @Before
     public void setup() {
-        BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
-        testFactory.setExecutor(MoreExecutors.sameThreadExecutor());
+        final BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
+        testFactory.setExecutor(MoreExecutors.newDirectExecutorService());
         testFactory.setStartWithParsedSchema(true);
         testContext = testFactory.getTestContext();
 
@@ -118,44 +124,109 @@ public class CrossBrokerMountPointTest {
 
     @Test
     public void testMountPoint() {
+        final Integer attrIntValue = 500;
+        domMountPointService.createMountPoint(TLL_INSTANCE_ID_BI)
+            .addService(DOMDataBroker.class, new DOMDataBroker() {
 
-        testContext.getBindingDataBroker().readOperationalData(NODE_INSTANCE_ID_BA);
+                @Override
+                public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
+                        final YangInstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
+                    throw new UnsupportedOperationException();
+                }
 
-        MountProvisionInstance domMountPoint = domMountPointService.createMountPoint(NODE_INSTANCE_ID_BI);
-        assertNotNull(domMountPoint);
-        MountProviderInstance bindingMountPoint = bindingMountPointService.getMountPoint(NODE_INSTANCE_ID_BA);
+                @Override
+                public DOMDataWriteTransaction newWriteOnlyTransaction() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public DOMDataReadWriteTransaction newReadWriteTransaction() {
+                    return  new DOMDataReadWriteTransaction() {
+
+                        @Override
+                        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+                                final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+                            if(store == LogicalDatastoreType.OPERATIONAL && path.getLastPathArgument().equals(GROUP_STATISTICS_ID_BI.getLastPathArgument())) {
+
+                                final ContainerNode data = Builders.containerBuilder()
+                                        .withNodeIdentifier(new NodeIdentifier(AUG_CONT))
+                                        .withChild(ImmutableNodes.leafNode(QName.create(AUG_CONT, "attr-int"), attrIntValue))
+                                        .build();
+
+                                return Futures.immediateCheckedFuture(Optional.<NormalizedNode<?,?>>of(data));
+                            }
+                            return Futures.immediateFailedCheckedFuture(new ReadFailedException(TLL_NAME, new Exception()));
+                        }
+
+                        @Override
+                        public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                                final YangInstanceIdentifier path) {
+                            throw new UnsupportedOperationException();
+                        }
+
+                        @Override
+                        public Object getIdentifier() {
+                            return this;
+                        }
+
+                        @Override
+                        public boolean cancel() {
+                            return false;
+                        }
+
+                        @Override
+                        public ListenableFuture<RpcResult<TransactionStatus>> commit() {
+                            return null;
+                        }
+
+                        @Override
+                        public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+                            throw new UnsupportedOperationException();
+                        }
+
+                        @Override
+                        public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                                final NormalizedNode<?, ?> data) {
+                            throw new UnsupportedOperationException();
+                        }
+
+                        @Override
+                        public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                                final NormalizedNode<?, ?> data) {
+                            throw new UnsupportedOperationException();
+                        }
+
+                        @Override
+                        public CheckedFuture<Void, TransactionCommitFailedException> submit() {
+                            throw new UnsupportedOperationException();
+                        }
+
+                    };
+                }
+
+                @Override
+                public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
+                    return Collections.emptyMap();
+                }
+            }).register();
+
+
+
+        final MountProviderInstance bindingMountPoint = bindingMountPointService.getMountPoint(TLL_INSTANCE_ID_BA);
         assertNotNull(bindingMountPoint);
 
-        final BigInteger packetCount = BigInteger.valueOf(500L);
-        
-        
-        DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode> simpleReader = new DataReader<org.opendaylight.yangtools.yang.data.api.InstanceIdentifier, CompositeNode>() {
-
-            @Override
-            public CompositeNode readConfigurationData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
-                return null;
-            }
-
-            
-            @Override
-            public CompositeNode readOperationalData(org.opendaylight.yangtools.yang.data.api.InstanceIdentifier arg0) {
-                if (arg0.equals(GROUP_STATISTICS_ID_BI)) {
-                    ImmutableCompositeNode data = ImmutableCompositeNode
-                            .builder()
-                            .setQName(AUGMENTED_GROUP_STATISTICS)
-                            .addLeaf(QName.create(AUGMENTED_GROUP_STATISTICS, "packet-count"), packetCount) //
-                            .toInstance();
-
-                    return data;
-                }
-                return null;
-            }
-
-        };
-        domMountPoint.registerOperationalReader(NODE_INSTANCE_ID_BI, simpleReader);
-        
-        GroupStatistics data = (GroupStatistics) bindingMountPoint.readOperationalData(GROUP_STATISTICS_ID_BA);
+        final Cont data = (Cont) bindingMountPoint.readOperationalData(AUG_CONT_ID_BA);
         assertNotNull(data);
-        assertEquals(packetCount,data.getPacketCount().getValue());
+        assertEquals(attrIntValue ,data.getAttrInt());
     }
 }

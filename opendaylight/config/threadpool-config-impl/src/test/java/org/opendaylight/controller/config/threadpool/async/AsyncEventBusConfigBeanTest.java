@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.config.threadpool.async;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -40,7 +39,7 @@ public class AsyncEventBusConfigBeanTest extends AbstractConfigTest {
                 TestingScheduledThreadPoolModule.class, poolImplName);
 
         factory = new AsyncEventBusModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory,
                 scheduledThreadPoolConfigFactory));
     }
 

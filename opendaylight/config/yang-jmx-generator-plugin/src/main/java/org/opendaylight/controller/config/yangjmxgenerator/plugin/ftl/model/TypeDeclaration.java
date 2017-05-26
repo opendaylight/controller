@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 import java.util.List;
+import org.opendaylight.controller.config.yangjmxgenerator.plugin.java.TypeName;
 
 public class TypeDeclaration {
     private final String type, name;
@@ -52,6 +53,24 @@ public class TypeDeclaration {
 
     public List<String> getImplemented() {
         return implemented;
+    }
+
+    public TypeName toTypeName() {
+        if ("interface".equals(type)) {
+            return TypeName.interfaceType;
+        } else if ("class".equals(type)) {
+            if (isAbstract) {
+                return TypeName.absClassType;
+            } else if (isFinal) {
+                return TypeName.finalClassType;
+            } else {
+                return TypeName.classType;
+            }
+        } else if ("enum".equals(type)) {
+            return TypeName.enumType;
+        } else {
+            throw new IllegalStateException("Type not supported: " + type);
+        }
     }
 
     @Override

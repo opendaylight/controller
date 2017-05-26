@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
 import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,9 +28,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 public class ServiceInterfaceEntryTest extends AbstractYangTest {
     public static final String PACKAGE_NAME = "packages.sis";
@@ -53,15 +54,15 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
         }
     }
 
-    public static final QName EVENTBUS_QNAME = new QName(THREADS_NAMESPACE,
+    public static final QName EVENTBUS_QNAME = QName.create(THREADS_NAMESPACE,
             THREADS_REVISION_DATE, "eventbus");
-    public static final QName THREADFACTORY_QNAME = new QName(
+    public static final QName THREADFACTORY_QNAME = QName.create(
             THREADS_NAMESPACE, THREADS_REVISION_DATE, "threadfactory");
-    public static final QName THREADPOOL_QNAME = new QName(THREADS_NAMESPACE,
+    public static final QName THREADPOOL_QNAME = QName.create(THREADS_NAMESPACE,
             THREADS_REVISION_DATE, "threadpool");
-    public static final QName SCHEDULED_THREADPOOL_QNAME = new QName(
+    public static final QName SCHEDULED_THREADPOOL_QNAME = QName.create(
             THREADS_NAMESPACE, THREADS_REVISION_DATE, "scheduled-threadpool");
-    public static final QName SCHEDULED_EXECUTOR_SERVICE_QNAME = new QName(
+    public static final QName SCHEDULED_EXECUTOR_SERVICE_QNAME = QName.create(
             THREADS_NAMESPACE, THREADS_REVISION_DATE,
             "scheduled-executor-service");
     public static final String SCHEDULED_THREADPOOL_INTERFACE_NAME = "ScheduledThreadPoolServiceInterface";
@@ -133,9 +134,10 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
                 + SCHEDULED_THREADPOOL_INTERFACE_NAME));
     }
 
-    static String trimInnerSpacesOrNull(String input) {
-        if (input == null)
+    static String trimInnerSpacesOrNull(final String input) {
+        if (input == null) {
             return null;
+        }
         return input.replaceAll("\\s{2,}", " ");
     }
 }

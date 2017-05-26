@@ -1,0 +1,19 @@
+module cluster-singleton-service-spi {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:md:sal:config:spi:cluster-singleton-service";
+    prefix "cluster-singleton-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description "MD-SAL ClusterSingletonServiceProvider service interface definition";
+
+    revision 2016-07-18 {
+        description "Initial revision";
+    }
+
+    identity cluster-singleton-service {
+        base "config:service-type";
+        config:java-class "org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider";
+        config:disable-osgi-service-registration;
+    }
+}

@@ -8,14 +8,13 @@
 package org.opendaylight.controller.config.manager.testingservices.parallelapsp;
 
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 
 @ServiceInterfaceAnnotation(value = TestingParallelAPSPConfigMXBean.NAME, osgiRegistrationType = TestingAPSP.class,
-namespace = "namespace", revision = "rev", localName = TestingParallelAPSPConfigMXBean.NAME)
+    namespace = "namespace", revision = "rev", localName = TestingParallelAPSPConfigMXBean.NAME)
 public interface TestingParallelAPSPConfigMXBean {
 
-    static final String NAME = "apsp";
+    String NAME = "apsp";
 
     ObjectName getThreadPool();
 

@@ -10,9 +10,7 @@ package org.opendaylight.controller.config.manager.testingservices.parallelapsp.
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.Executor;
-
 import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -36,14 +34,14 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         ClassBasedModuleFactory mockedThreadPoolConfigFactory = new ClassBasedModuleFactory(
                 threadPoolImplementationName, MockedThreadPoolModule.class);
 
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TestingParallelAPSPModuleFactory(),
                 mockedThreadPoolConfigFactory));
     }
 
-    public static interface MockedTestingThreadPoolConfigMXBean extends
+    public interface MockedTestingThreadPoolConfigMXBean extends
             TestingThreadPoolConfigMXBean {
-        public void setThreadCount(int threadCount);
+        void setThreadCount(int threadCount);
     }
 
     public static class MockedThreadPoolModule implements Module,
@@ -73,6 +71,11 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
         @Override
         public void validate() {
 
+        }
+
+        @Override
+        public boolean canReuse(Module oldModule) {
+            return false;
         }
 
         @Override

@@ -7,6 +7,15 @@
  */
 package org.opendaylight.controller.config.threadpool.scheduled;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -20,16 +29,6 @@ import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFacto
 import org.opendaylight.controller.config.yang.threadpool.impl.scheduled.ScheduledThreadPoolModuleFactory;
 import org.opendaylight.controller.config.yang.threadpool.impl.scheduled.ScheduledThreadPoolModuleMXBean;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 public class ScheduledThreadPoolConfigBeanTest extends AbstractConfigTest {
 
     private ScheduledThreadPoolModuleFactory factory;
@@ -39,7 +38,7 @@ public class ScheduledThreadPoolConfigBeanTest extends AbstractConfigTest {
     public void setUp() {
 
         factory = new ScheduledThreadPoolModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, factory,
                 new NamingThreadFactoryModuleFactory()));
     }
 
@@ -103,7 +102,7 @@ public class ScheduledThreadPoolConfigBeanTest extends AbstractConfigTest {
         transaction.commit();
 
         transaction = configRegistryClient.createTransaction();
-        transaction.destroyConfigBean(factory.getImplementationName(), instanceName);
+        transaction.destroyModule(factory.getImplementationName(), instanceName);
         CommitStatus status = transaction.commit();
 
         assertBeanCount(0, factory.getImplementationName());

@@ -7,18 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
+import com.google.common.base.Preconditions;
 import java.io.Closeable;
-
 import javax.annotation.concurrent.ThreadSafe;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 
 /**
  * This subclass is used for registering readable module into JMX, it is also
- * used as underlying provider in {@link RuntimeBeanRegistratorImpl}. Closing
+ * used as underlying provider in RuntimeBeanRegistratorImpl. Closing
  * the instance thus unregisters all JMX beans related to the module excluding
  * currently open transactions.
  */
@@ -26,14 +24,14 @@ import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrato
 public class ModuleJMXRegistrator implements Closeable {
     private final InternalJMXRegistrator childJMXRegistrator;
 
-    public ModuleJMXRegistrator(InternalJMXRegistrator internalJMXRegistrator) {
-        this.childJMXRegistrator = internalJMXRegistrator.createChild();
+    ModuleJMXRegistrator(final InternalJMXRegistrator internalJMXRegistrator) {
+        this.childJMXRegistrator = Preconditions.checkNotNull(internalJMXRegistrator);
     }
 
     static class ModuleJMXRegistration implements AutoCloseable {
         private final InternalJMXRegistration internalJMXRegistration;
 
-        ModuleJMXRegistration(InternalJMXRegistration registration) {
+        ModuleJMXRegistration(final InternalJMXRegistration registration) {
             this.internalJMXRegistration = registration;
         }
 
@@ -43,12 +41,13 @@ public class ModuleJMXRegistrator implements Closeable {
         }
     }
 
-    public ModuleJMXRegistration registerMBean(Object object, ObjectName on)
+    public ModuleJMXRegistration registerMBean(final Object object, final ObjectName on)
             throws InstanceAlreadyExistsException {
         ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_MODULE);
-        if (ObjectNameUtil.getTransactionName(on) != null)
+        if (ObjectNameUtil.getTransactionName(on) != null) {
             throw new IllegalArgumentException(
                     "Transaction name not expected in " + on);
+        }
         return new ModuleJMXRegistration(childJMXRegistrator.registerMBean(
                 object, on));
     }

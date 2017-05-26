@@ -15,19 +15,17 @@ import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.MODULE_TYPE_Q_NAME;
 import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 
 public class SchemaContextTest extends AbstractYangTest {
 
@@ -95,19 +93,23 @@ public class SchemaContextTest extends AbstractYangTest {
             }
         }
         assertEquals("Expected identities not found " + copyOfExpectedNames,
-                Collections.EMPTY_MAP, copyOfExpectedNames);
+                Collections.emptyMap(), copyOfExpectedNames);
     }
 
     @Test
     public void testReadingIdentities_threadsJavaModule() {
-        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = new HashMap(){{
-            put(ModuleMXBeanEntryTest.EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-            put(ModuleMXBeanEntryTest.ASYNC_EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-            put(ModuleMXBeanEntryTest.THREADFACTORY_NAMING_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-            put(ModuleMXBeanEntryTest.THREADPOOL_DYNAMIC_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-            put("thread-rpc-context", Optional.absent());
-            put(ModuleMXBeanEntryTest.THREADPOOL_REGISTRY_IMPL_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-        }};
+        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = new HashMap<String, Optional<QName>>(){
+            private static final long serialVersionUID = 1L;
+
+            {
+                put(ModuleMXBeanEntryTest.EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+                put(ModuleMXBeanEntryTest.ASYNC_EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+                put(ModuleMXBeanEntryTest.THREADFACTORY_NAMING_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+                put(ModuleMXBeanEntryTest.THREADPOOL_DYNAMIC_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+                put("thread-rpc-context", Optional.<QName>absent());
+                put(ModuleMXBeanEntryTest.THREADPOOL_REGISTRY_IMPL_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+            }
+        };
 
         assertAllIdentitiesAreExpected(threadsJavaModule,
                 expectedIdentitiesToBases);

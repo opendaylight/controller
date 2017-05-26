@@ -1,0 +1,21 @@
+module messagebus-event-source-registry {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:messagebus:spi:eventsourceregistry";
+    prefix "mb-esr";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+            "Event source registry service interface definition for MessageBus";
+
+     revision "2015-04-02" {
+             description
+                 "Initial revision";
+         }
+
+     identity event-source-registry {
+             base "config:service-type";
+             config:java-class "org.opendaylight.controller.messagebus.spi.EventSourceRegistry";
+     }
+
+}

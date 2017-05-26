@@ -7,41 +7,40 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
-import org.opendaylight.yangtools.binding.generator.util.Types;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
-
+import java.util.List;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
-import java.util.List;
+import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.mdsal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.model.util.Types;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
 public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
     private final String nullableDescription, nullableDefault;
     private final TypedAttribute innerAttribute;
 
-    public static ListAttribute create(ListSchemaNode node,
-            TypeProviderWrapper typeProvider, String packageName) {
+    public static ListAttribute create(final ListSchemaNode node,
+            final TypeProviderWrapper typeProvider, final String packageName) {
 
-        TOAttribute innerAttribute = TOAttribute.create(node, typeProvider, packageName);
-
-        return new ListAttribute(node, innerAttribute, node.getDescription());
-    }
-
-    public static ListAttribute create(LeafListSchemaNode node,
-            TypeProviderWrapper typeProvider) {
-
-        JavaAttribute innerAttribute = new JavaAttribute(node, typeProvider);
+        final TOAttribute innerAttribute = TOAttribute.create(node, typeProvider, packageName);
 
         return new ListAttribute(node, innerAttribute, node.getDescription());
     }
 
-    ListAttribute(DataSchemaNode attrNode, TypedAttribute innerAttribute,
-            String description) {
+    public static ListAttribute create(final LeafListSchemaNode node,
+            final TypeProviderWrapper typeProvider) {
+
+        final JavaAttribute innerAttribute = new JavaAttribute(node, typeProvider);
+
+        return new ListAttribute(node, innerAttribute, node.getDescription());
+    }
+
+    ListAttribute(final DataSchemaNode attrNode, final TypedAttribute innerAttribute,
+            final String description) {
         super(attrNode);
         this.nullableDescription = description;
         this.innerAttribute = innerAttribute;
@@ -50,54 +49,59 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public String getNullableDescription() {
-        return nullableDescription;
+        return this.nullableDescription;
     }
 
     @Override
     public String getNullableDefault() {
-        return nullableDefault;
+        return this.nullableDefault;
     }
 
     public AttributeIfc getInnerAttribute() {
-        return innerAttribute;
+        return this.innerAttribute;
     }
 
     @Override
     public String toString() {
         return "ListAttribute{" + getAttributeYangName() + "," + "to="
-                + innerAttribute + '}';
+                + this.innerAttribute + '}';
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31
-                * result
-                + (nullableDescription != null ? nullableDescription.hashCode()
+        result = (31
+                * result)
+                + (this.nullableDescription != null ? this.nullableDescription.hashCode()
                         : 0);
-        result = 31 * result
-                + (nullableDefault != null ? nullableDefault.hashCode() : 0);
+        result = (31 * result)
+                + (this.nullableDefault != null ? this.nullableDefault.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
+    public boolean equals(final Object o) {
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if ((o == null) || (getClass() != o.getClass())) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
-        ListAttribute that = (ListAttribute) o;
+        final ListAttribute that = (ListAttribute) o;
 
-        if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+        if (this.nullableDefault != null ? !this.nullableDefault
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
-        if (nullableDescription != null ? !nullableDescription
+        }
+        if (this.nullableDescription != null ? !this.nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
+        }
 
         return true;
     }
@@ -105,19 +109,19 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
     @Override
     public Type getType() {
-        return Types.parameterizedTypeFor(Types.typeForClass(List.class), innerAttribute.getType());
+        return Types.parameterizedTypeFor(Types.typeForClass(List.class), this.innerAttribute.getType());
     }
 
     @Override
     public ArrayType<?> getOpenType() {
-        OpenType<?> innerOpenType = innerAttribute.getOpenType();
+        final OpenType<?> innerOpenType = this.innerAttribute.getOpenType();
         return constructArrayType(innerOpenType);
     }
 
-    static ArrayType<?> constructArrayType(OpenType<?> innerOpenType){
+    static ArrayType<?> constructArrayType(final OpenType<?> innerOpenType){
         try {
             return new ArrayType<>(1, innerOpenType);
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             throw new RuntimeException("Unable to create " + ArrayType.class
                     + " with inner element of type " + innerOpenType, e);
         }

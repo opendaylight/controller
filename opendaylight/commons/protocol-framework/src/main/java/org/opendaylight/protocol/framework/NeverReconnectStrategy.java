@@ -18,6 +18,7 @@ import com.google.common.base.Preconditions;
  * Utility ReconnectStrategy singleton, which will cause the reconnect process
  * to always fail.
  */
+@Deprecated
 @ThreadSafe
 public final class NeverReconnectStrategy implements ReconnectStrategy {
     private final EventExecutor executor;
@@ -31,7 +32,7 @@ public final class NeverReconnectStrategy implements ReconnectStrategy {
 
     @Override
     public Future<Void> scheduleReconnect(final Throwable cause) {
-        return executor.newFailedFuture(new Throwable());
+        return executor.newFailedFuture(new Throwable("Reconnect failed", cause));
     }
 
     @Override

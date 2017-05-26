@@ -12,12 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntryTest;
@@ -91,8 +89,8 @@ public class ModuleMXBeanEntryPluginTest extends ModuleMXBeanEntryTest {
             assertThat(runtimeBeans.size(), is(4));
 
             {
-                RuntimeBeanEntry streamRB = findFirstByYangName(runtimeBeans,
-                        "stream");
+                RuntimeBeanEntry streamRB = findFirstByNamePrefix(runtimeBeans,
+                        "ThreadStream");
                 assertNotNull(streamRB);
                 assertFalse(streamRB.getKeyYangName().isPresent());
                 assertFalse(streamRB.getKeyJavaName().isPresent());
@@ -130,9 +128,9 @@ public class ModuleMXBeanEntryPluginTest extends ModuleMXBeanEntryTest {
                         is(true));
                 assertThat(peerTO.getFullyQualifiedName(), is(PACKAGE_NAME
                         + ".Peer"));
-                assertThat(peerTO.getMethods().size(), is(5));
-                Method getPort = findFirstMethodByName(peerTO.getMethods(),
-                        "getPort");
+                assertThat(peerTO.getMethods().size(), is(5 + 2/*hashCode Equals*/));
+
+                Method getPort = findFirstMethodByName(peerTO.getMethods(), "getPort");
                 assertNotNull(getPort);
                 Method setPort = findFirstMethodByName(peerTO.getMethods(),
                         "setPort");
@@ -148,8 +146,7 @@ public class ModuleMXBeanEntryPluginTest extends ModuleMXBeanEntryTest {
         }
     }
 
-    private Method findFirstMethodByName(List<? extends Method> methods,
-            String name) {
+    private static Method findFirstMethodByName(final List<? extends Method> methods, final String name) {
         for (Method ms : methods) {
             if (name.equals(ms.getName())) {
                 return ms;

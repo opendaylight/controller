@@ -9,11 +9,8 @@ package org.opendaylight.controller.config.manager.impl;
 
 import java.util.Collection;
 import java.util.List;
-
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
@@ -23,7 +20,7 @@ import org.osgi.framework.BundleContext;
  * and {@link ConfigRegistryImpl} (consumer).
  */
 interface ConfigTransactionControllerInternal extends
-        ConfigTransactionControllerImplMXBean {
+        ConfigTransactionControllerImplMXBean, AutoCloseable {
 
 
 
@@ -73,6 +70,10 @@ interface ConfigTransactionControllerInternal extends
 
     BundleContext getModuleFactoryBundleContext(String factoryName);
 
-    ServiceReferenceWritableRegistry getWritableRegistry();
+    SearchableServiceReferenceWritableRegistry  getWritableRegistry();
 
+    TransactionIdentifier getTransactionIdentifier();
+
+    @Override
+    void close();
 }

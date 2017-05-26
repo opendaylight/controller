@@ -16,5 +16,5 @@ import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 public interface SimpleInput extends DataObject,Augmentable<SimpleInput> {
 
     @RoutingContext(BaseIdentity.class)
-    InstanceIdentifier getIdentifier();
+    InstanceIdentifier<?> getIdentifier();
 }

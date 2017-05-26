@@ -84,7 +84,7 @@ public class JmxAttributeValidationException extends RuntimeException {
 
     public static void checkCondition(boolean condition, String message,
             JmxAttribute jmxAttribute) throws JmxAttributeValidationException {
-        if (condition == false) {
+        if (!condition) {
             throw new JmxAttributeValidationException(
                     jmxAttribute.getAttributeName() + " " + message,
                     jmxAttribute);

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0">
+
+  <reference id="domEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"/>
+
+  <bean id="legacyEntityOwnershipService" class="org.opendaylight.controller.md.sal.dom.clustering.impl.LegacyEntityOwnershipServiceAdapter"
+          destroy-method="close">
+    <argument ref="domEntityOwnershipService"/>
+  </bean>
+
+  <service ref="legacyEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"
+        odl:type="default"/>
+</blueprint>

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
+import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public abstract class AbstractAttribute implements AttributeIfc {
@@ -22,8 +22,8 @@ public abstract class AbstractAttribute implements AttributeIfc {
     AbstractAttribute(DataSchemaNode attrNode) {
         this.attributeYangName = getLocalName(attrNode);
         this.node = attrNode;
-        this.upperCaseCammelCase = ModuleMXBeanEntry.findJavaNamePrefix(node);
-        this.lowerCaseCammelCase = ModuleMXBeanEntry.findJavaParameter(node);
+        this.upperCaseCammelCase = TypeProviderWrapper.findJavaNamePrefix(node);
+        this.lowerCaseCammelCase = TypeProviderWrapper.findJavaParameter(node);
     }
 
     @Override
@@ -33,17 +33,20 @@ public abstract class AbstractAttribute implements AttributeIfc {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof AbstractAttribute))
+        }
+        if (!(o instanceof AbstractAttribute)) {
             return false;
+        }
 
         AbstractAttribute that = (AbstractAttribute) o;
 
         if (attributeYangName != null ? !attributeYangName
                 .equals(that.attributeYangName)
-                : that.attributeYangName != null)
+                : that.attributeYangName != null) {
             return false;
+        }
 
         return true;
     }
@@ -57,7 +60,7 @@ public abstract class AbstractAttribute implements AttributeIfc {
      *
      * @return Yang name converted to cammel case, starting with a capital
      *         letter. For details see
-     *         {@link ModuleMXBeanEntry#findJavaNamePrefix(org.opendaylight.yangtools.yang.model.api.SchemaNode)}
+     *         {@link org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry#getJavaNamePrefix()}
      */
     @Override
     public String getUpperCaseCammelCase() {

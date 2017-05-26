@@ -1,92 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- vi: set et smarttab sw=4 tabstop=4: -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-plugin-parent</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+    <relativePath>../config-plugin-parent</relativePath>
+  </parent>
+  <artifactId>threadpool-config-impl</artifactId>
+  <packaging>bundle</packaging>
+  <name>${project.artifactId}</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>threadpool-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <!--test dependencies -->
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-plugin-parent</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
-        <relativePath>../config-plugin-parent</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>threadpool-config-impl</artifactId>
-   <name>${project.artifactId}</name>
-   <packaging>bundle</packaging>
-   <prerequisites>
-      <maven>3.0.4</maven>
-   </prerequisites>
+      <artifactId>config-manager</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-manager</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-util</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-   <dependencies>
-      <dependency>
-         <groupId>${project.groupId}</groupId>
-         <artifactId>config-api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>${project.groupId}</groupId>
-         <artifactId>threadpool-config-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
-      </dependency>
-
-      <!--test dependencies -->
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-manager</artifactId>
-         <scope>test</scope>
-         <type>test-jar</type>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-manager</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-util</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.yangtools</groupId>
-         <artifactId>mockito-configuration</artifactId>
-      </dependency>
-   </dependencies>
-
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <configuration>
-               <instructions>
-                  <Private-Package>
-                     org.opendaylight.controller.config.threadpool.util,
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Private-Package>org.opendaylight.controller.config.threadpool.util,
                      javax.annotation.*,
-                     org.opendaylight.controller.config.yang.threadpool.impl*,
-                  </Private-Package>
-                  <Export-Package>
-                      org.opendaylight.controller.config.threadpool.util,
-                      org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.threadpool.impl.rev130405.*,
-                  </Export-Package>
-               </instructions>
-            </configuration>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-         </plugin>
+                     org.opendaylight.controller.config.yang.threadpool.impl*,</Private-Package>
+            <Export-Package>org.opendaylight.controller.config.threadpool.util,
+                      org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.threadpool.impl.*,</Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
 
-         <plugin>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>yang-maven-plugin</artifactId>
-         </plugin>
-      </plugins>
-   </build>
+      <plugin>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

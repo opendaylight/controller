@@ -9,10 +9,20 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import java.util.EventListener;
 
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
-
-public interface DataChangeListener<P/* extends Path<P> */,D> extends EventListener {
-
+import org.opendaylight.yangtools.concepts.Path;
+/**
+ *
+ *
+ * @deprecated Replaced by {@link AsyncDataChangeEvent}
+ */
+@Deprecated
+public interface DataChangeListener<P extends Path<P>, D> extends EventListener {
+    /**
+     * Note that this method may be invoked from a shared thread pool, so
+     * implementations SHOULD NOT perform CPU-intensive operations and they
+     * definitely MUST NOT invoke any potentially blocking operations.
+     *
+     * @param change Data Change Event being delivered.
+     **/
     void onDataChanged(DataChangeEvent<P, D> change);
 }

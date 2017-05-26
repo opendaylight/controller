@@ -1,0 +1,23 @@
+module people {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:people";
+    prefix "people";
+
+    revision "2014-03-13" {
+        description "Initial revision.";
+    }
+
+    container people {
+        presence "expected to exist when empty";
+        list person {
+            key name;
+            leaf name {
+                type string;
+            }
+
+            leaf age {
+                type uint32;
+            }
+        }
+    }
+}

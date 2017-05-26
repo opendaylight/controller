@@ -8,14 +8,15 @@
 package org.opendaylight.controller.config.manager.impl.jmx;
 
 public class ServiceReference {
-    private final String serviceInterfaceName, refName;
+    private final String serviceInterfaceName;
+    private final String refName;
 
     public ServiceReference(String serviceInterfaceName, String refName) {
         this.serviceInterfaceName = serviceInterfaceName;
         this.refName = refName;
     }
 
-    public String getServiceInterfaceName() {
+    public String getServiceInterfaceQName() {
         return serviceInterfaceName;
     }
 
@@ -25,13 +26,21 @@ public class ServiceReference {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ServiceReference that = (ServiceReference) o;
 
-        if (!refName.equals(that.refName)) return false;
-        if (!serviceInterfaceName.equals(that.serviceInterfaceName)) return false;
+        if (!refName.equals(that.refName)) {
+            return false;
+        }
+        if (!serviceInterfaceName.equals(that.serviceInterfaceName)) {
+            return false;
+        }
 
         return true;
     }
@@ -41,5 +50,13 @@ public class ServiceReference {
         int result = serviceInterfaceName.hashCode();
         result = 31 * result + refName.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceReference{" +
+                "serviceInterfaceName='" + serviceInterfaceName + '\'' +
+                ", refName='" + refName + '\'' +
+                '}';
     }
 }

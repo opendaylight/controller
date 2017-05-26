@@ -7,10 +7,15 @@
  */
 package org.opendaylight.controller.config.yang.test.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import com.google.common.collect.Lists;
-
-import junit.framework.Assert;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.IdentityAttributeRef;
@@ -19,24 +24,9 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.test.impl.rev130403.TestIdentity1;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.test.impl.rev130403.TestIdentity2;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.ObjectName;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
 
 public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
@@ -47,28 +37,25 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
     @Before
     public void setUp() {
 
-        factory = new NetconfTestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory,
+        this.factory = new NetconfTestImplModuleFactory();
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(this.mockedContext,this.factory,
                 new DepTestImplModuleFactory(), new IdentityTestModuleFactory()));
     }
 
     @Override
-    protected CodecRegistry getCodecRegistry() {
-        final IdentityCodec<?> codec = mock(IdentityCodec.class);
-        doReturn(TestIdentity1.class).when(codec).deserialize(TestIdentity1.QNAME);
-        doReturn(TestIdentity2.class).when(codec).deserialize(TestIdentity2.QNAME);
-
-        final CodecRegistry ret = super.getCodecRegistry();
-        doReturn(codec).when(ret).getIdentityCodec();
+    protected BindingRuntimeContext getBindingRuntimeContext() {
+        final BindingRuntimeContext ret = super.getBindingRuntimeContext();
+        doReturn(TestIdentity1.class).when(ret).getIdentityClass(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(ret).getIdentityClass(TestIdentity2.QNAME);
         return ret;
     }
 
     @Test
     public void testIdentities() throws Exception {
-        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        final ConfigTransactionJMXClient transaction = this.configRegistryClient.createTransaction();
 
-        ObjectName nameCreated = transaction.createModule(IdentityTestModuleFactory.NAME, instanceName);
-        IdentityTestModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, IdentityTestModuleMXBean.class);
+        final ObjectName nameCreated = transaction.createModule(IdentityTestModuleFactory.NAME, this.instanceName);
+        final IdentityTestModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, IdentityTestModuleMXBean.class);
 
         final IdentitiesContainer c = new IdentitiesContainer();
         c.setAfi(new IdentityAttributeRef(TestIdentity2.QNAME.toString()));
@@ -78,81 +65,74 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
     @Test
     public void testDependencyList() throws Exception {
-        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        ConfigTransactionJMXClient transaction = this.configRegistryClient.createTransaction();
 
-        ObjectName on = createInstance(transaction, instanceName, 4);
+        final ObjectName on = createInstance(transaction, this.instanceName, 4);
         transaction.validateConfig();
-        CommitStatus status1 = transaction.commit();
+        final CommitStatus status1 = transaction.commit();
 
-        assertBeanCount(1, factory.getImplementationName());
+        assertBeanCount(1, this.factory.getImplementationName());
         assertBeanCount(4 + 1, DepTestImplModuleFactory.NAME);
         assertStatus(status1, 1 + 4 + 1, 0, 0);
 
-        transaction = configRegistryClient.createTransaction();
+        transaction = this.configRegistryClient.createTransaction();
 
-        NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(ObjectNameUtil.withoutTransactionName(on),
+        final NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(ObjectNameUtil.withoutTransactionName(on),
                 NetconfTestImplModuleMXBean.class);
         proxy.getComplexList();
-        List<ObjectName> testingDeps = proxy.getTestingDeps();
-        ObjectName testingDep = proxy.getTestingDep();
+        final List<ObjectName> testingDeps = proxy.getTestingDeps();
+        final ObjectName testingDep = proxy.getTestingDep();
 
-        Assert.assertEquals(TESTING_DEP_PREFIX, ObjectNameUtil.getInstanceName(testingDep));
+        assertEquals(TESTING_DEP_PREFIX, ObjectNameUtil.getInstanceName(testingDep));
         assertTestingDeps(testingDeps, 4);
 
         transaction.abortConfig();
 
         // check that reuse logic works - equals on list of dependencies.
-        transaction = configRegistryClient.createTransaction();
-        CommitStatus status2 = transaction.commit();
+        transaction = this.configRegistryClient.createTransaction();
+        final CommitStatus status2 = transaction.commit();
         assertStatus(status2, 0, 0, 6);
 
         // replace single dependency
-        transaction = configRegistryClient.createTransaction();
-        String instanceName1 = TESTING_DEP_PREFIX + 1;
+        transaction = this.configRegistryClient.createTransaction();
+        final String instanceName1 = TESTING_DEP_PREFIX + 1;
         transaction.destroyModule(DepTestImplModuleFactory.NAME, instanceName1);
         transaction.createModule(DepTestImplModuleFactory.NAME, instanceName1);
-        CommitStatus status3 = transaction.commit();
+        final CommitStatus status3 = transaction.commit();
         assertStatus(status3, 1, 1, 4);
 
     }
 
     @Test
     public void testNullCheckInListOfDependencies() throws Exception {
-        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
+        final ConfigTransactionJMXClient transaction = this.configRegistryClient.createTransaction();
 
-        ObjectName on = createInstance(transaction, instanceName, 4);
-        NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(on, NetconfTestImplModuleMXBean.class);
-        try{
-            proxy.setTestingDeps(null);
-            fail();
-        }catch(RuntimeException e) {
-            Throwable cause = e.getCause();
-            assertNotNull(cause);
-            assertTrue("Invalid type " + cause, cause instanceof IllegalArgumentException);
-            assertEquals("Null not supported", cause.getMessage());
-        }
+        final ObjectName on = createInstance(transaction, this.instanceName, 4);
+        final NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(on, NetconfTestImplModuleMXBean.class);
+        proxy.setTestingDeps(null);
+        assertTrue(proxy.getTestingDeps().isEmpty());
         proxy.setTestingDeps(Collections.<ObjectName>emptyList());
     }
 
-    private void assertTestingDeps(List<ObjectName> testingDeps, int i) {
-        Assert.assertEquals(i, testingDeps.size());
+    private void assertTestingDeps(final List<ObjectName> testingDeps, final int i) {
+        assertEquals(i, testingDeps.size());
 
         int c = 1;
-        for (ObjectName testingDep : testingDeps) {
-            Assert.assertEquals(TESTING_DEP_PREFIX + Integer.toString(c++), ObjectNameUtil.getInstanceName(testingDep));
+        for (final ObjectName testingDep : testingDeps) {
+            assertEquals(TESTING_DEP_PREFIX + Integer.toString(c++), ObjectNameUtil.getInstanceName(testingDep));
         }
     }
 
 
-    private ObjectName createInstance(ConfigTransactionJMXClient transaction, String instanceName, int depsCount)
+    private ObjectName createInstance(final ConfigTransactionJMXClient transaction, final String instanceName, final int depsCount)
             throws InstanceAlreadyExistsException {
-        ObjectName nameCreated = transaction.createModule(factory.getImplementationName(), instanceName);
-        NetconfTestImplModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, NetconfTestImplModuleMXBean.class);
+        final ObjectName nameCreated = transaction.createModule(this.factory.getImplementationName(), instanceName);
+        final NetconfTestImplModuleMXBean mxBean = transaction.newMXBeanProxy(nameCreated, NetconfTestImplModuleMXBean.class);
 
         ObjectName dep = transaction.createModule(DepTestImplModuleFactory.NAME, TESTING_DEP_PREFIX);
         mxBean.setTestingDep(dep);
 
-        ArrayList<ObjectName> testingDeps = Lists.newArrayList();
+        final ArrayList<ObjectName> testingDeps = Lists.newArrayList();
         for (int i = 0; i < depsCount; i++) {
             dep = transaction.createModule(DepTestImplModuleFactory.NAME, TESTING_DEP_PREFIX + Integer.toString(i + 1));
             testingDeps.add(dep);

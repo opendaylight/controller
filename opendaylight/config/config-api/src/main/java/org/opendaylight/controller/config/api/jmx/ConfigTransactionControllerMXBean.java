@@ -11,7 +11,7 @@ import org.opendaylight.controller.config.api.ConfigTransactionController;
 
 /**
  * Those are executed by Jolokia clients on configuration transaction
- * represented by {@link ConfigMBeanServer} instance. Note: Reason for having
+ * represented by <code>ConfigMBeanServer</code> instance. Note: Reason for having
  * methods in super interface is that JMX allows only one MXBean to be
  * implemented and implementations can expose additional methods to be exported. <br>
  * Implementation of {@link ConfigTransactionController} is not required to

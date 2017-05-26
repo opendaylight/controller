@@ -1,8 +1,0 @@
-<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <leaf-list-output
-            xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
-        <context-instance>
-            /modules/module[type='impl-netconf'][name='instance-from-code']/inner-running-data[key='0']/inner-inner-running-data[key='1']
-        </context-instance>
-    </leaf-list-output>
-</rpc>

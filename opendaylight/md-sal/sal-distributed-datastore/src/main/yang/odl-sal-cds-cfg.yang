@@ -1,0 +1,41 @@
+module odl-concurrent-data-broker-cfg {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:concurrent-data-broker";
+    prefix "cdb";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import opendaylight-md-sal-dom {prefix sal; }
+    import opendaylight-sal-dom-broker-impl { prefix broker; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+
+    description
+        "Service definition for concurrent dom broker.";
+
+    revision "2014-11-24" {
+        description
+            "Initial revision";
+    }
+
+    identity dom-concurrent-data-broker {
+        base config:module-type;
+        config:provided-service sal:dom-async-data-broker;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case dom-concurrent-data-broker {
+            when "/config:modules/config:module/config:type = 'dom-concurrent-data-broker'";
+
+            uses broker:dom-broker-config;
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case dom-concurrent-data-broker {
+            when "/config:modules/config:module/config:type = 'dom-concurrent-data-broker'";
+
+            uses broker:dom-broker-operational;
+        }
+    }
+}

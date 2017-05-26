@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.common.api.notify;
 
-import org.opendaylight.yangtools.concepts.Registration;
+import java.util.EventListener;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-public interface NotificationSubscriptionService<T,N,L> {
+public interface NotificationSubscriptionService<T, N, L extends EventListener> {
 
-    Registration<L> registerNotificationListener(T type,L listener);
+    ListenerRegistration<L> registerNotificationListener(T type, L listener);
 }

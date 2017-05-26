@@ -23,20 +23,22 @@ module config-bgp-listener-impl {
     augment "/config:modules/config:module/config:state" {
         case bgp-listener-impl {
             when "/config:modules/config:module/config:type = 'bgp-listener-impl'";
-            list peers {
-                config:inner-state-bean;
-                leaf port {
-                    type inet:port-number;
-                    default 179;
+            container bgp-listener-impl {
+                list peers {
+                    config:inner-state-bean;
+                    leaf port {
+                        type inet:port-number;
+                        default 179;
+                    }
+                    leaf core-size {
+                        type uint32;
+                    }
                 }
-                leaf core-size {
-                    type uint32;
-                }
-            }
 
-           leaf as-number {
-                mandatory true;
-                type inet:as-number;
+                leaf as-number {
+                    mandatory true;
+                    type inet:as-number;
+                }
             }
         }
     }

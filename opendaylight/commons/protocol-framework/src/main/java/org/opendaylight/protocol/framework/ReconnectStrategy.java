@@ -23,6 +23,7 @@ import io.netty.util.concurrent.Future;
  * not attempt any more connection attempts and should abort the reconnection
  * process.
  */
+@Deprecated
 public interface ReconnectStrategy {
     /**
      * Query the strategy for the connect timeout.

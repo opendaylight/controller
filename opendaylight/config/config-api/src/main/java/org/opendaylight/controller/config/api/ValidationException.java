@@ -16,9 +16,11 @@ import java.util.Map.Entry;
 
 /**
  * This exception is not intended to be used while implementing modules,
- * itaggregates validation exceptions and sends them back to the user.
+ * it aggregates validation exceptions and sends them back to the user.
+ * Use {@link org.opendaylight.controller.config.api.JmxAttributeValidationException} for
+ * validating modules instead.
  */
-public class ValidationException extends RuntimeException {
+public class ValidationException extends Exception {
     private static final long serialVersionUID = -6072893219820274247L;
 
     private final Map<String/* module name */, Map<String/* instance name */, ExceptionMessageWithStackTrace>> failedValidations;
@@ -118,23 +120,30 @@ public class ValidationException extends RuntimeException {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ExceptionMessageWithStackTrace other = (ExceptionMessageWithStackTrace) obj;
             if (message == null) {
-                if (other.message != null)
+                if (other.message != null) {
                     return false;
-            } else if (!message.equals(other.message))
+                }
+            } else if (!message.equals(other.message)) {
                 return false;
+            }
             if (stackTrace == null) {
-                if (other.stackTrace != null)
+                if (other.stackTrace != null) {
                     return false;
-            } else if (!stackTrace.equals(other.stackTrace))
+                }
+            } else if (!stackTrace.equals(other.stackTrace)) {
                 return false;
+            }
             return true;
         }
 

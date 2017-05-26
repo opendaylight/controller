@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.config.api;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
 import java.util.Map;
 import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 
 public interface ServiceReferenceReadableRegistry {
 

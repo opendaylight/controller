@@ -10,15 +10,16 @@ package org.opendaylight.protocol.framework;
 import java.util.EventListener;
 
 /**
- * Listener that receives session state informations. This interface should be
+ * Listener that receives session state information. This interface should be
  * implemented by a protocol specific abstract class, that is extended by
  * a final class that implements the methods.
  */
+@Deprecated
 public interface SessionListener<M, S extends ProtocolSession<?>, T extends TerminationReason> extends EventListener {
     /**
      * Fired when the session was established successfully.
      *
-     * @param remoteParams Peer address families which we accepted
+     * @param session New session
      */
     void onSessionUp(S session);
 

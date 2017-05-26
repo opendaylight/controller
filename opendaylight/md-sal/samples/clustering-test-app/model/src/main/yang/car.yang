@@ -1,0 +1,140 @@
+module car {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:car";
+
+    prefix car;
+
+	import ietf-inet-types { prefix "inet"; revision-date 2013-07-15; }
+	
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG model for car for test application";
+
+    revision "2014-08-18" {
+      description
+        "Clustering sample app";
+    }
+    
+    typedef car-id {
+      type inet:uri;
+      description "An identifier for car entry.";
+    }
+
+    grouping car-entry {
+      description "Describes the contents of a car entry -
+                       Details of the car manufacturer, model etc";
+      leaf id {
+        type car-id;
+        description "identifier of single list of entries.";
+      }
+
+      leaf model {
+        type string;
+      }
+      leaf manufacturer {
+        type string;
+      }
+
+      leaf year {
+        type uint32;
+      }
+
+      leaf category {
+        type string;
+      }
+    }
+    
+    container cars {
+      description
+        "Top-level container for all car objects.";
+      list car-entry {
+      	key "id";
+      	description "A list of cars (as defined by the 'grouping car-entry').";
+      	uses car-entry;
+      }
+    }
+    
+    rpc stress-test {
+        input {
+            leaf rate {
+              type uint16;
+              description "The rate is a measure of the number of car-entry(s) added per second.
+                           Thus the rate is measured in terms of transactions per second.  The
+                           rate is not necessary achievable;  the controller may not keep up with
+                           the specified value.  In this instance, rate is considered maximum rate.";
+            }
+
+            leaf count {
+              type uint32;
+              default 0;
+              description "Number of cars to create. Zero implies unlimited cars; use
+                           stop-stress-test rpc to stop the test.";
+            }
+        }
+    }
+    
+    rpc stop-stress-test {
+        output {
+            leaf success-count {
+              type uint32;
+              default 0;
+              description "Total number of cars created when running stess-test rpc";
+            }
+
+            leaf failure-count {
+              type uint32;
+              default 0;
+              description "Total number of cars failed when running stess-test rpc";
+            }
+        }
+    }
+
+    rpc register-ownership {
+        input {
+            leaf car-id {
+                type string;
+              }
+        }
+    }
+    
+    rpc unregister-ownership {
+        input {
+            leaf car-id {
+                type string;
+              }
+        }
+    }
+
+    rpc register-logging-dcl {
+        description "Registers a basic logging DCL on the cars container.  This is useful
+                    for analyzing effects of DCL on a long, flat list.";
+    }
+
+    rpc unregister-logging-dcls {
+        description "Unregisters the logging DCL(s) for the cars container.";
+    }
+
+    rpc register-logging-dtcl {
+        description "Registers a basic logging DTCL on the cars container.  This is useful
+                            for analyzing the effects of DTCL on a long, flat list.";
+    }
+
+    rpc unregister-logging-dtcls {
+        description "Unregisters the logging DTCL(s) for the cars container.";
+    }
+
+    rpc register-commit-cohort {
+        description "Registers a sample commit cohort that validates car entry input.";
+    }
+
+    rpc unregister-commit-cohort {
+        description "Unregisters the sample commit cohort.";
+    }
+
+}

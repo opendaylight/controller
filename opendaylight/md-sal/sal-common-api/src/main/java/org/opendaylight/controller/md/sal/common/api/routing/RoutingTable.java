@@ -9,16 +9,15 @@ package org.opendaylight.controller.md.sal.common.api.routing;
 
 import java.util.Map;
 
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.concepts.Path;
 
-public interface RoutingTable<C,P/* extends Path<P> */,T> {
+public interface RoutingTable<C, P extends Path<P>, T> {
 
     C getIdentifier();
-    
+
     T getDefaultRoute();
-    
+
     Map<P,T> getRoutes();
-    
+
     T getRoute(P path);
 }

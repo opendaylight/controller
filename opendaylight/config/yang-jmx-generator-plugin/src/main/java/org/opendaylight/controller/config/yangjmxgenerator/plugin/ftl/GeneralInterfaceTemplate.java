@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
 import java.util.Collections;
 import java.util.List;
-
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDeclaration;

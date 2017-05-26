@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright © 2016, 2017 Red Hat, Inc. and others.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>single-feature-parent</artifactId>
+        <version>1.8.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>odl-mdsal-broker</artifactId>
+    <version>1.5.0-SNAPSHOT</version>
+    <packaging>feature</packaging>
+
+    <properties>
+        <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
+        <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
+        <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-mdsal-remoterpc-connector</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-mdsal-distributed-datastore</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>config</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>entityownershipconfig</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/initial/akka.conf" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>akkaconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/factory/akka.conf" override="true" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>factoryakkaconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/initial/module-shards.conf" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>moduleshardconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="configuration/initial/modules.conf" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>moduleconf</classifier>
+        </dependency>
+        <dependency>
+            <!-- finalname="etc/org.opendaylight.controller.cluster.datastore.cfg" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sal-clustering-config</artifactId>
+            <version>${project.version}</version>
+            <type>cfg</type>
+            <classifier>datastore</classifier>
+        </dependency>
+    </dependencies>
+</project>

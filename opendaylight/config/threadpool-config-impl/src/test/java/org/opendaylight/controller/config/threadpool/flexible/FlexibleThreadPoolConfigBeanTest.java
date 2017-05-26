@@ -7,6 +7,13 @@
  */
 package org.opendaylight.controller.config.threadpool.flexible;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -20,14 +27,6 @@ import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFacto
 import org.opendaylight.controller.config.yang.threadpool.impl.flexible.FlexibleThreadPoolModuleFactory;
 import org.opendaylight.controller.config.yang.threadpool.impl.flexible.FlexibleThreadPoolModuleMXBean;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
-
 public class FlexibleThreadPoolConfigBeanTest extends AbstractConfigTest {
 
     private FlexibleThreadPoolModuleFactory flexibleFactory;
@@ -38,7 +37,7 @@ public class FlexibleThreadPoolConfigBeanTest extends AbstractConfigTest {
     public void setUp() {
 
         flexibleFactory = new FlexibleThreadPoolModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(flexibleFactory,
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,flexibleFactory,
                 new NamingThreadFactoryModuleFactory()));
     }
 

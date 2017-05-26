@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.threadpool;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
+import java.util.Set;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -19,16 +21,12 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThreadPoolModuleFactory implements ModuleFactory {
     public static final String NAME = "fixed";
 
-    private static Set<Class<? extends AbstractServiceInterface>> ifc = Collections.unmodifiableSet(Sets.newHashSet(
+    private static final Set<Class<? extends AbstractServiceInterface>> ifc = ImmutableSet.of(
             (Class<? extends AbstractServiceInterface>) ModifiableThreadPoolServiceInterface.class,
-            TestingThreadPoolServiceInterface.class));
+            TestingThreadPoolServiceInterface.class);
 
     @Override
     public String getImplementationName() {
@@ -36,15 +34,15 @@ public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThr
     }
 
     @Override
-    public TestingFixedThreadPoolModule createModule(String instanceName,
-            DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public TestingFixedThreadPoolModule createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
         return new TestingFixedThreadPoolModule(new ModuleIdentifier(NAME,
                 instanceName), null, null);
     }
 
     @Override
-    public Module createModule(String instanceName,
-            DependencyResolver dependencyResolver, DynamicMBeanWithInstance old, BundleContext bundleContext)
+    public Module createModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext bundleContext)
             throws Exception {
         int threadCount = (Integer) old.getAttribute("ThreadCount");
         // is the instance compatible?
@@ -65,13 +63,13 @@ public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThr
 
     @Override
     public boolean isModuleImplementingServiceInterface(
-            Class<? extends AbstractServiceInterface> serviceInterface) {
+            final Class<? extends AbstractServiceInterface> serviceInterface) {
         return ifc.contains(serviceInterface);
     }
 
     @Override
-    public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
-        return new HashSet<Module>();
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
+        return new HashSet<>();
     }
 
     @Override

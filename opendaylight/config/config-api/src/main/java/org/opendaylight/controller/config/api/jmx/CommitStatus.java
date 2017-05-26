@@ -10,29 +10,24 @@ package org.opendaylight.controller.config.api.jmx;
 import java.beans.ConstructorProperties;
 import java.util.Collections;
 import java.util.List;
-
 import javax.annotation.concurrent.Immutable;
 import javax.management.ObjectName;
 
 @Immutable
 public class CommitStatus {
     private final List<ObjectName> newInstances, reusedInstances,
-            recreatedInstances;
+        recreatedInstances;
 
     /**
-     *
-     * @param newInstances
-     *            newly created instances
-     * @param reusedInstances
-     *            reused instances
-     * @param recreatedInstances
-     *            recreated instances
+     * @param newInstances       newly created instances
+     * @param reusedInstances    reused instances
+     * @param recreatedInstances recreated instances
      */
-    @ConstructorProperties({ "newInstances", "reusedInstances",
-            "recreatedInstances" })
+    @ConstructorProperties({"newInstances", "reusedInstances",
+            "recreatedInstances"})
     public CommitStatus(List<ObjectName> newInstances,
-            List<ObjectName> reusedInstances,
-            List<ObjectName> recreatedInstances) {
+                        List<ObjectName> reusedInstances,
+                        List<ObjectName> recreatedInstances) {
         this.newInstances = Collections.unmodifiableList(newInstances);
         this.reusedInstances = Collections.unmodifiableList(reusedInstances);
         this.recreatedInstances = Collections
@@ -40,7 +35,6 @@ public class CommitStatus {
     }
 
     /**
-     *
      * @return list of objectNames representing newly created instances
      */
     public List<ObjectName> getNewInstances() {
@@ -48,7 +42,6 @@ public class CommitStatus {
     }
 
     /**
-     *
      * @return list of objectNames representing reused instances
      */
     public List<ObjectName> getReusedInstances() {
@@ -56,7 +49,6 @@ public class CommitStatus {
     }
 
     /**
-     *
      * @return list of objectNames representing recreated instances
      */
     public List<ObjectName> getRecreatedInstances() {
@@ -72,7 +64,7 @@ public class CommitStatus {
         result = prime
                 * result
                 + ((recreatedInstances == null) ? 0 : recreatedInstances
-                        .hashCode());
+                .hashCode());
         result = prime * result
                 + ((reusedInstances == null) ? 0 : reusedInstances.hashCode());
         return result;
@@ -80,28 +72,37 @@ public class CommitStatus {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         CommitStatus other = (CommitStatus) obj;
         if (newInstances == null) {
-            if (other.newInstances != null)
+            if (other.newInstances != null) {
                 return false;
-        } else if (!newInstances.equals(other.newInstances))
+            }
+        } else if (!newInstances.equals(other.newInstances)) {
             return false;
+        }
         if (recreatedInstances == null) {
-            if (other.recreatedInstances != null)
+            if (other.recreatedInstances != null) {
                 return false;
-        } else if (!recreatedInstances.equals(other.recreatedInstances))
+            }
+        } else if (!recreatedInstances.equals(other.recreatedInstances)) {
             return false;
+        }
         if (reusedInstances == null) {
-            if (other.reusedInstances != null)
+            if (other.reusedInstances != null) {
                 return false;
-        } else if (!reusedInstances.equals(other.reusedInstances))
+            }
+        } else if (!reusedInstances.equals(other.reusedInstances)) {
             return false;
+        }
         return true;
     }
 

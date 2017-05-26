@@ -17,21 +17,18 @@
  */
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
-import io.netty.util.concurrent.AbstractEventExecutor;
 import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.concurrent.EventExecutorGroup;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GlobalEventExecutor;
-import io.netty.util.concurrent.ScheduledFuture;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin;
+import org.osgi.framework.BundleContext;
 
 /**
-*
-*/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class GlobalEventExecutorModule extends
         org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractGlobalEventExecutorModule {
+    private BundleContext bundleContext;
 
     public GlobalEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -50,92 +47,15 @@ public final class GlobalEventExecutorModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        return new GlobalEventExecutorCloseable(GlobalEventExecutor.INSTANCE);
+    public AutoCloseable createInstance() {
+        // The service is provided via blueprint so wait for and return it here for backwards compatibility.
+        final WaitingServiceTracker<EventExecutor> tracker = WaitingServiceTracker.create(
+                EventExecutor.class, bundleContext, "(type=global-event-executor)");
+        EventExecutor eventExecutor = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        return CloseableEventExecutorMixin.forwardingEventExecutor(eventExecutor, tracker);
     }
 
-    static final private class GlobalEventExecutorCloseable extends AbstractEventExecutor implements AutoCloseable {
-
-        private EventExecutor executor;
-
-        public GlobalEventExecutorCloseable(EventExecutor executor) {
-            this.executor = executor;
-        }
-
-        @Override
-        public EventExecutorGroup parent() {
-            return this.executor.parent();
-        }
-
-        @Override
-        public boolean inEventLoop(Thread thread) {
-            return this.executor.inEventLoop(thread);
-        }
-
-        @Override
-        public boolean isShuttingDown() {
-            return this.executor.isShuttingDown();
-        }
-
-        @Override
-        public Future<?> shutdownGracefully(long quietPeriod, long timeout, TimeUnit unit) {
-            return this.executor.shutdownGracefully(quietPeriod, timeout, unit);
-        }
-
-        @Override
-        public Future<?> terminationFuture() {
-            return this.executor.terminationFuture();
-        }
-
-        @Override
-        public boolean isShutdown() {
-            return this.executor.isShutdown();
-        }
-
-        @Override
-        public boolean isTerminated() {
-            return this.executor.isTerminated();
-        }
-
-        @Override
-        public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-            return this.executor.awaitTermination(timeout, unit);
-        }
-
-        @Override
-        public void execute(Runnable command) {
-            this.executor.execute(command);
-        }
-
-        @Override
-        public void close() throws Exception {
-            shutdownGracefully();
-        }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        public void shutdown() {
-            this.executor.shutdown();
-        }
-
-        @Override
-        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-            return this.executor.scheduleWithFixedDelay(command, initialDelay, delay, unit);
-        }
-
-        @Override
-        public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-            return this.executor.schedule(command, delay, unit);
-        }
-
-        @Override
-        public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-            return this.executor.schedule(callable, delay, unit);
-        }
-
-        @Override
-        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-            return this.executor.scheduleAtFixedRate(command, initialDelay, period, unit);
-        }
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }

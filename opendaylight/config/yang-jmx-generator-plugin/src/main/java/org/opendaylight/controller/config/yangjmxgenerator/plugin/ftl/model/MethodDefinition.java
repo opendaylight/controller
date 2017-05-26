@@ -9,9 +9,11 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import javax.lang.model.element.Modifier;
 
 public class MethodDefinition implements Method {
-    private final List<String> modifiers;
+    private final List<Modifier> modifiers;
     private final String returnType;
     private final String name;
     private final List<Field> parameters;
@@ -29,18 +31,17 @@ public class MethodDefinition implements Method {
 
     public MethodDefinition(String returnType, String name,
             List<Field> parameters, String body) {
-        this(Collections.<String> emptyList(), returnType, name, parameters,
-                Collections.<String> emptyList(), Collections
-                        .<Annotation> emptyList(), body);
+        this(Collections.emptyList(), returnType, name, parameters,
+                Collections.emptyList(), Collections.emptyList(), body);
     }
 
     public MethodDefinition(String returnType, String name,
             List<Field> parameters, List<Annotation> annotations, String body) {
-        this(Collections.<String> emptyList(), returnType, name, parameters,
-                Collections.<String> emptyList(), annotations, body);
+        this(Collections.emptyList(), returnType, name, parameters,
+                Collections.emptyList(), annotations, body);
     }
 
-    public MethodDefinition(List<String> modifiers, String returnType,
+    public MethodDefinition(List<Modifier> modifiers, String returnType,
             String name, List<Field> parameters, List<String> throwsExceptions,
             List<Annotation> annotations, String body) {
         this.modifiers = modifiers;
@@ -67,6 +68,11 @@ public class MethodDefinition implements Method {
     }
 
     @Override
+    public Optional<Modifier> getVisibility() {
+        return Optional.of(Modifier.PUBLIC);
+    }
+
+    @Override
     public String getReturnType() {
         return returnType;
     }
@@ -81,16 +87,23 @@ public class MethodDefinition implements Method {
         return parameters;
     }
 
+    @Override
     public List<String> getThrowsExceptions() {
         return throwsExceptions;
     }
 
-    public String getBody() {
-        return body;
+    @Override
+    public Optional<String> getBody() {
+        return Optional.of(body);
     }
 
     @Override
-    public List<String> getModifiers() {
+    public List<Modifier> getModifiers() {
         return modifiers;
+    }
+
+    @Override
+    public String toString() {
+        return MethodSerializer.toString(this);
     }
 }

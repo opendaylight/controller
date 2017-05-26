@@ -13,7 +13,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.lang.management.ManagementFactory;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBeanServerTest;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
@@ -27,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigRegistryImplTest extends
         AbstractLockedPlatformMBeanServerTest {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(ConfigRegistryImplTest.class);
 
     @Test
@@ -36,7 +35,7 @@ public class ConfigRegistryImplTest extends
         BundleContext context = mock(BundleContext.class);
         ConfigRegistryImpl configRegistry = null;
         try {
-            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(
+            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(mock(BundleContext.class),
                     factory, factory);
 
             configRegistry = new ConfigRegistryImpl(resolver,
@@ -56,7 +55,7 @@ public class ConfigRegistryImplTest extends
                 configRegistry.close();
             } catch (Exception e) {
                 // ignore
-                logger.warn("Ignoring exception", e);
+                LOG.warn("Ignoring exception", e);
             }
         }
     }

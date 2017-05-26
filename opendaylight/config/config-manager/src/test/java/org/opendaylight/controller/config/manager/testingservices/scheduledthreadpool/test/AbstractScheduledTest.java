@@ -15,8 +15,7 @@ import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolImpl;
-import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool
-        .TestingScheduledThreadPoolModuleFactory;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 
 public abstract class AbstractScheduledTest extends AbstractConfigTest {
@@ -26,7 +25,7 @@ public abstract class AbstractScheduledTest extends AbstractConfigTest {
     public final void setUp() {
         assertEquals(0,
                 TestingScheduledThreadPoolImpl.getNumberOfCloseMethodCalls());
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TestingScheduledThreadPoolModuleFactory(),
                 new TestingFixedThreadPoolModuleFactory(),
                 new TestingParallelAPSPModuleFactory()));

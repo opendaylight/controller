@@ -8,19 +8,21 @@
 
 package org.opendaylight.controller.config.threadpool.util;
 
+import com.google.common.eventbus.DeadEvent;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import java.io.Closeable;
-
 import org.opendaylight.controller.config.yang.threadpool.impl.EventBusRuntimeMXBean;
 import org.opendaylight.controller.config.yang.threadpool.impl.EventBusRuntimeRegistration;
 import org.opendaylight.controller.config.yang.threadpool.impl.EventBusRuntimeRegistrator;
 
-import com.google.common.eventbus.DeadEvent;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 /**
  * Closeable {@link EventBus}.
  */
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class CloseableEventBus extends EventBus implements Closeable {
 
     private final EventBusRuntimeRegistration rootRegistration;

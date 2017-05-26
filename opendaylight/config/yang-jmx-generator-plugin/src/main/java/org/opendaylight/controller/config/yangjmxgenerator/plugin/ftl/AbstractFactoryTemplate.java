@@ -8,94 +8,25 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
 import com.google.common.collect.Lists;
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
-import org.opendaylight.controller.config.spi.Module;
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
-import org.osgi.framework.BundleContext;
 
-import java.util.Collections;
-import java.util.List;
-
-/**
- *
- */
 public class AbstractFactoryTemplate extends GeneralClassTemplate {
 
-    private static final List<String> implementedIfcs = Lists
+    private static final List<String> IMPLEMENTED_IFCS = Lists
             .newArrayList(ModuleFactory.class.getCanonicalName());
 
-    private final String globallyUniqueName, moduleInstanceType;
-    private final List<String> providedServices;
-    private final ModuleMXBeanEntry mbe;
-
     public AbstractFactoryTemplate(Header header, String packageName,
-                                   String abstractFactoryName, String globallyUniqueName,
-                                   String moduleInstanceType, List<Field> fields,
-                                   List<String> providedServices, ModuleMXBeanEntry mbe) {
+                                   String abstractFactoryName,
+                                   List<Field> fields) {
         super(header, packageName, abstractFactoryName, Collections
-                .<String> emptyList(), implementedIfcs, fields, Collections
+                .<String> emptyList(), IMPLEMENTED_IFCS, fields, Collections
                 .<MethodDefinition> emptyList(), true, false, Collections
                 .<Constructor> emptyList());
-        this.globallyUniqueName = globallyUniqueName;
-        this.moduleInstanceType = moduleInstanceType;
-        this.providedServices = providedServices;
-        this.mbe = mbe;
-    }
-
-    public String getGloballyUniqueName() {
-        return globallyUniqueName;
-    }
-
-    public String getInstanceType() {
-        return AutoCloseable.class.getCanonicalName();
-    }
-
-    public String getModuleNameType() {
-        return ModuleIdentifier.class.getCanonicalName();
-    }
-
-    public String getModuleInstanceType() {
-        return moduleInstanceType;
-    }
-
-    public String getAbstractServiceInterfaceType() {
-        return AbstractServiceInterface.class.getCanonicalName();
-    }
-
-    public List<String> getProvidedServices() {
-        return providedServices;
-    }
-
-    public String getModuleType() {
-        return Module.class.getCanonicalName();
-    }
-
-    public String getDependencyResolverType() {
-        return DependencyResolver.class.getCanonicalName();
-    }
-
-    public String getDynamicMBeanWithInstanceType() {
-        return DynamicMBeanWithInstance.class.getCanonicalName();
-    }
-
-    public String getBundleContextType() {
-        return BundleContext.class.getCanonicalName();
-    }
-
-    @Override
-    public String getFtlTempleteLocation() {
-        return "factory_abs_template.ftl";
-    }
-
-    public ModuleMXBeanEntry getMbe() {
-        return mbe;
     }
 }

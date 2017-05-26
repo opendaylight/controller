@@ -1,0 +1,91 @@
+module odl-mdsal-lowlevel-target {
+
+    yang-version 1;
+    namespace "tag:opendaylight.org,2017:controller:yang:lowlevel:target";
+    prefix llt;
+
+    import odl-mdsal-lowlevel-common {
+        revision-date "2017-02-15";
+        prefix llc;
+    }
+
+    organization "OpenDaylight";
+    contact "Vratko Polak <vrpolak@cisco.com>";
+    description "Elements to test, which are not to be backed by any default implementation
+        upon feature installation.
+        See odl-mdsal-lowlevel-control (ll) for methods how to assign implementation in runtime.
+        This is separate module from odl-mdsal-lowlevel-control to simplify binding aware
+        implementation, which requires either all or no RPCs to be backed up by a single Java instance.";
+
+    revision "2017-02-15" {
+        description "Initial revision for Carbon clustering testing.";
+    }
+
+    rpc get-constant {
+        description "Return the constant string provided by the previously registered implementation.
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        // No input.
+        output {
+            uses llc:constant-grouping;
+        }
+    }
+
+    rpc get-contexted-constant {
+        description "Return the constant corresponding to a registered implementation (either bound or default).
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        input {
+            uses llc:context-grouping;
+        }
+        output {
+            uses llc:constant-grouping;
+        }
+    }
+
+    rpc get-singleton-constant {
+        description "Return the constant string provided by the previously registered implementation.
+            Propagate appropriate error if no, unreachable, or failing implementation is found.
+            This is basically the same as get-constant, but it can have a different
+            implementation registered, thus allowing to track both implementations in longevity jobs.";
+        // No input.
+        output {
+            uses llc:constant-grouping;
+        }
+    }
+
+    notification id-sequence {
+        description "Notification where the publisher is identified by the id
+            and each publish increases the sequence number.";
+        uses llc:id-grouping;
+        leaf sequence-number {
+            description "Subscriber shall verify whether this value has increased
+                since the previous notification. The first sequence number published shall be 1.
+                Type is 64 bit to allow longevity tests, and signed to allow exceptional numbers.";
+            mandatory true;
+            type int64;
+        }
+    }
+
+    list id-ints {
+        description "A list of integers nested in list of ids.
+            Ids are there to avoid OptimisticLockFailures from different writers.
+            Typical use of the int list is to generate data change notifications.
+            Config is true, in order to allow Restconf to reset content at will.
+            Expected writes should create and delete items at random, values 0 .. 2^20.";
+        ordered-by system;
+        config true;
+        key "id";
+        uses llc:id-grouping;
+        list item {
+            description "Unsorted keyed list item. One write should create or delete up to one item.";
+            ordered-by system;
+            config true;
+            key "number";
+            leaf number {
+                description "The integer value of this item.
+                    Not range restricted, to allow more scenarios.";
+                type int32;
+            }
+        }
+    }
+
+}

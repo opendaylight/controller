@@ -7,6 +7,14 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,15 +23,6 @@ import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-
-import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class LogbackModuleTest extends AbstractConfigTest {
 
@@ -35,7 +34,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
     public void setUp() throws Exception {
 
         factory = new LogbackModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     @Test
@@ -89,7 +88,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
         assertBeanCount(1, factory.getImplementationName());
 
         ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
-        transaction.destroyConfigBean(factory.getImplementationName(), INSTANCE_NAME);
+        transaction.destroyModule(factory.getImplementationName(), INSTANCE_NAME);
         CommitStatus status = transaction.commit();
 
         assertBeanCount(0, factory.getImplementationName());
@@ -149,7 +148,7 @@ public class LogbackModuleTest extends AbstractConfigTest {
         try {
             createBeans(
 
-            true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1",
+                true, "target/rollingApp", "", "30MB", 1, 5, "target/%i.log", "rolling", "consoleName", "ALL", "logger1",
                     "DEBUG", "FixedWindowRollingPolicy", 0, "FileAppender").commit();
             fail();
         } catch (ValidationException e) {

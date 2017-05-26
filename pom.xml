@@ -1,164 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
-    <tag>HEAD</tag>
-  </scm>
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
-    <relativePath>opendaylight/commons/parent</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>releasepom</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <name>controller</name>
+  <!-- Used by Sonar to set project name -->
+
   <modules>
-    <module>opendaylight/distribution/opendaylight</module>
-    <module>opendaylight/forwarding/staticrouting</module>
-    <module>opendaylight/clustering/services</module>
-    <module>opendaylight/clustering/services_implementation</module>
-    <module>opendaylight/clustering/stub</module>
-    <module>opendaylight/clustering/test</module>
-    <module>opendaylight/configuration/api</module>
-    <module>opendaylight/configuration/implementation</module>
-    <module>opendaylight/routing/dijkstra_implementation</module>
-    <module>opendaylight/arphandler</module>
-    <module>opendaylight/forwardingrulesmanager/api</module>
-    <module>opendaylight/forwardingrulesmanager/implementation</module>
-    <module>opendaylight/hosttracker/api</module>
-    <module>opendaylight/hosttracker/implementation</module>
-    <module>opendaylight/hosttracker_new/api</module>
-    <module>opendaylight/hosttracker_new/implementation</module>
-    <module>opendaylight/containermanager/api</module>
-    <module>opendaylight/containermanager/implementation</module>
-    <module>opendaylight/appauth</module>
-    <module>opendaylight/switchmanager/api</module>
-    <module>opendaylight/switchmanager/implementation</module>
-    <module>opendaylight/statisticsmanager/api</module>
-    <module>opendaylight/statisticsmanager/implementation</module>
-    <module>opendaylight/topologymanager/implementation</module>
-    <module>opendaylight/usermanager/api</module>
-    <module>opendaylight/usermanager/implementation</module>
-    <module>opendaylight/connectionmanager/api</module>
-    <module>opendaylight/connectionmanager/implementation</module>
-    <module>opendaylight/security</module>
-
-    <!-- third-parties uncomment them if you need snapshot version of it -->
-    <!-- <module>third-party/openflowj</module> -->
-    <!-- <module>third-party/net.sf.jung2</module> -->
-    <!-- <module>third-party/jersey-servlet</module> -->
-    <!-- <module>third-party/org.apache.catalina.filters.CorsFilter</module> -->
-    <module>third-party/ganymed</module>
-
-    <module>third-party/commons/thirdparty</module>
-
-    <!-- SAL bundles -->
-    <module>opendaylight/sal/api</module>
-    <module>opendaylight/sal/implementation</module>
-
-    <!-- SAL Extension bundles -->
-    <module>opendaylight/sal/connection/api</module>
-    <module>opendaylight/sal/connection/implementation</module>
-    <module>opendaylight/sal/networkconfiguration/api</module>
-    <module>opendaylight/sal/networkconfiguration/implementation</module>
 
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>
     <!-- config -->
     <module>opendaylight/config</module>
-    <!-- netconf -->
-    <module>opendaylight/netconf</module>
 
-    <!--  Web bundles -->
-    <module>opendaylight/web/root</module>
-    <module>opendaylight/web/flows</module>
-    <module>opendaylight/web/devices</module>
-    <module>opendaylight/web/troubleshoot</module>
-    <module>opendaylight/web/topology</module>
-    <module>opendaylight/web/osgi-brandfragment</module>
+    <module>opendaylight/model</module>
 
-    <!--  Neutron -->
-    <module>opendaylight/networkconfiguration/neutron</module>
-    <module>opendaylight/networkconfiguration/neutron/implementation</module>
-    <module>opendaylight/northbound/networkconfiguration/neutron</module>
-
-    <!-- Northbound bundles -->
-    <module>opendaylight/northbound/commons</module>
-    <module>opendaylight/northbound/bundlescanner/api</module>
-    <module>opendaylight/northbound/bundlescanner/implementation</module>
-    <module>opendaylight/northbound/topology</module>
-    <module>opendaylight/northbound/staticrouting</module>
-    <module>opendaylight/northbound/statistics</module>
-    <module>opendaylight/northbound/flowprogrammer</module>
-    <module>opendaylight/northbound/hosttracker</module>
-    <module>opendaylight/northbound/subnets</module>
-    <module>opendaylight/northbound/switchmanager</module>
-    <module>opendaylight/northbound/containermanager</module>
-    <module>opendaylight/northbound/networkconfiguration/bridgedomain</module>
-    <module>opendaylight/northbound/httpservice-bridge</module>
-    <module>opendaylight/northbound/jolokia</module>
-    <module>opendaylight/northbound/connectionmanager</module>
-    <module>opendaylight/northbound/usermanager</module>
-    <module>opendaylight/northbound/controllermanager</module>
-
-    <!-- Debug and logging -->
-    <module>opendaylight/logging/bridge</module>
-
-    <!-- Southbound bundles -->
-    <module>opendaylight/protocol_plugins/openflow</module>
-    <module>opendaylight/protocol_plugins/stub</module>
-
-    <!-- Samples -->
-    <module>opendaylight/samples/simpleforwarding</module>
-    <module>opendaylight/samples/loadbalancer</module>
-    <module>opendaylight/samples/northbound/loadbalancer</module>
+    <module>opendaylight/blueprint</module>
 
     <!-- Parents -->
-    <module>opendaylight/commons/concepts</module>
     <module>opendaylight/commons/protocol-framework</module>
-    <module>opendaylight/commons/httpclient</module>
-    <module>opendaylight/commons/checkstyle</module>
-    <module>opendaylight/commons/opendaylight</module>
-    <module>opendaylight/commons/parent</module>
     <module>opendaylight/commons/logback_settings</module>
-  </modules>
+    <module>opendaylight/commons/filter-valve</module>
+    <module>opendaylight/commons/liblldp</module>
+    <module>benchmark</module>
+    <module>opendaylight/commons/jolokia</module>
 
-    <profiles>
-        <profile>
-           <id>integrationtests</id>
-           <activation>
-               <activeByDefault>false</activeByDefault>
-           </activation>
-            <modules>
-                <module>opendaylight/clustering/integrationtest</module>
-                <module>opendaylight/configuration/integrationtest</module>
-                <module>opendaylight/forwardingrulesmanager/integrationtest</module>
-                <module>opendaylight/hosttracker/integrationtest</module>
-                <module>opendaylight/switchmanager/integrationtest</module>
-                <module>opendaylight/topologymanager/integrationtest</module>
-                <!-- Northbound integration tests -->
-                <module>opendaylight/northbound/integrationtest</module>
-                <module>opendaylight/statisticsmanager/integrationtest</module>
-                <module>opendaylight/commons/integrationtest</module>
-                <module>opendaylight/containermanager/it.implementation</module>
-                <module>opendaylight/distribution/sanitytest/</module>
-            </modules>
-        </profile>
-        <profile>
-           <id>docs</id>
-           <activation>
-               <activeByDefault>false</activeByDefault>
-           </activation>
-            <modules>
-              <module>opendaylight/northbound/java-client</module>
-            </modules>
-        </profile>
-    </profiles>
+    <!-- Karaf Distribution -->
+    <module>karaf</module>
+    <module>features</module>
+
+    <!-- archetypes -->
+    <module>opendaylight/archetypes</module>
+  </modules>
+  <scm>
+    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
+  </scm>
 </project>

@@ -7,8 +7,20 @@
  */
 package org.opendaylight.controller.config.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,19 +28,6 @@ import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class LookupTest {
 
@@ -93,8 +92,7 @@ public class LookupTest {
     public void testLookupConfigBeans2() throws Exception {
         Method method = LookupRegistry.class.getMethod("lookupConfigBeans",
                 String.class, String.class);
-        Object[] args = new Object[] { TestingConfigRegistry.moduleName1,
-                TestingConfigRegistry.instName1 };
+        Object[] args = new Object[] { TestingConfigRegistry.moduleName1, TestingConfigRegistry.instName1 };
         test(method, args);
     }
 
@@ -102,8 +100,7 @@ public class LookupTest {
     public void testLookupConfigBean() throws Exception {
         Method method = LookupRegistry.class.getMethod("lookupConfigBean",
                 String.class, String.class);
-        Object[] args = new Object[] { TestingConfigRegistry.moduleName1,
-                TestingConfigRegistry.instName1 };
+        Object[] args = new Object[] { TestingConfigRegistry.moduleName1, TestingConfigRegistry.instName1 };
         test(method, args);
     }
 

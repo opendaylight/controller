@@ -17,11 +17,27 @@
 */
 package org.opendaylight.controller.config.yang.netty.threadgroup;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.osgi.framework.BundleContext;
+
 /**
-*
-*/
-public class NettyThreadgroupModuleFactory extends org.opendaylight.controller.config.yang.netty.threadgroup.AbstractNettyThreadgroupModuleFactory
-{
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
+public class NettyThreadgroupModuleFactory extends AbstractNettyThreadgroupModuleFactory {
+    @Override
+    public NettyThreadgroupModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            NettyThreadgroupModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+        NettyThreadgroupModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule, oldInstance, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 
-
+    @Override
+    public NettyThreadgroupModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            BundleContext bundleContext) {
+        NettyThreadgroupModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 }

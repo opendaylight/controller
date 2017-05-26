@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
+import com.google.common.base.Preconditions;
+import java.io.StringReader;
+import java.io.StringWriter;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.annotation.DomHandler;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.StringReader;
-import java.io.StringWriter;
 
 class SnapshotHandler implements DomHandler<String, StreamResult> {
 
@@ -22,18 +23,23 @@ class SnapshotHandler implements DomHandler<String, StreamResult> {
 
     private StringWriter xmlWriter = new StringWriter();
 
+    @Override
     public StreamResult createUnmarshaller(ValidationEventHandler errorHandler) {
         xmlWriter.getBuffer().setLength(0);
         return new StreamResult(xmlWriter);
     }
 
+    @Override
     public String getElement(StreamResult rt) {
         String xml = rt.getWriter().toString();
         int beginIndex = xml.indexOf(START_TAG) + START_TAG.length();
         int endIndex = xml.indexOf(END_TAG);
+        Preconditions.checkArgument(beginIndex != -1 && endIndex != -1,
+                "Unknown element present in config snapshot(expected only configuration): %s", xml);
         return xml.substring(beginIndex, endIndex);
     }
 
+    @Override
     public Source marshal(String n, ValidationEventHandler errorHandler) {
         try {
             String xml = START_TAG + n.trim() + END_TAG;

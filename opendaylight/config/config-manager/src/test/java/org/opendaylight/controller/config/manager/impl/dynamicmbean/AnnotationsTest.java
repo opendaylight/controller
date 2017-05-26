@@ -13,6 +13,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,17 +22,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-
 import javax.management.ObjectName;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.annotations.Description;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
 
 public class AnnotationsTest {
 
@@ -98,8 +95,8 @@ public class AnnotationsTest {
     static final String SUBCLASS2 = "subclass2";
 
     @ServiceInterfaceAnnotation(value = SIMPLE, osgiRegistrationType = Executor.class,
-    namespace = "ns", revision = "rev", localName = SIMPLE)
-    static interface SimpleSI extends AbstractServiceInterface {
+        namespace = "ns", revision = "rev", localName = SIMPLE)
+    interface SimpleSI extends AbstractServiceInterface {
 
     }
 
@@ -158,14 +155,13 @@ public class AnnotationsTest {
                 emptySetOfInterfaces(), "class");
     }
 
-    static interface SubSI extends SimpleSI {
+    interface SubSI extends SimpleSI {
 
     }
 
     @ServiceInterfaceAnnotation(value = SUBCLASS2, osgiRegistrationType = ExecutorService.class,
-    namespace = "ns", revision = "rev", localName = SUBCLASS2)
-
-    static interface SubSI2 extends SubSI {
+        namespace = "ns", revision = "rev", localName = SUBCLASS2)
+    interface SubSI2 extends SubSI {
 
     }
 
@@ -195,7 +191,7 @@ public class AnnotationsTest {
         }
     }
 
-    public static interface HasSomeMethod {
+    public interface HasSomeMethod {
         void setSomething(ObjectName objectName);
     }
 
@@ -248,7 +244,7 @@ public class AnnotationsTest {
     }
 
     @Description("class")
-    static interface HasSomeMethodWithAnnotations {
+    interface HasSomeMethodWithAnnotations {
 
         @RequireInterface(SubSI2.class)
         @Description("descr")
@@ -276,7 +272,7 @@ public class AnnotationsTest {
 
         assertDescriptionOnClass(
                 HasSomeMethodWithAnnotationsImpl.class,
-                new HashSet<Class<?>>(Arrays
+                new HashSet<>(Arrays
                         .asList(HasSomeMethodWithAnnotations.class)), "class");
     }
 

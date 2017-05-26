@@ -7,344 +7,263 @@
  */
 package org.opendaylight.controller.sal.binding.test.util;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Future;
-
-import javassist.ClassPool;
-
+import static com.google.common.base.Preconditions.checkState;
+import com.google.common.annotations.Beta;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.MutableClassToInstanceMap;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
+import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
-import org.opendaylight.controller.sal.binding.impl.DataBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingDomConnectorDeployer;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
-import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBindingBrokerImpl;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
-import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
+import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.controller.sal.core.api.data.DataStore;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
+import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
-import org.opendaylight.controller.sal.dom.broker.MountPointManagerImpl;
-import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
-import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProvider;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
+import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerGenerator;
+import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
+import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javassist.ClassPool;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.ImmutableClassToInstanceMap;
-import com.google.common.util.concurrent.ListeningExecutorService;
+@Beta
+public class BindingTestContext implements AutoCloseable {
 
-import static com.google.common.base.Preconditions.*;
 
-public class BindingTestContext implements AutoCloseable, SchemaContextProvider {
+    private BindingToNormalizedNodeCodec codec;
 
-    public static final org.opendaylight.yangtools.yang.data.api.InstanceIdentifier TREE_ROOT = org.opendaylight.yangtools.yang.data.api.InstanceIdentifier
-            .builder().toInstance();
+    private RootBindingAwareBroker baBrokerImpl;
 
-    private static final Logger LOG = LoggerFactory.getLogger(BindingTestContext.class);
+    private HeliumNotificationProviderServiceAdapter baNotifyImpl;
 
-    private RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
 
-    private DomForwardedBindingBrokerImpl baBrokerImpl;
-    private DataBrokerImpl baDataImpl;
-    private NotificationBrokerImpl baNotifyImpl;
-    private BindingIndependentConnector baConnectImpl;
-
-    private org.opendaylight.controller.sal.dom.broker.DataBrokerImpl biDataImpl;
     private BrokerImpl biBrokerImpl;
-    private HashMapDataStore rawDataStore;
-    private SchemaAwareDataStoreAdapter schemaAwareDataStore;
-    private DataStoreStatsWrapper dataStoreStats;
-    private DataStore dataStore;
-
-    private boolean dataStoreStatisticsEnabled = false;
 
     private final ListeningExecutorService executor;
     private final ClassPool classPool;
 
     private final boolean startWithSchema;
 
-    private MountPointManagerImpl biMountImpl;
+    private DOMMountPointService biMountImpl;
 
-    private SchemaContext schemaContext;
+    private ImmutableMap<LogicalDatastoreType, DOMStore> newDatastores;
 
-    public SchemaContext getSchemaContext() {
-        return schemaContext;
+    @Deprecated
+    private DataProviderService baData;
+
+    private DOMDataBroker newDOMDataBroker;
+
+    private final MockSchemaService mockSchemaService = new MockSchemaService();
+
+    private DataBroker dataBroker;
+
+    private RpcConsumerRegistry baConsumerRpc;
+
+    private BindingDOMRpcProviderServiceAdapter baProviderRpc;
+    private DOMRpcRouter domRouter;
+
+    private NotificationPublishService publishService;
+
+    private NotificationService listenService;
+
+    private DOMNotificationPublishService domPublishService;
+
+    private DOMNotificationService domListenService;
+
+
+
+    public DOMDataBroker getDomAsyncDataBroker() {
+        return this.newDOMDataBroker;
     }
 
-    protected BindingTestContext(ListeningExecutorService executor, ClassPool classPool, boolean startWithSchema) {
+    public BindingToNormalizedNodeCodec getCodec() {
+        return this.codec;
+    }
+
+    protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool, final boolean startWithSchema) {
         this.executor = executor;
         this.classPool = classPool;
         this.startWithSchema = startWithSchema;
     }
 
-    public void startDomDataStore() {
-        checkState(dataStore == null, "DataStore already started.");
-        checkState(biDataImpl != null, "Dom Data Broker not present");
-        rawDataStore = new HashMapDataStore();
-        schemaAwareDataStore = new SchemaAwareDataStoreAdapter();
-        schemaAwareDataStore.changeDelegate(rawDataStore);
-        if (dataStoreStatisticsEnabled) {
-            dataStoreStats = new DataStoreStatsWrapper(schemaAwareDataStore);
-            dataStore = dataStoreStats;
-        } else {
-            dataStore = schemaAwareDataStore;
-        }
-
-        biDataImpl.registerConfigurationReader(TREE_ROOT, dataStore);
-        biDataImpl.registerOperationalReader(TREE_ROOT, dataStore);
-        biDataImpl.registerCommitHandler(TREE_ROOT, dataStore);
+    public void startDomDataBroker() {
     }
 
-    public void startDomDataBroker() {
-        checkState(executor != null, "Executor needs to be set");
-        biDataImpl = new org.opendaylight.controller.sal.dom.broker.DataBrokerImpl();
-        biDataImpl.setExecutor(executor);
+    public void startNewDataBroker() {
+        checkState(this.executor != null, "Executor needs to be set");
+        checkState(this.newDOMDataBroker != null, "DOM Data Broker must be set");
+        this.dataBroker = new BindingDOMDataBrokerAdapter(this.newDOMDataBroker, this.codec);
+    }
+
+    public void startNewDomDataBroker() {
+        checkState(this.executor != null, "Executor needs to be set");
+        final InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
+            MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
+            MoreExecutors.newDirectExecutorService());
+        this.newDatastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
+                .put(LogicalDatastoreType.OPERATIONAL, operStore)
+                .put(LogicalDatastoreType.CONFIGURATION, configStore)
+                .build();
+
+        this.newDOMDataBroker = new SerializedDOMDataBroker(this.newDatastores, this.executor);
+
+        this.mockSchemaService.registerSchemaContextListener(configStore);
+        this.mockSchemaService.registerSchemaContextListener(operStore);
     }
 
     public void startBindingDataBroker() {
-        checkState(executor != null, "Executor needs to be set");
-        baDataImpl = new DataBrokerImpl();
-        baDataImpl.setExecutor(executor);
+
     }
 
     public void startBindingBroker() {
-        checkState(executor != null, "Executor needs to be set");
-        checkState(baDataImpl != null, "Binding Data Broker must be started");
-        checkState(baNotifyImpl != null, "Notification Service must be started");
-        baBrokerImpl = new DomForwardedBindingBrokerImpl("test");
+        checkState(this.executor != null, "Executor needs to be set");
+        checkState(this.baData != null, "Binding Data Broker must be started");
+        checkState(this.baNotifyImpl != null, "Notification Service must be started");
 
-        baBrokerImpl.getMountManager().setDataCommitExecutor(executor);
-        baBrokerImpl.getMountManager().setNotificationExecutor(executor);
-        baBrokerImpl.setRpcBroker(new RpcProviderRegistryImpl("test"));
-        baBrokerImpl.setDataBroker(baDataImpl);
-        baBrokerImpl.setNotificationBroker(baNotifyImpl);
-        baBrokerImpl.start();
+        this.baConsumerRpc = new BindingDOMRpcServiceAdapter(getDomRpcInvoker(), this.codec);
+        this.baProviderRpc = new BindingDOMRpcProviderServiceAdapter(getDomRpcRegistry(), this.codec);
+
+        this.baBrokerImpl = new RootBindingAwareBroker("test");
+
+        final MountPointService mountService = new BindingDOMMountPointServiceAdapter(this.biMountImpl, this.codec);
+        this.baBrokerImpl.setMountService(mountService);
+        this.baBrokerImpl.setLegacyMountManager(new HydrogenMountProvisionServiceAdapter(mountService));
+        this.baBrokerImpl.setRpcBroker(new HeliumRpcProviderRegistry(this.baConsumerRpc, this.baProviderRpc));
+        this.baBrokerImpl.setLegacyDataBroker(this.baData);
+        this.baBrokerImpl.setNotificationBroker(this.baNotifyImpl);
+        this.baBrokerImpl.start();
     }
 
     public void startForwarding() {
-        checkState(baDataImpl != null, "Binding Data Broker needs to be started");
-        checkState(biDataImpl != null, "DOM Data Broker needs to be started.");
-        checkState(mappingServiceImpl != null, "DOM Mapping Service needs to be started.");
 
-        baConnectImpl = BindingDomConnectorDeployer.createConnector(getBindingToDomMappingService());
-        baConnectImpl.setDomRpcRegistry(getDomRpcRegistry());
-        baBrokerImpl.setConnector(baConnectImpl);
-        baBrokerImpl.setDomProviderContext(createMockContext());
-        baBrokerImpl.startForwarding();
-    }
-
-    private ProviderSession createMockContext() {
-        // TODO Auto-generated method stub
-        final ClassToInstanceMap<BrokerService> domBrokerServices = ImmutableClassToInstanceMap
-                .<BrokerService> builder()
-                //
-                .put(org.opendaylight.controller.sal.core.api.data.DataProviderService.class, biDataImpl) //
-                .put(RpcProvisionRegistry.class, biBrokerImpl.getRouter()) //
-                .put(MountProvisionService.class, biMountImpl) //
-                .build();
-
-        return new ProviderSession() {
-
-            @Override
-            public Future<RpcResult<CompositeNode>> rpc(QName rpc, CompositeNode input) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public <T extends BrokerService> T getService(Class<T> service) {
-                return domBrokerServices.getInstance(service);
-            }
-
-            @Override
-            public boolean isClosed() {
-                return false;
-            }
-
-            @Override
-            public Set<QName> getSupportedRpcs() {
-                return null;
-            }
-
-            @Override
-            public void close() {
-            }
-
-            @Override
-            public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(
-                    RpcRegistrationListener listener) {
-                return null;
-            }
-
-            @Override
-            public RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
-                    throws IllegalArgumentException {
-                return null;
-            }
-
-            @Override
-            public RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation) {
-                return null;
-            }
-
-            @Override
-            public RoutedRpcRegistration addMountedRpcImplementation(QName rpcType, RpcImplementation implementation) {
-                return null;
-            }
-        };
     }
 
     public void startBindingToDomMappingService() {
-        checkState(classPool != null, "ClassPool needs to be present");
-        mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl();
-        mappingServiceImpl.setPool(classPool);
-        mappingServiceImpl.init();
+        checkState(this.classPool != null, "ClassPool needs to be present");
+
+        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(this.classPool));
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
+        final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
+        this.codec = new BindingToNormalizedNodeCodec(loading,  codecRegistry);
+        this.mockSchemaService.registerSchemaContextListener(this.codec);
     }
 
-    public void updateYangSchema(String[] files) {
-        schemaContext = getContext(files);
-        if (schemaAwareDataStore != null) {
-            schemaAwareDataStore.onGlobalContextUpdated(schemaContext);
-        }
-        if (mappingServiceImpl != null) {
-            mappingServiceImpl.onGlobalContextUpdated(schemaContext);
-        }
+    private void updateYangSchema(final ImmutableSet<YangModuleInfo> moduleInfos) {
+        this.mockSchemaService.changeSchema(getContext(moduleInfos));
     }
 
-    public static String[] getAllYangFilesOnClasspath() {
-        Predicate<String> predicate = new Predicate<String>() {
-            @Override
-            public boolean apply(String input) {
-                return input.endsWith(".yang");
-            }
-        };
-        Reflections reflection = new Reflections("META-INF.yang", new ResourcesScanner());
-        Set<String> result = reflection.getResources(predicate);
-        return (String[]) result.toArray(new String[result.size()]);
-    }
-
-    private static SchemaContext getContext(String[] yangFiles) {
-        ClassLoader loader = BindingTestContext.class.getClassLoader();
-        List<InputStream> streams = new ArrayList<>();
-        for (String string : yangFiles) {
-            InputStream stream = loader.getResourceAsStream(string);
-            streams.add(stream);
-        }
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(streams);
-        return parser.resolveSchemaContext(modules);
+    private SchemaContext getContext(final ImmutableSet<YangModuleInfo> moduleInfos) {
+        final ModuleInfoBackedContext ctx = ModuleInfoBackedContext.create();
+        ctx.addModuleInfos(moduleInfos);
+        return ctx.tryToCreateSchemaContext().get();
     }
 
     public void start() {
-        startBindingDataBroker();
-        startBindingNotificationBroker();
-        startBindingBroker();
-        startDomDataBroker();
-        startDomDataStore();
+        startNewDomDataBroker();
+
         startDomBroker();
         startDomMountPoint();
         startBindingToDomMappingService();
+        startNewDataBroker();
+        startNewBindingDataBroker();
+        startBindingNotificationBroker();
+        startBindingBroker();
+
         startForwarding();
-        if (startWithSchema) {
+        if (this.startWithSchema) {
             loadYangSchemaFromClasspath();
         }
     }
 
+    public void startNewBindingDataBroker() {
+        final HydrogenDataBrokerAdapter forwarded = new HydrogenDataBrokerAdapter(this.dataBroker);
+        this.baData = forwarded;
+    }
+
     private void startDomMountPoint() {
-        biMountImpl = new MountPointManagerImpl();
-        biMountImpl.setDataBroker(getDomDataBroker());
+        this.biMountImpl = new DOMMountPointServiceImpl();
     }
 
     private void startDomBroker() {
-        checkState(executor != null);
-        biBrokerImpl = new BrokerImpl();
-        biBrokerImpl.setExecutor(executor);
-        biBrokerImpl.setRouter(new SchemaAwareRpcBroker("/", this));
+        checkState(this.executor != null);
+
+        this.domRouter = new DOMRpcRouter();
+        this.mockSchemaService.registerSchemaContextListener(this.domRouter);
+
+        final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
+        services.put(DOMRpcService.class, this.domRouter);
+
+        this.biBrokerImpl = new BrokerImpl(this.domRouter,services);
+
     }
 
     public void startBindingNotificationBroker() {
-        checkState(executor != null);
-        baNotifyImpl = new NotificationBrokerImpl(executor);
+        checkState(this.executor != null);
+        final DOMNotificationRouter router = DOMNotificationRouter.create(16);
+        this.domPublishService = router;
+        this.domListenService = router;
+        this.publishService = new BindingDOMNotificationPublishServiceAdapter(this.codec, this.domPublishService);
+        this.listenService = new BindingDOMNotificationServiceAdapter(this.codec, this.domListenService);
+        this.baNotifyImpl = new HeliumNotificationProviderServiceAdapter(this.publishService,this.listenService);
 
     }
 
     public void loadYangSchemaFromClasspath() {
-        String[] files = getAllYangFilesOnClasspath();
-        updateYangSchema(files);
+        final ImmutableSet<YangModuleInfo> moduleInfos = BindingReflections.loadModuleInfos();
+        updateYangSchema(moduleInfos);
     }
 
+    @Deprecated
     public DataProviderService getBindingDataBroker() {
-        return baDataImpl;
-    }
-
-    public org.opendaylight.controller.sal.core.api.data.DataProviderService getDomDataBroker() {
-        return biDataImpl;
-    }
-
-    public DataStore getDomDataStore() {
-        return dataStore;
-    }
-
-    public BindingIndependentMappingService getBindingToDomMappingService() {
-        return mappingServiceImpl;
-    }
-
-    public void logDataStoreStatistics() {
-        if (dataStoreStats == null) {
-            return;
-        }
-
-        LOG.info("BIDataStore Statistics: Configuration Read Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
-                dataStoreStats.getConfigurationReadCount(), dataStoreStats.getConfigurationReadTotalTime(),
-                dataStoreStats.getConfigurationReadAverageTime());
-
-        LOG.info("BIDataStore Statistics: Operational Read Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
-                dataStoreStats.getOperationalReadCount(), dataStoreStats.getOperationalReadTotalTime(),
-                dataStoreStats.getOperationalReadAverageTime());
-
-        LOG.info("BIDataStore Statistics: Request Commit Count: {} TotalTime: {} ms AverageTime (ns): {} ms",
-                dataStoreStats.getRequestCommitCount(), dataStoreStats.getRequestCommitTotalTime(),
-                dataStoreStats.getRequestCommitAverageTime());
+        return this.baData;
     }
 
     public RpcProviderRegistry getBindingRpcRegistry() {
-        return baBrokerImpl.getRoot();
+        return this.baBrokerImpl.getRoot();
     }
 
-    public RpcProvisionRegistry getDomRpcRegistry() {
-        if (biBrokerImpl == null) {
-            return null;
-        }
-        return biBrokerImpl.getRouter();
+    public DOMRpcProviderService getDomRpcRegistry() {
+        return this.domRouter;
     }
 
-    public RpcImplementation getDomRpcInvoker() {
-        return biBrokerImpl.getRouter();
+    public DOMRpcService getDomRpcInvoker() {
+        return this.domRouter;
     }
 
     @Override
@@ -353,10 +272,16 @@ public class BindingTestContext implements AutoCloseable, SchemaContextProvider 
     }
 
     public MountProviderService getBindingMountProviderService() {
-        return baBrokerImpl.getMountManager();
+        return this.baBrokerImpl.getLegacyMount();
     }
 
-    public MountProvisionService getDomMountProviderService() {
-        return biMountImpl;
+    public DOMMountPointService getDomMountProviderService() {
+        return this.biMountImpl;
     }
+
+    public DataBroker getDataBroker() {
+        return this.dataBroker;
+    }
+
+
 }

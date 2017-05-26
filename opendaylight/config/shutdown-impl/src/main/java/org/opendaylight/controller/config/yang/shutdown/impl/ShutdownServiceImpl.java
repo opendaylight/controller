@@ -8,14 +8,13 @@
 package org.opendaylight.controller.config.yang.shutdown.impl;
 
 import com.google.common.base.Optional;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import org.opendaylight.controller.config.shutdown.ShutdownService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
 
 public class ShutdownServiceImpl implements ShutdownService, AutoCloseable {
     private final ShutdownService impl;
@@ -42,7 +41,7 @@ public class ShutdownServiceImpl implements ShutdownService, AutoCloseable {
 }
 
 class Impl implements ShutdownService {
-    private static final Logger logger = LoggerFactory.getLogger(Impl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Impl.class);
     private final String secret;
     private final Bundle systemBundle;
 
@@ -53,27 +52,27 @@ class Impl implements ShutdownService {
 
     @Override
     public void shutdown(String inputSecret, Long maxWaitTime, Optional<String> reason) {
-        logger.warn("Shutdown issued with secret {} and reason {}", inputSecret, reason);
+        LOG.warn("Shutdown issued with secret {} and reason {}", inputSecret, reason);
         try {
             Thread.sleep(1000); // prevent brute force attack
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.warn("Shutdown process interrupted", e);
+            LOG.warn("Shutdown process interrupted", e);
         }
         if (this.secret.equals(inputSecret)) {
-            logger.info("Server is shutting down");
+            LOG.info("Server is shutting down");
 
             // actual work:
             Thread stopSystemBundleThread = new StopSystemBundleThread(systemBundle);
             stopSystemBundleThread.start();
             if (maxWaitTime != null && maxWaitTime > 0) {
                 Thread systemExitThread = new CallSystemExitThread(maxWaitTime);
-                logger.debug("Scheduling {}", systemExitThread);
+                LOG.debug("Scheduling {}", systemExitThread);
                 systemExitThread.start();
             }
             // end
         } else {
-            logger.warn("Unauthorized attempt to shut down server");
+            LOG.warn("Unauthorized attempt to shut down server");
             throw new IllegalArgumentException("Invalid secret");
         }
     }
@@ -81,7 +80,7 @@ class Impl implements ShutdownService {
 }
 
 class StopSystemBundleThread extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(StopSystemBundleThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StopSystemBundleThread.class);
     private final Bundle systemBundle;
 
     StopSystemBundleThread(Bundle systemBundle) {
@@ -94,17 +93,18 @@ class StopSystemBundleThread extends Thread {
         try {
             // wait so that JMX response is received
             Thread.sleep(1000);
+            LOG.debug("Stopping system bundle");
             systemBundle.stop();
         } catch (BundleException e) {
-            logger.warn("Can not stop OSGi server", e);
+            LOG.warn("Can not stop OSGi server", e);
         } catch (InterruptedException e) {
-            logger.warn("Shutdown process interrupted", e);
+            LOG.warn("Shutdown process interrupted", e);
         }
     }
 }
 
 class CallSystemExitThread extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(CallSystemExitThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CallSystemExitThread.class);
     private final long maxWaitTime;
     CallSystemExitThread(long maxWaitTime) {
         super("call-system-exit-daemon");
@@ -127,7 +127,7 @@ class CallSystemExitThread extends Thread {
         try {
             // wait specified time
             Thread.sleep(maxWaitTime);
-            logger.error("Since some threads are still running, server is going to shut down via System.exit(1) !");
+            LOG.error("Since some threads are still running, server is going to shut down via System.exit(1) !");
             // do a thread dump
             ThreadInfo[] threads = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
             StringBuffer sb = new StringBuffer();
@@ -135,10 +135,10 @@ class CallSystemExitThread extends Thread {
                 sb.append(info);
                 sb.append("\n");
             }
-            logger.warn("Thread dump:{}", sb);
+            LOG.warn("Thread dump:{}", sb);
             System.exit(1);
         } catch (InterruptedException e) {
-            logger.warn("Interrupted, not going to call System.exit(1)");
+            LOG.warn("Interrupted, not going to call System.exit(1)");
         }
     }
 }

@@ -29,12 +29,14 @@ module threadpool-impl-fixed {
 
 
     identity threadpool-fixed {
+        status deprecated;
         base config:module-type;
         config:provided-service th:threadpool;
         config:java-name-prefix FixedThreadPool;
     }
 
     augment "/config:modules/config:module/config:configuration" {
+        status deprecated;
         case threadpool-fixed {
             when "/config:modules/config:module/config:type = 'threadpool-fixed'";
             leaf max-thread-count {

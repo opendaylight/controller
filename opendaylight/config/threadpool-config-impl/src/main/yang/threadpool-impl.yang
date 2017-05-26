@@ -37,9 +37,11 @@ module threadpool-impl {
         base config:module-type;
         config:provided-service th:eventbus;
         config:java-name-prefix EventBus;
+        status deprecated;
     }
 
     augment "/config:modules/config:module/config:configuration" {
+        status deprecated;
         case eventbus {
             when "/config:modules/config:module/config:type = 'eventbus'";
             // No real configuration
@@ -47,6 +49,7 @@ module threadpool-impl {
     }
 
     augment "/config:modules/config:module/config:state" {
+        status deprecated;
         case eventbus {
             when "/config:modules/config:module/config:type = 'eventbus'";
             rpcx:rpc-context-instance "event-bus-rpc";
@@ -59,9 +62,11 @@ module threadpool-impl {
         base config:module-type;
         config:provided-service th:eventbus;
         config:java-name-prefix AsyncEventBus;
+        status deprecated;
     }
 
     augment "/config:modules/config:module/config:configuration" {
+        status deprecated;
         case async-eventbus {
             when "/config:modules/config:module/config:type = 'async-eventbus'";
             container threadpool {
@@ -76,6 +81,7 @@ module threadpool-impl {
     }
 
     augment "/config:modules/config:module/config:state" {
+        status deprecated;
         case async-eventbus {
             when "/config:modules/config:module/config:type = 'async-eventbus'";
             rpcx:rpc-context-instance "event-bus-rpc";

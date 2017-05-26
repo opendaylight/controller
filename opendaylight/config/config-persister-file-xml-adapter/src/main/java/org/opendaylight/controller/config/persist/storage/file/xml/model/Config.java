@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import org.apache.commons.lang3.StringUtils;
-
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -21,9 +22,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(name = "persisted-snapshots")
 public final class Config {
@@ -66,15 +69,19 @@ public final class Config {
     }
 
     public static Config fromXml(File from) {
-        if(isEmpty(from))
+        if(isEmpty(from)) {
             return new Config();
+        }
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
             Unmarshaller um = jaxbContext.createUnmarshaller();
-
-            return (Config) um.unmarshal(from);
-        } catch (JAXBException e) {
+            XMLInputFactory xif = XMLInputFactory.newFactory();
+            xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(from));
+            return (Config) um.unmarshal(xsr);
+        } catch (JAXBException | XMLStreamException e) {
             throw new PersistException("Unable to restore configuration", e);
         }
     }
@@ -85,7 +92,7 @@ public final class Config {
 
     private static boolean isBlank(File from) {
         try {
-            return StringUtils.isBlank(Files.toString(from, Charsets.UTF_8));
+            return StringUtils.isBlank(Files.toString(from, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException("Unexpected error reading file" + from, e);
         }
@@ -97,7 +104,7 @@ public final class Config {
     }
 
     public void addConfigSnapshot(ConfigSnapshot snap, int numberOfStoredBackups) {
-        if(shouldReplaceLast(numberOfStoredBackups) && snapshots.isEmpty() == false) {
+        if (shouldReplaceLast(numberOfStoredBackups) && !snapshots.isEmpty()) {
             snapshots.remove(0);
         }
         snapshots.add(snap);

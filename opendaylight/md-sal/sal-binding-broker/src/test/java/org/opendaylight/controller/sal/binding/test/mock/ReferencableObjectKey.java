@@ -10,9 +10,9 @@ package org.opendaylight.controller.sal.binding.test.mock;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 
 public class ReferencableObjectKey implements Identifier<ReferencableObject> {
-
+    private static final long serialVersionUID = 1L;
     final Integer value;
-    
+
     public ReferencableObjectKey(Integer _value) {
         this.value = _value;
     }
@@ -46,6 +46,6 @@ public class ReferencableObjectKey implements Identifier<ReferencableObject> {
     public String toString() {
         return "ReferencableObjectKey [value=" + value + "]";
     }
-    
-    
+
+
 }

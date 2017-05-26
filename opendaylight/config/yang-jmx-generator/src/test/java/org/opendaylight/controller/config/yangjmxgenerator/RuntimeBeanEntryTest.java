@@ -7,30 +7,28 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import javax.management.openmbean.SimpleType;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
-
-import javax.management.openmbean.SimpleType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doReturn;
 
 public class RuntimeBeanEntryTest extends AbstractYangTest {
 
@@ -47,94 +45,92 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
 
     @Test
     public void createRuntimeBean() {
-        ChoiceCaseNode caseNode = Mockito.mock(ChoiceCaseNode.class);
+        final ChoiceCaseNode caseNode = Mockito.mock(ChoiceCaseNode.class);
         doReturn(new HashSet<LeafSchemaNode>()).when(caseNode).getChildNodes();
         doReturn(new ArrayList<UnknownSchemaNode>()).when(caseNode)
                 .getUnknownSchemaNodes();
-        Map<String, RuntimeBeanEntry> runtimeBeans = RuntimeBeanEntry
+        final Map<String, RuntimeBeanEntry> runtimeBeans = RuntimeBeanEntry
                 .extractClassNameToRuntimeBeanMap(PACKAGE_NAME, caseNode, "test-name", new TypeProviderWrapper(new
-                        TypeProviderImpl(context)), "test", jmxImplModule);
-        assertThat(runtimeBeans.size(), is(1));
-        RuntimeBeanEntry runtimeMXBean = runtimeBeans.get("testRuntimeMXBean");
-        assertThat(runtimeMXBean.isRoot(), is(true));
-        assertThat(runtimeMXBean.getYangName(), is("test-name"));
+                        TypeProviderImpl(this.context)), "test", this.jmxImplModule, this.context);
+        assertEquals(1, runtimeBeans.size());
+        final RuntimeBeanEntry runtimeMXBean = runtimeBeans.get("testRuntimeMXBean");
+        assertTrue(runtimeMXBean.isRoot());
+        assertEquals("test-name", runtimeMXBean.getYangName());
     }
 
     @Test
     public void runtimeBeanRPCTest() {
         // create service interfaces
-        Map<QName, ServiceInterfaceEntry> modulesToSIEs = ServiceInterfaceEntry
-                .create(threadsModule, "packages.sis",identitiesToSIs);
+        final Map<QName, ServiceInterfaceEntry> modulesToSIEs = ServiceInterfaceEntry
+                .create(this.threadsModule, "packages.sis",identitiesToSIs);
         assertNotNull(modulesToSIEs);
 
         // create MXBeans map
-        Map<String, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry.create(
-                threadsJavaModule, modulesToSIEs, context,
-                new TypeProviderWrapper(new TypeProviderImpl(context)),
+        final Map<String, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry.create(
+                this.threadsJavaModule, modulesToSIEs, this.context,
+                new TypeProviderWrapper(new TypeProviderImpl(this.context)),
                 PACKAGE_NAME);
-        assertThat(namesToMBEs.isEmpty(), is(false));
+        assertFalse(namesToMBEs.isEmpty());
 
         // get threadfactory-naming bean
-        ModuleMXBeanEntry threadfactoryNamingMXBean = namesToMBEs
+        final ModuleMXBeanEntry threadfactoryNamingMXBean = namesToMBEs
                 .get(THREADFACTORY_NAMING_MXB_NAME);
         assertNotNull(threadfactoryNamingMXBean);
 
         // get runtime beans
-        Collection<RuntimeBeanEntry> runtimeBeanEntries = threadfactoryNamingMXBean
+        final Collection<RuntimeBeanEntry> runtimeBeanEntries = threadfactoryNamingMXBean
                 .getRuntimeBeans();
-        assertThat(runtimeBeanEntries.isEmpty(), is(false));
+        assertFalse(runtimeBeanEntries.isEmpty());
 
         // get root runtime bean
-        RuntimeBeanEntry threadfactoryRuntimeBeanEntry = getRuntimeBeanEntryByJavaName(
+        final RuntimeBeanEntry threadfactoryRuntimeBeanEntry = getRuntimeBeanEntryByJavaName(
                 runtimeBeanEntries, "NamingThreadFactoryRuntimeMXBean");
         assertNotNull(threadfactoryRuntimeBeanEntry);
-        assertThat(threadfactoryRuntimeBeanEntry.isRoot(), is(true));
+        assertTrue(threadfactoryRuntimeBeanEntry.isRoot());
 
         // get thread runtime bean
-        RuntimeBeanEntry runtimeBeanEntry = getRuntimeBeanEntryByJavaName(
+        final RuntimeBeanEntry runtimeBeanEntry = getRuntimeBeanEntryByJavaName(
                 runtimeBeanEntries, THREAD_RUNTIME_BEAN_JAVA_NAME);
         assertNotNull(runtimeBeanEntry);
 
         // test thread runtime bean properties
-        assertThat(runtimeBeanEntry.getJavaNamePrefix(),
-                is(THREAD_RUNTIME_BEAN_JAVA_PREFIX));
-        assertThat(runtimeBeanEntry.getPackageName(), is(PACKAGE_NAME));
-        assertThat(runtimeBeanEntry.getFullyQualifiedName(runtimeBeanEntry
-                .getJavaNameOfRuntimeMXBean()), is(PACKAGE_NAME + "."
-                + THREAD_RUNTIME_BEAN_JAVA_NAME));
-        assertThat(runtimeBeanEntry.getYangName(),
-                is(THREAD_RUNTIME_BEAN_YANG_NAME));
+        assertEquals(THREAD_RUNTIME_BEAN_JAVA_PREFIX, runtimeBeanEntry.getJavaNamePrefix());
+        assertEquals(PACKAGE_NAME, runtimeBeanEntry.getPackageName());
+        assertEquals(PACKAGE_NAME + "." + THREAD_RUNTIME_BEAN_JAVA_NAME,
+            runtimeBeanEntry.getFullyQualifiedName(runtimeBeanEntry
+                .getJavaNameOfRuntimeMXBean()));
+        assertEquals(THREAD_RUNTIME_BEAN_YANG_NAME, runtimeBeanEntry.getYangName());
 
         // get thread runtime bean rpcs
-        List<RuntimeBeanEntry.Rpc> rpcs = new ArrayList<RuntimeBeanEntry.Rpc>(
+        final List<RuntimeBeanEntry.Rpc> rpcs = new ArrayList<>(
                 runtimeBeanEntry.getRpcs());
-        assertThat(rpcs.size(), is(2));
+        assertEquals(2, rpcs.size());
 
         // get sleep rpc and test it
-        RuntimeBeanEntry.Rpc rpc = getRpcByName(rpcs, SLEEP_RPC_NAME);
+        final RuntimeBeanEntry.Rpc rpc = getRpcByName(rpcs, SLEEP_RPC_NAME);
         assertNotNull(rpc);
-        assertThat(rpc.getYangName(), is(SLEEP_RPC_NAME));
+        assertEquals(SLEEP_RPC_NAME, rpc.getYangName());
 
-        assertThat(((JavaAttribute)rpc.getReturnType()).getType().getFullyQualifiedName().endsWith(SLEEP_RPC_OUTPUT),  is(true));
+        assertTrue(((JavaAttribute)rpc.getReturnType()).getType().getFullyQualifiedName().endsWith(SLEEP_RPC_OUTPUT));
 
         // get sleep rpc input attribute and test it
-        List<JavaAttribute> attributes = rpc.getParameters();
-        assertThat(attributes.size(), is(1));
-        JavaAttribute attribute = attributes.get(0);
-        assertThat(attribute.getAttributeYangName(), is(SLEEP_RPC_INPUT_NAME));
-        assertThat(attribute.getType().getName(), is(SLEEP_RPC_INPUT_TYPE));
-        assertThat(attribute.getLowerCaseCammelCase(), is(SLEEP_RPC_INPUT_NAME));
-        assertThat(attribute.getUpperCaseCammelCase(), is("Millis"));
+        final List<JavaAttribute> attributes = rpc.getParameters();
+        assertEquals(1, attributes.size());
+        final JavaAttribute attribute = attributes.get(0);
+        assertEquals(SLEEP_RPC_INPUT_NAME, attribute.getAttributeYangName());
+        assertEquals(SLEEP_RPC_INPUT_TYPE, attribute.getType().getName());
+        assertEquals(SLEEP_RPC_INPUT_NAME, attribute.getLowerCaseCammelCase());
+        assertEquals("Millis", attribute.getUpperCaseCammelCase());
         assertNull(attribute.getNullableDefault());
         assertNull(attribute.getNullableDescription());
-        assertThat(attribute.getOpenType(), is(SimpleType.class));
+        assertTrue(attribute.getOpenType() instanceof SimpleType);
     }
 
     private RuntimeBeanEntry getRuntimeBeanEntryByJavaName(
             final Collection<RuntimeBeanEntry> runtimeBeanEntries,
-            String javaName) {
-        if (runtimeBeanEntries != null && !runtimeBeanEntries.isEmpty()) {
-            for (RuntimeBeanEntry runtimeBeanEntry : runtimeBeanEntries) {
+            final String javaName) {
+        if ((runtimeBeanEntries != null) && !runtimeBeanEntries.isEmpty()) {
+            for (final RuntimeBeanEntry runtimeBeanEntry : runtimeBeanEntries) {
                 if (runtimeBeanEntry.getJavaNameOfRuntimeMXBean().equals(
                         javaName)) {
                     return runtimeBeanEntry;
@@ -145,9 +141,9 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
     }
 
     private RuntimeBeanEntry.Rpc getRpcByName(
-            final List<RuntimeBeanEntry.Rpc> rpcs, String name) {
-        if (rpcs != null && !rpcs.isEmpty()) {
-            for (RuntimeBeanEntry.Rpc rpc : rpcs) {
+            final List<RuntimeBeanEntry.Rpc> rpcs, final String name) {
+        if ((rpcs != null) && !rpcs.isEmpty()) {
+            for (final RuntimeBeanEntry.Rpc rpc : rpcs) {
                 if (rpc.getName().equals(name)) {
                     return rpc;
                 }

@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.config.api.jmx;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
-
-import javax.annotation.concurrent.ThreadSafe;
-import javax.management.ObjectName;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +14,11 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.annotation.concurrent.ThreadSafe;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 /**
  * Provides ObjectName creation. Each created ObjectName consists of domain that
@@ -28,13 +28,14 @@ import java.util.Set;
  */
 @ThreadSafe
 public class ObjectNameUtil {
+    private ObjectNameUtil() {
+    }
 
     public static final String ON_DOMAIN = ConfigRegistryConstants.ON_DOMAIN;
     public static final String MODULE_FACTORY_NAME_KEY = "moduleFactoryName";
     public static final String SERVICE_QNAME_KEY = "serviceQName";
     public static final String INSTANCE_NAME_KEY = "instanceName";
     public static final String TYPE_KEY = ConfigRegistryConstants.TYPE_KEY;
-    public static final String TYPE_CONFIG_REGISTRY = ConfigRegistryConstants.TYPE_CONFIG_REGISTRY;
     public static final String TYPE_CONFIG_TRANSACTION = "ConfigTransaction";
     public static final String TYPE_MODULE = "Module";
     public static final String TYPE_SERVICE_REFERENCE = "ServiceReference";
@@ -42,12 +43,13 @@ public class ObjectNameUtil {
     public static final String TRANSACTION_NAME_KEY = "TransactionName";
     public static final String REF_NAME_KEY = "RefName";
     private static final String REPLACED_QUOTATION_MARK = "\\?";
+    public static final String ON_WILDCARD = "*";
 
     public static ObjectName createON(String on) {
         try {
             return new ObjectName(on);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -63,8 +65,8 @@ public class ObjectNameUtil {
         Hashtable<String, String> table = new Hashtable<>(attribs);
         try {
             return new ObjectName(domain, table);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e);
         }
 
     }
@@ -116,8 +118,7 @@ public class ObjectNameUtil {
     public static String getServiceQName(ObjectName objectName) {
         checkType(objectName, TYPE_SERVICE_REFERENCE);
         String quoted = objectName.getKeyProperty(SERVICE_QNAME_KEY);
-        String result = unquoteAndUnescape(objectName, quoted);
-        return result;
+        return unquoteAndUnescape(objectName, quoted);
     }
 
     // ObjectName supports quotation and ignores tokens like =, but fails to ignore ? sign.
@@ -127,7 +128,7 @@ public class ObjectNameUtil {
         if (quoted == null) {
             throw new IllegalArgumentException("Cannot find " + SERVICE_QNAME_KEY + " in " + objectName);
         }
-        if (quoted.startsWith("\"") == false || quoted.endsWith("\"") == false) {
+        if (!quoted.startsWith("\"") || !quoted.endsWith("\"")) {
             throw new IllegalArgumentException("Quotes not found in " + objectName);
         }
         String substring = quoted.substring(1);
@@ -200,7 +201,7 @@ public class ObjectNameUtil {
             throw new IllegalArgumentException(
                     "Expected ObjectName with transaction:" + inputON);
         }
-        if (ON_DOMAIN.equals(inputON.getDomain()) == false) {
+        if (!ON_DOMAIN.equals(inputON.getDomain())) {
             throw new IllegalArgumentException("Expected different domain: "
                     + inputON);
         }
@@ -262,7 +263,7 @@ public class ObjectNameUtil {
         Map<String, String> allProperties = getAdditionalProperties(on);
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String> entry : allProperties.entrySet()) {
-            if (blacklist.contains(entry.getKey()) == false) {
+            if (!blacklist.contains(entry.getKey())) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
@@ -270,7 +271,7 @@ public class ObjectNameUtil {
     }
 
     public static Map<String, String> getAdditionalProperties(ObjectName on) {
-        Hashtable<String, String> keyPropertyList = on.getKeyPropertyList();
+        Map<String, String> keyPropertyList = on.getKeyPropertyList();
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String> entry : keyPropertyList.entrySet()) {
             result.put(entry.getKey(), entry.getValue());
@@ -292,8 +293,8 @@ public class ObjectNameUtil {
         }
     }
 
-    public static void checkTypeOneOf(ObjectName objectName, String ... types) {
-        for(String type: types) {
+    public static void checkTypeOneOf(ObjectName objectName, String... types) {
+        for (String type : types) {
             if (type.equals(objectName.getKeyProperty(TYPE_KEY))) {
                 return;
             }
@@ -304,37 +305,43 @@ public class ObjectNameUtil {
 
     public static ObjectName createModulePattern(String moduleName,
                                                  String instanceName) {
-        if (moduleName == null)
-            moduleName = "*";
-        if (instanceName == null)
-            instanceName = "*";
+        String finalModuleName = moduleName == null ? ON_WILDCARD : moduleName;
+        String finalInstanceName = instanceName == null ? ON_WILDCARD : instanceName;
+
         // do not return object names containing transaction name
         ObjectName namePattern = ObjectNameUtil
                 .createON(ObjectNameUtil.ON_DOMAIN + ":"
                         + ObjectNameUtil.TYPE_KEY + "="
                         + ObjectNameUtil.TYPE_MODULE + ","
                         + ObjectNameUtil.MODULE_FACTORY_NAME_KEY + "="
-                        + moduleName + "," + ""
-                        + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + instanceName);
+                        + finalModuleName + "," + ""
+                        + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + finalInstanceName);
         return namePattern;
     }
 
     public static ObjectName createModulePattern(String ifcName,
                                                  String instanceName, String transactionName) {
+        String finalIfcName = ifcName == null ? ON_WILDCARD : ifcName;
+        String finalInstanceName = instanceName == null ? ON_WILDCARD : instanceName;
+        String finalTransactionName = transactionName == null ? ON_WILDCARD : transactionName;
+
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
-                + "=" + ifcName + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "="
-                + instanceName + "," + ObjectNameUtil.TRANSACTION_NAME_KEY
-                + "=" + transactionName);
+                + "=" + finalIfcName + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "="
+                + finalInstanceName + "," + ObjectNameUtil.TRANSACTION_NAME_KEY
+                + "=" + finalTransactionName);
     }
 
     public static ObjectName createRuntimeBeanPattern(String moduleName,
                                                       String instanceName) {
+        String finalModuleName = moduleName == null ? ON_WILDCARD : moduleName;
+        String finalInstanceName = instanceName == null ? ON_WILDCARD : instanceName;
+
         return ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN + ":"
                 + ObjectNameUtil.TYPE_KEY + "="
                 + ObjectNameUtil.TYPE_RUNTIME_BEAN + ","
-                + ObjectNameUtil.MODULE_FACTORY_NAME_KEY + "=" + moduleName
-                + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + instanceName
+                + ObjectNameUtil.MODULE_FACTORY_NAME_KEY + "=" + finalModuleName
+                + "," + ObjectNameUtil.INSTANCE_NAME_KEY + "=" + finalInstanceName
                 + ",*");
 
     }
@@ -343,13 +350,15 @@ public class ObjectNameUtil {
                                           String expectedType) {
         checkType(objectName, expectedType);
         String factoryName = getFactoryName(objectName);
-        if (factoryName == null)
+        if (factoryName == null) {
             throw new IllegalArgumentException(
                     "ObjectName does not contain module name");
+        }
         String instanceName = getInstanceName(objectName);
-        if (instanceName == null)
+        if (instanceName == null) {
             throw new IllegalArgumentException(
                     "ObjectName does not contain instance name");
+        }
         return new ModuleIdentifier(factoryName, instanceName);
     }
 

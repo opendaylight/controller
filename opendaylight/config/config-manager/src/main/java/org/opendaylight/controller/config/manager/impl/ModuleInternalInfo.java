@@ -8,13 +8,15 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;
 import org.opendaylight.controller.config.manager.impl.jmx.ModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
+import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.osgi.framework.BundleContext;
 
 /**
  * Provides metadata about Module from controller to registry.
@@ -36,21 +38,19 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     private final ModuleJMXRegistrator moduleJMXRegistrator;
     private final int orderingIdx;
     private final boolean isDefaultBean;
+    private final ModuleFactory moduleFactory;
+    private final BundleContext bundleContext;
 
     public ModuleInternalInfo(ModuleIdentifier name,
             @Nullable DynamicReadableWrapper readableModule,
             OsgiRegistration osgiRegistration,
-            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
+            @Nullable RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
             ModuleJMXRegistrator moduleJMXRegistrator, int orderingIdx,
-            boolean isDefaultBean) {
+            boolean isDefaultBean, ModuleFactory moduleFactory, BundleContext bundleContext) {
 
         if (osgiRegistration == null) {
             throw new IllegalArgumentException(
                     "Parameter 'osgiRegistration' is missing");
-        }
-        if (runtimeBeanRegistrator == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'runtimeBeanRegistrator' is missing");
         }
         this.readableModule = readableModule;
         this.osgiRegistration = osgiRegistration;
@@ -59,6 +59,8 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
         this.moduleJMXRegistrator = moduleJMXRegistrator;
         this.orderingIdx = orderingIdx;
         this.isDefaultBean = isDefaultBean;
+        this.moduleFactory = moduleFactory;
+        this.bundleContext = bundleContext;
     }
 
     public DynamicReadableWrapper getReadableModule() {
@@ -108,7 +110,7 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     public DestroyedModule toDestroyedModule() {
         return new DestroyedModule(getIdentifier(),
                 getReadableModule().getInstance(), getModuleJMXRegistrator(),
-                getOsgiRegistration(), getOrderingIdx());
+                getOsgiRegistration(), getOrderingIdx(), runtimeBeanRegistrator);
     }
 
     @Override
@@ -118,5 +120,13 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
 
     public boolean isDefaultBean() {
         return isDefaultBean;
+    }
+
+    public ModuleFactory getModuleFactory() {
+        return moduleFactory;
+    }
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
     }
 }

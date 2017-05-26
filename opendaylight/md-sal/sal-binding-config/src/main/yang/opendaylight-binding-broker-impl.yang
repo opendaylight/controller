@@ -1,0 +1,299 @@
+module opendaylight-sal-binding-broker-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl";
+    prefix "binding-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding {prefix sal;}
+    import opendaylight-md-sal-binding-v1-codec {prefix v1codec;}
+    import opendaylight-md-sal-dom {prefix dom;}
+    import opendaylight-md-sal-common {prefix common;}
+
+    description
+        "Service definition for Binding Aware MD-SAL.";
+
+    revision "2013-10-28" {
+        description
+            "Initial revision";
+    }
+
+    identity binding-dom-mapping-service {
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec";
+        config:disable-osgi-service-registration;
+    }
+
+    /* FIXME: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
+    identity binding-new-notification-service {
+        status deprecated;
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationService";
+        config:disable-osgi-service-registration;
+    }
+
+    /* TODO: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
+    identity binding-new-notification-publish-service {
+        status deprecated;
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationPublishService";
+        config:disable-osgi-service-registration;
+    }
+
+    identity binding-broker-impl {
+        status deprecated;
+        base config:module-type;
+        config:provided-service sal:binding-broker-osgi-registry;
+        config:provided-service sal:binding-rpc-registry;
+        config:java-name-prefix BindingBrokerImpl;
+    }
+
+    identity binding-data-compatible-broker {
+        status deprecated;
+        base config:module-type;
+        config:provided-service sal:binding-data-broker;
+        config:provided-service sal:binding-data-consumer-broker;
+        config:java-name-prefix ForwardedCompatibleDataBrokerImpl;
+    }
+
+    identity binding-forwarded-data-broker {
+        status deprecated;
+        base config:module-type;
+        config:provided-service sal:binding-async-data-broker;
+        config:java-name-prefix BindingAsyncDataBrokerImpl;
+    }
+
+    identity binding-notification-broker {
+        status deprecated;
+        base config:module-type;
+        config:provided-service sal:binding-notification-service;
+        config:provided-service sal:binding-notification-subscription-service;
+        config:java-name-prefix NotificationBrokerImpl;
+    }
+
+    identity runtime-generated-mapping {
+        status deprecated;
+        base config:module-type;
+        config:provided-service binding-dom-mapping-service;
+        config:provided-service sal:binding-codec-tree-factory;
+        config:provided-service sal:binding-normalized-node-serializer;
+        config:provided-service v1codec:binding-v1-codec-tree-factory;
+        config:provided-service v1codec:binding-v1-normalized-node-serializer;
+        config:java-name-prefix RuntimeMapping;
+    }
+
+    identity binding-notification-adapter {
+        status deprecated;
+        base config:module-type;
+        config:provided-service binding-new-notification-service;
+        config:java-name-prefix BindingNotificationAdapter;
+    }
+
+    identity binding-notification-publish-adapter {
+        status deprecated;
+        base config:module-type;
+        config:provided-service binding-new-notification-publish-service;
+        config:java-name-prefix BindingNotificationPublishAdapter;
+    }
+
+    grouping dom-forwarding-component {
+        status deprecated;
+        container dom-async-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+        container binding-mapping-service {
+            uses config:service-ref {
+                refine type {
+                    mandatory true;
+                    config:required-identity binding-dom-mapping-service;
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-broker-impl {
+            when "/config:modules/config:module/config:type = 'binding-broker-impl'";
+
+            /*
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:binding-rpc-registry;
+                    }
+                }
+            }*/
+            container binding-broker-impl {
+                uses dom-forwarding-component;
+    
+                container data-broker {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-data-broker;
+                        }
+                    }
+                }
+    
+                container notification-service {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-notification-service;
+                        }
+                    }
+                }
+    
+                container root-data-broker {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-async-data-broker;
+                        }
+                    }
+                }
+
+                container notification-publish-service {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity binding-new-notification-publish-service;
+                        }
+                        refine name {
+                            mandatory false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-data-compatible-broker {
+            when "/config:modules/config:module/config:type = 'binding-data-compatible-broker'";
+
+            container binding-data-compatible-broker {
+                container data-broker {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-async-data-broker;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-forwarded-data-broker {
+            when "/config:modules/config:module/config:type = 'binding-forwarded-data-broker'";
+            container binding-forwarded-data-broker {
+                container dom-async-broker {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity dom:dom-async-data-broker;
+                        }
+                    }
+                }
+
+                container binding-mapping-service {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity binding-dom-mapping-service;
+                        }
+                    }
+                }
+
+                container schema-service {
+                    status deprecated;
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity dom:schema-service;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    augment "/config:modules/config:module/config:configuration" {
+        case runtime-generated-mapping {
+            when "/config:modules/config:module/config:type = 'runtime-generated-mapping'";
+            leaf wait-for-schema {
+                status deprecated;
+                default "false";
+                type boolean;
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-notification-broker {
+            when "/config:modules/config:module/config:type = 'binding-notification-broker'";
+            container notification-adapter {
+                status deprecated;
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity binding-new-notification-service;
+                    }
+                }
+            }
+
+            container notification-publish-adapter {
+                status deprecated;
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity binding-new-notification-publish-service;
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case binding-notification-broker {
+            when "/config:modules/config:module/config:type = 'binding-notification-broker'";
+            uses common:notification-state;
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-notification-adapter {
+            when "/config:modules/config:module/config:type = 'binding-notification-adapter'";
+            container binding-notification-adapter {
+                status deprecated;
+                uses dom-forwarding-component;
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-notification-publish-adapter {
+            when "/config:modules/config:module/config:type = 'binding-notification-publish-adapter'";
+            container binding-notification-publish-adapter {
+                status deprecated;
+                uses dom-forwarding-component;
+            }
+        }
+    }
+}

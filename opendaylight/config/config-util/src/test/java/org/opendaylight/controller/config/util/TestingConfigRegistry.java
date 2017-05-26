@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.config.util;
 
+import com.google.common.collect.Sets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
@@ -21,25 +21,34 @@ import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
-import com.google.common.collect.Sets;
-
 public class TestingConfigRegistry implements ConfigRegistryMXBean {
 
     static final ObjectName conf1, conf2, conf3, run1, run2, run3;
+    public static String check;
+    public static boolean checkBool;
+    private Map<String, ObjectName> map = new HashMap<>();
 
     public static final String moduleName1 = "moduleA";
     public static final String moduleName2 = "moduleB";
     public static final String instName1 = "instA";
     public static final String instName2 = "instB";
+    public static final String refName1 = "refA";
+    public static final String refName2 = "refB";
+    public static final String serviceQName1 = "qnameA";
+    public static final String serviceQName2 = "qnameB";
 
     static {
         conf1 = ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
-                + "=" + moduleName1);
+                + "=" + moduleName1 + "," + ObjectNameUtil.SERVICE_QNAME_KEY
+                + "=" + serviceQName1 + "," + ObjectNameUtil.REF_NAME_KEY
+                + "=" + refName1);
         conf2 = ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
                 + "=" + moduleName1 + "," + ObjectNameUtil.INSTANCE_NAME_KEY
-                + "=" + instName1);
+                + "=" + instName1 + "," + ObjectNameUtil.SERVICE_QNAME_KEY
+                + "=" + serviceQName2 + "," + ObjectNameUtil.REF_NAME_KEY
+                + "=" + refName1);
         conf3 = ObjectNameUtil.createON(ObjectNameUtil.ON_DOMAIN
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
                 + "=" + moduleName2 + "," + ObjectNameUtil.INSTANCE_NAME_KEY
@@ -55,11 +64,15 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
                 + ":type=RuntimeBean," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
                 + "=" + moduleName2 + "," + ObjectNameUtil.INSTANCE_NAME_KEY
                 + "=" + instName2);
+
+        check = null;
+        checkBool = false;
+
     }
 
     @Override
     public ObjectName beginConfig() {
-        return null;
+        return conf2;
     }
 
     @Override
@@ -146,42 +159,60 @@ public class TestingConfigRegistry implements ConfigRegistryMXBean {
 
     @Override
     public void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        Set<ObjectName> configBeans = Sets.<ObjectName> newHashSet(run1, run2, run3);
+        if(configBeans.size()>0){
+            checkBool = true;
+        }
     }
 
     @Override
     public ObjectName lookupConfigBeanByServiceInterfaceName(String serviceInterfaceQName, String refName) {
-        throw new UnsupportedOperationException();
+        if (serviceInterfaceQName.equals(serviceQName1) && refName.equals(refName1)) {
+            return conf1;
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
     public Map<String, Map<String, ObjectName>> getServiceMapping() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(String serviceInterfaceQName) {
-        throw new UnsupportedOperationException();
+
+        if(serviceInterfaceQName.equals(serviceQName1)){
+            map.put("conf1", conf1);
+        }
+        else if(serviceInterfaceQName.equals(serviceQName2)){
+            map.put("conf2", conf2);
+        }
+        else{
+            map.put("conf3", conf3);
+        }
+        return map;
     }
 
     @Override
     public Set<String> lookupServiceInterfaceNames(ObjectName objectName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        return Sets.<String> newHashSet(serviceQName1, serviceQName2);
     }
 
     @Override
     public String getServiceInterfaceName(String namespace, String localName) {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public Set<String> getAvailableModuleFactoryQNames() {
-        throw new UnsupportedOperationException();
+        return Sets.<String> newHashSet(moduleName1, moduleName2);
     }
 
     @Override
     public ObjectName getServiceReference(String serviceInterfaceQName, String refName) throws InstanceNotFoundException {
-        throw new UnsupportedOperationException();
+        return conf1;
     }
 
     @Override

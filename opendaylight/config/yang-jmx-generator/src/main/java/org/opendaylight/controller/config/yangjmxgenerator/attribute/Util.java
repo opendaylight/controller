@@ -13,17 +13,19 @@ import java.util.Date;
 
 final class Util {
 
+    private Util() {
+    }
     /**
      * Used for date <-> xml serialization
      */
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
             "yyyy-MM-dd");
 
     public static String writeDate(Date date) {
-        return dateFormat.format(date);
+        return DATE_FORMAT.format(date);
     }
 
     public static Date readDate(String s) throws ParseException {
-        return dateFormat.parse(s);
+        return DATE_FORMAT.parse(s);
     }
 }

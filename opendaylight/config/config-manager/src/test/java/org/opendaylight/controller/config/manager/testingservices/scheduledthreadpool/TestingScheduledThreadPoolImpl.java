@@ -7,19 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool;
 
+import com.google.common.collect.Lists;
 import java.io.Closeable;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 import org.opendaylight.controller.config.api.runtime.HierarchicalRuntimeBeanRegistration;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
-import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.runtimebeans
-        .TestingScheduledRuntimeBean;
+import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.runtimebeans.TestingScheduledRuntimeBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
-
-import com.google.common.collect.Lists;
 
 public class TestingScheduledThreadPoolImpl implements TestingThreadPoolIfc,
         TestingScheduledThreadPoolIfc, Closeable {

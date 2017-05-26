@@ -4,10 +4,10 @@ module opendaylight-md-sal-binding {
     prefix "md-sal-binding";
 
     import config { prefix config; revision-date 2013-04-05; }
- 
+
     description
         "Service definition for Binding Aware MD-SAL.";
- 
+
     revision "2013-10-28" {
         description
             "Initial revision";
@@ -23,6 +23,12 @@ module opendaylight-md-sal-binding {
         config:java-class "org.opendaylight.controller.sal.binding.api.data.DataProviderService";
     }
 
+    identity binding-async-data-broker {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.md.sal.binding.api.DataBroker";
+        config:disable-osgi-service-registration;
+    }
+
     identity binding-data-consumer-broker {
         base "config:service-type";
         config:java-class "org.opendaylight.controller.sal.binding.api.data.DataBrokerService";
@@ -31,16 +37,31 @@ module opendaylight-md-sal-binding {
     identity binding-rpc-registry {
         base "config:service-type";
         config:java-class "org.opendaylight.controller.sal.binding.api.RpcProviderRegistry";
+        config:disable-osgi-service-registration;
     }
 
     identity binding-notification-service {
         base "config:service-type";
         config:java-class "org.opendaylight.controller.sal.binding.api.NotificationProviderService";
+        config:disable-osgi-service-registration;
+    }
+
+    identity binding-codec-tree-factory {
+        base "config:service-type";
+        config:java-class "org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory";
+        config:disable-osgi-service-registration;
+    }
+
+    identity binding-normalized-node-serializer {
+        base "config:service-type";
+        config:java-class "org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer";
+        config:disable-osgi-service-registration;
     }
 
     identity binding-notification-subscription-service {
         base "config:service-type";
         config:java-class "org.opendaylight.controller.sal.binding.api.NotificationService";
+        config:disable-osgi-service-registration;
     }
 
 }

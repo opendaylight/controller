@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.test;
 
-import junit.framework.Assert;
-
-
+import static org.junit.Assert.assertNotNull;
 import org.opendaylight.yangtools.yang.binding.Augmentable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 
@@ -23,17 +21,17 @@ public class AugmentationVerifier<T extends Augmentable<T>> {
 
     public AugmentationVerifier<T> assertHasAugmentation(Class<? extends Augmentation<T>> augmentation) {
         assertHasAugmentation(object, augmentation);
-        return (AugmentationVerifier<T>) this;
+        return this;
     }
 
     public static <T extends Augmentable<T>> void assertHasAugmentation(T object,
             Class<? extends Augmentation<T>> augmentation) {
-        Assert.assertNotNull(object);
-        Assert.assertNotNull("Augmentation " + augmentation.getSimpleName() + " is not present.", object.getAugmentation(augmentation));
+        assertNotNull(object);
+        assertNotNull("Augmentation " + augmentation.getSimpleName() + " is not present.", object.getAugmentation(augmentation));
     }
 
     public static <T extends Augmentable<T>> AugmentationVerifier<T> from(T obj) {
-        return new AugmentationVerifier<T>(obj);
+        return new AugmentationVerifier<>(obj);
     }
 
 }

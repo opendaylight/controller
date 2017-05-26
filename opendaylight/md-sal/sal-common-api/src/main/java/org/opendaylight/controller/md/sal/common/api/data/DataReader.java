@@ -7,23 +7,24 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-// FIXME: After 0.6 Release of YANGTools refactor to use Path marker interface for arguments.
-// import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.concepts.Path;
 
 /**
  * Reader for reading YANG subtrees based on their path.
- * 
+ *
  * Reader is requested to return object at specified path and all it's subnodes
  * known to the reader or null if node is not found in this reader.
  *
  * @param <P> Path Type
  * @param <D> Data Type
+ * @deprecated Replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore contract.
  */
-public interface DataReader<P/* extends Path<P> */,D> {
+@Deprecated
+public interface DataReader<P extends Path<P> ,D> {
 
     /**
      * Reads data from Operational data store located at provided path
-     * 
+     *
      * @param path Path to data
      * @return
      */

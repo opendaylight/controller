@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl;
 
 import java.util.Collections;
 import java.util.List;
-
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Constructor;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Header;
@@ -39,9 +38,10 @@ public class GeneralClassTemplate extends AbstractFtlTemplate {
     }
 
     static List<String> checkCardinality(List<String> extendedClass) {
-        if (extendedClass.size() > 1)
+        if (extendedClass.size() > 1) {
             throw new IllegalArgumentException(
-                    "Class cannot have more than one super " + "class");
+                    "Class cannot have more than one super class, found: " + extendedClass);
+        }
         return extendedClass;
     }
 

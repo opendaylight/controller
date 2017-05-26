@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.jmx;
 
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
 
 public class ServiceReferenceMXBeanImpl implements ServiceReferenceMXBean {
     private ObjectName currentImplementation;

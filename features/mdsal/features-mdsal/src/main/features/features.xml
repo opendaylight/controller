@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+    <repository>mvn:org.opendaylight.odlparent/features-odlparent/{{VERSION}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
+
+    <repository>mvn:org.opendaylight.mdsal/features-mdsal/{{VERSION}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+
+    <repository>mvn:org.opendaylight.controller/features-config/{{VERSION}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-config-persister/{{VERSION}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-config-netty/{{VERSION}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.odlparent/features-akka/{{VERSION}}/xml/features</repository>
+    <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <feature version='${project.version}'>odl-mdsal-xsql</feature>
+        <feature version='${project.version}'>odl-toaster</feature>
+    </feature>
+    <feature name='odl-mdsal-common' version='${project.version}' description="OpenDaylight :: Config :: All">
+      <feature version='${yangtools.version}'>odl-yangtools-yang-data</feature>
+      <feature version='${config.version}'>odl-config-api</feature>
+      <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
+      <bundle>wrap:mvn:net.java.dev.stax-utils/stax-utils/{{VERSION}}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-api/{{VERSION}}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-impl/{{VERSION}}</bundle>
+      <bundle>mvn:org.opendaylight.controller/sal-common-util/{{VERSION}}</bundle>
+    </feature>
+
+    <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
+        <feature version='${yangtools.version}'>odl-yangtools-common</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-binding-dom-adapter</feature>
+        <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+        <feature version='${project.version}'>odl-mdsal-common</feature>
+        <feature version='${config.version}'>odl-config-startup</feature>
+        <feature version='${config.version}'>odl-config-netty</feature>
+        <feature version="${odlparent.version}">odl-lmax-3</feature>
+        <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
+        <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
+        <feature version='${mdsal.version}'>odl-mdsal-dom</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-eos-dom</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-eos-binding</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-singleton-dom</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-core-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-core-spi/{{VERSION}}</bundle>
+        <bundle start-level="70">mvn:org.opendaylight.controller/sal-schema-service/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-broker-impl/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-binding-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-binding-broker-impl/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-binding-util/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-connector-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-dom-config/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-binding-config/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-dom-broker-config/{{VERSION}}</bundle>
+        <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{VERSION}}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/{{VERSION}}/xml/config</configfile>
+    </feature>
+    <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
+        <feature version='${yangtools.version}'>odl-yangtools-common</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/{{VERSION}}</bundle>
+    </feature>
+    <feature name ='odl-mdsal-xsql' version='${project.version}'>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-dom-xsql/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-karaf-xsql/{{VERSION}}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/{{VERSION}}/xml/config</configfile>
+    </feature>
+    <feature name ='odl-mdsal-clustering-commons' version='${project.version}'>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <feature version="${odlparent.version}">odl-akka-system-2.4</feature>
+        <feature version="${odlparent.version}">odl-akka-persistence-2.4</feature>
+        <feature version="${odlparent.version}">odl-akka-clustering-2.4</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-clustering-commons/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-akka-raft/{{VERSION}}</bundle>
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/{{VERSION}}</bundle>
+    </feature>
+    <feature name ='odl-mdsal-distributed-datastore' version='${project.version}'>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
+        <bundle>mvn:org.opendaylight.controller/cds-access-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/cds-access-client/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/cds-dom-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-distributed-datastore/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-cluster-admin-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-cluster-admin-impl/{{VERSION}}</bundle>
+    </feature>
+    <feature name ='odl-mdsal-remoterpc-connector' version='${project.version}'>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
+        <feature version="${odlparent.version}">odl-akka-leveldb-0.7</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-remoterpc-connector/{{VERSION}}</bundle>
+    </feature>
+    <feature name ='odl-mdsal-broker' version='${project.version}'>
+        <feature version='${project.version}'>odl-mdsal-remoterpc-connector</feature>
+        <feature version='${project.version}'>odl-mdsal-distributed-datastore</feature>
+        <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true" >mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/config</configfile>
+        <configfile finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/entityownershipconfig</configfile>
+        <configfile finalname="configuration/initial/akka.conf">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/akkaconf</configfile>
+        <configfile finalname="configuration/factory/akka.conf" override="true">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/factoryakkaconf</configfile>
+        <configfile finalname="configuration/initial/module-shards.conf">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/moduleshardconf</configfile>
+        <configfile finalname="configuration/initial/modules.conf">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/moduleconf</configfile>
+        <configfile finalname="etc/org.opendaylight.controller.cluster.datastore.cfg">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/cfg/datastore</configfile>
+    </feature>
+    <feature name ='odl-mdsal-clustering' version='${project.version}'>
+      <feature version='${project.version}'>odl-mdsal-broker</feature>
+    </feature>
+    <feature name='odl-clustering-test-app' version='${project.version}'>
+        <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/{{VERSION}}</bundle>
+    </feature>
+
+    <feature name='odl-message-bus-collector' version='${project.version}'>
+        <!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-binding-base -->
+        <bundle>mvn:org.opendaylight.controller.model/model-inventory/{{VERSION}}</bundle>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller/messagebus-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/messagebus-spi/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/messagebus-util/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/messagebus-impl/{{VERSION}}</bundle>
+        <configfile finalname="${config.configfile.directory}/05-message-bus.xml">mvn:org.opendaylight.controller/messagebus-config/{{VERSION}}/xml/config</configfile>
+    </feature>
+</features>

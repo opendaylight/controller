@@ -12,9 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.Closeable;
-
 import javax.annotation.Nullable;
-
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.RuntimeBeanRegistratorAwareModule;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
@@ -61,6 +59,12 @@ public class TestingScheduledThreadPoolModule implements Module,
         // check thread count
         checkState(threadCount > 0,
                 "Parameter 'ThreadCount' must be greater than 0");
+    }
+
+    @Override
+    public boolean canReuse(final Module oldModule) {
+        return getClass().isInstance(oldModule) && getThreadCount() ==
+                ((TestingScheduledThreadPoolModule) oldModule).getThreadCount();
     }
 
     @Override

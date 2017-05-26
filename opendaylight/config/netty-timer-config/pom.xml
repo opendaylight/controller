@@ -1,104 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- vi: set et smarttab sw=4 tabstop=4: -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-plugin-parent</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+    <relativePath>../config-plugin-parent</relativePath>
+  </parent>
+  <artifactId>netty-timer-config</artifactId>
+  <packaging>bundle</packaging>
+  <name>${project.artifactId}</name>
+  <description>Configuration Wrapper around netty's timer</description>
+
+  <dependencies>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-plugin-parent</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
-        <relativePath>../config-plugin-parent</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>netty-timer-config</artifactId>
-   <description>Configuration Wrapper around netty's timer</description>
-   <packaging>bundle</packaging>
-   <name>${project.artifactId}</name>
-   <prerequisites>
-      <maven>3.0.4</maven>
-   </prerequisites>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netty-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>threadpool-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
 
-   <dependencies>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>netty-config-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>threadpool-config-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
-      </dependency>
+    <!--test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-manager</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-manager</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-util</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>threadpool-config-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-      <!--test dependencies -->
-      <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-manager</artifactId>
-         <scope>test</scope>
-         <type>test-jar</type>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-manager</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>config-util</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.yangtools</groupId>
-         <artifactId>mockito-configuration</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.opendaylight.controller</groupId>
-         <artifactId>threadpool-config-impl</artifactId>
-         <version>${project.version}</version>
-         <scope>test</scope>
-      </dependency>
+  </dependencies>
 
-   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+            <Export-Package>org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.netty.timer.rev131119.*,</Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>yang-maven-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <extensions>true</extensions>
-            <configuration>
-               <instructions>
-                  <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                  <Export-Package>
-                      org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.netty.timer.rev131119.*,
-                  </Export-Package>
-               </instructions>
-            </configuration>
-         </plugin>
-      </plugins>
-   </build>
-
-   <distributionManagement>
-      <site>
-         <id>${project.artifactId}</id>
-         <name>NETTY-TIMER-CONFIG Module site</name>
-         <url>${basedir}/target/site/${project.artifactId}</url>
-      </site>
-   </distributionManagement>
+  <distributionManagement>
+    <site>
+      <id>${project.artifactId}</id>
+      <name>NETTY-TIMER-CONFIG Module site</name>
+      <url>${basedir}/target/site/${project.artifactId}</url>
+    </site>
+  </distributionManagement>
 </project>

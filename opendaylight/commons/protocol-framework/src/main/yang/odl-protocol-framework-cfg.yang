@@ -1,0 +1,151 @@
+// vi: set smarttab et sw=4 tabstop=4:
+module protocol-framework {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:protocol:framework";
+    prefix "pf";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import netty { prefix netty; revision-date 2013-11-19; }
+
+    organization "Cisco Systems, Inc.";
+
+    contact "Milos Fabian <milfabia@cisco.com>";
+
+    description
+        "This module contains the base YANG definitions for
+         protocol framework.
+
+        Copyright (c)2013 Cisco Systems, Inc. All rights reserved.;
+
+        This program and the accompanying materials are made available
+        under the terms of the Eclipse Public License v1.0 which
+        accompanies this distribution, and is available at
+        http://www.eclipse.org/legal/epl-v10.html";
+
+    revision "2014-03-13" {
+        description
+            "Changed reconnect-strategy to reconnect-strategy-factory - represents ReconnectStrategyFactory.
+            reconnect-strategy-factory modules provides reconnect-strategy-factory service.";
+    }
+
+    revision "2013-11-09" {
+        description
+            "Initial revision";
+    }
+
+    identity reconnect-strategy-factory {
+        description
+            "Service representing a reconnect strategy factory.";
+
+        base "config:service-type";
+        config:java-class "org.opendaylight.protocol.framework.ReconnectStrategyFactory";
+    }
+
+    identity never-reconnect-strategy-factory {
+        base config:module-type;
+        config:provided-service reconnect-strategy-factory;
+        config:java-name-prefix NeverReconnectStrategyFactory;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case never-reconnect-strategy-factory {
+            when "/config:modules/config:module/config:type = 'never-reconnect-strategy-factory'";
+
+            leaf timeout {
+                mandatory true;
+                type int32;
+            }
+
+            container executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity netty:netty-event-executor;
+                    }
+                }
+            }
+        }
+    }
+
+    identity reconnect-immediately-strategy-factory {
+        base config:module-type;
+        config:provided-service reconnect-strategy-factory;
+        config:java-name-prefix ReconnectImmediatelyStrategyFactory;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case reconnect-immediately-strategy-factory {
+            when "/config:modules/config:module/config:type = 'reconnect-immediately-strategy-factory'";
+
+            leaf reconnect-timeout {
+                mandatory true;
+                type int32;
+            }
+
+            container reconnect-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity netty:netty-event-executor;
+                    }
+                }
+            }
+        }
+    }
+
+    identity timed-reconnect-strategy-factory {
+        base config:module-type;
+        config:provided-service reconnect-strategy-factory;
+        config:java-name-prefix TimedReconnectStrategyFactory;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case timed-reconnect-strategy-factory {
+            when "/config:modules/config:module/config:type = 'timed-reconnect-strategy-factory'";
+
+            leaf deadline {
+                type int64;
+                units "epoch nanoseconds";
+            }
+
+            leaf max-attempts {
+                mandatory true;
+                type int64;
+            }
+
+            leaf max-sleep {
+                mandatory true;
+                type int64;
+                units "milliseconds";
+            }
+
+            leaf min-sleep {
+                mandatory true;
+                type int64;
+                units "milliseconds";
+            }
+
+            leaf sleep-factor {
+                mandatory true;
+                type decimal64 {
+                    fraction-digits 2;
+                }
+            }
+
+            leaf connect-time {
+                mandatory true;
+                type int32;
+                units "milliseconds";
+            }
+
+            container timed-reconnect-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity netty:netty-event-executor;
+                    }
+                }
+            }
+        }
+    }
+}

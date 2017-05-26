@@ -9,9 +9,7 @@ package org.opendaylight.controller.config.api;
 
 import java.util.List;
 import java.util.Set;
-
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
@@ -23,14 +21,16 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
 
     /**
      * Only well-known ObjectName in configuration system, under which
-     * ConfigRegisry is registered.
+     * ConfigRegistry is registered.
      */
-    public static final ObjectName OBJECT_NAME = ConfigRegistryConstants.OBJECT_NAME;
+    ObjectName OBJECT_NAME = ConfigRegistryConstants.OBJECT_NAME;
+    ObjectName OBJECT_NAME_NO_NOTIFICATIONS = ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS;
 
     /**
      * Opens new configuration transaction.
      *
-     * @return {@link ObjectName} of {@link ConfigTransactionControllerMXBean}
+     * @return {@link ObjectName} of
+     *         {@link org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean}
      */
     ObjectName beginConfig();
 
@@ -39,8 +39,8 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      *
      * @param transactionControllerON
      *            {@link ObjectName} of
-     *            {@link ConfigTransactionControllerMXBean} that was received in
-     *            {@link #beginConfig()} method call.
+     *            {@link org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean} that was
+     *            received in {@link #beginConfig()} method call.
      * @return CommitStatus
      * @throws ValidationException
      *             if validation fails
@@ -66,25 +66,5 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      * @return module factory names available in the system
      */
     Set<String> getAvailableModuleNames();
-
-
-
-    /**
-     * Find all runtime beans
-     *
-     * @return objectNames
-     */
-    Set<ObjectName> lookupRuntimeBeans();
-
-    /**
-     * Find all runtime of specified module
-     *
-     * @param moduleName
-     *            of bean
-     * @param instanceName
-     *            of bean
-     * @return objectNames
-     */
-    Set<ObjectName> lookupRuntimeBeans(String moduleName, String instanceName);
 
 }

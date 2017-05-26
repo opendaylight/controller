@@ -7,43 +7,71 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import java.util.EventListener;
 import java.util.concurrent.ExecutorService;
-
 import org.opendaylight.controller.md.sal.common.api.notify.NotificationPublishService;
-import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
+/**
+ * Interface for a notification service that provides publish/subscribe capabilities for YANG
+ * modeled notifications. This interface is a combination of the {@link NotificationService} and
+ * {@link NotificationPublishService} interfaces.
+ *
+ * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.NotificationPublishService}.
+ */
+@Deprecated
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {
 
     /**
-     * Deprecated. Use {@link #publish(Notification)}.
-     * 
-     * @param notification
-     */
-    @Deprecated
-    void notify(Notification notification);
-
-    /**
-     * Deprecated. Use {@link #publish(Notification,ExecutorService)}.
-     * 
-     * @param notification
-     */
-    @Deprecated
-    void notify(Notification notification, ExecutorService service);
-
-    /**
-     * Publishes a notification.
-     * 
-     * @param Notification notification to publish.
-     * 
+     * {@inheritDoc}
      */
     @Override
     void publish(Notification notification);
 
     /**
-     * Publishes a notification, listener calls are done in provided executor.
-     * 
+     * {@inheritDoc}
      */
     @Override
-    void publish(Notification notification, ExecutorService service);
+    void publish(Notification notification, ExecutorService executor);
+
+    /**
+     * Registers a listener to be notified about notification subscriptions. This
+     * enables a component to know when there is a notification listener subscribed
+     * for a particular notification type.
+     * <p>
+     * On registration of this listener, the
+     * {@link NotificationInterestListener#onNotificationSubscribtion(Class)} method
+     * will be invoked for every notification type that currently has a notification listener
+     * subscribed.
+     *
+     * @param interestListener the listener that will be notified when subscriptions
+     *                         for new notification types occur.
+     * @return a {@link ListenerRegistration} instance that should be used to unregister the listener
+     *         by invoking the {@link ListenerRegistration#close()} method when no longer needed.
+     */
+    ListenerRegistration<NotificationInterestListener> registerInterestListener(
+            NotificationInterestListener interestListener);
+
+    /**
+     * Interface for a listener interested in being notified about notification subscriptions.
+     */
+    interface NotificationInterestListener extends EventListener {
+
+        /**
+         * Callback that is invoked when a notification listener subscribes for a
+         * particular notification type.
+         * <p>
+         * This method is only called for the first subscription that occurs for a
+         * particular notification type. Subsequent subscriptions for the same
+         * notification type do not trigger invocation of this method.
+         * <p>
+         * <b>Note:</b>This callback is delivered from thread not owned by this listener,
+         * all processing should be as fast as possible and implementations should
+         * not do any blocking calls or block this thread.
+         *
+         * @param notificationType the notification type for the subscription that occurred.
+         */
+        void onNotificationSubscribtion(Class<? extends Notification> notificationType);
+    }
 }

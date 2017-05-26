@@ -9,13 +9,10 @@ package org.opendaylight.controller.config.manager.impl.jmx;
 
 import java.io.Closeable;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 
 public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRegistrator {
     private final InternalJMXRegistrator currentJMXRegistrator;
@@ -44,7 +41,7 @@ public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRe
 
     public TransactionModuleJMXRegistration registerMBean(Object object,
             ObjectName on) throws InstanceAlreadyExistsException {
-        if (transactionName.equals(ObjectNameUtil.getTransactionName(on)) == false) {
+        if (!transactionName.equals(ObjectNameUtil.getTransactionName(on))) {
             throw new IllegalArgumentException("Transaction name mismatch between expected "
                             + transactionName + " " + "and " + on);
         }
@@ -66,6 +63,7 @@ public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRe
         return transactionName;
     }
 
+    @Override
     public InternalJMXRegistrator createChild() {
         return currentJMXRegistrator.createChild();
     }

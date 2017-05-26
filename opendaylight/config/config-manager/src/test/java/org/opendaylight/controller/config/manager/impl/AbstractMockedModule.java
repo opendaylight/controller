@@ -31,6 +31,12 @@ public abstract class AbstractMockedModule implements Module {
         this.id = id==null ? new ModuleIdentifier(getClass().getCanonicalName(), "mock") : id;
     }
 
+
+    @Override
+    public boolean canReuse(Module oldModule) {
+        return instance!=null;
+    }
+
     @Override
     public void validate() {
     }

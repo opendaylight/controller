@@ -7,6 +7,13 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import java.io.Closeable;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.LookupRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
@@ -15,14 +22,6 @@ import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.manager.impl.util.ModuleQNameUtil;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ObjectName;
-import java.io.Closeable;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Responsible for creating TransactionJMXRegistrator, registering transaction and all its beans,
@@ -45,7 +44,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
     private void checkTransactionName(ObjectName objectName) {
         String foundTransactionName = ObjectNameUtil
                 .getTransactionName(objectName);
-        if (transactionIdentifier.getName().equals(foundTransactionName) == false) {
+        if (!transactionIdentifier.getName().equals(foundTransactionName)) {
             throw new IllegalArgumentException("Wrong transaction name "
                     + objectName);
         }
@@ -104,6 +103,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         return txModuleJMXRegistrator;
     }
 
+    @Override
     public void close() {
         transactionJMXRegistrator.close();
     }
@@ -117,6 +117,26 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         return ModuleQNameUtil.getQNames(allCurrentFactories);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans() {
+        return lookupRuntimeBeans("*", "*");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ObjectName> lookupRuntimeBeans(String moduleName,
+                                              String instanceName) {
+        String finalModuleName = moduleName == null ? "*" : moduleName;
+        String finalInstanceName = instanceName == null ? "*" : instanceName;
+        ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
+                finalModuleName, finalInstanceName);
+        return transactionJMXRegistrator.queryNames(namePattern, null);
+    }
 
     @Override
     public String toString() {

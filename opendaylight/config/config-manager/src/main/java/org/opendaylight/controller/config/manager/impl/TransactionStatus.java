@@ -48,29 +48,32 @@ public class TransactionStatus {
     }
 
     public synchronized void checkNotCommitStarted() {
-        if (secondPhaseCommitStarted == true)
+        if (secondPhaseCommitStarted) {
             throw new IllegalStateException("Commit was triggered");
+        }
     }
 
     public synchronized void checkCommitStarted() {
-        if (secondPhaseCommitStarted == false)
+        if (!secondPhaseCommitStarted) {
             throw new IllegalStateException("Commit was not triggered");
+        }
     }
 
     public synchronized void checkNotAborted() {
-        if (aborted == true)
+        if (aborted) {
             throw new IllegalStateException("Configuration was aborted");
+        }
     }
 
     public synchronized void checkNotCommitted() {
-        if (committed == true) {
+        if (committed) {
             throw new IllegalStateException(
                     "Cannot use this method after second phase commit");
         }
     }
 
     public synchronized void checkCommitted() {
-        if (committed == false) {
+        if (!committed) {
             throw new IllegalStateException(
                     "Cannot use this method before second phase commit");
         }

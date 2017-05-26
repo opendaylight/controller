@@ -1,0 +1,53 @@
+module ntfbenchmark-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ntfbenchmark:impl";
+    prefix "ntfbenchmark-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+    import opendaylight-sal-binding-broker-impl {prefix binding-impl; revision-date 2013-10-28;}
+
+    description
+        "Service definition for ntfbenchmark project";
+
+    revision "2014-12-10" {
+        description
+            "Initial revision";
+    }
+
+    identity ntfbenchmark {
+        base config:module-type;
+        config:java-name-prefix Ntfbenchmark;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case ntfbenchmark {
+            when "/config:modules/config:module/config:type = 'ntfbenchmark'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+            container publish-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity binding-impl:binding-new-notification-publish-service;
+                    }
+                }
+            }
+            container listen-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity binding-impl:binding-new-notification-service;
+                    }
+                }
+            }
+
+        }
+    }
+}

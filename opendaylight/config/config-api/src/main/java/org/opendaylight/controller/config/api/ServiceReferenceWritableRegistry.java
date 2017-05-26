@@ -21,7 +21,6 @@ public interface ServiceReferenceWritableRegistry extends ServiceReferenceReadab
 
     /**
      * Remove service reference.
-     * @return true iif removed
      * @throws IllegalArgumentException if service interface name is not advertised by any module
      */
     void removeServiceReference(String serviceInterfaceName, String refName) throws InstanceNotFoundException;

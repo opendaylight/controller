@@ -7,12 +7,10 @@
  */
 package org.opendaylight.controller.config.util;
 
-import org.opendaylight.controller.config.api.ConflictingVersionException;
-import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.api.jmx.CommitStatus;
-import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
@@ -22,10 +20,13 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.CommitStatus;
+import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
+import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     private final ConfigRegistryMXBean configRegistryMXBeanProxy;
@@ -33,15 +34,22 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     private final MBeanServer configMBeanServer;
 
     public ConfigRegistryJMXClient(MBeanServer configMBeanServer) {
+        this(configMBeanServer, OBJECT_NAME);
+    }
+
+    private ConfigRegistryJMXClient(MBeanServer configMBeanServer, ObjectName configRegistryON) {
         this.configMBeanServer = configMBeanServer;
-        configRegistryON = OBJECT_NAME;
-        Set<ObjectInstance> searchResult = configMBeanServer.queryMBeans(
-                configRegistryON, null);
-        if (!(searchResult.size() == 1)) {
+        this.configRegistryON = configRegistryON;
+        Set<ObjectInstance> searchResult = configMBeanServer.queryMBeans(configRegistryON, null);
+        if (searchResult.size() != 1) {
             throw new IllegalStateException("Config registry not found");
         }
         configRegistryMXBeanProxy = JMX.newMXBeanProxy(configMBeanServer, configRegistryON, ConfigRegistryMXBean.class,
                 false);
+    }
+
+    public static ConfigRegistryJMXClient createWithoutNotifications(MBeanServer configMBeanServer) {
+        return new ConfigRegistryJMXClient(configMBeanServer, ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS);
     }
 
     @Override
@@ -65,9 +73,27 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
                 configMBeanServer);
     }
 
+    /**
+     * Usage of this method indicates error as config JMX uses solely MXBeans.
+     * Use {@link #newMXBeanProxy(javax.management.ObjectName, Class)}
+     * or {@link JMX#newMBeanProxy(javax.management.MBeanServerConnection, javax.management.ObjectName, Class)}
+     * This method will be removed soon.
+     */
+    @Deprecated
     public <T> T newMBeanProxy(ObjectName on, Class<T> clazz) {
-        return JMX.newMBeanProxy(configMBeanServer, on, clazz);
+        ObjectName onObj = translateServiceRefIfPossible(on, clazz, configMBeanServer);
+        return JMX.newMBeanProxy(configMBeanServer, onObj, clazz);
     }
+
+    static  ObjectName translateServiceRefIfPossible(ObjectName on, Class<?> clazz, MBeanServer configMBeanServer) {
+        ObjectName onObj = on;
+        if (ObjectNameUtil.isServiceReference(onObj) && !clazz.equals(ServiceReferenceMXBean.class)) {
+            ServiceReferenceMXBean proxy = JMX.newMXBeanProxy(configMBeanServer, onObj, ServiceReferenceMXBean.class);
+            onObj = proxy.getCurrentImplementation();
+        }
+        return onObj;
+    }
+
 
     public <T> T newMXBeanProxy(ObjectName on, Class<T> clazz) {
         return JMX.newMXBeanProxy(configMBeanServer, on, clazz);
@@ -193,7 +219,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
         } catch (AttributeNotFoundException | InstanceNotFoundException
                 | MBeanException | ReflectionException e) {
             throw new RuntimeException("Unable to get attribute "
-                    + attributeName + " for " + on, e);
+                    + attributeName + " for " + on + ". Available beans: " + lookupConfigBeans(), e);
         }
     }
 
@@ -211,5 +237,4 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     public void checkServiceReferenceExists(ObjectName objectName) throws InstanceNotFoundException {
         configRegistryMXBeanProxy.checkServiceReferenceExists(objectName);
     }
-
 }

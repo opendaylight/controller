@@ -7,42 +7,37 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-
+import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
-import java.util.Set;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 
 public class BaseJMXRegistrator implements AutoCloseable, NestableJMXRegistrator {
 
     private final InternalJMXRegistrator internalJMXRegistrator;
 
-    public BaseJMXRegistrator(MBeanServer configMBeanServer) {
-        internalJMXRegistrator = new InternalJMXRegistrator(configMBeanServer);
+    public BaseJMXRegistrator(final MBeanServer configMBeanServer) {
+        internalJMXRegistrator = InternalJMXRegistrator.create(configMBeanServer);
     }
 
-    public BaseJMXRegistrator(InternalJMXRegistrator internalJMXRegistrator) {
+    public BaseJMXRegistrator(final InternalJMXRegistrator internalJMXRegistrator) {
         this.internalJMXRegistrator = internalJMXRegistrator;
     }
 
-    public TransactionJMXRegistrator createTransactionJMXRegistrator(
-            String transactionName) {
-        return new TransactionJMXRegistrator(
-                internalJMXRegistrator.createChild(), transactionName);
+    public TransactionJMXRegistrator createTransactionJMXRegistrator(final String transactionName) {
+        return new TransactionJMXRegistrator(internalJMXRegistrator.createChild(), transactionName);
     }
 
     public ModuleJMXRegistrator createModuleJMXRegistrator() {
         return new ModuleJMXRegistrator(internalJMXRegistrator.createChild());
     }
 
-    public RootRuntimeBeanRegistratorImpl createRuntimeBeanRegistrator(
-            ModuleIdentifier moduleIdentifier) {
-        return new RootRuntimeBeanRegistratorImpl(internalJMXRegistrator.createChild(),
-                moduleIdentifier);
+    public RootRuntimeBeanRegistratorImpl createRuntimeBeanRegistrator(final ModuleIdentifier moduleIdentifier) {
+        return new RootRuntimeBeanRegistratorImpl(internalJMXRegistrator.createChild(), moduleIdentifier);
     }
 
-    public Set<ObjectName> queryNames(ObjectName name, QueryExp query) {
+    public Set<ObjectName> queryNames(final ObjectName name, final QueryExp query) {
         return internalJMXRegistrator.queryNames(name, query);
     }
 

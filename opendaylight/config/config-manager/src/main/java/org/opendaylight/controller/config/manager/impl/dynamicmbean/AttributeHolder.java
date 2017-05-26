@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
-import org.opendaylight.controller.config.api.annotations.Description;
-import org.opendaylight.controller.config.api.annotations.RequireInterface;
-
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
-import javax.management.MBeanAttributeInfo;
-import javax.management.ObjectName;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import javax.management.MBeanAttributeInfo;
+import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.annotations.Description;
+import org.opendaylight.controller.config.api.annotations.RequireInterface;
 
 @Immutable
 class AttributeHolder {
@@ -31,7 +30,7 @@ class AttributeHolder {
     private final RequireInterface requireInterfaceAnnotation;
     private final String attributeType;
 
-    public static final Set<Class<?>> PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER = new HashSet<>();
+    protected static final Set<Class<?>> PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER = new HashSet<>();
 
     static {
         PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(ObjectName.class);
@@ -40,9 +39,9 @@ class AttributeHolder {
     }
 
     public AttributeHolder(String name, Object object, String returnType,
-            boolean writable,
-            @Nullable RequireInterface requireInterfaceAnnotation,
-            String description) {
+                           boolean writable,
+                           @Nullable RequireInterface requireInterfaceAnnotation,
+                           String description) {
         if (name == null) {
             throw new NullPointerException();
         }
@@ -58,14 +57,13 @@ class AttributeHolder {
     }
 
     public MBeanAttributeInfo toMBeanAttributeInfo() {
-        MBeanAttributeInfo info = new MBeanAttributeInfo(name, attributeType,
+        return new MBeanAttributeInfo(name, attributeType,
                 description, true, true, false);
-        return info;
     }
 
     /**
      * @return annotation if setter sets ObjectName or ObjectName[], and is
-     *         annotated. Return null otherwise.
+     * annotated. Return null otherwise.
      */
     RequireInterface getRequireInterfaceOrNull() {
         return requireInterfaceAnnotation;
@@ -98,7 +96,7 @@ class AttributeHolder {
      * @param setter
      * @param jmxInterfaces
      * @return empty string if no annotation is found, or list of descriptions
-     *         separated by newline
+     * separated by newline
      */
     static String findDescription(Method setter, Set<Class<?>> jmxInterfaces) {
         List<Description> descriptions = AnnotationsHelper
@@ -112,31 +110,29 @@ class AttributeHolder {
      *
      * @param setter
      * @param inspectedInterfaces
-     * @throws IllegalStateException
-     *             if more than one value is specified by found annotations
-     * @throws IllegalArgumentException
-     *             if set of exported interfaces contains non interface type
      * @return null if no annotation is found, otherwise return the annotation
+     * @throws IllegalStateException    if more than one value is specified by found annotations
+     * @throws IllegalArgumentException if set of exported interfaces contains non interface type
      */
     static RequireInterface findRequireInterfaceAnnotation(final Method setter,
-            Set<Class<?>> inspectedInterfaces) {
+                                                           Set<Class<?>> inspectedInterfaces) {
 
         // only allow setX(ObjectName y) or setX(ObjectName[] y) or setX(List<ObjectName> y) to continue
 
-        if (setter.getParameterTypes().length > 1)
+        if (setter.getParameterTypes().length > 1 ||
+                !PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0])) {
             return null;
-        if(PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0]) == false)
-            return null;
+        }
 
         List<RequireInterface> foundRequireInterfaces = AnnotationsHelper
                 .findMethodAnnotationInSuperClassesAndIfcs(setter, RequireInterface.class, inspectedInterfaces);
         // make sure the list if not empty contains always annotation with same
         // value
-        Set<Class<?>> foundValues = new HashSet<Class<?>>();
+        Set<Class<?>> foundValues = new HashSet<>();
         for (RequireInterface ri : foundRequireInterfaces) {
             foundValues.add(ri.value());
         }
-        if (foundValues.size() == 0) {
+        if (foundValues.isEmpty()) {
             return null;
         } else if (foundValues.size() > 1) {
             throw new IllegalStateException("Error finding @RequireInterface. "

@@ -10,23 +10,21 @@ package org.opendaylight.controller.config.manager.testingservices.parallelapsp;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Strings;
 import java.io.Closeable;
-
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
+import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
 import org.opendaylight.controller.config.spi.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
 
 /**
  * Represents service that has dependency to thread pool.
@@ -34,7 +32,7 @@ import com.google.common.base.Strings;
 @NotThreadSafe
 public class TestingParallelAPSPModule implements Module,
         TestingParallelAPSPConfigMXBean {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(TestingParallelAPSPModule.class);
 
     private final DependencyResolver dependencyResolver;
@@ -104,6 +102,17 @@ public class TestingParallelAPSPModule implements Module,
             checkState("Commit was not triggered".equals(e.getMessage()),
                     e.getMessage());
         }
+
+        // test retrieving dependent module's attribute
+        int threadCount;
+        try {
+            threadCount = (Integer)dependencyResolver.getAttribute(threadPoolON, "ThreadCount");
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        checkState(threadCount > 0);
+        TestingThreadPoolConfigMXBean proxy = dependencyResolver.newMXBeanProxy(threadPoolON, TestingThreadPoolConfigMXBean.class);
+        checkState(threadCount == proxy.getThreadCount());
     }
 
     @Override
@@ -116,13 +125,13 @@ public class TestingParallelAPSPModule implements Module,
                 // changing thread pool is not supported
                 boolean reuse = threadPoolInstance == oldInstance.getThreadPool();
                 if (reuse) {
-                    logger.debug("Reusing old instance");
+                    LOG.debug("Reusing old instance");
                     instance = oldInstance;
                     instance.setSomeParam(someParam);
                 }
             }
             if (instance == null) {
-                logger.debug("Creating new instance");
+                LOG.debug("Creating new instance");
                 if (oldCloseable != null) {
                     try {
                         oldCloseable.close();
@@ -135,6 +144,11 @@ public class TestingParallelAPSPModule implements Module,
             }
         }
         return instance;
+    }
+
+    @Override
+    public boolean canReuse(final Module oldModule) {
+        return false;
     }
 
     @Override

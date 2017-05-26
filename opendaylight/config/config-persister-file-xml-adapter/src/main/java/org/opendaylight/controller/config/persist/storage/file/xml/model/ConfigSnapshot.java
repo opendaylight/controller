@@ -7,42 +7,55 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
-import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
-
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.SortedSet;
+import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 
 @XmlRootElement(name = ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME)
 public class ConfigSnapshot {
 
     public static final String SNAPSHOT_ROOT_ELEMENT_NAME = "snapshot";
 
-    private String configSnapshot;
-    private SortedSet<String> capabilities;
+    private String configXml;
+    private SortedSet<String> capabilities = new TreeSet<>();
+    private Set<String> features = new HashSet<>();
 
     ConfigSnapshot(String configXml, SortedSet<String> capabilities) {
-        this.configSnapshot = configXml;
+        this.configXml = configXml;
         this.capabilities = capabilities;
     }
 
-    public ConfigSnapshot() {
+    ConfigSnapshot(String configXml, SortedSet<String> capabilities, Set<String> features) {
+        this.configXml = configXml;
+        this.capabilities = capabilities;
+        this.features = features;
+    }
+
+    ConfigSnapshot() {
     }
 
     public static ConfigSnapshot fromConfigSnapshot(ConfigSnapshotHolder cfg) {
         return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities());
     }
 
+    public static ConfigSnapshot fromConfigSnapshot(ConfigSnapshotHolder cfg, Set<String> features) {
+        return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities(), features);
+    }
+
     @XmlAnyElement(SnapshotHandler.class)
     public String getConfigSnapshot() {
-        return configSnapshot;
+        return configXml;
     }
 
     public void setConfigSnapshot(String configSnapshot) {
-        this.configSnapshot = configSnapshot;
+        this.configXml = configSnapshot;
     }
 
     @XmlElement(name = "capability")
@@ -56,14 +69,25 @@ public class ConfigSnapshot {
         this.capabilities = capabilities;
     }
 
+    @XmlElement(name = "feature")
+    @XmlElementWrapper(name = "features")
+    @XmlJavaTypeAdapter(value=StringTrimAdapter.class)
+    public Set<String> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(final Set<String> features) {
+        this.features = features;
+    }
+
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("ConfigSnapshot{");
-        sb.append("configSnapshot='").append(configSnapshot).append('\'');
+        final StringBuilder sb = new StringBuilder("ConfigSnapshot{");
+        sb.append("configSnapshot='").append(configXml).append('\'');
         sb.append(", capabilities=").append(capabilities);
+        sb.append(", features=").append(features);
         sb.append('}');
         return sb.toString();
     }
-
 }
 

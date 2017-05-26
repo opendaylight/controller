@@ -5,7 +5,7 @@ module config-test-duplicate-attribute-in-list {
     prefix "it-duplicate";
 
     import config { prefix config; revision-date 2013-04-05; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15;}
 
     description
         "Testing IMPL";
@@ -75,7 +75,7 @@ module config-test-duplicate-attribute-in-list {
         case netconf {
             when "/config:modules/config:module/config:type = 'netconf'";
             // root runtime bean
-            leaf created-sessions {
+            leaf created-sessions2 {
                 type uint32;
             }
 

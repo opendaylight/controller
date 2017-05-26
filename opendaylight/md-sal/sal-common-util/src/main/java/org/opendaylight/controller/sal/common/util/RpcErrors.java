@@ -12,24 +12,24 @@ import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 
 /**
- * @author mirehak
- *
+ * @deprecated Use {@link org.opendaylight.yangtools.yang.common.RpcResultBuilder}
  */
+@Deprecated
 public class RpcErrors {
-    
+
     /**
      * @param applicationTag
      * @param tag
      * @param info
      * @param severity
      * @param message
-     * @param errorType 
-     * @param cause 
+     * @param errorType
+     * @param cause
      * @return {@link RpcError} implementation
      */
     public static RpcError getRpcError(String applicationTag, String tag, String info,
             ErrorSeverity severity, String message, ErrorType errorType, Throwable cause) {
-        RpcErrorTO ret = new RpcErrorTO(applicationTag, tag, info, severity, message, 
+        RpcErrorTO ret = new RpcErrorTO(applicationTag, tag, info, severity, message,
                 errorType, cause);
         return ret;
     }
@@ -94,7 +94,7 @@ public class RpcErrors {
         public Throwable getCause() {
             return cause;
         }
-        
+
         @Override
         public ErrorType getErrorType() {
             return errorType;

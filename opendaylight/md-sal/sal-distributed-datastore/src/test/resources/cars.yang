@@ -1,0 +1,23 @@
+module cars {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars";
+    prefix "cars";
+
+    revision "2014-03-13" {
+        description "Initial revision.";
+    }
+
+    container cars {
+        presence "expected to exist when empty";
+        list car {
+            key name;
+            leaf name {
+                type string;
+            }
+
+            leaf price {
+                type uint64;
+            }
+        }
+    }
+}

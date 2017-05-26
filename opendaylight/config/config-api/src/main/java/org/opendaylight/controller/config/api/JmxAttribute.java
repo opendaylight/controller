@@ -15,34 +15,40 @@ public class JmxAttribute {
     private final String attributeName;
 
     public JmxAttribute(String attributeName) {
-        if (attributeName == null)
+        if (attributeName == null) {
             throw new NullPointerException("Parameter 'attributeName' is null");
+        }
         this.attributeName = attributeName;
     }
 
+    /**
+     * Name of attribute in JMX.
+     */
     public String getAttributeName() {
         return attributeName;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         JmxAttribute that = (JmxAttribute) o;
 
-        if (attributeName != null ? !attributeName.equals(that.attributeName)
-                : that.attributeName != null)
+        if (!attributeName.equals(that.attributeName)) {
             return false;
+        }
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return attributeName != null ? attributeName.hashCode() : 0;
+        return attributeName.hashCode();
     }
 
     @Override

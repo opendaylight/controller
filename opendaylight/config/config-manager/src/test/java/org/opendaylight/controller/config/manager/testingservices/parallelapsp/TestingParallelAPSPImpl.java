@@ -9,14 +9,11 @@ package org.opendaylight.controller.config.manager.testingservices.parallelapsp;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Strings;
 import java.io.Closeable;
 import java.io.IOException;
-
 import javax.annotation.concurrent.NotThreadSafe;
-
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
-
-import com.google.common.base.Strings;
 
 @NotThreadSafe
 public class TestingParallelAPSPImpl implements TestingAPSP, Closeable {

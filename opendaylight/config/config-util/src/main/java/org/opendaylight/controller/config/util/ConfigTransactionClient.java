@@ -10,14 +10,13 @@ package org.opendaylight.controller.config.util;
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean;
 
 public interface ConfigTransactionClient extends
-        ConfigTransactionControllerMXBean {
+        ConfigTransactionControllerMXBean, BeanReader {
 
     CommitStatus commit() throws ConflictingVersionException,
             ValidationException;
@@ -41,4 +40,14 @@ public interface ConfigTransactionClient extends
     void destroyModule(String moduleName, String instanceName) throws InstanceNotFoundException;
 
     void setAttribute(ObjectName on, String jmxName, Attribute attribute);
+
+    /*
+     * Get the attribute named jmxName from the Object with ObjectName on
+     *
+     * @param on - ObjectName of the Object from which the attribute should be read
+     * @param jmxName - name of the attribute to be read
+     *
+     * @return Object of Object on with attribute name jmxName
+     */
+    Attribute getAttribute(ObjectName on, String jmxName);
 }

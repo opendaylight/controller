@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 
 import java.io.Closeable;
 import java.io.IOException;
-
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.spi.Module;
@@ -61,6 +60,11 @@ public class TestingNamingThreadPoolFactoryModule implements Module, ThreadFacto
     @Override
     public Closeable getInstance() {
         return fact;
+    }
+
+    @Override
+    public boolean canReuse(Module oldModule) {
+        return false;
     }
 
 }

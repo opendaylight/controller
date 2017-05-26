@@ -7,25 +7,22 @@
  */
 package org.opendaylight.controller.md.sal.binding.util;
 
-import java.awt.image.SinglePixelPackedSampleModel;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider.ProviderFunctionality;
-import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-
-import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
@@ -38,7 +35,7 @@ public class BindingContextUtils {
         checkNotNull(serviceProvider,"Service map should not be null");
         return new SingleConsumerContextImpl(serviceProvider);
     }
-    
+
     public static ProviderContext createProviderContext(BindingAwareProvider provider,
             ClassToInstanceMap<BindingAwareService> serviceProvider) {
         checkNotNull(provider,"Provider should not be null");
@@ -52,7 +49,7 @@ public class BindingContextUtils {
         consumer.onSessionInitialized(context);
         return context;
     }
-    
+
     public static ProviderContext createProviderContextAndInitialize(BindingAwareProvider provider,
             ClassToInstanceMap<BindingAwareService> serviceProvider) {
         ProviderContext context = createProviderContext(provider, serviceProvider);
@@ -64,9 +61,9 @@ public class BindingContextUtils {
         // FIXME: Create Proxy
         return instance;
     }
-    
+
     private static class SingleConsumerContextImpl implements ConsumerContext, AutoCloseable {
-        
+
         private ClassToInstanceMap<BindingAwareService> alreadyRetrievedServices;
         private ClassToInstanceMap<BindingAwareService> serviceProvider;
 
@@ -79,7 +76,7 @@ public class BindingContextUtils {
         public final <T extends RpcService> T getRpcService(Class<T> module) {
             return getSALService(RpcConsumerRegistry.class).getRpcService(module);
         }
-        
+
         @Override
         public final <T extends BindingAwareService> T getSALService(Class<T> service) {
             checkNotNull(service,"Service class should not be null.");
@@ -89,7 +86,7 @@ public class BindingContextUtils {
             }
             return tryToRetrieveSalService(service);
         }
-        
+
         private synchronized <T extends BindingAwareService> T tryToRetrieveSalService(Class<T> service) {
             final T potential = alreadyRetrievedServices.getInstance(service);
             if(potential != null) {
@@ -103,48 +100,36 @@ public class BindingContextUtils {
             alreadyRetrievedServices.put(service, retrieved);
             return retrieved;
         }
-        
+
         @Override
         public final void close() throws Exception {
             alreadyRetrievedServices = null;
             serviceProvider = null;
         }
     }
-    
+
     private static class SingleProviderContextImpl extends SingleConsumerContextImpl implements ProviderContext {
 
         public SingleProviderContextImpl(ClassToInstanceMap<BindingAwareService> serviceProvider) {
             super(serviceProvider);
         }
-        
+
         @Override
         public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
                 L listener) {
             return getSALService(RpcProviderRegistry.class).registerRouteChangeListener(listener);
         }
-        
+
         @Override
         public <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(Class<T> type,
                 T implementation) throws IllegalStateException {
             return getSALService(RpcProviderRegistry.class).addRoutedRpcImplementation(type, implementation);
         }
-        
+
         @Override
         public <T extends RpcService> RpcRegistration<T> addRpcImplementation(Class<T> type, T implementation)
                 throws IllegalStateException {
             return getSALService(RpcProviderRegistry.class).addRpcImplementation(type, implementation);
-        }
-        
-        @Deprecated
-        @Override
-        public void registerFunctionality(ProviderFunctionality functionality) {
-            // NOOP
-        }
-        
-        @Deprecated
-        @Override
-        public void unregisterFunctionality(ProviderFunctionality functionality) {
-            // NOOP
         }
     }
 }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+
+ NOTE: This file is deprecated as wiring is now done via blueprint. This file is kept for
+       backwards compatibility. Runtime modifications are not honored.
+-->
+<snapshot>
+    <required-capabilities>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:netty?module=netty&amp;revision=2013-11-19</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:netty:eventexecutor?module=netty-event-executor&amp;revision=2013-11-12</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup?module=threadgroup&amp;revision=2013-11-07</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:netty:timer?module=netty-timer&amp;revision=2013-11-19</capability>
+    </required-capabilities>
+    <configuration>
+
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup">netty:netty-threadgroup-fixed</type>
+                    <name>global-boss-group</name>
+                </module>
+                <module>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup">netty:netty-threadgroup-fixed</type>
+                    <name>global-worker-group</name>
+                </module>
+                <module>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty:timer">netty:netty-hashed-wheel-timer</type>
+                    <name>global-timer</name>
+                </module>
+                <module>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty:eventexecutor">netty:netty-global-event-executor</type>
+                    <name>singleton</name>
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <service>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty">netty:netty-threadgroup</type>
+                    <instance>
+                        <name>global-boss-group</name>
+                        <provider>/modules/module[type='netty-threadgroup-fixed'][name='global-boss-group']</provider>
+                    </instance>
+                    <instance>
+                        <name>global-worker-group</name>
+                        <provider>/modules/module[type='netty-threadgroup-fixed'][name='global-worker-group']</provider>
+                    </instance>
+                </service>
+                <service>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty">netty:netty-event-executor</type>
+                    <instance>
+                        <name>global-event-executor</name>
+                        <provider>/modules/module[type='netty-global-event-executor'][name='singleton']</provider>
+                    </instance>
+                </service>
+                <service>
+                    <type xmlns:netty="urn:opendaylight:params:xml:ns:yang:controller:netty">netty:netty-timer</type>
+                    <instance>
+                        <name>global-timer</name>
+                        <provider>/modules/module[type='netty-hashed-wheel-timer'][name='global-timer']</provider>
+                    </instance>
+                </service>
+            </services>
+        </data>
+
+    </configuration>
+</snapshot>

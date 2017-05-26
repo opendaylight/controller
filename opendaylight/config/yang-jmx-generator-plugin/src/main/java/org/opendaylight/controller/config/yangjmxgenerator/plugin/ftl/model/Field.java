@@ -7,45 +7,47 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
-import com.google.common.collect.Lists;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import javax.lang.model.element.Modifier;
 
 public class Field {
     private final String type;
     private final String name;
     private final String definition;
-    private final List<String> modifiers;
+    private final List<Modifier> modifiers;
     private final boolean needsDepResolver;
 
     public Field(String type, String name) {
-        this(Lists.<String> newArrayList(), type, name, null, false);
+        this(new ArrayList<>(), type, name, null, false);
     }
 
     public Field(String type, String name, String definition) {
-        this(Lists.<String> newArrayList(), type, name, definition, false);
+        this(new ArrayList<>(), type, name, definition, false);
     }
 
-    public Field(List<String> modifiers, String type, String name) {
+    public Field(List<Modifier> modifiers, String type, String name) {
         this(modifiers, type, name, null, false);
     }
 
-    public Field(List<String> modifiers, String type, String name,
+    public Field(List<Modifier> modifiers, String type, String name,
             String definition) {
         this(modifiers, type, name, definition, false);
     }
 
-    public Field(List<String> modifiers, String type, String name,
-            String definition, boolean needsDepResolver) {
-        this.modifiers = modifiers;
-        this.type = type;
-        this.name = name;
-        this.definition = definition;
+    public Field(List<Modifier> modifiers, String type, String name,
+            String nullableDefinition, boolean needsDepResolver) {
+        this.modifiers = checkNotNull(modifiers);
+        this.type = checkNotNull(type);
+        this.name = checkNotNull(name);
+        this.definition = nullableDefinition;
         this.needsDepResolver = needsDepResolver;
     }
 
     public Field(String type, String name, String definition, boolean needsDepResolver) {
-        this(Lists.<String> newArrayList(), type, name, definition, needsDepResolver);
+        this(new ArrayList<>(), type, name, definition, needsDepResolver);
     }
 
     public boolean isNeedsDepResolver() {
@@ -56,7 +58,11 @@ public class Field {
         return type;
     }
 
-    public List<String> getModifiers() {
+    public String getGenericInnerType() {
+        return type.substring(type.indexOf("<") + 1, type.indexOf(">"));
+    }
+
+    public List<Modifier> getModifiers() {
         return modifiers;
     }
 
@@ -70,5 +76,10 @@ public class Field {
 
     public boolean isArray() {
         return type.endsWith("[]");
+    }
+
+    @Override
+    public String toString() {
+        return FieldSerializer.toString(this);
     }
 }

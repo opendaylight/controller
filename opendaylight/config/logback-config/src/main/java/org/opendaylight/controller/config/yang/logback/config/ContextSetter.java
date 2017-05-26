@@ -12,6 +12,6 @@ package org.opendaylight.controller.config.yang.logback.config;
  */
 public interface ContextSetter {
 
-    public void updateContext(LogbackModule module);
+    void updateContext(LogbackModule module);
 
 }

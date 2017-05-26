@@ -26,8 +26,7 @@ public class Header {
 
     @Override
     public String toString() {
-        return "yang module name: " + yangModuleName + " "
-                + " yang module local name: " + yangModuleLocalName;
+        return HeaderSerializer.toString(this);
     }
 
 }

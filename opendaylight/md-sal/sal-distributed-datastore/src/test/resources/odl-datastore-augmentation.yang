@@ -1,0 +1,25 @@
+module odl-datastore-augmentation {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug";
+    prefix "store-aug";
+
+    import odl-datastore-test {prefix test;revision-date "2014-03-13";}
+
+    revision "2014-03-13" {
+        description "Initial revision.";
+    }
+
+
+    augment "/test:test" {
+        leaf name {
+            type string;
+        }
+    }
+
+    augment "/test:test" {
+        container aug-container {
+            container aug-inner-container {
+            }
+        }
+    }
+}

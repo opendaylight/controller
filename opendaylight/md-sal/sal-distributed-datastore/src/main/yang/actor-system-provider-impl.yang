@@ -1,0 +1,26 @@
+module actor-system-provider-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:actor-system-provider:impl";
+    prefix "actor-system-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import actor-system-provider-service {prefix actor-system;}
+
+    description "Akka actor system provider implementation";
+
+    revision "2015-10-05" {
+        description "Initial revision";
+    }
+
+    identity actor-system-provider-impl {
+        base config:module-type;
+        config:provided-service actor-system:actor-system-provider-service;
+        config:java-name-prefix ActorSystemProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case actor-system-provider-impl {
+            when "/config:modules/config:module/config:type = 'actor-system-provider-impl'";
+        }
+    }
+}

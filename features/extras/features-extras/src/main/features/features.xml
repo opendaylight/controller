@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+
+<!--
+
+ This feature file is intended to contain only third party features that cannot be accommodated in any
+ other feature file. This is a good place to add features like jolokia which no other feature depends on
+ but which provides a utility.
+-->
+<features name="odl-extras-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <feature name='odl-extras-all' version='${project.version}' description='OpenDaylight :: Extras :: All'>
+        <feature version="${project.version}">odl-jolokia</feature>
+    </feature>
+    <feature name="odl-jolokia" version="${project.version}" description="Jolokia JMX/HTTP bridge">
+        <configfile finalname="/etc/org.jolokia.osgi.cfg">mvn:org.opendaylight.controller/odl-jolokia-osgi/{{VERSION}}/cfg/configuration</configfile>
+        <feature>http</feature>
+        <bundle>mvn:org.jolokia/jolokia-osgi/{{VERSION}}</bundle>
+    </feature>
+</features>

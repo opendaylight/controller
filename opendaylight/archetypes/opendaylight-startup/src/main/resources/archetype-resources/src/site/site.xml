@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="${artifactId}">
+    <body>
+        <menu name="Overview">
+            <item name="Javadocs" href="apidocs/index.html" />
+        </menu>
+    </body>
+</project>

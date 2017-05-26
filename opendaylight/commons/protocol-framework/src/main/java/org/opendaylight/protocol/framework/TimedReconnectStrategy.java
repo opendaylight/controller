@@ -29,7 +29,7 @@ import com.google.common.base.Preconditions;
  *
  * Initial sleep time is specified as minSleep. Each subsequent unsuccessful attempt multiplies this time by a constant
  * factor (sleepFactor) -- this allows for either constant reconnect times (sleepFactor = 1), or various degrees of
- * exponential back-off (sleepFactor > 1). Maximum sleep time between attempts can be capped to a specific value
+ * exponential back-off (sleepFactor &gt; 1). Maximum sleep time between attempts can be capped to a specific value
  * (maxSleep).
  *
  * The strategy can optionally give up based on two criteria:
@@ -42,6 +42,7 @@ import com.google.common.base.Preconditions;
  *
  * Both these caps can be combined, with the strategy giving up as soon as the first one is reached.
  */
+@Deprecated
 @ThreadSafe
 public final class TimedReconnectStrategy implements ReconnectStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(TimedReconnectStrategy.class);

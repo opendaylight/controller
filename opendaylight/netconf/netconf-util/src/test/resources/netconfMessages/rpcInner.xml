@@ -1,7 +1,0 @@
-<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <noArgInner xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
-        <context-instance>
-            /modules/module[name='instance-from-code'][type='impl-netconf']/inner-running-data-additional[key='1']
-        </context-instance>
-    </noArgInner>
-</rpc>

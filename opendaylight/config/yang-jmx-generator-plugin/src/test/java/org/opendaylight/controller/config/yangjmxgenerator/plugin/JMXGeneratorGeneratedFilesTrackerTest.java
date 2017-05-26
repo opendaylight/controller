@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
-
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 public class JMXGeneratorGeneratedFilesTrackerTest {
@@ -20,7 +19,7 @@ public class JMXGeneratorGeneratedFilesTrackerTest {
         JMXGenerator.GeneratedFilesTracker tracker = new JMXGenerator.GeneratedFilesTracker();
 
         tracker.addFile(new File("./a/b/c"));
-        Assert.assertEquals(1, tracker.getFiles().size());
+        assertEquals(1, tracker.getFiles().size());
         tracker.addFile(new File("./a/b/c"));
     }
 }

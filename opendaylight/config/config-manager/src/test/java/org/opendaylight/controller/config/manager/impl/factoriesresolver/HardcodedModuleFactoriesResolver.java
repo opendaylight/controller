@@ -7,24 +7,23 @@
  */
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+import java.io.Closeable;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import java.io.Closeable;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.AbstractMap;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class HardcodedModuleFactoriesResolver implements ModuleFactoriesResolver {
     private Map<String, Map.Entry<ModuleFactory, BundleContext>> factories;
@@ -58,10 +57,6 @@ public class HardcodedModuleFactoriesResolver implements ModuleFactoriesResolver
                 throw new IllegalArgumentException(errors.toString());
             }
         }
-    }
-
-    public HardcodedModuleFactoriesResolver(ModuleFactory... list) {
-        this(mockBundleContext(),list);
     }
 
     private static BundleContext mockBundleContext() {

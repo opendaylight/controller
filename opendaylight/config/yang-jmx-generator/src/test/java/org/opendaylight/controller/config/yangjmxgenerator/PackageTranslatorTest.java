@@ -11,13 +11,11 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.Map;
-
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.model.api.Module;
-
-import com.google.common.collect.Maps;
 
 public class PackageTranslatorTest {
     public static final String EXPECTED_PACKAGE_PREFIX = "org.opendaylight.controller.config";

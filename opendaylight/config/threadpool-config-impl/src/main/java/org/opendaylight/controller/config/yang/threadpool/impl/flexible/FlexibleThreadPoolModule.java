@@ -17,8 +17,8 @@
 */
 package org.opendaylight.controller.config.yang.threadpool.impl.flexible;
 
+import com.google.common.base.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.threadpool.util.FlexibleThreadPoolWrapper;
 
@@ -50,11 +50,15 @@ public final class FlexibleThreadPoolModule extends org.opendaylight.controller.
         JmxAttributeValidationException.checkNotNull(getMaxThreadCount(), maxThreadCountJmxAttribute);
         JmxAttributeValidationException.checkCondition(getMaxThreadCount() > 0, "must be greater than zero",
                 maxThreadCountJmxAttribute);
+
+        if(getQueueCapacity() != null) {
+            JmxAttributeValidationException.checkCondition(getQueueCapacity() > 0, "Queue capacity cannot be < 1", queueCapacityJmxAttribute);
+        }
     }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
         return new FlexibleThreadPoolWrapper(getMinThreadCount(), getMaxThreadCount(), getKeepAliveMillis(),
-                TimeUnit.MILLISECONDS, getThreadFactoryDependency());
+                TimeUnit.MILLISECONDS, getThreadFactoryDependency(), Optional.fromNullable(getQueueCapacity()));
     }
 }

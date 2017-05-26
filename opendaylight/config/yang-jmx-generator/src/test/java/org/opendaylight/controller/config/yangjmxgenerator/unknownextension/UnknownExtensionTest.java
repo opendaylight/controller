@@ -10,18 +10,14 @@ package org.opendaylight.controller.config.yangjmxgenerator.unknownextension;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Lists;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.google.common.collect.Lists;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
 
@@ -31,23 +27,16 @@ public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
                 .getResourceAsStream("test-ifcWithUnknownExtension.yang"));
         yangISs.addAll(getConfigApiYangInputStreams());
         try {
-            YangParserImpl parser = new YangParserImpl();
-            Set<Module> modulesToBuild = parser
-                    .parseYangModelsFromStreams(yangISs);
-            context = parser.resolveSchemaContext(modulesToBuild);
-            namesToModules = YangModelSearchUtils.mapModulesByNames(context
-                    .getModules());
+            context = YangParserTestUtils.parseYangStreams(yangISs);
+            namesToModules = YangModelSearchUtils.mapModulesByNames(context.getModules());
             configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
-            threadsModule = namesToModules
-                    .get(ConfigConstants.CONFIG_THREADS_MODULE);
+            threadsModule = namesToModules.get(ConfigConstants.CONFIG_THREADS_MODULE);
             try {
                 super.testCreateFromIdentities();
                 fail();
             } catch (IllegalStateException e) {
-                assertTrue(
-                        e.getMessage(),
-                        e.getMessage().startsWith(
-                                "Unexpected unknown schema node."));
+                assertTrue(e.getMessage(),
+                        e.getMessage().startsWith("Unexpected unknown schema node."));
             }
         } finally {
             for (InputStream is : yangISs) {

@@ -11,9 +11,15 @@ import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+/**
+ *
+ * @deprecated Replaced by {@link org.opendaylight.controller.md.sal.binding.api.DataChangeListener}
+ *
+ */
+@Deprecated
 public interface DataChangeListener extends
         org.opendaylight.controller.md.sal.common.api.data.DataChangeListener<InstanceIdentifier<? extends DataObject>, DataObject> {
 
     @Override
-    public void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change);
+    void onDataChanged(DataChangeEvent<InstanceIdentifier<?>, DataObject> change);
 }

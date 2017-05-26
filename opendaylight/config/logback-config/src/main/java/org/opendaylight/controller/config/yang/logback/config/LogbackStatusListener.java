@@ -17,18 +17,16 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.status.StatusBase;
+import ch.qos.logback.core.status.StatusListener;
+import ch.qos.logback.core.status.StatusManager;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.status.StatusBase;
-import ch.qos.logback.core.status.StatusListener;
-import ch.qos.logback.core.status.StatusManager;
 
 public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBean, Closeable {
 
@@ -108,8 +106,9 @@ public class LogbackStatusListener implements StatusListener, LogbackRuntimeMXBe
 
     @Override
     public void close() throws IOException {
-        if (reg != null)
+        if (reg != null) {
             reg.close();
+        }
         unregisterFromLogback();
     }
 

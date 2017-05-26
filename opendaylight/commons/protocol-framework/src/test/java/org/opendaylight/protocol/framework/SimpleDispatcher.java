@@ -54,6 +54,10 @@ public class SimpleDispatcher extends AbstractDispatcher<SimpleSession, SimpleSe
         return super.createClient(address, strategy, new SimplePipelineInitializer(listenerFactory));
     }
 
+    public Future<Void> createReconnectingClient(final InetSocketAddress address, final ReconnectStrategyFactory strategy, final SessionListenerFactory<SimpleSessionListener> listenerFactory) {
+        return super.createReconnectingClient(address, strategy, new SimplePipelineInitializer(listenerFactory));
+    }
+
     public ChannelFuture createServer(final InetSocketAddress address, final SessionListenerFactory<SimpleSessionListener> listenerFactory) {
         return super.createServer(address, new SimplePipelineInitializer(listenerFactory));
     }

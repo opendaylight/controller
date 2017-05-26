@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.config.manager.impl.runtimembean;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.internal.matchers.StringContains.containsString;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import java.lang.management.ManagementFactory;
 import java.util.Map;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +28,6 @@ import org.opendaylight.controller.config.manager.impl.AbstractLockedPlatformMBe
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.HierarchicalRuntimeBeanRegistrationImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 public class RuntimeBeanRegistratorImplTest extends
         AbstractLockedPlatformMBeanServerTest {
@@ -60,11 +57,11 @@ public class RuntimeBeanRegistratorImplTest extends
         assertEquals(0, baseJMXRegistrator.getRegisteredObjectNames().size());
     }
 
-    protected void checkExists(ObjectName on) throws Exception {
+    protected void checkExists(final ObjectName on) throws Exception {
         platformMBeanServer.getMBeanInfo(on);
     }
 
-    protected void checkNotExists(ObjectName on) throws Exception {
+    protected void checkNotExists(final ObjectName on) throws Exception {
         try {
             platformMBeanServer.getMBeanInfo(on);
             fail();
@@ -98,7 +95,7 @@ public class RuntimeBeanRegistratorImplTest extends
     }
 
     private HierarchicalRuntimeBeanRegistration createAdditional(
-            HierarchicalRuntimeBeanRegistrationImpl rootRegistration)
+            final HierarchicalRuntimeBeanRegistrationImpl rootRegistration)
             throws Exception {
 
         HierarchicalRuntimeBeanRegistrationImpl registration = rootRegistration

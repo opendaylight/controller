@@ -8,45 +8,53 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static org.junit.Assert.assertEquals;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.management.MXBean;
-
 import org.junit.Test;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingScheduledThreadPoolServiceInterface;
 import org.opendaylight.controller.config.manager.testingservices.seviceinterface.TestingThreadPoolServiceInterface;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
-import com.google.common.collect.Sets;
-
 public class InterfacesHelperTest {
 
-    interface SuperA {
+    public interface SuperA {
 
     }
 
-    interface SuperBMXBean {
+    public interface SuperBMXBean {
 
     }
 
-    interface SuperC extends SuperA, SuperBMXBean {
+    public interface SuperC extends SuperA, SuperBMXBean {
 
     }
 
-    class SuperClass implements SuperC {
+    public class SuperClass implements SuperC {
 
     }
 
     @MXBean
-    interface SubA {
+    public interface SubA {
 
     }
 
-    abstract class SubClass extends SuperClass implements SubA, Module {
+    @ServiceInterfaceAnnotation(value = "a", osgiRegistrationType = SuperA.class, namespace = "n", revision = "r", localName = "l")
+    public interface Service extends AbstractServiceInterface{}
+    @ServiceInterfaceAnnotation(value = "b", osgiRegistrationType = SuperC.class, namespace = "n", revision = "r", localName = "l")
+    public interface SubService extends Service{}
+
+    public abstract class SubClass extends SuperClass implements SubA, Module {
+
+    }
+
+    public abstract class SubClassWithService implements SubService, Module {
 
     }
 
@@ -56,6 +64,19 @@ public class InterfacesHelperTest {
                 SubA.class, Identifiable.class, Module.class);
         assertEquals(expected,
                 InterfacesHelper.getAllInterfaces(SubClass.class));
+    }
+
+    @Test
+    public void testGetServiceInterfaces() throws Exception {
+        assertEquals(Collections.<Class<?>>emptySet(), InterfacesHelper.getServiceInterfaces(SubClass.class));
+        assertEquals(Sets.<Class<?>>newHashSet(Service.class, SubService.class), InterfacesHelper.getServiceInterfaces(SubClassWithService.class));
+    }
+
+    @Test
+    public void testGetOsgiRegistrationTypes() throws Exception {
+        assertEquals(Collections.<Class<?>>emptySet(), InterfacesHelper.getOsgiRegistrationTypes(SubClass.class));
+        assertEquals(Sets.<Class<?>>newHashSet(SuperA.class, SuperC.class),
+                InterfacesHelper.getOsgiRegistrationTypes(SubClassWithService.class));
     }
 
     @Test
@@ -71,9 +92,9 @@ public class InterfacesHelperTest {
         input.add(clazz);
         Set<Class<? extends AbstractServiceInterface>> result = InterfacesHelper.getAllAbstractServiceInterfaceClasses(input);
 
-        Set<Class<?>> expected = Sets.newHashSet((Class<?>) TestingScheduledThreadPoolServiceInterface.class,
+        Set<Class<?>> expected = ImmutableSet.of((Class<?>) TestingScheduledThreadPoolServiceInterface.class,
                 TestingThreadPoolServiceInterface.class
-                );
+        );
         assertEquals(expected, result);
     }
 

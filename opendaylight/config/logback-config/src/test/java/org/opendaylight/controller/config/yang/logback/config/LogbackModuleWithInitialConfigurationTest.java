@@ -9,29 +9,6 @@ package org.opendaylight.controller.config.yang.logback.config;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMX;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
-import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -39,8 +16,28 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
-
 import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import org.junit.Before;
+import org.junit.Test;
+import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
+import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.slf4j.LoggerFactory;
 
 public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTest {
 
@@ -50,7 +47,7 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
     public void setUp() throws IOException, ClassNotFoundException {
 
         factory = new LogbackModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(factory));
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,factory));
     }
 
     /**
@@ -145,7 +142,7 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
     }
 
     public ObjectName createBeans() throws JoranException, InstanceAlreadyExistsException, IOException,
-            MalformedObjectNameException, InstanceNotFoundException {
+            MalformedObjectNameException, InstanceNotFoundException, ValidationException, ConflictingVersionException {
 
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -153,8 +150,9 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
         configurator.setContext(lc);
         configurator.doConfigure("src/test/resources/simple_config_logback.xml");
         File f = new File("target/it");
-        if (f.exists())
-            FileUtils.cleanDirectory(f);
+        if (f.exists()) {
+            cleanDirectory(f);
+        }
         ch.qos.logback.classic.Logger logger = lc.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent> fileAppender = (ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent>) logger
                 .getAppender("VARLOGFILE");
@@ -175,14 +173,14 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
         rollingApp.setMinIndex(rollingPolicy.getMinIndex());
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = (SizeBasedTriggeringPolicy<ILoggingEvent>) fileAppender
                 .getTriggeringPolicy();
-        rollingApp.setMaxFileSize(triggeringPolicy.getMaxFileSize());
+        rollingApp.setMaxFileSize(LogbackModuleFactory.getMaxFileSize(triggeringPolicy).toString());
         rollingApp.setName(fileAppender.getName());
         rollingApp.setFileNamePattern(rollingPolicy.getFileNamePattern());
         rollingAppenders.add(rollingApp);
 
-        assertEquals(rollingApp.getFileName(), "target/osgi.log");
-        assertEquals(rollingApp.getMaxFileSize(), "50MB");
-        assertEquals(rollingApp.getName(), "VARLOGFILE");
+        assertEquals("target/osgi.log", rollingApp.getFileName());
+        assertEquals("50 MB", rollingApp.getMaxFileSize());
+        assertEquals("VARLOGFILE", rollingApp.getName());
 
         List<ConsoleAppenderTO> consoleAppenders = new ArrayList<>();
         ConsoleAppenderTO consoleApp = new ConsoleAppenderTO();

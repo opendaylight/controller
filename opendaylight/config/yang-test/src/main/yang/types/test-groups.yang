@@ -1,0 +1,79 @@
+module test-groups {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:test:groups";
+    prefix "tg";
+
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+
+    description
+        "Groupings generated for testing";
+
+    revision "2014-12-08";
+
+    grouping common-operational-rpc {
+        rpcx:rpc-context-instance common-rpc-ctx;
+        rpcx:rpc-context-instance common-rpc-ctx-two;
+    }
+
+    typedef version {
+        type enumeration {
+            enum version1 {
+                value 1;
+              }
+            enum version2 {
+                value 2;
+              }
+            enum version3 {
+                value 3;
+              }
+            enum version4 {
+                value 4;
+              }
+        }
+    }
+
+    grouping config-grouping {
+
+        container from-grouping {
+            leaf enum-in-grouping {
+                type version;
+            }
+        }
+    }
+
+
+    identity common-rpc-ctx;
+    identity common-rpc-ctx-two;
+
+    rpc common-rpc {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance "common-rpc-ctx";
+                }
+            }
+        }
+
+        output {
+            leaf output {
+                type boolean;
+            }
+        }
+    }
+
+    rpc common-rpc-two {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance "common-rpc-ctx-two";
+                }
+            }
+        }
+
+        output {
+            leaf output {
+                type uint32;
+            }
+        }
+    }
+}

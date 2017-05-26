@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
 import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +24,6 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
 
 /**
  * Represents identity derived from {@link ConfigConstants#SERVICE_TYPE_Q_NAME}.
@@ -43,10 +43,9 @@ import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstant
  * </pre>
  *
  * </blockquote>
- * </p>
  */
 public class ServiceInterfaceEntry extends AbstractEntry {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOG = LoggerFactory
             .getLogger(ServiceInterfaceEntry.class);
 
     private static final String CLASS_NAME_SUFFIX = "ServiceInterface";
@@ -55,6 +54,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
     private final QName qName;
     private final String nullableDescription, packageName, typeName;
     private final QName yangModuleQName;
+    private final boolean registerToOsgi;
 
     private ServiceInterfaceEntry(IdentitySchemaNode id, String packageName, QName yangModuleQName) {
         this(Optional.<ServiceInterfaceEntry> absent(), id, packageName, yangModuleQName);
@@ -67,11 +67,14 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         List<UnknownSchemaNode> unknownSchemaNodes = id.getUnknownSchemaNodes();
         List<String> exportedOsgiClassNames = new ArrayList<>(
                 unknownSchemaNodes.size());
+
+        boolean disableOsgiServiceRegistration = false;
         for (UnknownSchemaNode usn : unknownSchemaNodes) {
-            if (ConfigConstants.JAVA_CLASS_EXTENSION_QNAME.equals(usn
-                    .getNodeType())) {
+            if (ConfigConstants.JAVA_CLASS_EXTENSION_QNAME.equals(usn.getNodeType())) {
                 String localName = usn.getNodeParameter();
                 exportedOsgiClassNames.add(localName);
+            } else if (ConfigConstants.DISABLE_OSGI_SERVICE_REG_QNAME.equals(usn.getNodeType())) {
+                disableOsgiServiceRegistration = true;
             } else {
                 throw new IllegalStateException(format(
                         "Unexpected unknown schema node. Expected %s, got %s",
@@ -86,6 +89,8 @@ public class ServiceInterfaceEntry extends AbstractEntry {
                             getClass(),
                             ConfigConstants.JAVA_CLASS_EXTENSION_QNAME, id));
         }
+
+        this.registerToOsgi = !disableOsgiServiceRegistration;
         this.exportedOsgiClassName = exportedOsgiClassNames.get(0);
         qName = id.getQName();
         nullableDescription = id.getDescription();
@@ -115,22 +120,26 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         return qName;
     }
 
+    public boolean isRegisterToOsgi() {
+        return registerToOsgi;
+    }
+
     /**
      * @return Map of QNames as keys and ServiceInterfaceEntry instances as
      *         values
      */
     public static Map<QName, ServiceInterfaceEntry> create(Module currentModule,
             String packageName,Map<IdentitySchemaNode, ServiceInterfaceEntry> definedSEItracker) {
-        logger.debug("Generating ServiceInterfaces from {} to package {}",
+        LOG.debug("Generating ServiceInterfaces from {} to package {}",
                 currentModule.getNamespace(), packageName);
 
         Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         Set<IdentitySchemaNode> notVisited = new HashSet<>(
                 currentModule.getIdentities());
         int lastSize = notVisited.size() + 1;
-        while (notVisited.size() > 0) {
+        while (!notVisited.isEmpty()) {
             if (notVisited.size() == lastSize) {
-                logger.debug(
+                LOG.debug(
                         "Following identities will be ignored while generating ServiceInterfaces, as they are not derived from {} : {}",
                         SERVICE_TYPE_Q_NAME, notVisited);
                 break;
@@ -175,7 +184,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         for (ServiceInterfaceEntry sie : identitiesToSIs.values()) {
             resultMap.put(sie.getQName(), sie);
         }
-        logger.debug("Number of ServiceInterfaces to be generated: {}",
+        LOG.debug("Number of ServiceInterfaces to be generated: {}",
                 resultMap.size());
         return resultMap;
     }
@@ -198,25 +207,33 @@ public class ServiceInterfaceEntry extends AbstractEntry {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         ServiceInterfaceEntry that = (ServiceInterfaceEntry) o;
 
-        if (!maybeBaseCache.equals(that.maybeBaseCache))
+        if (!maybeBaseCache.equals(that.maybeBaseCache)) {
             return false;
-        if (!nullableDescription.equals(that.nullableDescription))
+        }
+        if (!nullableDescription.equals(that.nullableDescription)) {
             return false;
-        if (!exportedOsgiClassName.equals(that.exportedOsgiClassName))
+        }
+        if (!exportedOsgiClassName.equals(that.exportedOsgiClassName)) {
             return false;
-        if (!qName.equals(that.qName))
+        }
+        if (!qName.equals(that.qName)) {
             return false;
-        if (!packageName.equals(that.packageName))
+        }
+        if (!packageName.equals(that.packageName)) {
             return false;
-        if (!typeName.equals(that.typeName))
+        }
+        if (!typeName.equals(that.typeName)) {
             return false;
+        }
 
         return true;
     }

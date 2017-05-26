@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.config.api;
 
-import org.opendaylight.yangtools.yang.binding.BaseIdentity;
-
 import java.beans.ConstructorProperties;
+import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 
 public final class IdentityAttributeRef {
 
@@ -19,8 +18,9 @@ public final class IdentityAttributeRef {
 
     @ConstructorProperties(QNAME_ATTR_NAME)
     public IdentityAttributeRef(String qNameOfIdentity) {
-        if (qNameOfIdentity == null)
+        if (qNameOfIdentity == null) {
             throw new NullPointerException("Parameter " + QNAME_ATTR_NAME + " is null");
+        }
         this.qNameOfIdentity = qNameOfIdentity;
     }
 
@@ -38,7 +38,7 @@ public final class IdentityAttributeRef {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("IdentityAttributeRef{");
+        final StringBuilder sb = new StringBuilder("IdentityAttributeRef{");
         sb.append("qNameOfIdentity='").append(qNameOfIdentity).append('\'');
         sb.append('}');
         return sb.toString();
@@ -46,12 +46,18 @@ public final class IdentityAttributeRef {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof IdentityAttributeRef)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof IdentityAttributeRef)) {
+            return false;
+        }
 
         IdentityAttributeRef that = (IdentityAttributeRef) o;
 
-        if (!qNameOfIdentity.equals(that.qNameOfIdentity)) return false;
+        if (!qNameOfIdentity.equals(that.qNameOfIdentity)) {
+            return false;
+        }
 
         return true;
     }

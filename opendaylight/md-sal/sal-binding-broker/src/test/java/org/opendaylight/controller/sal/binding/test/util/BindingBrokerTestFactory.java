@@ -11,28 +11,25 @@ import java.util.concurrent.ExecutorService;
 
 import javassist.ClassPool;
 
-import org.opendaylight.controller.sal.core.api.data.DataStore;
-import org.opendaylight.controller.sal.dom.broker.impl.DataStoreStatsWrapper;
-import org.opendaylight.controller.sal.dom.broker.impl.HashMapDataStore;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareDataStoreAdapter;
-
+import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
+@Beta
 public class BindingBrokerTestFactory {
 
-    private static final ClassPool CLASS_POOL = new ClassPool();
+    private static final ClassPool CLASS_POOL = ClassPool.getDefault();
     private boolean startWithParsedSchema = true;
     private ExecutorService executor;
     private ClassPool classPool;
 
-    
+
     public boolean isStartWithParsedSchema() {
         return startWithParsedSchema;
     }
 
-    public void setStartWithParsedSchema(boolean startWithParsedSchema) {
+    public void setStartWithParsedSchema(final boolean startWithParsedSchema) {
         this.startWithParsedSchema = startWithParsedSchema;
     }
 
@@ -40,7 +37,7 @@ public class BindingBrokerTestFactory {
         return executor;
     }
 
-    public void setExecutor(ExecutorService executor) {
+    public void setExecutor(final ExecutorService executor) {
         this.executor = executor;
     }
 
@@ -55,11 +52,11 @@ public class BindingBrokerTestFactory {
         if(classPool == null) {
             return CLASS_POOL;
         }
-        
+
         return classPool;
     }
 
-    public void setClassPool(ClassPool classPool) {
+    public void setClassPool(final ClassPool classPool) {
         this.classPool = classPool;
     }
 

@@ -1,0 +1,16 @@
+module basic-rpc-test {
+    yang-version 1;
+
+    namespace "urn:opendaylight:controller:basic-rpc-test";
+    prefix "base-endpoint";
+
+    revision "2016-01-20" {
+        description
+                "Initial revision.";
+    }
+
+    rpc basic-global {
+        description "Invoke a global rpc that should only have one implementation registered on one of the nodes.
+                     It has no input/output.";
+    }
+}

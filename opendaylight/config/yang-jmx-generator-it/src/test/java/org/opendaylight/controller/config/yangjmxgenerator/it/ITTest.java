@@ -11,7 +11,6 @@ import static org.junit.Assert.fail;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,7 +41,7 @@ public class ITTest extends AbstractConfigTest {
     public void setUp() {
 
         factory = new TestImplModuleFactory();
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 factory));
     }
 

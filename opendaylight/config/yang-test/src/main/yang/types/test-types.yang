@@ -3,6 +3,8 @@ module test-types {
     namespace "urn:opendaylight:params:xml:ns:yang:controller:config:test:types";
     prefix "tt";
 
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+
     description
         "Types generated for testing";
 
@@ -18,8 +20,8 @@ module test-types {
 
     typedef extend-enum {
         type enumeration {
-            enum "ONE";
-            enum "TWO";
+            enum "one";
+            enum "two";
         }
     }
 
@@ -31,4 +33,43 @@ module test-types {
         }
       }
 
+
+
+    identity test-identity1 {
+
+    }
+
+    identity test-identity2 {
+        base test-identity1;
+    }
+
+    grouping common-operational {
+       leaf common-stat {
+           type uint64;
+       }
+       // This would not work, since it clashes with identity common-rpc-ctx from test-groups
+       // Both grouping add the same unknown node "rpcx:rpc-context-instance common-rpc-ctx-three;"
+       // and we cannot match the unknown node to the grouping that added it
+       //rpcx:rpc-context-instance common-rpc-ctx-three;
+       rpcx:rpc-context-instance common-rpc-ctx-three;
+    }
+
+    //identity common-rpc-ctx;
+    identity common-rpc-ctx-three;
+
+    rpc common-rpc-three {
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance "common-rpc-ctx-three";
+                }
+            }
+        }
+
+        output {
+            leaf output {
+                type string;
+            }
+        }
+    }
 }

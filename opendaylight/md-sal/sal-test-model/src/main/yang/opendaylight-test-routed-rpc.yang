@@ -1,0 +1,46 @@
+module opendaylight-test-routed-rpc {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:rpc:routing";
+    prefix "rpc";
+    import yang-ext { prefix ext; }
+
+    description
+        "Test model for testing of registering rpc service on binding independent mount point 
+        and retrieving rpc service via binding aware mount point.";
+
+    revision "2014-07-01" {
+        description
+            "Initial revision";
+    }
+
+    identity test-context {
+        description "Test Context";
+    }
+    
+    typedef encapsulated-route {
+        type instance-identifier;
+    }
+    
+    grouping route-in-grouping {
+        leaf route {
+            type instance-identifier;
+            ext:context-reference test-context;
+        }
+    }
+    
+    grouping encapsulated-route-in-grouping {
+        leaf route {
+            type encapsulated-route;
+            ext:context-reference test-context;
+        }
+    }
+
+    rpc routed-simple-route {
+        input {
+            leaf route {
+                type instance-identifier;
+                ext:context-reference test-context;
+            }
+        }
+    }
+}

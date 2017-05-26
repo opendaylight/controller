@@ -40,25 +40,31 @@ public abstract class AbstractDependencyAttribute extends AbstractAttribute  imp
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!super.equals(o))
+        }
+        if (!super.equals(o)) {
             return false;
+        }
 
         AbstractDependencyAttribute that = (AbstractDependencyAttribute) o;
 
         if (dependency != null ? !dependency.equals(that.dependency)
-                : that.dependency != null)
+                : that.dependency != null) {
             return false;
+        }
         if (nullableDefault != null ? !nullableDefault
-                .equals(that.nullableDefault) : that.nullableDefault != null)
+                .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
+        }
         if (nullableDescription != null ? !nullableDescription
                 .equals(that.nullableDescription)
-                : that.nullableDescription != null)
+                : that.nullableDescription != null) {
             return false;
+        }
 
         return true;
     }

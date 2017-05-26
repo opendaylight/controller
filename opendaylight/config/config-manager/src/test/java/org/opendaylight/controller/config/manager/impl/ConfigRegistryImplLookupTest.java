@@ -11,15 +11,14 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.collect.Sets;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,8 +28,6 @@ import org.opendaylight.controller.config.api.runtime.RuntimeBean;
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.manager.impl.runtimembean.TestingRuntimeBean;
-
-import com.google.common.collect.Sets;
 
 public class ConfigRegistryImplLookupTest extends
         AbstractLockedPlatformMBeanServerTest {

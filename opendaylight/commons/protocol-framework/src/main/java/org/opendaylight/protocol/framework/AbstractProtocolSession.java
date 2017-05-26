@@ -13,6 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public abstract class AbstractProtocolSession<M> extends SimpleChannelInboundHandler<Object> implements ProtocolSession<M> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProtocolSession.class);
 
@@ -37,9 +38,16 @@ public abstract class AbstractProtocolSession<M> extends SimpleChannelInboundHan
     public final void channelInactive(final ChannelHandlerContext ctx) {
         LOG.debug("Channel {} inactive.", ctx.channel());
         endOfInput();
+        try {
+            // Forward channel inactive event, all handlers in pipeline might be interested in the event e.g. close channel handler of reconnect promise
+            super.channelInactive(ctx);
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to delegate channel inactive event on channel " + ctx.channel(), e);
+        }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected final void channelRead0(final ChannelHandlerContext ctx, final Object msg) {
         LOG.debug("Message was received: {}", msg);
         handleMessage((M) msg);

@@ -1,2 +1,0 @@
-    </modules>
-    <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">

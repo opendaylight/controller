@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.manager.testingservices.threadpool;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
@@ -18,8 +19,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-
-import com.google.common.collect.Lists;
 
 public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
         TestingModifiableThreadPoolIfc {
@@ -53,6 +52,7 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
     @Override
     public void close() throws IOException {
         executorService.shutdown();
+        allExecutors.remove(executorService);
 
     }
 

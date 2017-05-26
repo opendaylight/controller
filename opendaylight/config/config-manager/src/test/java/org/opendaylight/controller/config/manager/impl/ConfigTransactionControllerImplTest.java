@@ -7,11 +7,19 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.collect.Sets;
+import java.lang.management.ManagementFactory;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.config.api.ServiceReferenceWritableRegistry;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
@@ -19,16 +27,6 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.manager.impl.runtimembean.TestingRuntimeBean;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
-
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
 
 public class ConfigTransactionControllerImplTest extends
         AbstractLockedPlatformMBeanServerTest {
@@ -70,7 +68,7 @@ public class ConfigTransactionControllerImplTest extends
             }
         }, currentlyRegisteredFactories);
 
-        ServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
+        SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
                 ServiceReferenceRegistryImpl.createInitialSRLookupRegistry(), txLookupRegistry, currentlyRegisteredFactories);
 
 
@@ -122,5 +120,4 @@ public class ConfigTransactionControllerImplTest extends
                 moduleName124, instanceName134);
         assertEquals(Sets.newHashSet(name1), beans);
     }
-
 }

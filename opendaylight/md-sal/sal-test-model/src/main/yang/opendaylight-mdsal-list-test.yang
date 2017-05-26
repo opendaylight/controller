@@ -1,0 +1,55 @@
+module opendaylight-mdsal-list-test {
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:list";
+    prefix list-test;
+
+
+    description
+        "This module contains a collection of YANG definitions used for
+        some test cases.";
+
+    revision 2014-07-01 {
+        description
+        "Test model for testing data broker with nested lists.";
+    }
+
+    grouping two-level-list {
+        list top-level-list {
+            description
+                "Top Level List";
+            key "name";
+            leaf name {
+                type string;
+            }
+            list nested-list {
+                key "name";
+                leaf name {
+                    type string;
+                }
+                leaf type {
+                    type string;
+//                    mandatory true;
+//                    description
+//                        "Mandatory type of list.";
+                }
+                ordered-by user;
+                description
+                    "A list of service functions that compose the service chain";
+            }
+        }
+    }
+
+    container top {
+        uses two-level-list;
+    }
+
+    notification two-level-list-changed {
+        uses two-level-list;
+    }
+
+    rpc put-top {
+        input {
+            uses two-level-list;
+        }
+    }
+}

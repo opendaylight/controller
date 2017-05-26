@@ -16,22 +16,6 @@
  */
 package org.opendaylight.controller.config.yang.logback.config;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.DependencyResolverFactory;
-import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.osgi.framework.BundleContext;
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -41,10 +25,26 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-
+import ch.qos.logback.core.util.FileSize;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DependencyResolverFactory;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.osgi.framework.BundleContext;
+import org.slf4j.LoggerFactory;
 
 /**
 *
@@ -59,8 +59,8 @@ public class LogbackModuleFactory extends
     private Map<String, FileAppenderTO> fileDTOs;
 
     @Override
-    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            BundleContext bundleContext) {
+    public LogbackModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
@@ -74,8 +74,8 @@ public class LogbackModuleFactory extends
     }
 
     @Override
-    public LogbackModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
-            LogbackModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+    public LogbackModule instantiateModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final LogbackModule oldModule, final AutoCloseable oldInstance, final BundleContext bundleContext) {
         Preconditions.checkArgument(instanceName.equals(INSTANCE_NAME),
                 "There should be just one instance of logback, named " + INSTANCE_NAME);
         prepareDTOs();
@@ -97,7 +97,7 @@ public class LogbackModuleFactory extends
         prepareAppendersDTOs(context);
     }
 
-    private void prepareAppendersDTOs(LoggerContext context) {
+    private void prepareAppendersDTOs(final LoggerContext context) {
         this.rollingDTOs = new HashMap<>();
         this.consoleDTOs = new HashMap<>();
         this.fileDTOs = new HashMap<>();
@@ -131,7 +131,7 @@ public class LogbackModuleFactory extends
                         app.setFileNamePattern(rollingPolicy.getFileNamePattern());
                         app.setRollingPolicyType("FixedWindowRollingPolicy");
                     } else if (rollingApp.getRollingPolicy() instanceof TimeBasedRollingPolicy<?>) {
-                        TimeBasedRollingPolicy rollingPolicy = (TimeBasedRollingPolicy) rollingApp.getRollingPolicy();
+                        TimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = (TimeBasedRollingPolicy<ILoggingEvent>) rollingApp.getRollingPolicy();
                         app.setRollingPolicyType("TimeBasedRollingPolicy");
                         app.setFileNamePattern(rollingPolicy.getFileNamePattern());
                         app.setMaxHistory(rollingPolicy.getMaxHistory());
@@ -139,7 +139,7 @@ public class LogbackModuleFactory extends
                     }
                     SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = (SizeBasedTriggeringPolicy<ILoggingEvent>) rollingApp
                             .getTriggeringPolicy();
-                    app.setMaxFileSize(triggeringPolicy.getMaxFileSize());
+                    app.setMaxFileSize(getMaxFileSize(triggeringPolicy).toString());
                     app.setName(rollingApp.getName());
                     this.rollingDTOs.put(rollingApp.getName(), app);
                 } else if (appender instanceof ch.qos.logback.core.FileAppender<?>) {
@@ -166,17 +166,18 @@ public class LogbackModuleFactory extends
         }
     }
 
-    private Map<String, LoggerTO> prepareLoggersDTOs(LoggerContext context) {
+    private Map<String, LoggerTO> prepareLoggersDTOs(final LoggerContext context) {
         Map<String, LoggerTO> DTOs = new HashMap<>();
         List<String> appenders = new ArrayList<>();
         List<org.slf4j.Logger> loggersToBeAdd = removeUnusableLoggers(context.getLoggerList(),
                 context.getLogger(Logger.ROOT_LOGGER_NAME));
         for (org.slf4j.Logger log : loggersToBeAdd) {
             LoggerTO logger = new LoggerTO();
-            if (((Logger) log).getLevel() != null)
+            if (((Logger) log).getLevel() != null) {
                 logger.setLevel(((Logger) log).getLevel().levelStr);
-            else
+            } else {
                 logger.setLevel(((Logger) log).getEffectiveLevel().levelStr);
+            }
             logger.setLoggerName(log.getName());
             Iterator<Appender<ILoggingEvent>> iter = ((Logger) log).iteratorForAppenders();
             while (iter.hasNext()) {
@@ -191,7 +192,7 @@ public class LogbackModuleFactory extends
         return DTOs;
     }
 
-    private List<org.slf4j.Logger> removeUnusableLoggers(List<Logger> loggerList, Logger rootLogger) {
+    private List<org.slf4j.Logger> removeUnusableLoggers(final List<Logger> loggerList, final Logger rootLogger) {
         Collections.sort(loggerList, new LoggerComparator());
         Map<String, org.slf4j.Logger> loggersToReturn = new HashMap<>();
 
@@ -233,8 +234,8 @@ public class LogbackModuleFactory extends
     }
 
     @Override
-    public Set<LogbackModule> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
-            BundleContext bundleContext) {
+    public Set<LogbackModule> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory,
+            final BundleContext bundleContext) {
         DependencyResolver resolver = dependencyResolverFactory.createDependencyResolver(new ModuleIdentifier(
                 getImplementationName(), INSTANCE_NAME));
         LogbackModule defaultLogback = instantiateModule(INSTANCE_NAME, resolver, bundleContext);
@@ -242,4 +243,26 @@ public class LogbackModuleFactory extends
         return defaultModules;
     }
 
+    // Ugly hack to deal with logback changing its api
+    private static final Field MAX_FILE_SIZE_FIELD;
+    static {
+        Field f;
+        try {
+            f = SizeBasedTriggeringPolicy.class.getDeclaredField("maxFileSize");
+            f.setAccessible(true);
+        } catch (NoSuchFieldException | SecurityException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+
+        MAX_FILE_SIZE_FIELD = f;
+    }
+
+    @VisibleForTesting
+    static FileSize getMaxFileSize(SizeBasedTriggeringPolicy<?> policy) {
+        try {
+            return (FileSize) MAX_FILE_SIZE_FIELD.get(policy);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw new IllegalStateException("Cannot get maxFileSize field", e);
+        }
+    }
 }

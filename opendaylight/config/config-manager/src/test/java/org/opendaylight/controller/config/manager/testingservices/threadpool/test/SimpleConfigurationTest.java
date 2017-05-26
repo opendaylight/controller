@@ -7,7 +7,24 @@
  */
 package org.opendaylight.controller.config.manager.testingservices.threadpool.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,26 +41,6 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
-import javax.management.DynamicMBean;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.RuntimeMBeanException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 /**
  * Tests basic functionality of configuration registry:
  * <ol>
@@ -57,7 +54,7 @@ import static org.junit.Assert.fail;
  * dependencies.
  */
 public class SimpleConfigurationTest extends AbstractConfigTest {
-    private final int numberOfThreads = 5;
+    private static final int numberOfThreads = 5;
     private final int numberOfThreads2 = 10;
     private static final String fixed1 = "fixed1";
     private static final List<ObjectName> emptyONs = Collections
@@ -69,7 +66,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
     @Before
     public void setUp() {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
+        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext,
                 new TestingFixedThreadPoolModuleFactory()));
     }
 
@@ -97,7 +94,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         return fixed1names;
     }
 
-    private ObjectName createFixedThreadPool(
+    static ObjectName createFixedThreadPool(
             ConfigTransactionJMXClient transaction)
             throws InstanceAlreadyExistsException, InstanceNotFoundException {
         transaction.assertVersion(0, 1);
@@ -135,7 +132,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
     private void testValidation(ConfigTransactionClient transaction)
             throws InstanceAlreadyExistsException, ReflectionException,
-            InstanceNotFoundException, MBeanException {
+            InstanceNotFoundException, MBeanException, ConflictingVersionException {
         ObjectName fixed1names = transaction.createModule(
                 TestingFixedThreadPoolModuleFactory.NAME, fixed1);
         // call validate on config bean
@@ -143,8 +140,8 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
             platformMBeanServer.invoke(fixed1names, "validate", new Object[0],
                     new String[0]);
             fail();
-        } catch (RuntimeMBeanException e) {
-            RuntimeException targetException = e.getTargetException();
+        } catch (MBeanException e) {
+            Exception targetException = e.getTargetException();
             assertNotNull(targetException);
             assertEquals(ValidationException.class, targetException.getClass());
         }
@@ -214,11 +211,9 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         ObjectName fixed1name = firstCommit();
 
         // 2, check that configuration was copied to platform
-        DynamicMBean dynamicMBean = configRegistryClient.newMBeanProxy(
-                ObjectNameUtil.withoutTransactionName(fixed1name),
-                DynamicMBean.class);
-        dynamicMBean.getMBeanInfo();
-        assertEquals(numberOfThreads, dynamicMBean.getAttribute("ThreadCount"));
+        ObjectName on = ObjectNameUtil.withoutTransactionName(fixed1name);
+        platformMBeanServer.getMBeanInfo(on);
+        assertEquals(numberOfThreads, platformMBeanServer.getAttribute(on, "ThreadCount"));
 
         // 3, shutdown fixed1 in new transaction
         assertFalse(TestingFixedThreadPool.allExecutors.get(0).isShutdown());
@@ -247,15 +242,14 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
         // 4, check
         assertEquals(2, configRegistryClient.getVersion());
-        assertEquals(1, TestingFixedThreadPool.allExecutors.size());
-        assertTrue(TestingFixedThreadPool.allExecutors.get(0).isShutdown());
+        assertEquals(0, TestingFixedThreadPool.allExecutors.size());
 
         // dynamic config should be removed from platform
         try {
-            dynamicMBean.getMBeanInfo();
+            platformMBeanServer.getMBeanInfo(on);
             fail();
         } catch (Exception e) {
-            assertTrue(e.getCause() instanceof InstanceNotFoundException);
+            assertTrue(e instanceof InstanceNotFoundException);
         }
     }
 
@@ -279,7 +273,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         // commit
         transaction.commit();
         // check that first threadpool is closed
-        checkThreadPools(2, numberOfThreads2);
+        checkThreadPools(1, numberOfThreads2);
     }
 
     private void checkThreadPools(int expectedTotalNumberOfExecutors,
@@ -309,7 +303,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
         // commit
         CommitStatus commitStatus = transaction.commit();
         // check that new threadpool is created and old one is closed
-        checkThreadPools(2, numberOfThreads);
+        checkThreadPools(1, numberOfThreads);
         CommitStatus expected = new CommitStatus(emptyONs, emptyONs, fixed1List);
         assertEquals(expected, commitStatus);
     }
@@ -327,26 +321,19 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     }
 
     @Test
-    public void testAbort() {
+    public void testAbort() throws Exception {
         ConfigTransactionJMXClient transaction = configRegistryClient
                 .createTransaction();
         assertEquals(1, configRegistryClient.getOpenConfigs().size());
 
         transaction.abortConfig();
-        try {
-            transaction.createModule(TestingFixedThreadPoolModuleFactory.NAME,
-                    fixed1);
-            fail();
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof InstanceNotFoundException);
-        }
-        try {
-            transaction.validateConfig();
-            fail();
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof InstanceNotFoundException);
-        }
         assertEquals(0, configRegistryClient.getOpenConfigs().size());
+        try {
+            platformMBeanServer.getMBeanInfo(transaction.getObjectName());
+            fail();
+        }catch(InstanceNotFoundException e){
+            assertEquals("org.opendaylight.controller:TransactionName=ConfigTransaction-0-1,type=ConfigTransaction", e.getMessage());
+        }
     }
 
     @Test
@@ -389,7 +376,8 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
     @Test
     public void testQNames() {
         Set<String> availableModuleFactoryQNames = configRegistryClient.getAvailableModuleFactoryQNames();
-        String expected = "(namespace?revision=revision)name";
+        String expected = "(namespace?revision=2012-12-12)name";
+
         assertEquals(Sets.newHashSet(expected), availableModuleFactoryQNames);
     }
 

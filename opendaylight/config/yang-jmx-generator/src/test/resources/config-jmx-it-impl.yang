@@ -5,10 +5,8 @@ module config-jmx-it-impl {
 
     import config-jmx-it { prefix jmxIt; revision-date 2013-06-13;}
     import config { prefix config; revision-date 2013-04-05; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15;}
     import config-threads { prefix th; revision-date 2013-04-09; }
-
-
 
     description
         "Testing IMPL";
@@ -51,7 +49,7 @@ module config-jmx-it-impl {
             }
 
 
-            leaf simpleInt {
+            leaf simpleInt1 {
                 type uint32;
                 default 99L;
             }
@@ -67,19 +65,7 @@ module config-jmx-it-impl {
             }
 
         }
-    }
 
-    augment "/config:modules/config:module/config:state" {
-        case impl {
-            when "/config:modules/config:module/config:type = 'impl'";
-            // root runtime bean
-            leaf created-sessions {
-                type uint32;
-            }
-        }
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
 
@@ -101,7 +87,7 @@ module config-jmx-it-impl {
                 }
             }
 
-            leaf simpleInt {
+            leaf simpleInt2 {
                 type uint32;
             }
 
@@ -199,19 +185,35 @@ module config-jmx-it-impl {
                         mandatory false;
                         config:required-identity th:threadfactory;
                     }
+                    refine name {
+                        mandatory false;
+                    }
                 }
             }
         }
     }
 
     augment "/config:modules/config:module/config:state" {
+        case impl {
+            when "/config:modules/config:module/config:type = 'impl'";
+            // root runtime bean
+            leaf created-sessions {
+                type uint32;
+            }
+        }
+
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
             // root runtime bean
-            leaf created-sessions {
+            leaf created-sessions-1 {
+                type uint32;
+            }
+
+            leaf created-sessions-2 {
                 type uint32;
             }
 
         }
     }
+
 }

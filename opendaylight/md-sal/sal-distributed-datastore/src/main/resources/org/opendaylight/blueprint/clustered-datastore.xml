@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+  <cm:property-placeholder persistent-id="org.opendaylight.controller.cluster.datastore.broker" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="max-data-broker-future-callback-queue-size" value="1000"/>
+      <cm:property name="max-data-broker-future-callback-pool-size" value="20"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <odl:static-reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
+
+  <!-- ActorSystemProvider -->
+
+  <bean id="actorSystemProvider" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.ActorSystemProviderImpl"
+          destroy-method="close">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <service ref="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
+
+  <!-- Distributed Config Datastore -->
+
+  <bean id="datastoreSnapshotRestore" class="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"
+          factory-method="instance">
+    <argument value="./clustered-datastore-restore"/>
+  </bean>
+
+  <bean id="configDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedConfigDataStoreProviderModule"
+          factory-method="newDatastoreContext" />
+
+  <bean id="configDatastore" class="org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory"
+          factory-method="createInstance" destroy-method="close">
+    <argument ref="schemaService"/>
+    <argument ref="configDatastoreContext"/>
+    <argument ref="datastoreSnapshotRestore"/>
+    <argument ref="actorSystemProvider"/>
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <service ref="configDatastore" odl:type="distributed-config">
+    <interfaces>
+      <value>org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface</value>
+    </interfaces>
+  </service>
+
+  <!-- Distributed Operational Datastore -->
+
+  <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
+          factory-method="newDatastoreContext" />
+
+  <bean id="operDatastore" class="org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory"
+          factory-method="createInstance" destroy-method="close">
+    <argument ref="schemaService"/>
+    <argument ref="operDatastoreContext"/>
+    <argument ref="datastoreSnapshotRestore"/>
+    <argument ref="actorSystemProvider"/>
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <service ref="operDatastore" odl:type="distributed-operational">
+    <interfaces>
+      <value>org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface</value>
+    </interfaces>
+  </service>
+
+  <!-- Concurrent DOMDataBroker -->
+
+  <bean id="listenableFutureExecutor" class="org.opendaylight.yangtools.util.concurrent.SpecialExecutors"
+          factory-method="newBlockingBoundedCachedThreadPool">
+    <argument value="${max-data-broker-future-callback-pool-size}"/>
+    <argument value="${max-data-broker-future-callback-queue-size}"/>
+    <argument value="CommitFutures"/>
+  </bean>
+
+  <bean id="commitStatsTracker" class="org.opendaylight.yangtools.util.DurationStatisticsTracker"
+          factory-method="createConcurrent"/>
+
+  <bean id="clusteredDOMDataBroker" class="org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker"
+          destroy-method="close">
+    <argument>
+      <map>
+        <entry key="CONFIGURATION" value-ref="configDatastore"/>
+        <entry key="OPERATIONAL" value-ref="operDatastore"/>
+      </map>
+    </argument>
+    <argument ref="listenableFutureExecutor"/>
+    <argument ref="commitStatsTracker"/>
+  </bean>
+
+  <service ref="clusteredDOMDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
+          odl:type="default"/>
+
+  <!-- JMX beans for the data broker -->
+
+  <bean id="commitStatsMXBean" class="org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanImpl"
+          init-method="register" destroy-method="unregister">
+    <argument ref="commitStatsTracker"/>
+    <argument value="DOMDataBroker"/>
+  </bean>
+
+  <bean id="threadStatsMXBean" class="org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl"
+          factory-method="create" destroy-method="unregister">
+    <argument ref="listenableFutureExecutor"/>
+    <argument value="CommitFutureExecutorStats"/>
+    <argument value="DOMDataBroker"/>
+    <argument><null/></argument>
+  </bean>
+
+  <!-- Distributed EntityOwnershipService -->
+
+  <bean id="selectionStrategyConfig" class="org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader"
+          factory-method="loadStrategyWithConfig">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <bean id="distributedEntityOwnershipService" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService"
+          factory-method="start" destroy-method="close">
+    <argument>
+      <bean factory-ref="operDatastore" factory-method="getActorContext"/>
+    </argument>
+    <argument ref="selectionStrategyConfig"/>
+  </bean>
+
+  <service ref="distributedEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"
+        odl:type="default"/>
+</blueprint>
