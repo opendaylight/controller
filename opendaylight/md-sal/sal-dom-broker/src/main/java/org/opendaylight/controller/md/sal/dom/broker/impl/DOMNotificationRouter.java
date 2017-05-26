@@ -217,7 +217,56 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
          * FIXME: we need a background thread, which will watch out for blocking too long. Here
          *        we will arm a tasklet for it and synchronize delivery of interrupt properly.
          */
-        throw new UnsupportedOperationException("Not implemented yet");
+        final PublishObserver publishObserver = new PublishObserver(timeout, unit, Thread.currentThread());
+        publishObserver.start();
+        try {
+            final ListenableFuture<?> withBlock = putNotification(notification);
+            publishObserver.exit();
+            return withBlock;
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return DOMNotificationPublishService.REJECTED;
+    }
+    /*
+        Create a publishObserver to watch out for blocking to long, if so, we will interrupt the offerNotification operation.
+     */
+    private final class PublishObserver {
+        final long timeout;
+        final TimeUnit unit;
+        final Thread observer;
+        PublishObserver(final long timeout, final TimeUnit unit, final Thread publish){
+            this.timeout = timeout;
+            this.unit = unit;
+            this.observer = new Thread(new TaskLet(timeout, unit, publish));
+        }
+        void start() {
+            observer.start();
+        }
+        void exit() {
+            observer.interrupt();
+        }
+    }
+    private final class TaskLet implements Runnable {
+        final long timeout;
+        final TimeUnit unit;
+        final Thread publishThread;
+
+        private TaskLet(final long timeout, final TimeUnit unit, final Thread publishThread) {
+            this.timeout = timeout;
+            this.unit = unit;
+            this.publishThread = publishThread;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Thread.currentThread().sleep(unit.toMillis(timeout));
+                publishThread.interrupt();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
