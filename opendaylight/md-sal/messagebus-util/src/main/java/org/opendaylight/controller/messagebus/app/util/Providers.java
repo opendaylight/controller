@@ -16,14 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Providers {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Providers.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Providers.class);
 
     public static class BindingAware implements BindingAwareProvider, AutoCloseable {
 
 
         @Override
         public void onSessionInitiated(final BindingAwareBroker.ProviderContext session) {
-            LOGGER.info("BindingAwareBroker.ProviderContext initialized");
+            LOG.info("BindingAwareBroker.ProviderContext initialized");
         }
 
         @Override
@@ -34,7 +34,7 @@ public class Providers {
 
         @Override
         public void onSessionInitiated(final Broker.ProviderSession session) {
-            LOGGER.info("Broker.ProviderSession initialized");
+            LOG.info("Broker.ProviderSession initialized");
         }
 
         @Override
