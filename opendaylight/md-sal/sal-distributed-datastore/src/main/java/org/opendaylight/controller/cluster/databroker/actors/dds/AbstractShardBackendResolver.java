@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
+import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
@@ -137,14 +138,16 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         FutureConverters.toJava(ExplicitAsk.ask(info.getPrimaryShardActor(), connectFunction, CONNECT_TIMEOUT))
             .whenComplete((response, failure) -> {
                 if (failure != null) {
-                    LOG.debug("Connect attempt to {} failed", shardName, failure);
-                    future.completeExceptionally(failure);
+                    LOG.debug("Connect attempt to {} failed, will retry", shardName, failure);
+                    future.completeExceptionally(wrap("Connection attempt failed", failure));
                     return;
                 }
                 if (response instanceof RequestFailure) {
                     final Throwable cause = ((RequestFailure<?, ?>) response).getCause().unwrap();
                     LOG.debug("Connect attempt to {} failed to process", shardName, cause);
-                    future.completeExceptionally(cause);
+                    final Throwable result = cause instanceof NotLeaderException
+                            ? wrap("Leader moved during establishment", cause) : cause;
+                    future.completeExceptionally(result);
                     return;
                 }
 
