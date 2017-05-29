@@ -137,23 +137,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      */
     public final void sendRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback) {
         final long now = currentTime();
-        long delay = enqueueEntry(new ConnectionEntry(request, callback, now), now);
-        try {
-            if (delay >= DEBUG_DELAY_NANOS) {
-                if (delay > MAX_DELAY_NANOS) {
-                    LOG.info("Capping {} throttle delay from {} to {} seconds", this,
-                        TimeUnit.NANOSECONDS.toSeconds(delay), MAX_DELAY_SECONDS);
-                    delay = MAX_DELAY_NANOS;
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Sleeping for {}ms", TimeUnit.NANOSECONDS.toMillis(delay));
-                }
-            }
-            TimeUnit.NANOSECONDS.sleep(delay);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.debug("Interrupted after sleeping {}ns", e, currentTime() - now);
-        }
+        sendEntry(new ConnectionEntry(request, callback, now), now);
     }
 
     /**
@@ -171,6 +155,24 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     public final void enqueueRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         enqueueEntry(new ConnectionEntry(request, callback, enqueuedTicks), currentTime());
+    }
+
+    public final long enqueueEntry(final ConnectionEntry entry, final long now) {
+        lock.lock();
+        try {
+            final RequestException maybePoison = poisoned;
+            if (maybePoison != null) {
+                throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+            }
+
+            if (queue.isEmpty()) {
+                // The queue is becoming non-empty, schedule a timer.
+                scheduleTimer(entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now);
+            }
+            return queue.enqueue(entry, now);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public abstract Optional<T> getBackendInfo();
@@ -209,21 +211,23 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current,
             RequestException runtimeRequestException);
 
-    final long enqueueEntry(final ConnectionEntry entry, final long now) {
-        lock.lock();
+    final void sendEntry(final ConnectionEntry entry, final long now) {
+        long delay = enqueueEntry(entry, now);
         try {
-            final RequestException maybePoison = poisoned;
-            if (maybePoison != null) {
-                throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+            if (delay >= DEBUG_DELAY_NANOS) {
+                if (delay > MAX_DELAY_NANOS) {
+                    LOG.info("Capping {} throttle delay from {} to {} seconds", this,
+                        TimeUnit.NANOSECONDS.toSeconds(delay), MAX_DELAY_SECONDS);
+                    delay = MAX_DELAY_NANOS;
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sleeping for {}ms", TimeUnit.NANOSECONDS.toMillis(delay));
+                }
             }
-
-            if (queue.isEmpty()) {
-                // The queue is becoming non-empty, schedule a timer.
-                scheduleTimer(entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now);
-            }
-            return queue.enqueue(entry, now);
-        } finally {
-            lock.unlock();
+            TimeUnit.NANOSECONDS.sleep(delay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.debug("Interrupted after sleeping {}ns", e, currentTime() - now);
         }
     }
 
