@@ -231,11 +231,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             }
 
             for (AbstractProxyTransaction t : proxies.values()) {
-                LOG.debug("{} creating successor transaction proxy for {}", identifier, t);
-                final AbstractProxyTransaction newProxy = successor.createTransactionProxy(t.getIdentifier(),
-                    t.isSnapshotOnly());
-                LOG.debug("{} created successor transaction proxy {}", identifier, newProxy);
-                t.replayMessages(newProxy, previousEntries);
+                LOG.debug("{} replaying messages to old proxy {} towards successor {}", identifier, t, successor);
+                t.replayMessages(successor, previousEntries);
             }
 
             // Now look for any finalizing messages
@@ -387,9 +384,19 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     final void completeTransaction(final AbstractProxyTransaction tx) {
         lock.lock();
         try {
-            proxies.remove(tx.getIdentifier());
+            // Removal will be completed once purge completes
             LOG.debug("Proxy {} completing transaction {}", this, tx);
             onTransactionCompleted(tx);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    void purgeTransaction(final AbstractProxyTransaction tx) {
+        lock.lock();
+        try {
+            proxies.remove(tx.getIdentifier());
+            LOG.debug("Proxy {} purged transaction {}", this, tx);
         } finally {
             lock.unlock();
         }
