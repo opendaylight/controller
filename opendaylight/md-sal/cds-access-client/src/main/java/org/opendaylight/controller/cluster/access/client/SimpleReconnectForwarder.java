@@ -15,7 +15,12 @@ final class SimpleReconnectForwarder extends ReconnectForwarder {
 
     @Override
     protected void forwardEntry(final ConnectionEntry entry, final long now) {
-        // We are ignoring requested delay, as we have already paid the admission delay
+        successor().sendEntry(entry, now);
+    }
+
+    @Override
+    protected void replayEntry(final ConnectionEntry entry, final long now) {
+        // We are executing in the context of the client thread, do not block
         successor().enqueueEntry(entry, now);
     }
 }

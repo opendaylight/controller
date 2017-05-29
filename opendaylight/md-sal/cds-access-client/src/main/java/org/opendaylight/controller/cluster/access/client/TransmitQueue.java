@@ -188,6 +188,7 @@ abstract class TransmitQueue {
      */
     final long enqueue(final ConnectionEntry entry, final long now) {
         if (successor != null) {
+            // This call will pay the enqueuing price, hence the caller does not have to
             successor.forwardEntry(entry, now);
             return 0;
         }
@@ -257,14 +258,14 @@ abstract class TransmitQueue {
         int count = 0;
         ConnectionEntry entry = inflight.poll();
         while (entry != null) {
-            successor.forwardEntry(entry, now);
+            successor.replayEntry(entry, now);
             entry = inflight.poll();
             count++;
         }
 
         entry = pending.poll();
         while (entry != null) {
-            successor.forwardEntry(entry, now);
+            successor.replayEntry(entry, now);
             entry = pending.poll();
             count++;
         }
