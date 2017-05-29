@@ -58,8 +58,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     private final TransactionIdentifier identifier;
 
-    LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
-        super(parent);
+    LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier, final boolean isDone) {
+        super(parent, isDone);
         this.identifier = Preconditions.checkNotNull(identifier);
     }
 

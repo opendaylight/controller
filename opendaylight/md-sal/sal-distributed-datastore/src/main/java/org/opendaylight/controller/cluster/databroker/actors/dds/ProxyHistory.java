@@ -86,8 +86,15 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
-                final TransactionIdentifier txId, final boolean snapshotOnly) {
+                final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
             Preconditions.checkState(lastOpen == null, "Proxy %s has %s currently open", this, lastOpen);
+
+            if (isDone) {
+                // Done transactions do not register on our radar on should not have any state associated.
+                return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId)
+                        : new LocalReadWriteProxyTransaction(this, txId);
+            }
+
 
             // onTransactionCompleted() runs concurrently
             final LocalReadWriteProxyTransaction localSealed = lastSealed;
@@ -145,7 +152,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
-                final TransactionIdentifier txId, final boolean snapshotOnly) {
+                final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
             final DataTreeSnapshot snapshot = takeSnapshot();
             return snapshotOnly ? new LocalReadOnlyProxyTransaction(this, txId, snapshot) :
                 new LocalReadWriteProxyTransaction(this, txId, snapshot);
@@ -165,8 +172,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
-                final TransactionIdentifier txId, final boolean snapshotOnly) {
-            return new RemoteProxyTransaction(this, txId, snapshotOnly, true);
+                final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
+            return new RemoteProxyTransaction(this, txId, snapshotOnly, true, isDone);
         }
 
         @Override
@@ -183,8 +190,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
-                final TransactionIdentifier txId, final boolean snapshotOnly) {
-            return new RemoteProxyTransaction(this, txId, snapshotOnly, false);
+                final TransactionIdentifier txId, final boolean snapshotOnly, final boolean isDone) {
+            return new RemoteProxyTransaction(this, txId, snapshotOnly, false, isDone);
         }
 
         @Override
@@ -354,14 +361,19 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
             final boolean snapshotOnly) {
+        return createTransactionProxy(txId, snapshotOnly, false);
+    }
+
+    AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId, final boolean snapshotOnly,
+            final boolean isDone) {
         lock.lock();
         try {
             if (successor != null) {
-                return successor.createTransactionProxy(txId, snapshotOnly);
+                return successor.createTransactionProxy(txId, snapshotOnly, isDone);
             }
 
             final TransactionIdentifier proxyId = new TransactionIdentifier(identifier, txId.getTransactionId());
-            final AbstractProxyTransaction ret = doCreateTransactionProxy(connection, proxyId, snapshotOnly);
+            final AbstractProxyTransaction ret = doCreateTransactionProxy(connection, proxyId, snapshotOnly, isDone);
             proxies.put(proxyId, ret);
             LOG.debug("Allocated proxy {} for transaction {}", proxyId, txId);
             return ret;
@@ -429,7 +441,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
     @GuardedBy("lock")
     abstract AbstractProxyTransaction doCreateTransactionProxy(AbstractClientConnection<ShardBackendInfo> connection,
-            TransactionIdentifier txId, boolean snapshotOnly);
+            TransactionIdentifier txId, boolean snapshotOnly, boolean isDone);
 
     abstract ProxyHistory createSuccessor(AbstractClientConnection<ShardBackendInfo> connection);
 
