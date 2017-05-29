@@ -80,4 +80,9 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
             entry.complete(request.toRequestFailure(e));
         }
     }
+
+    @Override
+    protected void replayEntry(final ConnectionEntry entry, final long now) {
+
+    }
 }
