@@ -362,7 +362,7 @@ public class AbsModuleGeneratedObjectFactory {
     }
 
     private static String getLoggerDefinition(FullyQualifiedName fqn) {
-        return format("private static final %s LOGGER = %s.getLogger(%s.class);",
+        return format("private static final %s LOG = %s.getLogger(%s.class);",
                 Logger.class.getCanonicalName(), LoggerFactory.class.getCanonicalName(), fqn);
     }
 
@@ -396,6 +396,6 @@ public class AbsModuleGeneratedObjectFactory {
     }
 
     public String getGetLogger() {
-        return new MethodDefinition(Logger.class.getCanonicalName(), "getLogger", Collections.<Field>emptyList(), "return LOGGER;").toString();
+        return new MethodDefinition(Logger.class.getCanonicalName(), "getLogger", Collections.<Field>emptyList(), "return LOG;").toString();
     }
 }
