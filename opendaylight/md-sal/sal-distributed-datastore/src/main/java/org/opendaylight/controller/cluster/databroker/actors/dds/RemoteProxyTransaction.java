@@ -78,8 +78,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private volatile Exception operationFailure;
 
     RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
-            final boolean snapshotOnly, final boolean sendReadyOnSeal) {
-        super(parent);
+            final boolean snapshotOnly, final boolean sendReadyOnSeal, final boolean isDone) {
+        super(parent, isDone);
         this.snapshotOnly = snapshotOnly;
         this.sendReadyOnSeal = sendReadyOnSeal;
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
