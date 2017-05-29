@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.function.Consumer;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -58,8 +59,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     private final TransactionIdentifier identifier;
 
-    LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
-        super(parent);
+    LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier, final boolean isDone) {
+        super(parent, isDone);
         this.identifier = Preconditions.checkNotNull(identifier);
     }
 
@@ -68,7 +69,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         return identifier;
     }
 
-    abstract DataTreeSnapshot readOnlyView();
+    abstract @Nonnull DataTreeSnapshot readOnlyView();
 
     abstract void applyForwardedModifyTransactionRequest(ModifyTransactionRequest request,
             @Nullable Consumer<Response<?, ?>> callback);

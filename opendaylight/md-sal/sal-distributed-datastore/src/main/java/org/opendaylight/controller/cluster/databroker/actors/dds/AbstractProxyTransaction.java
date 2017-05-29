@@ -255,11 +255,18 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * variable. It uses pre-allocated objects for fast paths (i.e. no successor present) and a per-transition object
      * for slow paths (when successor is injected/present).
      */
-    private volatile int sealed = 0;
-    private volatile State state = OPEN;
+    private volatile int sealed;
+    private volatile State state;
 
-    AbstractProxyTransaction(final ProxyHistory parent) {
+    AbstractProxyTransaction(final ProxyHistory parent, final boolean isDone) {
         this.parent = Preconditions.checkNotNull(parent);
+        if (isDone) {
+            state = DONE;
+            // DONE implies previous seal operation completed
+            sealed = 1;
+        } else {
+            state = OPEN;
+        }
     }
 
     final void executeInActor(final Runnable command) {
@@ -627,8 +634,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         final State prevState = local.getPrevState();
 
         final AbstractProxyTransaction successor = successorHistory.createTransactionProxy(getIdentifier(),
-            isSnapshotOnly());
-        LOG.debug("{} created successor transaction proxy {}", this, successor);
+            isSnapshotOnly(), DONE.equals(prevState));
+        LOG.debug("{} created successor {}", this, successor);
         local.setSuccessor(successor);
 
         // Replay successful requests first
