@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -84,8 +85,14 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
-        super(parent, identifier);
+        super(parent, identifier, false);
         this.modification = (CursorAwareDataTreeModification) snapshot.newModification();
+    }
+
+    LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        super(parent, identifier, true);
+        // This is DONE transaction, this should never be touched
+        this.modification = null;
     }
 
     @Override
@@ -321,12 +328,12 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         closedException = this::abortedException;
     }
 
-    private CursorAwareDataTreeModification getModification() {
+    private @Nonnull CursorAwareDataTreeModification getModification() {
         if (closedException != null) {
             throw closedException.get();
         }
 
-        return modification;
+        return Preconditions.checkNotNull(modification, "Transaction %s is DONE", getIdentifier());
     }
 
     private void sendCommit(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {

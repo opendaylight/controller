@@ -175,7 +175,7 @@ public class ClientTransactionCommitCohortTest {
                 AccessClientUtil.createConnectedConnection(context, 0L, backend);
         final ProxyHistory proxyHistory = ProxyHistory.createClient(history, connection, HISTORY_ID);
         final RemoteProxyTransaction transaction =
-                new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false);
+                new RemoteProxyTransaction(proxyHistory, TRANSACTION_ID, false, false, false);
         return new TransactionTester<>(transaction, connection, backendProbe);
     }
 

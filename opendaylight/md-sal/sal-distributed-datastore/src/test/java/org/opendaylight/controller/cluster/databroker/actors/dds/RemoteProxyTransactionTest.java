@@ -47,7 +47,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Override
     protected RemoteProxyTransaction createTransaction(final ProxyHistory parent, final TransactionIdentifier id,
                                                        final DataTreeSnapshot snapshot) {
-        return new RemoteProxyTransaction(parent, TRANSACTION_ID, false, false);
+        return new RemoteProxyTransaction(parent, TRANSACTION_ID, false, false, false);
     }
 
     @Override
