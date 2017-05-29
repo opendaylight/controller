@@ -137,23 +137,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      */
     public final void sendRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback) {
         final long now = currentTime();
-        long delay = enqueueEntry(new ConnectionEntry(request, callback, now), now);
-        try {
-            if (delay >= DEBUG_DELAY_NANOS) {
-                if (delay > MAX_DELAY_NANOS) {
-                    LOG.info("Capping {} throttle delay from {} to {} seconds", this,
-                        TimeUnit.NANOSECONDS.toSeconds(delay), MAX_DELAY_SECONDS);
-                    delay = MAX_DELAY_NANOS;
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Sleeping for {}ms", TimeUnit.NANOSECONDS.toMillis(delay));
-                }
-            }
-            TimeUnit.NANOSECONDS.sleep(delay);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.debug("Interrupted after sleeping {}ns", e, currentTime() - now);
-        }
+        sendEntry(new ConnectionEntry(request, callback, now), now);
     }
 
     /**
@@ -171,6 +155,24 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     public final void enqueueRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         enqueueEntry(new ConnectionEntry(request, callback, enqueuedTicks), currentTime());
+    }
+
+    public final long enqueueEntry(final ConnectionEntry entry, final long now) {
+        lock.lock();
+        try {
+            final RequestException maybePoison = poisoned;
+            if (maybePoison != null) {
+                throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+            }
+
+            if (queue.isEmpty()) {
+                // The queue is becoming non-empty, schedule a timer.
+                scheduleTimer(entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now);
+            }
+            return queue.enqueue(entry, now);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public abstract Optional<T> getBackendInfo();
@@ -209,21 +211,24 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     abstract ClientActorBehavior<T> lockedReconnect(ClientActorBehavior<T> current,
             RequestException runtimeRequestException);
 
-    final long enqueueEntry(final ConnectionEntry entry, final long now) {
-        lock.lock();
+    final void sendEntry(final ConnectionEntry entry, final long now) {
+        long delay = enqueueEntry(entry, now);
         try {
-            final RequestException maybePoison = poisoned;
-            if (maybePoison != null) {
-                throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+            if (delay >= DEBUG_DELAY_NANOS) {
+                if (delay > MAX_DELAY_NANOS) {
+                    LOG.info("Capping {} throttle delay from {} to {} seconds", this,
+                        TimeUnit.NANOSECONDS.toSeconds(delay), MAX_DELAY_SECONDS);
+                    delay = MAX_DELAY_NANOS;
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("{}: Sleeping for {}ms on connection {}", context.persistenceId(),
+                        TimeUnit.NANOSECONDS.toMillis(delay), this);
+                }
             }
-
-            if (queue.isEmpty()) {
-                // The queue is becoming non-empty, schedule a timer.
-                scheduleTimer(entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now);
-            }
-            return queue.enqueue(entry, now);
-        } finally {
-            lock.unlock();
+            TimeUnit.NANOSECONDS.sleep(delay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.debug("Interrupted after sleeping {}ns", e, currentTime() - now);
         }
     }
 
@@ -244,11 +249,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @GuardedBy("lock")
     private void scheduleTimer(final long delay) {
         if (haveTimer) {
-            LOG.debug("{}: timer already scheduled", context.persistenceId());
+            LOG.debug("{}: timer already scheduled on {}", context.persistenceId(), this);
             return;
         }
         if (queue.hasSuccessor()) {
-            LOG.debug("{}: connection has successor, not scheduling timer", context.persistenceId());
+            LOG.debug("{}: connection {} has a successor, not scheduling timer", context.persistenceId(), this);
             return;
         }
 
@@ -257,7 +262,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         final long normalized =  delay <= 0 ? 0 : Math.min(delay, BACKEND_ALIVE_TIMEOUT_NANOS);
 
         final FiniteDuration dur = FiniteDuration.fromNanos(normalized);
-        LOG.debug("{}: scheduling timeout in {}", context.persistenceId(), dur);
+        LOG.debug("{}: connection {} scheduling timeout in {}", context.persistenceId(), this, dur);
         context.executeInActor(this::runTimer, dur);
         haveTimer = true;
     }
@@ -277,6 +282,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         try {
             haveTimer = false;
             final long now = currentTime();
+
+            LOG.debug("{}: running timer on {}", context.persistenceId(), this);
+
             // The following line is only reliable when queue is not forwarding, but such state should not last long.
             // FIXME: BUG-8422: this may not be accurate w.r.t. replayed entries
             final long ticksSinceProgress = queue.ticksStalling(now);
@@ -295,6 +303,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             delay = lockedCheckTimeout(now);
             if (delay == null) {
                 // We have timed out. There is no point in scheduling a timer
+                LOG.debug("{}: connection {} timed out", context.persistenceId(), this);
                 return lockedReconnect(current, new RuntimeRequestException("Backend connection timed out",
                     new TimeoutException()));
             }
@@ -302,6 +311,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             if (delay.isPresent()) {
                 // If there is new delay, schedule a timer
                 scheduleTimer(delay.get());
+            } else {
+                LOG.debug("{}: not scheduling timeout on {}", context.persistenceId(), this);
             }
         } finally {
             lock.unlock();
@@ -335,13 +346,14 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @GuardedBy("lock")
     private Optional<Long> lockedCheckTimeout(final long now) {
         if (queue.isEmpty()) {
+            LOG.debug("{}: connection {} is empty", context.persistenceId(), this);
             return Optional.empty();
         }
 
         final long backendSilentTicks = backendSilentTicks(now);
         if (backendSilentTicks >= BACKEND_ALIVE_TIMEOUT_NANOS) {
-            LOG.debug("Connection {} has not seen activity from backend for {} nanoseconds, timing out", this,
-                backendSilentTicks);
+            LOG.debug("{}: Connection {} has not seen activity from backend for {} nanoseconds, timing out",
+                context.persistenceId(), this, backendSilentTicks);
             return null;
         }
 
@@ -354,7 +366,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
             tasksTimedOut++;
             queue.remove(now);
-            LOG.debug("Connection {} timed out entryt {}", this, head);
+            LOG.debug("{}: Connection {} timed out entry {}", context.persistenceId(), this, head);
             head.complete(head.getRequest().toRequestFailure(
                 new RequestTimeoutException("Timed out after " + beenOpen + "ns")));
         }
