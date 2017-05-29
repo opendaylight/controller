@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MessageBusAppImplModule extends org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModule {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusAppImplModule.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageBusAppImplModule.class);
 
     private BundleContext bundleContext;
 
@@ -50,7 +50,7 @@ public class MessageBusAppImplModule extends org.opendaylight.controller.config.
         final DataBroker dataBroker = bindingCtx.getSALService(DataBroker.class);
         final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
         final EventSourceTopology eventSourceTopology = new EventSourceTopology(dataBroker, rpcRegistry);
-        LOGGER.info("Messagebus initialized");
+        LOG.info("Messagebus initialized");
         return eventSourceTopology;
     }
 
