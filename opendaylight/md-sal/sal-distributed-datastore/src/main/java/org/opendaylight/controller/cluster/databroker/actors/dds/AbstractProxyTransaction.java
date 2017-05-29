@@ -645,11 +645,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             for (Object obj : successfulRequests) {
                 if (obj instanceof TransactionRequest) {
                     LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                    successor.replayRequest((TransactionRequest<?>) obj, resp -> { }, now);
+                    successor.doReplayRequest((TransactionRequest<?>) obj, resp -> { }, now);
                 } else {
                     Verify.verify(obj instanceof IncrementSequence);
                     final IncrementSequence increment = (IncrementSequence) obj;
-                    successor.replayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
+                    successor.doReplayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
                         increment.getSequence(), localActor(), isSnapshotOnly(), increment.getDelta()), resp -> { },
                         now);
                     LOG.debug("Incrementing sequence {} to successor {}", obj, successor);
@@ -668,7 +668,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             if (getIdentifier().equals(req.getTarget())) {
                 Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
                 LOG.debug("Replaying queued request {} to successor {}", req, successor);
-                successor.replayRequest((TransactionRequest<?>) req, e.getCallback(), e.getEnqueuedTicks());
+                successor.doReplayRequest((TransactionRequest<?>) req, e.getCallback(), e.getEnqueuedTicks());
                 it.remove();
             }
         }
@@ -696,7 +696,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @param callback Callback to be invoked once the request completes
      * @param enqueuedTicks ticker-based time stamp when the request was enqueued
      */
-    private void replayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+    private void doReplayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         if (request instanceof AbstractLocalTransactionRequest) {
             handleReplayedLocalRequest((AbstractLocalTransactionRequest<?>) request, callback, enqueuedTicks);
@@ -734,6 +734,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         } else {
             throw new IllegalStateException("Unhandled successor " + successor);
         }
+    }
+
+    final void replayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
+        getSuccessorState().getSuccessor().doReplayRequest(request, callback, enqueuedTicks);
     }
 
     abstract boolean isSnapshotOnly();
