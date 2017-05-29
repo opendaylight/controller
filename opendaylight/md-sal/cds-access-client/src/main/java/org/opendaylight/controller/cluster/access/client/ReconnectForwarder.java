@@ -8,9 +8,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.base.Preconditions;
-import java.util.function.Consumer;
-import org.opendaylight.controller.cluster.access.concepts.Request;
-import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +26,17 @@ public abstract class ReconnectForwarder {
         this.successor = Preconditions.checkNotNull(successor);
     }
 
-    protected final void sendToSuccessor(final Request<?, ?> request, final Consumer<Response<?, ?>> callback) {
-        successor.sendRequest(request, callback);
+    protected final void sendToSuccessor(final ConnectionEntry entry) {
+        successor.sendRequest(entry.getRequest(), entry.getCallback());
+    }
+
+    protected final void replayToSuccessor(final ConnectionEntry entry) {
+        successor.enqueueRequest(entry.getRequest(), entry.getCallback(), entry.getEnqueuedTicks());
     }
 
     protected abstract void forwardEntry(ConnectionEntry entry, long now);
+
+    protected abstract void replayEntry(ConnectionEntry entry, long now);
 
     final AbstractReceivingClientConnection<?> successor() {
         return successor;
