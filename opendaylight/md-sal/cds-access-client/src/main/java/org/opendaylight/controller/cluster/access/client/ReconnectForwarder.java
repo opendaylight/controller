@@ -35,6 +35,8 @@ public abstract class ReconnectForwarder {
 
     protected abstract void forwardEntry(ConnectionEntry entry, long now);
 
+    protected abstract void replayEntry(ConnectionEntry entry, long now);
+
     final AbstractReceivingClientConnection<?> successor() {
         return successor;
     }
