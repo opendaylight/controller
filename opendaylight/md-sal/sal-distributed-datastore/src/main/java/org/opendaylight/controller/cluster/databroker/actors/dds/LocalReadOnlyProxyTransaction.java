@@ -32,8 +32,14 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
 
     LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
-        super(parent, identifier);
+        super(parent, identifier, false);
         this.snapshot = Preconditions.checkNotNull(snapshot);
+    }
+
+    LocalReadOnlyProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        super(parent, identifier, true);
+        // It is an error to touch snapshot once we are DONE
+        this.snapshot = null;
     }
 
     @Override

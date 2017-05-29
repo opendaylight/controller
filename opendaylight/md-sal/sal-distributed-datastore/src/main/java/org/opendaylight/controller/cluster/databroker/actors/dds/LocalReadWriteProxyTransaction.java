@@ -84,8 +84,14 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final DataTreeSnapshot snapshot) {
-        super(parent, identifier);
+        super(parent, identifier, false);
         this.modification = (CursorAwareDataTreeModification) snapshot.newModification();
+    }
+
+    LocalReadWriteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        super(parent, identifier, true);
+        // This is DONE transaction, this should never be touched
+        this.modification = null;
     }
 
     @Override
