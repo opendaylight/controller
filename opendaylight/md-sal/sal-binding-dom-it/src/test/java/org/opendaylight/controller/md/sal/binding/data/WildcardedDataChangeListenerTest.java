@@ -10,16 +10,18 @@ package org.opendaylight.controller.md.sal.binding.data;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
@@ -83,23 +85,20 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
     @Test
     public void testSeparateWrites() throws InterruptedException, TimeoutException, ExecutionException {
 
-        DataProviderService dataBroker = testContext.getBindingDataBroker();
+        DataBroker dataBroker = testContext.getDataBroker();
 
-        final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
-        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
-                eventFuture.set(dataChangeEvent);
-            }
-        });
+        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture =
+                SettableFuture.create();
+        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, DEEP_WILDCARDED_PATH,
+            dataChangeEvent -> eventFuture.set(dataChangeEvent), DataChangeScope.SUBTREE);
 
-        DataModificationTransaction transaction = dataBroker.beginTransaction();
-        transaction.putOperationalData(NODE_0_CWU_PATH, CWU);
-        transaction.putOperationalData(NODE_0_LVU_PATH, LVU);
-        transaction.putOperationalData(NODE_1_LVU_PATH, LVU);
-        transaction.commit().get();
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_0_CWU_PATH, CWU, true);
+        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
+        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
+        transaction.submit().get(5, TimeUnit.SECONDS);
 
-        DataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
+        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
 
         validateEvent(event);
     }
@@ -107,30 +106,27 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
     @Test
     public void testWriteByReplace() throws InterruptedException, TimeoutException, ExecutionException {
 
-        DataProviderService dataBroker = testContext.getBindingDataBroker();
+        DataBroker dataBroker = testContext.getDataBroker();
 
-        final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
-        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
-                eventFuture.set(dataChangeEvent);
-            }
-        });
+        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture =
+                SettableFuture.create();
+        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, DEEP_WILDCARDED_PATH,
+            dataChangeEvent -> eventFuture.set(dataChangeEvent), DataChangeScope.SUBTREE);
 
-        DataModificationTransaction cwuTx = dataBroker.beginTransaction();
-        cwuTx.putOperationalData(NODE_0_CWU_PATH, CWU);
-        cwuTx.commit().get();
+        final WriteTransaction cwuTx = dataBroker.newWriteOnlyTransaction();
+        cwuTx.put(LogicalDatastoreType.OPERATIONAL, NODE_0_CWU_PATH, CWU, true);
+        cwuTx.submit().get(5, TimeUnit.SECONDS);
 
         assertFalse(eventFuture.isDone());
 
-        DataModificationTransaction lvuTx = dataBroker.beginTransaction();
+        final WriteTransaction lvuTx = dataBroker.newWriteOnlyTransaction();
 
         TreeComplexUsesAugment tcua = new TreeComplexUsesAugmentBuilder()
                 .setListViaUses(Collections.singletonList(LVU)).build();
 
-        lvuTx.putOperationalData(NODE_0_TCU_PATH, tcua);
-        lvuTx.putOperationalData(NODE_1_LVU_PATH, LVU);
-        lvuTx.commit().get();
+        lvuTx.put(LogicalDatastoreType.OPERATIONAL, NODE_0_TCU_PATH, tcua, true);
+        lvuTx.put(LogicalDatastoreType.OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
+        lvuTx.submit().get(5, TimeUnit.SECONDS);
 
         validateEvent(eventFuture.get(1000, TimeUnit.MILLISECONDS));
     }
@@ -138,42 +134,38 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
     @Test
     public void testNoChangeOnReplaceWithSameValue() throws InterruptedException, TimeoutException, ExecutionException {
 
-        DataProviderService dataBroker = testContext.getBindingDataBroker();
+        DataBroker dataBroker = testContext.getDataBroker();
 
         // We wrote initial state NODE_0_FLOW
-        DataModificationTransaction transaction = dataBroker.beginTransaction();
-        transaction.putOperationalData(NODE_0_LVU_PATH, LVU);
-        transaction.commit().get();
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
+        transaction.submit().get(5, TimeUnit.SECONDS);
 
         // We registered DataChangeListener
-        final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture = SettableFuture.create();
-        dataBroker.registerDataChangeListener(DEEP_WILDCARDED_PATH, new DataChangeListener() {
-
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> dataChangeEvent) {
-                eventFuture.set(dataChangeEvent);
-            }
-        });
+        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture =
+                SettableFuture.create();
+        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, DEEP_WILDCARDED_PATH,
+            dataChangeEvent -> eventFuture.set(dataChangeEvent), DataChangeScope.SUBTREE);
         assertFalse(eventFuture.isDone());
 
-        DataModificationTransaction secondTx = dataBroker.beginTransaction();
-        secondTx.putOperationalData(NODE_0_LVU_PATH, LVU);
-        secondTx.putOperationalData(NODE_1_LVU_PATH, LVU);
-        secondTx.commit().get();
+        final WriteTransaction secondTx = dataBroker.newWriteOnlyTransaction();
+        secondTx.put(LogicalDatastoreType.OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
+        secondTx.put(LogicalDatastoreType.OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
+        secondTx.submit().get(5, TimeUnit.SECONDS);
 
-        DataChangeEvent<InstanceIdentifier<?>, DataObject> event = (eventFuture.get(1000, TimeUnit.MILLISECONDS));
+        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(event);
         // Data change should contains NODE_1 Flow - which was added
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_LVU_PATH));
+        assertTrue(event.getCreatedData().containsKey(NODE_1_LVU_PATH));
         // Data change must not containe NODE_0 Flow which was replaced with same value.
-        assertFalse(event.getUpdatedOperationalData().containsKey(NODE_0_LVU_PATH));
+        assertFalse(event.getUpdatedData().containsKey(NODE_0_LVU_PATH));
     }
 
-    private static void validateEvent(final DataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+    private static void validateEvent(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
         assertNotNull(event);
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_1_LVU_PATH));
-        assertTrue(event.getCreatedOperationalData().containsKey(NODE_0_LVU_PATH));
-        assertFalse(event.getCreatedOperationalData().containsKey(NODE_0_CWU_PATH));
+        assertTrue(event.getCreatedData().containsKey(NODE_1_LVU_PATH));
+        assertTrue(event.getCreatedData().containsKey(NODE_0_LVU_PATH));
+        assertFalse(event.getCreatedData().containsKey(NODE_0_CWU_PATH));
     }
 
 }

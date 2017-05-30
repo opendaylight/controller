@@ -8,28 +8,29 @@
 package org.opendaylight.controller.test.sal.binding.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import java.util.concurrent.Future;
+import static org.junit.Assert.assertTrue;
+
+import com.google.common.base.Optional;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
  * covers creating, reading and deleting of an item in dataStore
  */
 public class DataServiceIT extends AbstractIT {
-    protected DataBrokerService consumerDataService;
+    protected DataBroker dataBroker;
 
     /**
      *
@@ -41,51 +42,40 @@ public class DataServiceIT extends AbstractIT {
      */
     @Test
     public void test() throws Exception {
-        BindingAwareConsumer consumer = session -> consumerDataService = session.getSALService(DataBrokerService.class);
+        BindingAwareConsumer consumer = session -> dataBroker = session.getSALService(DataBroker.class);
 
         broker.registerConsumer(consumer);
 
-        assertNotNull(consumerDataService);
+        assertNotNull(dataBroker);
 
 
-        DataModificationTransaction transaction = consumerDataService.beginTransaction();
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         assertNotNull(transaction);
 
         InstanceIdentifier<UnorderedList> node1 = createNodeRef("0");
-        DataObject node = consumerDataService.readOperationalData(node1);
-        assertNull(node);
+        Optional<UnorderedList> node = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL, node1)
+                .checkedGet(5, TimeUnit.SECONDS);
+        assertFalse(node.isPresent());
         UnorderedList nodeData1 = createNode("0");
 
-        transaction.putOperationalData(node1, nodeData1);
-        Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
-        assertNotNull(commitResult);
+        transaction.put(LogicalDatastoreType.OPERATIONAL, node1, nodeData1);
+        transaction.submit().checkedGet(5, TimeUnit.SECONDS);
 
-        RpcResult<TransactionStatus> result = commitResult.get();
+        Optional<UnorderedList> readedData = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
+                node1).checkedGet(5, TimeUnit.SECONDS);
+        assertTrue(readedData.isPresent());
+        assertEquals(nodeData1.getKey(), readedData.get().getKey());
 
-        assertNotNull(result);
-        assertNotNull(result.getResult());
-        assertEquals(TransactionStatus.COMMITED, result.getResult());
-
-        UnorderedList readedData = (UnorderedList) consumerDataService.readOperationalData(node1);
-        assertNotNull(readedData);
-        assertEquals(nodeData1.getKey(), readedData.getKey());
-
-        DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
+        final WriteTransaction transaction2 = dataBroker.newWriteOnlyTransaction();
         assertNotNull(transaction2);
 
-        transaction2.removeOperationalData(node1);
+        transaction2.delete(LogicalDatastoreType.OPERATIONAL, node1);
 
-        Future<RpcResult<TransactionStatus>> commitResult2 = transaction2.commit();
-        assertNotNull(commitResult2);
+        transaction2.submit().checkedGet(5, TimeUnit.SECONDS);
 
-        RpcResult<TransactionStatus> result2 = commitResult2.get();
-
-        assertNotNull(result2);
-        assertNotNull(result2.getResult());
-        assertEquals(TransactionStatus.COMMITED, result2.getResult());
-
-        DataObject readedData2 = consumerDataService.readOperationalData(node1);
-        assertNull(readedData2);
+        Optional<UnorderedList> readedData2 = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
+                node1).checkedGet(5, TimeUnit.SECONDS);
+        assertFalse(readedData2.isPresent());
     }
 
 
