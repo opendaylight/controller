@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 public class SimpleDispatcher extends AbstractDispatcher<SimpleSession, SimpleSessionListener> {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleDispatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleDispatcher.class);
 
     private final SessionNegotiatorFactory<SimpleMessage, SimpleSession, SimpleSessionListener> negotiatorFactory;
     private final ChannelOutboundHandler encoder = new SimpleMessageToByteEncoder();
@@ -39,7 +39,7 @@ public class SimpleDispatcher extends AbstractDispatcher<SimpleSession, SimpleSe
             channel.pipeline().addLast(new SimpleByteToMessageDecoder());
             channel.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(listenerFactory, channel, promise));
             channel.pipeline().addLast(encoder);
-            logger.debug("initialization completed for channel {}", channel);
+            LOG.debug("initialization completed for channel {}", channel);
         }
 
     }

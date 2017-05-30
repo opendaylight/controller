@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 public class DOMBrokerPerformanceTest {
 
-    private static final Logger log = LoggerFactory.getLogger(DOMBrokerPerformanceTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DOMBrokerPerformanceTest.class);
 
     private static NormalizedNode<?, ?> outerList(final int i) {
         return ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i);
@@ -56,13 +56,13 @@ public class DOMBrokerPerformanceTest {
 
     private static <V> V measure(final String name, final Callable<V> callable) throws Exception {
         // TODO Auto-generated method stub
-        log.debug("Measurement:{} Start", name);
+        LOG.debug("Measurement:{} Start", name);
         long startNano = System.nanoTime();
         try {
             return callable.call();
         } finally {
             long endNano = System.nanoTime();
-            log.info("Measurement:\"{}\" Time:{} ms", name, (endNano - startNano) / 1000000.0d);
+            LOG.info("Measurement:\"{}\" Time:{} ms", name, (endNano - startNano) / 1000000.0d);
         }
     }
 

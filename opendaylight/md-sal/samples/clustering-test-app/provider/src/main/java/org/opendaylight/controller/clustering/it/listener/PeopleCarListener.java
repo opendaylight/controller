@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class PeopleCarListener implements CarPurchaseListener {
 
-  private static final Logger log = LoggerFactory.getLogger(PeopleCarListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PeopleCarListener.class);
 
   private DataBroker dataProvider;
 
@@ -46,7 +46,7 @@ public class PeopleCarListener implements CarPurchaseListener {
     carPersonBuilder.setKey(key);
     final CarPerson carPerson = carPersonBuilder.build();
 
-    log.info("Car bought, adding car-person entry: [{}]", carPerson);
+    LOG.info("Car bought, adding car-person entry: [{}]", carPerson);
 
     InstanceIdentifier<CarPerson> carPersonIId =
         InstanceIdentifier.<CarPeople>builder(CarPeople.class).child(CarPerson.class, carPerson.getKey()).build();
@@ -58,12 +58,12 @@ public class PeopleCarListener implements CarPurchaseListener {
     Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
       @Override
       public void onSuccess(final Void result) {
-        log.info("Successfully added car-person entry: [{}]", carPerson);
+        LOG.info("Successfully added car-person entry: [{}]", carPerson);
       }
 
       @Override
       public void onFailure(final Throwable t) {
-        log.error(String.format("Failed to add car-person entry: [%s]", carPerson), t);
+        LOG.error(String.format("Failed to add car-person entry: [%s]", carPerson), t);
       }
     });
 

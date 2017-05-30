@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService, AutoCloseable {
-    private final static Logger log = LoggerFactory.getLogger(BrokerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BrokerImpl.class);
 
     // Broker Generic Context
     private final Set<ConsumerContextImpl> sessions = Collections
@@ -144,7 +144,7 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
     @Override
     public ConsumerSession registerConsumer(final Consumer consumer) {
         checkPredicates(consumer);
-        log.trace("Registering consumer {}", consumer);
+        LOG.trace("Registering consumer {}", consumer);
         final ConsumerContextImpl session = newSessionFor(consumer);
         consumer.onSessionInitiated(session);
         sessions.add(session);

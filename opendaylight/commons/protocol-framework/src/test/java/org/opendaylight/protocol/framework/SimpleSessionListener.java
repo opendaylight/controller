@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * Simple Session Listener that is notified about messages and changes in the session.
  */
 public class SimpleSessionListener implements SessionListener<SimpleMessage, SimpleSession, TerminationReason> {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleSessionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpleSessionListener.class);
 
     public List<SimpleMessage> messages = new ArrayList<>();
 
@@ -27,7 +27,7 @@ public class SimpleSessionListener implements SessionListener<SimpleMessage, Sim
 
     @Override
     public void onMessage(final SimpleSession session, final SimpleMessage message) {
-        logger.debug("Received message: " + message.getClass() + " " + message);
+        LOG.debug("Received message: " + message.getClass() + " " + message);
         this.messages.add(message);
     }
 

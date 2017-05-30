@@ -222,8 +222,8 @@ public class LLDP extends Packet {
         int lldpOffset = bitOffset; // LLDP start
         int lldpSize = size; // LLDP size
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("LLDP: {} (offset {} bitsize {})", new Object[] { HexEncode.bytesToHexString(data),
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("LLDP: {} (offset {} bitsize {})", new Object[] { HexEncode.bytesToHexString(data),
                     lldpOffset, lldpSize });
         }
         /*
@@ -270,8 +270,8 @@ public class LLDP extends Packet {
             throw new PacketException(e.getMessage());
         }
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("LLDP: serialized: {}", HexEncode.bytesToHexString(serializedBytes));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("LLDP: serialized: {}", HexEncode.bytesToHexString(serializedBytes));
         }
         return serializedBytes;
     }
