@@ -13,23 +13,19 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcR
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
-public abstract class AbstractBindingSalProviderInstance<D extends DataProviderService, N extends NotificationProviderService, R extends RpcProviderRegistry> //
-        extends AbstractBindingSalConsumerInstance<D, N, R> //
-        implements //
-        DataProviderService, //
-        RpcProviderRegistry, //
-        NotificationProviderService {
+public abstract class AbstractBindingSalProviderInstance<N extends NotificationProviderService,
+                                                         R extends RpcProviderRegistry>
+        extends AbstractBindingSalConsumerInstance<N, R>
+        implements RpcProviderRegistry, NotificationProviderService {
 
-    public AbstractBindingSalProviderInstance(final R rpcRegistry, final N notificationBroker,
-            final D dataBroker) {
-        super(rpcRegistry, notificationBroker, dataBroker);
+    public AbstractBindingSalProviderInstance(final R rpcRegistry, final N notificationBroker) {
+        super(rpcRegistry, notificationBroker);
     }
 
     @Override
@@ -39,8 +35,8 @@ public abstract class AbstractBindingSalProviderInstance<D extends DataProviderS
     }
 
     @Override
-    public <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(final Class<T> type, final T implementation)
-            throws IllegalStateException {
+    public <T extends RpcService> RoutedRpcRegistration<T> addRoutedRpcImplementation(final Class<T> type,
+            final T implementation) throws IllegalStateException {
         return getRpcRegistryChecked().addRoutedRpcImplementation(type, implementation);
     }
 
