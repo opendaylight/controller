@@ -55,7 +55,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
-import org.opendaylight.controller.cluster.datastore.persisted.PreBoronShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
@@ -346,7 +346,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final NormalizedNode<?, ?> root = readStore(testStore, YangInstanceIdentifier.EMPTY);
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
-                new ShardSnapshotState(new PreBoronShardDataTreeSnapshot(root)),
+                new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
                 Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1, 1, null, null));
         return testStore;
     }
