@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -122,14 +122,15 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
 
     // Request order has already been checked by caller and replaySequence()
     @SuppressWarnings("checkstyle:IllegalCatch")
-    final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
-            final RequestEnvelope envelope, final long now) throws RequestException {
+    @Nullable
+    final TransactionSuccess<?> handleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
+            final long now) throws RequestException {
         if (request instanceof IncrementTransactionSequenceRequest) {
             final IncrementTransactionSequenceRequest incr = (IncrementTransactionSequenceRequest) request;
             expectedSequence += incr.getIncrement();
 
-            return recordSuccess(incr.getSequence(), new IncrementTransactionSequenceSuccess(incr.getTarget(),
-                incr.getSequence()));
+            return recordSuccess(incr.getSequence(),
+                    new IncrementTransactionSequenceSuccess(incr.getTarget(), incr.getSequence()));
         }
 
         if (previousFailure != null) {
@@ -141,8 +142,10 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
             return doHandleRequest(request, envelope, now);
         } catch (RuntimeException e) {
             /*
-             * The request failed to process, we should not attempt to ever apply it again. Furthermore we cannot
-             * accept any further requests from this connection, simply because the transaction state is undefined.
+             * The request failed to process, we should not attempt to ever
+             * apply it again. Furthermore we cannot accept any further requests
+             * from this connection, simply because the transaction state is
+             * undefined.
              */
             LOG.debug("{}: Request {} failed to process", persistenceId(), request, e);
             previousFailure = new RuntimeRequestException("Request " + request + " failed to process", e);
@@ -150,7 +153,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         }
     }
 
-    abstract @Nullable TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
+    @Nullable
+    abstract TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
             long now) throws RequestException;
 
     private void recordResponse(final long sequence, final Object response) {
@@ -189,5 +193,4 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
                 .add("lastPurgedSequence", lastPurgedSequence)
                 .toString();
     }
-
 }
