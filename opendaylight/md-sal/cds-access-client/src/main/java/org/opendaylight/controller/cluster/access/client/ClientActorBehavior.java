@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Verify;
 import java.util.Collection;
 import java.util.Map;
@@ -278,6 +279,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         LOG.info("{}: resolved shard {} to {}", persistenceId(), shard, backend);
         final long stamp = connectionsLock.writeLock();
         try {
+            final Stopwatch sw = Stopwatch.createStarted();
+
             // Create a new connected connection
             final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn.context(),
                     conn.cookie(), backend);
@@ -301,7 +304,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 LOG.warn("{}: old connection {} does not match existing {}, new connection {} in limbo",
                     persistenceId(), conn, existing, newConn);
             } else {
-                LOG.info("{}: replaced connection {} with {}", persistenceId(), conn, newConn);
+                LOG.info("{}: replaced connection {} with {} in {}", persistenceId(), conn, newConn, sw);
             }
         } finally {
             connectionsLock.unlockWrite(stamp);
