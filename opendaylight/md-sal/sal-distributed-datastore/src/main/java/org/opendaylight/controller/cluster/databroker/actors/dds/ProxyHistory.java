@@ -352,7 +352,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         return parent;
     }
 
-    final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
+    AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId,
             final boolean snapshotOnly) {
         lock.lock();
         try {

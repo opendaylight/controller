@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.core.Is.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -186,8 +185,8 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         transaction.startReconnect();
 
         final ProxyHistory mockSuccessor = mock(ProxyHistory.class);
-        doAnswer(inv -> successor.getTransaction()).when(mockSuccessor.createTransactionProxy(TRANSACTION_ID,
-            transaction.isSnapshotOnly()));
+        when(mockSuccessor.createTransactionProxy(TRANSACTION_ID, transaction.isSnapshotOnly()))
+            .thenReturn(successor.getTransaction());
 
         transaction.replayMessages(mockSuccessor, entries);
 

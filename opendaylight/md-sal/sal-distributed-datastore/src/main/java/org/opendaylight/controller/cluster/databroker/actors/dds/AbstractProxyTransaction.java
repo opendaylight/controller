@@ -91,7 +91,17 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
     }
 
-    // Generic state base class. Direct instances are used for fast paths, sub-class is used for successor transitions
+    /**
+     * State class used when a successor has interfered. Contains coordinator latch, the successor and previous state.
+     * This is a temporary state introduced during reconnection process and is necessary for correct state hand-off
+     * between the old connection (potentially being accessed by the user) and the new connection (being cleaned up
+     * by the actor.
+     *
+     * <p>
+     * When a user operation encounters this state, it synchronizes on the it and wait until reconnection completes,
+     * at which point the request is routed to the successor transaction. This is a relatively heavy-weight solution
+     * to the problem of state transfer, but the user will observe it only if the race condition is hit.
+     */
     private static class State {
         private final String string;
 
@@ -105,14 +115,24 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
     }
 
-    // State class used when a successor has interfered. Contains coordinator latch, the successor and previous state
+    /**
+     * State class used when a successor has interfered. Contains coordinator latch, the successor and previous state.
+     * This is a temporary state introduced during reconnection process and is necessary for correct state hand-off
+     * between the old connection (potentially being accessed by the user) and the new connection (being cleaned up
+     * by the actor.
+     *
+     * <p>
+     * When a user operation encounters this state, it synchronizes on the it and wait until reconnection completes,
+     * at which point the request is routed to the successor transaction. This is a relatively heavy-weight solution
+     * to the problem of state transfer, but the user will observe it only if the race condition is hit.
+     */
     private static final class SuccessorState extends State {
         private final CountDownLatch latch = new CountDownLatch(1);
         private AbstractProxyTransaction successor;
         private State prevState;
 
         SuccessorState() {
-            super("successor");
+            super("SUCCESSOR");
         }
 
         // Synchronize with succession process and return the successor
@@ -135,7 +155,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
 
         void setPrevState(final State prevState) {
-            Verify.verify(this.prevState == null);
+            Verify.verify(this.prevState == null, "Attempted to set previous state to %s when we already have %s",
+                    prevState, this.prevState);
             this.prevState = Preconditions.checkNotNull(prevState);
         }
 
@@ -145,7 +166,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
 
         void setSuccessor(final AbstractProxyTransaction successor) {
-            Verify.verify(this.successor == null);
+            Verify.verify(this.successor == null, "Attempted to set successor to %s when we already have %s",
+                    successor, this.successor);
             this.successor = Preconditions.checkNotNull(successor);
         }
     }
@@ -155,9 +177,41 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             AtomicIntegerFieldUpdater.newUpdater(AbstractProxyTransaction.class, "sealed");
     private static final AtomicReferenceFieldUpdater<AbstractProxyTransaction, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractProxyTransaction.class, State.class, "state");
-    private static final State OPEN = new State("open");
-    private static final State SEALED = new State("sealed");
-    private static final State FLUSHED = new State("flushed");
+
+    /**
+     * Transaction has been open and is being actively worked on.
+     */
+    private static final State OPEN = new State("OPEN");
+
+    /**
+     * Transaction has been sealed by the user, but it has not completed flushing to the backed, yet. This is
+     * a transition state, as we are waiting for the user to initiate commit procedures.
+     *
+     * <p>
+     * Since the reconnect mechanics relies on state replay for transactions, this state needs to be flushed into the
+     * queue to re-create state in successor transaction (which may be based on different messages as locality may have
+     * changed). Hence the transition to {@link #FLUSHED} state needs to be handled in a thread-safe manner.
+     */
+    private static final State SEALED = new State("SEALED");
+
+    /**
+     * Transaction state has been flushed into the queue, i.e. it is visible by the successor and potentially
+     * the backend. At this point the transaction does not hold any state besides successful requests, all other state
+     * is held either in the connection's queue or the successor object.
+     *
+     * <p>
+     * Transition to this state indicates we have all input from the user we need to initiate the correct commit
+     * protocol.
+     */
+    private static final State FLUSHED = new State("FLUSHED");
+
+    /**
+     * Transaction state has been completely resolved, we have received confirmation of the transaction fate from
+     * the backend. The only remaining task left to do is finishing up the state cleanup, which is done via purge
+     * request. We need to hang on to the transaction until that is done, as we have to make sure backend completes
+     * purging its state -- otherwise we could have a leak on the backend.
+     */
+    private static final State DONE = new State("DONE");
 
     // Touched from client actor thread only
     private final Deque<Object> successfulRequests = new ArrayDeque<>();
