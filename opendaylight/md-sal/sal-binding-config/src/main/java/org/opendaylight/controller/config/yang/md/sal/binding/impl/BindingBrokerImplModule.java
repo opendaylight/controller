@@ -69,7 +69,6 @@ public final class BindingBrokerImplModule extends
         final MountProviderService legacyMount = createLegacyMountPointService(mount);
 
 
-        broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
         if (getNotificationPublishServiceDependency() != null) {
             broker.setNotificationPublishService(getNotificationPublishServiceDependency());

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
@@ -15,13 +16,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
-import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
@@ -59,7 +60,6 @@ import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeC
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import javassist.ClassPool;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
@@ -153,7 +153,6 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startBindingBroker() {
         checkState(this.executor != null, "Executor needs to be set");
-        checkState(this.baData != null, "Binding Data Broker must be started");
         checkState(this.baNotifyImpl != null, "Notification Service must be started");
 
         this.baConsumerRpc = new BindingDOMRpcServiceAdapter(getDomRpcInvoker(), this.codec);
@@ -165,7 +164,6 @@ public class BindingTestContext implements AutoCloseable {
         this.baBrokerImpl.setMountService(mountService);
         this.baBrokerImpl.setLegacyMountManager(new HydrogenMountProvisionServiceAdapter(mountService));
         this.baBrokerImpl.setRpcBroker(new HeliumRpcProviderRegistry(this.baConsumerRpc, this.baProviderRpc));
-        this.baBrokerImpl.setLegacyDataBroker(this.baData);
         this.baBrokerImpl.setNotificationBroker(this.baNotifyImpl);
         this.baBrokerImpl.start();
     }
@@ -201,7 +199,6 @@ public class BindingTestContext implements AutoCloseable {
         startDomMountPoint();
         startBindingToDomMappingService();
         startNewDataBroker();
-        startNewBindingDataBroker();
         startBindingNotificationBroker();
         startBindingBroker();
 
@@ -209,11 +206,6 @@ public class BindingTestContext implements AutoCloseable {
         if (this.startWithSchema) {
             loadYangSchemaFromClasspath();
         }
-    }
-
-    public void startNewBindingDataBroker() {
-        final HydrogenDataBrokerAdapter forwarded = new HydrogenDataBrokerAdapter(this.dataBroker);
-        this.baData = forwarded;
     }
 
     private void startDomMountPoint() {
@@ -247,11 +239,6 @@ public class BindingTestContext implements AutoCloseable {
     public void loadYangSchemaFromClasspath() {
         final ImmutableSet<YangModuleInfo> moduleInfos = BindingReflections.loadModuleInfos();
         updateYangSchema(moduleInfos);
-    }
-
-    @Deprecated
-    public DataProviderService getBindingDataBroker() {
-        return this.baData;
     }
 
     public RpcProviderRegistry getBindingRpcRegistry() {
