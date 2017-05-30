@@ -58,6 +58,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.slf4j.Logger;
@@ -204,7 +205,11 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     static void commit(ShardDataTree shardDataTree, DataTreeModification modification)
             throws DataValidationFailedException {
-        shardDataTree.notifyListeners(shardDataTree.commit(modification));
+        modification.ready();
+        shardDataTree.getDataTree().validate(modification);
+        final DataTreeCandidate candidate = shardDataTree.getDataTree().prepare(modification);
+        shardDataTree.getDataTree().commit(candidate);
+        shardDataTree.notifyListeners(candidate);
     }
 
     static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity, final boolean expWasOwner,

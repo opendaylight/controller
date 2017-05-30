@@ -671,24 +671,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return dataTree.takeSnapshot().newModification();
     }
 
-    /**
-     * Commits a modification.
-     *
-     * @deprecated This method violates DataTree containment and will be removed.
-     */
-    @VisibleForTesting
-    @Deprecated
-    public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
-        // Direct modification commit is a utility, which cannot be used while we have transactions in-flight
-        Preconditions.checkState(tip == dataTree, "Cannot modify data tree while transacgitons are pending");
-
-        modification.ready();
-        dataTree.validate(modification);
-        DataTreeCandidate candidate = dataTree.prepare(modification);
-        dataTree.commit(candidate);
-        return candidate;
-    }
-
     public Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
         Collection<ShardDataTreeCohort> ret = new ArrayList<>(getQueueSize());
 

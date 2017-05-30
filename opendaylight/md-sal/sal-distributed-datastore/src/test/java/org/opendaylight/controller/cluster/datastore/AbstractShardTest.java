@@ -310,7 +310,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        store.notifyListeners(store.commit(modification));
+        store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
@@ -334,7 +334,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        store.notifyListeners(store.commit(modification));
+        store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
@@ -406,11 +406,13 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return mockCandidate;
     }
 
-    static void commitTransaction(final DataTree store, final DataTreeModification modification)
+    static DataTreeCandidate commitTransaction(final DataTree store, final DataTreeModification modification)
             throws DataValidationFailedException {
         modification.ready();
         store.validate(modification);
-        store.commit(store.prepare(modification));
+        final DataTreeCandidate candidate = store.prepare(modification);
+        store.commit(candidate);
+        return candidate;
     }
 
     @SuppressWarnings("serial")
