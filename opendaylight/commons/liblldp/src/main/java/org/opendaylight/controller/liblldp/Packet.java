@@ -23,8 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 
 public abstract class Packet {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(Packet.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(Packet.class);
     // Access level granted to this packet
     protected boolean writeAccess;
     // When deserialized from wire, packet could result corrupted
@@ -108,8 +107,8 @@ public abstract class Packet {
              */
             this.setHeaderField(hdrField, hdrFieldBytes);
 
-            if (logger.isTraceEnabled()) {
-                logger.trace("{}: {}: {} (offset {} bitsize {})",
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("{}: {}: {} (offset {} bitsize {})",
                         new Object[] { this.getClass().getSimpleName(), hdrField,
                         HexEncode.bytesToHexString(hdrFieldBytes),
                         startOffset, numBits });
@@ -162,7 +161,7 @@ public abstract class Packet {
         } else if (rawPayload != null) {
             payloadBytes = rawPayload;
         }
-        int payloadSize = (payloadBytes == null) ? 0 : payloadBytes.length;
+        int payloadSize = payloadBytes == null ? 0 : payloadBytes.length;
 
         // Allocate the buffer to contain the full (header + payload) packet
         int headerSize = this.getHeaderSize() / NetUtils.NumBitsInAByte;
@@ -190,8 +189,8 @@ public abstract class Packet {
         // Perform post serialize operations (like checksum computation)
         postSerializeCustomOperation(packetBytes);
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("{}: {}", this.getClass().getSimpleName(),
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{}: {}", this.getClass().getSimpleName(),
                     HexEncode.bytesToHexString(packetBytes));
         }
 
@@ -327,7 +326,7 @@ public abstract class Packet {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result
-                + ((this.hdrFieldsMap == null) ? 0 : hdrFieldsMap.hashCode());
+                + (this.hdrFieldsMap == null ? 0 : hdrFieldsMap.hashCode());
         return result;
     }
 

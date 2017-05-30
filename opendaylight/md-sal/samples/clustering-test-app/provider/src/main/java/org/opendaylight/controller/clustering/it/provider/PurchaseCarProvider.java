@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 
 public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable{
 
-  private static final Logger log = LoggerFactory.getLogger(PurchaseCarProvider.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
   private NotificationProviderService notificationProvider;
 
@@ -35,7 +35,7 @@ public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable{
 
   @Override
   public Future<RpcResult<Void>> buyCar(BuyCarInput input) {
-    log.info("Routed RPC buyCar : generating notification for buying car [{}]", input);
+    LOG.info("Routed RPC buyCar : generating notification for buying car [{}]", input);
     SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
     CarBoughtBuilder carBoughtBuilder = new CarBoughtBuilder();
     carBoughtBuilder.setCarId(input.getCarId());

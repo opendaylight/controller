@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * networking data structures
  */
 public abstract class NetUtils {
-    protected static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(NetUtils.class);
     /**
      * Constant holding the number of bits in a byte
      */
@@ -56,7 +56,7 @@ public abstract class NetUtils {
         if (ba == null || ba.length != 4) {
             return 0;
         }
-        return (0xff & ba[0]) << 24 | (0xff & ba[1]) << 16 | (0xff & ba[2]) << 8 | (0xff & ba[3]);
+        return (0xff & ba[0]) << 24 | (0xff & ba[1]) << 16 | (0xff & ba[2]) << 8 | 0xff & ba[3];
     }
 
     /**
@@ -108,7 +108,7 @@ public abstract class NetUtils {
      * @return the byte array
      */
     public static byte[] intToByteArray4(final int i) {
-        return new byte[] { (byte) ((i >> 24) & 0xff), (byte) ((i >> 16) & 0xff), (byte) ((i >> 8) & 0xff),
+        return new byte[] { (byte) (i >> 24 & 0xff), (byte) (i >> 16 & 0xff), (byte) (i >> 8 & 0xff),
                 (byte) (i & 0xff) };
     }
 
@@ -125,7 +125,7 @@ public abstract class NetUtils {
         try {
             ip = InetAddress.getByAddress(NetUtils.intToByteArray4(address));
         } catch (final UnknownHostException e) {
-            logger.error("", e);
+            LOG.error("", e);
         }
         return ip;
     }
@@ -143,12 +143,12 @@ public abstract class NetUtils {
      * @return
      */
     public static InetAddress getInetNetworkMask(final int prefixMaskLength, final boolean isV6) {
-        if (prefixMaskLength < 0 || (!isV6 && prefixMaskLength > 32) || (isV6 && prefixMaskLength > 128)) {
+        if (prefixMaskLength < 0 || !isV6 && prefixMaskLength > 32 || isV6 && prefixMaskLength > 128) {
             return null;
         }
         byte v4Address[] = { 0, 0, 0, 0 };
         byte v6Address[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        byte address[] = (isV6) ? v6Address : v4Address;
+        byte address[] = isV6 ? v6Address : v4Address;
         int numBytes = prefixMaskLength / 8;
         int numBits = prefixMaskLength % 8;
         int i = 0;
@@ -158,7 +158,7 @@ public abstract class NetUtils {
         if (numBits > 0) {
             int rem = 0;
             for (int j = 0; j < numBits; j++) {
-                rem |= 1 << (7 - j);
+                rem |= 1 << 7 - j;
             }
             address[i] = (byte) rem;
         }
@@ -166,7 +166,7 @@ public abstract class NetUtils {
         try {
             return InetAddress.getByAddress(address);
         } catch (final UnknownHostException e) {
-            logger.error("", e);
+            LOG.error("", e);
         }
         return null;
     }
@@ -229,12 +229,12 @@ public abstract class NetUtils {
         byte modifiedByte;
         byte[] sn = ip.getAddress();
         if (bits > 0) {
-            modifiedByte = (byte) (sn[bytes] >> (8 - bits));
-            sn[bytes] = (byte) (modifiedByte << (8 - bits));
+            modifiedByte = (byte) (sn[bytes] >> 8 - bits);
+            sn[bytes] = (byte) (modifiedByte << 8 - bits);
             bytes++;
         }
         for (; bytes < sn.length; bytes++) {
-            sn[bytes] = (byte) (0);
+            sn[bytes] = (byte) 0;
         }
         try {
             return InetAddress.getByAddress(sn);
@@ -271,7 +271,7 @@ public abstract class NetUtils {
     public static boolean inetAddressConflict(final InetAddress testAddress, final InetAddress filterAddress, final InetAddress testMask,
             final InetAddress filterMask) {
         // Sanity check
-        if ((testAddress == null) || (filterAddress == null)) {
+        if (testAddress == null || filterAddress == null) {
             return false;
         }
 
@@ -280,9 +280,9 @@ public abstract class NetUtils {
             return false;
         }
 
-        int testMaskLen = (testMask == null) ? ((testAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
+        int testMaskLen = testMask == null ? testAddress instanceof Inet4Address ? 32 : 128 : NetUtils
                 .getSubnetMaskLength(testMask);
-        int filterMaskLen = (filterMask == null) ? ((testAddress instanceof Inet4Address) ? 32 : 128) : NetUtils
+        int filterMaskLen = filterMask == null ? testAddress instanceof Inet4Address ? 32 : 128 : NetUtils
                 .getSubnetMaskLength(filterMask);
 
         // Mask length check. Test mask has to be more specific than filter one
@@ -293,7 +293,7 @@ public abstract class NetUtils {
         // Subnet Prefix on filter mask length must be the same
         InetAddress prefix1 = getSubnetPrefix(testAddress, filterMaskLen);
         InetAddress prefix2 = getSubnetPrefix(filterAddress, filterMaskLen);
-        return (!prefix1.equals(prefix2));
+        return !prefix1.equals(prefix2);
     }
 
     /**
@@ -377,7 +377,7 @@ public abstract class NetUtils {
     }
 
     public static boolean fieldsConflict(final int field1, final int field2) {
-        if ((field1 == 0) || (field2 == 0) || (field1 == field2)) {
+        if (field1 == 0 || field2 == 0 || field1 == field2) {
             return false;
         }
         return true;
@@ -388,7 +388,7 @@ public abstract class NetUtils {
         try {
             address = InetAddress.getByName(addressString);
         } catch (final UnknownHostException e) {
-            logger.error("", e);
+            LOG.error("", e);
         }
         return address;
     }
@@ -415,7 +415,7 @@ public abstract class NetUtils {
         }
         if (values.length >= 2) {
             int prefix = Integer.valueOf(values[1]);
-            if ((prefix < 0) || (prefix > 32)) {
+            if (prefix < 0 || prefix > 32) {
                 return false;
             }
         }
@@ -449,7 +449,7 @@ public abstract class NetUtils {
 
         if (values.length >= 2) {
             int prefix = Integer.valueOf(values[1]);
-            if ((prefix < 0) || (prefix > 128)) {
+            if (prefix < 0 || prefix > 128) {
                 return false;
             }
         }
@@ -503,7 +503,7 @@ public abstract class NetUtils {
      */
     public static InetAddress gethighestIP(final boolean v6) {
         try {
-            return (v6) ? InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") : InetAddress
+            return v6 ? InetAddress.getByName("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") : InetAddress
                     .getByName("255.255.255.255");
         } catch (final UnknownHostException e) {
             return null;

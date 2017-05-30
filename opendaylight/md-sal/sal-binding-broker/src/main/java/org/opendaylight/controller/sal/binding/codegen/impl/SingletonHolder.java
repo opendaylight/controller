@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import javassist.ClassPool;
 
 public class SingletonHolder {
-    private static final Logger logger = LoggerFactory.getLogger(SingletonHolder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SingletonHolder.class);
 
     public static final ClassPool CLASS_POOL = ClassPool.getDefault();
     public static final JavassistUtils JAVASSIST = JavassistUtils.forClassPool(CLASS_POOL);
@@ -55,9 +55,9 @@ public class SingletonHolder {
             if (StringUtils.isNotBlank(queueValue)) {
                 try {
                     queueSize = Integer.parseInt(queueValue);
-                    logger.trace("Queue size was set to {}", queueSize);
+                    LOG.trace("Queue size was set to {}", queueSize);
                 } catch (final NumberFormatException e) {
-                    logger.warn("Cannot parse {} as set by {}, using default {}", queueValue,
+                    LOG.warn("Cannot parse {} as set by {}, using default {}", queueValue,
                             NOTIFICATION_QUEUE_SIZE_PROPERTY, queueSize);
                 }
             }

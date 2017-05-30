@@ -16,7 +16,7 @@ import com.google.common.collect.Lists;
 
 public class Session extends AbstractProtocolSession<SimpleMessage> {
 
-    private static final Logger logger = LoggerFactory.getLogger(Session.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Session.class);
 
     public final List<SimpleMessage> msgs = Lists.newArrayList();
 
@@ -29,19 +29,19 @@ public class Session extends AbstractProtocolSession<SimpleMessage> {
 
     @Override
     public void handleMessage(final SimpleMessage msg) {
-        logger.debug("Message received: {}", msg.getMessage());
+        LOG.debug("Message received: {}", msg.getMessage());
         this.up = true;
         this.msgs.add(msg);
-        logger.debug(this.msgs.size() + "");
+        LOG.debug(this.msgs.size() + "");
     }
 
     @Override
     public void endOfInput() {
-        logger.debug("End of input reported.");
+        LOG.debug("End of input reported.");
     }
 
     @Override
     protected void sessionUp() {
-        logger.debug("Session up reported.");
+        LOG.debug("Session up reported.");
     }
 }
