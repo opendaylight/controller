@@ -543,9 +543,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     // Called with the connection locked
-    final void replayMessages(final AbstractProxyTransaction successor,
-            final Iterable<ConnectionEntry> enqueuedEntries) {
+    final void replayMessages(final ProxyHistory successorHistory, final Iterable<ConnectionEntry> enqueuedEntries) {
         final SuccessorState local = getSuccessorState();
+        final State prevState = local.getPrevState();
+
+        final AbstractProxyTransaction successor = successorHistory.createTransactionProxy(getIdentifier(),
+            isSnapshotOnly());
+        LOG.debug("{} created successor transaction proxy {}", this, successor);
         local.setSuccessor(successor);
 
         // Replay successful requests first
@@ -593,7 +597,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
          * reconnecting have been forced to slow paths, which will be unlocked once we unblock the state latch
          * at the end of this method.
          */
-        final State prevState = local.getPrevState();
         if (SEALED.equals(prevState)) {
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             flushState(successor);

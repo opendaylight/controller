@@ -183,7 +183,12 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
                 new ReadTransactionRequest(TRANSACTION_ID, 1L, probe.ref(), PATH_1, true);
         transaction.recordSuccessfulRequest(successful2);
         transaction.startReconnect();
-        transaction.replayMessages(successor.getTransaction(), entries);
+
+        final ProxyHistory mockSuccessor = mock(ProxyHistory.class);
+        when(mockSuccessor.createTransactionProxy(TRANSACTION_ID, transaction.isSnapshotOnly()))
+            .thenReturn(successor.getTransaction());
+
+        transaction.replayMessages(mockSuccessor, entries);
 
         final ModifyTransactionRequest transformed = successor.expectTransactionRequest(ModifyTransactionRequest.class);
         Assert.assertNotNull(transformed);
