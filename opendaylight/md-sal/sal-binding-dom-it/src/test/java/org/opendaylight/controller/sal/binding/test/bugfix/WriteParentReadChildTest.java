@@ -11,10 +11,14 @@ package org.opendaylight.controller.sal.binding.test.bugfix;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
@@ -28,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class WriteParentReadChildTest extends AbstractDataServiceTest {
 
@@ -49,43 +52,36 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
 
     private static final InstanceIdentifier<? extends DataObject> LIST11_INSTANCE_ID_BA = //
             LIST1_INSTANCE_ID_BA.child(List11.class, LIST11_KEY);
+
     /**
-     *
      * The scenario tests writing parent node, which also contains child items
      * and then reading child directly, by specifying path to the child.
-     *
      * Expected behaviour is child is returned.
-     *
-     * @throws Exception
      */
     @Test
     public void writeParentReadChild() throws Exception {
 
-        DataModificationTransaction modification = baDataService.beginTransaction();
+        DataBroker dataBroker = testContext.getDataBroker();
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
         List11 list11 = new List11Builder() //
                 .setKey(LIST11_KEY) //
                 .setAttrStr("primary")
                 .build();
 
-        List1 list1 = new List1Builder()
-            .setKey(LIST1_KEY)
-            .setList11(ImmutableList.of(list11))
-        .build();
+        List1 list1 = new List1Builder().setKey(LIST1_KEY).setList11(ImmutableList.of(list11)).build();
 
-        modification.putConfigurationData(LIST1_INSTANCE_ID_BA, list1);
-        RpcResult<TransactionStatus> ret = modification.commit().get();
-        assertNotNull(ret);
-        assertEquals(TransactionStatus.COMMITED, ret.getResult());
+        transaction.put(LogicalDatastoreType.OPERATIONAL, LIST1_INSTANCE_ID_BA, list1, true);
+        transaction.submit().get(5, TimeUnit.SECONDS);
 
-        DataObject readList1 = baDataService.readConfigurationData(LIST1_INSTANCE_ID_BA);
-        assertNotNull("Readed table should not be nul.", readList1);
-        assertTrue(readList1 instanceof List1);
+        Optional<List1> readList1 = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
+                LIST1_INSTANCE_ID_BA).checkedGet(1000, TimeUnit.MILLISECONDS);
+        assertTrue(readList1.isPresent());
 
-        DataObject readList11 = baDataService.readConfigurationData(LIST11_INSTANCE_ID_BA);
+        Optional<? extends DataObject> readList11 = dataBroker.newReadOnlyTransaction().read(
+                LogicalDatastoreType.OPERATIONAL, LIST11_INSTANCE_ID_BA).checkedGet(5, TimeUnit.SECONDS);
         assertNotNull("Readed flow should not be null.",readList11);
-        assertTrue(readList11 instanceof List11);
-        assertEquals(list11, readList11);
-
+        assertTrue(readList11.isPresent());
+        assertEquals(list11, readList11.get());
     }
 }
