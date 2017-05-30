@@ -31,7 +31,7 @@ public final class SerializationUtils {
         void apply(T instance, YangInstanceIdentifier path, NormalizedNode<?, ?> node);
     }
 
-    private static NormalizedNodeDataOutput streamWriter(DataOutput out) throws IOException {
+    private static NormalizedNodeDataOutput streamWriter(DataOutput out) {
         NormalizedNodeDataOutput streamWriter = REUSABLE_WRITER_TL.get();
         if (streamWriter == null) {
             streamWriter = NormalizedNodeInputOutput.newDataOutput(out);

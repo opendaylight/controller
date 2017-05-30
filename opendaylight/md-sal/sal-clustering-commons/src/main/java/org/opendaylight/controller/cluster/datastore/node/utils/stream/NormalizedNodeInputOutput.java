@@ -19,6 +19,14 @@ public final class NormalizedNodeInputOutput {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Creates a new {@link NormalizedNodeDataInput} instance that reads from the given input. This method first reads
+     * and validates that the input contains a valid NormalizedNode stream.
+     *
+     * @param input the DataInput to read from
+     * @return a new {@link NormalizedNodeDataInput} instance
+     * @throws IOException if an error occurs reading from the input
+     */
     public static NormalizedNodeDataInput newDataInput(@Nonnull final DataInput input) throws IOException {
         final byte marker = input.readByte();
         if (marker != TokenTypes.SIGNATURE_MARKER) {
@@ -34,7 +42,24 @@ public final class NormalizedNodeInputOutput {
         }
     }
 
-    public static NormalizedNodeDataOutput newDataOutput(@Nonnull final DataOutput output) throws IOException {
+    /**
+     * Creates a new {@link NormalizedNodeDataInput} instance that reads from the given input. This method does not
+     * perform any initial validation of the input stream.
+     *
+     * @param input the DataInput to read from
+     * @return a new {@link NormalizedNodeDataInput} instance
+     */
+    public static NormalizedNodeDataInput newDataInputWithoutValidation(@Nonnull final DataInput input) {
+        return new NormalizedNodeInputStreamReader(input, false);
+    }
+
+    /**
+     * Creates a new {@link NormalizedNodeDataOutput} instance that writes to the given output.
+     *
+     * @param output the DataOutput to write to
+     * @return a new {@link NormalizedNodeDataOutput} instance
+     */
+    public static NormalizedNodeDataOutput newDataOutput(@Nonnull final DataOutput output) {
         return new NormalizedNodeOutputStreamWriter(output);
     }
 }
