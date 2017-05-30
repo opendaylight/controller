@@ -14,26 +14,18 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
@@ -107,45 +99,6 @@ public class MigratedMessagesTest extends AbstractActorTest {
         assertEquals("Snapshots", 0, snapshots.size());
 
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
-    }
-
-    @Test
-    public void testSnapshotAfterStartupWithMigratedSnapshot() throws Exception {
-        TEST_LOG.info("testSnapshotAfterStartupWithMigratedSnapshot starting");
-
-        String persistenceId = factory.generateActorId("test-actor-");
-
-        List<Object> snapshotData = Arrays.asList(new MockPayload("1"));
-        final MockSnapshotState snapshotState = new MockSnapshotState(snapshotData);
-
-        org.opendaylight.controller.cluster.raft.Snapshot legacy = org.opendaylight.controller.cluster.raft.Snapshot
-            .create(SerializationUtils.serialize((Serializable) snapshotData),
-                Arrays.asList(new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))),
-                6, 2, 5, 1, 3, "member-1", new ServerConfigurationPayload(Arrays.asList(
-                        new ServerInfo(persistenceId, true), new ServerInfo("2", false))));
-        InMemorySnapshotStore.addSnapshot(persistenceId, legacy);
-
-        doTestSnapshotAfterStartupWithMigratedMessage(persistenceId, true, snapshot -> {
-            assertEquals("getLastIndex", legacy.getLastIndex(), snapshot.getLastIndex());
-            assertEquals("getLastTerm", legacy.getLastTerm(), snapshot.getLastTerm());
-            assertEquals("getLastAppliedIndex", legacy.getLastAppliedIndex(), snapshot.getLastAppliedIndex());
-            assertEquals("getLastAppliedTerm", legacy.getLastAppliedTerm(), snapshot.getLastAppliedTerm());
-            assertEquals("getState", snapshotState, snapshot.getState());
-            assertEquals("Unapplied entries size", legacy.getUnAppliedEntries().size(),
-                    snapshot.getUnAppliedEntries().size());
-            assertEquals("Unapplied entry term", legacy.getUnAppliedEntries().get(0).getTerm(),
-                    snapshot.getUnAppliedEntries().get(0).getTerm());
-            assertEquals("Unapplied entry index", legacy.getUnAppliedEntries().get(0).getIndex(),
-                    snapshot.getUnAppliedEntries().get(0).getIndex());
-            assertEquals("Unapplied entry data", legacy.getUnAppliedEntries().get(0).getData(),
-                    snapshot.getUnAppliedEntries().get(0).getData());
-            assertEquals("getElectionVotedFor", legacy.getElectionVotedFor(), snapshot.getElectionVotedFor());
-            assertEquals("getElectionTerm", legacy.getElectionTerm(), snapshot.getElectionTerm());
-            assertEquals("getServerConfiguration", Sets.newHashSet(legacy.getServerConfiguration().getServerConfig()),
-                    Sets.newHashSet(snapshot.getServerConfiguration().getServerConfig()));
-        }, snapshotState);
-
-        TEST_LOG.info("testSnapshotAfterStartupWithMigratedSnapshot ending");
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")

@@ -8,10 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.base.Verify;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -27,31 +25,6 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnapshot {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractVersionedShardDataTreeSnapshot.class);
-
-    @SuppressWarnings("checkstyle:FallThrough")
-    @Deprecated
-    static ShardDataTreeSnapshot deserializePreCarbon(final DataInputStream is) throws IOException {
-        final PayloadVersion version = PayloadVersion.readFrom(is);
-        switch (version) {
-            case BORON:
-                // Boron snapshots use Java Serialization
-                try (ObjectInputStream ois = new ObjectInputStream(is)) {
-                    return (ShardDataTreeSnapshot) ois.readObject();
-                } catch (ClassNotFoundException e) {
-                    LOG.error("Failed to serialize data tree snapshot", e);
-                    throw new IOException("Snapshot failed to deserialize", e);
-                }
-            case TEST_FUTURE_VERSION:
-            case TEST_PAST_VERSION:
-                // These versions are never returned and this code is effectively dead
-                break;
-            default:
-                throw new IOException("Invalid payload version in snapshot");
-        }
-
-        // Not included as default in above switch to ensure we get warnings when new versions are added
-        throw new IOException("Encountered unhandled version" + version);
-    }
 
     @SuppressWarnings("checkstyle:FallThrough")
     static ShardDataTreeSnapshot versionedDeserialize(final ObjectInput in) throws IOException {

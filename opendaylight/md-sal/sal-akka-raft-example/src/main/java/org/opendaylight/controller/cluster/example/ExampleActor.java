@@ -201,19 +201,14 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Snapshot.State deserializeSnapshot(ByteSource snapshotBytes) {
         try {
-            return deserializePreCarbonSnapshot(snapshotBytes.read());
+            return new MapState((Map<String, String>) SerializationUtils.deserialize(snapshotBytes.read()));
         } catch (IOException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Snapshot.State deserializePreCarbonSnapshot(byte[] from) {
-        return new MapState((Map<String, String>) SerializationUtils.deserialize(from));
     }
 
     private static class MapState implements Snapshot.State {

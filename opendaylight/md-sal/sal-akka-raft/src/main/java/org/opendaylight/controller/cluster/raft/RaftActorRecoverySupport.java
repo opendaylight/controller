@@ -110,19 +110,7 @@ class RaftActorRecoverySupport {
 
         initRecoveryTimer();
 
-        Object snapshotObj = offer.snapshot();
-        Snapshot snapshot;
-        if (snapshotObj instanceof org.opendaylight.controller.cluster.raft.Snapshot) {
-            org.opendaylight.controller.cluster.raft.Snapshot legacy =
-                    (org.opendaylight.controller.cluster.raft.Snapshot)snapshotObj;
-            snapshot = Snapshot.create(cohort.deserializePreCarbonSnapshot(legacy.getState()),
-                    legacy.getUnAppliedEntries(), legacy.getLastIndex(), legacy.getLastTerm(),
-                    legacy.getLastAppliedIndex(), legacy.getLastAppliedTerm(),
-                    legacy.getElectionTerm(), legacy.getElectionVotedFor(), legacy.getServerConfiguration());
-            hasMigratedDataRecovered = true;
-        } else {
-            snapshot = (Snapshot) offer.snapshot();
-        }
+        Snapshot snapshot = (Snapshot) offer.snapshot();
 
         for (ReplicatedLogEntry entry: snapshot.getUnAppliedEntries()) {
             if (isMigratedPayload(entry)) {
