@@ -10,12 +10,15 @@ package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
@@ -45,37 +48,32 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
     @Test
     public void writeNodeListenAugment() throws Exception {
 
-        final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
+        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
+        DataBroker dataBroker = testContext.getDataBroker();
+        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> dclRegistration =
+                dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, AUGMENT_WILDCARDED_PATH,
+                    change -> event.set(change), DataChangeScope.SUBTREE);
 
-        ListenerRegistration<DataChangeListener> dclRegistration = baDataService.registerDataChangeListener(
-                AUGMENT_WILDCARDED_PATH, new DataChangeListener() {
-
-                    @Override
-                    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-                        event.set(change);
-                    }
-                });
-
-        DataModificationTransaction modification = baDataService.beginTransaction();
+        final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
         TopLevelList tll = new TopLevelListBuilder() //
                 .setKey(TLL_KEY) //
                 .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment("one")).build();
-        modification.putOperationalData(TLL_INSTANCE_ID_BA, tll);
-        modification.commit().get();
+        transaction.put(LogicalDatastoreType.OPERATIONAL, TLL_INSTANCE_ID_BA, tll, true);
+        transaction.submit().get(5, TimeUnit.SECONDS);
 
-        DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get(1000, TimeUnit.MILLISECONDS);
-        assertTrue(receivedEvent.getCreatedOperationalData().containsKey(AUGMENT_TLL_PATH));
+        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get(1000, TimeUnit.MILLISECONDS);
+        assertTrue(receivedEvent.getCreatedData().containsKey(AUGMENT_TLL_PATH));
 
         dclRegistration.close();
 
-        DataModificationTransaction mod2 = baDataService.beginTransaction();
-        mod2.putOperationalData(AUGMENT_TLL_PATH, treeComplexUsesAugment("two"));
-        mod2.commit().get();
+        final WriteTransaction transaction2 = dataBroker.newWriteOnlyTransaction();
+        transaction2.put(LogicalDatastoreType.OPERATIONAL, AUGMENT_TLL_PATH, treeComplexUsesAugment("two"));
+        transaction2.submit().get(5, TimeUnit.SECONDS);
 
-        TreeComplexUsesAugment readedAug = (TreeComplexUsesAugment) baDataService.readOperationalData(AUGMENT_TLL_PATH);
+        TreeComplexUsesAugment readedAug = dataBroker.newReadOnlyTransaction().read(
+                LogicalDatastoreType.OPERATIONAL, AUGMENT_TLL_PATH).checkedGet(5, TimeUnit.SECONDS).get();
         assertEquals("two", readedAug.getContainerWithUses().getLeafFromGrouping());
-
     }
 
     private TreeComplexUsesAugment treeComplexUsesAugment(final String value) {

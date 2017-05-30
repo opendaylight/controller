@@ -9,12 +9,17 @@
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertFalse;
+
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugmentBuilder;
@@ -50,28 +55,23 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
 
 
     @Test
-    public void deleteChildListenParent() throws InterruptedException, ExecutionException {
-        DataModificationTransaction initTx = baDataService.beginTransaction();
+    public void deleteChildListenParent() throws InterruptedException, ExecutionException, TimeoutException {
+        DataBroker dataBroker = testContext.getDataBroker();
+        final WriteTransaction initTx = dataBroker.newWriteOnlyTransaction();
 
-        initTx.putOperationalData(LIST11_PATH, createList11());
-        initTx.commit().get();
+        initTx.put(LogicalDatastoreType.OPERATIONAL, LIST11_PATH, createList11(), true);
+        initTx.submit().get(5, TimeUnit.SECONDS);
 
-        final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
+        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
+        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, LIST11_PATH,
+            change -> event.set(change), DataChangeScope.SUBTREE);
 
-        baDataService.registerDataChangeListener(LIST11_PATH, new DataChangeListener() {
+        final WriteTransaction deleteTx = dataBroker.newWriteOnlyTransaction();
+        deleteTx.delete(LogicalDatastoreType.OPERATIONAL, LIST11_PATH.augmentation(List11SimpleAugment.class));
+        deleteTx.submit().get(5, TimeUnit.SECONDS);
 
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-                event.set(change);
-            }
-        });
-
-        DataModificationTransaction deleteTx = baDataService.beginTransaction();
-        deleteTx.removeOperationalData(LIST11_PATH.augmentation(List11SimpleAugment.class));
-        deleteTx.commit().get();
-
-        DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get();
-        assertFalse(receivedEvent.getRemovedOperationalData().contains(TLL_COMPLEX_AUGMENT_PATH));
+        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get();
+        assertFalse(receivedEvent.getRemovedPaths().contains(TLL_COMPLEX_AUGMENT_PATH));
     }
 
     private List11 createList11() {
