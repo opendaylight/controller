@@ -206,11 +206,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public Snapshot.State deserializePreCarbonSnapshot(byte[] from) {
-        return new MockSnapshotState(SerializationUtils.deserialize(from));
-    }
-
-    @Override
     protected void onStateChanged() {
         actorDelegate.onStateChanged();
     }

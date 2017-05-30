@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -24,11 +23,8 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
 import com.google.common.collect.Sets;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
@@ -191,52 +187,6 @@ public class RaftActorRecoverySupportTest {
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
-
-        sendMessageToSupport(snapshotOffer);
-
-        assertEquals("Journal log size", 2, context.getReplicatedLog().size());
-        assertEquals("Journal data size", 9, context.getReplicatedLog().dataSize());
-        assertEquals("Last index", lastIndexDuringSnapshotCapture, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", lastAppliedDuringSnapshotCapture, context.getLastApplied());
-        assertEquals("Commit index", lastAppliedDuringSnapshotCapture, context.getCommitIndex());
-        assertEquals("Snapshot term", 1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
-        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
-        assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-
-        verify(mockCohort).applyRecoverySnapshot(snapshotState);
-    }
-
-    @Deprecated
-    @Test
-    public void testOnSnapshotOfferWithPreCarbonSnapshot() {
-
-        ReplicatedLogEntry unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1,
-                new MockRaftActorContext.MockPayload("4", 4));
-
-        ReplicatedLogEntry unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1,
-                new MockRaftActorContext.MockPayload("5", 5));
-
-        long lastAppliedDuringSnapshotCapture = 3;
-        long lastIndexDuringSnapshotCapture = 5;
-        long electionTerm = 2;
-        String electionVotedFor = "member-2";
-
-        List<Object> snapshotData = Arrays.asList(new MockPayload("1"));
-        final MockSnapshotState snapshotState = new MockSnapshotState(snapshotData);
-
-        org.opendaylight.controller.cluster.raft.Snapshot snapshot = org.opendaylight.controller.cluster.raft.Snapshot
-            .create(SerializationUtils.serialize((Serializable) snapshotData),
-                Arrays.asList(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
-
-        SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
-
-        doAnswer(invocation -> new MockSnapshotState(SerializationUtils.deserialize(
-            invocation.getArgumentAt(0, byte[].class))))
-                .when(mockCohort).deserializePreCarbonSnapshot(any(byte[].class));
 
         sendMessageToSupport(snapshotOffer);
 

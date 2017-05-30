@@ -8,10 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.annotations.Beta;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
@@ -30,24 +27,6 @@ public abstract class ShardDataTreeSnapshot {
 
     ShardDataTreeSnapshot() {
         // Hidden to prevent subclassing from outside of this package
-    }
-
-    @Deprecated
-    public static ShardDataTreeSnapshot deserializePreCarbon(final byte[] bytes) throws IOException {
-        try (InputStream is = new ByteArrayInputStream(bytes)) {
-            try (DataInputStream dis = new DataInputStream(is)) {
-                final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserializePreCarbon(dis);
-
-                // Make sure we consume all bytes, otherwise something went very wrong
-                final int bytesLeft = dis.available();
-                if (bytesLeft != 0) {
-                    throw new IOException("Deserialization left " + bytesLeft + " in the buffer");
-                }
-
-
-                return ret;
-            }
-        }
     }
 
     public static ShardDataTreeSnapshot deserialize(final ObjectInput in) throws IOException {
