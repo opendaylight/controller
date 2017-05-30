@@ -21,7 +21,6 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -83,23 +82,6 @@ public class ShardDataTreeSnapshotTest {
         assertEquals("rootNode", expectedNode, actualNode.get());
         assertEquals("Deserialized type", MetadataShardDataTreeSnapshot.class, deserialized.getClass());
         assertEquals("Metadata", expMetadata, ((MetadataShardDataTreeSnapshot)deserialized).getMetadata());
-    }
-
-    @Test
-    @Deprecated
-    public void testPreBoronShardDataTreeSnapshot() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
-
-        byte[] serialized = SerializationUtils.serializeNormalizedNode(expectedNode);
-
-        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserializePreCarbon(serialized);
-
-        Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
-        assertEquals("rootNode present", true, actualNode.isPresent());
-        assertEquals("rootNode", expectedNode, actualNode.get());
-        assertEquals("Deserialized type", PreBoronShardDataTreeSnapshot.class, deserialized.getClass());
     }
 
     static class TestShardDataTreeSnapshotMetadata
