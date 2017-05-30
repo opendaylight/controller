@@ -74,16 +74,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private boolean readSignatureMarker = true;
 
-    /**
-     * Constructs an instance.
-     *
-     * @deprecated Use {@link NormalizedNodeInputOutput#newDataInput(DataInput)} instead.
-     */
-    @Deprecated
-    public NormalizedNodeInputStreamReader(final DataInput input) {
-        this(input, false);
-    }
-
     NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
         this.input = Preconditions.checkNotNull(input);
         readSignatureMarker = !versionChecked;
