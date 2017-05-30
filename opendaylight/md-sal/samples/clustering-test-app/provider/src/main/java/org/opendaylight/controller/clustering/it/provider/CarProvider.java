@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public class CarProvider implements CarService {
-    private static final Logger log = LoggerFactory.getLogger(PurchaseCarProvider.class);
+    private static final Logger LOG_PURCHASE_CAR = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
-    private static final Logger LOG = LoggerFactory.getLogger(CarProvider.class);
+    private static final Logger LOG_CAR_PROVIDER = LoggerFactory.getLogger(CarProvider.class);
 
     private static final String ENTITY_TYPE = "cars";
     private static final InstanceIdentifier CARS_IID = InstanceIdentifier.builder(Cars.class).build();
@@ -116,7 +116,7 @@ public class CarProvider implements CarService {
 
         // If rate is not provided, or given as zero, then just return.
         if (input.getRate() == null || input.getRate() == 0) {
-            log.info("Exiting stress test as no rate is given.");
+            LOG_PURCHASE_CAR.info("Exiting stress test as no rate is given.");
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
                     .withError(ErrorType.PROTOCOL, "invalid rate")
                     .build());
@@ -130,7 +130,7 @@ public class CarProvider implements CarService {
             inputCount = 0;
         }
 
-        log.info("Stress test starting : rate: {} count: {}", inputRate, inputCount);
+        LOG_PURCHASE_CAR.info("Stress test starting : rate: {} count: {}", inputRate, inputCount);
 
         stopThread();
         // clear counters
@@ -143,7 +143,7 @@ public class CarProvider implements CarService {
         try {
             tx.submit().checkedGet(5, TimeUnit.SECONDS);
         } catch (TransactionCommitFailedException | TimeoutException e) {
-            log.error("Put Cars failed",e);
+            LOG_PURCHASE_CAR.error("Put Cars failed",e);
             return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
         }
 
@@ -173,7 +173,7 @@ public class CarProvider implements CarService {
                     public void onFailure(final Throwable t) {
                         // Transaction failed
                         failureCounter.getAndIncrement();
-                        LOG.error("Put Cars failed", t);
+                        LOG_CAR_PROVIDER.error("Put Cars failed", t);
                     }
                 });
                 try {
@@ -183,7 +183,7 @@ public class CarProvider implements CarService {
                 }
 
                 if(count.get() % 1000 == 0) {
-                    log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
+                    LOG_PURCHASE_CAR.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
                 }
 
                 // Check if a count is specified in input and we have created that many cars.
@@ -192,7 +192,7 @@ public class CarProvider implements CarService {
                 }
             }
 
-            log.info("Stress test thread stopping after creating {} cars.", count.get());
+            LOG_PURCHASE_CAR.info("Stress test thread stopping after creating {} cars.", count.get());
         });
         testThread.start();
 
@@ -208,7 +208,7 @@ public class CarProvider implements CarService {
                 .setFailureCount(failureCounter.longValue());
 
         StopStressTestOutput result = stopStressTestOutput.build();
-        log.info("Executed Stop Stress test; No. of cars created {}; " +
+        LOG_PURCHASE_CAR.info("Executed Stop Stress test; No. of cars created {}; " +
                 "No. of cars failed {}; ", succcessCounter, failureCounter);
         // clear counters
         succcessCounter.set(0);
@@ -242,13 +242,13 @@ public class CarProvider implements CarService {
     private static class CarEntityOwnershipListener implements EntityOwnershipListener {
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
-            LOG.info("ownershipChanged: {}", ownershipChange);
+            LOG_CAR_PROVIDER.info("ownershipChanged: {}", ownershipChange);
         }
     }
 
     @Override
     public Future<RpcResult<java.lang.Void>> registerLoggingDcl() {
-        LOG.info("Registering a new CarDataChangeListener");
+        LOG_CAR_PROVIDER.info("Registering a new CarDataChangeListener");
         final ListenerRegistration carsDclRegistration = dataProvider.registerDataChangeListener(
                 LogicalDatastoreType.CONFIGURATION, CARS_IID, new CarDataChangeListener(),
                 AsyncDataBroker.DataChangeScope.SUBTREE);
@@ -262,7 +262,7 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<java.lang.Void>> registerLoggingDtcl() {
-        LOG.info("Registering a new CarDataTreeChangeListener");
+        LOG_CAR_PROVIDER.info("Registering a new CarDataTreeChangeListener");
         final ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration =
                 dataProvider.registerDataTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
 
@@ -275,7 +275,7 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<java.lang.Void>> unregisterLoggingDcls() {
-        LOG.info("Unregistering the CarDataChangeListener(s)");
+        LOG_CAR_PROVIDER.info("Unregistering the CarDataChangeListener(s)");
         synchronized (carsDclRegistrations) {
             int numListeners = 0;
             for (ListenerRegistration<DataChangeListener> carsDclRegistration : carsDclRegistrations) {
@@ -283,14 +283,14 @@ public class CarProvider implements CarService {
                 numListeners++;
             }
             carsDclRegistrations.clear();
-            LOG.info("Unregistered {} CarDataChangeListener(s)", numListeners);
+            LOG_CAR_PROVIDER.info("Unregistered {} CarDataChangeListener(s)", numListeners);
         }
         return RpcResultBuilder.<Void>success().buildFuture();
     }
 
     @Override
     public Future<RpcResult<java.lang.Void>> unregisterLoggingDtcls() {
-        LOG.info("Unregistering the CarDataTreeChangeListener(s)");
+        LOG_CAR_PROVIDER.info("Unregistering the CarDataTreeChangeListener(s)");
         synchronized (carsDtclRegistrations) {
             int numListeners = 0;
             for (ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration : carsDtclRegistrations) {
@@ -298,7 +298,7 @@ public class CarProvider implements CarService {
                 numListeners++;
             }
             carsDtclRegistrations.clear();
-            LOG.info("Unregistered {} CaraDataTreeChangeListener(s)", numListeners);
+            LOG_CAR_PROVIDER.info("Unregistered {} CaraDataTreeChangeListener(s)", numListeners);
         }
         return RpcResultBuilder.<Void>success().buildFuture();
     }
@@ -310,7 +310,7 @@ public class CarProvider implements CarService {
         if (reg != null) {
             try {
                 reg.close();
-                LOG.info("Unregistered commit cohort");
+                LOG_CAR_PROVIDER.info("Unregistered commit cohort");
             } catch (Exception e) {
                 return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
                         "Error closing commit cohort registration", e).buildFuture();
@@ -348,7 +348,7 @@ public class CarProvider implements CarService {
                     org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
                         carEntryPath), new CarEntryDataTreeCommitCohort()));
 
-        LOG.info("Registered commit cohort");
+        LOG_CAR_PROVIDER.info("Registered commit cohort");
 
         return RpcResultBuilder.<Void>success().buildFuture();
     }
