@@ -7,20 +7,19 @@
  */
 package org.opendaylight.controller.md.sal.binding.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
  * FIXME: THis test should be moved to sal-binding-broker and rewriten
@@ -35,25 +34,16 @@ public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
     private static final InstanceIdentifier<TopLevelList> BAR_PATH = TOP_PATH.child(TopLevelList.class, BAR_KEY);
 
     @Test
-    public void testConcurrentCreate() throws InterruptedException, ExecutionException {
+    public void testConcurrentCreate() throws InterruptedException, ExecutionException, TimeoutException {
 
-        DataModificationTransaction fooTx = baDataService.beginTransaction();
-        DataModificationTransaction barTx = baDataService.beginTransaction();
+        DataBroker dataBroker = testContext.getDataBroker();
+        WriteTransaction fooTx = dataBroker.newWriteOnlyTransaction();
+        WriteTransaction barTx = dataBroker.newWriteOnlyTransaction();
 
-        fooTx.putOperationalData(FOO_PATH, new TopLevelListBuilder().setKey(FOO_KEY).build());
-        barTx.putOperationalData(BAR_PATH, new TopLevelListBuilder().setKey(BAR_KEY).build());
+        fooTx.put(LogicalDatastoreType.OPERATIONAL, FOO_PATH, new TopLevelListBuilder().setKey(FOO_KEY).build());
+        barTx.put(LogicalDatastoreType.OPERATIONAL, BAR_PATH, new TopLevelListBuilder().setKey(BAR_KEY).build());
 
-        Future<RpcResult<TransactionStatus>> fooFuture = fooTx.commit();
-        Future<RpcResult<TransactionStatus>> barFuture = barTx.commit();
-
-        RpcResult<TransactionStatus> fooResult = fooFuture.get();
-        RpcResult<TransactionStatus> barResult = barFuture.get();
-
-        assertTrue(fooResult.isSuccessful());
-        assertTrue(barResult.isSuccessful());
-
-        assertEquals(TransactionStatus.COMMITED, fooResult.getResult());
-        assertEquals(TransactionStatus.COMMITED, barResult.getResult());
-
+        fooTx.submit().get(5, TimeUnit.SECONDS);
+        barTx.submit().get(5, TimeUnit.SECONDS);
     }
 }
