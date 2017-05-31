@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.binding.api.mount;
 
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -17,7 +16,6 @@ public interface MountInstance //
         extends //
         RpcConsumerRegistry, //
         Identifiable<InstanceIdentifier<?>>, //
-        NotificationService, //
-        DataBrokerService {
+        NotificationService {
 
 }

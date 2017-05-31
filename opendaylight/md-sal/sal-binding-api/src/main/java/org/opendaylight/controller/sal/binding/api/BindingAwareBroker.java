@@ -35,9 +35,6 @@ import org.osgi.framework.BundleContext;
  * {@link ProviderContext}
  * <li>Notification Service - see {@link NotificationService} and
  * {@link NotificationProviderService}
- * <li>Functionality and Data model
- * <li>Data Store access and modification - see {@link org.opendaylight.controller.sal.binding.api.data.DataBrokerService} and
- * {@link org.opendaylight.controller.sal.binding.api.data.DataProviderService}
  * </ul>
  *
  * The services are exposed via session.
