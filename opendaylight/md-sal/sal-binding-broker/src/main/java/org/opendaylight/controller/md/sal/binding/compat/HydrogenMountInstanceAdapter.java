@@ -22,13 +22,9 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
-import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -82,27 +78,6 @@ public class HydrogenMountInstanceAdapter implements MountProviderInstance {
     public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
             final org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
         return service(NotificationService.class).registerNotificationListener(listener);
-    }
-
-    @Override
-    public DataModificationTransaction beginTransaction() {
-        return service(DataBrokerService.class).beginTransaction();
-    }
-
-    @Override
-    public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
-        return service(DataBrokerService.class).readConfigurationData(path);
-    }
-
-    @Override
-    public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
-        return service(DataBrokerService.class).readOperationalData(path);
-    }
-
-    @Override
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(
-            final InstanceIdentifier<? extends DataObject> path, final DataChangeListener listener) {
-        return service(DataBrokerService.class).registerDataChangeListener(path,listener);
     }
 
     @Override

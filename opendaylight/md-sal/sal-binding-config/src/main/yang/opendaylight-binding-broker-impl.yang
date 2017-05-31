@@ -124,16 +124,6 @@ module opendaylight-sal-binding-broker-impl {
             container binding-broker-impl {
                 uses dom-forwarding-component;
 
-                container data-broker {
-                    status deprecated;
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity sal:binding-data-broker;
-                        }
-                    }
-                }
-
                 container notification-service {
                     status deprecated;
                     uses config:service-ref {

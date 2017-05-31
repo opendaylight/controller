@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -17,8 +18,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.MountPoint;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -32,8 +38,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
@@ -101,7 +105,7 @@ public class CrossBrokerMountPointTest {
             .node(AUG_CONT).build();
 
     private BindingTestContext testContext;
-    private MountProviderService bindingMountPointService;
+    private MountPointService bindingMountPointService;
     private DOMMountPointService domMountPointService;
 
     @Before
@@ -112,7 +116,7 @@ public class CrossBrokerMountPointTest {
         testContext = testFactory.getTestContext();
 
         testContext.start();
-        bindingMountPointService = testContext.getBindingMountProviderService();
+        bindingMountPointService = testContext.getBindingMountPointService();
         domMountPointService = testContext.getDomMountProviderService();
 
         // biRpcInvoker = testContext.getDomRpcInvoker();
@@ -123,7 +127,7 @@ public class CrossBrokerMountPointTest {
     }
 
     @Test
-    public void testMountPoint() {
+    public void testMountPoint() throws ReadFailedException, TimeoutException {
         final Integer attrIntValue = 500;
         domMountPointService.createMountPoint(TLL_INSTANCE_ID_BI)
             .addService(DOMDataBroker.class, new DOMDataBroker() {
@@ -222,11 +226,15 @@ public class CrossBrokerMountPointTest {
 
 
 
-        final MountProviderInstance bindingMountPoint = bindingMountPointService.getMountPoint(TLL_INSTANCE_ID_BA);
-        assertNotNull(bindingMountPoint);
+        final Optional<MountPoint> bindingMountPoint = bindingMountPointService.getMountPoint(TLL_INSTANCE_ID_BA);
+        assertTrue(bindingMountPoint.isPresent());
 
-        final Cont data = (Cont) bindingMountPoint.readOperationalData(AUG_CONT_ID_BA);
-        assertNotNull(data);
-        assertEquals(attrIntValue ,data.getAttrInt());
+        final Optional<DataBroker> dataBroker = bindingMountPoint.get().getService(DataBroker.class);
+        assertTrue(dataBroker.isPresent());
+
+        final Optional<Cont> data = dataBroker.get().newReadWriteTransaction().read(LogicalDatastoreType.OPERATIONAL,
+                AUG_CONT_ID_BA).checkedGet(5, TimeUnit.SECONDS);
+        assertTrue(data.isPresent());
+        assertEquals(attrIntValue ,data.get().getAttrInt());
     }
 }

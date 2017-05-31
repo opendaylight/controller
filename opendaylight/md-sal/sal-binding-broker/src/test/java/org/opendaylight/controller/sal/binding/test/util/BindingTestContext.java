@@ -45,7 +45,6 @@ import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointSer
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.BrokerService;
@@ -82,9 +81,6 @@ public class BindingTestContext implements AutoCloseable {
     private DOMMountPointService biMountImpl;
 
     private ImmutableMap<LogicalDatastoreType, DOMStore> newDatastores;
-
-    @Deprecated
-    private DataProviderService baData;
 
     private DOMDataBroker newDOMDataBroker;
 
@@ -260,6 +256,10 @@ public class BindingTestContext implements AutoCloseable {
 
     public MountProviderService getBindingMountProviderService() {
         return this.baBrokerImpl.getLegacyMount();
+    }
+
+    public MountPointService getBindingMountPointService() {
+        return this.baBrokerImpl.getMountService();
     }
 
     public DOMMountPointService getDomMountProviderService() {

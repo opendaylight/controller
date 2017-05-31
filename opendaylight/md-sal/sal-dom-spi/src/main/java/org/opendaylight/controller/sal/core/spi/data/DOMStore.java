@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public interface DOMStore extends DOMStoreTransactionFactory {
 
     /**
-     * Registers {@link org.opendaylight.controller.md.sal.common.api.data.DataChangeListener} for Data Change callbacks which will
+     * Registers {@link org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener} for Data Change callbacks which will
      * be triggered on the change of provided subpath. What constitutes a change
      * depends on the @scope parameter.
      *
