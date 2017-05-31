@@ -69,6 +69,24 @@
       "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_09db5e1c",
+        "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/LLDP.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-31T18:21:04Z",
+      "side": 1,
+      "message": "yeah - I didn\u0027t mean to do it in this patch. We can look at removing it later.",
+      "parentUuid": "3afa9182_695dc2e9",
+      "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
