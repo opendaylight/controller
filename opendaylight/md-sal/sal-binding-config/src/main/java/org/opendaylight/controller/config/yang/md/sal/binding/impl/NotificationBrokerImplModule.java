@@ -11,12 +11,10 @@ import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceWithInterestListeners;
-import org.opendaylight.controller.md.sal.binding.compat.HydrogenNotificationBrokerImpl;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 
 /**
  * @deprecated Replaced by blueprint wiring
@@ -44,21 +42,7 @@ public final class NotificationBrokerImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-
-        final NotificationPublishService notificationPublishService = getNotificationPublishAdapterDependency();
-        final NotificationService notificationService = getNotificationAdapterDependency();
-
-        if(notificationPublishService != null & notificationService != null) {
-            return createHeliumAdapter(notificationPublishService,notificationService);
-        }
-
-        /*
-         *  FIXME: Switch to new broker (which has different threading model)
-         *  once this change is communicated with downstream users or
-         *  we will have adapter implementation which will honor Helium
-         *  threading model for notifications.
-         */
-        return new HydrogenNotificationBrokerImpl(SingletonHolder.getDefaultNotificationExecutor());
+        return createHeliumAdapter(getNotificationPublishAdapterDependency(), getNotificationAdapterDependency());
     }
 
     private static AutoCloseable createHeliumAdapter(final NotificationPublishService publishService,

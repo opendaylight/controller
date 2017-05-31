@@ -216,7 +216,7 @@ module opendaylight-sal-binding-broker-impl {
                 status deprecated;
                 uses config:service-ref {
                     refine type {
-                        mandatory false;
+                        mandatory true;
                         config:required-identity binding-new-notification-service;
                     }
                 }
@@ -226,7 +226,7 @@ module opendaylight-sal-binding-broker-impl {
                 status deprecated;
                 uses config:service-ref {
                     refine type {
-                        mandatory false;
+                        mandatory true;
                         config:required-identity binding-new-notification-publish-service;
                     }
                 }
