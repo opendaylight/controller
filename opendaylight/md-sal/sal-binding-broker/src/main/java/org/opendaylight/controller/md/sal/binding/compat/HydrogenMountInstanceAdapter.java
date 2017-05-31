@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import java.util.concurrent.ExecutorService;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
@@ -45,10 +44,6 @@ public class HydrogenMountInstanceAdapter implements MountProviderInstance {
         this.identifier = key.getIdentifier();
         final ImmutableClassToInstanceMap.Builder<BindingAwareService> builder = ImmutableClassToInstanceMap.builder();
 
-        final Optional<DataBroker> dataBroker = key.getService(DataBroker.class);
-        if(dataBroker.isPresent()) {
-            builder.put(DataBrokerService.class, new HydrogenDataBrokerAdapter(dataBroker.get()));
-        }
         final Optional<org.opendaylight.controller.md.sal.binding.api.NotificationService> notificationService = key.getService(org.opendaylight.controller.md.sal.binding.api.NotificationService.class);
         if(notificationService.isPresent()) {
             builder.put(NotificationService.class, new HeliumNotificationServiceAdapter(notificationService.get()));

@@ -47,14 +47,6 @@ module opendaylight-sal-binding-broker-impl {
         config:java-name-prefix BindingBrokerImpl;
     }
 
-    identity binding-data-compatible-broker {
-        status deprecated;
-        base config:module-type;
-        config:provided-service sal:binding-data-broker;
-        config:provided-service sal:binding-data-consumer-broker;
-        config:java-name-prefix ForwardedCompatibleDataBrokerImpl;
-    }
-
     identity binding-forwarded-data-broker {
         status deprecated;
         base config:module-type;
@@ -131,7 +123,7 @@ module opendaylight-sal-binding-broker-impl {
             }*/
             container binding-broker-impl {
                 uses dom-forwarding-component;
-    
+
                 container data-broker {
                     status deprecated;
                     uses config:service-ref {
@@ -141,7 +133,7 @@ module opendaylight-sal-binding-broker-impl {
                         }
                     }
                 }
-    
+
                 container notification-service {
                     status deprecated;
                     uses config:service-ref {
@@ -151,7 +143,7 @@ module opendaylight-sal-binding-broker-impl {
                         }
                     }
                 }
-    
+
                 container root-data-broker {
                     status deprecated;
                     uses config:service-ref {
@@ -171,24 +163,6 @@ module opendaylight-sal-binding-broker-impl {
                         }
                         refine name {
                             mandatory false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
-        case binding-data-compatible-broker {
-            when "/config:modules/config:module/config:type = 'binding-data-compatible-broker'";
-
-            container binding-data-compatible-broker {
-                container data-broker {
-                    status deprecated;
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity sal:binding-async-data-broker;
                         }
                     }
                 }
