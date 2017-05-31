@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afa9182_b6f42588",
+        "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/LLDP.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-05-31T14:37:28Z",
+      "side": 1,
+      "message": "Why is LLDP code still in the controller? I wonder if any of the classes in this package are even used anymore...",
+      "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
