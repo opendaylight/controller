@@ -337,6 +337,10 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             });
             return null;
         }
+        if (state instanceof Failed) {
+            // FIXME: for illegal models we have transitioned to FAILED state during canCommit, to which the frontend
+            //        reacts by sending an ABORT. We need to persist that...
+        }
         if (ABORTING.equals(state)) {
             LOG.debug("{}: Transaction {} already aborting", persistenceId(), getIdentifier());
             return null;
