@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3afa9182_8958eefb",
+        "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/BitBufferHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-05-31T18:16:55Z",
+      "side": 1,
+      "message": "Yes, I\u0027ll remove them. In this case it is easy to find out, this module does not have the CS enforcement activated. I thought all the modules in the Controller had it, but it is not. I can start the enforcement tasks in separate commits.",
+      "parentUuid": "3afa9182_a9d96a85",
+      "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3afa9182_b6f42588",
         "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/LLDP.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-05-31T14:37:28Z",
       "side": 1,
       "message": "Why is LLDP code still in the controller? I wonder if any of the classes in this package are even used anymore...",
+      "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_695dc2e9",
+        "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/LLDP.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-05-31T18:16:55Z",
+      "side": 1,
+      "message": "I don\u0027t really know :). If you want we can remove it in separate commit.",
+      "parentUuid": "3afa9182_b6f42588",
       "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
