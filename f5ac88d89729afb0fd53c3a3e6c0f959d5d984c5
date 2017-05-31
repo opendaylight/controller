@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3afa9182_a9d96a85",
+        "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/BitBufferHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-05-31T16:58:26Z",
+      "side": 1,
+      "message": "remove these tabs here (and figure out why Checkstyle has not caught this?!)",
+      "revId": "f5ac88d89729afb0fd53c3a3e6c0f959d5d984c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3afa9182_b6f42588",
         "filename": "opendaylight/commons/liblldp/src/main/java/org/opendaylight/controller/liblldp/LLDP.java",
         "patchSetId": 1
