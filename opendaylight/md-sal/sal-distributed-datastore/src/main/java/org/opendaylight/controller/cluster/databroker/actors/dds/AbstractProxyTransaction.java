@@ -551,6 +551,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             }
 
             LOG.debug("Transaction {} doCommit completed", this);
+
+            // Needed for ProxyHistory$Local data tree rebase points.
+            parent.completeTransaction(this);
+
             enqueuePurge();
         });
     }
@@ -565,18 +569,19 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void enqueuePurge(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        enqueueRequest(purgeRequest(), resp -> {
-            LOG.debug("Transaction {} purge completed", this);
-            parent.completeTransaction(this);
+        LOG.debug("{}: initiating purge", this);
+        // TODO: we should be asserting previous state
+        STATE_UPDATER.getAndSet(this, DONE);
+        successfulRequests.clear();
+
+        enqueueRequest(new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor()), resp -> {
+            LOG.debug("{}: purge completed", this);
+            parent.purgeTransaction(this);
+
             if (callback != null) {
                 callback.accept(resp);
             }
         }, enqueuedTicks);
-    }
-
-    private TransactionPurgeRequest purgeRequest() {
-        successfulRequests.clear();
-        return new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
     }
 
     // Called with the connection unlocked
