@@ -119,10 +119,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * at which point the request is routed to the successor transaction. This is a relatively heavy-weight solution
      * to the problem of state transfer, but the user will observe it only if the race condition is hit.
      */
-    private static final class SuccessorState extends State {
+    private static class SuccessorState extends State {
         private final CountDownLatch latch = new CountDownLatch(1);
         private AbstractProxyTransaction successor;
         private State prevState;
+
+        // SUCCESSOR + DONE
+        private boolean done;
 
         SuccessorState() {
             super("SUCCESSOR");
@@ -162,6 +165,14 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             Verify.verify(this.successor == null, "Attempted to set successor to %s when we already have %s",
                     successor, this.successor);
             this.successor = Preconditions.checkNotNull(successor);
+        }
+
+        boolean isDone() {
+            return done;
+        }
+
+        void setDone() {
+            done = true;
         }
     }
 
@@ -544,6 +555,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             }
 
             LOG.debug("Transaction {} doCommit completed", this);
+
+            // Needed for ProxyHistory$Local data tree rebase points.
+            parent.completeTransaction(this);
+
             enqueuePurge();
         });
     }
@@ -558,18 +573,28 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void enqueuePurge(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        enqueueRequest(purgeRequest(), resp -> {
-            LOG.debug("Transaction {} purge completed", this);
-            parent.completeTransaction(this);
+        LOG.debug("{}: initiating purge", this);
+
+        final State prev = state;
+        if (prev instanceof SuccessorState) {
+            ((SuccessorState) prev).setDone();
+        } else {
+            final boolean success = STATE_UPDATER.compareAndSet(this, prev, DONE);
+            if (!success) {
+                LOG.warn("{}: moved from state {} while we were purging it", this, prev);
+            }
+        }
+
+        successfulRequests.clear();
+
+        enqueueRequest(new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor()), resp -> {
+            LOG.debug("{}: purge completed", this);
+            parent.purgeTransaction(this);
+
             if (callback != null) {
                 callback.accept(resp);
             }
         }, enqueuedTicks);
-    }
-
-    private TransactionPurgeRequest purgeRequest() {
-        successfulRequests.clear();
-        return new TransactionPurgeRequest(getIdentifier(), nextSequence(), localActor());
     }
 
     // Called with the connection unlocked
