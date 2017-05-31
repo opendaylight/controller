@@ -56,7 +56,7 @@
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-dom-broker-config/{{VERSION}}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{VERSION}}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/{{VERSION}}/xml/config</configfile>
+        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}" override="true">mvn:org.opendaylight.controller/md-sal-config/{{VERSION}}/xml/config</configfile>
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
