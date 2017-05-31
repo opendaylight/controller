@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -17,8 +18,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.MountPoint;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -32,8 +38,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
@@ -64,7 +68,7 @@ public class CrossBrokerMountPointTest {
 
     private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
 
-    private static final Map<QName, Object> TLL_KEY_BI = Collections.<QName, Object> singletonMap(TLL_NAME_QNAME,
+    private static final Map<QName, Object> TLL_KEY_BI = Collections.<QName, Object>singletonMap(TLL_NAME_QNAME,
             TLL_NAME);
 
     private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
@@ -85,23 +89,23 @@ public class CrossBrokerMountPointTest {
             Cont.QNAME.getLocalName());
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier TLL_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
+        YangInstanceIdentifier.builder() //
             .node(Top.QNAME) //
             .node(TopLevelList.QNAME) //
             .nodeWithKey(TopLevelList.QNAME, TLL_KEY_BI) //
             .build();
 
-    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier GROUP_STATISTICS_ID_BI = org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
-            //
+    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier GROUP_STATISTICS_ID_BI =
+        YangInstanceIdentifier
             .builder(TLL_INSTANCE_ID_BI)
-            .nodeWithKey(QName.create(TllComplexAugment.QNAME, "list1"), QName.create(TllComplexAugment.QNAME, "attr-str"),
-                    LIST1_KEY.getAttrStr())
-            .nodeWithKey(QName.create(TllComplexAugment.QNAME, "list1-1"), QName.create(TllComplexAugment.QNAME, "attr-int"),
-                    LIST11_KEY.getAttrInt())
+            .nodeWithKey(QName.create(TllComplexAugment.QNAME, "list1"),
+                    QName.create(TllComplexAugment.QNAME, "attr-str"), LIST1_KEY.getAttrStr())
+            .nodeWithKey(QName.create(TllComplexAugment.QNAME, "list1-1"),
+                    QName.create(TllComplexAugment.QNAME, "attr-int"), LIST11_KEY.getAttrInt())
             .node(AUG_CONT).build();
 
     private BindingTestContext testContext;
-    private MountProviderService bindingMountPointService;
+    private MountPointService bindingMountPointService;
     private DOMMountPointService domMountPointService;
 
     @Before
@@ -112,7 +116,7 @@ public class CrossBrokerMountPointTest {
         testContext = testFactory.getTestContext();
 
         testContext.start();
-        bindingMountPointService = testContext.getBindingMountProviderService();
+        bindingMountPointService = testContext.getBindingMountPointService();
         domMountPointService = testContext.getDomMountProviderService();
 
         // biRpcInvoker = testContext.getDomRpcInvoker();
@@ -123,14 +127,15 @@ public class CrossBrokerMountPointTest {
     }
 
     @Test
-    public void testMountPoint() {
+    public void testMountPoint() throws ReadFailedException, TimeoutException {
         final Integer attrIntValue = 500;
         domMountPointService.createMountPoint(TLL_INSTANCE_ID_BI)
             .addService(DOMDataBroker.class, new DOMDataBroker() {
 
                 @Override
-                public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-                        final YangInstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
+                public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(
+                        final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                        final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
                     throw new UnsupportedOperationException();
                 }
 
@@ -146,16 +151,19 @@ public class CrossBrokerMountPointTest {
                         @Override
                         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
                                 final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-                            if(store == LogicalDatastoreType.OPERATIONAL && path.getLastPathArgument().equals(GROUP_STATISTICS_ID_BI.getLastPathArgument())) {
+                            if (store == LogicalDatastoreType.OPERATIONAL && path.getLastPathArgument()
+                                    .equals(GROUP_STATISTICS_ID_BI.getLastPathArgument())) {
 
                                 final ContainerNode data = Builders.containerBuilder()
                                         .withNodeIdentifier(new NodeIdentifier(AUG_CONT))
-                                        .withChild(ImmutableNodes.leafNode(QName.create(AUG_CONT, "attr-int"), attrIntValue))
+                                        .withChild(ImmutableNodes.leafNode(QName.create(AUG_CONT, "attr-int"),
+                                                attrIntValue))
                                         .build();
 
                                 return Futures.immediateCheckedFuture(Optional.<NormalizedNode<?,?>>of(data));
                             }
-                            return Futures.immediateFailedCheckedFuture(new ReadFailedException(TLL_NAME, new Exception()));
+                            return Futures.immediateFailedCheckedFuture(new ReadFailedException(TLL_NAME,
+                                    new Exception()));
                         }
 
                         @Override
@@ -220,13 +228,15 @@ public class CrossBrokerMountPointTest {
                 }
             }).register();
 
+        final Optional<MountPoint> bindingMountPoint = bindingMountPointService.getMountPoint(TLL_INSTANCE_ID_BA);
+        assertTrue(bindingMountPoint.isPresent());
 
+        final Optional<DataBroker> dataBroker = bindingMountPoint.get().getService(DataBroker.class);
+        assertTrue(dataBroker.isPresent());
 
-        final MountProviderInstance bindingMountPoint = bindingMountPointService.getMountPoint(TLL_INSTANCE_ID_BA);
-        assertNotNull(bindingMountPoint);
-
-        final Cont data = (Cont) bindingMountPoint.readOperationalData(AUG_CONT_ID_BA);
-        assertNotNull(data);
-        assertEquals(attrIntValue ,data.getAttrInt());
+        final Optional<Cont> data = dataBroker.get().newReadWriteTransaction().read(LogicalDatastoreType.OPERATIONAL,
+                AUG_CONT_ID_BA).checkedGet(5, TimeUnit.SECONDS);
+        assertTrue(data.isPresent());
+        assertEquals(attrIntValue ,data.get().getAttrInt());
     }
 }
