@@ -23,7 +23,6 @@ import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
-import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
@@ -45,7 +44,6 @@ import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointSer
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -158,7 +156,6 @@ public class BindingTestContext implements AutoCloseable {
 
         final MountPointService mountService = new BindingDOMMountPointServiceAdapter(this.biMountImpl, this.codec);
         this.baBrokerImpl.setMountService(mountService);
-        this.baBrokerImpl.setLegacyMountManager(new HydrogenMountProvisionServiceAdapter(mountService));
         this.baBrokerImpl.setRpcBroker(new HeliumRpcProviderRegistry(this.baConsumerRpc, this.baProviderRpc));
         this.baBrokerImpl.setNotificationBroker(this.baNotifyImpl);
         this.baBrokerImpl.start();
@@ -252,10 +249,6 @@ public class BindingTestContext implements AutoCloseable {
     @Override
     public void close() throws Exception {
 
-    }
-
-    public MountProviderService getBindingMountProviderService() {
-        return this.baBrokerImpl.getLegacyMount();
     }
 
     public MountPointService getBindingMountPointService() {
