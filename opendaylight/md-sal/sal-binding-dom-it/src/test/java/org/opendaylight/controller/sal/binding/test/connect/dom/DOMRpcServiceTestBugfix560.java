@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -22,14 +23,15 @@ import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.MountPoint;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
+import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.OpendaylightTestRpcServiceService;
@@ -69,7 +71,7 @@ public class DOMRpcServiceTestBugfix560 {
 
     private BindingTestContext testContext;
     private DOMMountPointService domMountPointService;
-    private MountProviderService bindingMountPointService;
+    private MountPointService bindingMountPointService;
     private SchemaContext schemaContext;
 
     /**
@@ -84,7 +86,7 @@ public class DOMRpcServiceTestBugfix560 {
 
         testContext.start();
         domMountPointService = testContext.getDomMountProviderService();
-        bindingMountPointService = testContext.getBindingMountProviderService();
+        bindingMountPointService = testContext.getBindingMountPointService();
         assertNotNull(domMountPointService);
 
         final InputStream moduleStream = BindingReflections.getModuleInfo(
@@ -129,10 +131,13 @@ public class DOMRpcServiceTestBugfix560 {
                         return Futures.immediateCheckedFuture(result);
                     }
                 }).register();
-        final MountProviderInstance mountInstance = bindingMountPointService
-                .getMountPoint(BA_MOUNT_ID);
-        assertNotNull(mountInstance);
-        final OpendaylightTestRpcServiceService rpcService = mountInstance
+
+        final Optional<MountPoint> mountInstance = bindingMountPointService.getMountPoint(BA_MOUNT_ID);
+        assertTrue(mountInstance.isPresent());
+
+        final Optional<RpcConsumerRegistry> rpcRegistry = mountInstance.get().getService(RpcConsumerRegistry.class);
+        assertTrue(rpcRegistry.isPresent());
+        final OpendaylightTestRpcServiceService rpcService = rpcRegistry.get()
                 .getRpcService(OpendaylightTestRpcServiceService.class);
         assertNotNull(rpcService);
 

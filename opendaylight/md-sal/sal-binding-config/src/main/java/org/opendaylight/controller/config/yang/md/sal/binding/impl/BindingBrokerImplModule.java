@@ -18,7 +18,6 @@ package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
-import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
@@ -27,7 +26,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -66,8 +64,6 @@ public final class BindingBrokerImplModule extends
         final BindingDOMRpcProviderServiceAdapter rpcProvider = createRpcProvider(codec,session);
         final RootBindingAwareBroker broker = new RootBindingAwareBroker(getIdentifier().getInstanceName());
         final RpcProviderRegistry heliumRpcBroker = new HeliumRpcProviderRegistry(rpcConsumer, rpcProvider);
-        final MountProviderService legacyMount = createLegacyMountPointService(mount);
-
 
         broker.setNotificationBroker(getNotificationServiceDependency());
         if (getNotificationPublishServiceDependency() != null) {
@@ -76,18 +72,8 @@ public final class BindingBrokerImplModule extends
         broker.setRpcBroker(heliumRpcBroker);
         broker.setDataBroker(getRootDataBrokerDependency());
         broker.setMountService(mount);
-        broker.setLegacyMountManager(legacyMount);
         broker.start();
         return broker;
-    }
-
-
-    @SuppressWarnings("deprecation")
-    private MountProviderService createLegacyMountPointService(final MountPointService service) {
-        if(service != null) {
-            return new HydrogenMountProvisionServiceAdapter(service);
-        }
-        return null;
     }
 
     private BindingDOMRpcProviderServiceAdapter createRpcProvider(final BindingToNormalizedNodeCodec codec,

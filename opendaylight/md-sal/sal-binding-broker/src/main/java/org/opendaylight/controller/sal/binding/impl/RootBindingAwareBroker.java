@@ -24,8 +24,6 @@ import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
-import org.opendaylight.controller.sal.binding.api.mount.MountService;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -53,17 +51,11 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
 
     private DataBroker dataBroker;
 
-    private MountProviderService legacyMount;
-
     private ImmutableClassToInstanceMap<BindingAwareService> supportedConsumerServices;
 
     private ImmutableClassToInstanceMap<BindingAwareService> supportedProviderServices;
 
     private MountPointService mountService;
-
-    public void setLegacyMountManager(final MountProviderService legacyMount) {
-        this.legacyMount = legacyMount;
-    }
 
     public RootBindingAwareBroker(final String instanceName) {
         this.identifier = instanceName;
@@ -96,10 +88,6 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
 
     public MountPointService getMountService() {
         return mountService;
-    }
-
-    public MountProviderService getLegacyMount() {
-        return legacyMount;
     }
 
     public void setDataBroker(final DataBroker asyncDataBroker) {
@@ -137,17 +125,16 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
             consBuilder.put(DataBroker.class, dataBroker);
         }
         consBuilder.put(MountPointService.class, mountService);
-        consBuilder.put(MountService.class, legacyMount).build();
 
         supportedConsumerServices = consBuilder.build();
         final ImmutableClassToInstanceMap.Builder<BindingAwareService> provBuilder = ImmutableClassToInstanceMap
                 .builder();
         provBuilder.putAll(supportedConsumerServices).put(NotificationProviderService.class, getRoot())
-                .put(RpcProviderRegistry.class, getRoot()) .put(MountProviderService.class, legacyMount);
+                .put(RpcProviderRegistry.class, getRoot());
         if (notificationPublishService != null) {
             provBuilder.put(NotificationPublishService.class, notificationPublishService);
         }
-        supportedConsumerServices = consBuilder.build();
+
         supportedProviderServices = provBuilder.build();
     }
 
