@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afa9182_dd53cc6a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-01T12:45:46Z",
+      "side": 1,
+      "message": "This doc is the same as SuccessorState (copy/paste I\u0027m sure). This is a generic class that just represents a state (in fact all it really does is wrap a String :)).",
+      "revId": "e584b5c01fd668f50991a22eb8b358a3818b6486",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
