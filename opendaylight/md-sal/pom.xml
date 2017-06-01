@@ -21,6 +21,7 @@
     <module>sal-common-api</module>
     <module>sal-common-impl</module>
     <module>sal-common-util</module>
+    <module>sal-common-testutil</module>
 
     <!-- Binding Independent -->
     <module>sal-dom-api</module>
