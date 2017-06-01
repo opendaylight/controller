@@ -16,6 +16,24 @@
       "revId": "e584b5c01fd668f50991a22eb8b358a3818b6486",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_585ecaea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-06-01T14:22:19Z",
+      "side": 1,
+      "message": "Ugh, right, that\u0027s what I get from manually reapplying patches.",
+      "parentUuid": "3afa9182_dd53cc6a",
+      "revId": "e584b5c01fd668f50991a22eb8b358a3818b6486",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
