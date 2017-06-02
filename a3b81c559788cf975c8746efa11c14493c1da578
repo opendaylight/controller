@@ -16,6 +16,24 @@
       "revId": "a3b81c559788cf975c8746efa11c14493c1da578",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_84044c7f",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/impl/RootBindingAwareBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-02T00:16:56Z",
+      "side": 1,
+      "message": "yeah - that\u0027s the way it was - didn\u0027t notice that. It\u0027s also built again on line 138. We should only have to build it once on line 130.",
+      "parentUuid": "3afa9182_849bacc8",
+      "revId": "a3b81c559788cf975c8746efa11c14493c1da578",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
