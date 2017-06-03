@@ -118,15 +118,6 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     }
 
     @Test
-    public void testCheckTimeoutConnectionTimeouted() throws Exception {
-        final Consumer<Response<?, ?>> callback = mock(Consumer.class);
-        connection.sendRequest(createRequest(replyToProbe.ref()), callback);
-        final long now = context.ticker().read() + ConnectedClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS;
-        final Optional<Long> timeout = connection.checkTimeout(now);
-        Assert.assertNull(timeout);
-    }
-
-    @Test
     public void testCheckTimeout() throws Exception {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
