@@ -217,7 +217,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             if (delay >= DEBUG_DELAY_NANOS) {
                 if (delay > MAX_DELAY_NANOS) {
                     LOG.info("Capping {} throttle delay from {} to {} seconds", this,
-                        TimeUnit.NANOSECONDS.toSeconds(delay), MAX_DELAY_SECONDS);
+                        TimeUnit.NANOSECONDS.toSeconds(delay), MAX_DELAY_SECONDS, new Throwable());
                     delay = MAX_DELAY_NANOS;
                 }
                 if (LOG.isDebugEnabled()) {
