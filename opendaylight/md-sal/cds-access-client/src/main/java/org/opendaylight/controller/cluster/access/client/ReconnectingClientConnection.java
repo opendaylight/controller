@@ -30,9 +30,15 @@ public final class ReconnectingClientConnection<T extends BackendInfo> extends A
     }
 
     @Override
+    long backendSilentTicks(final long now) {
+        // We do not want to reconnect this connection, as we need the timer to to keep running
+        return 0;
+    }
+
+    @Override
     ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
         this.cause = Preconditions.checkNotNull(cause);
-        LOG.debug("Skipping reconnect of already-reconnecting connection {}", this);
+        LOG.warn("Skipping reconnect of already-reconnecting connection {}", this);
         return current;
     }
 
