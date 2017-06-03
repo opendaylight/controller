@@ -12,6 +12,7 @@ import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,6 +29,16 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 
 public class ReconnectingClientConnectionTest
         extends AbstractClientConnectionTest<ReconnectingClientConnection<BackendInfo>, BackendInfo> {
+
+    @Test
+    public void testCheckTimeoutConnectionTimedout() throws Exception {
+        final Consumer<Response<?, ?>> callback = mock(Consumer.class);
+        connection.sendRequest(createRequest(replyToProbe.ref()), callback);
+        final long now = context.ticker().read() + ConnectedClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS;
+        final Optional<Long> timeout = connection.checkTimeout(now);
+        Assert.assertNotNull(timeout);
+        Assert.assertTrue(timeout.isPresent());
+    }
 
     @Override
     protected ReconnectingClientConnection<BackendInfo> createConnection() {

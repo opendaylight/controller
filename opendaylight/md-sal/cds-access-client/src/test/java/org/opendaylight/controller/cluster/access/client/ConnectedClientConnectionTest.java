@@ -12,12 +12,25 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.Response;
 
 public class ConnectedClientConnectionTest
         extends AbstractClientConnectionTest<ConnectedClientConnection<BackendInfo>, BackendInfo> {
+
+    @Test
+    public void testCheckTimeoutConnectionTimedout() throws Exception {
+        final Consumer<Response<?, ?>> callback = mock(Consumer.class);
+        connection.sendRequest(createRequest(replyToProbe.ref()), callback);
+        final long now = context.ticker().read() + ConnectedClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS;
+        final Optional<Long> timeout = connection.checkTimeout(now);
+        Assert.assertNull(timeout);
+    }
 
     @Override
     protected ConnectedClientConnection<BackendInfo> createConnection() {
