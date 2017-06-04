@@ -174,7 +174,7 @@ abstract class TransmitQueue {
     }
 
     private void transmitEntry(final ConnectionEntry entry, final long now) {
-        LOG.debug("Queue {} transmitting entry {}", entry);
+        LOG.debug("Queue {} transmitting entry {}", this, entry);
         // We are not thread-safe and are supposed to be externally-guarded,
         // hence send-before-record should be fine.
         // This needs to be revisited if the external guards are lowered.
