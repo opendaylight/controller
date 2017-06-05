@@ -50,6 +50,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         ActorRef singleNodeCollectorActor = singleNodeActorRef.underlyingActor().collectorActor();
         final RaftActorContext singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
 
+        InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
 
         final MockRaftActorContext.MockPayload payload0 = sendPayloadData(singleNodeActorRef, "zero");
         final MockRaftActorContext.MockPayload payload1 = sendPayloadData(singleNodeActorRef, "one");
@@ -76,6 +77,8 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         assertEquals("Incorrect State after snapshot success is received ", Lists.newArrayList(payload0, payload1,
                 payload2, payload3, payload4, payload5), singleNodeActorRef.underlyingActor().getState());
+
+        InMemoryJournal.waitForWriteMessagesComplete(persistenceId);
 
         // we get 2 log entries (4 and 5 indexes) and 3 ApplyJournalEntries (for 3, 4, and 5 indexes)
         assertEquals(5, InMemoryJournal.get(persistenceId).size());
