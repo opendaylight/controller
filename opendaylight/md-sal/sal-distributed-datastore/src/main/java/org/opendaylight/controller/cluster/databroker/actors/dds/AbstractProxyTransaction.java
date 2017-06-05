@@ -147,13 +147,15 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
 
         State getPrevState() {
-            return prevState;
+            return Verify.verifyNotNull(prevState, "Attempted to access previous state, which was not set");
         }
 
         void setPrevState(final State prevState) {
             Verify.verify(this.prevState == null, "Attempted to set previous state to %s when we already have %s",
                     prevState, this.prevState);
             this.prevState = Preconditions.checkNotNull(prevState);
+            // We cannot have duplicate successor states, so this check is sufficient
+            this.done = DONE.equals(prevState);
         }
 
         // To be called from safe contexts, where successor is known to be completed
@@ -626,10 +628,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         final SuccessorState local = getSuccessorState();
         final State prevState = local.getPrevState();
 
-        final boolean isDone = DONE.equals(state)
-                || state instanceof SuccessorState && ((SuccessorState) state).isDone();
         final AbstractProxyTransaction successor = successorHistory.createTransactionProxy(getIdentifier(),
-            isSnapshotOnly(), isDone);
+            isSnapshotOnly(), local.isDone());
         LOG.debug("{} created successor {}", this, successor);
         local.setSuccessor(successor);
 
