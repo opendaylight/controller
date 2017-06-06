@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
-    <relativePath>../../config/config-parent</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>bundle-parent</artifactId>
+    <version>1.8.0-Carbon</version>
+    <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
@@ -43,19 +43,13 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-config-api</artifactId>
-    </dependency>
 
     <!-- Testing dependencies -->
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>mockito-configuration</artifactId>
+      <version>1.2.0-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -64,27 +58,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-manager</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-manager</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-util</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-event-executor-config</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
