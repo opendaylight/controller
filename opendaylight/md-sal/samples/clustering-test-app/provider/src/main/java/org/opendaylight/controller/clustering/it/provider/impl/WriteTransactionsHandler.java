@@ -179,10 +179,6 @@ public class WriteTransactionsHandler implements Runnable {
         LOG.debug("Filling the item list with initial values.");
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ITEM);
-        for (int i = 0; i < MAX_ITEM / 2; i++) {
-            usedValues.add(i);
-            mapBuilder.withChild(ImmutableNodes.mapEntry(ITEM, NUMBER, i));
-        }
 
         final YangInstanceIdentifier itemListId = idListWithKey.node(ITEM);
         final DOMDataWriteTransaction tx = txProvider.createTransaction();

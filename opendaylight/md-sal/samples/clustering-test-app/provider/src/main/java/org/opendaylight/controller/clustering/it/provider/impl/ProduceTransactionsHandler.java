@@ -124,11 +124,6 @@ public class ProduceTransactionsHandler implements Runnable {
         LOG.debug("Filling the item list with initial values.");
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ITEM);
-        for (int i = 0; i < MAX_ITEM / 2; i++) {
-            usedValues.add(i);
-            mapBuilder.withChild(ImmutableNodes.mapEntry(ITEM, NUMBER, i));
-        }
-
         idListWithKey = ID_INT_YID.node(new NodeIdentifierWithPredicates(ID_INT, ID, id));
 
         itemProducer = domDataTreeService.createProducer(
