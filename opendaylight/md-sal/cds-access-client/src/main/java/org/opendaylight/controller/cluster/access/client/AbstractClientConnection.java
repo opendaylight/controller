@@ -367,8 +367,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             tasksTimedOut++;
             queue.remove(now);
             LOG.debug("{}: Connection {} timed out entry {}", context.persistenceId(), this, head);
+
+			final double time = (beenOpen * 1.0) / 1_000_000_000;
             head.complete(head.getRequest().toRequestFailure(
-                new RequestTimeoutException("Timed out after " + beenOpen + "ns")));
+                new RequestTimeoutException("Timed out after " + time + "seconds")));
         }
 
         LOG.debug("Connection {} timed out {} tasks", this, tasksTimedOut);
