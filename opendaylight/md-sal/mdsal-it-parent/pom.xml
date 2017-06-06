@@ -21,7 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <karaf.distro.groupId>org.opendaylight.odlparent</karaf.distro.groupId>
     <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
-    <karaf.distro.version>1.9.0-SNAPSHOT</karaf.distro.version>
+    <karaf.distro.version>1.8.0-Carbon</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
     <karaf.keep.unpack>false</karaf.keep.unpack>
   </properties>
