@@ -8,8 +8,5 @@
  -->
 <features name="odl-dsbenchmark-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name='odl-dsbenchmark' version='${project.version}' description='OpenDaylight :: dsbenchmark :: '>
-        <configfile finalname="dsbenchmark-impl-default-config.xml">
-            mvn:org.opendaylight.controller/dsbenchmark/${project.version}/xml/config
-        </configfile>
     </feature>
 </features>
