@@ -513,4 +513,18 @@ module odl-mdsal-lowlevel-control {
         // No output.
     }
 
+    rpc shutdown-shard {
+        description "Upon receiving this, the member sends PoisonPill to local
+            configuration data store shard with specified name and returns immediately
+            (does not wait for actual shard termination). Fails if shard with given name
+            is not present locally or shard name is invalid.";
+        input {
+            leaf shard-name {
+                mandatory true;
+                type string;
+                description "The name of the configuration data store shard we want to
+                    send PoisonPill to.";
+            }
+        }
+    }
 }
