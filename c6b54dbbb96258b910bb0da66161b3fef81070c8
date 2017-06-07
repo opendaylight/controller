@@ -46,6 +46,29 @@
       "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_baffca00",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 2630
+      },
+      "writtenOn": "2017-06-07T15:51:25Z",
+      "side": 1,
+      "message": "Is this going to be applicable for both types of shards(module/prefix)?",
+      "range": {
+        "startLine": 516,
+        "startChar": 8,
+        "endLine": 516,
+        "endChar": 22
+      },
+      "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
