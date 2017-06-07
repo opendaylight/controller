@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afa9182_57903fec",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-06-07T15:31:26Z",
+      "side": 1,
+      "message": "poison-shard\n\nI have heard there already is an internal operation called \"shutdown shard\" which does more work before poisoning, and we might need to trigger that operation in the future.",
+      "range": {
+        "startLine": 516,
+        "startChar": 8,
+        "endLine": 516,
+        "endChar": 22
+      },
+      "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
