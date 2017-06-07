@@ -22,6 +22,30 @@
       "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_577e7faf",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-control.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2017-06-07T15:38:49Z",
+      "side": 1,
+      "message": "Well there is no such operation, there is just message called Shutdown, see https://github.com/opendaylight/controller/blob/fb81da23c32b8a332d2cc25e4b15e13b3d2963cd/opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/client/messages/Shutdown.java.\n\nThe message itself should be used with Patterns.gracefulStop(), please see http://doc.akka.io/docs/akka/current/java/actors.html#graceful-stop. So maybe we can call this future rpc something like gracefully-stop-shard..",
+      "parentUuid": "3afa9182_57903fec",
+      "range": {
+        "startLine": 516,
+        "startChar": 8,
+        "endLine": 516,
+        "endChar": 22
+      },
+      "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
