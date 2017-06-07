@@ -15,11 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.NtfbenchmarkService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput.ProducerType;
@@ -32,11 +29,11 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NtfbenchmarkProvider implements BindingAwareProvider, AutoCloseable, NtfbenchmarkService {
+public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService {
 
     private static final Logger LOG = LoggerFactory.getLogger(NtfbenchmarkProvider.class);
-    private NotificationService listenService;
-    private NotificationPublishService publishService;
+    private final NotificationService listenService;
+    private final NotificationPublishService publishService;
     private static final int testTimeout = 5;
 
     public NtfbenchmarkProvider(final NotificationService listenServiceDependency,
@@ -46,15 +43,13 @@ public class NtfbenchmarkProvider implements BindingAwareProvider, AutoCloseable
         publishService = publishServiceDependency;
     }
 
-    @Override
-    public void onSessionInitiated(final ProviderContext session) {
-        LOG.debug("NtfbenchmarkProvider Session Initiated");
-        session.addRpcImplementation(NtfbenchmarkService.class, this);
+    public void init() {
+        LOG.info("NtfbenchmarkProvider initiated");
     }
 
     @Override
     public void close() throws Exception {
-        LOG.debug("NtfbenchmarkProvider Closed");
+        LOG.info("NtfbenchmarkProvider closed");
     }
 
     @Override
@@ -128,8 +123,8 @@ public class NtfbenchmarkProvider implements BindingAwareProvider, AutoCloseable
                             .setListenerOk(allListeners)
                             .setProducerOk(allProducersOk)
                             .setProducerError(allProducersError)
-                            .setProducerRate(((allProducersOk + allProducersError) * 1000000000) / producerElapsedTime)
-                            .setListenerRate((allListeners * 1000000000) / listenerElapsedTime)
+                            .setProducerRate((allProducersOk + allProducersError) * 1000000000 / producerElapsedTime)
+                            .setListenerRate(allListeners * 1000000000 / listenerElapsedTime)
                            .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {

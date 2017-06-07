@@ -8,8 +8,5 @@
  -->
 <features name="odl-dsbenchmark-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-ntfbenchmark" version="${project.version}">
-        <configfile finalname="ntfbenchmark-impl-default-config.xml">
-            mvn:org.opendaylight.controller/ntfbenchmark/${project.version}/xml/config
-        </configfile>
     </feature>
 </features>
