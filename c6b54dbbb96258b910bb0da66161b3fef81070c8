@@ -69,6 +69,23 @@
       "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_daaa96d3",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-07T15:58:09Z",
+      "side": 1,
+      "message": "This bypasses the ShardMgr so it won\u0027t know the shard actor was killed. The intent is for the  ShardMgr to control shard actor lifecycle. Why is this needed anyway? We already have remove-shard-replica.",
+      "revId": "c6b54dbbb96258b910bb0da66161b3fef81070c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
