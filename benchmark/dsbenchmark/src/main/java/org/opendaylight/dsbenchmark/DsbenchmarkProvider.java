@@ -7,18 +7,15 @@
  */
 package org.opendaylight.dsbenchmark;
 
+import com.google.common.util.concurrent.Futures;
 import java.util.Collections;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.dsbenchmark.listener.DsbenchmarkListenerProvider;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaDelete;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaRead;
@@ -48,9 +45,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.Futures;
-
-public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkService, AutoCloseable {
+public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
@@ -61,35 +56,30 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private final DsbenchmarkListenerProvider listenerProvider = new DsbenchmarkListenerProvider();
     private final DOMDataBroker domDataBroker;  // Async DOM Broker for use with all DOM operations
-    private final DataBroker bindingDataBroker; // Async Binding-Aware Broker for use in tx chains; initialized to
+    private final DataBroker txChainDataBroker; // Async Binding-Aware Broker for use in tx chains; initialized to
                                                 // ping-pong broker in default config (see default-config.xml and
                                                 // dsbenchmark-impl.yang)
-    private DataBroker dataBroker;              // "Legacy" OSGI Data Broker for use in simple transactions
-    private RpcRegistration<DsbenchmarkService> dstReg;
+    private final DataBroker simpleTxDataBroker;      // "Legacy" OSGI Data Broker for use in simple transactions
 
     private long testsCompleted = 0;
 
-    public DsbenchmarkProvider(final DOMDataBroker domDataBroker, final DataBroker bindingDataBroker) {
-        // We have to get the DOMDataBroker via the constructor,
-        // since we can't get it from the session
+    public DsbenchmarkProvider(final DOMDataBroker domDataBroker, final DataBroker txChainDataBroker,
+            final DataBroker simpleTxDataBroker) {
         this.domDataBroker = domDataBroker;
-        this.bindingDataBroker = bindingDataBroker;
+        this.txChainDataBroker = txChainDataBroker;
+        this.simpleTxDataBroker = simpleTxDataBroker;
     }
 
-    @Override
-    public void onSessionInitiated(final ProviderContext session) {
-        this.dataBroker = session.getSALService(DataBroker.class);
-        this.dstReg = session.addRpcImplementation( DsbenchmarkService.class, this );
-        listenerProvider.setDataBroker(dataBroker);
+    public void init() {
+        listenerProvider.setDataBroker(simpleTxDataBroker);
         setTestOperData(this.execStatus.get(), testsCompleted);
 
-        LOG.debug("DsbenchmarkProvider Session Initiated");
+        LOG.info("DsbenchmarkProvider started");
     }
 
     @Override
     public void close() throws Exception {
-        dstReg.close();
-        LOG.debug("DsbenchmarkProvider Closed");
+        LOG.info("DsbenchmarkProvider Closed");
     }
 
     @Override
@@ -171,7 +161,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
                 .setTestsCompleted(tstCompl)
                 .build();
 
-        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        WriteTransaction tx = simpleTxDataBroker.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.OPERATIONAL, TEST_STATUS_IID, status);
 
         try {
@@ -188,7 +178,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
                 .setOuterList(Collections.<OuterList>emptyList())
                 .build();
 
-        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        WriteTransaction tx = simpleTxDataBroker.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID, data);
         try {
             tx.submit().checkedGet();
@@ -198,7 +188,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
             throw new IllegalStateException(e);
         }
 
-        tx = dataBroker.newWriteOnlyTransaction();
+        tx = simpleTxDataBroker.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID, data);
         try {
             tx.submit().checkedGet();
@@ -226,13 +216,13 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
             if (txType == StartTestInput.TransactionType.SIMPLETX) {
                 if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
                     if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new SimpletxBaDelete(this.dataBroker, outerListElem,
+                        retVal = new SimpletxBaDelete(this.simpleTxDataBroker, outerListElem,
                                 innerListElem,writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new SimpletxBaRead(this.dataBroker, outerListElem,
+                        retVal = new SimpletxBaRead(this.simpleTxDataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else {
-                        retVal = new SimpletxBaWrite(this.dataBroker, oper, outerListElem,
+                        retVal = new SimpletxBaWrite(this.simpleTxDataBroker, oper, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     }
                 } else {
@@ -250,13 +240,13 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
             } else {
                 if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
                     if (StartTestInput.Operation.DELETE == oper) {
-                        retVal = new TxchainBaDelete(this.bindingDataBroker, outerListElem,
+                        retVal = new TxchainBaDelete(this.txChainDataBroker, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
-                        retVal = new TxchainBaRead(this.bindingDataBroker,outerListElem,
+                        retVal = new TxchainBaRead(this.txChainDataBroker,outerListElem,
                                 innerListElem,writesPerTx, dataStore);
                     } else {
-                        retVal = new TxchainBaWrite(this.bindingDataBroker, oper, outerListElem,
+                        retVal = new TxchainBaWrite(this.txChainDataBroker, oper, outerListElem,
                                 innerListElem, writesPerTx, dataStore);
                     }
                 } else {
