@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Assert;
@@ -19,7 +19,7 @@ public class ModifyTransactionRequestEmptyTest extends AbstractTransactionReques
     private static final PersistenceProtocol PROTOCOL = PersistenceProtocol.ABORT;
 
     private static final ModifyTransactionRequest OBJECT = new ModifyTransactionRequest(
-            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, Lists.newArrayList(), PROTOCOL);
+            TRANSACTION_IDENTIFIER, 0, ACTOR_REF, new ArrayList<>(), PROTOCOL);
 
     @Override
     protected ModifyTransactionRequest object() {
@@ -43,7 +43,7 @@ public class ModifyTransactionRequestEmptyTest extends AbstractTransactionReques
     @Test
     public void addToStringAttributesTest() {
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        Assert.assertTrue(result.toString().contains("operations=" + Lists.newArrayList()));
+        Assert.assertTrue(result.toString().contains("modifications=0"));
         Assert.assertTrue(result.toString().contains("protocol=" + PROTOCOL));
     }
 
