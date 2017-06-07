@@ -15,6 +15,7 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -81,6 +82,7 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantInput;
@@ -562,6 +564,37 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         handler.start(settableFuture);
 
         return settableFuture;
+    }
+
+    @Override
+    public Future<RpcResult<Void>> shutdownShard(final ShutdownShardInput input) {
+        LOG.debug("Received shutdown-shard rpc, input: {}", input);
+
+        final String shardName = input.getShardName();
+        if (Strings.isNullOrEmpty(shardName)) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
+                            "A valid shard name must be specified.");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        final ActorContext context = configDataStore.getActorContext();
+        final Optional<ActorRef> localShardReply = context.findLocalShard(shardName);
+
+        // check presence
+        if (!localShardReply.isPresent()) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value",
+                            "Shard with given name is not present on local node");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        LOG.debug("Sending PoisonPill message to {}", localShardReply.get());
+        localShardReply.get().tell(PoisonPill.getInstance(), noSender());
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
