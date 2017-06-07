@@ -55,7 +55,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     @Test
     public void addToStringAttributesTest() {
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
-        Assert.assertTrue(result.toString().contains("operations=" + MODIFICATIONS));
+        Assert.assertTrue(result.toString().contains("modifications=1"));
         Assert.assertTrue(result.toString().contains("protocol=" + PROTOCOL));
     }
 
