@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3afa9182_7a6c429d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-06-07T16:18:37Z",
+      "side": 1,
+      "message": "when we lose",
+      "range": {
+        "startLine": 470,
+        "startChar": 31,
+        "endLine": 470,
+        "endChar": 40
+      },
+      "revId": "9cea501f87c8f10d9d801c0bf8b69eb325f210a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
