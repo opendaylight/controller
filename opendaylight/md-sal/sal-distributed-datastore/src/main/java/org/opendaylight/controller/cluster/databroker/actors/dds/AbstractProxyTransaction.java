@@ -30,6 +30,7 @@ import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
@@ -463,7 +464,14 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     if (t instanceof TransactionCommitSuccess) {
                         ret.set(Boolean.TRUE);
                     } else if (t instanceof RequestFailure) {
-                        ret.setException(((RequestFailure<?, ?>) t).getCause().unwrap());
+                        final Throwable cause = ((RequestFailure<?, ?>) t).getCause().unwrap();
+                        if (cause instanceof ClosedTransactionException) {
+                            // This is okay, as it indicates the transaction has been completed. It can happen
+                            // when lose connectivity with the backend after it has received the request.
+                            ret.set(Boolean.TRUE);
+                        } else {
+                            ret.setException(cause);
+                        }
                     } else {
                         ret.setException(new IllegalStateException("Unhandled response " + t.getClass()));
                     }
