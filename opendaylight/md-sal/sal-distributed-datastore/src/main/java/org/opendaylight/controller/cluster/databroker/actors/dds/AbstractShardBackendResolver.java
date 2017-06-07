@@ -139,6 +139,10 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
             .whenComplete((response, failure) -> {
                 if (failure != null) {
                     LOG.debug("Connect attempt to {} failed, will retry", shardName, failure);
+                    if (failure instanceof NotLeaderException) {
+                        // invalidate the old cache
+                        flushCache(shardName);
+                    }
                     future.completeExceptionally(wrap("Connection attempt failed", failure));
                     return;
                 }
