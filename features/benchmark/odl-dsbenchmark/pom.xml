@@ -45,13 +45,5 @@
             <artifactId>dsbenchmark</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <!-- finalname="dsbenchmark-impl-default-config.xml" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>dsbenchmark</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-        </dependency>
     </dependencies>
 </project>
