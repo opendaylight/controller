@@ -61,14 +61,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <!-- finalname="ntfbenchmark-impl-default-config.xml" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ntfbenchmark</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-        </dependency>
-        <dependency>
             <!-- finalname="rpcbenchmark-impl-default-config.xml" -->
             <groupId>${project.groupId}</groupId>
             <artifactId>rpcbenchmark</artifactId>
