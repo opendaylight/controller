@@ -432,7 +432,9 @@ public class Shard extends RaftActor {
     private void handleConnectClient(final ConnectClientRequest message) {
         try {
             if (!isLeader() || !isLeaderActive()) {
-                LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), message);
+                LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
+                                + "isLeadershipTransferInProgress: {}.",
+                        persistenceId(), message, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
                 throw new NotLeaderException(getSelf());
             }
 
@@ -451,7 +453,9 @@ public class Shard extends RaftActor {
             throws RequestException {
         // We are not the leader, hence we want to fail-fast.
         if (!isLeader() || !isLeaderActive()) {
-            LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), envelope);
+            LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
+                            + "isLeadershipTransferInProgress: {}.",
+                    persistenceId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
             throw new NotLeaderException(getSelf());
         }
 
