@@ -50,7 +50,8 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("operations", modifications).add("protocol", protocol);
+        return super.addToStringAttributes(toStringHelper).add("modifications", modifications.size())
+                .add("protocol", protocol);
     }
 
     @Override
