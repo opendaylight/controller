@@ -32,6 +32,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${project.version}'>odl-dsbenchmark</feature>
     <feature version='${project.version}'>odl-ntfbenchmark</feature>
     <bundle>mvn:org.opendaylight.controller/rpcbenchmark/{{VERSION}}</bundle>
-    <configfile finalname="rpcbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/rpcbenchmark/{{VERSION}}/xml/config</configfile>
   </feature>
 </features>
