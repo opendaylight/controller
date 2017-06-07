@@ -60,13 +60,5 @@
             <artifactId>rpcbenchmark</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <!-- finalname="rpcbenchmark-impl-default-config.xml" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>rpcbenchmark</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-        </dependency>
     </dependencies>
 </project>

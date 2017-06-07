@@ -15,11 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
-import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.NodeContext;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RpcbenchPayloadService;
@@ -40,30 +36,27 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable, RpcbenchmarkService {
+public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpcbenchmarkProvider.class);
-    private static final GlobalBindingRTCServer gServer = new GlobalBindingRTCServer();
     private static final int testTimeout = 5;
+
+    private final GlobalBindingRTCServer globalServer;
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
-    private RpcConsumerRegistry consumerRegistry;
-    private RpcProviderRegistry providerRegistry;
+    private final RpcProviderRegistry providerRegistry;
 
-    @Override
-    public void onSessionInitiated(final ProviderContext session) {
-        LOG.debug("RpcbenchmarkProvider Session Initiated");
-        consumerRegistry = session.getSALService(RpcConsumerRegistry.class);
-        providerRegistry = session.getSALService(RpcProviderRegistry.class);
+    public RpcbenchmarkProvider(final RpcProviderRegistry providerRegistry, final GlobalBindingRTCServer globalServer) {
+        this.providerRegistry = providerRegistry;
+        this.globalServer = globalServer;
+    }
 
-        // Register the benchmark Global RPC
-        session.addRpcImplementation(RpcbenchPayloadService.class, gServer);
-        // Register RPC Benchmark's control REST API
-        session.addRpcImplementation(RpcbenchmarkService.class, this);
+    public void init() {
+        LOG.info("RpcbenchmarkProvider initiated");
     }
 
     @Override
-    public void close() throws Exception {
-        LOG.debug("RpcbenchmarkProvider Closed");
+    public void close() {
+        LOG.info("RpcbenchmarkProvider closed");
     }
 
     @Override
@@ -90,11 +83,11 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
                 rpcRegs.add(routedReg);
             }
 
-            client = new RoutedBindingRTClient(consumerRegistry, input.getPayloadSize().intValue(), routeIid);
+            client = new RoutedBindingRTClient(providerRegistry, input.getPayloadSize().intValue(), routeIid);
             break;
 
         case GLOBALRTC:
-            client = new GlobalBindingRTCClient(consumerRegistry, input.getPayloadSize().intValue());
+            client = new GlobalBindingRTCClient(providerRegistry, input.getPayloadSize().intValue());
             break;
 
         default:
@@ -118,7 +111,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
             try {
                 executor.awaitTermination(testTimeout, TimeUnit.MINUTES);
             } catch (final InterruptedException e) {
-                LOG.error("Out of time: test did not finish within the {} min deadline ", testTimeout); 
+                LOG.error("Out of time: test did not finish within the {} min deadline ", testTimeout);
             }
 
             long endTime = System.nanoTime();
@@ -131,7 +124,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
                                             .setGlobalRtcClientError(client.getRpcError())
                                             .setGlobalRtcClientOk(client.getRpcOk())
                                             .setExecTime(TimeUnit.NANOSECONDS.toMillis(elapsedTime))
-                                            .setRate(((client.getRpcOk() + client.getRpcError()) * 1000000000) / elapsedTime)
+                                            .setRate((client.getRpcOk() + client.getRpcError()) * 1000000000 / elapsedTime)
                                             .build();
             return RpcResultBuilder.success(output).buildFuture();
         } finally {
@@ -145,7 +138,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
     public Future<RpcResult<TestStatusOutput>> testStatus() {
         LOG.info("testStatus");
         TestStatusOutput output = new TestStatusOutputBuilder()
-                                        .setGlobalServerCnt((long)gServer.getNumRpcs())
+                                        .setGlobalServerCnt((long)globalServer.getNumRpcs())
                                         .setExecStatus(execStatus.get())
                                         .build();
         return RpcResultBuilder.success(output).buildFuture();
