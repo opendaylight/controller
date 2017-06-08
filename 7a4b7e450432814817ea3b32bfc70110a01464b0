@@ -16,6 +16,24 @@
       "revId": "7a4b7e450432814817ea3b32bfc70110a01464b0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3afa9182_82a0a091",
+        "filename": "features/benchmark/odl-dsbenchmark/src/main/feature/feature.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-08T14:37:05Z",
+      "side": 1,
+      "message": "I\u0027m not clear on why this even existed in the first place. I guess the entire subproject can be deleted?",
+      "parentUuid": "3afa9182_e276c43d",
+      "revId": "7a4b7e450432814817ea3b32bfc70110a01464b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
