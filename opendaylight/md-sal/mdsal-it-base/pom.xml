@@ -9,10 +9,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
-    <relativePath>../../config/config-parent</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>bundle-parent</artifactId>
+    <version>1.8.0-Carbon</version>
+    <relativePath/>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>mdsal-it-base</artifactId>
@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>${project.groupId}</groupId>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
@@ -34,13 +34,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-it-base</artifactId>
       <version>${config.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
     </dependency>
         <!-- Dependencies for pax exam karaf container -->
