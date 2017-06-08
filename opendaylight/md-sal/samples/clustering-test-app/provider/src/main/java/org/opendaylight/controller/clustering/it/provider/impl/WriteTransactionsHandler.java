@@ -165,7 +165,7 @@ public class WriteTransactionsHandler implements Runnable {
 
         try {
             tx.submit().checkedGet(125, TimeUnit.SECONDS);
-        } catch (final TransactionCommitFailedException | TimeoutException e) {
+        } catch (final Exception e) {
             LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
             settableFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
@@ -186,7 +186,7 @@ public class WriteTransactionsHandler implements Runnable {
 
         try {
             tx.submit().checkedGet(125, TimeUnit.SECONDS);
-        } catch (final TransactionCommitFailedException | TimeoutException e) {
+        } catch (final Exception e) {
             LOG.warn("Unable to fill the initial item list.", e);
             settableFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
@@ -245,7 +245,7 @@ public class WriteTransactionsHandler implements Runnable {
                         .withResult(output).build());
 
                 executor.shutdown();
-            } catch (InterruptedException | ExecutionException | TimeoutException exception) {
+            } catch (Exception exception) {
                 LOG.error("Write transactions failed.", exception);
                 completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                         .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", exception).build());
