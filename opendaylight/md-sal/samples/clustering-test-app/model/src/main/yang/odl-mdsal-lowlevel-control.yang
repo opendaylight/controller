@@ -527,4 +527,20 @@ module odl-mdsal-lowlevel-control {
             }
         }
     }
+
+    rpc shutdown-prefix-shard {
+        description "Upon receiving this, the member sends PoisonPill to local
+            configuration data store prefix shard with specified instance-identifier and
+            returns immediately (does not wait for actual shard termination). Fails if
+            shard with given instance-identifier is not present locally or
+            instance-identifier is invalid.";
+        input {
+            leaf shard-prefix {
+                mandatory true;
+                type instance-identifier;
+                description "The prefix of the configuration data store shard we want to
+                    send PoisonPill to.";
+            }
+        }
+    }
 }
