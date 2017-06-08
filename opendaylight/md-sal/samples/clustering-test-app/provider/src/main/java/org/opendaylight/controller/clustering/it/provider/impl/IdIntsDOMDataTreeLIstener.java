@@ -46,7 +46,8 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
                 if (localCopy == null || checkEqual(change.getRootNode().getDataBefore().get())) {
                     localCopy = change.getRootNode().getDataAfter().get();
                 } else {
-                    LOG.debug("Ignoring notification: {}", change);
+                    LOG.warn("Ignoring notification.");
+                    LOG.trace("Ignored notification content: {}", change);
                 }
             } else {
                 LOG.warn("getDataAfter() is missing from notification. change: {}", change);
