@@ -82,6 +82,7 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownPrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
@@ -579,22 +580,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                     RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
         }
 
-        final ActorContext context = configDataStore.getActorContext();
-        final Optional<ActorRef> localShardReply = context.findLocalShard(shardName);
-
-        // check presence
-        if (!localShardReply.isPresent()) {
-            final RpcError rpcError =
-                    RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value",
-                            "Shard with given name is not present on local node");
-            return Futures.immediateFuture(
-                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
-        }
-
-        LOG.debug("Sending PoisonPill message to {}", localShardReply.get());
-        localShardReply.get().tell(PoisonPill.getInstance(), noSender());
-
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return sendPoisonPillToShard(shardName);
     }
 
     @Override
@@ -621,6 +607,45 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public Future<RpcResult<Void>> unregisterDefaultConstant() {
         return null;
+    }
+
+    @Override
+    public Future<RpcResult<Void>> shutdownPrefixShard(final ShutdownPrefixShardInput input) {
+        LOG.debug("Received shutdown-prefix-shard rpc, input: {}", input);
+
+        final InstanceIdentifier shardPrefix = input.getShardPrefix();
+        if (shardPrefix == null) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
+                            "A valid prefix-shard identifier must be specified.");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        final YangInstanceIdentifier prefixShardPath =
+                bindingNormalizedNodeSerializer.toYangInstanceIdentifier(shardPrefix);
+        final String cleanPrefixShardName = ClusterUtils.getCleanShardName(prefixShardPath);
+
+        return sendPoisonPillToShard(cleanPrefixShardName);
+    }
+
+    private Future<RpcResult<Void>> sendPoisonPillToShard(final String shardName) {
+        final ActorContext context = configDataStore.getActorContext();
+        final Optional<ActorRef> localShardReply = context.findLocalShard(shardName);
+
+        // check presence
+        if (!localShardReply.isPresent()) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value",
+                            "Shard with given name is not present on local node");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        LOG.debug("Sending PoisonPill message to {}", localShardReply.get());
+        localShardReply.get().tell(PoisonPill.getInstance(), noSender());
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
