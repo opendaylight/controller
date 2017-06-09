@@ -605,6 +605,45 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
+    public Future<RpcResult<Void>> shutdownPrefixShardReplica(final ShutdownPrefixShardReplicaInput input) {
+        LOG.debug("Received shutdow-prefix-shard-replica rpc, input: {}", input);
+
+        final InstanceIdentifier shardPrefix = input.getPrefix();
+
+        if (shardPrefix == null) {
+            final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
+                    "A valid shard prefix must be specified");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        final YangInstanceIdentifier shardPath = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(shardPrefix);
+
+        final String cleanPrefixShardName = ClusterUtils.getCleanShardName(shardPath);
+        final ActorContext context = configDataStore.getActorContext();
+        final Optional<ActorRef> localShardReply = context.findLocalShard(cleanPrefixShardName);
+
+        // check presence
+        if (!localShardReply.isPresent()) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value",
+                            "Shard with given name is not present on local node");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        LOG.debug("Sending Shutdown message to {}", localShardReply.get());
+        long timeoutInMS = Math.max(context.getDatastoreContext().getShardRaftConfig()
+                .getElectionTimeOutInterval().$times(3).toMillis(), 10000);
+
+        final scala.concurrent.Future<Boolean> stopFuture = Patterns.gracefulStop(localShardReply.get(),
+                FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
+        localShardReply.get().tell(PoisonPill.getInstance(), noSender());
+
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+    }
+
+    @Override
     public Future<RpcResult<Void>> registerConstant(final RegisterConstantInput input) {
 
         LOG.debug("Received register-constant rpc, input: {}", input);
