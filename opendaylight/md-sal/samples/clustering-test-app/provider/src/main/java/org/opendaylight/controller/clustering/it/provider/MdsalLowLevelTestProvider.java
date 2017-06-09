@@ -442,6 +442,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                 FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
         localShardReply.get().tell(PoisonPill.getInstance(), noSender());
 
+
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
