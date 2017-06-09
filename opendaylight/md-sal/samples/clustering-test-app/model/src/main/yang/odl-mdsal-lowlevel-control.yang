@@ -513,4 +513,13 @@ module odl-mdsal-lowlevel-control {
         // No output.
     }
 
+    rpc shutdown-shard-replica {
+        description "Upon receiving this, the member ";
+        input {
+            leaf shard-name {
+                type string;
+            }
+        }
+    }
+
 }
