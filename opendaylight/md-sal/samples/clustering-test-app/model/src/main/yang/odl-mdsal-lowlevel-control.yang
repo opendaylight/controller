@@ -528,4 +528,19 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
+    rpc shutdown-prefix-shard-replica {
+        description "Upon receiving this, the member will try to gracefully shutdown local configuration
+            data store prefix-based shard replica and return immediately (does no wait for actual shard's
+            replica shutdown).
+
+            TODO: Since we are stopping shard replica gracefully, we should wait for shard termination.";
+        input {
+            leaf prefix {
+                description "The prefix of the configuration data store prefix-based shard to be shutdown
+                    gracefully.";
+                mandatory true;
+                type instance-identifier;
+            }
+        }
+    }
 }

@@ -83,6 +83,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShard
 import org.opendaylight.controller.cluster.datastore.messages.RemovePrefixShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.ShutdownPrefixShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShutdownShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -282,6 +283,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onShutdownShardReplica((ShutdownShardReplica) message);
         } else if (message instanceof RemovePrefixShardReplica) {
             onRemovePrefixShardReplica((RemovePrefixShardReplica) message);
+        } else if (message instanceof ShutdownPrefixShardReplica) {
+            onShutdownPrefixShardReplica((ShutdownPrefixShardReplica) message);
         } else if (message instanceof WrappedShardResponse) {
             onWrappedShardResponse((WrappedShardResponse) message);
         } else if (message instanceof GetSnapshot) {
@@ -1620,6 +1623,15 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         primaryPath, getSender()), getTargetActor());
             }
         });
+    }
+
+    private void onShutdownPrefixShardReplica(final ShutdownPrefixShardReplica message) {
+        LOG.debug("{}: onShutdownPrefixShardReplica: {}", message);
+
+        final ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
+                ClusterUtils.getCleanShardName(message.getPrefix()));
+
+        removeShard(shardId);
     }
 
     private void persistShardList() {
