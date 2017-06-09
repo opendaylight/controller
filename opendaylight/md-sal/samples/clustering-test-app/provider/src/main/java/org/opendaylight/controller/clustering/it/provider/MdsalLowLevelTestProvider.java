@@ -14,7 +14,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
+import akka.pattern.Patterns;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -33,6 +35,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStore
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.clustering.it.provider.impl.FlappingSingletonService;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
@@ -81,6 +84,8 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownPrefixShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantInput;
@@ -104,6 +109,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.duration.FiniteDuration;
 
 public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService {
 
@@ -400,6 +406,45 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
+    
+    @Override
+    public Future<RpcResult<Void>> shutdownPrefixShardReplica(final ShutdownPrefixShardReplicaInput input) {
+        LOG.debug("Received shutdow-prefix-shard-replica rpc, input: {}", input);
+
+        final InstanceIdentifier shardPrefix = input.getPrefix();
+
+        if (shardPrefix == null) {
+            final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
+                    "A valid shard prefix must be specified");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        final YangInstanceIdentifier shardPath = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(shardPrefix);
+
+        final String cleanPrefixShardName = ClusterUtils.getCleanShardName(shardPath);
+        final ActorContext context = configDataStore.getActorContext();
+        final Optional<ActorRef> localShardReply = context.findLocalShard(cleanPrefixShardName);
+
+        // check presence
+        if (!localShardReply.isPresent()) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value",
+                            "Shard with given name is not present on local node");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        LOG.debug("Sending Shutdown message to {}", localShardReply.get());
+        long timeoutInMS = Math.max(context.getDatastoreContext().getShardRaftConfig()
+                .getElectionTimeOutInterval().$times(3).toMillis(), 10000);
+
+        final scala.concurrent.Future<Boolean> stopFuture = Patterns.gracefulStop(localShardReply.get(),
+                FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
+        localShardReply.get().tell(PoisonPill.getInstance(), noSender());
+
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+    }
 
     @Override
     public Future<RpcResult<Void>> registerBoundConstant(final RegisterBoundConstantInput input) {
@@ -562,6 +607,40 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         handler.start(settableFuture);
 
         return settableFuture;
+    }
+
+    @Override
+    public Future<RpcResult<Void>> shutdownShardReplica(final ShutdownShardReplicaInput input) {
+        LOG.debug("Received shutdown-shard-replica rpc, input: {}", input);
+
+        final String shardName = input.getShardName();
+        if (Strings.isNullOrEmpty(shardName)) {
+            final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
+                    "A valid shard name must be specified");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        final ActorContext context = configDataStore.getActorContext();
+        final Optional<ActorRef> localShardReply = context.findLocalShard(shardName);
+
+        // check presence
+        if (!localShardReply.isPresent()) {
+            final RpcError rpcError =
+                    RpcResultBuilder.newError(ErrorType.APPLICATION, "invalid-value",
+                            "Shard with given name is not present on local node");
+            return Futures.immediateFuture(
+                    RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        LOG.debug("Sending Shutdown message to {}", localShardReply.get());
+        long timeoutInMS = Math.max(context.getDatastoreContext().getShardRaftConfig()
+                .getElectionTimeOutInterval().$times(3).toMillis(), 10000);
+
+        final scala.concurrent.Future<Boolean> stopFuture = Patterns.gracefulStop(localShardReply.get(),
+                FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
+        localShardReply.get().tell(PoisonPill.getInstance(), noSender());
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
