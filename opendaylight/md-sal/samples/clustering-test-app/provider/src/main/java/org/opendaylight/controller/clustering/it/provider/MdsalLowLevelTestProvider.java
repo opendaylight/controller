@@ -85,6 +85,7 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownPrefixShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
@@ -581,6 +582,28 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
         }
 
+        return shutdownShardGracefully(shardName);
+    }
+
+    @Override
+    public Future<RpcResult<Void>> shutdownPrefixShardReplica(final ShutdownPrefixShardReplicaInput input) {
+        LOG.debug("Received shutdown-prefix-shard-replica rpc, input: {}", input);
+
+        final InstanceIdentifier shardPrefix = input.getPrefix();
+
+        if (shardPrefix == null) {
+            final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
+                    "A valid shard prefix must be specified");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+        }
+
+        final YangInstanceIdentifier shardPath = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(shardPrefix);
+        final String cleanPrefixShardName = ClusterUtils.getCleanShardName(shardPath);
+
+        return shutdownShardGracefully(cleanPrefixShardName);
+    }
+
+    private SettableFuture<RpcResult<Void>> shutdownShardGracefully(final String shardName) {
         final SettableFuture<RpcResult<Void>> rpcResult = SettableFuture.create();
         final ActorContext context = configDataStore.getActorContext();
 
@@ -614,7 +637,6 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                 }
             }
         }, context.getClientDispatcher());
-
         return rpcResult;
     }
 
