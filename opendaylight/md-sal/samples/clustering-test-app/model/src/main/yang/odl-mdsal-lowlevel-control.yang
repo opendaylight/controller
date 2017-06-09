@@ -522,4 +522,12 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
+    rpc shutdown-prefix-shard-replica {
+        input {
+            leaf prefix {
+                mandatory true;
+                type instance-identifier;
+            }
+        }
+    }
 }
