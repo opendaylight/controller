@@ -16,6 +16,24 @@
       "revId": "7f6364c6d264f7a7ef16662b10ab70e4ce0011aa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_f4e6ae43",
+        "filename": "opendaylight/md-sal/mdsal-trace/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-12T11:45:19Z",
+      "side": 1,
+      "message": "I changed the wrong pom :(",
+      "parentUuid": "1af78d9a_d1e1049c",
+      "revId": "7f6364c6d264f7a7ef16662b10ab70e4ce0011aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
