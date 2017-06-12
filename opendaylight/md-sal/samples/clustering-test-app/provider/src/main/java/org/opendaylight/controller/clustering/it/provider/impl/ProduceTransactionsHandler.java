@@ -208,6 +208,13 @@ public class ProduceTransactionsHandler implements Runnable {
                 completionFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
                         .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", exception).build());
 
+                for (int i = 0; i < futures.size(); i++) {
+                    final CheckedFuture<Void, TransactionCommitFailedException> future = futures.get(i);
+                    if (!future.isDone()) {
+                        LOG.warn("Future #{}/{} possibly hanged.", future, futures.size());
+                    }
+                }
+
                 executor.shutdown();
             } finally {
                 try {
