@@ -51,8 +51,8 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
             .registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
     }
 
-    public void updateService() {
-        if(this.osgiReg != null) {
+    public synchronized void updateService() {
+        if (this.osgiReg != null) {
             try {
                 this.bindingContextProvider.update(this.classLoadingStrat, this.schemaContextProvider);
 
@@ -75,8 +75,8 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
     }
 
     @Override
-    public void close() throws Exception {
-        if(this.osgiReg != null) {
+    public synchronized void close() throws Exception {
+        if (this.osgiReg != null) {
             this.osgiReg.unregister();
         }
 
