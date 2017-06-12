@@ -17,6 +17,7 @@ import com.google.common.base.Function;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
+import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 
 /**
@@ -39,6 +40,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
     private void setup(String testName) {
         String persistenceId = factory.generateActorId(testName + "-leader-");
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(config)
                 .pauseLeaderFunction(pauseLeaderFunction).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 persistenceId).underlyingActor();
@@ -74,7 +76,6 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
     @Test
     public void testNotLeaderOnDoTransfer() {
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         setup("testNotLeaderOnDoTransfer");
         cohort.doTransfer();
         verify(onComplete).onSuccess(mockRaftActor.self());
@@ -90,9 +91,17 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     @Test
     public void testPauseLeaderTimeout() {
         pauseLeaderFunction = input -> null;
-
         setup("testPauseLeaderTimeout");
+
+        Leader leader = new Leader(mockRaftActor.getRaftActorContext()) {
+            @Override
+            public void transferLeadership(RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+                leadershipTransferCohort.transferComplete();
+            }
+        };
+        mockRaftActor.setCurrentBehavior(leader);
+
         cohort.init();
-        verify(onComplete, timeout(2000)).onFailure(mockRaftActor.self());
+        verify(onComplete, timeout(2000)).onSuccess(mockRaftActor.self());
     }
 }
