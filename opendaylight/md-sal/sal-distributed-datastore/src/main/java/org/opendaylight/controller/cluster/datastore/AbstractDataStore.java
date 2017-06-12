@@ -283,8 +283,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
         for (int i = 0; i < 100; i++) {
             try {
-                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher).withMailbox(
-                        ActorContext.BOUNDED_MAILBOX), shardManagerId);
+                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher), shardManagerId);
             } catch (Exception e) {
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
