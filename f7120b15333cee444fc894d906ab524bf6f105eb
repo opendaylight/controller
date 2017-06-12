@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af78d9a_14a6dac1",
+        "filename": "opendaylight/config/yang-test/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-06-12T12:17:27Z",
+      "side": 1,
+      "message": "erm.. I think we can remove a lot here, and make future odlparent version bumps less painful (who will remember this next time...), as all this is provided by odplarent now (meanwhile; perhaps it wasn\u0027t when this was created), isn\u0027t it? I\u0027ll give it a quick try to see if I\u0027m missing anything.",
+      "revId": "f7120b15333cee444fc894d906ab524bf6f105eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
