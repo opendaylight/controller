@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.concurrent.CompletionStage;
+import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.dom.api.CDSDataTreeProducer;
 import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -20,6 +21,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -57,6 +59,11 @@ public class PrefixLeaderHandler {
             });
         } catch (final DOMDataTreeProducerException e) {
             LOG.warn("Error while closing producer", e);
+        } catch (final TimeoutException e) {
+            LOG.warn("Timeout while on producer operation", e);
+            Futures.immediateFuture(RpcResultBuilder.failed().withError(RpcError.ErrorType.RPC,
+                    "resource-denied-transport", "Timeout while opening producer please retry.", "clustering-it",
+                    "clustering-it", e));
         }
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
