@@ -103,13 +103,14 @@ public class RaftActorLeadershipTransferCohort {
         raftActor.pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), raftActor) {
             @Override
             protected void doRun() {
+                LOG.debug("{}: pauseLeader successfully completed - doing transfer", raftActor.persistenceId());
                 doTransfer();
             }
 
             @Override
             protected void doCancel() {
-                LOG.debug("{}: pauseLeader timed out - aborting transfer", raftActor.persistenceId());
-                abortTransfer();
+                LOG.debug("{}: pauseLeader timed out - continuing with transfer", raftActor.persistenceId());
+                doTransfer();
             }
         });
     }
