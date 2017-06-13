@@ -71,7 +71,7 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     void onTransactionPurged(final TransactionIdentifier txId) {
         final UnsignedLong id = UnsignedLong.fromLongBits(txId.getTransactionId());
         closedTransactions.remove(id);
-        purgedTransactions.add(Range.singleton(id));
+        purgedTransactions.add(Range.closedOpen(id, UnsignedLong.ONE.plus(id)));
     }
 
     /**

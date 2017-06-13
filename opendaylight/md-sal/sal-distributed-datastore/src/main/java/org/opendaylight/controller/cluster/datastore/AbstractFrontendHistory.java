@@ -94,7 +94,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                         closedTransactions = ImmutableMap.of();
                     }
 
-                    purgedTransactions.add(Range.singleton(ul));
+                    purgedTransactions.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
                     LOG.debug("{}: finished purging inherited transaction {}", persistenceId(), id);
                     envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
                 });
@@ -107,12 +107,12 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                 // purged transactions in one go. If it does, we warn about the situation and
                 LOG.warn("{}: transaction {} not tracked in {}, but not present in active transactions", persistenceId,
                     id, purgedTransactions);
-                purgedTransactions.add(Range.singleton(ul));
+                purgedTransactions.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
                 return new TransactionPurgeResponse(id, request.getSequence());
             }
 
             tree.purgeTransaction(id, () -> {
-                purgedTransactions.add(Range.singleton(ul));
+                purgedTransactions.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
                 transactions.remove(id);
                 LOG.debug("{}: finished purging transaction {}", persistenceId(), id);
                 envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
