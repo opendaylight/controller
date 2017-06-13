@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1af78d9a_83b9e9eb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/AbortSlicing.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1af78d9a_c347711c",
+      "range": {
+        "startLine": 28,
+        "startChar": 24,
+        "endLine": 28,
+        "endChar": 37
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af78d9a_235595c6",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/AssembledMessageState.java",
         "patchSetId": 23
@@ -36,6 +60,30 @@
       "writtenOn": "2017-06-13T15:35:35Z",
       "side": 1,
       "message": "file",
+      "range": {
+        "startLine": 56,
+        "startChar": 27,
+        "endLine": 56,
+        "endChar": 32
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_e3cd4d88",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/AssembledMessageState.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": ":)",
+      "parentUuid": "1af78d9a_235595c6",
       "range": {
         "startLine": 56,
         "startChar": 27,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1af78d9a_c3cad16d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/AssembledMessageState.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1af78d9a_635e7deb",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 9
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af78d9a_2303d5b9",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageAssembler.java",
         "patchSetId": 23
@@ -82,6 +154,30 @@
       "writtenOn": "2017-06-13T15:35:35Z",
       "side": 1,
       "message": "this::stateRemoved ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 86,
+        "endLine": 53,
+        "endChar": 46
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_23c8f573",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageAssembler.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "1af78d9a_2303d5b9",
       "range": {
         "startLine": 52,
         "startChar": 86,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "1af78d9a_63a15da9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageAssembler.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": "So what\u0027s the alternative? non-private?",
+      "parentUuid": "1af78d9a_4331c1a1",
+      "range": {
+        "startLine": 202,
+        "startChar": 4,
+        "endLine": 202,
+        "endChar": 11
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af78d9a_832ba92f",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSliceIdentifier.java",
         "patchSetId": 23
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "1af78d9a_83b0c9f5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSliceIdentifier.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": "yeah - this was generated by eclipse.",
+      "parentUuid": "1af78d9a_832ba92f",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 9
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af78d9a_c31c9116",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
         "patchSetId": 23
@@ -151,6 +295,30 @@
       "writtenOn": "2017-06-13T15:35:35Z",
       "side": 1,
       "message": "this method looks like it has two-stage logic. can it be split into smaller private methods?",
+      "range": {
+        "startLine": 87,
+        "startChar": 3,
+        "endLine": 87,
+        "endChar": 45
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_039cd968",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T15:48:19Z",
+      "side": 1,
+      "message": "I\u0027m sure I can split it up",
+      "parentUuid": "1af78d9a_c31c9116",
       "range": {
         "startLine": 87,
         "startChar": 3,
