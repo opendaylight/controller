@@ -159,6 +159,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         waitUntilLeader(leaderActor);
 
         expectMatching(leaderCollectorActor, AppendEntriesReply.class, 2);
+        expectFirstMatching(follower1CollectorActor, AppendEntries.class);
 
         clearMessages(leaderCollectorActor);
         clearMessages(follower1CollectorActor);
