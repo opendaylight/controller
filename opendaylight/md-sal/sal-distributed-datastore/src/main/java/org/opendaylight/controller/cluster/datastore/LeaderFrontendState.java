@@ -179,7 +179,8 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         }
 
         LOG.debug("{}: purging history {}", persistenceId, id);
-        purgedHistories.add(Range.singleton(UnsignedLong.fromLongBits(id.getHistoryId())));
+        final UnsignedLong ul = UnsignedLong.fromLongBits(id.getHistoryId());
+        purgedHistories.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
         existing.purge(request.getSequence(), envelope, now);
         return null;
     }
