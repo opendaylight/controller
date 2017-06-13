@@ -28,7 +28,6 @@
     <!-- Parents -->
     <module>opendaylight/commons/protocol-framework</module>
     <module>opendaylight/commons/logback_settings</module>
-    <module>opendaylight/commons/filter-valve</module>
     <module>opendaylight/commons/liblldp</module>
     <module>benchmark</module>
     <module>opendaylight/commons/jolokia</module>
