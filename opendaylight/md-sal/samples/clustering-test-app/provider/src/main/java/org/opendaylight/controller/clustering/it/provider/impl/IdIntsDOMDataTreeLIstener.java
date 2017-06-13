@@ -43,12 +43,11 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
                                 ? change.getRootNode().getDataBefore().get() : "",
                         change.getRootNode().getDataAfter().get());
 
-                if (localCopy == null || checkEqual(change.getRootNode().getDataBefore().get())) {
-                    localCopy = change.getRootNode().getDataAfter().get();
-                } else {
-                    LOG.warn("Ignoring notification.");
-                    LOG.trace("Ignored notification content: {}", change);
+                if (!checkEqual(change.getRootNode().getDataBefore().get())) {
+                    LOG.warn("Notification doesnt match previous state, resync?.");
+                    LOG.trace("Notification content: {}", change);
                 }
+                localCopy = change.getRootNode().getDataAfter().get();
             } else {
                 LOG.warn("getDataAfter() is missing from notification. change: {}", change);
             }
