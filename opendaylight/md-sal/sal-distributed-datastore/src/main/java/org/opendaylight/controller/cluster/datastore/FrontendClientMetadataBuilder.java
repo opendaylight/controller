@@ -110,7 +110,8 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         }
 
         // XXX: do we need to account for cookies?
-        purgedHistories.add(Range.singleton(UnsignedLong.fromLongBits(historyId.getHistoryId())));
+        final UnsignedLong ul = UnsignedLong.fromLongBits(historyId.getHistoryId());
+        purgedHistories.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
         LOG.debug("{}: Purged history {}", historyId);
     }
 
