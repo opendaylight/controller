@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "1af78d9a_a3350548",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageAssembler.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T16:13:56Z",
+      "side": 1,
+      "message": "Compiler didn\u0027t like this::stateRemoved",
+      "parentUuid": "1af78d9a_23c8f573",
+      "range": {
+        "startLine": 52,
+        "startChar": 86,
+        "endLine": 53,
+        "endChar": 46
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af78d9a_4331c1a1",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageAssembler.java",
         "patchSetId": 23
@@ -342,6 +366,30 @@
       "writtenOn": "2017-06-13T15:35:35Z",
       "side": 1,
       "message": "What is the relative cost of .size() here? would it be better to just run cleanUp?",
+      "range": {
+        "startLine": 172,
+        "startChar": 8,
+        "endLine": 172,
+        "endChar": 36
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_e3f70d8b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSlicer.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-13T16:13:56Z",
+      "side": 1,
+      "message": "I looked at that - cleanup incurs locking so I added the size check which just incurs volatile reads of each segment. Most of the time there shouldn\u0027t be anything to cleanup.",
+      "parentUuid": "1af78d9a_231ab517",
       "range": {
         "startLine": 172,
         "startChar": 8,
