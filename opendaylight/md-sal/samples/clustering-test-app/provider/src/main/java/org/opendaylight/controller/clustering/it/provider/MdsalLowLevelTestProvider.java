@@ -23,8 +23,10 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
@@ -456,6 +458,16 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed().withRpcError(error).build());
         }
 
+        try {
+            idIntsListener.tryFinishProcessing().get(120, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.RPC, "resource-denied-transport", "Unable to finish notification processing in 120 seconds.",
+                    "clustering-it", "clustering-it", e);
+            return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
+                    .withRpcError(error).build());
+        }
+
         dtclReg.close();
         dtclReg = null;
 
@@ -598,6 +610,16 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.RPC, "Ddtl missing.", "No DOMDataTreeListener registered.");
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDdtlOutput>failed().withRpcError(error).build());
+        }
+
+        try {
+            idIntsDdtl.tryFinishProcessing().get(120, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.RPC, "resource-denied-transport", "Unable to finish notification processing in 120 seconds.",
+                    "clustering-it", "clustering-it", e);
+            return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDdtlOutput>failed()
+                    .withRpcError(error).build());
         }
 
         ddtlReg.close();
