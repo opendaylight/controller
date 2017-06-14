@@ -23,6 +23,16 @@ import org.slf4j.LoggerFactory;
  * sync if it is behind by 'syncThreshold' commits.
  */
 public class SyncStatusTracker {
+    private static final class LeaderInfo {
+        final long minimumCommitIndex;
+        final String leaderId;
+
+        LeaderInfo(final String leaderId, final long minimumCommitIndex) {
+            this.leaderId = Preconditions.checkNotNull(leaderId);
+            this.minimumCommitIndex = minimumCommitIndex;
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SyncStatusTracker.class);
 
     private static final boolean IN_SYNC = true;
@@ -32,10 +42,8 @@ public class SyncStatusTracker {
     private final ActorRef actor;
     private final int syncThreshold;
 
-    // FIXME: what is this magic constant?
-    private long minimumExpectedIndex = -2L;
-    private String syncedLeaderId = null;
-    private boolean syncStatus = false;
+    private LeaderInfo syncTarget;
+    private boolean syncStatus;
 
     public SyncStatusTracker(final ActorRef actor, final String id, final int syncThreshold) {
         this.actor = Preconditions.checkNotNull(actor, "actor should not be null");
@@ -47,12 +55,11 @@ public class SyncStatusTracker {
     public void update(final String leaderId, final long leaderCommit, final long commitIndex) {
         Preconditions.checkNotNull(leaderId, "leaderId should not be null");
 
-        if (!leaderId.equals(syncedLeaderId)) {
-            minimumExpectedIndex = leaderCommit;
-            LOG.debug("Last sync leader {} does not match current leader {}, need to catch up to {}", syncedLeaderId,
-                leaderId, leaderCommit);
+        if (syncTarget == null || !leaderId.equals(syncTarget.leaderId)) {
+            LOG.debug("Last sync leader {} does not match current leader {}, need to catch up to {}",
+                syncTarget.leaderId, leaderId, leaderCommit);
             changeSyncStatus(NOT_IN_SYNC, true);
-            syncedLeaderId = leaderId;
+            syncTarget = new LeaderInfo(leaderId, leaderCommit);
             return;
         }
 
@@ -60,9 +67,9 @@ public class SyncStatusTracker {
         if (lag > syncThreshold) {
             LOG.debug("Lagging {} entries behind leader {}", lag, leaderId);
             changeSyncStatus(NOT_IN_SYNC, false);
-        } else if (commitIndex >= minimumExpectedIndex) {
+        } else if (commitIndex >= syncTarget.minimumCommitIndex) {
             LOG.debug("Lagging {} entries behind leader and reached {} (of expected {})", lag, leaderId, commitIndex,
-                minimumExpectedIndex);
+                syncTarget.minimumCommitIndex);
             changeSyncStatus(IN_SYNC, false);
         }
     }
