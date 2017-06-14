@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af78d9a_972bda2f",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/IdIntsListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-06-14T14:56:47Z",
+      "side": 1,
+      "message": "Is this needed? I was expecting something like awaitility [0].\n\n[0] https://github.com/awaitility/awaitility/wiki/Usage#example-6---advanced",
+      "range": {
+        "startLine": 79,
+        "startChar": 26,
+        "endLine": 79,
+        "endChar": 61
+      },
+      "revId": "026777aa8b271fc0f0e0228e5e82338e2e5a14d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_f71fbe07",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/IdIntsListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-06-14T14:56:47Z",
+      "side": 1,
+      "message": "I think the longest GC pause I have seen in ordinary run was 2.3 seconds, so I would write 3 or 4 here.",
+      "range": {
+        "startLine": 93,
+        "startChar": 81,
+        "endLine": 93,
+        "endChar": 82
+      },
+      "revId": "026777aa8b271fc0f0e0228e5e82338e2e5a14d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
