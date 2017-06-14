@@ -258,7 +258,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 LOG.debug("{}: timed out resolving shard {}, scheduling retry in {}", persistenceId(), shard,
                     RESOLVE_RETRY_DURATION, failure);
                 context().executeInActor(b -> {
-                    resolveConnection(shard, conn);
+                    refreshConnection(conn);
                     return b;
                 }, RESOLVE_RETRY_DURATION);
                 return;
@@ -352,26 +352,26 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             connectionsLock.unlockWrite(stamp);
         }
 
-        final Long shard = oldConn.cookie();
+        refreshConnection(conn);
+    }
+
+    private ConnectingClientConnection<T> createConnection(final Long shard) {
+        final ConnectingClientConnection<T> conn = new ConnectingClientConnection<>(context(), shard);
+        LOG.debug("{}: resolving shard {} connection {}", persistenceId(), shard, conn);
+        resolver().getBackendInfo(shard).whenComplete((backend, failure) -> context().executeInActor(behavior -> {
+            backendConnectFinished(shard, conn, backend, failure);
+            return behavior;
+        }));
+        return conn;
+    }
+
+    private void refreshConnection(final AbstractClientConnection<T> conn) {
+        final Long shard = conn.cookie();
         LOG.info("{}: refreshing backend for shard {}", persistenceId(), shard);
         resolver().refreshBackendInfo(shard, conn.getBackendInfo().get()).whenComplete(
             (backend, failure) -> context().executeInActor(behavior -> {
                 backendConnectFinished(shard, conn, backend, failure);
                 return behavior;
             }));
-    }
-
-    private ConnectingClientConnection<T> createConnection(final Long shard) {
-        final ConnectingClientConnection<T> conn = new ConnectingClientConnection<>(context(), shard);
-        resolveConnection(shard, conn);
-        return conn;
-    }
-
-    private void resolveConnection(final Long shard, final AbstractClientConnection<T> conn) {
-        LOG.debug("{}: resolving shard {} connection {}", persistenceId(), shard, conn);
-        resolver().getBackendInfo(shard).whenComplete((backend, failure) -> context().executeInActor(behavior -> {
-            backendConnectFinished(shard, conn, backend, failure);
-            return behavior;
-        }));
     }
 }
