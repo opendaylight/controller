@@ -41,18 +41,33 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     private CompletionStage<ShardBackendInfo> getBackendInfo(final long cookie) {
         Preconditions.checkArgument(cookie == 0);
 
-        ShardState local = state;
-        if (local == null) {
-            synchronized (this) {
-                local = state;
-                if (local == null) {
-                    local = resolveBackendInfo(shardName, 0);
-                    state = local;
-                }
-            }
+        final ShardState existing = state;
+        if (existing != null) {
+            return existing.getStage();
         }
 
-        return local.getStage();
+        synchronized (this) {
+            final ShardState recheck = state;
+            if (recheck != null) {
+                return recheck.getStage();
+            }
+
+            final ShardState newState = resolveBackendInfo(shardName, 0);
+            state = newState;
+
+            final CompletionStage<ShardBackendInfo> stage = newState.getStage();
+            stage.whenComplete((info, failure) -> {
+                if (failure != null) {
+                    synchronized (SimpleShardBackendResolver.this) {
+                        if (state == newState) {
+                            state = null;
+                        }
+                    }
+                }
+            });
+
+            return stage;
+        }
     }
 
     @Override
