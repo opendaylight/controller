@@ -60,6 +60,41 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>pax-exam</artifactId>
     </dependency>
     <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-features</artifactId>
+        <type>xml</type>
+
+        <!-- FIXME: remove version declaration and scope once odlparent has this -->
+        <version>${exam.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-extender-service</artifactId>
+
+        <!-- FIXME: remove version declaration and scope once odlparent has this -->
+        <version>${exam.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-inject</artifactId>
+
+        <!-- FIXME: remove version declaration and scope once odlparent has this -->
+        <version>${exam.version}</version>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-invoker-junit</artifactId>
+
+        <!-- FIXME: remove version declaration and scope once odlparent has this -->
+        <version>${exam.version}</version>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
         <groupId>org.ops4j.pax.url</groupId>
         <artifactId>pax-url-aether</artifactId>
     </dependency>
