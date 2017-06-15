@@ -22,6 +22,30 @@
       "revId": "d3c5dc3b0f6bea3fa1c2f964353b87d1a9fcaef8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af78d9a_355f7910",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-06-15T16:58:40Z",
+      "side": 1,
+      "message": "Please do, I wanted to make sure this method\u0027s contract to the rest of the code does not change.",
+      "parentUuid": "1af78d9a_b55c0927",
+      "range": {
+        "startLine": 373,
+        "startChar": 16,
+        "endLine": 373,
+        "endChar": 23
+      },
+      "revId": "d3c5dc3b0f6bea3fa1c2f964353b87d1a9fcaef8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
