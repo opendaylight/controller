@@ -20,13 +20,13 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
     private BundleContext bundleContext;
 
     public DistributedConfigDataStoreProviderModule(
-        org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-        org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+        final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+        final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DistributedConfigDataStoreProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver,
-            DistributedConfigDataStoreProviderModule oldModule, AutoCloseable oldInstance) {
+    public DistributedConfigDataStoreProviderModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver,
+            final DistributedConfigDataStoreProviderModule oldModule, final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -36,7 +36,7 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
     }
 
     @Override
-    public boolean canReuseInstance(AbstractDistributedConfigDataStoreProviderModule oldModule) {
+    public boolean canReuseInstance(final AbstractDistributedConfigDataStoreProviderModule oldModule) {
         return true;
     }
 
@@ -54,7 +54,7 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
         return newDatastoreContext(null);
     }
 
-    private static DatastoreContext newDatastoreContext(ConfigProperties inProps) {
+    private static DatastoreContext newDatastoreContext(final ConfigProperties inProps) {
         ConfigProperties props = inProps;
         if (props == null) {
             props = new ConfigProperties();
@@ -97,10 +97,11 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
                 .useTellBasedProtocol(props.getUseTellBasedProtocol())
+                .syncIndexThreshold(props.getSyncIndexThreshold().getValue())
                 .build();
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 }
