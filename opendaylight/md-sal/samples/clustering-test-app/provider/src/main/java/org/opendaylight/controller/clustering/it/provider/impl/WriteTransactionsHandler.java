@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.clustering.it.provider.impl;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -59,57 +61,55 @@ public class WriteTransactionsHandler implements Runnable {
     private static final int MAX_ITEM = 1048576;
 
     private static final QName ID_INTS =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints").intern();
     private static final QName ID_INT =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int").intern();
     private static final QName ID =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id").intern();
     private static final QName ITEM =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "item");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "item").intern();
     private static final QName NUMBER =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number").intern();
 
     public static final YangInstanceIdentifier ID_INTS_YID = YangInstanceIdentifier.of(ID_INTS);
-    public static final YangInstanceIdentifier ID_INT_YID = ID_INTS_YID.node(ID_INT);
+    public static final YangInstanceIdentifier ID_INT_YID = ID_INTS_YID.node(ID_INT).toOptimized();
 
-    private final DOMDataBroker domDataBroker;
-    private final Long timeToTake;
-    private final Long delay;
-    private final String id;
     private final WriteTransactionsInput input;
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final ArrayList<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
+    private final List<ListenableFuture<Void>> futures = new ArrayList<>();
     private final Set<Integer> usedValues = new HashSet<>();
 
     private RandomnessProvider random;
     private TxProvider txProvider;
 
-    private long startTime;
+    private final DOMDataBroker domDataBroker;
+    private final Long runtimeNanos;
+    private final Long delayNanos;
+    private final String id;
+
     private SettableFuture<RpcResult<WriteTransactionsOutput>> completionFuture;
+    private Stopwatch stopwatch;
 
     private long allTx = 0;
     private long insertTx = 0;
     private long deleteTx = 0;
     private ScheduledFuture<?> scheduledFuture;
-    private YangInstanceIdentifier idListWithKey;
+    private YangInstanceIdentifier idListItem;
 
     public WriteTransactionsHandler(final DOMDataBroker domDataBroker, final WriteTransactionsInput input) {
         this.domDataBroker = domDataBroker;
         this.input = input;
 
-        timeToTake = input.getSeconds() * SECOND_AS_NANO;
-        delay = SECOND_AS_NANO / input.getTransactionsPerSecond();
+        runtimeNanos = TimeUnit.SECONDS.toNanos(input.getSeconds());
+        delayNanos = SECOND_AS_NANO / input.getTransactionsPerSecond();
         id = input.getId();
     }
 
     @Override
     public void run() {
-        final long current = System.nanoTime();
-
-        futures.add(execWrite());
-
-        maybeFinish(current);
+        futures.add(execWrite(futures.size()));
+        maybeFinish();
     }
 
     public void start(final SettableFuture<RpcResult<WriteTransactionsOutput>> settableFuture) {
@@ -124,9 +124,9 @@ public class WriteTransactionsHandler implements Runnable {
         }
 
         if (ensureListExists(settableFuture) && fillInitialList(settableFuture)) {
-            startTime = System.nanoTime();
+            stopwatch = Stopwatch.createStarted();
             completionFuture = settableFuture;
-            scheduledFuture = executor.scheduleAtFixedRate(this, 0, delay, TimeUnit.NANOSECONDS);
+            scheduledFuture = executor.scheduleAtFixedRate(this, 0, delayNanos, TimeUnit.NANOSECONDS);
         } else {
             executor.shutdown();
         }
@@ -159,20 +159,19 @@ public class WriteTransactionsHandler implements Runnable {
                 .withChild(ImmutableNodes.mapNodeBuilder(ITEM).build())
                 .build();
 
-        idListWithKey = ID_INT_YID.node(entry.getIdentifier());
+        idListItem = ID_INT_YID.node(entry.getIdentifier());
         tx = txProvider.createTransaction();
-        tx.merge(LogicalDatastoreType.CONFIGURATION, idListWithKey, entry);
+        tx.merge(LogicalDatastoreType.CONFIGURATION, idListItem, entry);
 
         try {
             tx.submit().checkedGet(125, TimeUnit.SECONDS);
+            return true;
         } catch (final Exception e) {
             LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
             settableFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
             return false;
         }
-
-        return true;
     }
 
     private boolean fillInitialList(final SettableFuture<RpcResult<WriteTransactionsOutput>> settableFuture) {
@@ -180,27 +179,26 @@ public class WriteTransactionsHandler implements Runnable {
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ITEM);
 
-        final YangInstanceIdentifier itemListId = idListWithKey.node(ITEM);
+        final YangInstanceIdentifier itemListId = idListItem.node(ITEM);
         final DOMDataWriteTransaction tx = txProvider.createTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, itemListId, mapBuilder.build());
 
         try {
             tx.submit().checkedGet(125, TimeUnit.SECONDS);
+            return true;
         } catch (final Exception e) {
             LOG.warn("Unable to fill the initial item list.", e);
             settableFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
             return false;
         }
-
-        return true;
     }
 
-    private CheckedFuture<Void, TransactionCommitFailedException> execWrite() {
+    private ListenableFuture<Void> execWrite(final int offset) {
         final int i = random.nextInt(MAX_ITEM + 1);
 
         final YangInstanceIdentifier entryId =
-                idListWithKey.node(ITEM).node(new YangInstanceIdentifier.NodeIdentifierWithPredicates(ITEM, NUMBER, i));
+                idListItem.node(ITEM).node(new YangInstanceIdentifier.NodeIdentifierWithPredicates(ITEM, NUMBER, i));
 
         final DOMDataWriteTransaction tx = txProvider.createTransaction();
         allTx++;
@@ -219,11 +217,27 @@ public class WriteTransactionsHandler implements Runnable {
             usedValues.add(i);
         }
 
-        return tx.submit();
+        final ListenableFuture<Void> future = tx.submit();
+        if (LOG.isDebugEnabled()) {
+            Futures.addCallback(future, new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(final Void result) {
+                    LOG.debug("Future #{} completed successfully", offset);
+                }
+
+                @Override
+                public void onFailure(final Throwable cause) {
+                    LOG.debug("Future #{} failed", offset, cause);
+                }
+            });
+        }
+
+        return future;
     }
 
-    private void maybeFinish(final long current) {
-        if ((current - startTime) > timeToTake) {
+    private void maybeFinish() {
+        final long elapsed = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+        if (elapsed >= runtimeNanos) {
             LOG.debug("Reached max running time, waiting for futures to complete.");
             scheduledFuture.cancel(false);
 
@@ -245,17 +259,35 @@ public class WriteTransactionsHandler implements Runnable {
                         .withResult(output).build());
 
                 executor.shutdown();
+            } catch (final ExecutionException e) {
+                LOG.error("Write transactions failed.", e.getCause());
+
+                completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
+                        .withError(RpcError.ErrorType.APPLICATION, "Submit failed", e.getCause()).build());
+            } catch (InterruptedException | TimeoutException e) {
+                LOG.error("Write transactions failed.", e);
+
+                completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
+                        .withError(RpcError.ErrorType.APPLICATION,
+                                "Final submit was timed out by the test provider or was interrupted", e).build());
+
+                for (int i = 0; i < futures.size(); i++) {
+                    final ListenableFuture<Void> future = futures.get(i);
+
+                    try {
+                        future.get(0, TimeUnit.NANOSECONDS);
+                    } catch (final TimeoutException fe) {
+                        LOG.warn("Future #{}/{} not completed yet", i, futures.size());
+                    } catch (final ExecutionException fe) {
+                        LOG.warn("Future #{}/{} failed", i, futures.size(), e.getCause());
+                    } catch (final InterruptedException fe) {
+                        LOG.warn("Interrupted while examining future #{}/{}", i, futures.size(), e);
+                    }
+                }
             } catch (Exception exception) {
                 LOG.error("Write transactions failed.", exception);
                 completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
                         .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", exception).build());
-
-                for (int i = 0; i < futures.size(); i++) {
-                    final CheckedFuture<Void, TransactionCommitFailedException> future = futures.get(i);
-                    if (!future.isDone()) {
-                        LOG.warn("Future #{}/{} possibly hanged.", future, futures.size());
-                    }
-                }
 
                 executor.shutdown();
             }
