@@ -38,14 +38,14 @@ public class SyncStatusTracker {
     private static final boolean IN_SYNC = true;
     private static final boolean NOT_IN_SYNC = false;
 
-    private final String id;
+    private final long syncThreshold;
     private final ActorRef actor;
-    private final int syncThreshold;
+    private final String id;
 
     private LeaderInfo syncTarget;
     private boolean syncStatus;
 
-    public SyncStatusTracker(final ActorRef actor, final String id, final int syncThreshold) {
+    public SyncStatusTracker(final ActorRef actor, final String id, final long syncThreshold) {
         this.actor = Preconditions.checkNotNull(actor, "actor should not be null");
         this.id = Preconditions.checkNotNull(id, "id should not be null");
         Preconditions.checkArgument(syncThreshold >= 0, "syncThreshold should be greater than or equal to 0");
@@ -56,7 +56,7 @@ public class SyncStatusTracker {
         Preconditions.checkNotNull(leaderId, "leaderId should not be null");
 
         if (syncTarget == null || !leaderId.equals(syncTarget.leaderId)) {
-            LOG.debug("Last sync leader does not match current leader {}, need to catch up to {}",
+            LOG.debug("{}: Last sync leader does not match current leader {}, need to catch up to {}", id,
                 leaderId, leaderCommit);
             changeSyncStatus(NOT_IN_SYNC, true);
             syncTarget = new LeaderInfo(leaderId, leaderCommit);
@@ -65,11 +65,11 @@ public class SyncStatusTracker {
 
         final long lag = leaderCommit - commitIndex;
         if (lag > syncThreshold) {
-            LOG.debug("Lagging {} entries behind leader {}", lag, leaderId);
+            LOG.debug("{}: Lagging {} entries behind leader {}", id, lag, leaderId);
             changeSyncStatus(NOT_IN_SYNC, false);
         } else if (commitIndex >= syncTarget.minimumCommitIndex) {
-            LOG.debug("Lagging {} entries behind leader and reached {} (of expected {})", lag, leaderId, commitIndex,
-                syncTarget.minimumCommitIndex);
+            LOG.debug("{}: Lagging {} entries behind leader and reached {} (of expected {})", id, lag, leaderId,
+                commitIndex, syncTarget.minimumCommitIndex);
             changeSyncStatus(IN_SYNC, false);
         }
     }
@@ -79,7 +79,7 @@ public class SyncStatusTracker {
             actor.tell(new FollowerInitialSyncUpStatus(newSyncStatus, id), ActorRef.noSender());
             syncStatus = newSyncStatus;
         } else {
-            LOG.trace("No change in sync status of {}, dampening message", actor);
+            LOG.trace("{}: No change in sync status of, dampening message", id);
         }
     }
 }
