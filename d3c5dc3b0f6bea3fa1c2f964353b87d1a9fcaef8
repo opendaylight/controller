@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af78d9a_b55c0927",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-15T16:46:15Z",
+      "side": 1,
+      "message": "This shouldn\u0027t/can\u0027t be null (AE serialization would get an NPE). We should enforce it in AE constructor and annotate with @Nullable. I can follow up a patch for that.",
+      "range": {
+        "startLine": 373,
+        "startChar": 16,
+        "endLine": 373,
+        "endChar": 23
+      },
+      "revId": "d3c5dc3b0f6bea3fa1c2f964353b87d1a9fcaef8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
