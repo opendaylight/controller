@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.clustering.it.provider.impl;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -18,12 +19,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SplittableRandom;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
@@ -44,7 +43,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,65 +54,61 @@ public class ProduceTransactionsHandler implements Runnable {
     private static final int MAX_ITEM = 1048576;
 
     static final QName ID_INTS =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-ints").intern();
     public static final QName ID_INT =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id-int").intern();
     static final QName ID =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "id").intern();
     static final QName ITEM =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "item");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "item").intern();
     private static final QName NUMBER =
-            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number");
+            QName.create("tag:opendaylight.org,2017:controller:yang:lowlevel:target", "2017-02-15", "number".intern());
 
     public static final YangInstanceIdentifier ID_INTS_YID = YangInstanceIdentifier.of(ID_INTS);
-    public static final YangInstanceIdentifier ID_INT_YID = ID_INTS_YID.node(ID_INT);
-
-    private final DOMDataTreeService domDataTreeService;
-
-    private final long timeToTake;
-    private final long delay;
-    private final String id;
+    public static final YangInstanceIdentifier ID_INT_YID = ID_INTS_YID.node(ID_INT).toOptimized();
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ArrayList<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
     private final Set<Integer> usedValues = new HashSet<>();
     private final SplittableRandom random = new SplittableRandom();
 
-    private long startTime;
+    private final DOMDataTreeService domDataTreeService;
+    private final long runtimeNanos;
+    private final long delayNanos;
+    private final String id;
+
     private SettableFuture<RpcResult<ProduceTransactionsOutput>> completionFuture;
+    private Stopwatch stopwatch;
 
     private long allTx = 0;
     private long insertTx = 0;
     private long deleteTx = 0;
     private ScheduledFuture<?> scheduledFuture;
     private DOMDataTreeProducer itemProducer;
-    private YangInstanceIdentifier idListWithKey;
+    private DOMDataTreeIdentifier idListItem;
 
     public ProduceTransactionsHandler(final DOMDataTreeService domDataTreeService,
                                       final ProduceTransactionsInput input) {
 
         this.domDataTreeService = domDataTreeService;
 
-        timeToTake = input.getSeconds() * SECOND_AS_NANO;
-        delay = SECOND_AS_NANO / input.getTransactionsPerSecond();
+        runtimeNanos = TimeUnit.SECONDS.toNanos(input.getSeconds());
+        delayNanos = SECOND_AS_NANO / input.getTransactionsPerSecond();
         id = input.getId();
     }
 
     @Override
     public void run() {
-        final long current = System.nanoTime();
-
         futures.add(execWrite());
-
-        maybeFinish(current);
+        maybeFinish();
     }
 
     public void start(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
         completionFuture = settableFuture;
 
         if (fillInitialList(completionFuture)) {
-            startTime = System.nanoTime();
-            scheduledFuture = executor.scheduleAtFixedRate(this, 0, delay, TimeUnit.NANOSECONDS);
+            stopwatch = Stopwatch.createStarted();
+            scheduledFuture = executor.scheduleAtFixedRate(this, 0, delayNanos, TimeUnit.NANOSECONDS);
         } else {
             executor.shutdown();
         }
@@ -123,8 +117,7 @@ public class ProduceTransactionsHandler implements Runnable {
     private boolean fillInitialList(final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture) {
         LOG.debug("Filling the item list with initial values.");
 
-        final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ITEM);
-        idListWithKey = ID_INT_YID.node(new NodeIdentifierWithPredicates(ID_INT, ID, id));
+        final YangInstanceIdentifier idListWithKey = ID_INT_YID.node(new NodeIdentifierWithPredicates(ID_INT, ID, id));
 
         itemProducer = domDataTreeService.createProducer(
                 Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey)));
@@ -133,50 +126,52 @@ public class ProduceTransactionsHandler implements Runnable {
         final DOMDataTreeWriteCursor cursor =
                 tx.createCursor(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey));
 
-        final MapNode list = mapBuilder.build();
+
+        final MapNode list = ImmutableNodes.mapNodeBuilder(ITEM).build();
         cursor.write(list.getIdentifier(), list);
         cursor.close();
 
+        idListItem = new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
+            idListWithKey.node(list.getIdentifier()).toOptimized());
+
         try {
             tx.submit().checkedGet(125, TimeUnit.SECONDS);
+            return true;
         } catch (final Exception e) {
             LOG.warn("Unable to fill the initial item list.", e);
             settableFuture.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
-
-            try {
-                itemProducer.close();
-            } catch (final DOMDataTreeProducerException exception) {
-                LOG.warn("Failure while closing producer.", exception);
-            }
-            return false;
         }
 
-        return true;
+        try {
+            itemProducer.close();
+        } catch (final DOMDataTreeProducerException exception) {
+            LOG.warn("Failure while closing producer.", exception);
+        }
+        return false;
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> execWrite() {
         final int i = random.nextInt(MAX_ITEM + 1);
-
-        final YangInstanceIdentifier entryId =
-                idListWithKey.node(ITEM).node(new NodeIdentifierWithPredicates(ITEM, NUMBER, i));
-
         final DOMDataTreeCursorAwareTransaction tx = itemProducer.createTransaction(false);
-        final DOMDataTreeWriteCursor cursor = tx.createCursor(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey.node(ITEM)));
+        final DOMDataTreeWriteCursor cursor = tx.createCursor(idListItem);
+
         allTx++;
 
+        final NodeIdentifierWithPredicates entryId = new NodeIdentifierWithPredicates(ITEM, NUMBER, i);
         if (usedValues.contains(i)) {
             LOG.debug("Deleting item: {}", i);
             deleteTx++;
-            cursor.delete(entryId.getLastPathArgument());
+            cursor.delete(entryId);
             usedValues.remove(i);
 
         } else {
             LOG.debug("Inserting item: {}", i);
             insertTx++;
-            final MapEntryNode entry = ImmutableNodes.mapEntry(ITEM, NUMBER, i);
-            cursor.write(entryId.getLastPathArgument(), entry);
+
+            final MapEntryNode entry = ImmutableNodes.mapEntryBuilder().withNodeIdentifier(entryId)
+                    .withChild(ImmutableNodes.leafNode(NUMBER, i)).build();
+            cursor.write(entryId, entry);
             usedValues.add(i);
         }
 
@@ -185,8 +180,9 @@ public class ProduceTransactionsHandler implements Runnable {
         return tx.submit();
     }
 
-    private void maybeFinish(final long current) {
-        if ((current - startTime) > timeToTake) {
+    private void maybeFinish() {
+        final long elapsed = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+        if (elapsed >= runtimeNanos) {
             LOG.debug("Reached max running time, waiting for futures to complete.");
             scheduledFuture.cancel(false);
 
