@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af78d9a_1a20aa48",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-15T14:34:04Z",
+      "side": 1,
+      "message": "This isn\u0027t a public API and all users (blueprint XML) are in this bundle so can\u0027t we just remove this method?",
+      "revId": "cede1c2e693d5a35b6e5df220513b4af0aec5e09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
