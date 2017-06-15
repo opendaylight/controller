@@ -12,7 +12,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-artifacts</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.4-Boron-SR4</version>
     <packaging>pom</packaging>
 
     <dependencyManagement>
@@ -198,12 +198,12 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-access-api</artifactId>
-                <version>1.0.4-SNAPSHOT</version>
+                <version>1.0.4-Boron-SR4</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-access-client</artifactId>
-                <version>1.0.4-SNAPSHOT</version>
+                <version>1.0.4-Boron-SR4</version>
             </dependency>
 
             <!-- Toaster -->

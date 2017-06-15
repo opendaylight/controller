@@ -5,14 +5,14 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.7.4-SNAPSHOT</version>
+    <version>1.7.4-Boron-SR4</version>
     <relativePath>../commons/opendaylight</relativePath>
   </parent>
 
   <artifactId>blueprint</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-  <version>0.5.4-SNAPSHOT</version>
+  <version>0.5.4-Boron-SR4</version>
 
   <dependencies>
     <dependency>

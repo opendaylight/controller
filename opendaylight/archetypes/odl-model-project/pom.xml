@@ -5,11 +5,11 @@
   <parent>
      <groupId>org.opendaylight.controller.archetypes</groupId>
      <artifactId>archetypes-parent</artifactId>
-     <version>0.4.4-SNAPSHOT</version>
+     <version>0.4.4-Boron-SR4</version>
   </parent>
 
   <artifactId>odl-model-project</artifactId>
-  <version>1.4.4-SNAPSHOT</version>
+  <version>1.4.4-Boron-SR4</version>
   <packaging>maven-archetype</packaging>
   <name>odl-model-project</name>
 

@@ -12,12 +12,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.7.4-SNAPSHOT</version>
+    <version>1.7.4-Boron-SR4</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>karaf-aggregator</artifactId>
-  <version>1.3.4-SNAPSHOT</version>
+  <version>1.3.4-Boron-SR4</version>
   <packaging>pom</packaging>
   <modules>
     <module>karaf-parent</module>

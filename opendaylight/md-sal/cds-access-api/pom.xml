@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>bundle-parent</artifactId>
-        <version>1.7.4-SNAPSHOT</version>
+        <version>1.7.4-Boron-SR4</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>cds-access-api</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4-Boron-SR4</version>
     <packaging>bundle</packaging>
 
     <dependencyManagement>
@@ -19,14 +19,14 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yangtools-artifacts</artifactId>
-                <version>1.0.4-SNAPSHOT</version>
+                <version>1.0.4-Boron-SR4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.4.4-SNAPSHOT</version>
+                <version>1.4.4-Boron-SR4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.4-Boron-SR4</version>
   </parent>
   <artifactId>sal-common-impl</artifactId>
   <packaging>bundle</packaging>
