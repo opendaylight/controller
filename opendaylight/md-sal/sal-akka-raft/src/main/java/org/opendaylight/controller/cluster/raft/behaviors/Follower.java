@@ -157,7 +157,6 @@ public class Follower extends AbstractRaftActorBehavior {
         leaderId = appendEntries.getLeaderId();
         leaderPayloadVersion = appendEntries.getPayloadVersion();
 
-        updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
         // First check if the logs are in sync or not
         long lastIndex = lastIndex();
 
@@ -169,7 +168,7 @@ public class Follower extends AbstractRaftActorBehavior {
                     lastTerm(), context.getPayloadVersion());
 
             log.info("{}: Follower is out-of-sync so sending negative reply: {}", logName(), reply);
-
+            updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
             sender.tell(reply, actor());
             return this;
         }
@@ -217,6 +216,7 @@ public class Follower extends AbstractRaftActorBehavior {
                             // follower's log and state.
 
                             log.info("{}: Could not remove entries - sending reply to force snapshot", logName());
+                            updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
                             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                     lastTerm(), context.getPayloadVersion(), true), actor());
                             return this;
@@ -224,6 +224,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
                         break;
                     } else {
+                        updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
                         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                 lastTerm(), context.getPayloadVersion(), true), actor());
                         return this;
@@ -294,6 +295,7 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         // Reply to the leader before applying any previous state so as not to hold up leader consensus.
+        updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
         sender.tell(reply, actor());
 
         // If commitIndex > lastApplied: increment lastApplied, apply
