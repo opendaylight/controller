@@ -131,4 +131,12 @@ public interface ConfigParams {
      * @return the threshold in terms of number of bytes.
      */
     int getFileBackedStreamingThreshold();
+
+    /**
+     * Returns the threshold in terms of number journal entries that we can lag behind a leader until we raise a
+     * 'not synced' transition.
+     *
+     * @return the threshold in terms of number of journal entries.
+     */
+    long getSyncIndexThreshold();
 }

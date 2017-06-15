@@ -49,6 +49,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public static final FiniteDuration HEART_BEAT_INTERVAL =
         new FiniteDuration(100, TimeUnit.MILLISECONDS);
 
+    private final Supplier<RaftPolicy> policySupplier = Suppliers.memoize(this::getPolicy);
+
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
@@ -64,53 +66,53 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private long electionTimeoutFactor = 2;
     private String customRaftPolicyImplementationClass;
 
-    private final Supplier<RaftPolicy> policySupplier = Suppliers.memoize(new PolicySupplier());
-
     private PeerAddressResolver peerAddressResolver = NoopPeerAddressResolver.INSTANCE;
 
     private String tempFileDirectory = "";
 
     private int fileBackedStreamingThreshold = 128 * MEGABYTE;
 
-    public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
+    private long syncIndexThreshold = 10;
+
+    public void setHeartBeatInterval(final FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
         electionTimeOutInterval = null;
     }
 
-    public void setSnapshotBatchCount(long snapshotBatchCount) {
+    public void setSnapshotBatchCount(final long snapshotBatchCount) {
         this.snapshotBatchCount = snapshotBatchCount;
     }
 
-    public void setSnapshotDataThresholdPercentage(int snapshotDataThresholdPercentage) {
+    public void setSnapshotDataThresholdPercentage(final int snapshotDataThresholdPercentage) {
         this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
     }
 
-    public void setSnapshotChunkSize(int snapshotChunkSize) {
+    public void setSnapshotChunkSize(final int snapshotChunkSize) {
         this.snapshotChunkSize = snapshotChunkSize;
     }
 
-    public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
+    public void setJournalRecoveryLogBatchSize(final int journalRecoveryLogBatchSize) {
         this.journalRecoveryLogBatchSize = journalRecoveryLogBatchSize;
     }
 
-    public void setIsolatedLeaderCheckInterval(FiniteDuration isolatedLeaderCheckInterval) {
+    public void setIsolatedLeaderCheckInterval(final FiniteDuration isolatedLeaderCheckInterval) {
         this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval.toMillis();
     }
 
-    public void setElectionTimeoutFactor(long electionTimeoutFactor) {
+    public void setElectionTimeoutFactor(final long electionTimeoutFactor) {
         this.electionTimeoutFactor = electionTimeoutFactor;
         electionTimeOutInterval = null;
     }
 
-    public void setTempFileDirectory(String tempFileDirectory) {
+    public void setTempFileDirectory(final String tempFileDirectory) {
         this.tempFileDirectory = tempFileDirectory;
     }
 
-    public void setFileBackedStreamingThreshold(int fileBackedStreamingThreshold) {
+    public void setFileBackedStreamingThreshold(final int fileBackedStreamingThreshold) {
         this.fileBackedStreamingThreshold = fileBackedStreamingThreshold;
     }
 
-    public void setCustomRaftPolicyImplementationClass(String customRaftPolicyImplementationClass) {
+    public void setCustomRaftPolicyImplementationClass(final String customRaftPolicyImplementationClass) {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
     }
 
@@ -184,37 +186,45 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         return fileBackedStreamingThreshold;
     }
 
-    private class PolicySupplier implements Supplier<RaftPolicy> {
-        @Override
-        @SuppressWarnings("checkstyle:IllegalCatch")
-        public RaftPolicy get() {
-            if (Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)) {
-                LOG.debug("No custom RaftPolicy specified. Using DefaultRaftPolicy");
-                return DefaultRaftPolicy.INSTANCE;
-            }
-
-            try {
-                String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
-                LOG.info("Trying to use custom RaftPolicy {}", className);
-                return (RaftPolicy)Class.forName(className).newInstance();
-            } catch (Exception e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.error("Could not create custom raft policy, will stick with default", e);
-                } else {
-                    LOG.error("Could not create custom raft policy, will stick with default : cause = {}",
-                            e.getMessage());
-                }
-            }
-            return DefaultRaftPolicy.INSTANCE;
-        }
-    }
 
     @Override
     public PeerAddressResolver getPeerAddressResolver() {
         return peerAddressResolver;
     }
 
-    public void setPeerAddressResolver(@Nonnull PeerAddressResolver peerAddressResolver) {
+    public void setPeerAddressResolver(@Nonnull final PeerAddressResolver peerAddressResolver) {
         this.peerAddressResolver = Preconditions.checkNotNull(peerAddressResolver);
+    }
+
+    @Override
+    public long getSyncIndexThreshold() {
+        return syncIndexThreshold;
+    }
+
+    public void setSyncIndexThreshold(final long syncIndexThreshold) {
+        Preconditions.checkArgument(syncIndexThreshold >= 0);
+        this.syncIndexThreshold = syncIndexThreshold;
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private RaftPolicy getPolicy() {
+        if (Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)) {
+            LOG.debug("No custom RaftPolicy specified. Using DefaultRaftPolicy");
+            return DefaultRaftPolicy.INSTANCE;
+        }
+
+        try {
+            String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
+            LOG.info("Trying to use custom RaftPolicy {}", className);
+            return (RaftPolicy)Class.forName(className).newInstance();
+        } catch (Exception e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.error("Could not create custom raft policy, will stick with default", e);
+            } else {
+                LOG.error("Could not create custom raft policy, will stick with default : cause = {}",
+                    e.getMessage());
+            }
+        }
+        return DefaultRaftPolicy.INSTANCE;
     }
 }

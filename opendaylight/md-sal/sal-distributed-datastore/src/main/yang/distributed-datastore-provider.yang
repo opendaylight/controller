@@ -248,6 +248,14 @@ module distributed-datastore-provider {
                 is the threshold in terms of number of megabytes before it should switch from storing in memory to
                 buffering to a file.";
         }
+
+        leaf sync-index-threshold {
+            default 10;
+            type non-zero-uint32-type;
+            description "Permitted synchronization lag, expressed in terms of RAFT entry count. It a follower's
+                         commitIndex trails the leader's journal by more than this amount of entries the follower
+                         is considered to be out-of-sync.";
+        }
     }
 
     // Augments the 'configuration' choice node under modules/module.

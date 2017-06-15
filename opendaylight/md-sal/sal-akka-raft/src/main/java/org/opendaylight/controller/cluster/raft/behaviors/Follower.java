@@ -51,8 +51,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * </ul>
  */
 public class Follower extends AbstractRaftActorBehavior {
-    private static final int SYNC_THRESHOLD = 10;
-
     private static final long MAX_ELECTION_TIMEOUT_FACTOR = 18;
 
     private final SyncStatusTracker initialSyncStatusTracker;
@@ -62,16 +60,18 @@ public class Follower extends AbstractRaftActorBehavior {
     private String leaderId;
     private short leaderPayloadVersion;
 
-    public Follower(RaftActorContext context) {
+    public Follower(final RaftActorContext context) {
         this(context, null, (short)-1);
     }
 
-    public Follower(RaftActorContext context, String initialLeaderId, short initialLeaderPayloadVersion) {
+    public Follower(final RaftActorContext context, final String initialLeaderId,
+            final short initialLeaderPayloadVersion) {
         super(context, RaftState.Follower);
         this.leaderId = initialLeaderId;
         this.leaderPayloadVersion = initialLeaderPayloadVersion;
 
-        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
+        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), context.getConfigParams()
+            .getSyncIndexThreshold());
 
         if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
             actor().tell(TimeoutNow.INSTANCE, actor());
@@ -96,7 +96,7 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    protected final void setLeaderPayloadVersion(short leaderPayloadVersion) {
+    protected final void setLeaderPayloadVersion(final short leaderPayloadVersion) {
         this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
@@ -108,7 +108,7 @@ public class Follower extends AbstractRaftActorBehavior {
         lastLeaderMessageTimer.start();
     }
 
-    private boolean isLogEntryPresent(long index) {
+    private boolean isLogEntryPresent(final long index) {
         if (context.getReplicatedLog().isInSnapshot(index)) {
             return true;
         }
@@ -118,12 +118,12 @@ public class Follower extends AbstractRaftActorBehavior {
 
     }
 
-    private void updateInitialSyncStatus(long currentLeaderCommit, String newLeaderId) {
+    private void updateInitialSyncStatus(final long currentLeaderCommit, final String newLeaderId) {
         initialSyncStatusTracker.update(newLeaderId, currentLeaderCommit, context.getCommitIndex());
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries) {
+    protected RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
 
         int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
         if (log.isTraceEnabled()) {
@@ -317,7 +317,7 @@ public class Follower extends AbstractRaftActorBehavior {
         return this;
     }
 
-    private boolean isOutOfSync(AppendEntries appendEntries) {
+    private boolean isOutOfSync(final AppendEntries appendEntries) {
 
         long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
         boolean prevEntryPresent = isLogEntryPresent(appendEntries.getPrevLogIndex());
@@ -371,19 +371,19 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply) {
+    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
+        final AppendEntriesReply appendEntriesReply) {
         return this;
     }
 
     @Override
-    protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply) {
+    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender,
+        final RequestVoteReply requestVoteReply) {
         return this;
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         if (message instanceof ElectionTimeout || message instanceof TimeoutNow) {
             return handleElectionTimeout(message);
         }
@@ -419,7 +419,7 @@ public class Follower extends AbstractRaftActorBehavior {
         return super.handleMessage(sender, rpc);
     }
 
-    private RaftActorBehavior handleElectionTimeout(Object message) {
+    private RaftActorBehavior handleElectionTimeout(final Object message) {
         // If the message is ElectionTimeout, verify we haven't actually seen a message from the leader
         // during the election timeout interval. It may that the election timer expired b/c this actor
         // was busy and messages got delayed, in which case leader messages would be backed up in the
@@ -512,7 +512,7 @@ public class Follower extends AbstractRaftActorBehavior {
         return false;
     }
 
-    private void handleInstallSnapshot(final ActorRef sender, InstallSnapshot installSnapshot) {
+    private void handleInstallSnapshot(final ActorRef sender, final InstallSnapshot installSnapshot) {
 
         log.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
 
