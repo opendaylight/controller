@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -321,55 +322,62 @@ public class Follower extends AbstractRaftActorBehavior {
 
     private boolean isOutOfSync(final AppendEntries appendEntries) {
 
-        long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
-        boolean prevEntryPresent = isLogEntryPresent(appendEntries.getPrevLogIndex());
-        long lastIndex = lastIndex();
-        int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
-        boolean outOfSync = true;
-
+        final long lastIndex = lastIndex();
         if (lastIndex == -1 && appendEntries.getPrevLogIndex() != -1) {
 
-            // The follower's log is out of sync because the leader does have
-            // an entry at prevLogIndex and this follower has no entries in
-            // it's log.
+            // The follower's log is out of sync because the leader does have an entry at prevLogIndex and this
+            // follower has no entries in it's log.
 
-            log.info("{}: The followers log is empty and the senders prevLogIndex is {}",
-                        logName(), appendEntries.getPrevLogIndex());
-        } else if (lastIndex > -1 && appendEntries.getPrevLogIndex() != -1 && !prevEntryPresent) {
-
-            // The follower's log is out of sync because the Leader's
-            // prevLogIndex entry was not found in it's log
-
-            log.info("{}: The log is not empty but the prevLogIndex {} was not found in it - "
-                    + "lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
-                    context.getReplicatedLog().getSnapshotIndex());
-        } else if (lastIndex > -1 && prevEntryPresent && prevLogTerm != appendEntries.getPrevLogTerm()) {
-
-            // The follower's log is out of sync because the Leader's
-            // prevLogIndex entry does exist in the follower's log but it has
-            // a different term in it
-
-            log.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append entries"
-                      + "prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(),
-                      prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
-                      context.getReplicatedLog().getSnapshotIndex());
-        } else if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
-                && appendEntries.getReplicatedToAllIndex() != -1
-                && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
-            // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
-            // the previous entry in it's in-memory journal
-
-            log.info("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the"
-                    + " in-memory journal", logName(), appendEntries.getReplicatedToAllIndex());
-        } else if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
-                && appendEntries.getReplicatedToAllIndex() != -1 && numLogEntries > 0
-                && !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)) {
-            log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
-                    + " in-memory journal", logName(), appendEntries.getEntries().get(0).getIndex() - 1);
-        } else {
-            outOfSync = false;
+            log.info("{}: The followers log is empty and the senders prevLogIndex is {}", logName(),
+                appendEntries.getPrevLogIndex());
+            return true;
         }
-        return outOfSync;
+
+        if (lastIndex > -1) {
+            if (isLogEntryPresent(appendEntries.getPrevLogIndex())) {
+                final long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
+                if (prevLogTerm != appendEntries.getPrevLogTerm()) {
+
+                    // The follower's log is out of sync because the Leader's prevLogIndex entry does exist
+                    // in the follower's log but it has a different term in it
+
+                    log.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append" +
+                            " entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(),
+                            appendEntries.getPrevLogIndex(), prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
+                            context.getReplicatedLog().getSnapshotIndex());
+                    return true;
+                }
+            } else if (appendEntries.getPrevLogIndex() != -1) {
+
+                // The follower's log is out of sync because the Leader's prevLogIndex entry was not found in it's log
+
+                log.info("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, "
+                        + "snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
+                        context.getReplicatedLog().getSnapshotIndex());
+                return true;
+            }
+        }
+
+        if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1) {
+            if (!isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
+                // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
+                // the previous entry in it's in-memory journal
+
+                log.info("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the " +
+                        "in-memory journal", logName(), appendEntries.getReplicatedToAllIndex());
+                return true;
+            }
+
+            final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
+            if (entries != null && entries.size() > 0 && !isLogEntryPresent(entries.get(0).getIndex() - 1)) {
+                log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
+                        + " in-memory journal", logName(), entries.get(0).getIndex() - 1);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
