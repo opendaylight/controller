@@ -157,7 +157,6 @@ public class Follower extends AbstractRaftActorBehavior {
         leaderId = appendEntries.getLeaderId();
         leaderPayloadVersion = appendEntries.getPayloadVersion();
 
-        updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
         // First check if the logs are in sync or not
         long lastIndex = lastIndex();
 
@@ -171,6 +170,7 @@ public class Follower extends AbstractRaftActorBehavior {
             log.info("{}: Follower is out-of-sync so sending negative reply: {}", logName(), reply);
 
             sender.tell(reply, actor());
+            updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
             return this;
         }
 
@@ -216,9 +216,11 @@ public class Follower extends AbstractRaftActorBehavior {
                             // so we must send back a reply to force a snapshot to completely re-sync the
                             // follower's log and state.
 
+
                             log.info("{}: Could not remove entries - sending reply to force snapshot", logName());
                             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                     lastTerm(), context.getPayloadVersion(), true), actor());
+                            updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
                             return this;
                         }
 
@@ -226,6 +228,7 @@ public class Follower extends AbstractRaftActorBehavior {
                     } else {
                         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                 lastTerm(), context.getPayloadVersion(), true), actor());
+                        updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
                         return this;
                     }
                 }
@@ -314,6 +317,7 @@ public class Follower extends AbstractRaftActorBehavior {
             super.performSnapshotWithoutCapture(appendEntries.getReplicatedToAllIndex());
         }
 
+        updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
         return this;
     }
 
