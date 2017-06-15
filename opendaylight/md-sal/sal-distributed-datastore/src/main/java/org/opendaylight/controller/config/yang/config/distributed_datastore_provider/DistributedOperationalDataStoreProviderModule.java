@@ -20,14 +20,14 @@ public class DistributedOperationalDataStoreProviderModule
         extends AbstractDistributedOperationalDataStoreProviderModule {
     private BundleContext bundleContext;
 
-    public DistributedOperationalDataStoreProviderModule(ModuleIdentifier identifier,
-            DependencyResolver dependencyResolver) {
+    public DistributedOperationalDataStoreProviderModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DistributedOperationalDataStoreProviderModule(ModuleIdentifier identifier,
-            DependencyResolver dependencyResolver,DistributedOperationalDataStoreProviderModule oldModule,
-            AutoCloseable oldInstance) {
+    public DistributedOperationalDataStoreProviderModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver,final DistributedOperationalDataStoreProviderModule oldModule,
+            final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -37,7 +37,7 @@ public class DistributedOperationalDataStoreProviderModule
     }
 
     @Override
-    public boolean canReuseInstance(AbstractDistributedOperationalDataStoreProviderModule oldModule) {
+    public boolean canReuseInstance(final AbstractDistributedOperationalDataStoreProviderModule oldModule) {
         return true;
     }
 
@@ -55,7 +55,7 @@ public class DistributedOperationalDataStoreProviderModule
         return newDatastoreContext(null);
     }
 
-    private static DatastoreContext newDatastoreContext(OperationalProperties inProps) {
+    private static DatastoreContext newDatastoreContext(final OperationalProperties inProps) {
         OperationalProperties props = inProps;
         if (props == null) {
             props = new OperationalProperties();
@@ -98,10 +98,11 @@ public class DistributedOperationalDataStoreProviderModule
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
                 .useTellBasedProtocol(props.getUseTellBasedProtocol())
+                .syncIndexThreshold(props.getSyncIndexThreshold().getValue())
                 .build();
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
