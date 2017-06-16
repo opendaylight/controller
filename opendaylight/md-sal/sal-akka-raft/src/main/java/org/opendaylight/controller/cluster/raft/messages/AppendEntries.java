@@ -8,12 +8,14 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -45,18 +47,20 @@ public class AppendEntries extends AbstractRaftRPC {
 
     private final short payloadVersion;
 
-    public AppendEntries(long term, String leaderId, long prevLogIndex, long prevLogTerm,
-            List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex, short payloadVersion) {
+    public AppendEntries(long term, @Nonnull String leaderId, long prevLogIndex, long prevLogTerm,
+            @Nonnull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
+            short payloadVersion) {
         super(term);
-        this.leaderId = leaderId;
+        this.leaderId = Preconditions.checkNotNull(leaderId);
         this.prevLogIndex = prevLogIndex;
         this.prevLogTerm = prevLogTerm;
-        this.entries = entries;
+        this.entries = Preconditions.checkNotNull(entries);
         this.leaderCommit = leaderCommit;
         this.replicatedToAllIndex = replicatedToAllIndex;
         this.payloadVersion = payloadVersion;
     }
 
+    @Nonnull
     public String getLeaderId() {
         return leaderId;
     }
@@ -69,6 +73,7 @@ public class AppendEntries extends AbstractRaftRPC {
         return prevLogTerm;
     }
 
+    @Nonnull
     public List<ReplicatedLogEntry> getEntries() {
         return entries;
     }
