@@ -13,10 +13,6 @@
               <module>
                   <name>messagebus-app-impl</name>
                   <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">binding-impl:messagebus-app-impl</type>
-                  <binding-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">
-                      <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</type>
-                      <name>binding-osgi-broker</name>
-                  </binding-broker>
               </module>
           </modules>
           <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">

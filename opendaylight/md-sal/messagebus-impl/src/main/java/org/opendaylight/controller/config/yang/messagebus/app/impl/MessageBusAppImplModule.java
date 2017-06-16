@@ -9,16 +9,16 @@ package org.opendaylight.controller.config.yang.messagebus.app.impl;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.messagebus.app.impl.EventSourceTopology;
-import org.opendaylight.controller.messagebus.app.util.Providers;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.opendaylight.controller.messagebus.spi.EventSource;
+import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
+import org.opendaylight.controller.messagebus.spi.EventSourceRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MessageBusAppImplModule extends org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModule {
+@Deprecated
+public class MessageBusAppImplModule extends AbstractMessageBusAppImplModule {
     private static final Logger LOG = LoggerFactory.getLogger(MessageBusAppImplModule.class);
 
     private BundleContext bundleContext;
@@ -41,17 +41,23 @@ public class MessageBusAppImplModule extends org.opendaylight.controller.config.
     }
 
     @Override
-    protected void customValidation() {
-    }
-
-    @Override
     public java.lang.AutoCloseable createInstance() {
-        final ProviderContext bindingCtx = getBindingBrokerDependency().registerProvider(new Providers.BindingAware());
-        final DataBroker dataBroker = bindingCtx.getSALService(DataBroker.class);
-        final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
-        final EventSourceTopology eventSourceTopology = new EventSourceTopology(dataBroker, rpcRegistry);
-        LOG.info("Messagebus initialized");
-        return eventSourceTopology;
-    }
+        final WaitingServiceTracker<EventSourceRegistry> tracker =
+                WaitingServiceTracker.create(EventSourceRegistry.class, bundleContext);
+        final EventSourceRegistry service = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
+        return new EventSourceRegistry() {
+            @Override
+            public void close() {
+                // We need to close the WaitingServiceTracker however we don't want to close the actual
+                // service instance because its life-cycle is controlled via blueprint.
+                tracker.close();
+            }
+
+            @Override
+            public <T extends EventSource> EventSourceRegistration<T> registerEventSource(T eventSource) {
+                return service.registerEventSource(eventSource);
+            }
+        };
+    }
 }

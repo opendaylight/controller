@@ -22,7 +22,8 @@ import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 
-public class MessageBusAppImplModuleFactory extends org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModuleFactory {
+@Deprecated
+public class MessageBusAppImplModuleFactory extends AbstractMessageBusAppImplModuleFactory {
     @Override
     public Module createModule(String instanceName,
                                DependencyResolver dependencyResolver,
