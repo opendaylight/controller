@@ -126,7 +126,7 @@ public class Follower extends AbstractRaftActorBehavior {
     @Override
     protected RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
 
-        int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
+        int numLogEntries = appendEntries.getEntries().size();
         if (log.isTraceEnabled()) {
             log.trace("{}: handleAppendEntries: {}", logName(), appendEntries);
         } else if (log.isDebugEnabled() && numLogEntries > 0) {
@@ -174,10 +174,8 @@ public class Follower extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
-
-            log.debug("{}: Number of entries to be appended = {}", logName(),
-                        appendEntries.getEntries().size());
+        if (numLogEntries > 0) {
+            log.debug("{}: Number of entries to be appended = {}", logName(), numLogEntries);
 
             // 3. If an existing entry conflicts with a new one (same index
             // but different terms), delete the existing entry and all that
@@ -186,7 +184,7 @@ public class Follower extends AbstractRaftActorBehavior {
             if (context.getReplicatedLog().size() > 0) {
 
                 // Find the entry up until the one that is not in the follower's log
-                for (int i = 0;i < appendEntries.getEntries().size(); i++, addEntriesFrom++) {
+                for (int i = 0;i < numLogEntries; i++, addEntriesFrom++) {
                     ReplicatedLogEntry matchEntry = appendEntries.getEntries().get(i);
 
                     if (!isLogEntryPresent(matchEntry.getIndex())) {
@@ -246,15 +244,15 @@ public class Follower extends AbstractRaftActorBehavior {
             // purged from the persisted log as well.
             final AtomicBoolean shouldCaptureSnapshot = new AtomicBoolean(false);
             final Procedure<ReplicatedLogEntry> appendAndPersistCallback = logEntry -> {
-                final ReplicatedLogEntry lastEntryToAppend = appendEntries.getEntries().get(
-                        appendEntries.getEntries().size() - 1);
+                final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
+                final ReplicatedLogEntry lastEntryToAppend = entries.get(entries.size() - 1);
                 if (shouldCaptureSnapshot.get() && logEntry == lastEntryToAppend) {
                     context.getSnapshotManager().capture(context.getReplicatedLog().last(), getReplicatedToAllIndex());
                 }
             };
 
             // 4. Append any new entries not already in the log
-            for (int i = addEntriesFrom; i < appendEntries.getEntries().size(); i++) {
+            for (int i = addEntriesFrom; i < numLogEntries; i++) {
                 ReplicatedLogEntry entry = appendEntries.getEntries().get(i);
 
                 log.debug("{}: Append entry to log {}", logName(), entry.getData());
@@ -370,7 +368,7 @@ public class Follower extends AbstractRaftActorBehavior {
             }
 
             final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
-            if (entries != null && entries.size() > 0 && !isLogEntryPresent(entries.get(0).getIndex() - 1)) {
+            if (entries.size() > 0 && !isLogEntryPresent(entries.get(0).getIndex() - 1)) {
                 log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
                         + "in-memory journal", logName(), entries.get(0).getIndex() - 1);
                 return true;

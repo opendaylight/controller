@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
@@ -101,7 +102,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         // First set the receivers term to a high number (1000)
         context.getTermInformation().update(1000, "test");
 
-        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, null, 101, -1, (short)4);
+        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 101, -1,
+                (short)4);
 
         behavior = createBehavior(context);
 
@@ -329,7 +331,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, null, 1, -1, (short)0);
+        return new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 1, -1, (short)0);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {
