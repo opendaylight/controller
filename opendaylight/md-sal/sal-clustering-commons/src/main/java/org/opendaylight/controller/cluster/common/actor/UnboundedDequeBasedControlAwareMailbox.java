@@ -74,12 +74,12 @@ public class UnboundedDequeBasedControlAwareMailbox implements MailboxType,
         @Override
         public void enqueueFirst(ActorRef actor, Envelope envelope) {
             final Object message = envelope.message();
-            LOG.debug("enqueueFirst: actor {}, message type: {}", actor, message.getClass());
+            LOG.trace("enqueueFirst: actor {}, message type: {}", actor, message.getClass());
             if (message instanceof ControlMessage) {
-                LOG.debug("Adding {} to the ControlMessage queue", message.getClass());
+                LOG.trace("Adding {} to the ControlMessage queue", message.getClass());
                 controlQueue.addFirst(envelope);
             } else {
-                LOG.debug("Adding {} to the normal queue", message.getClass());
+                LOG.trace("Adding {} to the normal queue", message.getClass());
                 queue.addFirst(envelope);
             }
         }
