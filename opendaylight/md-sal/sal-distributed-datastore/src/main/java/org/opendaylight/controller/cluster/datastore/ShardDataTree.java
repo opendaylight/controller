@@ -787,8 +787,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     void startCanCommit(final SimpleShardDataTreeCohort cohort) {
-        final SimpleShardDataTreeCohort current = pendingTransactions.peek().cohort;
-        if (!cohort.equals(current)) {
+        final CommitEntry head = pendingTransactions.peek();
+        if (head == null) {
+            LOG.warn("{}: No transactions enqueued while attempting to start canCommit on {}", logContext, cohort);
+            return;
+        }
+        if (!cohort.equals(head.cohort)) {
             LOG.debug("{}: Transaction {} scheduled for canCommit step", logContext, cohort.getIdentifier());
             return;
         }
