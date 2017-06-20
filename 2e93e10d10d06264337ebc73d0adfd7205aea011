@@ -261,6 +261,30 @@
     },
     {
       "key": {
+        "uuid": "1af78d9a_3b263e17",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageAssembler.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-06-20T09:24:47Z",
+      "side": 1,
+      "message": "yup, package-private methods.",
+      "parentUuid": "1af78d9a_63a15da9",
+      "range": {
+        "startLine": 202,
+        "startChar": 4,
+        "endLine": 202,
+        "endChar": 11
+      },
+      "revId": "2e93e10d10d06264337ebc73d0adfd7205aea011",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af78d9a_832ba92f",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/messaging/MessageSliceIdentifier.java",
         "patchSetId": 23
