@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.or;
@@ -648,7 +647,8 @@ public class DistributedEntityOwnershipIntegrationTest {
         verify(leaderMockListener, timeout(20000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
 
         verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME, raftState -> {
-            assertNull("Custom RaftPolicy class name", raftState.getCustomRaftPolicyClassName());
+            assertEquals("Custom RaftPolicy class name",
+                    DisableElectionsRaftPolicy.class.getName(), raftState.getCustomRaftPolicyClassName());
             assertEquals("Peer count", 1, raftState.getPeerAddresses().keySet().size());
             assertThat("Peer Id", Iterables.<String>getLast(raftState.getPeerAddresses().keySet()),
                     org.hamcrest.CoreMatchers.containsString("member-1"));
