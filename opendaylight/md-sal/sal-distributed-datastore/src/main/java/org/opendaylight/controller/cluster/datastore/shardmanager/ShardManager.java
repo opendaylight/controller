@@ -18,6 +18,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Status;
 import akka.actor.SupervisorStrategy;
 import akka.actor.SupervisorStrategy.Directive;
+import akka.actor.Terminated;
 import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.MemberWeaklyUp;
 import akka.cluster.Member;
@@ -299,6 +300,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onGetShardRole((GetShardRole) message);
         } else if (message instanceof RunnableMessage) {
             ((RunnableMessage)message).run();
+        } else if (message instanceof Terminated) {
+            onTerminated((Terminated) message);
         } else {
             unknownMessage(message);
         }
@@ -532,6 +535,22 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         LOG.debug("{} : Local Shard replica for shard {} has been removed", persistenceId(), shardName);
         persistShardList();
+    }
+
+
+    private void onTerminated(final Terminated message) {
+        LOG.debug("{}: onTerminated: {}", persistenceId(), message);
+
+        final ShardIdentifier terminatedShardId = ShardIdentifier.fromShardIdString(message.getActor().path().name());
+        final String terminatedShardName = terminatedShardId.getShardName();
+
+        if (!localShards.containsKey(terminatedShardName)) {
+            return;
+        }
+
+        final ShardInformation terminatedShardInfo = localShards.get(terminatedShardName);
+        terminatedShardInfo.setActor(null);
+        removeShard(terminatedShardId);
     }
 
     private void onGetSnapshot() {
@@ -1138,8 +1157,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @VisibleForTesting
     protected ActorRef newShardActor(final ShardInformation info) {
-        return getContext().actorOf(info.newProps().withDispatcher(shardDispatcherPath),
-                info.getShardId().toString());
+        final ActorRef shardActor =
+                getContext().actorOf(info.newProps().withDispatcher(shardDispatcherPath), info.getShardId().toString());
+
+        getContext().watch(shardActor);
+        return shardActor;
     }
 
     private void findPrimary(final FindPrimary message) {
