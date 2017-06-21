@@ -10,7 +10,6 @@ package org.opendaylight.controller.sample.kitchen.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -73,23 +72,22 @@ public class KitchenServiceImpl extends AbstractMXBean
 
         // Then transform the RpcResults into 1.
 
-        return Futures.transform(combinedFutures,
-            (AsyncFunction<List<RpcResult<Void>>, RpcResult<Void>>) results -> {
-                boolean atLeastOneSucceeded = false;
-                Builder<RpcError> errorList = ImmutableList.builder();
-                for (RpcResult<Void> result : results) {
-                    if (result.isSuccessful()) {
-                        atLeastOneSucceeded = true;
-                    }
-
-                    if (result.getErrors() != null) {
-                        errorList.addAll(result.getErrors());
-                    }
+        return Futures.transformAsync(combinedFutures, results -> {
+            boolean atLeastOneSucceeded = false;
+            Builder<RpcError> errorList = ImmutableList.builder();
+            for (RpcResult<Void> result : results) {
+                if (result.isSuccessful()) {
+                    atLeastOneSucceeded = true;
                 }
 
-                return Futures.immediateFuture(RpcResultBuilder.<Void>status(atLeastOneSucceeded)
-                        .withRpcErrors(errorList.build()).build());
-            });
+                if (result.getErrors() != null) {
+                    errorList.addAll(result.getErrors());
+                }
+            }
+
+            return Futures.immediateFuture(RpcResultBuilder.<Void>status(atLeastOneSucceeded)
+                    .withRpcErrors(errorList.build()).build());
+        });
     }
 
     private ListenableFuture<RpcResult<Void>> makeEggs(EggsType eggsType) {

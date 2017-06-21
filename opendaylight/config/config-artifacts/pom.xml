@@ -73,11 +73,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>config-persister-feature4-adapter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>config-persister-file-adapter</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -810,7 +810,7 @@ public class ShardTest extends AbstractShardTest {
                 final Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
                 if (failure != null) {
-                    Throwables.propagateIfInstanceOf(failure.cause(), Exception.class);
+                    Throwables.throwIfInstanceOf(failure.cause(), Exception.class);
                     Throwables.propagate(failure.cause());
                 }
             }

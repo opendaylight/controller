@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.sharding;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -100,8 +101,9 @@ class PrefixedShardConfigWriter {
         final AsyncFunction<Boolean, Void> validateFunction = input -> cohort.preCommit();
         final AsyncFunction<Void, Void> prepareFunction = input -> cohort.commit();
 
-        final ListenableFuture<Void> prepareFuture = Futures.transform(cohort.canCommit(), validateFunction);
-        return Futures.transform(prepareFuture, prepareFunction);
+        final ListenableFuture<Void> prepareFuture = Futures.transformAsync(cohort.canCommit(), validateFunction,
+            MoreExecutors.directExecutor());
+        return Futures.transformAsync(prepareFuture, prepareFunction, MoreExecutors.directExecutor());
     }
 
     boolean checkDefaultIsPresent() {
