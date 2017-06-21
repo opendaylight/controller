@@ -17,6 +17,7 @@ public class Dispatchers {
     public static final String TXN_DISPATCHER_PATH = "txn-dispatcher";
     public static final String SHARD_DISPATCHER_PATH = "shard-dispatcher";
     public static final String NOTIFICATION_DISPATCHER_PATH = "notification-dispatcher";
+    public static final String SERIALIZATION_DISPATCHER_PATH = "serialization-dispatcher";
 
     private final akka.dispatch.Dispatchers dispatchers;
 
@@ -24,9 +25,11 @@ public class Dispatchers {
         Client(CLIENT_DISPATCHER_PATH),
         Transaction(TXN_DISPATCHER_PATH),
         Shard(SHARD_DISPATCHER_PATH),
-        Notification(NOTIFICATION_DISPATCHER_PATH);
+        Notification(NOTIFICATION_DISPATCHER_PATH),
+        Serialization(SERIALIZATION_DISPATCHER_PATH);
 
         private final String path;
+
         DispatcherType(String path) {
             this.path = path;
         }
