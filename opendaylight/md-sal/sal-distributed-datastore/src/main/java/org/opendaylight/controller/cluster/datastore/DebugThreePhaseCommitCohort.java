@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
@@ -32,26 +33,26 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
     private final TransactionIdentifier transactionId;
     private Logger log = LOG;
 
-    DebugThreePhaseCommitCohort(TransactionIdentifier transactionId, AbstractThreePhaseCommitCohort<?> delegate,
-            Throwable debugContext) {
+    DebugThreePhaseCommitCohort(final TransactionIdentifier transactionId,
+            final AbstractThreePhaseCommitCohort<?> delegate, final Throwable debugContext) {
         this.delegate = Preconditions.checkNotNull(delegate);
         this.debugContext = Preconditions.checkNotNull(debugContext);
         this.transactionId = Preconditions.checkNotNull(transactionId);
     }
 
-    private <V> ListenableFuture<V> addFutureCallback(ListenableFuture<V> future) {
+    private <V> ListenableFuture<V> addFutureCallback(final ListenableFuture<V> future) {
         Futures.addCallback(future, new FutureCallback<V>() {
             @Override
-            public void onSuccess(V result) {
+            public void onSuccess(final V result) {
                 // no-op
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 log.warn("Transaction {} failed with error \"{}\" - was allocated in the following context",
                         transactionId, failure, debugContext);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return future;
     }
@@ -83,7 +84,7 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
     }
 
     @VisibleForTesting
-    void setLogger(Logger log) {
+    void setLogger(final Logger log) {
         this.log = log;
     }
 }

@@ -12,11 +12,11 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
@@ -56,7 +56,7 @@ final class RpcInvoker extends AbstractUntypedActor {
         final ActorRef sender = getSender();
         final ActorRef self = self();
 
-        final CheckedFuture<DOMRpcResult, DOMRpcException> future;
+        final ListenableFuture<DOMRpcResult> future;
         try {
             future = rpcService.invokeRpc(schemaPath, msg.getInputNormalizedNode());
         } catch (final RuntimeException e) {
@@ -93,6 +93,6 @@ final class RpcInvoker extends AbstractUntypedActor {
                     msg.getRpc(), Throwables.getRootCause(failure));
                 sender.tell(new akka.actor.Status.Failure(failure), self);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 }

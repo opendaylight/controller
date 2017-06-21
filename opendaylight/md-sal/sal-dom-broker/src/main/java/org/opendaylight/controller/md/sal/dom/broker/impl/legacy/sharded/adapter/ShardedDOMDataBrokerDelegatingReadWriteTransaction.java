@@ -16,11 +16,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.Queue;
@@ -116,7 +116,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
 
     @Override
     public ListenableFuture<RpcResult<TransactionStatus>> commit() {
-        return Futures.transform(submit(), (AsyncFunction<Void, RpcResult<TransactionStatus>>) input -> SUCCESS_FUTURE);
+        return Futures.transformAsync(submit(), input -> SUCCESS_FUTURE, MoreExecutors.directExecutor());
     }
 
     @Override
@@ -140,7 +140,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
             public void onFailure(final Throwable t) {
                 readResult.setException(t);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return Futures.makeChecked(readResult, ReadFailedException.MAPPER);
     }

@@ -12,11 +12,10 @@ import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -43,14 +42,14 @@ public class ClientSnapshotTest extends AbstractClientHandleTest<ClientSnapshot>
 
     @Test
     public void testExists() throws Exception {
-        final CheckedFuture<Boolean, ReadFailedException> exists = getHandle().exists(PATH);
+        final ListenableFuture<Boolean> exists = getHandle().exists(PATH);
         verify(getDataTreeSnapshot()).readNode(PATH);
         Assert.assertFalse(getWithTimeout(exists));
     }
 
     @Test
     public void testRead() throws Exception {
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> exists = getHandle().read(PATH);
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> exists = getHandle().read(PATH);
         verify(getDataTreeSnapshot()).readNode(PATH);
         Assert.assertFalse(getWithTimeout(exists).isPresent());
     }

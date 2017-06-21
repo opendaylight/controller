@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.common.impl.service;
 
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -25,6 +24,6 @@ public abstract class AbstractDataTransaction {
             Futures.immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
 
     public static ListenableFuture<RpcResult<TransactionStatus>> convertToLegacyCommitFuture(final CheckedFuture<Void,TransactionCommitFailedException> from) {
-        return Futures.transform(from, (AsyncFunction<Void, RpcResult<TransactionStatus>>) input -> SUCCESS_FUTURE);
+        return Futures.transformAsync(from, input -> SUCCESS_FUTURE);
     }
 }
