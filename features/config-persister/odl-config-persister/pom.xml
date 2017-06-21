@@ -81,7 +81,7 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
-            <version>${karaf4.version}</version>
+            <version>${karaf.version}</version>
         </dependency>
     </dependencies>
 
