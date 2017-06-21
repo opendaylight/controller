@@ -1,47 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>features-parent</artifactId>
-    <version>1.9.0</version>
-    <relativePath/>
-  </parent>
+<!--
+ Copyright © 2016, 2017 Red Hat, Inc. and others.
 
-  <groupId>org.opendaylight.controller</groupId>
-  <artifactId>features-protocol-framework</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <config.version>0.7.0-SNAPSHOT</config.version>
-  </properties>
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>feature-repo-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-config</artifactId>
-      <classifier>features</classifier>
-      <version>${config.version}</version>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-config-netty</artifactId>
-      <version>${config.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>protocol-framework</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
-  <scm>
-    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>features-protocol-framework</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+    <packaging>feature</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-protocol-framework</artifactId>
+            <version>0.10.0-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+    </dependencies>
+
 </project>

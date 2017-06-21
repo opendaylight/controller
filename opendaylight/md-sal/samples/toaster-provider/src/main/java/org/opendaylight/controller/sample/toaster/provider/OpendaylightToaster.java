@@ -16,7 +16,6 @@ import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICAT
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -229,7 +228,7 @@ public class OpendaylightToaster extends AbstractMXBean
         ListenableFuture<Optional<Toaster>> readFuture = tx.read(OPERATIONAL, TOASTER_IID);
 
         final ListenableFuture<Void> commitFuture =
-            Futures.transform(readFuture, (AsyncFunction<Optional<Toaster>, Void>) toasterData -> {
+            Futures.transformAsync(readFuture, toasterData -> {
                 ToasterStatus toasterStatus = ToasterStatus.Up;
                 if (toasterData.isPresent()) {
                     toasterStatus = toasterData.get().getToasterStatus();

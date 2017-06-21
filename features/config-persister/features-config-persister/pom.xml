@@ -1,108 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>features-parent</artifactId>
-    <version>1.9.0</version>
-    <relativePath/>
-  </parent>
+<!--
+ Copyright © 2016, 2017 Red Hat, Inc. and others.
 
-  <groupId>org.opendaylight.controller</groupId>
-  <artifactId>features-config-persister</artifactId>
-  <version>0.7.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <mdsal.version>2.3.0-SNAPSHOT</mdsal.version>
-    <config.version>0.7.0-SNAPSHOT</config.version>
-    <features.file>features.xml</features.file>
-  </properties>
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>feature-repo-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
 
-  <dependencyManagement>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>features-config-persister</artifactId>
+    <version>0.7.0-SNAPSHOT</version>
+    <packaging>feature</packaging>
+
     <dependencies>
-      <dependency>
-        <groupId>org.opendaylight.mdsal</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>${config.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-manager-facade-xml</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-persister</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-persister-all</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-startup</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
     </dependencies>
-  </dependencyManagement>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>features-mdsal</artifactId>
-      <version>${mdsal.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-config</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-persister-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-manager-facade-xml</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-persister-file-xml-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-persister-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-persister-feature-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence.moxy</artifactId>
-    </dependency>
-
-  </dependencies>
-
-  <scm>
-    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
 </project>

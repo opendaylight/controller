@@ -1,151 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>features-parent</artifactId>
-    <version>1.9.0</version>
-    <relativePath/>
-  </parent>
+<!--
+ Copyright © 2016, 2017 Red Hat, Inc. and others.
 
-  <groupId>org.opendaylight.controller</groupId>
-  <artifactId>features-config</artifactId>
-  <version>0.7.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <yangtools.version>1.2.0-SNAPSHOT</yangtools.version>
-    <mdsal.version>2.3.0-SNAPSHOT</mdsal.version>
-    <config.version>0.7.0-SNAPSHOT</config.version>
-    <odlparent.version>1.9.0</odlparent.version>
-    <features.file>features.xml</features.file>
-    <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-  </properties>
-
-
-  <dependencyManagement>
-    <dependencies>
-       <dependency>
+    <parent>
         <groupId>org.opendaylight.odlparent</groupId>
-        <artifactId>odlparent-artifacts</artifactId>
-        <version>1.9.0</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yangtools-artifacts</artifactId>
-        <version>${yangtools.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.mdsal</groupId>
-        <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>${config.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
+        <artifactId>feature-repo-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>features-config</artifactId>
+    <version>0.7.0-SNAPSHOT</version>
+    <packaging>feature</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-all</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-api</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-core</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-manager</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>odl-config-netty-config-api</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
     </dependencies>
-  </dependencyManagement>
 
-
-  <dependencies>
-
-    <!-- Required features repositories -->
-    <dependency>
-      <groupId>org.opendaylight.odlparent</groupId>
-      <artifactId>features-odlparent</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>features-yangtools</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>features-mdsal</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-
-    <!-- Config artifacts -->
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netty-config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-transport</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-codec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-handler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-buffer</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>yang-jmx-generator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>shutdown-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>shutdown-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.javassist</groupId>
-      <artifactId>javassist</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-manager</artifactId>
-    </dependency>
-  </dependencies>
-
-  <scm>
-    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
-  </scm>
 </project>
