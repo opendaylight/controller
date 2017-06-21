@@ -22,7 +22,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>pom</packaging>
 
   <modules>
-    <!-- FIXME: re-enable this once we are on 2.0.0
-    <module>opendaylight-karaf</module-->
+    <module>opendaylight-karaf</module>
   </modules>
 </project>
