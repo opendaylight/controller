@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa2559ec_79359345",
+        "filename": "karaf/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2017-06-21T19:34:01Z",
+      "side": 1,
+      "message": "Do we know if others use karaf-parent?",
+      "revId": "5ee8bc2ace2d08ccf845f84f1d8ac1f304e8c187",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
