@@ -17,6 +17,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,7 +81,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return executeRead(shardNameFromIdentifier(path), new DataExists(path, DataStoreVersions.CURRENT_VERSION));
     }
 
-    private <T> CheckedFuture<T, ReadFailedException> executeRead(String shardName, final AbstractRead<T> readCmd) {
+    private <T> CheckedFuture<T, ReadFailedException> executeRead(final String shardName,
+            final AbstractRead<T> readCmd) {
         Preconditions.checkState(type != TransactionType.WRITE_ONLY,
                 "Reads from write-only transactions are not allowed");
 
@@ -90,7 +92,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
-            public void invoke(TransactionContext transactionContext) {
+            public void invoke(final TransactionContext transactionContext) {
                 transactionContext.executeRead(readCmd, proxyFuture);
             }
         });
@@ -138,7 +140,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
                 }
-            });
+            }, MoreExecutors.directExecutor());
 
         return MappingCheckedFuture.create(aggregateFuture, ReadFailedException.MAPPER);
     }
@@ -167,7 +169,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
-            protected void invoke(TransactionContext transactionContext) {
+            protected void invoke(final TransactionContext transactionContext) {
                 transactionContext.executeModification(modification);
             }
         });
@@ -201,7 +203,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         for (TransactionContextWrapper contextWrapper : txContextWrappers.values()) {
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
-                public void invoke(TransactionContext transactionContext) {
+                public void invoke(final TransactionContext transactionContext) {
                     transactionContext.closeTransaction();
                 }
             });
@@ -255,7 +257,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             final Promise promise = akka.dispatch.Futures.promise();
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
-                public void invoke(TransactionContext newTransactionContext) {
+                public void invoke(final TransactionContext newTransactionContext) {
                     promise.completeWith(getDirectCommitFuture(newTransactionContext, operationCallbackRef));
                 }
             });
@@ -269,8 +271,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             operationCallbackRef);
     }
 
-    private Future<?> getDirectCommitFuture(TransactionContext transactionContext,
-            OperationCallback.Reference operationCallbackRef) {
+    private Future<?> getDirectCommitFuture(final TransactionContext transactionContext,
+            final OperationCallback.Reference operationCallbackRef) {
         TransactionRateLimitingCallback rateLimitingCallback = new TransactionRateLimitingCallback(
                 txContextFactory.getActorContext());
         operationCallbackRef.set(rateLimitingCallback);

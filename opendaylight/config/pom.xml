@@ -23,7 +23,6 @@
     <module>config-persister-api</module>
     <module>config-persister-file-xml-adapter</module>
     <module>config-persister-feature-adapter</module>
-    <module>config-persister-feature4-adapter</module>
     <module>config-manager-facade-xml</module>
     <module>yang-jmx-generator</module>
     <module>yang-jmx-generator-plugin</module>

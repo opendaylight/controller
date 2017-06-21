@@ -11,6 +11,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
@@ -31,8 +32,8 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final LocalTransactionReadySupport readySupport;
     private Exception operationError;
 
-    LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier identifier,
-            LocalTransactionReadySupport readySupport) {
+    LocalTransactionContext(final DOMStoreTransaction txDelegate, final TransactionIdentifier identifier,
+            final LocalTransactionReadySupport readySupport) {
         super(identifier);
         this.txDelegate = Preconditions.checkNotNull(txDelegate);
         this.readySupport = readySupport;
@@ -44,7 +45,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void executeModification(AbstractModification modification) {
+    public void executeModification(final AbstractModification modification) {
         incrementModificationCount();
         if (operationError == null) {
             try {
@@ -56,7 +57,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public <T> void executeRead(AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture) {
+    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture) {
         Futures.addCallback(readCmd.apply(getReadDelegate()), new FutureCallback<T>() {
             @Override
             public void onSuccess(final T result) {
@@ -67,7 +68,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
             public void onFailure(final Throwable failure) {
                 proxyFuture.setException(failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private LocalThreePhaseCommitCohort ready() {

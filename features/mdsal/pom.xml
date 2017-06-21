@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-lite</artifactId>
-        <version>1.9.0</version>
+        <version>2.0.0</version>
         <relativePath/>
     </parent>
 
@@ -24,7 +24,6 @@
 
     <modules>
         <module>features-mdsal</module>
-        <module>features4-mdsal</module>
         <module>odl-clustering-test-app</module>
         <module>odl-mdsal-all</module>
         <module>odl-mdsal-broker</module>
