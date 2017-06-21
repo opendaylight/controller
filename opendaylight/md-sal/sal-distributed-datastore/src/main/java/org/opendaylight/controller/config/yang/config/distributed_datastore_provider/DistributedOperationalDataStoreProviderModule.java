@@ -96,7 +96,7 @@ public class DistributedOperationalDataStoreProviderModule
                         props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
                 .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
-                .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
+                .maximumMessageSliceSize(props.getMaximumMessageSliceSize().getValue().intValue())
                 .useTellBasedProtocol(props.getUseTellBasedProtocol())
                 .syncIndexThreshold(props.getSyncIndexThreshold().getValue())
                 .build();
