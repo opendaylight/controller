@@ -54,5 +54,5 @@ public interface DatastoreConfigurationMXBean {
 
     int getMaxShardDataStoreExecutorQueueSize();
 
-    int getShardSnapshotChunkSize();
+    int getMaximumMessageSliceSize();
 }

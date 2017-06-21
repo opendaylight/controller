@@ -130,8 +130,7 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     }
 
     @Override
-    public int getShardSnapshotChunkSize() {
-        return context.getShardSnapshotChunkSize();
+    public int getMaximumMessageSliceSize() {
+        return context.getMaximumMessageSliceSize();
     }
-
 }

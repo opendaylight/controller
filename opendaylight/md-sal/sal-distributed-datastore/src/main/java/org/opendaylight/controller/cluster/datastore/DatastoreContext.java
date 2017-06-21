@@ -23,6 +23,8 @@ import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -54,9 +56,11 @@ public class DatastoreContext {
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS =
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
-    public static final int DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE = 2048000;
+    public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
+
+    private static final Logger LOG = LoggerFactory.getLogger(DatastoreContext.class);
 
     private static final Set<String> GLOBAL_DATASTORE_NAMES = ConcurrentHashMap.newKeySet();
 
@@ -82,6 +86,7 @@ public class DatastoreContext {
     private boolean useTellBasedProtocol = false;
     private boolean transactionDebugContextEnabled = false;
     private String shardManagerPersistenceId;
+    private int maximumMessageSliceSize = DEFAULT_MAX_MESSAGE_SLICE_SIZE;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -94,8 +99,8 @@ public class DatastoreContext {
         setIsolatedLeaderCheckInterval(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS);
         setSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE);
         setElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR);
-        setShardSnapshotChunkSize(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
+        setMaximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE);
     }
 
     private DatastoreContext(final DatastoreContext other) {
@@ -127,6 +132,7 @@ public class DatastoreContext {
         setSnapshotDataThresholdPercentage(other.raftConfig.getSnapshotDataThresholdPercentage());
         setElectionTimeoutFactor(other.raftConfig.getElectionTimeoutFactor());
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
+        setMaximumMessageSliceSize(other.getMaximumMessageSliceSize());
         setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
         setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
         setTempFileDirectory(other.getTempFileDirectory());
@@ -263,8 +269,18 @@ public class DatastoreContext {
         raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
     }
 
+    @Deprecated
     private void setShardSnapshotChunkSize(final int shardSnapshotChunkSize) {
-        raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
+        // We'll honor the shardSnapshotChunkSize setting for backwards compatibility but only if it doesn't exceed
+        // maximumMessageSliceSize.
+        if (shardSnapshotChunkSize < maximumMessageSliceSize) {
+            raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
+        }
+    }
+
+    private void setMaximumMessageSliceSize(final int maximumMessageSliceSize) {
+        raftConfig.setSnapshotChunkSize(maximumMessageSliceSize);
+        this.maximumMessageSliceSize = maximumMessageSliceSize;
     }
 
     private void setSyncIndexThreshold(final long syncIndexThreshold) {
@@ -291,8 +307,8 @@ public class DatastoreContext {
         return useTellBasedProtocol;
     }
 
-    public int getShardSnapshotChunkSize() {
-        return raftConfig.getSnapshotChunkSize();
+    public int getMaximumMessageSliceSize() {
+        return maximumMessageSliceSize;
     }
 
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
@@ -523,8 +539,16 @@ public class DatastoreContext {
             return this;
         }
 
+        @Deprecated
         public Builder shardSnapshotChunkSize(final int shardSnapshotChunkSize) {
+            LOG.warn("The shard-snapshot-chunk-size configuration parameter is deprecated - "
+                    + "use maximum-message-slice-size instead");
             datastoreContext.setShardSnapshotChunkSize(shardSnapshotChunkSize);
+            return this;
+        }
+
+        public Builder maximumMessageSliceSize(final int maximumMessageSliceSize) {
+            datastoreContext.setMaximumMessageSliceSize(maximumMessageSliceSize);
             return this;
         }
 

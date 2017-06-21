@@ -228,10 +228,18 @@ module distributed-datastore-provider {
         }
 
         leaf shard-snapshot-chunk-size {
+            status deprecated;
             default 2048000;
             type non-zero-uint32-type;
             description "When sending a snapshot to a follower, this is the maximum size in bytes for
                          a chunk of data.";
+        }
+
+        leaf maximum-message-slice-size {
+            default 2048000;
+            type non-zero-uint32-type;
+            description "When fragmenting messages thru the akka remoting framework, this is the
+                         maximum size in bytes for a message slice.";
         }
 
         leaf use-tell-based-protocol {
