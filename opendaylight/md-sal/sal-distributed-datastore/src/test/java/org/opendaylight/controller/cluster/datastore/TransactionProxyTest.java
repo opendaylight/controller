@@ -34,6 +34,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collection;
 import java.util.List;
@@ -138,7 +139,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         propagateReadFailedExceptionCause(transactionProxy.read(TestModel.TEST_PATH));
     }
 
-    private void testExceptionOnInitialCreateTransaction(Exception exToThrow, Invoker invoker) throws Exception {
+    private void testExceptionOnInitialCreateTransaction(final Exception exToThrow, final Invoker invoker)
+            throws Exception {
         ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         if (exToThrow instanceof PrimaryNotFoundException) {
@@ -156,7 +158,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         propagateReadFailedExceptionCause(invoker.invoke(transactionProxy));
     }
 
-    private void testReadWithExceptionOnInitialCreateTransaction(Exception exToThrow) throws Exception {
+    private void testReadWithExceptionOnInitialCreateTransaction(final Exception exToThrow) throws Exception {
         testExceptionOnInitialCreateTransaction(exToThrow, proxy -> proxy.read(TestModel.TEST_PATH));
     }
 
@@ -355,7 +357,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         com.google.common.util.concurrent.Futures.addCallback(transactionProxy.read(TestModel.TEST_PATH),
                 new  FutureCallback<Optional<NormalizedNode<?, ?>>>() {
                     @Override
-                    public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
+                    public void onSuccess(final Optional<NormalizedNode<?, ?>> result) {
                         try {
                             transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
                         } catch (Exception e) {
@@ -366,11 +368,11 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                     }
 
                     @Override
-                    public void onFailure(Throwable failure) {
+                    public void onFailure(final Throwable failure) {
                         caughtEx.set(failure);
                         readComplete.countDown();
                     }
-                });
+                }, MoreExecutors.directExecutor());
 
         createTxPromise.success(createTransactionReply(actorRef, DataStoreVersions.CURRENT_VERSION));
 
@@ -682,7 +684,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyCohortFutures((SingleCommitCohortProxy)ready, RuntimeException.class);
     }
 
-    private void testWriteOnlyTxWithFindPrimaryShardFailure(Exception toThrow) throws Exception {
+    private void testWriteOnlyTxWithFindPrimaryShardFailure(final Exception toThrow) throws Exception {
         doReturn(Futures.failed(toThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
@@ -773,26 +775,27 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         void run(TransactionProxy transactionProxy);
     }
 
-    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef) {
+    private PrimaryShardInfo newPrimaryShardInfo(final ActorRef actorRef) {
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION);
     }
 
-    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, DataTree dataTree) {
+    private PrimaryShardInfo newPrimaryShardInfo(final ActorRef actorRef, final DataTree dataTree) {
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
                 dataTree);
     }
 
-    private void throttleOperation(TransactionProxyOperation operation) {
+    private void throttleOperation(final TransactionProxyOperation operation) {
         throttleOperation(operation, 1, true);
     }
 
-    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound) {
+    private void throttleOperation(final TransactionProxyOperation operation, final int outstandingOpsLimit,
+            final boolean shardFound) {
         throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.MILLISECONDS.toNanos(
                 mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()));
     }
 
-    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound,
-            long expectedCompletionTime) {
+    private void throttleOperation(final TransactionProxyOperation operation, final int outstandingOpsLimit,
+            final boolean shardFound, final long expectedCompletionTime) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
@@ -834,11 +837,11 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     }
 
-    private void completeOperation(TransactionProxyOperation operation) {
+    private void completeOperation(final TransactionProxyOperation operation) {
         completeOperation(operation, true);
     }
 
-    private void completeOperation(TransactionProxyOperation operation, boolean shardFound) {
+    private void completeOperation(final TransactionProxyOperation operation, final boolean shardFound) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
@@ -878,7 +881,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 expected, end - start), end - start <= expected);
     }
 
-    private void completeOperationLocal(TransactionProxyOperation operation, DataTree dataTree) {
+    private void completeOperationLocal(final TransactionProxyOperation operation, final DataTree dataTree) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
@@ -913,7 +916,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         return dataTree;
     }
 
-    private static DataTree createDataTree(NormalizedNode<?, ?> readResponse) {
+    private static DataTree createDataTree(final NormalizedNode<?, ?> readResponse) {
         DataTree dataTree = mock(DataTree.class);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
         DataTreeModification dataTreeModification = mock(DataTreeModification.class);
@@ -1238,7 +1241,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 .getOperationTimeoutInMillis()) * 2);
     }
 
-    private void testModificationOperationBatching(TransactionType type) throws Exception {
+    private void testModificationOperationBatching(final TransactionType type) throws Exception {
         int shardBatchedModificationCount = 3;
         dataStoreContextBuilder.shardBatchedModificationCount(shardBatchedModificationCount);
 
@@ -1448,7 +1451,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
 
-    private void setUpReadData(String shardName, NormalizedNode<?, ?> expectedNode) {
+    private void setUpReadData(final String shardName, final NormalizedNode<?, ?> expectedNode) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 

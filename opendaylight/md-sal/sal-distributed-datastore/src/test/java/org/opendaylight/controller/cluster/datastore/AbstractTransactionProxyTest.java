@@ -395,7 +395,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                 cause = e.getCause();
             }
 
-            Throwables.propagateIfInstanceOf(cause, Exception.class);
+            Throwables.throwIfInstanceOf(cause, Exception.class);
             Throwables.propagate(cause);
         }
     }

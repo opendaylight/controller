@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -54,7 +53,7 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
 
     @Test
     public void testRead() throws Exception {
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> result = object().read(
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> result = object().read(
                 YangInstanceIdentifier.EMPTY);
         final Optional<NormalizedNode<?, ?>> resultData = result.get();
         Assert.assertTrue(resultData.isPresent());
@@ -63,7 +62,7 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
 
     @Test
     public void testExists() throws Exception {
-        final CheckedFuture<Boolean, ReadFailedException> result = object().exists(YangInstanceIdentifier.EMPTY);
+        final ListenableFuture<Boolean> result = object().exists(YangInstanceIdentifier.EMPTY);
         Assert.assertTrue(result.get());
     }
 }
