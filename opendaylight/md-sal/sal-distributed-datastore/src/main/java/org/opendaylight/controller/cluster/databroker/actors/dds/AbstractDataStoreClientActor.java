@@ -15,6 +15,7 @@ import com.google.common.base.Verify;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
+import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
@@ -31,6 +32,11 @@ public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
     AbstractDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext) {
         super(frontendId);
         this.actorContext = Preconditions.checkNotNull(actorContext);
+    }
+
+    @Override
+    protected ClientActorConfig getClientActorConfig() {
+        return actorContext.getDatastoreContext();
     }
 
     @Override
