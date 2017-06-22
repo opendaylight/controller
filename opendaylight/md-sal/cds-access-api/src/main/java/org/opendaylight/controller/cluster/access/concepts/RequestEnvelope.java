@@ -40,7 +40,11 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * @throws NullPointerException if success is null
      */
     public void sendSuccess(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
-        sendResponse(new SuccessEnvelope(success, getSessionId(), getTxSequence(), executionTimeNanos));
+        sendResponse(newSuccessEnvelope(success, executionTimeNanos));
+    }
+
+    public ResponseEnvelope<?> newSuccessEnvelope(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
+        return new SuccessEnvelope(success, getSessionId(), getTxSequence(), executionTimeNanos);
     }
 
     private void sendResponse(final ResponseEnvelope<?> envelope) {

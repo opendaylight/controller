@@ -31,6 +31,8 @@ import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationExce
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.slf4j.Logger;
@@ -78,11 +80,18 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     private final Map<Long, AbstractClientConnection<T>> connections = new ConcurrentHashMap<>();
     private final InversibleLock connectionsLock = new InversibleLock();
     private final BackendInfoResolver<T> resolver;
+    private final MessageAssembler responseMessageAssembler;
 
     protected ClientActorBehavior(@Nonnull final ClientActorContext context,
             @Nonnull final BackendInfoResolver<T> resolver) {
         super(context);
         this.resolver = Preconditions.checkNotNull(resolver);
+
+        final ClientActorConfig config = context.getConfig();
+        responseMessageAssembler = MessageAssembler.builder().logContext(persistenceId())
+                .filedBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
+                        config.getTempFileDirectory()))
+                .assembledMessageCallback((message, sender) -> onReceiveCommand(message)).build();
     }
 
     @Override
@@ -120,11 +129,17 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         if (command instanceof InternalCommand) {
             return ((InternalCommand<T>) command).execute(this);
         }
+
         if (command instanceof SuccessEnvelope) {
             return onRequestSuccess((SuccessEnvelope) command);
         }
+
         if (command instanceof FailureEnvelope) {
             return internalOnRequestFailure((FailureEnvelope) command);
+        }
+
+        if (responseMessageAssembler.handleMessage(command, context().self())) {
+            return this;
         }
 
         return onCommand(command);
