@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  * @author Robert Varga
  */
 @Beta
-public abstract class AbstractClientActorBehavior<C extends AbstractClientActorContext> {
+public abstract class AbstractClientActorBehavior<C extends AbstractClientActorContext> implements AutoCloseable {
     private final C context;
 
     AbstractClientActorBehavior(@Nonnull final C context) {
@@ -58,6 +58,10 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
     @Nonnull
     public final ActorRef self() {
         return context.self();
+    }
+
+    @Override
+    public void close() {
     }
 
     /**

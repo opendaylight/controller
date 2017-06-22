@@ -35,8 +35,8 @@ final class InitialClientActorContext extends AbstractClientActorContext {
 
     ClientActorBehavior<?> createBehavior(final ClientIdentifier clientId) {
         final ActorSystem system = actor.getContext().system();
-        final ClientActorContext context = new ClientActorContext(self(), system.scheduler(), system.dispatcher(),
-            persistenceId(), clientId, actor.getClientActorConfig());
+        final ClientActorContext context = new ClientActorContext(self(), persistenceId(), system,
+            clientId, actor.getClientActorConfig());
 
         return actor.initialBehavior(context);
     }
