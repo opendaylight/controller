@@ -4,25 +4,25 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.7.4-SNAPSHOT</version>
+    <version>1.7.5-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-mdsal</artifactId>
-  <version>1.4.4-SNAPSHOT</version>
+  <version>1.4.5-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
   <properties>
-    <blueprint.version>0.5.4-SNAPSHOT</blueprint.version>
-    <yangtools.version>1.0.4-SNAPSHOT</yangtools.version>
-    <mdsal.version>2.1.4-SNAPSHOT</mdsal.version>
-    <mdsal.model.version>0.9.4-SNAPSHOT</mdsal.model.version>
-    <controller.mdsal.version>1.4.4-SNAPSHOT</controller.mdsal.version>
-    <config.version>0.5.4-SNAPSHOT</config.version>
-    <commons.opendaylight.version>1.7.4-SNAPSHOT</commons.opendaylight.version>
-    <akka.features.version>1.7.4-SNAPSHOT</akka.features.version>
+    <blueprint.version>0.5.5-SNAPSHOT</blueprint.version>
+    <yangtools.version>1.0.5-SNAPSHOT</yangtools.version>
+    <mdsal.version>2.1.5-SNAPSHOT</mdsal.version>
+    <mdsal.model.version>0.9.5-SNAPSHOT</mdsal.model.version>
+    <controller.mdsal.version>1.4.5-SNAPSHOT</controller.mdsal.version>
+    <config.version>0.5.5-SNAPSHOT</config.version>
+    <commons.opendaylight.version>1.7.5-SNAPSHOT</commons.opendaylight.version>
+    <akka.features.version>1.7.5-SNAPSHOT</akka.features.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
@@ -37,7 +37,7 @@
       <dependency>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-artifacts</artifactId>
-        <version>1.7.4-SNAPSHOT</version>
+        <version>1.7.5-SNAPSHOT</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
