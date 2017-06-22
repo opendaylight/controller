@@ -65,8 +65,8 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         system = ActorSystem.apply();
         backendProbe = new TestProbe(system);
         contextProbe = new TestProbe(system);
-        context = new ClientActorContext(contextProbe.ref(), system.scheduler(), system.dispatcher(),
-                PERSISTENCE_ID, CLIENT_ID, AccessClientUtil.newMockClientActorConfig());
+        context = new ClientActorContext(contextProbe.ref(), PERSISTENCE_ID, system,
+                CLIENT_ID, AccessClientUtil.newMockClientActorConfig());
         replyToProbe = new TestProbe(system);
         connection = createConnection();
     }
