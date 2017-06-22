@@ -245,7 +245,7 @@ public class WriteTransactionsHandler implements Runnable {
 
             try {
                 // Timeout from cds should be 2 minutes so leave some leeway.
-                allFutures.get(125, TimeUnit.SECONDS);
+                allFutures.get(28, TimeUnit.MINUTES);
 
                 LOG.debug("All futures completed successfully.");
 
