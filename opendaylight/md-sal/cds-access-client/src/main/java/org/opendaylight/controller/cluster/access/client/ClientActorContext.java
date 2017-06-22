@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.actor.Scheduler;
 import com.google.common.annotations.Beta;
@@ -16,6 +17,7 @@ import com.google.common.base.Ticker;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.duration.FiniteDuration;
@@ -36,15 +38,17 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     private final ExecutionContext executionContext;
     private final ClientIdentifier identifier;
     private final Scheduler scheduler;
+    private final Dispatchers dispatchers;
     private final ClientActorConfig config;
 
     // Hidden to avoid subclassing
-    ClientActorContext(final ActorRef self, final Scheduler scheduler, final ExecutionContext executionContext,
-            final String persistenceId, final ClientIdentifier identifier, final ClientActorConfig config) {
+    ClientActorContext(final ActorRef self, final String persistenceId, final ActorSystem system,
+            final ClientIdentifier identifier, final ClientActorConfig config) {
         super(self, persistenceId);
         this.identifier = Preconditions.checkNotNull(identifier);
-        this.scheduler = Preconditions.checkNotNull(scheduler);
-        this.executionContext = Preconditions.checkNotNull(executionContext);
+        this.scheduler = Preconditions.checkNotNull(system).scheduler();
+        this.executionContext = system.dispatcher();
+        this.dispatchers = new Dispatchers(system.dispatchers());
         this.config = Preconditions.checkNotNull(config);
     }
 
@@ -57,6 +61,11 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     @Nonnull
     public ClientActorConfig config() {
         return config;
+    }
+
+    @Nonnull
+    public Dispatchers dispatchers() {
+        return dispatchers;
     }
 
     /**
