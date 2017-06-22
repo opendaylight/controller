@@ -27,8 +27,7 @@ public class AccessClientUtil {
     public static ClientActorContext createClientActorContext(final ActorSystem system, final ActorRef actor,
                                                               final ClientIdentifier id, final String persistenceId) {
 
-        return spy(new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id,
-                newMockClientActorConfig()));
+        return spy(new ClientActorContext(actor, persistenceId, system, id, newMockClientActorConfig()));
     }
 
     public static ClientActorConfig newMockClientActorConfig() {

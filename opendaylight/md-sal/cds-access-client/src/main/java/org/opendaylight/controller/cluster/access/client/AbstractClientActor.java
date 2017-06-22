@@ -35,6 +35,15 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
         return currentBehavior.persistenceId();
     }
 
+    @Override
+    public void postStop() {
+        if (currentBehavior != null) {
+            currentBehavior.close();
+        }
+
+        super.postStop();
+    }
+
     private void switchBehavior(final AbstractClientActorBehavior<?> nextBehavior) {
         if (!currentBehavior.equals(nextBehavior)) {
             if (nextBehavior == null) {
@@ -44,6 +53,7 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
                 LOG.debug("{}: switched from {} to {}", persistenceId(), currentBehavior, nextBehavior);
             }
 
+            currentBehavior.close();
             currentBehavior = nextBehavior;
         }
     }
