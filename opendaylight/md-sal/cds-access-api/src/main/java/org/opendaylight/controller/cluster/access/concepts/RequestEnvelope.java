@@ -40,7 +40,18 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * @throws NullPointerException if success is null
      */
     public void sendSuccess(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
-        sendResponse(new SuccessEnvelope(success, getSessionId(), getTxSequence(), executionTimeNanos));
+        sendResponse(newSuccessEnvelope(success, executionTimeNanos));
+    }
+
+    /**
+     * Creates a successful ResponseEnvelope that wraps the given successful Request response message.
+     *
+     * @param success the successful Request response message
+     * @param executionTimeNanos the execution time of the request
+     * @return a {@link ResponseEnvelope} instance
+     */
+    public ResponseEnvelope<?> newSuccessEnvelope(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
+        return new SuccessEnvelope(success, getSessionId(), getTxSequence(), executionTimeNanos);
     }
 
     private void sendResponse(final ResponseEnvelope<?> envelope) {
