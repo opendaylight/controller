@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import akka.actor.ActorRef;
@@ -24,7 +26,16 @@ public class AccessClientUtil {
 
     public static ClientActorContext createClientActorContext(final ActorSystem system, final ActorRef actor,
                                                               final ClientIdentifier id, final String persistenceId) {
-        return spy(new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id));
+
+        return spy(new ClientActorContext(actor, system.scheduler(), system.dispatcher(), persistenceId, id,
+                newMockClientActorConfig()));
+    }
+
+    public static ClientActorConfig newMockClientActorConfig() {
+        ClientActorConfig mockConfig = mock(ClientActorConfig.class);
+        doReturn(2_000_000).when(mockConfig).getMaximumMessageSliceSize();
+        doReturn(1_000_000_000).when(mockConfig).getFileBackedStreamingThreshold();
+        return mockConfig;
     }
 
     public static <T extends BackendInfo> ConnectedClientConnection<T> createConnectedConnection(

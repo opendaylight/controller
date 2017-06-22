@@ -36,20 +36,27 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     private final ExecutionContext executionContext;
     private final ClientIdentifier identifier;
     private final Scheduler scheduler;
+    private final ClientActorConfig config;
 
     // Hidden to avoid subclassing
     ClientActorContext(final ActorRef self, final Scheduler scheduler, final ExecutionContext executionContext,
-            final String persistenceId, final ClientIdentifier identifier) {
+            final String persistenceId, final ClientIdentifier identifier, final ClientActorConfig config) {
         super(self, persistenceId);
         this.identifier = Preconditions.checkNotNull(identifier);
         this.scheduler = Preconditions.checkNotNull(scheduler);
         this.executionContext = Preconditions.checkNotNull(executionContext);
+        this.config = Preconditions.checkNotNull(config);
     }
 
     @Override
     @Nonnull
     public ClientIdentifier getIdentifier() {
         return identifier;
+    }
+
+    @Nonnull
+    public ClientActorConfig config() {
+        return config;
     }
 
     /**
