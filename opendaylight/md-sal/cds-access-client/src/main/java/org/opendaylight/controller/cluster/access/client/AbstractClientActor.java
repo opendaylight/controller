@@ -68,4 +68,6 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
     }
 
     protected abstract ClientActorBehavior<?> initialBehavior(ClientActorContext context);
+
+    protected abstract ClientActorConfig getClientActorConfig();
 }
