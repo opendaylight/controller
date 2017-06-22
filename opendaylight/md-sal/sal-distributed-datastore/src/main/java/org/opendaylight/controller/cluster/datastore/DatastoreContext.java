@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.text.WordUtils;
+import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
@@ -33,7 +34,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public class DatastoreContext {
+public class DatastoreContext implements ClientActorConfig {
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
     public static final Duration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = Duration.create(10, TimeUnit.MINUTES);
@@ -216,6 +217,7 @@ public class DatastoreContext {
         return shardManagerPersistenceId;
     }
 
+    @Override
     public String getTempFileDirectory() {
         return raftConfig.getTempFileDirectory();
     }
@@ -224,6 +226,7 @@ public class DatastoreContext {
         raftConfig.setTempFileDirectory(tempFileDirectory);
     }
 
+    @Override
     public int getFileBackedStreamingThreshold() {
         return raftConfig.getFileBackedStreamingThreshold();
     }
@@ -307,6 +310,7 @@ public class DatastoreContext {
         return useTellBasedProtocol;
     }
 
+    @Override
     public int getMaximumMessageSliceSize() {
         return maximumMessageSliceSize;
     }

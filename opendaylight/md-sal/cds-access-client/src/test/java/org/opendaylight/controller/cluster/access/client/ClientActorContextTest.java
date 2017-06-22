@@ -46,7 +46,7 @@ public class ClientActorContextTest {
         system = ActorSystem.apply();
         probe = new TestProbe(system);
         ctx = new ClientActorContext(probe.ref(), system.scheduler(), system.dispatcher(),
-                PERSISTENCE_ID, CLIENT_ID);
+                PERSISTENCE_ID, CLIENT_ID, AccessClientUtil.newMockClientActorConfig());
     }
 
     @Test

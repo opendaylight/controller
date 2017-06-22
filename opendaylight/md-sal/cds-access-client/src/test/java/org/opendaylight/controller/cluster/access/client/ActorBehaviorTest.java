@@ -189,6 +189,25 @@ public class ActorBehaviorTest {
             return initialBehavior;
         }
 
+        @Override
+        protected ClientActorConfig getClientActorConfig() {
+            return new ClientActorConfig() {
+                @Override
+                public String getTempFileDirectory() {
+                    return null;
+                }
+
+                @Override
+                public int getMaximumMessageSliceSize() {
+                    return 2000000;
+                }
+
+                @Override
+                public int getFileBackedStreamingThreshold() {
+                    return 1000000000;
+                }
+            };
+        }
     }
 
 }
