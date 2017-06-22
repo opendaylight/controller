@@ -45,8 +45,8 @@ public class ClientActorContextTest {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         probe = new TestProbe(system);
-        ctx = new ClientActorContext(probe.ref(), system.scheduler(), system.dispatcher(),
-                PERSISTENCE_ID, CLIENT_ID, AccessClientUtil.newMockClientActorConfig());
+        ctx = new ClientActorContext(probe.ref(), PERSISTENCE_ID, system,
+                CLIENT_ID, AccessClientUtil.newMockClientActorConfig());
     }
 
     @Test
