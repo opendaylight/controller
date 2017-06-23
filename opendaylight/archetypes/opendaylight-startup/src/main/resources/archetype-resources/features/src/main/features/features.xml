@@ -17,7 +17,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
-  <repository>mvn:org.opendaylight.dluxapps/features-dluxapps/{{VERSION}}/xml/features</repository>
   <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api'>
     <feature version='${symbol_dollar}{mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:${groupId}/${artifactId}-api/{{VERSION}}</bundle>
@@ -30,11 +29,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <feature name='odl-${artifactId}-rest' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: REST'>
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>
     <feature version="${symbol_dollar}{restconf.version}">odl-restconf</feature>
-  </feature>
-  <feature name='odl-${artifactId}-ui' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: UI'>
-    <feature version="${symbol_dollar}{project.version}">odl-${artifactId}-rest</feature>
-    <feature version="${symbol_dollar}{restconf.version}">odl-mdsal-apidocs</feature>
-    <feature version="${symbol_dollar}{dluxapps.version}">odl-dluxapps-yangman</feature>
   </feature>
   <feature name='odl-${artifactId}-cli' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: CLI'>
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>
