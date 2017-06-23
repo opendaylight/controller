@@ -15,6 +15,7 @@ import static org.mockito.Mockito.mock;
 
 import akka.dispatch.MessageDispatcher;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 
 public class DispatchersTest {
 
