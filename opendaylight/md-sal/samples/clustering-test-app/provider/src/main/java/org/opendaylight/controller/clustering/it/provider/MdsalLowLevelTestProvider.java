@@ -135,17 +135,17 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private final DOMDataTreeChangeService domDataTreeChangeService;
     private final ActorSystem actorSystem;
 
-    private Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>> routedRegistrations =
+    private final Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>> routedRegistrations =
             new HashMap<>();
 
-    private Map<String, ListenerRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
+    private final Map<String, ListenerRegistration<YnlListener>> ynlRegistrations = new HashMap<>();
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
     private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
     private FlappingSingletonService flappingSingletonService;
     private ListenerRegistration<DOMDataTreeChangeListener> dtclReg;
     private IdIntsListener idIntsListener;
-    private Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
+    private final Map<String, PublishNotificationsTask> publishNotificationsTasks = new HashMap<>();
     private ListenerRegistration<IdIntsDOMDataTreeLIstener> ddtlReg;
     private IdIntsDOMDataTreeLIstener idIntsDdtl;
 
@@ -250,13 +250,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public Future<RpcResult<WriteTransactionsOutput>> writeTransactions(final WriteTransactionsInput input) {
         LOG.debug("write-transactions, input: {}", input);
-
-        final WriteTransactionsHandler writeTransactionsHandler = new WriteTransactionsHandler(domDataBroker, input);
-
-        final SettableFuture<RpcResult<WriteTransactionsOutput>> settableFuture = SettableFuture.create();
-        writeTransactionsHandler.start(settableFuture);
-
-        return settableFuture;
+        return WriteTransactionsHandler.start(domDataBroker, input);
     }
 
     @Override
@@ -265,7 +259,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
+    public Future<RpcResult<Void>> removeShardReplica(final RemoveShardReplicaInput input) {
         return null;
     }
 
@@ -337,7 +331,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerDefaultConstant(RegisterDefaultConstantInput input) {
+    public Future<RpcResult<Void>> registerDefaultConstant(final RegisterDefaultConstantInput input) {
         return null;
     }
 
@@ -379,7 +373,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> addShardReplica(AddShardReplicaInput input) {
+    public Future<RpcResult<Void>> addShardReplica(final AddShardReplicaInput input) {
         return null;
     }
 
@@ -561,14 +555,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public Future<RpcResult<ProduceTransactionsOutput>> produceTransactions(final ProduceTransactionsInput input) {
         LOG.debug("producer-transactions, input: {}", input);
-
-        final ProduceTransactionsHandler handler =
-                new ProduceTransactionsHandler(domDataTreeService, input);
-
-        final SettableFuture<RpcResult<ProduceTransactionsOutput>> settableFuture = SettableFuture.create();
-        handler.start(settableFuture);
-
-        return settableFuture;
+        return ProduceTransactionsHandler.start(domDataTreeService, input);
     }
 
     @Override
@@ -589,7 +576,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     public Future<RpcResult<Void>> shutdownPrefixShardReplica(final ShutdownPrefixShardReplicaInput input) {
         LOG.debug("Received shutdown-prefix-shard-replica rpc, input: {}", input);
 
-        final InstanceIdentifier shardPrefix = input.getPrefix();
+        final InstanceIdentifier<?> shardPrefix = input.getPrefix();
 
         if (shardPrefix == null) {
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",

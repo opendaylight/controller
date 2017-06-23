@@ -8,13 +8,9 @@
 
 package org.opendaylight.controller.clustering.it.provider;
 
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.DELETE;
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.SUBTREE_MODIFIED;
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.WRITE;
-
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
@@ -32,7 +28,7 @@ public class CarDataTreeChangeListener implements DataTreeChangeListener<Cars> {
     private static final Logger LOG = LoggerFactory.getLogger(CarDataTreeChangeListener.class);
 
     @java.lang.Override
-    public void onDataTreeChanged(@Nonnull java.util.Collection<DataTreeModification<Cars>> changes) {
+    public void onDataTreeChanged(@Nonnull final java.util.Collection<DataTreeModification<Cars>> changes) {
         if (LOG.isTraceEnabled()) {
             for (DataTreeModification<Cars> change : changes) {
                 ouputChanges(change);
@@ -40,7 +36,7 @@ public class CarDataTreeChangeListener implements DataTreeChangeListener<Cars> {
         }
     }
 
-    private void ouputChanges(final DataTreeModification<Cars> change) {
+    private static void ouputChanges(final DataTreeModification<Cars> change) {
         final DataObjectModification<Cars> rootNode = change.getRootNode();
         final ModificationType modificationType = rootNode.getModificationType();
         final InstanceIdentifier<Cars> rootIdentifier = change.getRootPath().getRootIdentifier();

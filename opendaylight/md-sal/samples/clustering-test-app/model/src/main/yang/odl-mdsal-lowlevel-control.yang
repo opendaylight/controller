@@ -227,6 +227,37 @@ module odl-mdsal-lowlevel-control {
         }
     }
 
+    grouping transactions-params {
+        leaf seconds {
+            description "This RPC has to work (roughly) this long.";
+            mandatory true;
+            type uint32;
+        }
+        leaf transactions-per-second {
+            description "An upper limit of transactions per second this RPC shall try to achieve.";
+            mandatory true;
+            type uint32;
+        }
+    }
+
+    grouping transactions-result {
+        leaf all-tx {
+            description "Number of all transactions executed.";
+            type int64;
+            mandatory true;
+        }
+        leaf insert-tx {
+            description "Number of transactions that inserted data.";
+            type int64;
+            mandatory true;
+        }
+        leaf delete-tx {
+            description "Number of transactions that deleted data.";
+            type int64;
+            mandatory true;
+        }
+    }
+
     rpc write-transactions {
         description "Upon receiving this, the member shall make sure the outer list item
             of llt:id-ints exists for the given id, and then start creating (one by one)
@@ -245,16 +276,7 @@ module odl-mdsal-lowlevel-control {
             OptimisticLockException is always considered an error.";
         input {
             uses llc:id-grouping;
-            leaf seconds {
-                description "This RPC has to work (roughly) this long.";
-                mandatory true;
-                type uint32;
-            }
-            leaf transactions-per-second {
-                description "An upper limit of transactions per second this RPC shall try to achieve.";
-                mandatory true;
-                type uint32;
-            }
+            uses transactions-params;
             leaf chained-transactions {
                 description "If true, write transactions shall be created on a transaction chain,
                     (created at start of the RPC call, and deleted at at its end).
@@ -264,21 +286,7 @@ module odl-mdsal-lowlevel-control {
             }
         }
         output {
-            leaf all-tx {
-                description "Number of all transactions executed.";
-                type int64;
-                mandatory true;
-            }
-            leaf insert-tx {
-                description "Number of transactions that inserted data.";
-                type int64;
-                mandatory true;
-            }
-            leaf delete-tx {
-                description "Number of transactions that deleted data.";
-                type int64;
-                mandatory true;
-            }
+            uses transactions-result;
         }
     }
 
@@ -305,16 +313,7 @@ module odl-mdsal-lowlevel-control {
             but the shard and the whole id item shall be kept as they are.";
         input {
             uses llc:id-grouping;
-            leaf seconds {
-                description "This RPC has to work (roughly) this long.";
-                mandatory true;
-                type uint32;
-            }
-            leaf transactions-per-second {
-                description "An upper limit of transactions per second this RPC shall try to achieve.";
-                mandatory true;
-                type uint32;
-            }
+            uses transactions-params;
             leaf isolated-transactions {
                 description "The value for DOMDataTreeProducer#createTransaction argument.";
                 mandatory true;
@@ -322,21 +321,7 @@ module odl-mdsal-lowlevel-control {
             }
         }
         output {
-            leaf all-tx {
-                description "Number of all transactions executed.";
-                type int64;
-                mandatory true;
-            }
-            leaf insert-tx {
-                description "Number of transactions that inserted data.";
-                type int64;
-                mandatory true;
-            }
-            leaf delete-tx {
-                description "Number of transactions that deleted data.";
-                type int64;
-                mandatory true;
-            }
+            uses transactions-result;
         }
     }
 
