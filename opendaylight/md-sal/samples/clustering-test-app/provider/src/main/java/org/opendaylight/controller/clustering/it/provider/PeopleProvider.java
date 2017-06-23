@@ -43,12 +43,12 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
   }
 
 
-  public void setRpcRegistration(BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration) {
+  public void setRpcRegistration(final BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration) {
     this.rpcRegistration = rpcRegistration;
   }
 
   @Override
-  public Future<RpcResult<Void>> addPerson(AddPersonInput input) {
+  public Future<RpcResult<Void>> addPerson(final AddPersonInput input) {
     LOG.info("RPC addPerson : adding person [{}]", input);
 
     PersonBuilder builder = new PersonBuilder(input);
@@ -59,7 +59,7 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
     final InstanceIdentifier.InstanceIdentifierBuilder<Person> personIdBuilder =
         InstanceIdentifier.<People>builder(People.class)
             .child(Person.class, person.getKey());
-    final InstanceIdentifier personId = personIdBuilder.build();
+    final InstanceIdentifier<Person> personId = personIdBuilder.build();
     // Place entry in data store tree
     WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
     tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);

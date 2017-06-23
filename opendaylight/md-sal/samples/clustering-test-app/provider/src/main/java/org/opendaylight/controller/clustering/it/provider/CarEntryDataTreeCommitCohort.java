@@ -39,10 +39,9 @@ public class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
     private static final QName YEAR_QNAME = QName.create(Cars.QNAME, "year").intern();
     private static final NodeIdentifier YEAR_NODE_ID = new NodeIdentifier(YEAR_QNAME);
 
-    @SuppressWarnings("unchecked")
     @Override
-    public CheckedFuture<PostCanCommitStep, DataValidationFailedException> canCommit(Object txId,
-            DOMDataTreeCandidate candidate, SchemaContext ctx) {
+    public CheckedFuture<PostCanCommitStep, DataValidationFailedException> canCommit(final Object txId,
+            final DOMDataTreeCandidate candidate, final SchemaContext ctx) {
 
         // Simple data validation - verify the year, if present, is >= 1990
 
@@ -77,6 +76,6 @@ public class CarEntryDataTreeCommitCohort implements DOMDataTreeCommitCohort {
 
         // Return the noop PostCanCommitStep as we're only validating input data and not participating in the
         // remaining 3PC stages (pre-commit and commit).
-        return (CheckedFuture<PostCanCommitStep, DataValidationFailedException>) PostCanCommitStep.NOOP_SUCCESS_FUTURE;
+        return PostCanCommitStep.NOOP_SUCCESS_FUTURE;
     }
 }

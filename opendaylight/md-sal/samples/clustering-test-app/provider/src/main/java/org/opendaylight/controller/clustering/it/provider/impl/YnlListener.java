@@ -23,10 +23,10 @@ public class YnlListener implements OdlMdsalLowlevelTargetListener {
 
     private final String id;
 
-    private AtomicLong localNumber = new AtomicLong();
-    private AtomicLong allNot = new AtomicLong();
-    private AtomicLong idNot = new AtomicLong();
-    private AtomicLong errNot = new AtomicLong();
+    private final AtomicLong localNumber = new AtomicLong();
+    private final AtomicLong allNot = new AtomicLong();
+    private final AtomicLong idNot = new AtomicLong();
+    private final AtomicLong errNot = new AtomicLong();
 
     public YnlListener(final String id) {
         Preconditions.checkNotNull(id);
@@ -42,14 +42,13 @@ public class YnlListener implements OdlMdsalLowlevelTargetListener {
         if (notification.getId().equals(id)) {
             idNot.incrementAndGet();
 
-            localNumber.getAndUpdate((value -> {
+            localNumber.getAndUpdate(value -> {
                 if (notification.getSequenceNumber() - value == 1) {
                     return value + 1;
-                } else {
-                    errNot.getAndIncrement();
-                    return value;
                 }
-            }));
+                errNot.getAndIncrement();
+                return value;
+            });
         }
     }
 

@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -63,7 +62,7 @@ public class CarProvider implements CarService {
     private static final Logger LOG_CAR_PROVIDER = LoggerFactory.getLogger(CarProvider.class);
 
     private static final String ENTITY_TYPE = "cars";
-    private static final InstanceIdentifier CARS_IID = InstanceIdentifier.builder(Cars.class).build();
+    private static final InstanceIdentifier<Cars> CARS_IID = InstanceIdentifier.builder(Cars.class).build();
     private static final DataTreeIdentifier<Cars> CARS_DTID = new DataTreeIdentifier<>(
             LogicalDatastoreType.CONFIGURATION, CARS_IID);
 
@@ -76,7 +75,7 @@ public class CarProvider implements CarService {
     private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
     private final AtomicBoolean registeredListener = new AtomicBoolean();
 
-    private final Collection<ListenerRegistration<DataChangeListener>> carsDclRegistrations =
+    private final Collection<ListenerRegistration<?>> carsDclRegistrations =
             Sets.newConcurrentHashSet();
     private final Collection<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
             Sets.newConcurrentHashSet();
@@ -86,8 +85,8 @@ public class CarProvider implements CarService {
     private final AtomicReference<DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort>> commitCohortReg =
             new AtomicReference<>();
 
-    public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService,
-            DOMDataBroker domDataBroker) {
+    public CarProvider(final DataBroker dataProvider, final EntityOwnershipService ownershipService,
+            final DOMDataBroker domDataBroker) {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
         this.domDataBroker = domDataBroker;
@@ -110,7 +109,7 @@ public class CarProvider implements CarService {
     }
 
     @Override
-    public Future<RpcResult<Void>> stressTest(StressTestInput input) {
+    public Future<RpcResult<Void>> stressTest(final StressTestInput input) {
         final int inputRate;
         final long inputCount;
 
@@ -120,10 +119,9 @@ public class CarProvider implements CarService {
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
                     .withError(ErrorType.PROTOCOL, "invalid rate")
                     .build());
-        } else {
-            inputRate = input.getRate();
         }
 
+        inputRate = input.getRate();
         if (input.getCount() != null) {
             inputCount = input.getCount();
         } else {
@@ -218,7 +216,7 @@ public class CarProvider implements CarService {
 
 
     @Override
-    public Future<RpcResult<Void>> registerOwnership(RegisterOwnershipInput input) {
+    public Future<RpcResult<Void>> registerOwnership(final RegisterOwnershipInput input) {
         if(registeredListener.compareAndSet(false, true)) {
             ownershipService.registerListener(ENTITY_TYPE, ownershipListener);
         }
@@ -235,13 +233,13 @@ public class CarProvider implements CarService {
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterOwnership(UnregisterOwnershipInput input) {
+    public Future<RpcResult<Void>> unregisterOwnership(final UnregisterOwnershipInput input) {
         return RpcResultBuilder.<Void>success().buildFuture();
     }
 
     private static class CarEntityOwnershipListener implements EntityOwnershipListener {
         @Override
-        public void ownershipChanged(EntityOwnershipChange ownershipChange) {
+        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
             LOG_CAR_PROVIDER.info("ownershipChanged: {}", ownershipChange);
         }
     }
@@ -278,7 +276,7 @@ public class CarProvider implements CarService {
         LOG_CAR_PROVIDER.info("Unregistering the CarDataChangeListener(s)");
         synchronized (carsDclRegistrations) {
             int numListeners = 0;
-            for (ListenerRegistration<DataChangeListener> carsDclRegistration : carsDclRegistrations) {
+            for (ListenerRegistration<?> carsDclRegistration : carsDclRegistrations) {
                 carsDclRegistration.close();
                 numListeners++;
             }

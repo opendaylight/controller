@@ -27,14 +27,14 @@ public class CarDataChangeListener implements DataChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(CarDataChangeListener.class);
 
     @Override
-    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("onDataChanged invoked");
             outputChanges(change);
         }
     }
 
-    private void outputChanges(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+    private static void outputChanges(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
         final Map<InstanceIdentifier<?>, DataObject> originalData = change.getOriginalData() != null ?
                 change.getOriginalData(): Collections.<InstanceIdentifier<?>, DataObject>emptyMap();
         final Map<InstanceIdentifier<?>, DataObject> updatedData = change.getUpdatedData() != null ?
