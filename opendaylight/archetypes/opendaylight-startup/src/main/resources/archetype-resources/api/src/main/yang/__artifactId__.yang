@@ -1,9 +1,12 @@
+#set( $ldt = $package.getClass().forName("java.time.LocalDateTime").getMethod("now").invoke(null) )
+#set( $dtf = $package.getClass().forName("java.time.format.DateTimeFormatter").getMethod("ofPattern", $package.getClass()).invoke(null, "yyyy-MM-dd") )
+#set( $date = $ldt.format($dtf) )
 module ${artifactId} {
     yang-version 1;
     namespace "urn:opendaylight:params:xml:ns:yang:${artifactId}";
     prefix "${artifactId}";
 
-    revision "2015-01-05" {
+    revision "${date}" {
         description "Initial revision of ${artifactId} model";
     }
 }
