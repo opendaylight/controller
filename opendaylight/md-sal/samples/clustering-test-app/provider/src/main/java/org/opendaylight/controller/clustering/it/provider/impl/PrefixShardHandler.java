@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.clustering.it.provider.impl;
 
-import static org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler.ID;
-import static org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler.ID_INT;
-import static org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler.ID_INTS;
-import static org.opendaylight.controller.clustering.it.provider.impl.ProduceTransactionsHandler.ITEM;
+import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ID;
+import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ID_INT;
+import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ID_INTS;
+import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ITEM;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -38,7 +38,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardInput;
-import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -94,13 +93,13 @@ public class PrefixShardHandler {
                 final CheckedFuture<Void, TransactionCommitFailedException> ensureFuture = ensureListExists();
                 Futures.addCallback(ensureFuture, new FutureCallback<Void>() {
                     @Override
-                    public void onSuccess(@Nullable Void result) {
+                    public void onSuccess(@Nullable final Void result) {
                         LOG.debug("Initial list write successful.");
                         future.set(RpcResultBuilder.<Void>success().build());
                     }
 
                     @Override
-                    public void onFailure(Throwable throwable) {
+                    public void onFailure(final Throwable throwable) {
                         LOG.warn("Shard[{}] creation failed:", identifier, throwable);
 
                         final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "create-shard-failed",
@@ -189,7 +188,7 @@ public class PrefixShardHandler {
         final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(@Nullable Void result) {
+            public void onSuccess(@Nullable final Void result) {
                 try {
                     LOG.debug("Closing producer for initial list.");
                     producer.close();
@@ -199,7 +198,7 @@ public class PrefixShardHandler {
             }
 
             @Override
-            public void onFailure(Throwable throwable) {
+            public void onFailure(final Throwable throwable) {
                 //NOOP handled by the caller of this method.
             }
         });
