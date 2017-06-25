@@ -89,7 +89,7 @@ final class AveragingProgressTracker extends ProgressTracker {
      * @return delay (in ticks) after which another openTask() would be fair to be called by the same thread again
      */
     @Override
-    public long estimateIsolatedDelay(final long now) {
+    protected long estimateIsolatedDelay(final long now) {
         final long open = tasksOpen();
         if (open <= noDelayThreshold) {
             return 0L;
@@ -102,7 +102,7 @@ final class AveragingProgressTracker extends ProgressTracker {
          * Calculate the task capacity relative to the limit on open tasks. In real terms this value can be
          * in the open interval (0.0, 0.5).
          */
-        final double relativeRemainingCapacity = 1.0 - (((double) open) / tasksOpenLimit);
+        final double relativeRemainingCapacity = 1.0 - (double) open / tasksOpenLimit;
 
         /*
          * Calculate delay coefficient. It increases in inverse proportion to relative remaining capacity, approaching
