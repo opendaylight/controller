@@ -120,7 +120,7 @@ abstract class ProgressTracker {
      *
      * @return default ticks per task value
      */
-    public final long defaultTicksPerTask() {
+    final long defaultTicksPerTask() {
         return defaultTicksPerTask;
     }
 
@@ -129,7 +129,7 @@ abstract class ProgressTracker {
      *
      * @return number of tasks known to be finished already; the value never decreases
      */
-    public final long tasksClosed() {
+    final long tasksClosed() {
         return tasksClosed;
     }
 
@@ -138,7 +138,7 @@ abstract class ProgressTracker {
      *
      * @return number of tasks encountered so far, open or finished; the value never decreases
      */
-    public final long tasksEncountered() {
+    final long tasksEncountered() {
         return tasksEncountered;
     }
 
@@ -147,7 +147,7 @@ abstract class ProgressTracker {
      *
      * @return number of tasks started but not finished yet
      */
-    public final long tasksOpen() {
+    final long tasksOpen() {
         // TODO: Should we check the return value is non-negative?
         return tasksEncountered - tasksClosed;
     }
@@ -157,7 +157,7 @@ abstract class ProgressTracker {
      *
      * @return {@code true} if every encountered task is already closed, {@code false} otherwise
      */
-    public boolean isIdle() {
+    boolean isIdle() {
         return tasksClosed >= tasksEncountered;
     }
 
@@ -167,7 +167,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return number of ticks backend is neither idle nor responding
      */
-    public long ticksStalling(final long now) {
+    long ticksStalling(final long now) {
         return isIdle() ? 0 : Math.max(now, lastClosed) - lastClosed;
     }
 
@@ -177,7 +177,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return number of ticks there was at least one task open
      */
-    public long ticksWorked(final long now) {
+    long ticksWorked(final long now) {
         return isIdle() ? elapsedBeforeIdle : Math.max(now, lastIdle) - lastIdle + elapsedBeforeIdle;
     }
 
@@ -187,7 +187,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return total ticks worked divided by closed tasks, or the default value if no closed tasks
      */
-    public double ticksWorkedPerClosedTask(final long now) {
+    double ticksWorkedPerClosedTask(final long now) {
         if (tasksClosed < 1) {
             return defaultTicksPerTask;
         }
@@ -204,7 +204,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return delay (in ticks) after which another openTask() is fair to be called by the same thread again
      */
-    public long estimateDelay(final long now) {
+    long estimateDelay(final long now) {
         return estimateAllowed(now) - now;
     }
 
@@ -218,7 +218,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return estimated tick number when all threads with opened tasks are done waiting
      */
-    public long estimateAllowed(final long now) {
+    long estimateAllowed(final long now) {
         return Math.max(now, nearestAllowed) + estimateIsolatedDelay(now);
     }
 
@@ -232,7 +232,7 @@ abstract class ProgressTracker {
      * @param transmitTicks see TransitQueue#recordCompletion
      * @param execNanos see TransitQueue#recordCompletion
      */
-    public void closeTask(final long now, final long enqueuedTicks, final long transmitTicks, final long execNanos) {
+    void closeTask(final long now, final long enqueuedTicks, final long transmitTicks, final long execNanos) {
         if (isIdle()) {
             LOG.info("Attempted to close a task while no tasks are open");
         } else {
@@ -246,7 +246,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return number of ticks (nanos) the caller thread should wait before opening another task
      */
-    public long openTask(final long now) {
+    long openTask(final long now) {
         protectedOpenTask(now);
         return reserveDelay(now);
     }
@@ -260,7 +260,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return number of ticks (nanos) the caller thread should wait before opening another task
      */
-    protected long reserveDelay(final long now) {
+    long reserveDelay(final long now) {
         nearestAllowed = estimateAllowed(now);
         return nearestAllowed - now;
     }
@@ -276,7 +276,7 @@ abstract class ProgressTracker {
      * @param transmitTicks see TransmitQueue#recordCompletion
      * @param execNanos see TransmitQueue#recordCompletion
      */
-    protected void protectedCloseTask(final long now, final long enqueuedTicks, final long transmitTicks,
+    void protectedCloseTask(final long now, final long enqueuedTicks, final long transmitTicks,
                 final long execNanos) {
         tasksClosed++;
         lastClosed = now;
@@ -293,7 +293,7 @@ abstract class ProgressTracker {
      *
      * @param now tick number corresponding to caller's present
      */
-    protected void protectedOpenTask(final long now) {
+    void protectedOpenTask(final long now) {
         if (isIdle()) {
             lastIdle = Math.max(now, lastIdle);
         }
@@ -307,4 +307,13 @@ abstract class ProgressTracker {
      * @return delay (in ticks) after which another openTask() would be fair to be called by the same thread again
      */
     abstract long estimateIsolatedDelay(long now);
+
+    void inheritTiming(final ProgressTracker source) {
+        // Sanity check: we should not be losing messages
+        Preconditions.checkArgument(source.tasksEncountered >= tasksEncountered, "{} cannot inherit from {}",
+                this, source);
+
+        tasksEncountered += source.tasksClosed;
+        tasksClosed = source.tasksClosed;
+    }
 }
