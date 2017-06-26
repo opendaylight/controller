@@ -17,30 +17,32 @@ import org.slf4j.LoggerFactory;
  * Base class for tracking throughput and computing delays when processing stream of tasks.
  *
  * <p>The idea is to improve throughput in a typical request-response scenario.
- * A "frontend" is sending requests towards "backend", backend is sending responses back to fronted.
- * Both frontend and backend may be realized by multiple Java threads,
- * so there may be multiple requests not yet responded to.
- * In terms of taks processing, frontend is "opening" tasks and backend is "closing" them.
+ * Multiple "user" threads are submitting requests to a "frontend". The frontend does some pre-processing
+ * and then sends requests to (usually one) "backend". The backend does the main work
+ * and replies to the frontend, which reports to the the corresponding user.
+ * In terms of taks processing, user threads are "opening" tasks and frontend is "closing" them.
  * Latency of the backend may fluctuate wildly. To avoid backend running out of open tasks,
- * there should be a queue of requests frontend can add to.
+ * frontend should maintain a queue of requests for users to submit tasks to.
  * In order to avoid excessive memory consumption, there should be a back-pressure mechanism
- * which blocks the frontend threads for appropriate durations.
- * Frontend can tolerate moderately delayed responses, but it only tolerates small block times.
+ * which blocks the user (submit) threads for appropriate durations.
+ * Users can tolerate moderately delayed responses, but they only tolerates small block (submit) times.
  *
  * <p>An ideal back-pressure algorithm would keep the queue reasonably full,
- * while fairly delaying the frontend threads. In other words, backend idle time should be low,
- * as well as frontend block time dispersion
+ * while fairly delaying the user threads. In other words, backend idle time should be low,
+ * as well as user block time dispersion
  * (as opposed to block time average, which is dictated by overall performance).
  *
  * <p>In order for an algorithm to compute reasonable wait times,
  * various inputs can be useful, mostly related to timing of various stages of task processing.
- * Methods of this class assume "enqueue and wait" usage.
+ * Methods of this class assume "enqueue and wait" usage, submit thread is supposed to block itself when asked to.
  * The delay computation is pessimistic, it expects each participating thread to enqueue another task
  * as soon as its delay time allows.
  *
- * <p>This class is not thread safe, the callers are responsible for guarding against conflicting access.
- * Time is measured in ticks (nanos), methods never look at current time, relying on {@code now} argument instead.
- * This means the sequence of {$code now} argument values is expected to be non-decreasing.
+ * <p>This class is to be used by single frontend. This class is not thread safe,
+ * the frontend is responsible for guarding against conflicting access.
+ * Time is measured in ticks (nanoseconds), methods never look at current time,
+ * relying on {@code now} argument where appropriate.
+ * This means the sequence of {@code now} argument values is expected to be non-decreasing.
  *
  * <p>Input data used for tracking is tightly coupled with TransitQueue#recordCompletion arguments.
  *
