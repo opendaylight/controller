@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_cc1cbfc4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-06-26T14:26:44Z",
+      "side": 1,
+      "message": "To cleanup this TODO, https://git.opendaylight.org/gerrit/#/c/57301/ would have to be merged first.",
+      "range": {
+        "startLine": 245,
+        "startChar": 8,
+        "endLine": 245,
+        "endChar": 15
+      },
+      "revId": "c0fb684b18099461833f7b36a0bab09f1d960eaa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
