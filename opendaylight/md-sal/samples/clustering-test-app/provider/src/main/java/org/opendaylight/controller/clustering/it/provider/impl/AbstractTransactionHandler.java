@@ -53,7 +53,7 @@ abstract class AbstractTransactionHandler {
         @Override
         void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
             futures.remove(execFuture);
-            if (failure != null) {
+            if (failure == null) {
                 failure = cause;
             }
         }
