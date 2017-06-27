@@ -33,7 +33,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
     private long candidateElectionTerm;
 
     @Test
-    public void runTest() throws Exception {
+    public void runTest() {
         testLog.info("PartitionedCandidateOnStartupElectionScenarioTest starting");
 
         setupInitialMember1AndMember2Behaviors();
@@ -47,7 +47,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         testLog.info("PartitionedCandidateOnStartupElectionScenarioTest ending");
     }
 
-    private void sendElectionTimeoutToFollowerMember1() throws Exception {
+    private void sendElectionTimeoutToFollowerMember1() {
         testLog.info("sendElectionTimeoutToFollowerMember1 starting");
 
         // At this point we have no leader. Candidate member 3 would continue to start new elections
@@ -96,7 +96,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         testLog.info("sendElectionTimeoutToFollowerMember1 ending");
     }
 
-    private void resolvePartitionAndSendElectionTimeoutsToCandidateMember3() throws Exception {
+    private void resolvePartitionAndSendElectionTimeoutsToCandidateMember3() {
         testLog.info("resolvePartitionAndSendElectionTimeoutsToCandidateMember3 starting");
 
         // Now send a couple more ElectionTimeouts to Candidate member 3 with the partition resolved.
@@ -208,7 +208,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         testLog.info("setupPartitionedCandidateMember3AndSendElectionTimeouts ending");
     }
 
-    private void setupInitialMember1AndMember2Behaviors() throws Exception {
+    private void setupInitialMember1AndMember2Behaviors() {
         testLog.info("setupInitialMember1AndMember2Behaviors starting");
 
         // Initialize the ReplicatedLog and election term info for member 1 and 2. The current term
@@ -257,6 +257,5 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member3Actor.clear();
 
         testLog.info("setupInitialMember1AndMember2Behaviors ending");
-
     }
 }

@@ -319,8 +319,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
 
                 if (failure != null) {
-                    Throwables.propagateIfInstanceOf(failure.cause(), Exception.class);
-                    Throwables.propagate(failure.cause());
+                    Throwables.propagateIfPossible(failure.cause(), Exception.class);
+                    throw new RuntimeException(failure.cause());
                 }
             }
         };
@@ -348,8 +348,9 @@ public class ShardTransactionTest extends AbstractActorTest {
                 watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
 
                 if (failure != null) {
-                    Throwables.propagateIfInstanceOf(failure.cause(), Exception.class);
-                    Throwables.propagate(failure.cause());
+                    Throwables.throwIfInstanceOf(failure.cause(), Exception.class);
+                    Throwables.throwIfUnchecked(failure.cause());
+                    throw new RuntimeException(failure.cause());
                 }
             }
         };

@@ -35,7 +35,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
     @Override
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (isolatedLeader != null) {
             isolatedLeader.close();
         }
@@ -44,7 +44,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Override
-    protected IsolatedLeader createBehavior(RaftActorContext actorContext) {
+    protected IsolatedLeader createBehavior(final RaftActorContext actorContext) {
         return new IsolatedLeader(actorContext);
     }
 
@@ -54,7 +54,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Override
-    protected MockRaftActorContext createActorContext(ActorRef actor) {
+    protected MockRaftActorContext createActorContext(final ActorRef actor) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setElectionTimeoutFactor(100000);
         MockRaftActorContext context = new MockRaftActorContext("isolated-leader", getSystem(), actor);

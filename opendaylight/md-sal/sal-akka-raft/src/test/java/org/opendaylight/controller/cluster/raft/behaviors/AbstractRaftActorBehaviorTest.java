@@ -55,7 +55,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     RaftActorBehavior behavior;
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (behavior != null) {
             behavior.close();
         }
@@ -71,7 +71,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      * term the RaftActor gets into the Follower state.
      */
     @Test
-    public void testHandleRaftRPCWithNewerTerm() throws Exception {
+    public void testHandleRaftRPCWithNewerTerm() {
         MockRaftActorContext actorContext = createActorContext();
 
         assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, behaviorActor,
@@ -94,7 +94,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      * change it's state and it responds back with a failure.
      */
     @Test
-    public void testHandleAppendEntriesSenderTermLessThanReceiverTerm() throws Exception {
+    public void testHandleAppendEntriesSenderTermLessThanReceiverTerm() {
         MockRaftActorContext context = createActorContext();
         short payloadVersion = 5;
         context.setPayloadVersion(payloadVersion);
@@ -124,7 +124,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
 
     @Test
-    public void testHandleAppendEntriesAddSameEntryToLog() throws Exception {
+    public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
         context.getTermInformation().update(2, "test");
@@ -156,8 +156,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         handleAppendEntriesAddSameEntryToLogReply(behaviorActor);
     }
 
-    protected void handleAppendEntriesAddSameEntryToLogReply(TestActorRef<MessageCollectorActor> replyActor)
-            throws Exception {
+    protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor) {
         AppendEntriesReply reply = MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class);
         Assert.assertNull("Expected no AppendEntriesReply", reply);
     }
@@ -279,8 +278,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
 
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) {
 
         Payload payload = new MockRaftActorContext.MockPayload("");
         setLastLogEntry(actorContext, 1, 0, payload);
@@ -297,12 +296,12 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
-        MockRaftActorContext actorContext, long term, long index, Payload data) {
+        final MockRaftActorContext actorContext, final long term, final long index, final Payload data) {
         return setLastLogEntry(actorContext, new SimpleReplicatedLogEntry(index, term, data));
     }
 
-    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(MockRaftActorContext actorContext,
-            ReplicatedLogEntry logEntry) {
+    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
+            final ReplicatedLogEntry logEntry) {
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
         log.append(logEntry);
         actorContext.setReplicatedLog(log);
@@ -312,7 +311,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected abstract T createBehavior(RaftActorContext actorContext);
 
-    protected final T createBehavior(MockRaftActorContext actorContext) {
+    protected final T createBehavior(final MockRaftActorContext actorContext) {
         T ret = createBehavior((RaftActorContext)actorContext);
         actorContext.setCurrentBehavior(ret);
         return ret;
@@ -326,7 +325,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         return new MockRaftActorContext();
     }
 
-    protected MockRaftActorContext createActorContext(ActorRef actor) {
+    protected MockRaftActorContext createActorContext(final ActorRef actor) {
         return new MockRaftActorContext("test", getSystem(), actor);
     }
 
@@ -346,7 +345,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         return new RequestVoteReply(100, false);
     }
 
-    protected ByteString toByteString(Map<String, String> state) {
+    protected ByteString toByteString(final Map<String, String> state) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(state);
@@ -356,7 +355,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         }
     }
 
-    protected void logStart(String name) {
+    protected void logStart(final String name) {
         LoggerFactory.getLogger(getClass()).info("Starting " + name);
     }
 

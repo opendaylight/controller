@@ -27,7 +27,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionScenarioTest {
 
     @Test
-    public void runTest() throws Exception {
+    public void runTest() {
         testLog.info("DelayedMessagesElectionScenarioTest starting");
 
         setupInitialMemberBehaviors();
@@ -43,7 +43,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         testLog.info("DelayedMessagesElectionScenarioTest ending");
     }
 
-    private void forwardDelayedRequestVoteReplyFromOriginalFollowerMember3ToMember2() throws Exception {
+    private void forwardDelayedRequestVoteReplyFromOriginalFollowerMember3ToMember2() {
         testLog.info("forwardDelayedRequestVoteReplyFromOriginalFollowerMember3ToMember2 starting");
 
         // Now forward the original delayed RequestVoteReply from member 3 to member 2 that granted
@@ -65,7 +65,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         testLog.info("forwardDelayedRequestVoteReplyFromOriginalFollowerMember3ToMember2 ending");
     }
 
-    private void sendElectionTimeoutToFollowerMember3() throws Exception {
+    private void sendElectionTimeoutToFollowerMember3() {
         testLog.info("sendElectionTimeoutToFollowerMember3 starting");
 
         // Send ElectionTimeout to member 3 to simulate missing heartbeat from a Leader. member 3
@@ -104,7 +104,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         testLog.info("sendElectionTimeoutToFollowerMember3 ending");
     }
 
-    private void forwardDelayedRequestVotesToLeaderMember1AndFollowerMember3() throws Exception {
+    private void forwardDelayedRequestVotesToLeaderMember1AndFollowerMember3() {
         testLog.info("forwardDelayedRequestVotesToLeaderMember1AndFollowerMember3 starting");
 
         // At this point member 1 and 3 actors have captured the RequestVote messages. First
@@ -170,7 +170,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 ending");
     }
 
-    private void setupInitialMemberBehaviors() throws Exception {
+    private void setupInitialMemberBehaviors() {
         testLog.info("setupInitialMemberBehaviors starting");
 
         // Create member 2's behavior initially as Follower
@@ -215,6 +215,5 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.clear();
 
         testLog.info("setupInitialMemberBehaviors ending");
-
     }
 }
