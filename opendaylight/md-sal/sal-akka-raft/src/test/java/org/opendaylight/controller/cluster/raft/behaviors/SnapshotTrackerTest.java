@@ -119,7 +119,7 @@ public class SnapshotTrackerTest {
         }
     }
 
-    private byte[] getNextChunk(ByteString bs, int offset, int size) {
+    private static byte[] getNextChunk(final ByteString bs, final int offset, int size) {
         int snapshotLength = bs.size();
         int start = offset;
         if (size > snapshotLength) {

@@ -25,6 +25,7 @@ import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.AbstractMap.SimpleEntry;
@@ -308,13 +309,15 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                     distributedConfigDatastore.getActorContext().getClusterWrapper().getCurrentMemberName(), subtrees);
             return new ProxyProducer(producer, subtrees, shardedDataTreeActor,
                     distributedConfigDatastore.getActorContext(), shards);
-        } else if (response instanceof Exception) {
-            closeProducer(producer);
-            throw Throwables.propagate((Exception) response);
-        } else {
-            closeProducer(producer);
-            throw new RuntimeException("Unexpected response to create producer received." + response);
         }
+
+        closeProducer(producer);
+
+        if (response instanceof Throwable) {
+            Throwables.throwIfUnchecked((Throwable) response);
+            throw new RuntimeException((Throwable) response);
+        }
+        throw new RuntimeException("Unexpected response to create producer received." + response);
     }
 
     @Override
@@ -366,7 +369,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                 shardRegistrationPromise.failure(
                         new DOMDataTreeShardCreationFailedException("Unable to create a cds shard.", throwable));
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return FutureConverters.toJava(shardRegistrationPromise.future());
     }
@@ -458,7 +461,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             public void onFailure(final Throwable throwable) {
                 LOG.error("Removal of shard {} from configuration failed.", prefix, throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> lookupShardFrontend(

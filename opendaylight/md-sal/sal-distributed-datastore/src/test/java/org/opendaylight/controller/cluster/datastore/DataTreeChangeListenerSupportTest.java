@@ -26,7 +26,6 @@ import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Throwables;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +39,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
@@ -68,14 +68,14 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     }
 
     @Test
-    public void testChangeListenerWithNoInitialData() throws Exception {
+    public void testChangeListenerWithNoInitialData() {
         MockDataTreeChangeListener listener = registerChangeListener(TEST_PATH, 0).getKey();
 
         listener.expectNoMoreChanges("Unexpected initial change event");
     }
 
     @Test
-    public void testInitialChangeListenerEventWithContainerPath() throws Exception {
+    public void testInitialChangeListenerEventWithContainerPath() throws DataValidationFailedException {
         writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
 
         Entry<MockDataTreeChangeListener, ActorSelection> entry = registerChangeListener(TEST_PATH, 1);
@@ -100,7 +100,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     }
 
     @Test
-    public void testInitialChangeListenerEventWithListPath() throws Exception {
+    public void testInitialChangeListenerEventWithListPath() throws DataValidationFailedException {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
 
         MockDataTreeChangeListener listener = registerChangeListener(OUTER_LIST_PATH, 1).getKey();
@@ -110,7 +110,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     }
 
     @Test
-    public void testInitialChangeListenerEventWithWildcardedListPath() throws Exception {
+    public void testInitialChangeListenerEventWithWildcardedListPath() throws DataValidationFailedException {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
 
         MockDataTreeChangeListener listener =
@@ -121,7 +121,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     }
 
     @Test
-    public void testInitialChangeListenerEventWithNestedWildcardedListsPath() throws Exception {
+    public void testInitialChangeListenerEventWithNestedWildcardedListsPath() throws DataValidationFailedException {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
                 outerNodeEntry(1, innerNode("one", "two")), outerNodeEntry(2, innerNode("three", "four")))));
 
@@ -160,16 +160,17 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         MockDataTreeChangeListener listener = new MockDataTreeChangeListener(expectedEvents);
         ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TestModel.TEST_PATH));
 
+        RegisterDataTreeNotificationListenerReply reply;
         try {
-            RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)
-                Await.result(Patterns.ask(shardActor, new RegisterDataTreeChangeListener(path, dclActor, false),
-                    new Timeout(5, TimeUnit.SECONDS)), Duration.create(5, TimeUnit.SECONDS));
-            return new SimpleEntry<>(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));
-
+            reply = (RegisterDataTreeNotificationListenerReply)
+                    Await.result(Patterns.ask(shardActor, new RegisterDataTreeChangeListener(path, dclActor, false),
+                        new Timeout(5, TimeUnit.SECONDS)), Duration.create(5, TimeUnit.SECONDS));
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            Throwables.propagate(e);
-            return null;
+            throw new RuntimeException(e);
         }
+        return new SimpleEntry<>(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));
     }
 
     private void createShard() {

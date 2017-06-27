@@ -378,9 +378,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         Uninterruptibles.awaitUninterruptibly(readComplete, 5, TimeUnit.SECONDS);
 
-        if (caughtEx.get() != null) {
-            Throwables.propagateIfInstanceOf(caughtEx.get(), Exception.class);
-            Throwables.propagate(caughtEx.get());
+        final Throwable t = caughtEx.get();
+        if (t != null) {
+            Throwables.propagateIfPossible(t, Exception.class);
+            throw new RuntimeException(t);
         }
 
         // This sends the batched modification.

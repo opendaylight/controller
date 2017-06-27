@@ -26,7 +26,6 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
@@ -91,7 +90,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
     @Override
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (follower != null) {
             follower.close();
         }
@@ -100,7 +99,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected Follower createBehavior(RaftActorContext actorContext) {
+    protected Follower createBehavior(final RaftActorContext actorContext) {
         return spy(new Follower(actorContext));
     }
 
@@ -110,7 +109,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected  MockRaftActorContext createActorContext(ActorRef actorRef) {
+    protected  MockRaftActorContext createActorContext(final ActorRef actorRef) {
         MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
         context.setPayloadVersion(payloadVersion);
         return context;
@@ -209,7 +208,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
 
     @Test
-    public void testHandleFirstAppendEntries() throws Exception {
+    public void testHandleFirstAppendEntries() {
         logStart("testHandleFirstAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -237,7 +236,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleFirstAppendEntriesWithPrevIndexMinusOne() throws Exception {
+    public void testHandleFirstAppendEntriesWithPrevIndexMinusOne() {
         logStart("testHandleFirstAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -260,8 +259,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog()
-            throws Exception {
+    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog() {
         logStart("testHandleFirstAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -287,8 +285,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot()
-            throws Exception {
+    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot() {
         logStart("testHandleFirstAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -313,8 +310,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testFirstAppendEntriesWithNoPrevIndexAndReplicatedToAllPresentInSnapshotButCalculatedPrevEntryMissing()
-            throws Exception {
+    public void testFirstAppendEntriesWithNoPrevIndexAndReplToAllPresentInSnapshotButCalculatedPrevEntryMissing() {
         logStart(
                "testFirstAppendEntriesWithNoPrevIndexAndReplicatedToAllPresentInSnapshotButCalculatedPrevEntryMissing");
 
@@ -340,7 +336,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleSyncUpAppendEntries() throws Exception {
+    public void testHandleSyncUpAppendEntries() {
         logStart("testHandleSyncUpAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -364,11 +360,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         context.setLastApplied(101);
         context.setCommitIndex(101);
-        setLastLogEntry(context, 1, 101,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
 
-        entries = Arrays.asList(
-                newReplicatedLogEntry(2, 101, "foo"));
+        entries = Arrays.asList(newReplicatedLogEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         appendEntries = new AppendEntries(2, "leader-1", 101, 1, entries, 102, 101, (short)0);
@@ -387,11 +381,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         syncStatus = MessageCollectorActor.getFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
         assertNull(syncStatus);
-
     }
 
     @Test
-    public void testHandleAppendEntriesLeaderChangedBeforeSyncUpComplete() throws Exception {
+    public void testHandleAppendEntriesLeaderChangedBeforeSyncUpComplete() {
         logStart("testHandleAppendEntriesLeaderChangedBeforeSyncUpComplete");
 
         MockRaftActorContext context = createActorContext();
@@ -428,12 +421,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         // We get a new message saying initial status is not done
         assertFalse(syncStatus.isInitialSyncDone());
-
     }
 
-
     @Test
-    public void testHandleAppendEntriesLeaderChangedAfterSyncUpComplete() throws Exception {
+    public void testHandleAppendEntriesLeaderChangedAfterSyncUpComplete() {
         logStart("testHandleAppendEntriesLeaderChangedAfterSyncUpComplete");
 
         MockRaftActorContext context = createActorContext();
@@ -489,9 +480,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         // We get a new message saying initial status is not done
         assertFalse(syncStatus.isInitialSyncDone());
-
     }
-
 
     /**
      * This test verifies that when an AppendEntries RPC is received by a RaftActor
@@ -500,7 +489,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * sets it current applied state to the commitIndex of the sender.
      */
     @Test
-    public void testHandleAppendEntriesWithNewerCommitIndex() throws Exception {
+    public void testHandleAppendEntriesWithNewerCommitIndex() {
         logStart("testHandleAppendEntriesWithNewerCommitIndex");
 
         MockRaftActorContext context = createActorContext();
@@ -806,7 +795,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * the follower its applied correctly.
      */
     @Test
-    public void testHandleInstallSnapshot() throws Exception {
+    public void testHandleInstallSnapshot() {
         logStart("testHandleInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
@@ -864,13 +853,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertNull("Expected null SnapshotTracker", follower.getSnapshotTracker());
     }
 
-
     /**
      * Verify that when an AppendEntries is sent to a follower during a snapshot install
      * the Follower short-circuits the processing of the AppendEntries message.
      */
     @Test
-    public void testReceivingAppendEntriesDuringInstallSnapshot() throws Exception {
+    public void testReceivingAppendEntriesDuringInstallSnapshot() {
         logStart("testReceivingAppendEntriesDuringInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
@@ -913,7 +901,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testReceivingAppendEntriesDuringInstallSnapshotFromDifferentLeader() throws Exception {
+    public void testReceivingAppendEntriesDuringInstallSnapshotFromDifferentLeader() {
         logStart("testReceivingAppendEntriesDuringInstallSnapshotFromDifferentLeader");
 
         MockRaftActorContext context = createActorContext();
@@ -956,7 +944,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testInitialSyncUpWithHandleInstallSnapshotFollowedByAppendEntries() throws Exception {
+    public void testInitialSyncUpWithHandleInstallSnapshotFollowedByAppendEntries() {
         logStart("testInitialSyncUpWithHandleInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
@@ -1009,7 +997,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleOutOfSequenceInstallSnapshot() throws Exception {
+    public void testHandleOutOfSequenceInstallSnapshot() {
         logStart("testHandleOutOfSequenceInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
@@ -1111,7 +1099,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testCaptureSnapshotOnLastEntryInAppendEntries() throws Exception {
+    public void testCaptureSnapshotOnLastEntryInAppendEntries() {
         String id = "testCaptureSnapshotOnLastEntryInAppendEntries";
         logStart(id);
 
@@ -1166,7 +1154,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testCaptureSnapshotOnMiddleEntryInAppendEntries() throws Exception {
+    public void testCaptureSnapshotOnMiddleEntryInAppendEntries() {
         String id = "testCaptureSnapshotOnMiddleEntryInAppendEntries";
         logStart(id);
 
@@ -1241,7 +1229,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testCaptureSnapshotOnAppendEntriesWithUnapplied() throws Exception {
+    public void testCaptureSnapshotOnAppendEntriesWithUnapplied() {
         String id = "testCaptureSnapshotOnAppendEntriesWithUnapplied";
         logStart(id);
 
@@ -1299,31 +1287,35 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private RaftActorSnapshotCohort newRaftActorSnapshotCohort(final AtomicReference<MockRaftActor> followerRaftActor) {
+    private static RaftActorSnapshotCohort newRaftActorSnapshotCohort(
+            final AtomicReference<MockRaftActor> followerRaftActor) {
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef,
+                    final java.util.Optional<OutputStream> installSnapshotStream) {
                 try {
                     actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
                             installSnapshotStream), actorRef);
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
-                    Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
 
             @Override
-            public void applySnapshot(State snapshotState) {
+            public void applySnapshot(final State snapshotState) {
             }
 
             @Override
-            public State deserializeSnapshot(ByteSource snapshotBytes) {
+            public State deserializeSnapshot(final ByteSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };
         return snapshotCohort;
     }
 
-    public byte[] getNextChunk(ByteString bs, int offset, int chunkSize) {
+    public byte[] getNextChunk(final ByteString bs, final int offset, final int chunkSize) {
         int snapshotLength = bs.size();
         int start = offset;
         int size = chunkSize;
@@ -1340,14 +1332,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         return nextChunk;
     }
 
-    private void expectAndVerifyAppendEntriesReply(int expTerm, boolean expSuccess,
-            String expFollowerId, long expLogLastTerm, long expLogLastIndex) {
+    private void expectAndVerifyAppendEntriesReply(final int expTerm, final boolean expSuccess,
+            final String expFollowerId, final long expLogLastTerm, final long expLogLastIndex) {
         expectAndVerifyAppendEntriesReply(expTerm, expSuccess, expFollowerId, expLogLastTerm, expLogLastIndex, false);
     }
 
-    private void expectAndVerifyAppendEntriesReply(int expTerm, boolean expSuccess,
-                                                   String expFollowerId, long expLogLastTerm, long expLogLastIndex,
-                                                   boolean expForceInstallSnapshot) {
+    private void expectAndVerifyAppendEntriesReply(final int expTerm, final boolean expSuccess,
+            final String expFollowerId, final long expLogLastTerm, final long expLogLastIndex,
+            final boolean expForceInstallSnapshot) {
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
@@ -1362,7 +1354,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
 
-    private static ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
+    private static ReplicatedLogEntry newReplicatedLogEntry(final long term, final long index, final String data) {
         return new SimpleReplicatedLogEntry(index, term,
                 new MockRaftActorContext.MockPayload(data));
     }
@@ -1377,8 +1369,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
 
         String expVotedFor = rpc instanceof RequestVote ? ((RequestVote)rpc).getCandidateId() : null;
@@ -1386,8 +1378,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor)
-            throws Exception {
+    protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor) {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(replyActor, AppendEntriesReply.class);
         assertEquals("isSuccess", true, reply.isSuccess());
     }

@@ -61,7 +61,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Override
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (candidate != null) {
             candidate.close();
         }
@@ -307,7 +307,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Test
     @Override
-    public void testHandleAppendEntriesAddSameEntryToLog() throws Exception {
+    public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
         context.getTermInformation().update(2, "test");
@@ -347,7 +347,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         return new Candidate(actorContext);
     }
 
-    @Override protected MockRaftActorContext createActorContext() {
+    @Override
+    protected MockRaftActorContext createActorContext() {
         return new MockRaftActorContext("candidate", getSystem(), candidateActor);
     }
 
@@ -366,7 +367,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Override
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
-            final ActorRef actorRef, final RaftRPC rpc) throws Exception {
+            final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         if (rpc instanceof RequestVote) {
             assertEquals("New votedFor", ((RequestVote)rpc).getCandidateId(),
