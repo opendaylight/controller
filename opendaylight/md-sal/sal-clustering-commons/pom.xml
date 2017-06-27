@@ -8,7 +8,6 @@
     <relativePath>../../config/config-parent</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-clustering-commons</artifactId>
   <version>1.6.0-SNAPSHOT</version>
   <packaging>bundle</packaging>

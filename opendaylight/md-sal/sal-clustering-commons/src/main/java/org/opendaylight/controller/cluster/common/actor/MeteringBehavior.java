@@ -104,7 +104,7 @@ public class MeteringBehavior implements Procedure<Object> {
             meteredActor.onReceive(message);
         } catch (Throwable e) {
             Throwables.propagateIfPossible(e, Exception.class);
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         } finally {
             //stop timers
             contextByMsgType.stop();

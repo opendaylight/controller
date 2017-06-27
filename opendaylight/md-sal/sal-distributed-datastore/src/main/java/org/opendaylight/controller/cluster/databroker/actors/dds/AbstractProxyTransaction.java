@@ -11,7 +11,6 @@ import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -138,7 +137,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                 latch.await();
             } catch (InterruptedException e) {
                 LOG.warn("Interrupted while waiting for latch of {}", successor);
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
             return successor;
         }

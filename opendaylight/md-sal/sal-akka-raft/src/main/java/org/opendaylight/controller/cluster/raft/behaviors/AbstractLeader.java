@@ -14,7 +14,6 @@ import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -102,8 +101,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private Optional<SnapshotHolder> snapshotHolder = Optional.absent();
     private int minReplicationCount;
 
-    protected AbstractLeader(RaftActorContext context, RaftState state,
-            @Nullable AbstractLeader initializeFromLeader) {
+    protected AbstractLeader(final RaftActorContext context, final RaftState state,
+            @Nullable final AbstractLeader initializeFromLeader) {
         super(context, state);
 
         appendEntriesMessageSlicer = MessageSlicer.builder().logContext(logName())
@@ -136,7 +135,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
     }
 
-    protected AbstractLeader(RaftActorContext context, RaftState state) {
+    protected AbstractLeader(final RaftActorContext context, final RaftState state) {
         this(context, state, null);
     }
 
@@ -149,7 +148,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return followerToLog.keySet();
     }
 
-    public void addFollower(String followerId) {
+    public void addFollower(final String followerId) {
         FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(
                 context.getPeerInfo(followerId), -1, context);
         followerToLog.put(followerId, followerLogInformation);
@@ -159,7 +158,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    public void removeFollower(String followerId) {
+    public void removeFollower(final String followerId) {
         followerToLog.remove(followerId);
     }
 
@@ -186,7 +185,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    void setSnapshot(@Nullable SnapshotHolder snapshotHolder) {
+    void setSnapshot(@Nullable final SnapshotHolder snapshotHolder) {
         this.snapshotHolder = Optional.fromNullable(snapshotHolder);
     }
 
@@ -196,8 +195,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntries(ActorRef sender,
-        AppendEntries appendEntries) {
+    protected RaftActorBehavior handleAppendEntries(final ActorRef sender,
+        final AppendEntries appendEntries) {
 
         log.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
 
@@ -205,7 +204,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
+    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
+            final AppendEntriesReply appendEntriesReply) {
         log.trace("{}: handleAppendEntriesReply: {}", logName(), appendEntriesReply);
 
         // Update the FollowerLogInformation
@@ -403,8 +403,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    private boolean updateFollowerLogInformation(FollowerLogInformation followerLogInformation,
-            AppendEntriesReply appendEntriesReply) {
+    private boolean updateFollowerLogInformation(final FollowerLogInformation followerLogInformation,
+            final AppendEntriesReply appendEntriesReply) {
         boolean updated = followerLogInformation.setMatchIndex(appendEntriesReply.getLogLastIndex());
         updated = followerLogInformation.setNextIndex(appendEntriesReply.getLogLastIndex() + 1) || updated;
 
@@ -431,7 +431,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
+    protected ClientRequestTracker removeClientRequestTracker(final long logIndex) {
         final Iterator<ClientRequestTracker> it = trackers.iterator();
         while (it.hasNext()) {
             final ClientRequestTracker t = it.next();
@@ -445,15 +445,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply) {
+    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender,
+        final RequestVoteReply requestVoteReply) {
         return this;
     }
 
     protected void beforeSendHeartbeat(){}
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         Preconditions.checkNotNull(sender, "sender should not be null");
 
         if (appendEntriesMessageSlicer.handleMessage(message)) {
@@ -509,7 +509,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return this;
     }
 
-    private void handleInstallSnapshotReply(InstallSnapshotReply reply) {
+    private void handleInstallSnapshotReply(final InstallSnapshotReply reply) {
         log.debug("{}: handleInstallSnapshotReply: {}", logName(), reply);
 
         String followerId = reply.getFollowerId();
@@ -603,7 +603,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return false;
     }
 
-    private void replicate(Replicate replicate) {
+    private void replicate(final Replicate replicate) {
         long logIndex = replicate.getReplicatedLogEntry().getIndex();
 
         log.debug("{}: Replicate message: identifier: {}, logIndex: {}, payload: {}, isSendImmediate: {}", logName(),
@@ -630,7 +630,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    protected void sendAppendEntries(long timeSinceLastActivityInterval, boolean isHeartbeat) {
+    protected void sendAppendEntries(final long timeSinceLastActivityInterval, final boolean isHeartbeat) {
         // Send an AppendEntries to all followers
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             final String followerId = e.getKey();
@@ -647,8 +647,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * This method checks if any update needs to be sent to the given follower. This includes append log entries,
      * sending next snapshot chunk, and initiating a snapshot.
      */
-    private void sendUpdatesToFollower(String followerId, FollowerLogInformation followerLogInformation,
-                                       boolean sendHeartbeat, boolean isHeartbeat) {
+    private void sendUpdatesToFollower(final String followerId, final FollowerLogInformation followerLogInformation,
+                                       final boolean sendHeartbeat, final boolean isHeartbeat) {
 
         ActorSelection followerActor = context.getPeerActorSelection(followerId);
         if (followerActor != null) {
@@ -843,7 +843,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * @param followerId the id of the follower.
      * @return true if capture was initiated, false otherwise.
      */
-    public boolean initiateCaptureSnapshot(String followerId) {
+    public boolean initiateCaptureSnapshot(final String followerId) {
         FollowerLogInformation followerLogInfo = followerToLog.get(followerId);
         if (snapshotHolder.isPresent()) {
             // If a snapshot is present in the memory, most likely another install is in progress no need to capture
@@ -865,7 +865,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return captureInitiated;
     }
 
-    private boolean canInstallSnapshot(long nextIndex) {
+    private boolean canInstallSnapshot(final long nextIndex) {
         // If the follower's nextIndex is -1 then we might as well send it a snapshot
         // Otherwise send it a snapshot only if the nextIndex is not present in the log but is present
         // in the snapshot
@@ -897,7 +897,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      *  Sends a snapshot chunk to a given follower
      *  InstallSnapshot should qualify as a heartbeat too.
      */
-    private void sendSnapshotChunk(ActorSelection followerActor, FollowerLogInformation followerLogInfo) {
+    private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo) {
         if (snapshotHolder.isPresent()) {
             LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
             if (installSnapshotState == null) {
@@ -938,11 +938,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     actor()
                 );
 
-                log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
-                        installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
             } catch (IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
+
+            log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
+                installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
         }
     }
 
@@ -961,7 +962,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    private void scheduleHeartBeat(FiniteDuration interval) {
+    private void scheduleHeartBeat(final FiniteDuration interval) {
         if (followerToLog.isEmpty()) {
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
@@ -1028,7 +1029,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    public FollowerLogInformation getFollower(String followerId) {
+    public FollowerLogInformation getFollower(final String followerId) {
         return followerToLog.get(followerId);
     }
 
@@ -1042,7 +1043,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         private final long lastIncludedIndex;
         private final ByteSource snapshotBytes;
 
-        SnapshotHolder(Snapshot snapshot, ByteSource snapshotBytes) {
+        SnapshotHolder(final Snapshot snapshot, final ByteSource snapshotBytes) {
             this.lastIncludedTerm = snapshot.getLastAppliedTerm();
             this.lastIncludedIndex = snapshot.getLastAppliedIndex();
             this.snapshotBytes = snapshotBytes;

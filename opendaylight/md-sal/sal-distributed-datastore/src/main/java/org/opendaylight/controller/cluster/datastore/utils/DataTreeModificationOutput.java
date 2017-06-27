@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import com.google.common.base.Throwables;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,7 +32,7 @@ public final class DataTreeModificationOutput {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static void toFile(File file, DataTreeModification modification) {
+    public static void toFile(final File file, final DataTreeModification modification) {
         try (FileOutputStream outStream = new FileOutputStream(file)) {
             modification.applyToCursor(new DataTreeModificationOutputCursor(new DataOutputStream(outStream)));
         } catch (IOException | RuntimeException e) {
@@ -44,32 +43,32 @@ public final class DataTreeModificationOutput {
     private static class DataTreeModificationOutputCursor extends AbstractDataTreeModificationCursor {
         private final DataOutputStream output;
 
-        DataTreeModificationOutputCursor(DataOutputStream output) {
+        DataTreeModificationOutputCursor(final DataOutputStream output) {
             this.output = output;
         }
 
         @Override
-        public void delete(PathArgument child) {
+        public void delete(final PathArgument child) {
             try {
                 output.write("\nDELETE -> ".getBytes(StandardCharsets.UTF_8));
                 output.write(current().node(child).toString().getBytes(StandardCharsets.UTF_8));
                 output.writeByte('\n');
             } catch (IOException e) {
-                Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         }
 
         @Override
-        public void merge(PathArgument child, NormalizedNode<?, ?> data) {
+        public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
             outputPathAndNode("MERGE", child, data);
         }
 
         @Override
-        public void write(PathArgument child, NormalizedNode<?, ?> data) {
+        public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
             outputPathAndNode("WRITE", child, data);
         }
 
-        private void outputPathAndNode(String name, PathArgument child, NormalizedNode<?, ?> data) {
+        private void outputPathAndNode(final String name, final PathArgument child, final NormalizedNode<?, ?> data) {
             try {
                 output.writeByte('\n');
                 output.write(name.getBytes(StandardCharsets.UTF_8));
@@ -79,7 +78,7 @@ public final class DataTreeModificationOutput {
                 NormalizedNodeXMLOutput.toStream(output, data);
                 output.writeByte('\n');
             } catch (IOException | XMLStreamException e) {
-                Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         }
     }

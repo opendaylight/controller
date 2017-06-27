@@ -306,7 +306,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws Exception {
+            final NormalizedNode<?,?> node) throws DataValidationFailedException {
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
@@ -325,7 +325,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws Exception {
+            final NormalizedNode<?,?> node) throws DataValidationFailedException {
         final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
         batched.addModification(new MergeModification(id, node));
         batched.setReady(true);

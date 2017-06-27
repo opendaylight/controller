@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -48,8 +47,10 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
         try {
             return (List<String>) Await.result(
                 Patterns.ask(shardManager, GetLocalShardIds.INSTANCE, ASK_TIMEOUT_MILLIS), Duration.Inf());
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -58,7 +59,7 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
         return syncStatus;
     }
 
-    void setSyncStatus(boolean syncStatus) {
+    void setSyncStatus(final boolean syncStatus) {
         this.syncStatus = syncStatus;
     }
 
@@ -79,8 +80,10 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
                 try {
                     Await.result(Patterns.ask(shardManager, new SwitchShardBehavior(shardId, state, term),
                         ASK_TIMEOUT_MILLIS), Duration.Inf());
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
                 break;
             case Candidate:
@@ -91,13 +94,13 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
     }
 
     @Override
-    public void switchAllLocalShardsState(String newState, long term) {
+    public void switchAllLocalShardsState(final String newState, final long term) {
         LOG.info("switchAllLocalShardsState called newState = {}, term = {}", newState, term);
         requestSwitchShardState(null, newState, term);
     }
 
     @Override
-    public void switchShardState(String shardId, String newState, long term) {
+    public void switchShardState(final String shardId, final String newState, final long term) {
         final ShardIdentifier identifier = ShardIdentifier.fromShardIdString(shardId);
         LOG.info("switchShardState called shardName = {}, newState = {}, term = {}", shardId, newState, term);
         requestSwitchShardState(identifier, newState, term);
