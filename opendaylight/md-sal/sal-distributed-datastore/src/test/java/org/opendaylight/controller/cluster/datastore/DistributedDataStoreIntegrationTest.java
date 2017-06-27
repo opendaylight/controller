@@ -554,7 +554,9 @@ public class DistributedDataStoreIntegrationTest {
                     txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
                     fail("Expected NotInitializedException");
                 } catch (final Exception e) {
-                    Throwables.propagate(Throwables.getRootCause(e));
+                    final Throwable root = Throwables.getRootCause(e);
+                    Throwables.throwIfUnchecked(root);
+                    throw new RuntimeException(root);
                 } finally {
                     blockRecoveryLatch.countDown();
                 }
@@ -625,7 +627,9 @@ public class DistributedDataStoreIntegrationTest {
                         txReadFuture.get().checkedGet(5, TimeUnit.SECONDS);
                         fail("Expected NotInitializedException");
                     } catch (final ReadFailedException e) {
-                        Throwables.propagate(Throwables.getRootCause(e));
+                        final Throwable root = Throwables.getRootCause(e);
+                        Throwables.throwIfUnchecked(root);
+                        throw new RuntimeException(root);
                     } finally {
                         blockRecoveryLatch.countDown();
                     }

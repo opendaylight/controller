@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -52,8 +51,10 @@ public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
         try {
             return (DataStoreClient) Await.result(ExplicitAsk.ask(actor, GET_CLIENT_FACTORY,
                 Timeout.apply(timeout, unit)), Duration.Inf());
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }

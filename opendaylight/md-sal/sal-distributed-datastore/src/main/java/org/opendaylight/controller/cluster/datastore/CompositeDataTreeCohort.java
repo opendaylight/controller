@@ -268,8 +268,8 @@ class CompositeDataTreeCohort {
             while (it.hasNext()) {
                 firstEx.addSuppressed(it.next().cause());
             }
-            Throwables.propagateIfInstanceOf(firstEx, ExecutionException.class);
-            Throwables.propagateIfInstanceOf(firstEx, TimeoutException.class);
+            Throwables.throwIfInstanceOf(firstEx, ExecutionException.class);
+            Throwables.throwIfInstanceOf(firstEx, TimeoutException.class);
             throw new ExecutionException(firstEx);
         }
         changeStateFrom(currentState, afterState);

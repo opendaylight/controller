@@ -95,7 +95,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     @Override
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (leader != null) {
             leader.close();
         }
@@ -159,7 +159,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
 
-    private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long index) {
+    private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long index) {
         return sendReplicate(actorContext, 1, index);
     }
 
@@ -1240,11 +1240,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Override
-    protected MockRaftActorContext createActorContext(ActorRef actorRef) {
+    protected MockRaftActorContext createActorContext(final ActorRef actorRef) {
         return createActorContext(LEADER_ID, actorRef);
     }
 
-    private MockRaftActorContext createActorContext(String id, ActorRef actorRef) {
+    private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
@@ -1895,7 +1895,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertTrue("Expected Leader", newBehavior instanceof Leader);
     }
 
-    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(RaftPolicy raftPolicy) {
+    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(final RaftPolicy raftPolicy) {
         ActorRef followerActor1 = getSystem().actorOf(MessageCollectorActor.props(), "follower-1");
         ActorRef followerActor2 = getSystem().actorOf(MessageCollectorActor.props(), "follower-2");
 
@@ -2377,8 +2377,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Override
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }
@@ -2388,7 +2388,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         private final long electionTimeOutIntervalMillis;
         private final int snapshotChunkSize;
 
-        MockConfigParamsImpl(long electionTimeOutIntervalMillis, int snapshotChunkSize) {
+        MockConfigParamsImpl(final long electionTimeOutIntervalMillis, final int snapshotChunkSize) {
             super();
             this.electionTimeOutIntervalMillis = electionTimeOutIntervalMillis;
             this.snapshotChunkSize = snapshotChunkSize;

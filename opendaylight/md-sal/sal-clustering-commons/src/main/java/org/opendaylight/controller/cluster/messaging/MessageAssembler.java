@@ -40,7 +40,7 @@ public class MessageAssembler implements AutoCloseable {
     private final BiConsumer<Object, ActorRef> assembledMessageCallback;
     private final String logContext;
 
-    private MessageAssembler(Builder builder) {
+    private MessageAssembler(final Builder builder) {
         this.fileBackedStreamFactory = Preconditions.checkNotNull(builder.fileBackedStreamFactory,
                 "FiledBackedStreamFactory cannot be null");
         this.assembledMessageCallback = Preconditions.checkNotNull(builder.assembledMessageCallback,
@@ -69,7 +69,7 @@ public class MessageAssembler implements AutoCloseable {
      * @param message the message to check
      * @return true if handled, false otherwise
      */
-    public static boolean isHandledMessage(Object message) {
+    public static boolean isHandledMessage(final Object message) {
         return message instanceof MessageSlice || message instanceof AbortSlicing;
     }
 
@@ -144,7 +144,7 @@ public class MessageAssembler implements AutoCloseable {
                 messageSlice.getSliceIndex()), true);
     }
 
-    private void processMessageSliceForState(final MessageSlice messageSlice, AssembledMessageState state,
+    private void processMessageSliceForState(final MessageSlice messageSlice, final AssembledMessageState state,
             final ActorRef sendTo) {
         final Identifier identifier = messageSlice.getIdentifier();
         final ActorRef replyTo = messageSlice.getReplyTo();
@@ -177,7 +177,7 @@ public class MessageAssembler implements AutoCloseable {
         }
     }
 
-    private Object reAssembleMessage(final AssembledMessageState state) throws MessageSliceException {
+    private static Object reAssembleMessage(final AssembledMessageState state) throws MessageSliceException {
         try {
             final ByteSource assembledBytes = state.getAssembledBytes();
             try (ObjectInputStream in = new ObjectInputStream(assembledBytes.openStream())) {
@@ -190,7 +190,7 @@ public class MessageAssembler implements AutoCloseable {
         }
     }
 
-    private void onAbortSlicing(AbortSlicing message) {
+    private void onAbortSlicing(final AbortSlicing message) {
         removeState(message.getIdentifier());
     }
 
@@ -199,7 +199,7 @@ public class MessageAssembler implements AutoCloseable {
         stateCache.invalidate(identifier);
     }
 
-    private void stateRemoved(RemovalNotification<Identifier, AssembledMessageState> notification) {
+    private void stateRemoved(final RemovalNotification<Identifier, AssembledMessageState> notification) {
         if (notification.wasEvicted()) {
             LOG.warn("{}: AssembledMessageState for {} was expired from the cache", logContext, notification.getKey());
         } else {
@@ -211,7 +211,7 @@ public class MessageAssembler implements AutoCloseable {
     }
 
     @VisibleForTesting
-    boolean hasState(Identifier forIdentifier) {
+    boolean hasState(final Identifier forIdentifier) {
         boolean exists = stateCache.getIfPresent(forIdentifier) != null;
         stateCache.cleanUp();
         return exists;
