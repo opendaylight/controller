@@ -13,7 +13,6 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,14 +54,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
-            public void update(long newTerm, String newVotedFor) {
+            public void update(final long newTerm, final String newVotedFor) {
                 this.currentTerm = newTerm;
                 this.votedFor = newVotedFor;
 
                 // TODO : Write to some persistent state
             }
 
-            @Override public void updateAndPersist(long newTerm, String newVotedFor) {
+            @Override public void updateAndPersist(final long newTerm, final String newVotedFor) {
                 update(newTerm, newVotedFor);
             }
         };
@@ -74,7 +73,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
-    public MockRaftActorContext(String id, ActorSystem system, ActorRef actor) {
+    public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
         super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<>(),
             new DefaultConfigParamsImpl(), new NonPersistentDataProvider(),
             applyState -> actor.tell(applyState, actor), LOG);
@@ -95,11 +94,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         setLastApplied(replicatedLog.lastIndex());
     }
 
-    @Override public ActorRef actorOf(Props props) {
+    @Override public ActorRef actorOf(final Props props) {
         return system.actorOf(props);
     }
 
-    @Override public ActorSelection actorSelection(String path) {
+    @Override public ActorSelection actorSelection(final String path) {
         return system.actorSelection(path);
     }
 
@@ -107,7 +106,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         return this.system;
     }
 
-    @Override public ActorSelection getPeerActorSelection(String peerId) {
+    @Override public ActorSelection getPeerActorSelection(final String peerId) {
         String peerAddress = getPeerAddress(peerId);
         if (peerAddress != null) {
             return actorSelection(peerAddress);
@@ -115,7 +114,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         return null;
     }
 
-    public void setPeerAddresses(Map<String, String> peerAddresses) {
+    public void setPeerAddresses(final Map<String, String> peerAddresses) {
         for (String id: getPeerIds()) {
             removePeer(id);
         }
@@ -132,23 +131,23 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         snapshotManager.setSnapshotCohort(new RaftActorSnapshotCohort() {
             @Override
-            public State deserializeSnapshot(ByteSource snapshotBytes) throws IOException {
+            public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
                 return ByteState.of(snapshotBytes.read());
             }
 
             @Override
-            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
             }
 
             @Override
-            public void applySnapshot(State snapshotState) {
+            public void applySnapshot(final State snapshotState) {
             }
         });
 
         return snapshotManager;
     }
 
-    public void setCreateSnapshotProcedure(Consumer<Optional<OutputStream>> createSnapshotProcedure) {
+    public void setCreateSnapshotProcedure(final Consumer<Optional<OutputStream>> createSnapshotProcedure) {
         this.createSnapshotProcedure = createSnapshotProcedure;
     }
 
@@ -157,7 +156,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         return raftPolicy != null ? raftPolicy : super.getRaftPolicy();
     }
 
-    public void setRaftPolicy(RaftPolicy raftPolicy) {
+    public void setRaftPolicy(final RaftPolicy raftPolicy) {
         this.raftPolicy = raftPolicy;
     }
 
@@ -168,30 +167,32 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
+        public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
         }
 
         @Override
-        public boolean shouldCaptureSnapshot(long logIndex) {
+        public boolean shouldCaptureSnapshot(final long logIndex) {
             return false;
         }
 
         @Override
-        public boolean removeFromAndPersist(long index) {
+        public boolean removeFromAndPersist(final long index) {
             return removeFrom(index) >= 0;
         }
 
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback,
-                boolean doAsync) {
+        public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
+                final Procedure<ReplicatedLogEntry> callback, final boolean doAsync) {
             append(replicatedLogEntry);
 
             if (callback != null) {
                 try {
                     callback.apply(replicatedLogEntry);
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
-                    Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -207,12 +208,12 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public MockPayload() {
         }
 
-        public MockPayload(String data) {
+        public MockPayload(final String data) {
             this.value = data;
             size = value.length();
         }
 
-        public MockPayload(String data, int size) {
+        public MockPayload(final String data, final int size) {
             this(data);
             this.size = size;
         }
@@ -236,7 +237,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -261,7 +262,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public static class MockReplicatedLogBuilder {
         private final ReplicatedLog mockLog = new SimpleReplicatedLog();
 
-        public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
+        public  MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {
                 this.mockLog.append(new SimpleReplicatedLogEntry(i, term,
                         new MockRaftActorContext.MockPayload(Integer.toString(i))));
@@ -269,7 +270,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             return this;
         }
 
-        public  MockReplicatedLogBuilder addEntry(int index, int term, MockPayload payload) {
+        public  MockReplicatedLogBuilder addEntry(final int index, final int term, final MockPayload payload) {
             this.mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
             return this;
         }

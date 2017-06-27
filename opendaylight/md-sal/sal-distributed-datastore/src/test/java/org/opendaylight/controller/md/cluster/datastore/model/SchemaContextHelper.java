@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import com.google.common.base.Throwables;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -65,7 +64,7 @@ public class SchemaContextHelper {
         try {
             return YangParserTestUtils.parseYangSources(new File("src/main/yang/entity-owners.yang"));
         } catch (IOException | ReactorException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }

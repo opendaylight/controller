@@ -158,7 +158,8 @@ public class ConcurrentDOMDataBrokerTest {
         assertEquals("Submit complete", true, doneLatch.await(5, TimeUnit.SECONDS));
 
         if (caughtEx.get() != null) {
-            Throwables.propagate(caughtEx.get());
+            Throwables.throwIfUnchecked(caughtEx.get());
+            throw new RuntimeException(caughtEx.get());
         }
 
         assertEquals("Task count", doAsync ? 1 : 0, futureExecutor.getTaskCount());
