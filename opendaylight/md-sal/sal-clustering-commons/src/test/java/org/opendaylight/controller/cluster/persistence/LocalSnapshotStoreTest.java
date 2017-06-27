@@ -28,7 +28,6 @@ import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.serialization.Snapshot;
 import akka.persistence.serialization.SnapshotSerializer;
 import akka.testkit.JavaTestKit;
-import com.google.common.base.Throwables;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -152,15 +151,16 @@ public class LocalSnapshotStoreTest {
         assertEquals("SelectedSnapshot snapshot", "one", possibleSnapshot.get().snapshot());
     }
 
+    @SuppressWarnings("checkstyle:illegalThrows")
     @Test(expected = IOException.class)
-    public void testDoLoadAsyncWithFailure() throws IOException {
+    public void testDoLoadAsyncWithFailure() throws Throwable {
         createSnapshotFile(PERSISTENCE_ID, null, 1, 2000);
 
         JavaTestKit probe = new JavaTestKit(system);
         snapshotStore.tell(new SnapshotProtocol.LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
         LoadSnapshotFailed failed = probe.expectMsgClass(LoadSnapshotFailed.class);
-        Throwables.propagateIfInstanceOf(failed.cause(), IOException.class);
+        throw failed.cause();
     }
 
     @Test
@@ -185,7 +185,8 @@ public class LocalSnapshotStoreTest {
         assertEquals("SelectedSnapshot snapshot", "one", possibleSnapshot.get().snapshot());
     }
 
-    private void createSnapshotFile(String persistenceId, String payload, int seqNr, int timestamp) throws IOException {
+    private static void createSnapshotFile(final String persistenceId, final String payload, final int seqNr,
+            final int timestamp) throws IOException {
         String name = toSnapshotName(persistenceId, seqNr, timestamp);
         try (FileOutputStream fos = new FileOutputStream(new File(SNAPSHOT_DIR, name))) {
             if (payload != null) {
@@ -194,7 +195,7 @@ public class LocalSnapshotStoreTest {
         }
     }
 
-    private static String toSnapshotName(String persistenceId, int seqNr, int timestamp)
+    private static String toSnapshotName(final String persistenceId, final int seqNr, final int timestamp)
             throws UnsupportedEncodingException {
         final String encodedPersistenceId = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8.name());
         return "snapshot-" + encodedPersistenceId + "-" + seqNr + "-" + timestamp;

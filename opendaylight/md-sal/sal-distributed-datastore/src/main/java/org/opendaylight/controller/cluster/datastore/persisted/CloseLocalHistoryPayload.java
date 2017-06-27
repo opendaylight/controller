@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
@@ -62,7 +61,7 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
         } catch (IOException e) {
             // This should never happen
             LOG.error("Failed to serialize {}", historyId, e);
-            throw Throwables.propagate(e);
+            throw new RuntimeException("Failed to serialize " + historyId, e);
         }
         return new CloseLocalHistoryPayload(historyId, out.toByteArray());
     }

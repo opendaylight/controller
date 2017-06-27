@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -62,7 +63,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
      *             If any of arguments is null.
      */
     DOMBrokerTransactionChain(final long chainId, final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-            AbstractDOMBroker broker, final TransactionChainListener listener) {
+            final AbstractDOMBroker broker, final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
         this.broker = Preconditions.checkNotNull(broker);
@@ -97,7 +98,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
             public void onFailure(final Throwable failure) {
                 transactionFailed(transaction, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return ret;
     }
