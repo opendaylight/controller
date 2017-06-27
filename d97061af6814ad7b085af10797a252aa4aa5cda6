@@ -70,6 +70,30 @@
       "revId": "d97061af6814ad7b085af10797a252aa4aa5cda6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_435edaea",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/AbstractTransactionHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-06-27T14:09:48Z",
+      "side": 1,
+      "message": "That should not matter, unless you want to propagate the failure while the transactions are still being produced -- we check for failure immediately after the run completes.\n\nIt is the stopping part which will add more complication...",
+      "parentUuid": "da2a55be_03e7c241",
+      "range": {
+        "startLine": 55,
+        "startChar": 38,
+        "endLine": 55,
+        "endChar": 39
+      },
+      "revId": "d97061af6814ad7b085af10797a252aa4aa5cda6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
