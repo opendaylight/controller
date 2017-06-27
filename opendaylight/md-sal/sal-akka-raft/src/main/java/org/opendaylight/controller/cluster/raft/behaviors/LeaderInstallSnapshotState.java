@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,12 +44,12 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private long snapshotSize;
     private InputStream snapshotInputStream;
 
-    LeaderInstallSnapshotState(int snapshotChunkSize, String logName) {
+    LeaderInstallSnapshotState(final int snapshotChunkSize, final String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
         this.logName = logName;
     }
 
-    void setSnapshotBytes(ByteSource snapshotBytes) throws IOException {
+    void setSnapshotBytes(final ByteSource snapshotBytes) throws IOException {
         if (this.snapshotBytes != null) {
             return;
         }
@@ -98,11 +97,11 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
                 || replyReceivedForOffset == offset);
     }
 
-    boolean isLastChunk(int index) {
+    boolean isLastChunk(final int index) {
         return totalChunks == index;
     }
 
-    void markSendStatus(boolean success) {
+    void markSendStatus(final boolean success) {
         if (success) {
             // if the chunk sent was successful
             replyReceivedForOffset = offset;
@@ -153,7 +152,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         try {
             snapshotInputStream = snapshotBytes.openStream();
         } catch (IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

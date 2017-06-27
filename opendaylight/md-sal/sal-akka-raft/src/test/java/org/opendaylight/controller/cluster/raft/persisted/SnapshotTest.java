@@ -25,13 +25,13 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 public class SnapshotTest {
 
     @Test
-    public void testSerialization() throws Exception {
+    public void testSerialization() {
         testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7}, Arrays.asList(
                 new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))));
         testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, Collections.emptyList());
     }
 
-    private void testSerialization(byte[] state, List<ReplicatedLogEntry> unapplied) throws Exception {
+    private static void testSerialization(final byte[] state, final List<ReplicatedLogEntry> unapplied) {
         long lastIndex = 6;
         long lastTerm = 2;
         long lastAppliedIndex = 5;

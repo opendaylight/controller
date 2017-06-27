@@ -187,7 +187,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         final long stamp = lock.readLock();
         try {
             if (aborted != null) {
-                throw Throwables.propagate(aborted);
+                Throwables.throwIfUnchecked(aborted);
+                throw new RuntimeException(aborted);
             }
 
             final ClientLocalHistory history = new ClientLocalHistory(this, historyId);

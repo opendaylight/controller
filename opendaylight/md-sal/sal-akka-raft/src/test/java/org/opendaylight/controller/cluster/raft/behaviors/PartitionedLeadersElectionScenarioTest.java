@@ -105,7 +105,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("resolvePartitionedLeadersWithLeaderMember2SendingHeartbeatFirst ending");
     }
 
-    private void resolvePartitionedLeadersWithLeaderMember3SendingHeartbeatFirst() throws Exception {
+    private void resolvePartitionedLeadersWithLeaderMember3SendingHeartbeatFirst() {
         testLog.info("resolvePartitionedLeadersWithLeaderMember3SendingHeartbeatFirst starting");
 
         // Re-establish connectivity between member 2 and 3, ie stop dropping messages between
@@ -141,7 +141,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("resolvePartitionedLeadersWithLeaderMember3SendingHeartbeatFirst ending");
     }
 
-    private void sendElectionTimeoutToNowCandidateMember2() throws Exception {
+    private void sendElectionTimeoutToNowCandidateMember2() {
         testLog.info("sendElectionTimeoutToNowCandidateMember2 starting");
 
         // member 2, now a candidate, is partitioned from the Leader (now member 3) and hasn't received any
@@ -189,7 +189,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("sendElectionTimeoutToNowCandidateMember2 ending");
     }
 
-    private void sendInitialElectionTimeoutToFollowerMember3() throws Exception {
+    private void sendInitialElectionTimeoutToFollowerMember3() {
         testLog.info("sendInitialElectionTimeoutToFollowerMember3 starting");
 
         // Send ElectionTimeout to member 3 to simulate no heartbeat from a Leader (originally member 1).
@@ -238,7 +238,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("sendInitialElectionTimeoutToFollowerMember3 ending");
     }
 
-    private void sendInitialElectionTimeoutToFollowerMember2() {
+    private void sendInitialElectionTimeoutToFollowerMember2() throws Exception {
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 starting");
 
         // Send ElectionTimeout to member 2 to simulate no heartbeat from the Leader (member 1).
