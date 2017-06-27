@@ -111,7 +111,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         } catch (Exception e) {
             LOG.error("Failed to get actor for {}", clientProps, e);
             clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-            throw Throwables.propagate(e);
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
         }
 
         identifier = client.getIdentifier();

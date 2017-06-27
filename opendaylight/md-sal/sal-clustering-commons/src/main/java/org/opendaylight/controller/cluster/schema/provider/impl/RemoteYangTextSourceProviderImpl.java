@@ -9,9 +9,11 @@
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import com.google.common.annotations.Beta;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -34,8 +36,9 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
     private final SchemaRepository repository;
     private final Set<SourceIdentifier> providedSources;
 
-    public RemoteYangTextSourceProviderImpl(SchemaRepository repository, Set<SourceIdentifier> providedSources) {
-        this.repository = repository;
+    public RemoteYangTextSourceProviderImpl(final SchemaRepository repository,
+            final Set<SourceIdentifier> providedSources) {
+        this.repository = Preconditions.checkNotNull(repository);
         this.providedSources = providedSources;
     }
 
@@ -45,16 +48,16 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
     }
 
     @Override
-    public Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(SourceIdentifier identifier) {
+    public Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(final SourceIdentifier identifier) {
         LOG.trace("Sending yang schema source for {}", identifier);
 
         final Promise<YangTextSchemaSourceSerializationProxy> promise = akka.dispatch.Futures.promise();
-        CheckedFuture<YangTextSchemaSource, ?> future =
+        ListenableFuture<YangTextSchemaSource> future =
                 repository.getSchemaSource(identifier, YangTextSchemaSource.class);
 
         Futures.addCallback(future, new FutureCallback<YangTextSchemaSource>() {
             @Override
-            public void onSuccess(@Nonnull YangTextSchemaSource result) {
+            public void onSuccess(@Nonnull final YangTextSchemaSource result) {
                 try {
                     promise.success(new YangTextSchemaSourceSerializationProxy(result));
                 } catch (IOException e) {
@@ -64,11 +67,11 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 LOG.warn("Unable to retrieve schema source from provider", failure);
                 promise.failure(failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return promise.future();
     }
