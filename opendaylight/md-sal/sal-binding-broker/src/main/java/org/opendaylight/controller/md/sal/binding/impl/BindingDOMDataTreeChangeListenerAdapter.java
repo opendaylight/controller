@@ -40,4 +40,9 @@ class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implements D
         final Collection<DataTreeModification<T>> bindingChanges = LazyDataTreeModification.from(codec, domChanges, store);
         listener.onDataTreeChanged(bindingChanges);
     }
+
+    @Override
+    public String toString() {
+        return listener.toString();
+    }
 }

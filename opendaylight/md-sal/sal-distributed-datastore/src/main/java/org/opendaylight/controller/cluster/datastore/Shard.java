@@ -55,6 +55,7 @@ import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
@@ -155,6 +156,8 @@ public class Shard extends RaftActor {
 
     private final ShardStats shardMBean;
 
+    private final ShardDataTreeListenerInfoMXBeanImpl listenerInfoMXBean;
+
     private DatastoreContext datastoreContext;
 
     private final ShardCommitCoordinator commitCoordinator;
@@ -232,6 +235,10 @@ public class Shard extends RaftActor {
             this.name);
 
         messageRetrySupport = new ShardTransactionMessageRetrySupport(this);
+
+        listenerInfoMXBean = new ShardDataTreeListenerInfoMXBeanImpl(name, datastoreContext.getDataStoreMXBeanType(),
+                self());
+        listenerInfoMXBean.register();
     }
 
     private void setTransactionCommitTimeout() {
@@ -260,6 +267,7 @@ public class Shard extends RaftActor {
         commitCoordinator.abortPendingTransactions("Transaction aborted due to shutdown.", this);
 
         shardMBean.unregisterMBean();
+        listenerInfoMXBean.unregister();
     }
 
     @Override
@@ -858,7 +866,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected OnDemandRaftState.AbstractBuilder<?> newOnDemandRaftStateBuilder() {
+    protected OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {
         return OnDemandShardState.newBuilder().treeChangeListenerActors(treeChangeSupport.getListenerActors())
                 .dataChangeListenerActors(changeSupport.getListenerActors())
                 .commitCohortActors(store.getCohortActors());

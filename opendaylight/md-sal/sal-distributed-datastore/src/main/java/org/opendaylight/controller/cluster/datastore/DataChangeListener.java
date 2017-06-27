@@ -13,7 +13,9 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
+import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
+import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -43,6 +45,9 @@ public class DataChangeListener extends AbstractUntypedActor {
             dataChanged(message);
         } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
+        } else if (message instanceof GetInfo) {
+            getSender().tell(new DataTreeListenerInfo(listener.toString(), registeredPath.toString(),
+                    notificationsEnabled), getSelf());
         } else {
             unknownMessage(message);
         }

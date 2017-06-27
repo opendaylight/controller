@@ -12,7 +12,9 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
+import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
+import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -38,6 +40,9 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
             dataChanged((DataTreeChanged)message);
         } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
+        } else if (message instanceof GetInfo) {
+            getSender().tell(new DataTreeListenerInfo(listener.toString(), registeredPath.toString(),
+                    notificationsEnabled), getSelf());
         } else {
             unknownMessage(message);
         }

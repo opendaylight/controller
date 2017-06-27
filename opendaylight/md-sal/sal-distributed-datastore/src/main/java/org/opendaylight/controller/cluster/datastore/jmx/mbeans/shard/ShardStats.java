@@ -9,27 +9,19 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import akka.actor.ActorRef;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
-import com.google.common.base.Stopwatch;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
-import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
-import scala.concurrent.Await;
 
 /**
  * Maintains statistics for a shard.
@@ -42,10 +34,11 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @GuardedBy("DATE_FORMAT")
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private static final Cache<String, OnDemandRaftState> ONDEMAND_RAFT_STATE_CACHE =
-            CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.SECONDS).build();
-
     private static final MapJoiner MAP_JOINER = Joiner.on(", ").withKeyValueSeparator(": ");
+
+    private final Shard shard;
+
+    private final OnDemandShardStateCache stateCache;
 
     private long committedTransactionsCount;
 
@@ -65,11 +58,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private boolean followerInitialSyncStatus = false;
 
-    private final Shard shard;
-
     private String statRetrievalError;
-
-    private String statRetrievalTime;
 
     private long leadershipChangeCount;
 
@@ -78,35 +67,19 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public ShardStats(final String shardName, final String mxBeanType, @Nullable final Shard shard) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
         this.shard = shard;
+        stateCache = new OnDemandShardStateCache(shardName, shard != null ? shard.self() : null);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private OnDemandRaftState getOnDemandRaftState() {
-        String name = getShardName();
-        OnDemandRaftState state = ONDEMAND_RAFT_STATE_CACHE.getIfPresent(name);
-        if (state == null) {
+        try {
+            final OnDemandRaftState state = stateCache.get();
             statRetrievalError = null;
-            statRetrievalTime = null;
-
-            if (shard != null) {
-                Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
-                try {
-                    Stopwatch timer = Stopwatch.createStarted();
-
-                    state = (OnDemandRaftState) Await.result(Patterns.ask(shard.getSelf(),
-                            GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());
-
-                    statRetrievalTime = timer.stop().toString();
-                    ONDEMAND_RAFT_STATE_CACHE.put(name, state);
-                } catch (Exception e) {
-                    statRetrievalError = e.toString();
-                }
-            }
-
-            state = state != null ? state : OnDemandRaftState.builder().build();
+            return state;
+        } catch (Exception e) {
+            statRetrievalError = e.getCause().toString();
+            return OnDemandRaftState.builder().build();
         }
-
-        return state;
     }
 
     private static String formatMillis(final long timeMillis) {
@@ -327,7 +300,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public String getStatRetrievalTime() {
         getOnDemandRaftState();
-        return statRetrievalTime;
+        return stateCache.getStatRetrievaelTime();
     }
 
     @Override
