@@ -70,7 +70,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
 
     // Emit a debug entry if we sleep for more that this amount
-    private static final long DEBUG_DELAY_NANOS = TimeUnit.MILLISECONDS.toNanos(100);
+    private static final long DEBUG_DELAY_NANOS = TimeUnit.MILLISECONDS.toNanos(0);
 
     // Upper bound on the time a thread is forced to sleep to keep queue size under control
     private static final long MAX_DELAY_SECONDS = 5;
