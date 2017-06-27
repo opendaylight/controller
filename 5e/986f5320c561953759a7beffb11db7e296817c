@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Tom Pantelis <tompantelis@gmail.com>
+Submitted-by: Tom Pantelis <tompantelis@gmail.com>
+Submitted-at: Tue, 27 Jun 2017 15:57:01 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/59576
+Project: controller
+Branch: refs/heads/stable/carbon
