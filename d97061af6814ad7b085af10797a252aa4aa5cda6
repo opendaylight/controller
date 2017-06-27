@@ -22,6 +22,30 @@
       "revId": "d97061af6814ad7b085af10797a252aa4aa5cda6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_38d03553",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/AbstractTransactionHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-06-27T11:27:36Z",
+      "side": 1,
+      "message": "Yeah, but that would further complicate code structure here. We can do another iteration later.",
+      "parentUuid": "da2a55be_4c40cf56",
+      "range": {
+        "startLine": 55,
+        "startChar": 38,
+        "endLine": 55,
+        "endChar": 39
+      },
+      "revId": "d97061af6814ad7b085af10797a252aa4aa5cda6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
