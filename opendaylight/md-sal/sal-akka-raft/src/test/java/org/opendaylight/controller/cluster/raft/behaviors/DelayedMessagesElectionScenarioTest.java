@@ -141,7 +141,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         testLog.info("forwardDelayedRequestVotesToLeaderMember1AndFollowerMember3 ending");
     }
 
-    private void sendInitialElectionTimeoutToFollowerMember2() {
+    private void sendInitialElectionTimeoutToFollowerMember2() throws Exception {
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 starting");
 
         // Send ElectionTimeout to member 2 to simulate missing heartbeat from the Leader. member 2

@@ -22,7 +22,6 @@ import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -127,22 +126,22 @@ public class AbstractLeaderElectionScenarioTest {
                     Uninterruptibles.awaitUninterruptibly(behaviorStateChangeLatch, 5, TimeUnit.SECONDS));
         }
 
-        void expectMessageClass(Class<?> expClass, int expCount) {
+        void expectMessageClass(final Class<?> expClass, final int expCount) {
             messagesReceivedLatches.put(expClass, new CountDownLatch(expCount));
         }
 
-        void waitForExpectedMessages(Class<?> expClass) {
+        void waitForExpectedMessages(final Class<?> expClass) {
             CountDownLatch latch = messagesReceivedLatches.get(expClass);
             assertNotNull("No messages received for " + expClass, latch);
             assertTrue("Missing messages of type " + expClass,
                     Uninterruptibles.awaitUninterruptibly(latch, 5, TimeUnit.SECONDS));
         }
 
-        void dropMessagesToBehavior(Class<?> msgClass) {
+        void dropMessagesToBehavior(final Class<?> msgClass) {
             dropMessagesToBehavior(msgClass, 1);
         }
 
-        void dropMessagesToBehavior(Class<?> msgClass, int expCount) {
+        void dropMessagesToBehavior(final Class<?> msgClass, final int expCount) {
             expectMessageClass(msgClass, expCount);
             dropMessagesToBehavior.put(msgClass, Boolean.TRUE);
         }
@@ -159,19 +158,19 @@ public class AbstractLeaderElectionScenarioTest {
             super.clear();
         }
 
-        void forwardCapturedMessageToBehavior(Class<?> msgClass, ActorRef sender) throws Exception {
+        void forwardCapturedMessageToBehavior(final Class<?> msgClass, final ActorRef sender) throws Exception {
             Object message = getFirstMatching(getSelf(), msgClass);
             assertNotNull("Message of type " + msgClass + " not received", message);
             getSelf().tell(message, sender);
         }
 
-        void forwardCapturedMessagesToBehavior(Class<?> msgClass, ActorRef sender) throws Exception {
+        void forwardCapturedMessagesToBehavior(final Class<?> msgClass, final ActorRef sender) throws Exception {
             for (Object m: getAllMatching(getSelf(), msgClass)) {
                 getSelf().tell(m, sender);
             }
         }
 
-        <T> T getCapturedMessage(Class<T> msgClass) throws Exception {
+        <T> T getCapturedMessage(final Class<T> msgClass) throws Exception {
             T message = getFirstMatching(getSelf(), msgClass);
             assertNotNull("Message of type " + msgClass + " not received", message);
             return message;
@@ -196,7 +195,7 @@ public class AbstractLeaderElectionScenarioTest {
         RaftActorBehavior behavior;
         MockRaftActorContext context;
 
-        SetBehavior(RaftActorBehavior behavior, MockRaftActorContext context) {
+        SetBehavior(final RaftActorBehavior behavior, final MockRaftActorContext context) {
             this.behavior = behavior;
             this.context = context;
         }
@@ -239,8 +238,8 @@ public class AbstractLeaderElectionScenarioTest {
         return configParams;
     }
 
-    MockRaftActorContext newRaftActorContext(String id, ActorRef actor,
-            Map<String, String> peerAddresses) {
+    MockRaftActorContext newRaftActorContext(final String id, final ActorRef actor,
+            final Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
         context.getTermInformation().updateAndPersist(1, "");
@@ -248,18 +247,14 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void verifyBehaviorState(String name, MemberActor actor, RaftState expState) {
-        try {
-            RaftState actualState = (RaftState) Await.result(Patterns.ask(actor.self(), GetBehaviorState.INSTANCE,
-                    Timeout.apply(5, TimeUnit.SECONDS)), Duration.apply(5, TimeUnit.SECONDS));
-            assertEquals(name + " behavior state", expState, actualState);
-        } catch (Exception e) {
-            Throwables.propagate(e);
-        }
+    void verifyBehaviorState(final String name, final MemberActor actor, final RaftState expState) throws Exception {
+        RaftState actualState = (RaftState) Await.result(Patterns.ask(actor.self(), GetBehaviorState.INSTANCE,
+            Timeout.apply(5, TimeUnit.SECONDS)), Duration.apply(5, TimeUnit.SECONDS));
+        assertEquals(name + " behavior state", expState, actualState);
     }
 
-    void initializeLeaderBehavior(MemberActor actor, MockRaftActorContext context, int numActiveFollowers)
-            throws Exception {
+    void initializeLeaderBehavior(final MemberActor actor, final MockRaftActorContext context,
+            final int numActiveFollowers) throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
         // Sometimes the initial AppendEntries messages go to dead letters, probably b/c the follower actors
         // haven't been fully created/initialized by akka. So we try up to 3 times to create the Leader as
@@ -294,14 +289,14 @@ public class AbstractLeaderElectionScenarioTest {
 
     }
 
-    TestActorRef<MemberActor> newMemberActor(String name) throws Exception {
+    TestActorRef<MemberActor> newMemberActor(final String name) throws Exception {
         TestActorRef<MemberActor> actor = factory.createTestActor(MemberActor.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), name);
         MessageCollectorActor.waitUntilReady(actor);
         return actor;
     }
 
-    void sendHeartbeat(TestActorRef<MemberActor> leaderActor) {
+    void sendHeartbeat(final TestActorRef<MemberActor> leaderActor) {
         Uninterruptibles.sleepUninterruptibly(HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
         leaderActor.tell(SendImmediateHeartBeat.INSTANCE, ActorRef.noSender());
     }

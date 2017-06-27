@@ -26,7 +26,6 @@ import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Throwables;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -156,20 +155,14 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private Entry<MockDataTreeChangeListener, ActorSelection> registerChangeListener(final YangInstanceIdentifier path,
-            final int expectedEvents) {
+            final int expectedEvents) throws Exception {
         MockDataTreeChangeListener listener = new MockDataTreeChangeListener(expectedEvents);
         ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TestModel.TEST_PATH));
 
-        try {
-            RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)
+        RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)
                 Await.result(Patterns.ask(shardActor, new RegisterDataTreeChangeListener(path, dclActor, false),
                     new Timeout(5, TimeUnit.SECONDS)), Duration.create(5, TimeUnit.SECONDS));
-            return new SimpleEntry<>(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));
-
-        } catch (Exception e) {
-            Throwables.propagate(e);
-            return null;
-        }
+        return new SimpleEntry<>(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));
     }
 
     private void createShard() {

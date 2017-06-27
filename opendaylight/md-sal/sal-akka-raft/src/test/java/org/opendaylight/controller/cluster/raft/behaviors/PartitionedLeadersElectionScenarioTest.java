@@ -70,7 +70,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("PartitionedLeadersElectionScenarioTest 2 ending");
     }
 
-    private void resolvePartitionedLeadersWithLeaderMember2SendingHeartbeatFirst() {
+    private void resolvePartitionedLeadersWithLeaderMember2SendingHeartbeatFirst() throws Exception {
         testLog.info("resolvePartitionedLeadersWithLeaderMember2SendingHeartbeatFirst starting");
 
         // Re-establish connectivity between member 2 and 3, ie stop dropping messages between
@@ -238,7 +238,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("sendInitialElectionTimeoutToFollowerMember3 ending");
     }
 
-    private void sendInitialElectionTimeoutToFollowerMember2() {
+    private void sendInitialElectionTimeoutToFollowerMember2() throws Exception {
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 starting");
 
         // Send ElectionTimeout to member 2 to simulate no heartbeat from the Leader (member 1).

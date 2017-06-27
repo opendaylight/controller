@@ -37,7 +37,7 @@ public class MessageCollectorActor extends UntypedActor {
 
     private final List<Object> messages = new ArrayList<>();
 
-    @Override public void onReceive(Object message) throws Exception {
+    @Override public void onReceive(final Object message) throws Exception {
         if (ARE_YOU_READY.equals(message)) {
             getSender().tell("yes", getSelf());
         } else if (GET_ALL_MESSAGES.equals(message)) {
@@ -54,7 +54,7 @@ public class MessageCollectorActor extends UntypedActor {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Object> getAllMessages(ActorRef actor) throws Exception {
+    private static List<Object> getAllMessages(final ActorRef actor) throws Exception {
         FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
         Timeout operationTimeout = new Timeout(operationDuration);
         Future<Object> future = Patterns.ask(actor, GET_ALL_MESSAGES, operationTimeout);
@@ -62,7 +62,7 @@ public class MessageCollectorActor extends UntypedActor {
         return (List<Object>) Await.result(future, operationDuration);
     }
 
-    public static void clearMessages(ActorRef actor) {
+    public static void clearMessages(final ActorRef actor) {
         actor.tell(CLEAR_MESSAGES, ActorRef.noSender());
     }
 
@@ -73,7 +73,7 @@ public class MessageCollectorActor extends UntypedActor {
      * @param clazz the class to match
      * @return the first matching message
      */
-    public static <T> T getFirstMatching(ActorRef actor, Class<T> clazz) throws Exception {
+    public static <T> T getFirstMatching(final ActorRef actor, final Class<T> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);
 
         for (Object message : allMessages) {
@@ -86,13 +86,13 @@ public class MessageCollectorActor extends UntypedActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count) {
+    public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count) {
         return expectMatching(actor, clazz, count, msg -> true);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count,
-            Predicate<T> matcher) {
+    public static <T> List<T> expectMatching(final ActorRef actor, final Class<T> clazz, final int count,
+            final Predicate<T> matcher) {
         int timeout = 5000;
         Exception lastEx = null;
         List<T> messages = Collections.emptyList();
@@ -116,12 +116,12 @@ public class MessageCollectorActor extends UntypedActor {
                 clazz, messages.size(), messages), lastEx);
     }
 
-    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz) {
+    public static <T> T expectFirstMatching(final ActorRef actor, final Class<T> clazz) {
         return expectFirstMatching(actor, clazz, 5000);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz, long timeout) {
+    public static <T> T expectFirstMatching(final ActorRef actor, final Class<T> clazz, final long timeout) {
         Exception lastEx = null;
         int count = (int) (timeout / 50);
         for (int i = 0; i < count; i++) {
@@ -143,7 +143,7 @@ public class MessageCollectorActor extends UntypedActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz, Predicate<T> matcher) {
+    public static <T> T expectFirstMatching(final ActorRef actor, final Class<T> clazz, final Predicate<T> matcher) {
         int timeout = 5000;
         Exception lastEx = null;
         T lastMessage = null;
@@ -170,12 +170,12 @@ public class MessageCollectorActor extends UntypedActor {
                 clazz, lastMessage), lastEx);
     }
 
-    public static <T> void assertNoneMatching(ActorRef actor, Class<T> clazz) {
+    public static <T> void assertNoneMatching(final ActorRef actor, final Class<T> clazz) {
         assertNoneMatching(actor, clazz, 5000);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static <T> void assertNoneMatching(ActorRef actor, Class<T> clazz, long timeout) {
+    public static <T> void assertNoneMatching(final ActorRef actor, final Class<T> clazz, final long timeout) {
         Exception lastEx = null;
         int count = (int) (timeout / 50);
         for (int i = 0; i < count; i++) {
@@ -195,14 +195,15 @@ public class MessageCollectorActor extends UntypedActor {
         }
 
         if (lastEx != null) {
-            Throwables.propagate(lastEx);
+            Throwables.throwIfUnchecked(lastEx);
+            throw new RuntimeException(lastEx);
         }
 
         return;
     }
 
 
-    public static <T> List<T> getAllMatching(ActorRef actor, Class<T> clazz) throws Exception {
+    public static <T> List<T> getAllMatching(final ActorRef actor, final Class<T> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);
 
         List<T> output = Lists.newArrayList();
@@ -216,7 +217,7 @@ public class MessageCollectorActor extends UntypedActor {
         return output;
     }
 
-    public static void waitUntilReady(ActorRef actor) throws Exception {
+    public static void waitUntilReady(final ActorRef actor) throws Exception {
         long timeout = 500;
         FiniteDuration duration = Duration.create(timeout, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 10; i++) {

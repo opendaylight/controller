@@ -149,7 +149,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         testLog.info("resolvePartitionAndSendElectionTimeoutsToCandidateMember3 ending");
     }
 
-    private void setupPartitionedCandidateMember3AndSendElectionTimeouts() {
+    private void setupPartitionedCandidateMember3AndSendElectionTimeouts() throws Exception {
         testLog.info("setupPartitionedCandidateMember3AndSendElectionTimeouts starting");
 
         // Create member 3's behavior initially as a Candidate.

@@ -100,34 +100,34 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         Map<String, ShardStrategy> strategyMap = ImmutableMap.<String, ShardStrategy>builder().put(
                 "junk", new ShardStrategy() {
                     @Override
-                    public String findShard(YangInstanceIdentifier path) {
+                    public String findShard(final YangInstanceIdentifier path) {
                         return "junk";
                     }
 
                     @Override
-                    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+                    public YangInstanceIdentifier getPrefixForPath(final YangInstanceIdentifier path) {
                         return YangInstanceIdentifier.EMPTY;
                     }
                 }).put(
                 "cars", new ShardStrategy() {
                     @Override
-                    public String findShard(YangInstanceIdentifier path) {
+                    public String findShard(final YangInstanceIdentifier path) {
                         return "cars";
                     }
 
                     @Override
-                    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+                    public YangInstanceIdentifier getPrefixForPath(final YangInstanceIdentifier path) {
                         return YangInstanceIdentifier.EMPTY;
                     }
                 }).build();
 
         @Override
-        public ShardStrategy getStrategyForModule(String moduleName) {
+        public ShardStrategy getStrategyForModule(final String moduleName) {
             return strategyMap.get(moduleName);
         }
 
         @Override
-        public String getModuleNameFromNameSpace(String nameSpace) {
+        public String getModuleNameFromNameSpace(final String nameSpace) {
             if (TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
                 return "junk";
             } else if (CarsModel.BASE_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
@@ -201,7 +201,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
             final TransactionType type) {
         ArgumentMatcher<CreateTransaction> matcher = new ArgumentMatcher<CreateTransaction>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 if (CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
                     return obj.getTransactionId().getHistoryId().getClientId().getFrontendId().getMemberName()
@@ -218,7 +218,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     protected DataExists eqDataExists() {
         ArgumentMatcher<DataExists> matcher = new ArgumentMatcher<DataExists>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 return argument instanceof DataExists && ((DataExists)argument).getPath().equals(TestModel.TEST_PATH);
             }
         };
@@ -233,7 +233,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     protected ReadData eqReadData(final YangInstanceIdentifier path) {
         ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 return argument instanceof ReadData && ((ReadData)argument).getPath().equals(path);
             }
         };
@@ -241,20 +241,20 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         return argThat(matcher);
     }
 
-    protected Future<Object> readyTxReply(String path) {
+    protected Future<Object> readyTxReply(final String path) {
         return Futures.successful((Object)new ReadyTransactionReply(path));
     }
 
 
-    protected Future<ReadDataReply> readDataReply(NormalizedNode<?, ?> data) {
+    protected Future<ReadDataReply> readDataReply(final NormalizedNode<?, ?> data) {
         return Futures.successful(new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION));
     }
 
-    protected Future<DataExistsReply> dataExistsReply(boolean exists) {
+    protected Future<DataExistsReply> dataExistsReply(final boolean exists) {
         return Futures.successful(new DataExistsReply(exists, DataStoreVersions.CURRENT_VERSION));
     }
 
-    protected Future<BatchedModificationsReply> batchedModificationsReply(int count) {
+    protected Future<BatchedModificationsReply> batchedModificationsReply(final int count) {
         return Futures.successful(new BatchedModificationsReply(count));
     }
 
@@ -263,25 +263,25 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         return mock(Future.class);
     }
 
-    protected ActorSelection actorSelection(ActorRef actorRef) {
+    protected ActorSelection actorSelection(final ActorRef actorRef) {
         return getSystem().actorSelection(actorRef.path());
     }
 
-    protected void expectBatchedModifications(ActorRef actorRef, int count) {
+    protected void expectBatchedModifications(final ActorRef actorRef, final int count) {
         doReturn(batchedModificationsReply(count)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
     }
 
-    protected void expectBatchedModifications(int count) {
+    protected void expectBatchedModifications(final int count) {
         doReturn(batchedModificationsReply(count)).when(mockActorContext).executeOperationAsync(
                 any(ActorSelection.class), isA(BatchedModifications.class), any(Timeout.class));
     }
 
-    protected void expectBatchedModificationsReady(ActorRef actorRef) {
+    protected void expectBatchedModificationsReady(final ActorRef actorRef) {
         expectBatchedModificationsReady(actorRef, false);
     }
 
-    protected void expectBatchedModificationsReady(ActorRef actorRef, boolean doCommitOnReady) {
+    protected void expectBatchedModificationsReady(final ActorRef actorRef, final boolean doCommitOnReady) {
         doReturn(doCommitOnReady ? Futures.successful(new CommitTransactionReply().toSerializable()) :
             readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                     eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
@@ -292,32 +292,32 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                 any(ActorSelection.class), isA(BatchedModifications.class), any(Timeout.class));
     }
 
-    protected void expectFailedBatchedModifications(ActorRef actorRef) {
+    protected void expectFailedBatchedModifications(final ActorRef actorRef) {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
     }
 
-    protected void expectReadyLocalTransaction(ActorRef actorRef, boolean doCommitOnReady) {
+    protected void expectReadyLocalTransaction(final ActorRef actorRef, final boolean doCommitOnReady) {
         doReturn(doCommitOnReady ? Futures.successful(new CommitTransactionReply().toSerializable()) :
             readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                     eq(actorSelection(actorRef)), isA(ReadyLocalTransaction.class), any(Timeout.class));
     }
 
-    protected CreateTransactionReply createTransactionReply(ActorRef actorRef, short transactionVersion) {
+    protected CreateTransactionReply createTransactionReply(final ActorRef actorRef, final short transactionVersion) {
         return new CreateTransactionReply(actorRef.path().toString(), nextTransactionId(), transactionVersion);
     }
 
-    protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem) {
+    protected ActorRef setupActorContextWithoutInitialCreateTransaction(final ActorSystem actorSystem) {
         return setupActorContextWithoutInitialCreateTransaction(actorSystem, DefaultShardStrategy.DEFAULT_SHARD);
     }
 
-    protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName) {
+    protected ActorRef setupActorContextWithoutInitialCreateTransaction(final ActorSystem actorSystem, final String shardName) {
         return setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName,
                 DataStoreVersions.CURRENT_VERSION);
     }
 
-    protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName,
-            short transactionVersion) {
+    protected ActorRef setupActorContextWithoutInitialCreateTransaction(final ActorSystem actorSystem, final String shardName,
+            final short transactionVersion) {
         ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         log.info("Created mock shard actor {}", actorRef);
 
@@ -330,18 +330,18 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         return actorRef;
     }
 
-    protected Future<PrimaryShardInfo> primaryShardInfoReply(ActorSystem actorSystem, ActorRef actorRef) {
+    protected Future<PrimaryShardInfo> primaryShardInfoReply(final ActorSystem actorSystem, final ActorRef actorRef) {
         return primaryShardInfoReply(actorSystem, actorRef, DataStoreVersions.CURRENT_VERSION);
     }
 
-    protected Future<PrimaryShardInfo> primaryShardInfoReply(ActorSystem actorSystem, ActorRef actorRef,
-            short transactionVersion) {
+    protected Future<PrimaryShardInfo> primaryShardInfoReply(final ActorSystem actorSystem, final ActorRef actorRef,
+            final short transactionVersion) {
         return Futures.successful(new PrimaryShardInfo(actorSystem.actorSelection(actorRef.path()),
                 transactionVersion));
     }
 
-    protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, short transactionVersion, String shardName) {
+    protected ActorRef setupActorContextWithInitialCreateTransaction(final ActorSystem actorSystem,
+            final TransactionType type, final short transactionVersion, final String shardName) {
         ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName,
                 transactionVersion);
 
@@ -349,8 +349,8 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                 memberName, shardActorRef);
     }
 
-    protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, short transactionVersion, String prefix, ActorRef shardActorRef) {
+    protected ActorRef setupActorContextWithInitialCreateTransaction(final ActorSystem actorSystem,
+            final TransactionType type, final short transactionVersion, final String prefix, final ActorRef shardActorRef) {
 
         ActorRef txActorRef;
         if (type == TransactionType.WRITE_ONLY
@@ -371,18 +371,18 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         return txActorRef;
     }
 
-    protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type) {
+    protected ActorRef setupActorContextWithInitialCreateTransaction(final ActorSystem actorSystem, final TransactionType type) {
         return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION,
                 DefaultShardStrategy.DEFAULT_SHARD);
     }
 
-    protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type,
-            String shardName) {
+    protected ActorRef setupActorContextWithInitialCreateTransaction(final ActorSystem actorSystem, final TransactionType type,
+            final String shardName) {
         return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION,
                 shardName);
     }
 
-    protected void propagateReadFailedExceptionCause(CheckedFuture<?, ReadFailedException> future) throws Exception {
+    protected void propagateReadFailedExceptionCause(final CheckedFuture<?, ReadFailedException> future) throws Exception {
         try {
             future.checkedGet(5, TimeUnit.SECONDS);
             fail("Expected ReadFailedException");
@@ -395,12 +395,12 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                 cause = e.getCause();
             }
 
-            Throwables.throwIfInstanceOf(cause, Exception.class);
-            Throwables.propagate(cause);
+            Throwables.propagateIfPossible(cause, Exception.class);
+            throw new RuntimeException(cause);
         }
     }
 
-    protected List<BatchedModifications> captureBatchedModifications(ActorRef actorRef) {
+    protected List<BatchedModifications> captureBatchedModifications(final ActorRef actorRef) {
         ArgumentCaptor<BatchedModifications> batchedModificationsCaptor =
                 ArgumentCaptor.forClass(BatchedModifications.class);
         verify(mockActorContext, Mockito.atLeastOnce()).executeOperationAsync(
@@ -411,7 +411,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         return batchedModifications;
     }
 
-    protected <T> List<T> filterCaptured(ArgumentCaptor<T> captor, Class<T> type) {
+    protected <T> List<T> filterCaptured(final ArgumentCaptor<T> captor, final Class<T> type) {
         List<T> captured = new ArrayList<>();
         for (T c: captor.getAllValues()) {
             if (type.isInstance(c)) {
@@ -422,19 +422,19 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         return captured;
     }
 
-    protected void verifyOneBatchedModification(ActorRef actorRef, Modification expected, boolean expIsReady) {
+    protected void verifyOneBatchedModification(final ActorRef actorRef, final Modification expected, final boolean expIsReady) {
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
 
         verifyBatchedModifications(batchedModifications.get(0), expIsReady, expIsReady, expected);
     }
 
-    protected void verifyBatchedModifications(Object message, boolean expIsReady, Modification... expected) {
+    protected void verifyBatchedModifications(final Object message, final boolean expIsReady, final Modification... expected) {
         verifyBatchedModifications(message, expIsReady, false, expected);
     }
 
-    protected void verifyBatchedModifications(Object message, boolean expIsReady, boolean expIsDoCommitOnReady,
-            Modification... expected) {
+    protected void verifyBatchedModifications(final Object message, final boolean expIsReady, final boolean expIsDoCommitOnReady,
+            final Modification... expected) {
         assertEquals("Message type", BatchedModifications.class, message.getClass());
         BatchedModifications batchedModifications = (BatchedModifications)message;
         assertEquals("BatchedModifications size", expected.length, batchedModifications.getModifications().size());
@@ -453,8 +453,8 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    protected void verifyCohortFutures(AbstractThreePhaseCommitCohort<?> proxy,
-            Object... expReplies) throws Exception {
+    protected void verifyCohortFutures(final AbstractThreePhaseCommitCohort<?> proxy,
+            final Object... expReplies) throws Exception {
         assertEquals("getReadyOperationFutures size", expReplies.length,
                 proxy.getCohortFutures().size());
 
