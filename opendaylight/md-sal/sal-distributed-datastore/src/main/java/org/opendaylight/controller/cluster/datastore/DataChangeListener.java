@@ -13,7 +13,9 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
+import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
+import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -30,6 +32,7 @@ public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
     private final YangInstanceIdentifier registeredPath;
     private boolean notificationsEnabled = false;
+    private long notificationCount;
 
     public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener,
             final YangInstanceIdentifier registeredPath) {
@@ -43,6 +46,9 @@ public class DataChangeListener extends AbstractUntypedActor {
             dataChanged(message);
         } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
+        } else if (message instanceof GetInfo) {
+            getSender().tell(new DataTreeListenerInfo(listener.toString(), registeredPath.toString(),
+                    notificationsEnabled, notificationCount), getSelf());
         } else {
             unknownMessage(message);
         }
@@ -67,6 +73,8 @@ public class DataChangeListener extends AbstractUntypedActor {
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = reply.getChange();
 
         LOG.debug("Sending change notification {} to listener {}", change, listener);
+
+        notificationCount++;
 
         try {
             this.listener.onDataChanged(change);

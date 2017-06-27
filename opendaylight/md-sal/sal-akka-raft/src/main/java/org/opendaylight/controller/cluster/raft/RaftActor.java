@@ -451,7 +451,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-        OnDemandRaftState.AbstractBuilder<?> builder = newOnDemandRaftStateBuilder()
+        OnDemandRaftState.AbstractBuilder<?, ?> builder = newOnDemandRaftStateBuilder()
                 .commitIndex(context.getCommitIndex())
                 .currentTerm(context.getTermInformation().getCurrentTerm())
                 .inMemoryJournalDataSize(replicatedLog().dataSize())
@@ -495,7 +495,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     }
 
-    protected OnDemandRaftState.AbstractBuilder<?> newOnDemandRaftStateBuilder() {
+    protected OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {
         return OnDemandRaftState.builder();
     }
 
