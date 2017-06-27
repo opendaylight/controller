@@ -38,7 +38,7 @@ public class OnDemandShardState extends OnDemandRaftState {
         return new Builder();
     }
 
-    public static class Builder extends AbstractBuilder<Builder> {
+    public static class Builder extends AbstractBuilder<Builder, OnDemandShardState> {
         private final OnDemandShardState state = new OnDemandShardState();
 
         @Override
@@ -59,6 +59,11 @@ public class OnDemandShardState extends OnDemandRaftState {
         public Builder commitCohortActors(Collection<ActorRef> actors) {
             state.commitCohortActors = actors;
             return self();
+        }
+
+        @Override
+        public OnDemandShardState build() {
+            return super.build();
         }
     }
 }
