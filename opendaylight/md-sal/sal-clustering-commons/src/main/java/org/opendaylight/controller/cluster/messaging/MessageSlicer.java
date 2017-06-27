@@ -41,7 +41,7 @@ public class MessageSlicer implements AutoCloseable {
     private final int maxSlicingTries;
     private final String logContext;
 
-    private MessageSlicer(Builder builder) {
+    private MessageSlicer(final Builder builder) {
         this.filedBackedStreamFactory = builder.filedBackedStreamFactory;
         this.messageSliceSize = builder.messageSliceSize;
         this.maxSlicingTries = builder.maxSlicingTries;
@@ -73,7 +73,7 @@ public class MessageSlicer implements AutoCloseable {
      * @param message the message to check
      * @return true if handled, false otherwise
      */
-    public static boolean isHandledMessage(Object message) {
+    public static boolean isHandledMessage(final Object message) {
         return message instanceof MessageSliceReply;
     }
 
@@ -83,7 +83,7 @@ public class MessageSlicer implements AutoCloseable {
      *
      * @param options the SliceOptions
      */
-    public void slice(SliceOptions options) {
+    public void slice(final SliceOptions options) {
         final Identifier identifier = options.getIdentifier();
         final Serializable message = options.getMessage();
         final FileBackedOutputStream fileBackedStream;
@@ -145,7 +145,7 @@ public class MessageSlicer implements AutoCloseable {
         }
     }
 
-    private void sendTo(SliceOptions options, Object message, ActorRef sender) {
+    private static void sendTo(final SliceOptions options, final Object message, final ActorRef sender) {
         if (options.getSendToRef() != null) {
             options.getSendToRef().tell(message, sender);
         } else {
@@ -188,7 +188,7 @@ public class MessageSlicer implements AutoCloseable {
         stateCache.invalidateAll();
     }
 
-    private MessageSlice getNextSliceMessage(SlicedMessageState<ActorRef> state) throws IOException {
+    private static MessageSlice getNextSliceMessage(final SlicedMessageState<ActorRef> state) throws IOException {
         final byte[] firstSliceBytes = state.getNextSlice();
         return new MessageSlice(state.getIdentifier(), firstSliceBytes, state.getCurrentSliceIndex(),
                 state.getTotalSlices(), state.getLastSliceHashCode(), state.getReplyTarget());
@@ -263,7 +263,7 @@ public class MessageSlicer implements AutoCloseable {
         stateCache.invalidate(identifier);
     }
 
-    private void stateRemoved(RemovalNotification<Identifier, SlicedMessageState<ActorRef>> notification) {
+    private void stateRemoved(final RemovalNotification<Identifier, SlicedMessageState<ActorRef>> notification) {
         final SlicedMessageState<ActorRef> state = notification.getValue();
         state.close();
         if (notification.wasEvicted()) {
@@ -283,7 +283,7 @@ public class MessageSlicer implements AutoCloseable {
     }
 
     @VisibleForTesting
-    boolean hasState(Identifier forIdentifier) {
+    boolean hasState(final Identifier forIdentifier) {
         boolean exists = stateCache.getIfPresent(forIdentifier) != null;
         stateCache.cleanUp();
         return exists;
