@@ -133,126 +133,127 @@ public class OnDemandRaftState {
         return customRaftPolicyClassName;
     }
 
-    public abstract static class AbstractBuilder<T extends AbstractBuilder<T>> {
+    public abstract static class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends OnDemandRaftState> {
         @SuppressWarnings("unchecked")
-        protected T self() {
-            return (T) this;
+        protected B self() {
+            return (B) this;
         }
 
         @Nonnull
         protected abstract OnDemandRaftState state();
 
-        public T lastLogIndex(long value) {
+        public B lastLogIndex(long value) {
             state().lastLogIndex = value;
             return self();
         }
 
-        public T lastLogTerm(long value) {
+        public B lastLogTerm(long value) {
             state().lastLogTerm = value;
             return self();
         }
 
-        public T currentTerm(long value) {
+        public B currentTerm(long value) {
             state().currentTerm = value;
             return self();
         }
 
-        public T commitIndex(long value) {
+        public B commitIndex(long value) {
             state().commitIndex = value;
             return self();
         }
 
-        public T lastApplied(long value) {
+        public B lastApplied(long value) {
             state().lastApplied = value;
             return self();
         }
 
-        public T lastIndex(long value) {
+        public B lastIndex(long value) {
             state().lastIndex = value;
             return self();
         }
 
-        public T lastTerm(long value) {
+        public B lastTerm(long value) {
             state().lastTerm = value;
             return self();
         }
 
-        public T snapshotIndex(long value) {
+        public B snapshotIndex(long value) {
             state().snapshotIndex = value;
             return self();
         }
 
-        public T snapshotTerm(long value) {
+        public B snapshotTerm(long value) {
             state().snapshotTerm = value;
             return self();
         }
 
-        public T replicatedToAllIndex(long value) {
+        public B replicatedToAllIndex(long value) {
             state().replicatedToAllIndex = value;
             return self();
         }
 
-        public T inMemoryJournalDataSize(long value) {
+        public B inMemoryJournalDataSize(long value) {
             state().inMemoryJournalDataSize = value;
             return self();
         }
 
-        public T inMemoryJournalLogSize(long value) {
+        public B inMemoryJournalLogSize(long value) {
             state().inMemoryJournalLogSize = value;
             return self();
         }
 
-        public T leader(String value) {
+        public B leader(String value) {
             state().leader = value;
             return self();
         }
 
-        public T raftState(String value) {
+        public B raftState(String value) {
             state().raftState = value;
             return self();
         }
 
-        public T votedFor(String value) {
+        public B votedFor(String value) {
             state().votedFor = value;
             return self();
         }
 
-        public T isVoting(boolean isVoting) {
+        public B isVoting(boolean isVoting) {
             state().isVoting = isVoting;
             return self();
         }
 
-        public T followerInfoList(List<FollowerInfo> followerInfoList) {
+        public B followerInfoList(List<FollowerInfo> followerInfoList) {
             state().followerInfoList = followerInfoList;
             return self();
         }
 
-        public T peerAddresses(Map<String, String> peerAddresses) {
+        public B peerAddresses(Map<String, String> peerAddresses) {
             state().peerAddresses = peerAddresses;
             return self();
         }
 
-        public T peerVotingStates(Map<String, Boolean> peerVotingStates) {
+        public B peerVotingStates(Map<String, Boolean> peerVotingStates) {
             state().peerVotingStates = ImmutableMap.copyOf(peerVotingStates);
             return self();
         }
 
-        public T isSnapshotCaptureInitiated(boolean value) {
+        public B isSnapshotCaptureInitiated(boolean value) {
             state().isSnapshotCaptureInitiated = value;
             return self();
         }
 
-        public T customRaftPolicyClassName(String className) {
+        public B customRaftPolicyClassName(String className) {
             state().customRaftPolicyClassName = className;
             return self();
         }
 
-        public OnDemandRaftState build() {
-            return state();
+        @SuppressWarnings("unchecked")
+        public T build() {
+            return (T) state();
         }
     }
 
-    public static class Builder extends AbstractBuilder<Builder> {
+    public static class Builder extends AbstractBuilder<Builder, OnDemandRaftState> {
         private final OnDemandRaftState state = new OnDemandRaftState();
 
         @Override
