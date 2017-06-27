@@ -256,7 +256,8 @@ public class MessageSlicingIntegrationTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void testSlicing(String logContext, int messageSliceSize, int expTotalSlices, byte[] messageData) {
+    private void testSlicing(final String logContext, final int messageSliceSize, final int expTotalSlices,
+            final byte[] messageData) {
         reset(mockAssembledMessageCallback);
 
         final BytesMessage message = new BytesMessage(messageData);
@@ -308,21 +309,22 @@ public class MessageSlicingIntegrationTest {
         assertEquals("Sender ActorRef", sender, senderActorRefCaptor.getValue());
     }
 
-    static void assertSuccessfulMessageSliceReply(MessageSliceReply reply, Identifier identifier, int sliceIndex) {
+    static void assertSuccessfulMessageSliceReply(final MessageSliceReply reply, final Identifier identifier,
+            final int sliceIndex) {
         assertEquals("Identifier", identifier, ((MessageSliceIdentifier)reply.getIdentifier())
                 .getClientIdentifier());
         assertEquals("SliceIndex", sliceIndex, reply.getSliceIndex());
     }
 
-    static void assertFailedMessageSliceReply(MessageSliceReply reply, Identifier identifier, boolean isRetriable) {
+    static void assertFailedMessageSliceReply(final MessageSliceReply reply, final Identifier identifier, final boolean isRetriable) {
         assertEquals("Identifier", identifier, ((MessageSliceIdentifier)reply.getIdentifier())
                 .getClientIdentifier());
         assertEquals("Failure present", Boolean.TRUE, reply.getFailure().isPresent());
         assertEquals("isRetriable", isRetriable, reply.getFailure().get().isRetriable());
     }
 
-    static void assertMessageSlice(MessageSlice sliceMessage, Identifier identifier, int sliceIndex, int totalSlices,
-            int lastSliceHashCode, ActorRef replyTo) {
+    static void assertMessageSlice(final MessageSlice sliceMessage, final Identifier identifier, final int sliceIndex, final int totalSlices,
+            final int lastSliceHashCode, final ActorRef replyTo) {
         assertEquals("Identifier", identifier, ((MessageSliceIdentifier)sliceMessage.getIdentifier())
                 .getClientIdentifier());
         assertEquals("SliceIndex", sliceIndex, sliceMessage.getSliceIndex());
@@ -334,7 +336,7 @@ public class MessageSlicingIntegrationTest {
         }
     }
 
-    private MessageSlicer newMessageSlicer(String logContext, final int messageSliceSize) {
+    private static MessageSlicer newMessageSlicer(final String logContext, final int messageSliceSize) {
         return MessageSlicer.builder().messageSliceSize(messageSliceSize).logContext(logContext)
                 .filedBackedStreamFactory(FILE_BACKED_STREAM_FACTORY).build();
     }

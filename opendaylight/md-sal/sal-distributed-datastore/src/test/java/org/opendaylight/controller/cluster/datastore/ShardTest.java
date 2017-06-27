@@ -666,9 +666,10 @@ public class ShardTest extends AbstractShardTest {
 
                 final boolean done = commitLatch.await(timeoutSec, TimeUnit.SECONDS);
 
-                if (caughtEx.get() != null) {
-                    Throwables.propagateIfInstanceOf(caughtEx.get(), Exception.class);
-                    Throwables.propagate(caughtEx.get());
+                final Throwable t = caughtEx.get();
+                if (t != null) {
+                    Throwables.propagateIfPossible(t, Exception.class);
+                    throw new RuntimeException(t);
                 }
 
                 assertEquals("Commits complete", true, done);
@@ -810,8 +811,8 @@ public class ShardTest extends AbstractShardTest {
                 final Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
                 if (failure != null) {
-                    Throwables.throwIfInstanceOf(failure.cause(), Exception.class);
-                    Throwables.propagate(failure.cause());
+                    Throwables.propagateIfPossible(failure.cause(), Exception.class);
+                    throw new RuntimeException(failure.cause());
                 }
             }
         };

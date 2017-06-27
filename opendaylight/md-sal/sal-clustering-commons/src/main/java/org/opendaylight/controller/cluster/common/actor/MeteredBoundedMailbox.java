@@ -30,7 +30,7 @@ public class MeteredBoundedMailbox implements MailboxType,
     private final Integer capacity;
     private final FiniteDuration pushTimeOut;
 
-    public MeteredBoundedMailbox(ActorSystem.Settings settings, Config config) {
+    public MeteredBoundedMailbox(final ActorSystem.Settings settings, final Config config) {
 
         CommonConfig commonConfig = new CommonConfig(settings.config());
         this.capacity = commonConfig.getMailBoxCapacity();
@@ -39,13 +39,13 @@ public class MeteredBoundedMailbox implements MailboxType,
 
 
     @Override
-    public MeteredMessageQueue create(final scala.Option<ActorRef> owner, scala.Option<ActorSystem> system) {
+    public MeteredMessageQueue create(final scala.Option<ActorRef> owner, final scala.Option<ActorSystem> system) {
         final MeteredMessageQueue queue = new MeteredMessageQueue(this.capacity, this.pushTimeOut);
         monitorQueueSize(owner, queue);
         return queue;
     }
 
-    private void monitorQueueSize(scala.Option<ActorRef> owner, final MeteredMessageQueue monitoredQueue) {
+    private static void monitorQueueSize(final scala.Option<ActorRef> owner, final MeteredMessageQueue monitoredQueue) {
         registerMetric(owner, QUEUE_SIZE, getQueueSizeGuage(monitoredQueue));
     }
 
@@ -53,7 +53,8 @@ public class MeteredBoundedMailbox implements MailboxType,
         return monitoredQueue::size;
     }
 
-    static <T extends Metric> void registerMetric(scala.Option<ActorRef> owner, String metricName, T metric) {
+    static <T extends Metric> void registerMetric(final scala.Option<ActorRef> owner, final String metricName,
+            final T metric) {
         if (owner.isEmpty()) {
            // there's no actor to monitor
             return;
@@ -80,7 +81,7 @@ public class MeteredBoundedMailbox implements MailboxType,
     public static class MeteredMessageQueue extends BoundedDequeBasedMailbox.MessageQueue {
         private static final long serialVersionUID = 1L;
 
-        public MeteredMessageQueue(int capacity, FiniteDuration pushTimeOut) {
+        public MeteredMessageQueue(final int capacity, final FiniteDuration pushTimeOut) {
             super(capacity, pushTimeOut);
         }
     }
