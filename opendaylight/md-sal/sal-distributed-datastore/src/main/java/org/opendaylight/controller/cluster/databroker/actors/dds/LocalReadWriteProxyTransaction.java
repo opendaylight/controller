@@ -177,11 +177,12 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void doSeal() {
+    void sealOnly() {
         Preconditions.checkState(sealedModification == null, "Transaction %s is already sealed", getIdentifier());
         final CursorAwareDataTreeModification mod = getModification();
         mod.ready();
         sealedModification = mod;
+        super.sealOnly();
     }
 
     @Override
@@ -239,14 +240,14 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
             Verify.verify(callback != null, "Request {} has null callback", request);
-            ensureSealed();
+            sealOnly();
 
             switch (maybeProtocol.get()) {
                 case ABORT:
                     sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), callback);
                     break;
                 case READY:
-                    // No-op, as we have already issued a seal()
+                    // No-op, as we have already issued a sealOnly() and we are not transmitting anything
                     break;
                 case SIMPLE:
                     sendMethod.accept(commitRequest(false), callback);
@@ -264,6 +265,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof CommitLocalTransactionRequest) {
+            // FIXME: BUG-8704: this should go through enqueue
             sendCommit((CommitLocalTransactionRequest) request, callback);
         } else {
             super.handleReplayedLocalRequest(request, callback, now);
@@ -344,7 +346,9 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             request.getModification().applyToCursor(cursor);
         }
 
-        ensureSealed();
+        if (markSealed()) {
+            sealOnly();
+        }
         sendRequest(commitRequest(request.isCoordinated()), callback);
     }
 }
