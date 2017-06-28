@@ -38,7 +38,10 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         this.dataTree = Preconditions.checkNotNull(dataTree);
     }
 
-    private DataTreeSnapshot getSnapshot() {
+    private DataTreeSnapshot getSnapshot(TransactionIdentifier txId) {
+        printTrace("getSnapshot() Thread ID: " + Thread.currentThread().getId() + ", txId = " + txId.toString()
+                + ", openTransaction = "
+                + ((openTransaction != null) ? openTransaction.getIdentifier().toString() : "null"));
         Preconditions.checkState(!closed, "TransactionChain %s has been closed", this);
         Preconditions.checkState(openTransaction == null, "Transaction %s is open", openTransaction);
 
@@ -52,23 +55,24 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
-        final DataTreeSnapshot snapshot = getSnapshot();
+        final DataTreeSnapshot snapshot = getSnapshot(txId);
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
-
+        LOG.info("Thread ID {}, newReadOnlyTransaction() openTransaction is not set {}", Thread.currentThread().getId());
         return new ReadOnlyShardDataTreeTransaction(this, txId, snapshot);
     }
 
     ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
-        final DataTreeSnapshot snapshot = getSnapshot();
+        final DataTreeSnapshot snapshot = getSnapshot(txId);
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
         openTransaction = new ReadWriteShardDataTreeTransaction(this, txId, snapshot.newModification());
+        LOG.info("Thread ID {}, newReadWriteTransaction() openTransaction is now {}", Thread.currentThread().getId() ,openTransaction);
         return openTransaction;
     }
 
     void close() {
         closed = true;
-        LOG.debug("Closing chain {}", chainId);
+        LOG.warn("Closing chain {}", chainId);
     }
 
     @Override
@@ -78,6 +82,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
                     "Attempted to abort transaction %s while none is outstanding", transaction);
             LOG.debug("Aborted open transaction {}", transaction);
             openTransaction = null;
+            printTrace("abortFromTransactionActor() Thread ID: " + Thread.currentThread().getId() + " openTransaction set to null");
         }
     }
 
@@ -96,6 +101,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         // transaction in chain
         final ShardDataTreeCohort delegate = dataTree.finishTransaction(transaction);
         openTransaction = null;
+        printTrace("finishTransaction() Thread ID: " + Thread.currentThread().getId() + " openTransaction set to null");
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
 
@@ -127,5 +133,14 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         return dataTree.createReadyCohort(txId, mod);
+    }
+
+    private static void printTrace(String message) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+            sb.append(ste);
+            sb.append('\n');
+        }
+        LOG.info("PrintTrace: Message: {}. Trace: {}", message ,sb);
     }
 }
