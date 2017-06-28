@@ -241,7 +241,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     void runTimedOut(final Exception cause) {
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,
-                    "Final submit was timed out by the test provider or was interrupted", cause).build());
+                    "Not every transaction has completed in time", cause).build());
     }
 
     abstract DOMDataWriteTransaction createTransaction();

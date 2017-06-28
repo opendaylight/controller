@@ -110,7 +110,7 @@ abstract class AbstractTransactionHandler {
 
     static final long INIT_TX_TIMEOUT_SECONDS = 125;
 
-    private static final long DEAD_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(5);
+    private static final long TRANSACTIONS_COMPLETED_TIMEOUT_SECONDS = 125 + 18;  // ROBOT only waits 20 seconds after isolation and 125.
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -135,6 +135,7 @@ abstract class AbstractTransactionHandler {
     private void execute() {
         final long elapsed = stopwatch.elapsed(TimeUnit.NANOSECONDS);
         if (elapsed < runtimeNanos) {
+            LOG.debug("Elapsed {} nanos, next transaction is due.", elapsed);
             // Not completed yet: create a transaction and hook it up
             final long txId = txCounter++;
             final ListenableFuture<Void> execFuture = execWrite(txId);
@@ -155,6 +156,7 @@ abstract class AbstractTransactionHandler {
                 }
             });
         } else {
+            LOG.debug("Elapsed {} nanos, starting collection phase.", elapsed);
             startCollection();
         }
     }
@@ -178,7 +180,8 @@ abstract class AbstractTransactionHandler {
         }
 
         phase = new Collecting(running.futures);
-        executor.schedule(this::checkCollection, DEAD_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        executor.schedule(this::checkCollection, TRANSACTIONS_COMPLETED_TIMEOUT_SECONS, TimeUnit.SECONDS);
+        LOG.debug("Telling executor to shutdown itself after performing checkCollection.");
         executor.shutdown();
     }
 
@@ -193,25 +196,33 @@ abstract class AbstractTransactionHandler {
     }
 
     private synchronized void checkCollection() {
+        LOG.debug("Executing checkCollection.");
         final Collecting collecting = (Collecting) phase;
-        if (!collecting.done) {
-            final int size = collecting.futures.size();
-            for (int i = 0; i < size; i++) {
-                final ListenableFuture<Void> future = collecting.futures.get(i);
-
-                try {
-                    future.get(0, TimeUnit.NANOSECONDS);
-                } catch (final TimeoutException e) {
-                    LOG.warn("Future #{}/{} not completed yet", i, size);
-                } catch (final ExecutionException e) {
-                    LOG.warn("Future #{}/{} failed", i, size, e.getCause());
-                } catch (final InterruptedException e) {
-                    LOG.warn("Interrupted while examining future #{}/{}", i, size, e);
-                }
-            }
-
-            runTimedOut(new TimeoutException("Collection did not finish in " + DEAD_TIMEOUT_SECONDS + " seconds"));
+        if (collecting.done) {
+            LOG.debug("Returning as collecting.txFailure should call runFailed");
+            return;
         }
+        if (collecting.futures.isEmpty()) {
+            LOG.debug("Returning as collecting.txSuccess should call runSuccessful");
+            return;
+        }
+
+        final int size = collecting.futures.size();
+        for (int i = 0; i < size; i++) {
+            final ListenableFuture<Void> future = collecting.futures.get(i);
+
+            try {
+                future.get(0, TimeUnit.NANOSECONDS);
+            } catch (final TimeoutException e) {
+                LOG.warn("Future #{}/{} not completed yet", i, size);
+            } catch (final ExecutionException e) {
+                LOG.warn("Future #{}/{} failed", i, size, e.getCause());
+            } catch (final InterruptedException e) {
+                LOG.warn("Interrupted while examining future #{}/{}", i, size, e);
+            }
+        }
+
+        runTimedOut(new TimeoutException("Collection did not finish in " + TRANSACTIONS_COMPLETED_TIMEOUT_SECONS + " seconds"));
     }
 
     abstract ListenableFuture<Void> execWrite(final long txId);

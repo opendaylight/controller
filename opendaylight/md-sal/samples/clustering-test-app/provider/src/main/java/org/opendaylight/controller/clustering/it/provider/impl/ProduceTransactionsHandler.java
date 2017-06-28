@@ -146,6 +146,6 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
     void runTimedOut(final Exception cause) {
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,
-                    "Final submit was timed out by the test provider or was interrupted", cause).build());
+                    "Not every transaction has completed in time", cause).build());
     }
 }
