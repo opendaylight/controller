@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.access.client;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
+import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation-internal intermediate subclass between {@link AbstractClientConnection} and two-out of three of its
@@ -20,6 +23,8 @@ import java.util.Optional;
  * @param <T> Concrete {@link BackendInfo} type
  */
 abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractReceivingClientConnection.class);
+
     /**
      * Multiplication factor applied to remote's advertised limit on outstanding messages. Our default strategy
      * rate-limiting strategy in {@link AveragingProgressTracker} does not penalize threads as long as we have not
@@ -52,6 +57,15 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
     @Override
     public final Optional<T> getBackendInfo() {
         return Optional.of(backend);
+    }
+
+    @Override
+    final void receiveResponse(final ResponseEnvelope<?> envelope) {
+        if (envelope.getSessionId() != backend.getSessionId()) {
+            LOG.debug("Response {} does not match session ID {}, ignoring it", envelope, backend.getSessionId());
+        } else {
+            super.receiveResponse(envelope);
+        }
     }
 
     final T backend() {
