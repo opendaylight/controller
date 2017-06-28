@@ -368,7 +368,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             queue.remove(now);
             LOG.debug("{}: Connection {} timed out entry {}", context.persistenceId(), this, head);
 
-            final double time = (beenOpen * 1.0) / 1_000_000_000;
+            final double time = beenOpen * 1.0 / 1_000_000_000;
             head.complete(head.getRequest().toRequestFailure(
                 new RequestTimeoutException("Timed out after " + time + "seconds")));
         }
@@ -405,7 +405,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         return poisoned;
     }
 
-    final void receiveResponse(final ResponseEnvelope<?> envelope) {
+    void receiveResponse(final ResponseEnvelope<?> envelope) {
         final long now = currentTime();
         lastReceivedTicks = now;
 
