@@ -194,8 +194,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
                 }
             });
 
-            successor.ensureSealed();
-
+            successor.sealOnly();
             final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
             successor.sendRequest(successorReq, callback);
         } else if (request instanceof AbortLocalTransactionRequest) {

@@ -176,12 +176,23 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         return ret;
     }
 
-    @Override
-    void doSeal() {
-        Preconditions.checkState(sealedModification == null, "Transaction %s is already sealed", getIdentifier());
+    private void sealModification() {
+        Preconditions.checkState(sealedModification == null, "Transaction %s is already sealed", this);
         final CursorAwareDataTreeModification mod = getModification();
         mod.ready();
         sealedModification = mod;
+    }
+
+    @Override
+    void sealOnly() {
+        sealModification();
+        super.sealOnly();
+    }
+
+    @Override
+    boolean sealAndSend(final com.google.common.base.Optional<Long> enqueuedTicks) {
+        sealModification();
+        return super.sealAndSend(enqueuedTicks);
     }
 
     @Override
@@ -239,14 +250,16 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
             Verify.verify(callback != null, "Request {} has null callback", request);
-            ensureSealed();
+            if (markSealed()) {
+                sealOnly();
+            }
 
             switch (maybeProtocol.get()) {
                 case ABORT:
                     sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), callback);
                     break;
                 case READY:
-                    // No-op, as we have already issued a seal()
+                    // No-op, as we have already issued a sealOnly() and we are not transmitting anything
                     break;
                 case SIMPLE:
                     sendMethod.accept(commitRequest(false), callback);
@@ -264,7 +277,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long now) {
         if (request instanceof CommitLocalTransactionRequest) {
-            sendCommit((CommitLocalTransactionRequest) request, callback);
+            enqueueRequest(rebaseCommit((CommitLocalTransactionRequest)request), callback, now);
         } else {
             super.handleReplayedLocalRequest(request, callback, now);
         }
@@ -308,7 +321,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             final Consumer<Response<?, ?>> callback) {
         if (request instanceof CommitLocalTransactionRequest) {
             Verify.verify(successor instanceof LocalReadWriteProxyTransaction);
-            ((LocalReadWriteProxyTransaction) successor).sendCommit((CommitLocalTransactionRequest)request, callback);
+            ((LocalReadWriteProxyTransaction) successor).sendRebased((CommitLocalTransactionRequest)request, callback);
             LOG.debug("Forwarded request {} to successor {}", request, successor);
         } else {
             super.forwardToLocal(successor, request, callback);
@@ -336,7 +349,11 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         return Preconditions.checkNotNull(modification, "Transaction %s is DONE", getIdentifier());
     }
 
-    private void sendCommit(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
+    private void sendRebased(final CommitLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
+        sendRequest(rebaseCommit(request), callback);
+    }
+
+    private CommitLocalTransactionRequest rebaseCommit(final CommitLocalTransactionRequest request) {
         // Rebase old modification on new data tree.
         final CursorAwareDataTreeModification mod = getModification();
 
@@ -344,7 +361,10 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             request.getModification().applyToCursor(cursor);
         }
 
-        ensureSealed();
-        sendRequest(commitRequest(request.isCoordinated()), callback);
+        if (markSealed()) {
+            sealOnly();
+        }
+
+        return commitRequest(request.isCoordinated());
     }
 }
