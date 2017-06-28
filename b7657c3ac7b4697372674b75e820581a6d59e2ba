@@ -45,6 +45,30 @@
       "revId": "b7657c3ac7b4697372674b75e820581a6d59e2ba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_755d93e9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/AbstractTransactionHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-06-28T10:00:49Z",
+      "side": 1,
+      "message": "Oh, this is canceling checkComplete task. Nevermind.",
+      "parentUuid": "da2a55be_d5c39f88",
+      "range": {
+        "startLine": 156,
+        "startChar": 16,
+        "endLine": 157,
+        "endChar": 36
+      },
+      "revId": "b7657c3ac7b4697372674b75e820581a6d59e2ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
