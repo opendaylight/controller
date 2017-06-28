@@ -28,6 +28,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
 
     private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
             final YangInstanceIdentifier registeredPath) {
+        LOG.info("Registering listener {}", listener.getClass());
         this.listener = Preconditions.checkNotNull(listener);
         this.registeredPath = Preconditions.checkNotNull(registeredPath);
     }
@@ -53,7 +54,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
         }
 
         LOG.debug("{}: Sending {} change notification(s) {} to listener {}", logContext, message.getChanges().size(),
-                message.getChanges(), listener);
+                message.getChanges(), listener.getClass());
 
         try {
             this.listener.onDataTreeChanged(message.getChanges());
