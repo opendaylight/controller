@@ -327,23 +327,23 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     /**
-     * Seal this transaction before it is either committed or aborted.
+     * Seal this transaction before it is either committed or aborted. This method should only be invoked from
+     * application thread.
      */
     final void seal() {
         // Transition user-visible state first
-        final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
+        final boolean success = markSealed();
         Preconditions.checkState(success, "Proxy %s was already sealed", getIdentifier());
-        internalSeal();
+        sealAndSend();
     }
 
-    final void ensureSealed() {
-        if (SEALED_UPDATER.compareAndSet(this, 0, 1)) {
-            internalSeal();
-        }
+    void sealOnly() {
+        parent.onTransactionSealed(this);
+        final boolean success = STATE_UPDATER.compareAndSet(this, OPEN, SEALED);
+        Verify.verify(success, "Attempted to replay seal on {}", this);
     }
 
-    private void internalSeal() {
-        doSeal();
+    void sealAndSend() {
         parent.onTransactionSealed(this);
 
         // Now deal with state transfer, which can occur via successor or a follow-up canCommit() or directCommit().
@@ -355,8 +355,14 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             // still stuck here. The successor has not seen final part of our state, nor the fact it is sealed.
             // Propagate state and seal the successor.
             flushState(successor);
-            successor.ensureSealed();
+            if (successor.markSealed()) {
+                successor.sealAndSend();
+            }
         }
+    }
+
+    final boolean markSealed() {
+        return SEALED_UPDATER.compareAndSet(this, 0, 1);
     }
 
     private void checkNotSealed() {
@@ -689,7 +695,9 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         if (SEALED.equals(prevState)) {
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             flushState(successor);
-            successor.ensureSealed();
+            if (successor.markSealed()) {
+                successor.sealAndSend();
+            }
         }
     }
 
@@ -760,8 +768,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract CheckedFuture<Boolean, ReadFailedException> doExists(YangInstanceIdentifier path);
 
     abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(YangInstanceIdentifier path);
-
-    abstract void doSeal();
 
     @GuardedBy("this")
     abstract void flushState(AbstractProxyTransaction successor);
