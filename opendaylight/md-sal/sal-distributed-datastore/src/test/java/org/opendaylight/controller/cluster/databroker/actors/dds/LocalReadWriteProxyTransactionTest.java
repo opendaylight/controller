@@ -137,9 +137,9 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testDoSeal() throws Exception {
+    public void testSealOnly() throws Exception {
         assertOperationThrowsException(() -> transaction.getSnapshot(), IllegalStateException.class);
-        transaction.doSeal();
+        transaction.sealOnly();
         Assert.assertEquals(modification, transaction.getSnapshot());
     }
 
@@ -148,7 +148,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final TransactionTester<RemoteProxyTransaction> transactionTester = createRemoteProxyTransactionTester();
         final RemoteProxyTransaction successor = transactionTester.getTransaction();
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
-        transaction.doSeal();
+        transaction.sealOnly();
         transaction.flushState(successor);
         verify(modification).applyToCursor(any());
         transactionTester.getTransaction().seal();

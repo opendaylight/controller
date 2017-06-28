@@ -73,11 +73,6 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void doSeal() {
-        // No-op
-    }
-
-    @Override
     void flushState(final AbstractProxyTransaction successor) {
         // No-op
     }
