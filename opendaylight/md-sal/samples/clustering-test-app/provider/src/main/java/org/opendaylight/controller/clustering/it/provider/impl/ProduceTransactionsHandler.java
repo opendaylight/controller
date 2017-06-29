@@ -64,37 +64,32 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
         final YangInstanceIdentifier idListWithKey = ID_INT_YID.node(new NodeIdentifierWithPredicates(ID_INT, ID, id));
 
-        final DOMDataTreeProducer itemProducer = domDataTreeService.createProducer(
-            Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey)));
+        try (final DOMDataTreeProducer itemProducer = domDataTreeService.createProducer(
+                Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey)))) {
 
-        final DOMDataTreeCursorAwareTransaction tx = itemProducer.createTransaction(false);
-        final DOMDataTreeWriteCursor cursor =
-                tx.createCursor(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey));
+            final DOMDataTreeCursorAwareTransaction tx = itemProducer.createTransaction(false);
+            final DOMDataTreeWriteCursor cursor =
+                    tx.createCursor(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey));
 
-        final MapNode list = ImmutableNodes.mapNodeBuilder(ITEM).build();
-        cursor.write(list.getIdentifier(), list);
-        cursor.close();
-
-        try {
-            tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (final Exception e) {
-            LOG.warn("Unable to fill the initial item list.", e);
+            final MapNode list = ImmutableNodes.mapNodeBuilder(ITEM).build();
+            cursor.write(list.getIdentifier(), list);
+            cursor.close();
 
             try {
-                itemProducer.close();
-            } catch (final DOMDataTreeProducerException exception) {
-                LOG.warn("Failure while closing producer.", exception);
+                tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            } catch (final Exception e) {
+                LOG.warn("Unable to fill the initial item list.", e);
+
+                return Futures.immediateFuture(RpcResultBuilder.<ProduceTransactionsOutput>failed()
+                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
             }
 
-            return Futures.immediateFuture(RpcResultBuilder.<ProduceTransactionsOutput>failed()
-                .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
+            final ProduceTransactionsHandler handler = new ProduceTransactionsHandler(itemProducer,
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey.node(list.getIdentifier())
+                    .toOptimized()), input);
+            handler.doStart();
+            return handler.future;
         }
-
-        final ProduceTransactionsHandler handler = new ProduceTransactionsHandler(itemProducer,
-            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey.node(list.getIdentifier())
-                .toOptimized()), input);
-        handler.doStart();
-        return handler.future;
     }
 
     @Override
