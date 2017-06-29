@@ -9,10 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
-import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -32,6 +28,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongRangeSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +47,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     private final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories;
 
     // RangeSet performs automatic merging, hence we keep minimal state tracking information
-    private final RangeSet<UnsignedLong> purgedHistories;
+    private final UnsignedLongRangeSet purgedHistories;
 
     // Used for all standalone transactions
     private final AbstractFrontendHistory standaloneHistory;
@@ -71,12 +68,12 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     // - per-RequestException throw counters
 
     LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
-        this(persistenceId, clientId, tree, TreeRangeSet.create(), StandaloneFrontendHistory.create(persistenceId,
-            clientId, tree), new HashMap<>());
+        this(persistenceId, clientId, tree, UnsignedLongRangeSet.create(),
+            StandaloneFrontendHistory.create(persistenceId, clientId, tree), new HashMap<>());
     }
 
     LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
-        final RangeSet<UnsignedLong> purgedHistories, final AbstractFrontendHistory standaloneHistory,
+        final UnsignedLongRangeSet purgedHistories, final AbstractFrontendHistory standaloneHistory,
         final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories) {
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
         this.clientId = Preconditions.checkNotNull(clientId);
@@ -133,9 +130,9 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
         // We have not found the history. Before we create it we need to check history ID sequencing so that we do not
         // end up resurrecting a purged history.
-        if (purgedHistories.contains(UnsignedLong.fromLongBits(historyId.getHistoryId()))) {
+        if (purgedHistories.contains(historyId.getHistoryId())) {
             LOG.debug("{}: rejecting purged request {}", persistenceId, request);
-            throw new DeadHistoryException(purgedHistories);
+            throw new DeadHistoryException(purgedHistories.toImmutable());
         }
 
         // Update last history we have seen
@@ -179,8 +176,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         }
 
         LOG.debug("{}: purging history {}", persistenceId, id);
-        final UnsignedLong ul = UnsignedLong.fromLongBits(id.getHistoryId());
-        purgedHistories.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
+        purgedHistories.add(id.getHistoryId());
         existing.purge(request.getSequence(), envelope, now);
         return null;
     }
@@ -196,9 +192,9 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             if (lhId.getHistoryId() != 0) {
                 history = localHistories.get(lhId);
                 if (history == null) {
-                    if (purgedHistories.contains(UnsignedLong.fromLongBits(lhId.getHistoryId()))) {
+                    if (purgedHistories.contains(lhId.getHistoryId())) {
                         LOG.warn("{}: rejecting request {} to purged history", persistenceId, request);
-                        throw new DeadHistoryException(purgedHistories);
+                        throw new DeadHistoryException(purgedHistories.toImmutable());
                     }
 
                     LOG.warn("{}: rejecting unknown history request {}", persistenceId, request);
