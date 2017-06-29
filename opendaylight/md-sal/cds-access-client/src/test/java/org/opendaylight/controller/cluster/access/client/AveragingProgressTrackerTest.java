@@ -66,24 +66,4 @@ public class AveragingProgressTrackerTest {
         assertEquals(0, averagingProgressTracker.estimateIsolatedDelay(ticker.read()));
     }
 
-    @Test
-    public void copyObjectTest() {
-        final AveragingProgressTracker copyAverageProgressTracker = new AveragingProgressTracker(
-                averagingProgressTracker);
-
-        // copied object is the same as original
-        assertTrue(new ReflectionEquals(averagingProgressTracker).matches(copyAverageProgressTracker));
-
-        // afterwards work of copied tracker is independent
-        averagingProgressTracker.openTask(ticker.read());
-
-        final long time = ticker.read();
-        assertNotEquals("Trackers are expected to return different results for tracking",
-                averagingProgressTracker.openTask(time), copyAverageProgressTracker.openTask(time));
-        assertNotEquals("Trackers are expected to encounter different amount of tasks",
-                averagingProgressTracker.tasksEncountered(), copyAverageProgressTracker.tasksEncountered());
-
-        // and copied object is then no more the same as original
-        assertFalse(new ReflectionEquals(averagingProgressTracker).matches(copyAverageProgressTracker));
-    }
 }
