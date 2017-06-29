@@ -11,10 +11,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
-import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -24,6 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
+import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongRangeSet;
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
@@ -34,14 +31,14 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     private static final Logger LOG = LoggerFactory.getLogger(FrontendClientMetadataBuilder.class);
 
     private final Map<LocalHistoryIdentifier, FrontendHistoryMetadataBuilder> currentHistories = new HashMap<>();
-    private final RangeSet<UnsignedLong> purgedHistories;
+    private final UnsignedLongRangeSet purgedHistories;
     private final ClientIdentifier identifier;
     private final String shardName;
 
     FrontendClientMetadataBuilder(final String shardName, final ClientIdentifier identifier) {
         this.shardName = Preconditions.checkNotNull(shardName);
         this.identifier = Preconditions.checkNotNull(identifier);
-        purgedHistories = TreeRangeSet.create();
+        purgedHistories = UnsignedLongRangeSet.create();
 
         // History for stand-alone transactions is always present
         final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
@@ -51,7 +48,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     FrontendClientMetadataBuilder(final String shardName, final FrontendClientMetadata meta) {
         this.shardName = Preconditions.checkNotNull(shardName);
         this.identifier = Preconditions.checkNotNull(meta.getIdentifier());
-        purgedHistories = TreeRangeSet.create(meta.getPurgedHistories());
+        purgedHistories = UnsignedLongRangeSet.create(meta.getPurgedHistories());
 
         for (FrontendHistoryMetadata h : meta.getCurrentHistories()) {
             final FrontendHistoryMetadataBuilder b = new FrontendHistoryMetadataBuilder(identifier, h);
@@ -73,7 +70,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
 
     @Override
     public FrontendClientMetadata build() {
-        return new FrontendClientMetadata(identifier, purgedHistories,
+        return new FrontendClientMetadata(identifier, purgedHistories.toImmutable(),
             Collections2.transform(currentHistories.values(), FrontendHistoryMetadataBuilder::build));
     }
 
@@ -110,8 +107,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         }
 
         // XXX: do we need to account for cookies?
-        final UnsignedLong ul = UnsignedLong.fromLongBits(historyId.getHistoryId());
-        purgedHistories.add(Range.closedOpen(ul, UnsignedLong.ONE.plus(ul)));
+        purgedHistories.add(historyId.getHistoryId());
         LOG.debug("{}: Purged history {}", historyId);
     }
 
@@ -174,7 +170,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         }
 
         return new LeaderFrontendState(shard.persistenceId(), getIdentifier(), shard.getDataStore(),
-            TreeRangeSet.create(purgedHistories), singleHistory, histories);
+            purgedHistories.copy(), singleHistory, histories);
     }
 
     private FrontendHistoryMetadataBuilder getHistory(final TransactionIdentifier txId) {
