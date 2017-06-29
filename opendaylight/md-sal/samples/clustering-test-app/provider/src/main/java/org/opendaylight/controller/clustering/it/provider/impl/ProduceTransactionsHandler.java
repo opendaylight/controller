@@ -79,12 +79,7 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
             tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (final Exception e) {
             LOG.warn("Unable to fill the initial item list.", e);
-
-            try {
-                itemProducer.close();
-            } catch (final DOMDataTreeProducerException exception) {
-                LOG.warn("Failure while closing producer.", exception);
-            }
+            closeProducer(itemProducer);
 
             return Futures.immediateFuture(RpcResultBuilder.<ProduceTransactionsOutput>failed()
                 .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
@@ -93,8 +88,17 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
         final ProduceTransactionsHandler handler = new ProduceTransactionsHandler(itemProducer,
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, idListWithKey.node(list.getIdentifier())
                 .toOptimized()), input);
+        // It is handler's responsibility to close itemProducer when the work is finished.
         handler.doStart();
         return handler.future;
+    }
+
+    private static closeProducer(final DOMDataTreeProducer producer) {
+        try {
+            producer.close();
+        } catch (final DOMDataTreeProducerException exception) {
+            LOG.warn("Failure while closing producer.", exception);
+        }
     }
 
     @Override
@@ -127,12 +131,14 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
     @Override
     void runFailed(final Throwable cause) {
+        closeProducer(itemProducer);
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
     }
 
     @Override
     void runSuccessful(final long allTx) {
+        closeProducer(itemProducer);
         final ProduceTransactionsOutput output = new ProduceTransactionsOutputBuilder()
                 .setAllTx(allTx)
                 .setInsertTx(insertTx)
@@ -144,6 +150,7 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
     @Override
     void runTimedOut(final Exception cause) {
+        closeProducer(itemProducer);
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,
                     "Final submit was timed out by the test provider or was interrupted", cause).build());
