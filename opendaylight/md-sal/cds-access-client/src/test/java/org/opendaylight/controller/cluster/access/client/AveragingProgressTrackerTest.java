@@ -8,15 +8,12 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.testing.FakeTicker;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 
 public class AveragingProgressTrackerTest {
     private static final long CHECKER = TimeUnit.MILLISECONDS.toNanos(500);
