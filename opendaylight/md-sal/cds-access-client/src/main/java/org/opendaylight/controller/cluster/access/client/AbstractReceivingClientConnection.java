@@ -45,9 +45,13 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
         this.backend = Preconditions.checkNotNull(backend);
     }
 
-    AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
-        super(oldConnection, targetQueueSize(oldConnection.backend));
+    AbstractReceivingClientConnection(final AbstractClientConnection<T> oldConnection, final T backend) {
+        super(oldConnection, targetQueueSize(backend));
         this.backend = oldConnection.backend;
+    }
+
+    AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
+        this(oldConnection, oldConnection.backend);
     }
 
     private static int targetQueueSize(final BackendInfo backend) {

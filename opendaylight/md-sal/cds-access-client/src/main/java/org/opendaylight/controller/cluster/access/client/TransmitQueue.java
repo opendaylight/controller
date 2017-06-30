@@ -58,6 +58,10 @@ abstract class TransmitQueue {
             super(targetDepth);
         }
 
+        Halted(final TransmitQueue source, final int targetDepth, final long now) {
+            super(source, targetDepth, now);
+        }
+
         @Override
         int canTransmitCount(final int inflightSize) {
             return 0;
@@ -75,6 +79,11 @@ abstract class TransmitQueue {
 
         Transmitting(final int targetDepth, final BackendInfo backend) {
             super(targetDepth);
+            this.backend = Preconditions.checkNotNull(backend);
+        }
+
+        Transmitting(final TransmitQueue source, final int targetDepth, final BackendInfo backend, final long now) {
+            super(source, targetDepth, now);
             this.backend = Preconditions.checkNotNull(backend);
         }
 
@@ -104,6 +113,10 @@ abstract class TransmitQueue {
 
     TransmitQueue(final int targetDepth) {
         tracker = new AveragingProgressTracker(targetDepth);
+    }
+
+    TransmitQueue(final TransmitQueue source, final int targetDepth, final long now) {
+        tracker = new AveragingProgressTracker(source.tracker, targetDepth, now);
     }
 
     /**
@@ -186,10 +199,10 @@ abstract class TransmitQueue {
      *
      * @return Delay to be forced on the calling thread, in nanoseconds.
      */
-    final long enqueue(final ConnectionEntry entry, final long now) {
+    final long enqueue(final ConnectionEntry entry, final boolean throttle, final long now) {
         if (successor != null) {
             // This call will pay the enqueuing price, hence the caller does not have to
-            successor.forwardEntry(entry, now);
+            successor.forwardEntry(entry, throttle, now);
             return 0;
         }
 
@@ -197,7 +210,7 @@ abstract class TransmitQueue {
         // entry.getEnqueueTicks() should have non-negative difference from the last entry present in the queues
 
         // Reserve an entry before we do anything that can fail
-        final long delay = tracker.openTask(now);
+        final long delay = throttle ? tracker.openTask(now) : tracker.openTaskWithoutThrottle(now);
 
         /*
          * This is defensive to make sure we do not do the wrong thing here and reorder messages if we ever happen

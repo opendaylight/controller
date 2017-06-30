@@ -18,6 +18,10 @@ public final class ConnectedClientConnection<T extends BackendInfo> extends Abst
         super(context, cookie, backend);
     }
 
+    ConnectedClientConnection(final AbstractReceivingClientConnection<T> conn, final T backend) {
+        super(conn, backend);
+    }
+
     @Override
     ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
         final ReconnectingClientConnection<T> next = new ReconnectingClientConnection<>(this, cause);
