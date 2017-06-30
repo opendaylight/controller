@@ -306,12 +306,14 @@ abstract class ProgressTracker {
      * This call can make the collection of open tasks non-empty, that special case should be handled.
      *
      * @param now tick number corresponding to caller's present
+     * @return zero delay
      */
-    void openTaskWithoutThrottle(final long now) {
+    long openTaskWithoutThrottle(final long now) {
         if (isIdle()) {
             transitFromIdle(now);
         }
         tasksEncountered++;
+        return 0;
     }
 
     /**
