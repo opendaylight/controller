@@ -93,8 +93,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private volatile RequestException poisoned;
 
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final ClientActorContext context, final Long cookie,
-            final TransmitQueue queue) {
+    AbstractClientConnection(final ClientActorContext context, final Long cookie, final TransmitQueue queue) {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.queue = Preconditions.checkNotNull(queue);
@@ -105,7 +104,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     AbstractClientConnection(final AbstractClientConnection<T> oldConnection, final int targetQueueSize) {
         this.context = oldConnection.context;
         this.cookie = oldConnection.cookie;
-        this.queue = new TransmitQueue.Halted(targetQueueSize);
+        this.queue = new TransmitQueue.Halted(oldConnection.queue, targetQueueSize, currentTime());
         this.lastReceivedTicks = oldConnection.lastReceivedTicks;
     }
 
@@ -154,10 +153,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      */
     public final void enqueueRequest(final Request<?, ?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
-        enqueueEntry(new ConnectionEntry(request, callback, enqueuedTicks), currentTime());
+        enqueueEntry(new ConnectionEntry(request, callback, enqueuedTicks), false, currentTime());
     }
 
-    public final long enqueueEntry(final ConnectionEntry entry, final long now) {
+    public final long enqueueEntry(final ConnectionEntry entry, final boolean throttle, final long now) {
         lock.lock();
         try {
             final RequestException maybePoison = poisoned;
@@ -169,7 +168,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
                 // The queue is becoming non-empty, schedule a timer.
                 scheduleTimer(entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now);
             }
-            return queue.enqueue(entry, now);
+            return queue.enqueue(entry, throttle, now);
         } finally {
             lock.unlock();
         }
@@ -212,7 +211,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             RequestException runtimeRequestException);
 
     final void sendEntry(final ConnectionEntry entry, final long now) {
-        long delay = enqueueEntry(entry, now);
+        long delay = enqueueEntry(entry, true, now);
         try {
             if (delay >= DEBUG_DELAY_NANOS) {
                 if (delay > MAX_DELAY_NANOS) {

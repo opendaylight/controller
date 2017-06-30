@@ -86,7 +86,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         final Request<?, ?> request = createRequest(replyToProbe.ref());
         final ConnectionEntry entry = new ConnectionEntry(request, callback, 0L);
-        connection.enqueueEntry(entry, 0L);
+        connection.enqueueEntry(entry, true, 0L);
         connection.poison(new RuntimeRequestException("fail", new RuntimeException("fail")));
         verify(callback, timeout(1000)).accept(isA(TransactionFailure.class));
     }

@@ -21,6 +21,6 @@ final class SimpleReconnectForwarder extends ReconnectForwarder {
     @Override
     protected void replayEntry(final ConnectionEntry entry, final long now) {
         // We are executing in the context of the client thread, do not block
-        successor().enqueueEntry(entry, now);
+        successor().enqueueEntry(entry, false, now);
     }
 }
