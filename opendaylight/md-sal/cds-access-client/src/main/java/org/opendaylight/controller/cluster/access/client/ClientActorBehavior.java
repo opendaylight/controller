@@ -300,8 +300,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             final Stopwatch sw = Stopwatch.createStarted();
 
             // Create a new connected connection
-            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn.context(),
-                    conn.cookie(), backend);
+            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn, backend);
             LOG.info("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
 
             // Start reconnecting without the old connection lock held
