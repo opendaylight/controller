@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_207e2eaf",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ProgressTracker.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-06-30T11:47:28Z",
+      "side": 1,
+      "message": "I was thinking about adding reopenTask method to use when replaying, but it turns out it would do the same thing as this method. So we can use this directly, or perhaps rename this to something like openTaskWithoutThrottling",
+      "range": {
+        "startLine": 311,
+        "startChar": 9,
+        "endLine": 311,
+        "endChar": 26
+      },
+      "revId": "6899b0bf19d479235b1971bb9ea346c8088eef06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
