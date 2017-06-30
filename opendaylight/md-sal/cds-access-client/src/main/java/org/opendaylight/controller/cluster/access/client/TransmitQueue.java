@@ -58,6 +58,10 @@ abstract class TransmitQueue {
             super(targetDepth);
         }
 
+        Halted(final TransmitQueue source, final int targetDepth) {
+            super(source, targetDepth);
+        }
+
         @Override
         int canTransmitCount(final int inflightSize) {
             return 0;
@@ -75,6 +79,11 @@ abstract class TransmitQueue {
 
         Transmitting(final int targetDepth, final BackendInfo backend) {
             super(targetDepth);
+            this.backend = Preconditions.checkNotNull(backend);
+        }
+
+        Transmitting(final TransmitQueue source, final int targetDepth, final BackendInfo backend) {
+            super(source, targetDepth);
             this.backend = Preconditions.checkNotNull(backend);
         }
 
@@ -104,6 +113,10 @@ abstract class TransmitQueue {
 
     TransmitQueue(final int targetDepth) {
         tracker = new AveragingProgressTracker(targetDepth);
+    }
+
+    TransmitQueue(final TransmitQueue source, final int targetDepth) {
+        tracker = new AveragingProgressTracker(source.tracker, targetDepth);
     }
 
     /**
