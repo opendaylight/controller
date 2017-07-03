@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.primitives.UnsignedLong;
@@ -39,6 +40,11 @@ abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         @Override
         void throwCanCommitFailure() throws Exception {
             throw failure;
+        }
+
+        @Override
+        ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+            return super.addToStringAttributes(toStringHelper).add("failure", failure);
         }
     }
 
@@ -260,5 +266,10 @@ abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public boolean isFailed() {
         return state == State.FAILED || nextFailure != null;
+    }
+
+    @Override
+    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return super.addToStringAttributes(toStringHelper).add("nextFailure", nextFailure);
     }
 }
