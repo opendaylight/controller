@@ -700,11 +700,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         public CDSShardAccess getShardAccess(@Nonnull final DOMDataTreeIdentifier subtree) {
             Preconditions.checkArgument(
                     subtrees.stream().anyMatch(dataTreeIdentifier -> dataTreeIdentifier.contains(subtree)),
-                    "Subtree {} is not controlled by this producer {}", subtree, this);
+                    "Subtree %s is not controlled by this producer %s", subtree, this);
 
             final DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> lookup =
                     shardTable.lookup(subtree);
-            Preconditions.checkState(lookup != null, "Subtree {} is not contained in any registered shard.");
+            Preconditions.checkState(lookup != null, "Subtree %s is not contained in any registered shard.", subtree);
 
             final DOMDataTreeIdentifier lookupId = lookup.getValue().getPrefix();
 
