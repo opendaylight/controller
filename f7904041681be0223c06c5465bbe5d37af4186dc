@@ -16,6 +16,24 @@
       "revId": "f7904041681be0223c06c5465bbe5d37af4186dc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_36031311",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-07-03T10:16:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da2a55be_16024f3e",
+      "revId": "f7904041681be0223c06c5465bbe5d37af4186dc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
