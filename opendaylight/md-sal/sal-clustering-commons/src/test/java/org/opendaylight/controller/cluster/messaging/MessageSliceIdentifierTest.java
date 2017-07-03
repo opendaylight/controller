@@ -21,8 +21,10 @@ public class MessageSliceIdentifierTest {
 
     @Test
     public void testSerialization() {
-        MessageSliceIdentifier expected = new MessageSliceIdentifier(new StringIdentifier("test"));
+        MessageSliceIdentifier expected = new MessageSliceIdentifier(new StringIdentifier("test"), 123L);
         MessageSliceIdentifier cloned = (MessageSliceIdentifier) SerializationUtils.clone(expected);
         assertEquals("cloned", expected, cloned);
+        assertEquals("getClientIdentifier", expected.getClientIdentifier(), cloned.getClientIdentifier());
+        assertEquals("getSlicerId", expected.getSlicerId(), cloned.getSlicerId());
     }
 }

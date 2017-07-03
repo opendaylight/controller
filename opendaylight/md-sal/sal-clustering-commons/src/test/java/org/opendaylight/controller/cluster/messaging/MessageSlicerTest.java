@@ -47,13 +47,18 @@ public class MessageSlicerTest extends AbstractMessagingTest {
 
     @Test
     public void testHandledMessages() {
-        final MessageSliceReply reply = MessageSliceReply.success(IDENTIFIER, 1, testProbe.ref());
-        assertEquals("isHandledMessage", Boolean.TRUE, MessageSlicer.isHandledMessage(reply));
-        assertEquals("isHandledMessage", Boolean.FALSE, MessageSlicer.isHandledMessage(new Object()));
-
         try (MessageSlicer slicer = newMessageSlicer("testHandledMessages", 100)) {
+            MessageSliceIdentifier messageSliceId = new MessageSliceIdentifier(IDENTIFIER, slicer.getId());
+            final MessageSliceReply reply = MessageSliceReply.success(messageSliceId, 1, testProbe.ref());
+            assertEquals("isHandledMessage", Boolean.TRUE, MessageSlicer.isHandledMessage(reply));
+            assertEquals("isHandledMessage", Boolean.FALSE, MessageSlicer.isHandledMessage(new Object()));
+
             assertEquals("handledMessage", Boolean.TRUE, slicer.handleMessage(reply));
             assertEquals("handledMessage", Boolean.FALSE, slicer.handleMessage(new Object()));
+            assertEquals("handledMessage", Boolean.FALSE, slicer.handleMessage(MessageSliceReply.success(
+                    IDENTIFIER, 1,testProbe.ref())));
+            assertEquals("handledMessage", Boolean.FALSE, slicer.handleMessage(MessageSliceReply.success(
+                    new MessageSliceIdentifier(IDENTIFIER, slicer.getId() + 1), 1,testProbe.ref())));
         }
     }
 
@@ -105,9 +110,10 @@ public class MessageSlicerTest extends AbstractMessagingTest {
     @Test
     public void testMessageSliceReplyWithNoState() {
         try (MessageSlicer slicer = newMessageSlicer("testMessageSliceReplyWithNoState", 1000)) {
-            slicer.handleMessage(MessageSliceReply.success(IDENTIFIER, 1, testProbe.ref()));
+            MessageSliceIdentifier messageSliceId = new MessageSliceIdentifier(IDENTIFIER, slicer.getId());
+            slicer.handleMessage(MessageSliceReply.success(messageSliceId, 1, testProbe.ref()));
             final AbortSlicing abortSlicing = testProbe.expectMsgClass(AbortSlicing.class);
-            assertEquals("Identifier", IDENTIFIER, abortSlicing.getIdentifier());
+            assertEquals("Identifier", messageSliceId, abortSlicing.getIdentifier());
         }
     }
 
