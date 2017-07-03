@@ -88,7 +88,7 @@ abstract class InternalJMXRegistrator implements AutoCloseable {
     final synchronized void unregisterMBean(final ObjectName on) {
         // first check that on was registered using this instance
         boolean removed = registeredObjectNames.remove(on);
-        Preconditions.checkState(removed, "Cannot unregister - ObjectName not found in 'registeredObjectNames': {}", on);
+        Preconditions.checkState(removed, "Cannot unregister - ObjectName not found in 'registeredObjectNames': %s", on);
 
         try {
             getMBeanServer().unregisterMBean(on);
