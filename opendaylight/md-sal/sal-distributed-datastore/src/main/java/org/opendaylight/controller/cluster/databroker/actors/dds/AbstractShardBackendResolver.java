@@ -152,7 +152,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
                 }
 
                 LOG.debug("Resolved backend information to {}", response);
-                Preconditions.checkArgument(response instanceof ConnectClientSuccess, "Unhandled response {}",
+                Preconditions.checkArgument(response instanceof ConnectClientSuccess, "Unhandled response %s",
                     response);
                 final ConnectClientSuccess success = (ConnectClientSuccess) response;
                 future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),

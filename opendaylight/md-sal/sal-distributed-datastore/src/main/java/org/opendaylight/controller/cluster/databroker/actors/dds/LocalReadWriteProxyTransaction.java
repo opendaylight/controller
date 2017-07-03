@@ -249,7 +249,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
         final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
-            Verify.verify(callback != null, "Request {} has null callback", request);
+            Verify.verify(callback != null, "Request %s has null callback", request);
             if (markSealed()) {
                 sealOnly();
             }

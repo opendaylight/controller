@@ -364,7 +364,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void sealOnly() {
         parent.onTransactionSealed(this);
         final boolean success = STATE_UPDATER.compareAndSet(this, OPEN, SEALED);
-        Verify.verify(success, "Attempted to replay seal on {}", this);
+        Verify.verify(success, "Attempted to replay seal on %s", this);
     }
 
     /**
