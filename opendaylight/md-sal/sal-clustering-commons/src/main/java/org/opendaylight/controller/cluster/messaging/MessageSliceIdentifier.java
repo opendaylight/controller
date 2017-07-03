@@ -14,6 +14,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Identifier for a message slice that is composed of a client-supplied Identifier and an internal counter value.
@@ -25,19 +26,25 @@ final class MessageSliceIdentifier implements Identifier {
     private static final AtomicLong ID_COUNTER = new AtomicLong(1);
 
     private final Identifier clientIdentifier;
+    private final long slicerId;
     private final long messageId;
 
-    MessageSliceIdentifier(final Identifier clientIdentifier) {
-        this(clientIdentifier, ID_COUNTER.getAndIncrement());
+    MessageSliceIdentifier(final Identifier clientIdentifier, final long slicerId) {
+        this(clientIdentifier, slicerId, ID_COUNTER.getAndIncrement());
     }
 
-    private MessageSliceIdentifier(final Identifier clientIdentifier, final long messageId) {
+    private MessageSliceIdentifier(final Identifier clientIdentifier, final long slicerId, final long messageId) {
         this.clientIdentifier = Preconditions.checkNotNull(clientIdentifier);
         this.messageId = messageId;
+        this.slicerId = slicerId;
     }
 
     Identifier getClientIdentifier() {
         return clientIdentifier;
+    }
+
+    long getSlicerId() {
+        return slicerId;
     }
 
     @Override
@@ -46,6 +53,7 @@ final class MessageSliceIdentifier implements Identifier {
         int result = 1;
         result = prime * result + clientIdentifier.hashCode();
         result = prime * result + (int) (messageId ^ messageId >>> 32);
+        result = prime * result + (int) (slicerId ^ slicerId >>> 32);
         return result;
     }
 
@@ -60,12 +68,14 @@ final class MessageSliceIdentifier implements Identifier {
         }
 
         MessageSliceIdentifier other = (MessageSliceIdentifier) obj;
-        return other.clientIdentifier.equals(clientIdentifier) && other.messageId == messageId;
+        return other.clientIdentifier.equals(clientIdentifier) && other.slicerId == slicerId
+                && other.messageId == messageId;
     }
 
     @Override
     public String toString() {
-        return "MessageSliceIdentifier [clientIdentifier=" + clientIdentifier + ", messageId=" + messageId + "]";
+        return "MessageSliceIdentifier [clientIdentifier=" + clientIdentifier + ", slicerId=" + slicerId
+                + ", messageId=" + messageId + "]";
     }
 
     private Object writeReplace() {
@@ -90,12 +100,16 @@ final class MessageSliceIdentifier implements Identifier {
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
             out.writeObject(messageSliceId.clientIdentifier);
-            out.writeLong(messageSliceId.messageId);
+            WritableObjects.writeLongs(out, messageSliceId.slicerId, messageSliceId.messageId);
         }
 
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            messageSliceId = new MessageSliceIdentifier((Identifier) in.readObject(), in.readLong());
+            final Identifier clientIdentifier = (Identifier) in.readObject();
+            final byte header = WritableObjects.readLongHeader(in);
+            final long slicerId =  WritableObjects.readFirstLong(in, header);
+            final long messageId = WritableObjects.readSecondLong(in, header);
+            messageSliceId = new MessageSliceIdentifier(clientIdentifier, slicerId, messageId);
         }
 
         private Object readResolve() {

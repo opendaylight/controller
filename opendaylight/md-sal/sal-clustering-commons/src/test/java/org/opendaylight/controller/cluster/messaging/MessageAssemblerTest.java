@@ -72,7 +72,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
             final FileBackedOutputStream fileBackStream = spy(new FileBackedOutputStream(100000000, null));
             doReturn(fileBackStream).when(mockFiledBackedStreamFactory).newInstance();
 
-            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER);
+            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
             final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
 
             final MessageSlice messageSlice = new MessageSlice(identifier, SerializationUtils.serialize(message), 1, 1,
@@ -96,7 +96,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
             doThrow(mockFailure).when(mockByteSource).openStream();
             doThrow(mockFailure).when(mockByteSource).openBufferedStream();
 
-            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER);
+            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
             final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
 
             final MessageSlice messageSlice = new MessageSlice(identifier, SerializationUtils.serialize(message), 1, 1,
@@ -121,7 +121,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
             doThrow(mockFailure).when(mockFiledBackedStream).write(anyInt());
             doThrow(mockFailure).when(mockFiledBackedStream).flush();
 
-            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER);
+            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
             final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
 
             final MessageSlice messageSlice = new MessageSlice(identifier, SerializationUtils.serialize(message), 1, 1,
@@ -142,7 +142,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
         final int expiryDuration = 200;
         try (MessageAssembler assembler = newMessageAssemblerBuilder("testAssembledMessageStateExpiration")
                 .expireStateAfterInactivity(expiryDuration, TimeUnit.MILLISECONDS).build()) {
-            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER);
+            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
             final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
 
             final MessageSlice messageSlice = new MessageSlice(identifier, SerializationUtils.serialize(message), 1, 2,
@@ -163,7 +163,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
     @Test
     public void testFirstMessageSliceWithInvalidIndex() {
         try (MessageAssembler assembler = newMessageAssembler("testFirstMessageSliceWithInvalidIndex")) {
-            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER);
+            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
             final MessageSlice messageSlice = new MessageSlice(identifier, new byte[0], 2, 3, 1, testProbe.ref());
             assembler.handleMessage(messageSlice, testProbe.ref());
 
