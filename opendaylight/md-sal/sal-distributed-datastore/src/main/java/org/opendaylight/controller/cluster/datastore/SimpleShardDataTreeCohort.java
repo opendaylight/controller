@@ -27,39 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
-abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
-    static final class DeadOnArrival extends SimpleShardDataTreeCohort {
-        private final Exception failure;
-
-        DeadOnArrival(final ShardDataTree dataTree, final DataTreeModification transaction,
-            final TransactionIdentifier transactionId, final Exception failure) {
-            super(dataTree, transaction, transactionId, null);
-            this.failure = Preconditions.checkNotNull(failure);
-        }
-
-        @Override
-        void throwCanCommitFailure() throws Exception {
-            throw failure;
-        }
-
-        @Override
-        ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-            return super.addToStringAttributes(toStringHelper).add("failure", failure);
-        }
-    }
-
-    static final class Normal extends SimpleShardDataTreeCohort {
-        Normal(final ShardDataTree dataTree, final DataTreeModification transaction,
-            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts) {
-            super(dataTree, transaction, transactionId, Preconditions.checkNotNull(userCohorts));
-        }
-
-        @Override
-        void throwCanCommitFailure() {
-            // No-op
-        }
-    }
-
+final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
 
     private final DataTreeModification transaction;
@@ -77,7 +45,16 @@ abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionId = Preconditions.checkNotNull(transactionId);
-        this.userCohorts = userCohorts;
+        this.userCohorts = Preconditions.checkNotNull(userCohorts);
+    }
+
+    SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
+        final TransactionIdentifier transactionId, final Exception failure) {
+        this.dataTree = Preconditions.checkNotNull(dataTree);
+        this.transaction = Preconditions.checkNotNull(transaction);
+        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.userCohorts = null;
+        this.nextFailure = Preconditions.checkNotNull(nextFailure);
     }
 
     @Override
@@ -258,15 +235,12 @@ abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     void reportFailure(final Exception cause) {
-        this.nextFailure = Preconditions.checkNotNull(cause);
+        if (nextFailure == null) {
+            this.nextFailure = Preconditions.checkNotNull(cause);
+        } else {
+            LOG.debug("Transaction {} already has a set failure, not updating it", transactionId, cause);
+        }
     }
-
-    /**
-     * If there is an initial failure, throw it so the caller can process it.
-     *
-     * @throws Exception reported failure.
-     */
-    abstract void throwCanCommitFailure() throws Exception;
 
     @Override
     public boolean isFailed() {
