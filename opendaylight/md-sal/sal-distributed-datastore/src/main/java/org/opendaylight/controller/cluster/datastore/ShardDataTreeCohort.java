@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -57,4 +59,13 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
     public abstract boolean isFailed();
 
     public abstract State getState();
+
+    @Override
+    public final String toString() {
+        return addToStringAttributes(MoreObjects.toStringHelper(this).omitNullValues()).toString();
+    }
+
+    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return toStringHelper.add("id", getIdentifier()).add("state", getState());
+    }
 }

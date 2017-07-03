@@ -225,8 +225,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 // Already reconnecting, do not churn the logs
                 return this;
             } else if (conn != null) {
-                LOG.info("{}: connection {} indicated no sequencing mismatch on {} sequence {}, reconnecting it",
-                    persistenceId(), conn, failure.getTarget(), failure.getSequence(), cause);
+                LOG.info("{}: connection {} indicated sequencing mismatch on {} sequence {} ({}), reconnecting it",
+                    persistenceId(), conn, failure.getTarget(), failure.getSequence(), command.getTxSequence(), cause);
                 return conn.reconnect(this, cause);
             }
         }
