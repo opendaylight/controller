@@ -108,7 +108,12 @@ abstract class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         checkState(State.READY);
         this.callback = Preconditions.checkNotNull(newCallback);
         state = State.CAN_COMMIT_PENDING;
-        dataTree.startCanCommit(this);
+
+        if (nextFailure == null) {
+            dataTree.startCanCommit(this);
+        } else {
+            failedCanCommit(nextFailure);
+        }
     }
 
     @Override
