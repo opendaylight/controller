@@ -334,7 +334,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     synchronized void cancelTransaction(final PingPongTransaction tx, final DOMDataReadWriteTransaction frontendTx) {
         // Attempt to unlock the operation.
         final boolean lockedMatch = LOCKED_UPDATER.compareAndSet(this, tx, null);
-        Verify.verify(lockedMatch, "Cancelling transaction {} collided with locked transaction {}", tx, lockedTx);
+        Verify.verify(lockedMatch, "Cancelling transaction %s collided with locked transaction %s", tx, lockedTx);
 
         // Cancel the backend transaction, so we do not end up leaking it.
         final boolean backendCancelled = tx.getTransaction().cancel();

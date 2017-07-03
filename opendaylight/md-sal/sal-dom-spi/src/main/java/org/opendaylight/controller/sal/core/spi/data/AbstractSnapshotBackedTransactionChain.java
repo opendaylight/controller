@@ -200,7 +200,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         final State localState = state;
 
         do {
-            Preconditions.checkState(!CLOSED.equals(localState), "Transaction chain {} has been closed", this);
+            Preconditions.checkState(!CLOSED.equals(localState), "Transaction chain %s has been closed", this);
 
             if (FAILED.equals(localState)) {
                 LOG.debug("Ignoring user close in failed state");
