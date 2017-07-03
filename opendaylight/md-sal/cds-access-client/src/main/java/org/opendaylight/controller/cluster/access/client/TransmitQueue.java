@@ -246,7 +246,7 @@ abstract class TransmitQueue {
     }
 
     final void setForwarder(final ReconnectForwarder forwarder, final long now) {
-        Verify.verify(successor == null, "Successor {} already set on connection {}", successor, this);
+        Verify.verify(successor == null, "Successor %s already set on connection %s", successor, this);
         successor = Preconditions.checkNotNull(forwarder);
         LOG.debug("Connection {} superseded by {}, splicing queue", this, successor);
 

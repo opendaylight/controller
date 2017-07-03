@@ -437,8 +437,8 @@ class ConfigTransactionControllerImpl implements
                 LOG.debug("About to commit {} in transaction {}",
                         moduleIdentifier, getTransactionIdentifier());
                 AutoCloseable instance = module.getInstance();
-                Preconditions.checkNotNull(instance, "Instance is null:{} in transaction {}", moduleIdentifier, getTransactionIdentifier());
-            } catch (final Exception e) {
+                Preconditions.checkNotNull(instance, "Instance is null:%s in transaction %s", moduleIdentifier, getTransactionIdentifier());
+            } catch (Exception e) {
                 LOG.error("Commit failed on {} in transaction {}", moduleIdentifier,
                         getTransactionIdentifier(), e);
                 internalAbort();
