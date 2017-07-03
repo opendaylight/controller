@@ -64,7 +64,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
-    private static final FiniteDuration RESOLVE_RETRY_DURATION = FiniteDuration.apply(5, TimeUnit.SECONDS);
+    private static final FiniteDuration RESOLVE_RETRY_DURATION = FiniteDuration.apply(1, TimeUnit.SECONDS);
 
     /**
      * Map of connections to the backend. This map is concurrent to allow lookups, but given complex operations
