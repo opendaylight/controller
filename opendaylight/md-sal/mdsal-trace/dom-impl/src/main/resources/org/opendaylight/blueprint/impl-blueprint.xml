@@ -20,6 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         odl:type="default" />
 
   <reference id="realDefaultDOMBroker"
+      component-name="clusteredDOMDataBroker"
       interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
       odl:type="default" />
 
