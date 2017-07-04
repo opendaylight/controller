@@ -216,6 +216,12 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
     void reconnect() {
         expectedTxSequence = 0;
+
+        // FIXME: remove any taint
+    }
+
+    void taintState() {
+        // FIXME: add taint
     }
 
     void retire() {
@@ -227,4 +233,5 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         return MoreObjects.toStringHelper(LeaderFrontendState.class).add("clientId", clientId)
                 .add("purgedHistories", purgedHistories).toString();
     }
+
 }

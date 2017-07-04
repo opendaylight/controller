@@ -390,29 +390,39 @@ public class Shard extends RaftActor {
     }
 
     // Acquire our frontend tracking handle and verify generation matches
-    private LeaderFrontendState getFrontend(final ClientIdentifier clientId) throws RequestException {
+    @Nullable
+    private LeaderFrontendState findFrontend(final ClientIdentifier clientId) throws RequestException {
         final LeaderFrontendState existing = knownFrontends.get(clientId.getFrontendId());
-        if (existing != null) {
-            final int cmp = Long.compareUnsigned(existing.getIdentifier().getGeneration(), clientId.getGeneration());
-            if (cmp == 0) {
-                return existing;
-            }
-            if (cmp > 0) {
-                LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
-                throw new RetiredGenerationException(existing.getIdentifier().getGeneration());
-            }
-
-            LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
-            existing.retire();
-            knownFrontends.remove(clientId.getFrontendId());
-        } else {
+        if (existing == null) {
             LOG.debug("{}: client {} is not yet known", persistenceId(), clientId);
+            return null;
         }
 
+        final int cmp = Long.compareUnsigned(existing.getIdentifier().getGeneration(), clientId.getGeneration());
+        if (cmp == 0) {
+            return existing;
+        }
+        if (cmp > 0) {
+            LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
+            throw new RetiredGenerationException(existing.getIdentifier().getGeneration());
+        }
+
+        LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
+        existing.retire();
+        knownFrontends.remove(clientId.getFrontendId());
+        return null;
+    }
+
+    private LeaderFrontendState createFrontend(final ClientIdentifier clientId) {
         final LeaderFrontendState ret = new LeaderFrontendState(persistenceId(), clientId, store);
         knownFrontends.put(clientId.getFrontendId(), ret);
         LOG.debug("{}: created state {} for client {}", persistenceId(), ret, clientId);
         return ret;
+    }
+
+    private LeaderFrontendState getFrontend(final ClientIdentifier clientId) throws RequestException {
+        final LeaderFrontendState ret = findFrontend(clientId);
+        return ret != null ? ret : createFrontend(clientId);
     }
 
     private static @Nonnull ABIVersion selectVersion(final ConnectClientRequest message) {
@@ -430,48 +440,108 @@ public class Shard extends RaftActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void handleConnectClient(final ConnectClientRequest message) {
-        try {
-            if (!isLeader() || !isLeaderActive()) {
-                LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
-                                + "isLeadershipTransferInProgress: {}.",
-                        persistenceId(), message, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
-                throw new NotLeaderException(getSelf());
-            }
+        if (!isLeader() || !isLeaderActive()) {
+            // Do not allow new connections when we are not active
+            LOG.debug("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
+                    + "isLeadershipTransferInProgress: {}.", persistenceId(), message, isLeader(), isLeaderActive(),
+                    isLeadershipTransferInProgress());
+            message.getReplyTo().tell(new Failure(new NotLeaderException(getSelf())), ActorRef.noSender());
+            return;
+        }
 
-            final ABIVersion selectedVersion = selectVersion(message);
-            final LeaderFrontendState frontend = getFrontend(message.getTarget());
-            frontend.reconnect();
-            message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), getSelf(),
-                ImmutableList.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion),
-                ActorRef.noSender());
+        final LeaderFrontendState frontend;
+        final ABIVersion selectedVersion;
+        try {
+            selectedVersion = selectVersion(message);
+            frontend = getFrontend(message.getTarget());
         } catch (RequestException | RuntimeException e) {
             message.getReplyTo().tell(new Failure(e), ActorRef.noSender());
+            return;
         }
+
+        frontend.reconnect();
+        message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), getSelf(),
+            ImmutableList.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion),
+            ActorRef.noSender());
     }
 
     private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope, final long now)
             throws RequestException {
-        // We are not the leader, hence we want to fail-fast.
-        if (!isLeader() || !isLeaderActive()) {
-            LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
-                            + "isLeadershipTransferInProgress: {}.",
-                    persistenceId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
+        if (!isLeader()) {
+            // We are not the leader, hence we want to fail-fast.
+            LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), envelope);
             throw new NotLeaderException(getSelf());
         }
 
+        /*
+         * This is slightly more complicated, as we need to support two protocols with different semantics and backend
+         * behavior.
+         *
+         * ask-based protocol does not do frontend-side replays and we are in charge of forwarding requests towards
+         * the leader in the transition periods. It also allows limited forward progress during shutdown and leader
+         * transitions.
+         *
+         * tell-based protocol performs frontend-side replays and hence we can rely on that capability to transfer
+         * state to the new leader, but depends on periods of silence and explicit rejects to understand that leader
+         * movement occurred.
+         *
+         * These two protocols need to be reconciled with:
+         *
+         * 1) ShardDataTree transaction tracking logic, which considers any ready transaction as needing forward
+         *    progress (or timing out), which is in turn blocking pause leader (see below)
+         *
+         * 2) Potentially fluctuating isolated leadership, during which we do not want to accept more work headed
+         *    towards the journal.
+         *
+         * 3) Leadership transfers, which need to finish processing current transactions (as tracked by ShardDataTree)
+         *    before running the at-pause action.
+         *
+         * Since we need to retain compatibility of ask-based protocol, we cannot make changes to ShardDataTree's
+         * tracking, we need to deal with the differences for tell-based protocol without much help from ShardDataTree.
+         *
+         * To deal with this, we split processing here. If we get a message from a frontend while we are not active,
+         * we mark that fact and tell the frontend to reconnect.
+         */
+        return isLeaderActive() ? activeHandleRequest(envelope, now) : inactiveHandleRequest(envelope, now);
+    }
+
+    private @Nullable RequestSuccess<?, ?> activeHandleRequest(final RequestEnvelope envelope, final long now)
+            throws RequestException {
+        // We are an active leader, things are pretty straightforward
         final Request<?, ?> request = envelope.getMessage();
         if (request instanceof TransactionRequest) {
             final TransactionRequest<?> txReq = (TransactionRequest<?>)request;
             final ClientIdentifier clientId = txReq.getTarget().getHistoryId().getClientId();
-            return getFrontend(clientId).handleTransactionRequest(txReq, envelope, now);
+            return Preconditions.checkNotNull(findFrontend(clientId)).handleTransactionRequest(txReq, envelope, now);
         } else if (request instanceof LocalHistoryRequest) {
             final LocalHistoryRequest<?> lhReq = (LocalHistoryRequest<?>)request;
             final ClientIdentifier clientId = lhReq.getTarget().getClientId();
-            return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope, now);
+            return Preconditions.checkNotNull(findFrontend(clientId)).handleLocalHistoryRequest(lhReq, envelope, now);
         } else {
             LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
             throw new UnsupportedRequestException(request);
         }
+    }
+
+    private @Nullable RequestSuccess<?, ?> inactiveHandleRequest(final RequestEnvelope envelope, final long now)
+            throws RequestException {
+        final Request<?, ?> request = envelope.getMessage();
+        final ClientIdentifier clientId;
+
+        if (request instanceof TransactionRequest) {
+            clientId = ((TransactionRequest<?>)request).getTarget().getHistoryId().getClientId();
+        } else if (request instanceof LocalHistoryRequest) {
+            clientId = ((LocalHistoryRequest<?>)request).getTarget().getClientId();
+        } else {
+            LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
+            throw new UnsupportedRequestException(request);
+        }
+
+        final LeaderFrontendState frontend = findFrontend(clientId);
+        if (frontend != null) {
+            frontend.taintState();
+        }
+        throw new NotLeaderException(getSelf());
     }
 
     private boolean hasLeader() {
