@@ -64,16 +64,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <artifactId>maven-bundle-plugin</artifactId>
             <extensions>true</extensions>
             <configuration>
-            <instructions>
-                <Import-Package>
-                org.opendaylight.controller.md.sal.trace.api,org.opendaylight.mdsal.binding.generator.api,
-                org.opendaylight.controller.md.sal.trace.dom.impl,org.opendaylight.controller.md.sal.dom.api,
-                org.opendaylight.controller.md.sal.binding.api,
-                org.opendaylight.controller.md.sal.dom.broker.impl,org.opendaylight.controller.md.sal.binding.impl,
-                org.opendaylight.controller.sal.core.api.model,*
-                </Import-Package>
-                <Embed-Transitive>true</Embed-Transitive>
-            </instructions>
+                <instructions>
+                    <Import-Package>
+                      org.opendaylight.controller.md.sal.trace.api,
+                      org.opendaylight.mdsal.binding.generator.api,
+                      org.opendaylight.controller.md.sal.dom.api,
+                      org.opendaylight.controller.md.sal.binding.api,
+                      org.opendaylight.controller.md.sal.binding.impl,
+                      org.opendaylight.controller.sal.core.api.model,
+                      *
+                    </Import-Package>
+                </instructions>
             </configuration>
         </plugin>
         <plugin>

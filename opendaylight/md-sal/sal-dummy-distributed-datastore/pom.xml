@@ -118,9 +118,6 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-            <Export-package></Export-package>
-            <Private-Package></Private-Package>
-            <Import-Package>!*snappy;!org.jboss.*;!com.jcraft.*;!*jetty*;!sun.security.*;*</Import-Package>
           </instructions>
         </configuration>
       </plugin>

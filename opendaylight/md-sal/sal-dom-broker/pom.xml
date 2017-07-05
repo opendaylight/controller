@@ -139,7 +139,6 @@
                             org.opendaylight.controller.md.sal.dom.broker.impl.*,
                             org.opendaylight.controller.md.sal.dom.clustering.impl,
             </Export-Package>
-            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>
