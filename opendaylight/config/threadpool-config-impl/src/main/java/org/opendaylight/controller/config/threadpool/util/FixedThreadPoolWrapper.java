@@ -19,10 +19,6 @@ import org.opendaylight.controller.config.threadpool.ThreadPool;
  * Implementation of {@link ThreadPool} using fixed number of threads wraps
  * {@link ExecutorService}.
  */
-/**
- * To be removed in Nitrogen
- */
-@Deprecated
 public class FixedThreadPoolWrapper implements ThreadPool, Closeable {
 
     private final ThreadPoolExecutor executor;
