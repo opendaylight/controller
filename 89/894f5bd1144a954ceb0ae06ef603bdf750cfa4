@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Submitted-by: Stephen Kitt <skitt@redhat.com>
+Submitted-at: Wed, 05 Jul 2017 12:03:07 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/59925
+Project: controller
+Branch: refs/heads/master
