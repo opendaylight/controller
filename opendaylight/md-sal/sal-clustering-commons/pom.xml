@@ -157,7 +157,6 @@
         <instructions>
           <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
           <Export-Package>org.opendaylight.controller.cluster.schema.provider.impl, {local-packages}</Export-Package>
-          <DynamicImport-Package>*</DynamicImport-Package>
         </instructions>
         </configuration>
       </plugin>

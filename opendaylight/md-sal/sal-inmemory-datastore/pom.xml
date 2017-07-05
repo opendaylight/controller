@@ -150,10 +150,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-
             <Export-Package>org.opendaylight.controller.md.sal.dom.store.impl.*</Export-Package>
-
-            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>
