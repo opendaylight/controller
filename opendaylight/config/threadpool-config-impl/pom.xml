@@ -4,19 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-plugin-parent</artifactId>
+    <artifactId>config-subsystem</artifactId>
     <version>0.7.0-SNAPSHOT</version>
-    <relativePath>../config-plugin-parent</relativePath>
+    <relativePath>../</relativePath>
   </parent>
   <artifactId>threadpool-config-impl</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
 
   <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>threadpool-config-api</artifactId>
@@ -32,24 +28,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-
-    <!--test dependencies -->
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-manager</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-manager</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-util</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

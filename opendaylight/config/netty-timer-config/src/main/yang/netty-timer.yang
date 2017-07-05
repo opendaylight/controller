@@ -6,7 +6,6 @@ module netty-timer {
 
     import config { prefix config; revision-date 2013-04-05; }
     import netty { prefix netty; revision-date 2013-11-19; }
-    import threadpool { prefix th; revision-date 2013-04-09; }
 
     organization "Cisco Systems, Inc.";
 
@@ -47,16 +46,6 @@ module netty-timer {
             leaf ticks-per-wheel {
                 status deprecated;
                 type uint16;
-            }
-
-            container thread-factory {
-                status deprecated;
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity th:threadfactory;
-                    }
-                }
             }
         }
     }

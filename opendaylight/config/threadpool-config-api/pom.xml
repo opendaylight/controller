@@ -4,9 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-plugin-parent</artifactId>
+    <artifactId>config-subsystem</artifactId>
     <version>0.7.0-SNAPSHOT</version>
-    <relativePath>../config-plugin-parent</relativePath>
+    <relativePath>../</relativePath>
   </parent>
   <artifactId>threadpool-config-api</artifactId>
   <packaging>bundle</packaging>
@@ -16,10 +16,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
     </dependency>
   </dependencies>
 
