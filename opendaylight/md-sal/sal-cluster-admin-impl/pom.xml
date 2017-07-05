@@ -131,14 +131,6 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-Package></Export-Package>
-            <Import-Package>
-                !*snappy;
-                !org.jboss.*;
-                !com.jcraft.*;
-                !*jetty*;
-                !sun.security.*;
-                *;
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
