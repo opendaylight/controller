@@ -117,7 +117,6 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-package>org.opendaylight.cluster.raft</Export-package>
-            <Import-Package>*</Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
