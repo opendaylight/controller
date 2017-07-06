@@ -149,7 +149,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final RemoteProxyTransaction successor = transactionTester.getTransaction();
         doAnswer(this::applyToCursorAnswer).when(modification).applyToCursor(any());
         transaction.sealOnly();
-        transaction.flushState(successor);
+        final TransactionRequest<?> request = transaction.flushState().get();
+        transaction.forwardToSuccessor(successor, request, null);
         verify(modification).applyToCursor(any());
         transactionTester.getTransaction().seal();
         transactionTester.getTransaction().directCommit();

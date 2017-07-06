@@ -203,6 +203,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof TransactionPurgeRequest) {
             LOG.debug("Forwarding purge {} to successor {}", request, successor);
             successor.enqueuePurge(callback);
+        } else if (request instanceof ModifyTransactionRequest) {
+            successor.handleForwardedRequest(request, callback);
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }
