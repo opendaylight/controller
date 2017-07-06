@@ -19,10 +19,24 @@ package org.opendaylight.controller.md.sal.binding.test;
  * @author Michael Vorburger
  */
 public abstract class AbstractConcurrentDataBrokerTest extends AbstractBaseDataBrokerTest {
+    private final boolean useMTDataTreeChangeListenerExecutor;
+
+    protected AbstractConcurrentDataBrokerTest() {
+        this(false);
+    }
+
+    protected AbstractConcurrentDataBrokerTest(final boolean useMTDataTreeChangeListenerExecutor) {
+        this.useMTDataTreeChangeListenerExecutor = useMTDataTreeChangeListenerExecutor;
+    }
 
     @Override
     protected AbstractDataBrokerTestCustomizer createDataBrokerTestCustomizer() {
-        return new ConcurrentDataBrokerTestCustomizer();
+        ConcurrentDataBrokerTestCustomizer customizer = new ConcurrentDataBrokerTestCustomizer();
+        if (useMTDataTreeChangeListenerExecutor) {
+            customizer.useMTDataTreeChangeListenerExecutor();
+        }
+
+        return customizer;
     }
 
 }

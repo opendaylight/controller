@@ -23,5 +23,4 @@ public class DataBrokerTestCustomizer extends AbstractDataBrokerTestCustomizer {
     public ListeningExecutorService getCommitCoordinatorExecutor() {
         return MoreExecutors.newDirectExecutorService();
     }
-
 }

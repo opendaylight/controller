@@ -31,9 +31,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * This testsuite tests explanation for data change scope and data modifications
  * which were described in
- * https://lists.opendaylight.org/pipermail/controller-dev/2014-July/005541.html
+ * https://lists.opendaylight.org/pipermail/controller-dev/2014-July/005541.html.
  */
-public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListenerTest{
+public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListenerTest {
 
     private static final InstanceIdentifier<Top> TOP = InstanceIdentifier.create(Top.class);
     private static final InstanceIdentifier<TopLevelList> WILDCARDED = TOP.child(TopLevelList.class);
@@ -50,17 +50,17 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
     @Test
     public void replaceTopNodeSubtreeListeners() {
         TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE);
+        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
         TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE);
+        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.put(CONFIGURATION, TOP, top(topLevelList(TOP_BAR_KEY)));
         assertCommit(writeTx.submit());
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> top = topListener.event();
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> all = allListener.event();
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> foo = fooListener.event();
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> bar = barListener.event();
+        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> top = topListener.event();
+        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> all = allListener.event();
+        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> foo = fooListener.event();
+        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> bar = barListener.event();
 
         // Listener for TOP element
         assertContains(top.getOriginalData(), TOP,TOP_FOO);
@@ -105,9 +105,9 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
     @Test
     public void mergeTopNodeSubtreeListeners() {
         TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE);
+        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
         TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE);
+        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.merge(CONFIGURATION, TOP, top(topLevelList(TOP_BAR_KEY)));
@@ -119,9 +119,9 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
     @Test
     public void putTopBarNodeSubtreeListeners() {
         TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE);
+        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
         TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE);
+        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.put(CONFIGURATION, TOP_BAR, topLevelList(TOP_BAR_KEY));
@@ -133,9 +133,9 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
     @Test
     public void mergeTopBarNodeSubtreeListeners() {
         TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE);
+        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
         TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE);
+        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.merge(CONFIGURATION, TOP_BAR, topLevelList(TOP_BAR_KEY));
