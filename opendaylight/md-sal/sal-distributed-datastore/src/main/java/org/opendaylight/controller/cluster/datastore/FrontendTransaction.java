@@ -157,6 +157,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     abstract TransactionSuccess<?> doHandleRequest(TransactionRequest<?> request, RequestEnvelope envelope,
             long now) throws RequestException;
 
+    abstract void retire();
+
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {
             firstReplaySequence = sequence;

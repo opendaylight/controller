@@ -185,6 +185,7 @@ public class Shard extends RaftActor {
 
     private final FrontendMetadata frontendMetadata;
     private Map<FrontendIdentifier, LeaderFrontendState> knownFrontends = ImmutableMap.of();
+    private boolean paused;
 
     private final MessageSlicer responseMessageSlicer;
     private final Dispatchers dispatchers;
@@ -478,10 +479,10 @@ public class Shard extends RaftActor {
     private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope, final long now)
             throws RequestException {
         // We are not the leader, hence we want to fail-fast.
-        if (!isLeader() || !isLeaderActive()) {
-            LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
-                            + "isLeadershipTransferInProgress: {}.",
-                    persistenceId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
+        if (!isLeader() || paused || !isLeaderActive()) {
+            LOG.debug("{}: not currently active leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
+                            + "isLeadershipTransferInProgress: {}, paused: {}",
+                    persistenceId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress(), paused);
             throw new NotLeaderException(getSelf());
         }
 
@@ -814,6 +815,7 @@ public class Shard extends RaftActor {
                     persistenceId(), getId());
             }
 
+            paused = false;
             store.purgeLeaderState();
         }
 
@@ -825,19 +827,19 @@ public class Shard extends RaftActor {
     @Override
     protected void onLeaderChanged(final String oldLeader, final String newLeader) {
         shardMBean.incrementLeadershipChangeCount();
+        paused = false;
 
-        final boolean hasLeader = hasLeader();
-        if (!hasLeader) {
-            // No leader implies we are not the leader, lose frontend state if we have any. This also places
-            // an explicit guard so the map will not get modified accidentally.
+        if (!isLeader()) {
             if (!knownFrontends.isEmpty()) {
                 LOG.debug("{}: removing frontend state for {}", persistenceId(), knownFrontends.keySet());
                 knownFrontends = ImmutableMap.of();
             }
-            return;
-        }
 
-        if (!isLeader()) {
+            if (!hasLeader()) {
+                // No leader anywhere, nothing else to do
+                return;
+            }
+
             // Another leader was elected. If we were the previous leader and had pending transactions, convert
             // them to transaction messages and send to the new leader.
             ActorSelection leader = getLeader();
@@ -880,13 +882,24 @@ public class Shard extends RaftActor {
     @Override
     protected void pauseLeader(final Runnable operation) {
         LOG.debug("{}: In pauseLeader, operation: {}", persistenceId(), operation);
+        paused = true;
+
+        // Tell-based protocol can replay transaction state, so it is safe to blow it up when we are paused.
+        knownFrontends.values().forEach(LeaderFrontendState::retire);
+        knownFrontends = ImmutableMap.of();
+
         store.setRunOnPendingTransactionsComplete(operation);
     }
 
     @Override
     protected void unpauseLeader() {
         LOG.debug("{}: In unpauseLeader", persistenceId());
+        paused = false;
+
         store.setRunOnPendingTransactionsComplete(null);
+
+        // Restore tell-based protocol state as if we were becoming the leader
+        knownFrontends = Verify.verifyNotNull(frontendMetadata.toLeaderState(this));
     }
 
     @Override
