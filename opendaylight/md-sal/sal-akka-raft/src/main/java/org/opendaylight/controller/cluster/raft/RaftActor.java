@@ -851,6 +851,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         operation.run();
     }
 
+    /**
+     * This method is invoked when the actions hooked to the leader becoming paused failed to execute and the leader
+     * should resume normal operations.
+     *
+     * <p>
+     * Note this method can be invoked even before the operation supplied to {@link #pauseLeader(Runnable)} is invoked.
+     */
+    protected void unpauseLeader() {
+
+    }
+
     protected void onLeaderChanged(String oldLeader, String newLeader) {
     }
 
