@@ -76,9 +76,7 @@ public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
     private void deleteAndListenAugment(final DataChangeScope scope,
             final InstanceIdentifier<?> path) {
         writeInitialState();
-        TestListener listener = createListener(
-                LogicalDatastoreType.OPERATIONAL, WILDCARDED_AUGMENT_PATH,
-                scope);
+        TestListener listener = createListener(LogicalDatastoreType.OPERATIONAL, WILDCARDED_AUGMENT_PATH, scope, false);
         delete(path);
         verifyRemoved(listener.event());
     }

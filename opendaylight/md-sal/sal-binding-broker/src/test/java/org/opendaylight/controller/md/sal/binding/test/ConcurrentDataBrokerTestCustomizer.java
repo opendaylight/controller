@@ -14,7 +14,8 @@ import java.util.concurrent.Executors;
 /**
  * ConcurrentDataBrokerTestCustomizer.
  *
- * <p>See {@link AbstractConcurrentDataBrokerTest} and <a href="https://bugs.opendaylight.org/show_bug.cgi?id=7538">bug 7538</a> for more details & background.
+ * <p>See {@link AbstractConcurrentDataBrokerTest} and
+ * <a href="https://bugs.opendaylight.org/show_bug.cgi?id=7538">bug 7538</a> for more details & background.
  *
  * @author Michael Vorburger
  */
@@ -23,5 +24,9 @@ public class ConcurrentDataBrokerTestCustomizer extends AbstractDataBrokerTestCu
     @Override
     public ListeningExecutorService getCommitCoordinatorExecutor() {
         return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    }
+
+    public void useMTDataTreeChangeListenerExecutor() {
+        setDataTreeChangeListenerExecutor(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
     }
 }

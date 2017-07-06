@@ -49,8 +49,7 @@ public class Bug3090MultiKeyList extends AbstractDataChangeListenerTest{
     @Test
     public void listWithMultiKeyTest() {
         final AbstractDataChangeListenerTest.TestListener listener = createListener(CONFIGURATION, ROOT_PATH,
-                AsyncDataBroker.DataChangeScope.BASE);
-        listener.startCapture();
+                AsyncDataBroker.DataChangeScope.BASE, false);
 
         write(CONFIGURATION);
         final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
