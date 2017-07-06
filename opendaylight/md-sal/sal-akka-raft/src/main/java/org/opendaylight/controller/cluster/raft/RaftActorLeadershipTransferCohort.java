@@ -178,6 +178,7 @@ public class RaftActorLeadershipTransferCohort {
                         raftActor.getLeaderId(), transferTimer);
             } else {
                 LOG.warn("{}: Failed to transfer leadership in {}", raftActor.persistenceId(), transferTimer);
+                raftActor.unpauseLeader();
             }
         }
 

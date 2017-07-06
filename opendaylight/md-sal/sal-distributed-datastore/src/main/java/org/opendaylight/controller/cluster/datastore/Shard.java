@@ -858,6 +858,12 @@ public class Shard extends RaftActor {
     }
 
     @Override
+    protected void unpauseLeader() {
+        LOG.debug("{}: In unpauseLeader", persistenceId());
+        store.setRunOnPendingTransactionsComplete(null);
+    }
+
+    @Override
     protected OnDemandRaftState.AbstractBuilder<?> newOnDemandRaftStateBuilder() {
         return OnDemandShardState.newBuilder().treeChangeListenerActors(treeChangeSupport.getListenerActors())
                 .dataChangeListenerActors(changeSupport.getListenerActors())
