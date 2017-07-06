@@ -277,12 +277,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    void flushState(final AbstractProxyTransaction successor) {
-        if (builderBusy) {
-            final ModifyTransactionRequest request = builder.build();
-            builderBusy = false;
-            forwardToSuccessor(successor, request, null);
+    java.util.Optional<ModifyTransactionRequest> flushState() {
+        if (!builderBusy) {
+            return java.util.Optional.empty();
         }
+
+        final ModifyTransactionRequest request = builder.build();
+        builderBusy = false;
+        return java.util.Optional.of(request);
     }
 
     @Override
@@ -291,7 +293,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         successor.handleForwardedRequest(request, callback);
     }
 
-    private void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+    void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         if (request instanceof ModifyTransactionRequest) {
             final ModifyTransactionRequest req = (ModifyTransactionRequest) request;
 
