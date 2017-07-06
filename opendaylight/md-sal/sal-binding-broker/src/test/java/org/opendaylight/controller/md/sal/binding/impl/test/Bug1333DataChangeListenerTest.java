@@ -62,8 +62,7 @@ public class Bug1333DataChangeListenerTest extends AbstractDataChangeListenerTes
 
     @Test
     public void writeTopWithListItemAugmentedListenTopSubtree() {
-        TestListener listener = createListener(CONFIGURATION,TOP_PATH, DataChangeScope.SUBTREE);
-        listener.startCapture();
+        TestListener listener = createListener(CONFIGURATION,TOP_PATH, DataChangeScope.SUBTREE, false);
 
         writeTopWithListItem(CONFIGURATION);
 
@@ -81,8 +80,7 @@ public class Bug1333DataChangeListenerTest extends AbstractDataChangeListenerTes
 
     @Test
     public void writeTopWithListItemAugmentedListenAugmentSubtreeWildcarded() {
-        TestListener listener = createListener(CONFIGURATION,AUGMENT_WILDCARD, DataChangeScope.SUBTREE);
-        listener.startCapture();
+        TestListener listener = createListener(CONFIGURATION,AUGMENT_WILDCARD, DataChangeScope.SUBTREE, false);
         writeTopWithListItem(CONFIGURATION);
 
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
@@ -125,7 +123,7 @@ public class Bug1333DataChangeListenerTest extends AbstractDataChangeListenerTes
     public void deleteAugmentChildListenAugmentSubtreeWildcarded() {
         writeTopWithListItem(CONFIGURATION);
 
-        TestListener listener = createListener(CONFIGURATION, AUGMENT_WILDCARD, DataChangeScope.SUBTREE);
+        TestListener listener = createListener(CONFIGURATION, AUGMENT_WILDCARD, DataChangeScope.SUBTREE, false);
         InstanceIdentifier<?> deletePath = path(TOP_FOO_KEY,USES_ONE_KEY);
         deleteItem(CONFIGURATION,deletePath);
         AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();

@@ -49,8 +49,7 @@ public class Bug2562DeserializedUnkeyedListTest extends AbstractDataChangeListen
     @Test
     public void writeListToList2562Root() {
         final AbstractDataChangeListenerTest.TestListener listenerRoot = createListener(LogicalDatastoreType.CONFIGURATION,
-                ROOT_PATH, AsyncDataBroker.DataChangeScope.ONE);
-        listenerRoot.startCapture();
+                ROOT_PATH, AsyncDataBroker.DataChangeScope.ONE, false);
         writeRoot(LogicalDatastoreType.CONFIGURATION);
         final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> eventRoot = listenerRoot.event();
 

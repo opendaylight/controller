@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
@@ -31,7 +32,6 @@ import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializ
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import javassist.ClassPool;
 
 public abstract class AbstractDataBrokerTestCustomizer {
 
@@ -40,6 +40,7 @@ public abstract class AbstractDataBrokerTestCustomizer {
     private final MockSchemaService schemaService;
     private ImmutableMap<LogicalDatastoreType, DOMStore> datastores;
     private final BindingToNormalizedNodeCodec bindingToNormalized;
+    private ListeningExecutorService dataTreeChangeListenerExecutor = MoreExecutors.newDirectExecutorService();
 
     public ImmutableMap<LogicalDatastoreType, DOMStore> createDatastores() {
         return ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
@@ -60,13 +61,13 @@ public abstract class AbstractDataBrokerTestCustomizer {
     }
 
     public DOMStore createConfigurationDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", dataTreeChangeListenerExecutor);
         this.schemaService.registerSchemaContextListener(store);
         return store;
     }
 
     public DOMStore createOperationalDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", dataTreeChangeListenerExecutor);
         this.schemaService.registerSchemaContextListener(store);
         return store;
     }
@@ -109,6 +110,10 @@ public abstract class AbstractDataBrokerTestCustomizer {
             this.datastores = createDatastores();
         }
         return this.datastores;
+    }
+
+    public void setDataTreeChangeListenerExecutor(ListeningExecutorService executor) {
+        this.dataTreeChangeListenerExecutor = executor;
     }
 
     public void updateSchema(final SchemaContext ctx) {
