@@ -367,10 +367,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         shuttingDown = true;
 
         final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-        if (currentBehavior.state() != RaftState.Leader) {
-            // For non-leaders shutdown is a no-op
-            self().tell(PoisonPill.getInstance(), self());
-            return;
+        switch (currentBehavior.state()) {
+            case Leader:
+            case PreLeader:
+                // Fall-through to more work
+                break;
+            default:
+                // For non-leaders shutdown is a no-op
+                self().tell(PoisonPill.getInstance(), self());
+                return;
         }
 
         if (context.hasFollowers()) {
