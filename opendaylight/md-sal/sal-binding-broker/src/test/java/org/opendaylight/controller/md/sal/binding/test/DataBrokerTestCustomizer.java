@@ -24,4 +24,9 @@ public class DataBrokerTestCustomizer extends AbstractDataBrokerTestCustomizer {
         return MoreExecutors.newDirectExecutorService();
     }
 
+    @Override
+    public ListeningExecutorService getDataTreeChangeListenerExecutor() {
+        return MoreExecutors.newDirectExecutorService();
+    }
+
 }
