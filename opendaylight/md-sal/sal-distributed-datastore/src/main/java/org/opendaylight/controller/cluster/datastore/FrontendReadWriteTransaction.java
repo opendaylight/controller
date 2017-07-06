@@ -196,6 +196,12 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
+    @Override
+    void retire() {
+        // TODO Auto-generated method stub
+
+    }
+
     private void handleTransactionPreCommit(final TransactionPreCommitRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         throwIfFailed();

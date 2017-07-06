@@ -154,18 +154,23 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         return tx.handleRequest(request, envelope, now);
     }
 
-    void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
+    final void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
         tree.closeTransactionChain(getIdentifier(), () -> {
             envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
         });
     }
 
-    void purge(final long sequence, final RequestEnvelope envelope, final long now) {
+    final void purge(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
         tree.purgeTransactionChain(getIdentifier(), () -> {
             envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
         });
+    }
+
+    final void retire() {
+        transactions.values().forEach(FrontendTransaction::retire);
+        tree.removeTransactionChain(getIdentifier());
     }
 
     private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id)
