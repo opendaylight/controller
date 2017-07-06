@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -73,8 +74,9 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void flushState(final AbstractProxyTransaction successor) {
+    Optional<ModifyTransactionRequest> flushState() {
         // No-op
+        return Optional.empty();
     }
 
     @Override
