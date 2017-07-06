@@ -66,6 +66,11 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
         }
     }
 
+    @Override
+    void retire() {
+        // No-op
+    }
+
     private void handleModifyTransaction(final ModifyTransactionRequest request, final RequestEnvelope envelope,
             final long now) {
         // The only valid request here is with abort protocol
