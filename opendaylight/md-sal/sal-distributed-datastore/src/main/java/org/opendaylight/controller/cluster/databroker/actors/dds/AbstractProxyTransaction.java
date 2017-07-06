@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
@@ -351,7 +352,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         // At this point the successor has completed transition and is possibly visible by the user thread, which is
         // still stuck here. The successor has not seen final part of our state, nor the fact it is sealed.
         // Propagate state and seal the successor.
-        flushState(successor);
+        final java.util.Optional<ModifyTransactionRequest> optState = flushState();
+        if (optState.isPresent()) {
+            forwardToSuccessor(successor, optState.get(), null);
+        }
         successor.predecessorSealed();
     }
 
@@ -719,9 +723,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
          */
         if (SEALED.equals(prevState)) {
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
-            flushState(successor);
+            final long enqueuedTicks = parent.currentTime();
+            final java.util.Optional<ModifyTransactionRequest> optState = flushState();
+            if (optState.isPresent()) {
+                successor.handleReplayedRemoteRequest(optState.get(), null, enqueuedTicks);
+            }
             if (successor.markSealed()) {
-                successor.sealAndSend(Optional.of(parent.currentTime()));
+                successor.sealAndSend(Optional.of(enqueuedTicks));
             }
         }
     }
@@ -795,7 +803,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(YangInstanceIdentifier path);
 
     @GuardedBy("this")
-    abstract void flushState(AbstractProxyTransaction successor);
+    abstract java.util.Optional<ModifyTransactionRequest> flushState();
 
     abstract TransactionRequest<?> abortRequest();
 

@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.access.commands.AbortLocalTransaction
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
@@ -196,23 +197,28 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void flushState(final AbstractProxyTransaction successor) {
+    Optional<ModifyTransactionRequest> flushState() {
+        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(getIdentifier(), localActor());
+        b.setSequence(0);
+
         sealedModification.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
             public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
-                successor.write(current().node(child), data);
+                b.addModification(new TransactionWrite(current().node(child), data));
             }
 
             @Override
             public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
-                successor.merge(current().node(child), data);
+                b.addModification(new TransactionMerge(current().node(child), data));
             }
 
             @Override
             public void delete(final PathArgument child) {
-                successor.delete(current().node(child));
+                b.addModification(new TransactionDelete(current().node(child)));
             }
         });
+
+        return Optional.of(b.build());
     }
 
     DataTreeSnapshot getSnapshot() {
