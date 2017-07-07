@@ -34,4 +34,27 @@ public interface ClientActorConfig {
      * @return the directory name
      */
     String getTempFileDirectory();
+
+    /**
+     * Returns the timer interval whereby, on expiration after response inactivity from the back-end, the connection to
+     * the back-end is torn down and reconnection is attempted.
+
+     * @return timer interval in nanoseconds.
+     */
+    long getBackendAlivenessTimerInterval();
+
+    /**
+     * Returns the timeout interval whereby requests are failed.
+     *
+     * @return the timeout interval in nanoseconds.
+     */
+    long getRequestTimeout();
+
+    /**
+     * Returns the timeout interval whereby the client front-end hasn't made progress with the back-end on any request
+     * and terminates.
+     *
+     * @return the timeout interval in nanoseconds.
+     */
+    long getNoProgressTimeout();
 }

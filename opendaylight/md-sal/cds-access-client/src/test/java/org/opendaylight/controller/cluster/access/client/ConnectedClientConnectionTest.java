@@ -27,7 +27,7 @@ public class ConnectedClientConnectionTest
     public void testCheckTimeoutConnectionTimedout() throws Exception {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
-        final long now = context.ticker().read() + ConnectedClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS;
+        final long now = context.ticker().read() + ConnectedClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS;
         final Optional<Long> timeout = connection.checkTimeout(now);
         Assert.assertNull(timeout);
     }

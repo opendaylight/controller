@@ -35,6 +35,11 @@ public class AccessClientUtil {
         ClientActorConfig mockConfig = mock(ClientActorConfig.class);
         doReturn(2_000_000).when(mockConfig).getMaximumMessageSliceSize();
         doReturn(1_000_000_000).when(mockConfig).getFileBackedStreamingThreshold();
+        doReturn(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS)
+                .when(mockConfig).getBackendAlivenessTimerInterval();
+        doReturn(AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS).when(mockConfig).getRequestTimeout();
+        doReturn(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS)
+                 .when(mockConfig).getNoProgressTimeout();
         return mockConfig;
     }
 
