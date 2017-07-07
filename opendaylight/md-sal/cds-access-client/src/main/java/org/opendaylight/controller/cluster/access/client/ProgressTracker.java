@@ -234,7 +234,7 @@ abstract class ProgressTracker {
      * @return estimated tick number when all threads with opened tasks are done waiting
      */
     long estimateAllowed(final long now) {
-        return Math.max(now, nearestAllowed) + estimateIsolatedDelay(now);
+        return Math.max(now, nearestAllowed + estimateIsolatedDelay(now));
     }
 
     // State-altering public methods.
