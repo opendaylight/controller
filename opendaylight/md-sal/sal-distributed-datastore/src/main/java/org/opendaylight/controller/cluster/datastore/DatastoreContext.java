@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.text.WordUtils;
+import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
@@ -88,6 +89,9 @@ public class DatastoreContext implements ClientActorConfig {
     private boolean transactionDebugContextEnabled = false;
     private String shardManagerPersistenceId;
     private int maximumMessageSliceSize = DEFAULT_MAX_MESSAGE_SLICE_SIZE;
+    private long backendAlivenessTimerInterval = AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS;
+    private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
+    private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -125,6 +129,9 @@ public class DatastoreContext implements ClientActorConfig {
         this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
         this.shardManagerPersistenceId = other.shardManagerPersistenceId;
         this.useTellBasedProtocol = other.useTellBasedProtocol;
+        this.backendAlivenessTimerInterval = other.backendAlivenessTimerInterval;
+        this.requestTimeout = other.requestTimeout;
+        this.noProgressTimeout = other.noProgressTimeout;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -313,6 +320,21 @@ public class DatastoreContext implements ClientActorConfig {
     @Override
     public int getMaximumMessageSliceSize() {
         return maximumMessageSliceSize;
+    }
+
+    @Override
+    public long getBackendAlivenessTimerInterval() {
+        return backendAlivenessTimerInterval;
+    }
+
+    @Override
+    public long getRequestTimeout() {
+        return requestTimeout;
+    }
+
+    @Override
+    public long getNoProgressTimeout() {
+        return noProgressTimeout;
     }
 
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
@@ -566,13 +588,28 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
-        public Builder fileBackedStreamingThresholdInMegabytes(final int  fileBackedStreamingThreshold) {
+        public Builder fileBackedStreamingThresholdInMegabytes(final int fileBackedStreamingThreshold) {
             datastoreContext.setFileBackedStreamingThreshold(fileBackedStreamingThreshold * ConfigParams.MEGABYTE);
             return this;
         }
 
         public Builder syncIndexThreshold(final long syncIndexThreshold) {
             datastoreContext.setSyncIndexThreshold(syncIndexThreshold);
+            return this;
+        }
+
+        public Builder backendAlivenessTimerInterval(final long intervalInNanos) {
+            datastoreContext.backendAlivenessTimerInterval = intervalInNanos;
+            return this;
+        }
+
+        public Builder frontendRequestTimeout(final long timeoutInNanos) {
+            datastoreContext.requestTimeout = timeoutInNanos;
+            return this;
+        }
+
+        public Builder frontendNoProgressTimeout(final long timeoutInNanos) {
+            datastoreContext.noProgressTimeout = timeoutInNanos;
             return this;
         }
 

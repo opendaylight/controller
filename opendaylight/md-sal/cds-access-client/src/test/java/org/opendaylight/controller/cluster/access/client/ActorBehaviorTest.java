@@ -174,6 +174,7 @@ public class ActorBehaviorTest {
     private static class MockedActor extends AbstractClientActor {
 
         private final ClientActorBehavior<?> initialBehavior;
+        private final ClientActorConfig mockConfig = AccessClientUtil.newMockClientActorConfig();
 
         private static Props props(final FrontendIdentifier frontendId, final ClientActorBehavior<?> initialBehavior) {
             return Props.create(MockedActor.class, () -> new MockedActor(frontendId, initialBehavior));
@@ -191,22 +192,7 @@ public class ActorBehaviorTest {
 
         @Override
         protected ClientActorConfig getClientActorConfig() {
-            return new ClientActorConfig() {
-                @Override
-                public String getTempFileDirectory() {
-                    return null;
-                }
-
-                @Override
-                public int getMaximumMessageSliceSize() {
-                    return 2000000;
-                }
-
-                @Override
-                public int getFileBackedStreamingThreshold() {
-                    return 1000000000;
-                }
-            };
+            return mockConfig;
         }
     }
 

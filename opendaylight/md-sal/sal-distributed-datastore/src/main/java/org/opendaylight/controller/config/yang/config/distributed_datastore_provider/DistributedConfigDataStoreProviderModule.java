@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.config.api.DependencyResolver;
@@ -99,6 +100,11 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
                 .maximumMessageSliceSize(props.getMaximumMessageSliceSize().getValue().intValue())
                 .useTellBasedProtocol(props.getUseTellBasedProtocol())
                 .syncIndexThreshold(props.getSyncIndexThreshold().getValue())
+                .backendAlivenessTimerInterval(
+                        TimeUnit.SECONDS.toNanos(props.getBackendAlivenessTimerIntervalInSeconds().getValue()))
+                .frontendRequestTimeout(TimeUnit.SECONDS.toNanos(props.getFrontendRequestTimeoutInSeconds().getValue()))
+                .frontendNoProgressTimeout(
+                        TimeUnit.SECONDS.toNanos(props.getFrontendNoProgresstTimeoutInSeconds().getValue()))
                 .build();
     }
 
