@@ -264,6 +264,26 @@ module distributed-datastore-provider {
                          commitIndex trails the leader's journal by more than this amount of entries the follower
                          is considered to be out-of-sync.";
         }
+
+        leaf backend-aliveness-timer-interval-in-seconds {
+            default 30;
+            type non-zero-uint32-type;
+            description "The timer interval whereby, on expiration after response inactivity from the back-end,
+                        the connection to the back-end is torn down and reconnection is attempted.";
+        }
+
+        leaf frontend-request-timeout-in-seconds {
+            default 120; // 2 minutes
+            type non-zero-uint32-type;
+            description "The timeout interval whereby client frontend transaction requests are failed.";
+        }
+
+        leaf frontend-no-progress-timeout-in-seconds {
+            default 300; // 5 minutes
+            type non-zero-uint32-type;
+            description "The timeout interval whereby the client front-end hasn't made progress with the
+                         back-end on any request and terminates.";
+        }
     }
 
     // Augments the 'configuration' choice node under modules/module.

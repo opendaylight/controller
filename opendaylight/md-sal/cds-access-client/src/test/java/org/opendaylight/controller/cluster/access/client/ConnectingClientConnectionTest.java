@@ -142,6 +142,9 @@ public class ConnectingClientConnectionTest {
         ticker.advance(ThreadLocalRandom.current().nextLong());
         doReturn(ticker).when(mockContext).ticker();
 
+        final ClientActorConfig mockConfig = AccessClientUtil.newMockClientActorConfig();
+        doReturn(mockConfig).when(mockContext).config();
+
         mockActor = TestProbe.apply(actorSystem);
         mockBackendInfo = new BackendInfo(mockActor.ref(), 0, ABIVersion.current(), 5);
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
@@ -232,7 +235,7 @@ public class ConnectingClientConnectionTest {
     public void testRunTimeoutWithTimeoutLess() throws NoProgressException {
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS - 1);
+        ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS - 1);
 
         Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
@@ -245,7 +248,7 @@ public class ConnectingClientConnectionTest {
 
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS);
+        ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS);
 
         Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
@@ -257,7 +260,7 @@ public class ConnectingClientConnectionTest {
 
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.BACKEND_ALIVE_TIMEOUT_NANOS + 1);
+        ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS + 1);
 
         Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
@@ -267,7 +270,7 @@ public class ConnectingClientConnectionTest {
     public void testRunTimeoutWithoutProgressExact() throws NoProgressException {
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS);
+        ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS);
 
         // Kaboom
         queue.runTimer((ClientActorBehavior) mockBehavior);
@@ -278,7 +281,7 @@ public class ConnectingClientConnectionTest {
     public void testRunTimeoutWithoutProgressMore() throws NoProgressException {
         queue.sendRequest(mockRequest, mockCallback);
 
-        ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS + 1);
+        ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS + 1);
 
         // Kaboom
         queue.runTimer((ClientActorBehavior) mockBehavior);
@@ -287,7 +290,7 @@ public class ConnectingClientConnectionTest {
 
     @Test
     public void testRunTimeoutEmptyWithoutProgressExact() throws NoProgressException {
-        ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS);
+        ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS);
 
         // No problem
         Optional<Long> ret = queue.checkTimeout(ticker.read());
@@ -297,7 +300,7 @@ public class ConnectingClientConnectionTest {
 
     @Test
     public void testRunTimeoutEmptyWithoutProgressMore() throws NoProgressException {
-        ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS + 1);
+        ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS + 1);
 
         // No problem
         Optional<Long> ret = queue.checkTimeout(ticker.read());
@@ -346,7 +349,7 @@ public class ConnectingClientConnectionTest {
         queue.sendRequest(mockRequest2, mockCallback);
         queue.receiveResponse(mockResponseEnvelope);
 
-        ticker.advance(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS - 11);
+        ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS - 11);
 
         Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNull(ret);

@@ -50,24 +50,21 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      */
     /**
      * Backend aliveness timer. This is reset whenever we receive a response from the backend and kept armed whenever
-     * we have an outstanding request. If when this time expires, we tear down this connection and attept to reconnect
+     * we have an outstanding request. If when this time expires, we tear down this connection and attempt to reconnect
      * it.
      */
-    @VisibleForTesting
-    static final long BACKEND_ALIVE_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
+    public static final long DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
 
     /**
      * Request timeout. If the request fails to complete within this time since it was originally enqueued, we time
      * the request out.
      */
-    @VisibleForTesting
-    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(2);
+    public static final long DEFAULT_REQUEST_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(2);
 
     /**
      * No progress timeout. A client fails to make any forward progress in this time, it will terminate itself.
      */
-    @VisibleForTesting
-    static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
+    public static final long DEFAULT_NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
 
     // Emit a debug entry if we sleep for more that this amount
     private static final long DEBUG_DELAY_NANOS = TimeUnit.MILLISECONDS.toNanos(100);
@@ -167,7 +164,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
             if (queue.isEmpty()) {
                 // The queue is becoming non-empty, schedule a timer.
-                scheduleTimer(entry.getEnqueuedTicks() + REQUEST_TIMEOUT_NANOS - now);
+                scheduleTimer(entry.getEnqueuedTicks() + context.config().getRequestTimeout() - now);
             }
             return queue.enqueue(entry, now);
         } finally {
@@ -259,7 +256,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
         // If the delay is negative, we need to schedule an action immediately. While the caller could have checked
         // for that condition and take appropriate action, but this is more convenient and less error-prone.
-        final long normalized =  delay <= 0 ? 0 : Math.min(delay, BACKEND_ALIVE_TIMEOUT_NANOS);
+        final long normalized =  delay <= 0 ? 0 : Math.min(delay, context.config().getBackendAlivenessTimerInterval());
 
         final FiniteDuration dur = FiniteDuration.fromNanos(normalized);
         LOG.debug("{}: connection {} scheduling timeout in {}", context.persistenceId(), this, dur);
@@ -269,7 +266,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     /**
      * Check this queue for timeout and initiate reconnection if that happened. If the queue has not made progress
-     * in {@link #NO_PROGRESS_TIMEOUT_NANOS} nanoseconds, it will be aborted.
+     * in {@link #DEFAULT_NO_PROGRESS_TIMEOUT_NANOS} nanoseconds, it will be aborted.
      *
      * @param current Current behavior
      * @return Next behavior to use
@@ -288,7 +285,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             // The following line is only reliable when queue is not forwarding, but such state should not last long.
             // FIXME: BUG-8422: this may not be accurate w.r.t. replayed entries
             final long ticksSinceProgress = queue.ticksStalling(now);
-            if (ticksSinceProgress >= NO_PROGRESS_TIMEOUT_NANOS) {
+            if (ticksSinceProgress >= context.config().getNoProgressTimeout()) {
                 LOG.error("Queue {} has not seen progress in {} seconds, failing all requests", this,
                     TimeUnit.NANOSECONDS.toSeconds(ticksSinceProgress));
 
@@ -351,7 +348,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
 
         final long backendSilentTicks = backendSilentTicks(now);
-        if (backendSilentTicks >= BACKEND_ALIVE_TIMEOUT_NANOS) {
+        if (backendSilentTicks >= context.config().getBackendAlivenessTimerInterval()) {
             LOG.debug("{}: Connection {} has not seen activity from backend for {} nanoseconds, timing out",
                 context.persistenceId(), this, backendSilentTicks);
             return null;
@@ -360,8 +357,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         int tasksTimedOut = 0;
         for (ConnectionEntry head = queue.peek(); head != null; head = queue.peek()) {
             final long beenOpen = now - head.getEnqueuedTicks();
-            if (beenOpen < REQUEST_TIMEOUT_NANOS) {
-                return Optional.of(REQUEST_TIMEOUT_NANOS - beenOpen);
+            final long requestTimeout = context.config().getRequestTimeout();
+            if (beenOpen < requestTimeout) {
+                return Optional.of(requestTimeout - beenOpen);
             }
 
             tasksTimedOut++;
