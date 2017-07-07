@@ -99,6 +99,9 @@ public class DistributedOperationalDataStoreProviderModule
                 .maximumMessageSliceSize(props.getMaximumMessageSliceSize().getValue().intValue())
                 .useTellBasedProtocol(props.getUseTellBasedProtocol())
                 .syncIndexThreshold(props.getSyncIndexThreshold().getValue())
+                .backendAlivenessTimerIntervalInSeconds(props.getBackendAlivenessTimerIntervalInSeconds().getValue())
+                .frontendRequestTimeoutInSeconds(props.getFrontendRequestTimeoutInSeconds().getValue())
+                .frontendNoProgressTimeoutInSeconds(props.getFrontendNoProgressTimeoutInSeconds().getValue())
                 .build();
     }
 
