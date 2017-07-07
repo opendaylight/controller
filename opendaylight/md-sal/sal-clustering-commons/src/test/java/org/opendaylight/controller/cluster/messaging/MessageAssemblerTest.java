@@ -178,7 +178,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
     }
 
     private Builder newMessageAssemblerBuilder(String logContext) {
-        return MessageAssembler.builder().filedBackedStreamFactory(mockFiledBackedStreamFactory)
+        return MessageAssembler.builder().fileBackedStreamFactory(mockFiledBackedStreamFactory)
                 .assembledMessageCallback(mockAssembledMessageCallback).logContext(logContext);
     }
 }

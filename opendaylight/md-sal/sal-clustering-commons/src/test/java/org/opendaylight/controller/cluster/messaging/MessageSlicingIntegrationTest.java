@@ -63,7 +63,7 @@ public class MessageSlicingIntegrationTest {
 
     private final MessageAssembler assembler = MessageAssembler.builder()
             .assembledMessageCallback(mockAssembledMessageCallback).logContext("test")
-            .filedBackedStreamFactory(FILE_BACKED_STREAM_FACTORY).build();
+            .fileBackedStreamFactory(FILE_BACKED_STREAM_FACTORY).build();
 
     @Before
     public void setup() {
@@ -336,6 +336,6 @@ public class MessageSlicingIntegrationTest {
 
     private MessageSlicer newMessageSlicer(String logContext, final int messageSliceSize) {
         return MessageSlicer.builder().messageSliceSize(messageSliceSize).logContext(logContext)
-                .filedBackedStreamFactory(FILE_BACKED_STREAM_FACTORY).build();
+                .fileBackedStreamFactory(FILE_BACKED_STREAM_FACTORY).build();
     }
 }

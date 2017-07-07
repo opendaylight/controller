@@ -78,7 +78,7 @@ public class Follower extends AbstractRaftActorBehavior {
             .getSyncIndexThreshold());
 
         appendEntriesMessageAssembler = MessageAssembler.builder().logContext(logName())
-                .filedBackedStreamFactory(context.getFileBackedOutputStreamFactory())
+                .fileBackedStreamFactory(context.getFileBackedOutputStreamFactory())
                 .assembledMessageCallback((message, sender) -> handleMessage(sender, message)).build();
 
         if (context.getPeerIds().isEmpty() && getLeaderId() == null) {

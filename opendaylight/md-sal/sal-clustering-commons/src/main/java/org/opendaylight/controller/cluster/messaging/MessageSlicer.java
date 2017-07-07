@@ -38,14 +38,14 @@ public class MessageSlicer implements AutoCloseable {
     public static final int DEFAULT_MAX_SLICING_TRIES = 3;
 
     private final Cache<Identifier, SlicedMessageState<ActorRef>> stateCache;
-    private final FileBackedOutputStreamFactory filedBackedStreamFactory;
+    private final FileBackedOutputStreamFactory fileBackedStreamFactory;
     private final int messageSliceSize;
     private final int maxSlicingTries;
     private final String logContext;
     private final long id;
 
     private MessageSlicer(Builder builder) {
-        this.filedBackedStreamFactory = builder.filedBackedStreamFactory;
+        this.fileBackedStreamFactory = builder.fileBackedStreamFactory;
         this.messageSliceSize = builder.messageSliceSize;
         this.maxSlicingTries = builder.maxSlicingTries;
 
@@ -100,11 +100,11 @@ public class MessageSlicer implements AutoCloseable {
         if (message != null) {
             LOG.debug("{}: slice: identifier: {}, message: {}", logContext, identifier, message);
 
-            Preconditions.checkNotNull(filedBackedStreamFactory,
+            Preconditions.checkNotNull(fileBackedStreamFactory,
                     "The FiledBackedStreamFactory must be set in order to call this slice method");
 
             // Serialize the message to a FileBackedOutputStream.
-            fileBackedStream = filedBackedStreamFactory.newInstance();
+            fileBackedStream = fileBackedStreamFactory.newInstance();
             try (ObjectOutputStream out = new ObjectOutputStream(fileBackedStream)) {
                 out.writeObject(message);
             } catch (IOException e) {
@@ -305,7 +305,7 @@ public class MessageSlicer implements AutoCloseable {
     }
 
     public static class Builder {
-        private FileBackedOutputStreamFactory filedBackedStreamFactory;
+        private FileBackedOutputStreamFactory fileBackedStreamFactory;
         private int messageSliceSize = -1;
         private long expireStateAfterInactivityDuration = -1;
         private TimeUnit expireStateAfterInactivityUnit = TimeUnit.MINUTES;
@@ -317,11 +317,11 @@ public class MessageSlicer implements AutoCloseable {
          * is used by the {@link MessageSlicer#slice(SliceOptions)} method if a Serializable message is passed.
          * If Serializable messages aren't passed then the factory need not be set.
          *
-         * @param newFiledBackedStreamFactory the factory for creating FileBackedOutputStream instances
+         * @param newFileBackedStreamFactory the factory for creating FileBackedOutputStream instances
          * @return this Builder
          */
-        public Builder filedBackedStreamFactory(final FileBackedOutputStreamFactory newFiledBackedStreamFactory) {
-            this.filedBackedStreamFactory = Preconditions.checkNotNull(newFiledBackedStreamFactory);
+        public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
+            this.fileBackedStreamFactory = Preconditions.checkNotNull(newFileBackedStreamFactory);
             return this;
         }
 

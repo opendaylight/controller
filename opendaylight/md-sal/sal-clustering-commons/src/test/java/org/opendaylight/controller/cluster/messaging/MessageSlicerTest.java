@@ -138,7 +138,7 @@ public class MessageSlicerTest extends AbstractMessagingTest {
         final int expiryDuration = 200;
         try (MessageSlicer slicer = MessageSlicer.builder().messageSliceSize(1)
                 .logContext("testCheckExpiredSlicedMessageState")
-                .filedBackedStreamFactory(mockFiledBackedStreamFactory)
+                .fileBackedStreamFactory(mockFiledBackedStreamFactory)
                 .expireStateAfterInactivity(expiryDuration, TimeUnit.MILLISECONDS).build()) {
             slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{1, 2}), testProbe.ref(), testProbe.ref(),
                     mockOnFailureCallback);
@@ -159,7 +159,7 @@ public class MessageSlicerTest extends AbstractMessagingTest {
 
     private MessageSlicer newMessageSlicer(String logContext, final int messageSliceSize) {
         return MessageSlicer.builder().messageSliceSize(messageSliceSize).logContext(logContext)
-                .filedBackedStreamFactory(mockFiledBackedStreamFactory).build();
+                .fileBackedStreamFactory(mockFiledBackedStreamFactory).build();
     }
 
     static void slice(MessageSlicer slicer, Identifier identifier, Serializable message, ActorRef sendTo,

@@ -36,12 +36,12 @@ public class MessageAssembler implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(MessageAssembler.class);
 
     private final Cache<Identifier, AssembledMessageState> stateCache;
-    private final FileBackedOutputStreamFactory filedBackedStreamFactory;
+    private final FileBackedOutputStreamFactory fileBackedStreamFactory;
     private final BiConsumer<Object, ActorRef> assembledMessageCallback;
     private final String logContext;
 
     private MessageAssembler(Builder builder) {
-        this.filedBackedStreamFactory = Preconditions.checkNotNull(builder.filedBackedStreamFactory,
+        this.fileBackedStreamFactory = Preconditions.checkNotNull(builder.fileBackedStreamFactory,
                 "FiledBackedStreamFactory cannot be null");
         this.assembledMessageCallback = Preconditions.checkNotNull(builder.assembledMessageCallback,
                 "assembledMessageCallback cannot be null");
@@ -135,7 +135,7 @@ public class MessageAssembler implements AutoCloseable {
         if (messageSlice.getSliceIndex() == SlicedMessageState.FIRST_SLICE_INDEX) {
             LOG.debug("{}: Received first slice for {} - creating AssembledMessageState", logContext, identifier);
             return new AssembledMessageState(identifier, messageSlice.getTotalSlices(),
-                    filedBackedStreamFactory, logContext);
+                    fileBackedStreamFactory, logContext);
         }
 
         LOG.debug("{}: AssembledMessageState not found for {} - returning failed reply", logContext, identifier);
@@ -218,7 +218,7 @@ public class MessageAssembler implements AutoCloseable {
     }
 
     public static class Builder {
-        private FileBackedOutputStreamFactory filedBackedStreamFactory;
+        private FileBackedOutputStreamFactory fileBackedStreamFactory;
         private BiConsumer<Object, ActorRef> assembledMessageCallback;
         private long expireStateAfterInactivityDuration = 1;
         private TimeUnit expireStateAfterInactivityUnit = TimeUnit.MINUTES;
@@ -227,11 +227,11 @@ public class MessageAssembler implements AutoCloseable {
         /**
          * Sets the factory for creating FileBackedOutputStream instances used for streaming messages.
          *
-         * @param newFiledBackedStreamFactory the factory for creating FileBackedOutputStream instances
+         * @param newFileBackedStreamFactory the factory for creating FileBackedOutputStream instances
          * @return this Builder
          */
-        public Builder filedBackedStreamFactory(final FileBackedOutputStreamFactory newFiledBackedStreamFactory) {
-            this.filedBackedStreamFactory = Preconditions.checkNotNull(newFiledBackedStreamFactory);
+        public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
+            this.fileBackedStreamFactory = Preconditions.checkNotNull(newFileBackedStreamFactory);
             return this;
         }
 
