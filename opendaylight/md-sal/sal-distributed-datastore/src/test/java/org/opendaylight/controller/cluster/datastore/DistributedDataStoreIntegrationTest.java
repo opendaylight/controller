@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
@@ -50,6 +49,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -649,7 +649,8 @@ public class DistributedDataStoreIntegrationTest {
                 // The ShardManager uses the election timeout for FindPrimary so
                 // reset it low so it will timeout quickly.
                 datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1)
-                        .shardInitializationTimeout(200, TimeUnit.MILLISECONDS);
+                        .shardInitializationTimeout(200, TimeUnit.MILLISECONDS)
+                        .frontendRequestTimeout(TimeUnit.SECONDS.toNanos(2));
 
                 try (AbstractDataStore dataStore = setupAbstractDataStore(
                         testParameter, testName, false, shardName)) {
@@ -699,14 +700,16 @@ public class DistributedDataStoreIntegrationTest {
                         // should have timed out and throw an appropriate
                         // exception cause.
                         try {
-                            txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
+                            txCohort.get().canCommit().get(10, TimeUnit.SECONDS);
                             fail("Expected NoShardLeaderException");
                         } catch (final ExecutionException e) {
-                            assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
-                            assertEquals(DistributedDataStore.class, testParameter);
-                        } catch (TimeoutException e) {
-                            // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
-                            assertEquals(ClientBackedDataStore.class, testParameter);
+                            final String msg = "Unexpected exception: "
+                                    + Throwables.getStackTraceAsString(e.getCause());
+                            if (DistributedDataStore.class.equals(testParameter)) {
+                                assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
+                            } else {
+                                assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
+                            }
                         }
                     } finally {
                         try {

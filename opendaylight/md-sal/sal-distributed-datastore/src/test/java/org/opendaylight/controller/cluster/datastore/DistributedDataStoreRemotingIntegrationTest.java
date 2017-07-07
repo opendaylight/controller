@@ -42,7 +42,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.junit.Assume;
@@ -54,6 +53,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
@@ -119,7 +119,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { DistributedDataStore.class, 7}, { ClientBackedDataStore.class, 120 }
+                { DistributedDataStore.class, 7}, { ClientBackedDataStore.class, 12 }
         });
     }
 
@@ -139,6 +139,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static final String MODULE_SHARDS_CARS_ONLY_1_2 = "module-shards-cars-member-1-and-2.conf";
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 = "module-shards-member1-and-2.conf";
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2_3 = "module-shards-member1-and-2-and-3.conf";
+    private static final String MODULE_SHARDS_CARS_1_2_3 = "module-shards-cars-member-1-and-2-and-3.conf";
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
@@ -576,6 +577,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testSingleShardTransactionsWithLeaderChanges() throws Exception {
+        followerDatastoreContextBuilder.backendAlivenessTimerInterval(TimeUnit.SECONDS.toNanos(2));
         final String testName = "testSingleShardTransactionsWithLeaderChanges";
         initDatastoresWithCars(testName);
 
@@ -999,6 +1001,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionWithShardLeaderNotResponding() throws Exception {
+        followerDatastoreContextBuilder.frontendRequestTimeout(TimeUnit.SECONDS.toNanos(2));
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(50);
         initDatastoresWithCars("testTransactionWithShardLeaderNotResponding");
 
@@ -1023,17 +1026,18 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             fail("Exception expected");
         } catch (final ExecutionException e) {
             final String msg = "Unexpected exception: " + Throwables.getStackTraceAsString(e.getCause());
-            assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException
-                    || e.getCause() instanceof ShardLeaderNotRespondingException);
-            assertEquals(DistributedDataStore.class, testParameter);
-        } catch (final TimeoutException e) {
-            // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
-            assertEquals(ClientBackedDataStore.class, testParameter);
+            if (DistributedDataStore.class.equals(testParameter)) {
+                assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException
+                        || e.getCause() instanceof ShardLeaderNotRespondingException);
+            } else {
+                assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
+            }
         }
     }
 
     @Test
     public void testTransactionWithCreateTxFailureDueToNoLeader() throws Exception {
+        followerDatastoreContextBuilder.frontendRequestTimeout(TimeUnit.SECONDS.toNanos(2));
         initDatastoresWithCars("testTransactionWithCreateTxFailureDueToNoLeader");
 
         // Do an initial read to get the primary shard info cached.
@@ -1060,29 +1064,29 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             followerTestKit.doCommit(rwTx.ready());
             fail("Exception expected");
         } catch (final ExecutionException e) {
-            final String msg = "Expected instance of NoShardLeaderException, actual: \n"
-                    + Throwables.getStackTraceAsString(e.getCause());
-            assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException);
-            assertEquals(DistributedDataStore.class, testParameter);
-        } catch (TimeoutException e) {
-            // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
-            assertEquals(ClientBackedDataStore.class, testParameter);
+            final String msg = "Unexpected exception: " + Throwables.getStackTraceAsString(e.getCause());
+            if (DistributedDataStore.class.equals(testParameter)) {
+                assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException);
+            } else {
+                assertTrue(msg, Throwables.getRootCause(e) instanceof RequestTimeoutException);
+            }
         }
     }
 
     @Test
     public void testTransactionRetryWithInitialAskTimeoutExOnCreateTx() throws Exception {
+        followerDatastoreContextBuilder.backendAlivenessTimerInterval(TimeUnit.SECONDS.toNanos(2));
         String testName = "testTransactionRetryWithInitialAskTimeoutExOnCreateTx";
-        initDatastores(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, CARS);
+        initDatastores(testName, MODULE_SHARDS_CARS_1_2_3, CARS);
 
         final DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder()
-                .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
+                .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(10);
         final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
                 follower2System, follower2DatastoreContextBuilder, commitTimeout);
 
         try (AbstractDataStore ds =
                 follower2TestKit.setupAbstractDataStore(
-                        testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false, CARS)) {
+                        testParameter, testName, MODULE_SHARDS_CARS_1_2_3, false, CARS)) {
 
             followerTestKit.waitForMembersUp("member-1", "member-3");
             follower2TestKit.waitForMembersUp("member-1", "member-2");
@@ -1099,7 +1103,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
             sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder
-                .operationTimeoutInMillis(500).shardElectionTimeoutFactor(1).customRaftPolicyImplementation(null));
+                .operationTimeoutInMillis(500).shardElectionTimeoutFactor(5).customRaftPolicyImplementation(null));
 
             final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
