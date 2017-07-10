@@ -72,7 +72,14 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
 
     public void init() {
         listenerProvider.setDataBroker(simpleTxDataBroker);
-        setTestOperData(this.execStatus.get(), testsCompleted);
+
+        try {
+            // We want to set the initial operation status so users can detect we are ready to start test.
+            setTestOperData(this.execStatus.get(), testsCompleted);
+        } catch (final Exception e) {
+            // TODO: Use a singleton service to make sure the initial write is performed only once.
+            LOG.warn("Working around Bugs 8829 and 6793 by ignoring exception from setTestOperData: {}", e);
+        }
 
         LOG.info("DsbenchmarkProvider initiated");
     }
@@ -85,8 +92,8 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
     @Override
     public Future<RpcResult<Void>> cleanupStore() {
         cleanupTestStore();
-        LOG.debug("Data Store cleaned up");
-        return Futures.immediateFuture( RpcResultBuilder.<Void>success().build());
+        LOG.info("Data Store cleaned up");
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -94,7 +101,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
         // Check if there is a test in progress
-        if ( execStatus.compareAndSet(ExecStatus.Idle, ExecStatus.Executing) == false ) {
+        if (execStatus.compareAndSet(ExecStatus.Idle, ExecStatus.Executing) == false) {
             LOG.info("Test in progress");
             return RpcResultBuilder.success(new StartTestOutputBuilder()
                     .setStatus(StartTestOutput.Status.TESTINPROGRESS)
@@ -127,15 +134,15 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
             this.testsCompleted++;
 
         } catch (final Exception e) {
-            LOG.error( "Test error: {}", e.toString());
-            execStatus.set( ExecStatus.Idle );
+            LOG.error("Test error: {}", e.toString());
+            execStatus.set(ExecStatus.Idle);
             return RpcResultBuilder.success(new StartTestOutputBuilder()
                     .setStatus(StartTestOutput.Status.FAILED)
                     .build()).buildFuture();
         }
 
         LOG.info("Test finished");
-        setTestOperData( ExecStatus.Idle, testsCompleted);
+        setTestOperData(ExecStatus.Idle, testsCompleted);
         execStatus.set(ExecStatus.Idle);
 
         // Get the number of data change events and cleanup the data change listeners
@@ -155,7 +162,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         return RpcResultBuilder.success(output).buildFuture();
     }
 
-    private void setTestOperData( final ExecStatus sts, final long tstCompl ) {
+    private void setTestOperData(final ExecStatus sts, final long tstCompl) {
         TestStatus status = new TestStatusBuilder()
                 .setExecStatus(sts)
                 .setTestsCompleted(tstCompl)
