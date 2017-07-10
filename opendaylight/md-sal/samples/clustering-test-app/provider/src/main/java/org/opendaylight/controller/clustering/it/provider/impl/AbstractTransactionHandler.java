@@ -122,10 +122,10 @@ abstract class AbstractTransactionHandler {
             public void onFailure(final Throwable cause) {
                 txFailure(execFuture, txId, cause);
             }
-        });
+        }, executor);
     }
 
-    final synchronized void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
+    final void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
         LOG.debug("Future #{} completed successfully", txId);
         futures.remove(execFuture);
 
@@ -142,7 +142,7 @@ abstract class AbstractTransactionHandler {
         }
     }
 
-    final synchronized void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
+    final void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
         LOG.debug("Future #{} failed", txId, cause);
         futures.remove(execFuture);
 
@@ -162,7 +162,7 @@ abstract class AbstractTransactionHandler {
         }
     }
 
-    private synchronized void checkComplete() {
+    private void checkComplete() {
         final int size = futures.size();
         if (size == 0) {
             return;
