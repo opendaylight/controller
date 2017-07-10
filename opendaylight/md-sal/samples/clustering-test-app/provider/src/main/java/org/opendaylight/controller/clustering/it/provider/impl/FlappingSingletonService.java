@@ -10,7 +10,6 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,14 +27,13 @@ public class FlappingSingletonService implements ClusterSingletonService {
     private static final ServiceGroupIdentifier SERVICE_GROUP_IDENTIFIER =
             ServiceGroupIdentifier.create("flapping-singleton-service");
 
+    private static final ScheduledExecutorService EXECUTOR = FinalizableScheduledExecutorService.newSingleThread();
+
     private final ClusterSingletonServiceProvider singletonServiceProvider;
+    private final AtomicBoolean active = new AtomicBoolean(true);
 
     private volatile long flapCount = 0;
-    private AtomicBoolean active = new AtomicBoolean(true);
-
     private volatile ClusterSingletonServiceRegistration registration;
-
-    private static ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
     public FlappingSingletonService(final ClusterSingletonServiceProvider singletonServiceProvider) {
         LOG.debug("Registering flapping-singleton-service.");
@@ -74,8 +72,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
             EXECUTOR.schedule(() -> {
                 LOG.debug("Running re-registration");
                 try {
-                    registration =
-                            singletonServiceProvider.registerClusterSingletonService(this);
+                    registration = singletonServiceProvider.registerClusterSingletonService(this);
                 } catch (final Exception e) {
                     LOG.warn("There was a problem re-registering flapping singleton service.", e);
                     setInactive();
