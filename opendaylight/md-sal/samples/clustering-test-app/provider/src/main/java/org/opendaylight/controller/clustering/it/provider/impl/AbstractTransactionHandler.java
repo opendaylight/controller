@@ -35,7 +35,7 @@ abstract class AbstractTransactionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactionHandler.class);
 
-    static final int SECOND_AS_NANO = 1000000000;
+    static final int SECOND_AS_NANO = 1_000_000_000;
     //2^20 as in the model
     static final int MAX_ITEM = 1048576;
 
@@ -99,7 +99,6 @@ abstract class AbstractTransactionHandler {
                 state = State.WAITING;
                 scheduledFuture.cancel(false);
                 scheduledFuture = executor.schedule(this::checkComplete, DEAD_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                executor.shutdown();
             }
 
             return;
@@ -122,10 +121,10 @@ abstract class AbstractTransactionHandler {
             public void onFailure(final Throwable cause) {
                 txFailure(execFuture, txId, cause);
             }
-        });
+        }, executor);
     }
 
-    final synchronized void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
+    final void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
         LOG.debug("Future #{} completed successfully", txId);
         futures.remove(execFuture);
 
@@ -142,7 +141,7 @@ abstract class AbstractTransactionHandler {
         }
     }
 
-    final synchronized void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
+    final void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
         LOG.debug("Future #{} failed", txId, cause);
         futures.remove(execFuture);
 
@@ -162,7 +161,9 @@ abstract class AbstractTransactionHandler {
         }
     }
 
-    private synchronized void checkComplete() {
+    private void checkComplete() {
+        executor.shutdown();
+
         final int size = futures.size();
         if (size == 0) {
             return;
