@@ -171,12 +171,15 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
 
     @Override
     public synchronized void close() throws DOMDataTreeProducerException {
+        LOG.debug("Closing producer {}", this);
         if (!closed) {
             if (openTx != null) {
+                LOG.debug("Throwing, as transaction {} is still open.", openTx);
                 throw new DOMDataTreeProducerBusyException(String.format("Transaction %s is still open", openTx));
             }
 
             closed = true;
+            LOG.trace("Calling destroy this to {}", dataTree);
             dataTree.destroyProducer(this);
         }
     }

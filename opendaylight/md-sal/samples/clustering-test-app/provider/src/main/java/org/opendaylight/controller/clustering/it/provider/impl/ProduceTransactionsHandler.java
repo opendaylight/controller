@@ -131,6 +131,7 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
     @Override
     void runFailed(final Throwable cause) {
+        LOG.trace("runFailed: closing producer {}", itemProducer);
         closeProducer(itemProducer);
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
@@ -138,6 +139,7 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
     @Override
     void runSuccessful(final long allTx) {
+        LOG.trace("runSuccessful: closing producer {}", itemProducer);
         closeProducer(itemProducer);
         final ProduceTransactionsOutput output = new ProduceTransactionsOutputBuilder()
                 .setAllTx(allTx)
@@ -150,6 +152,7 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
     @Override
     void runTimedOut(final Exception cause) {
+        LOG.trace("runTimedOut: closing producer {}", itemProducer);
         closeProducer(itemProducer);
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,

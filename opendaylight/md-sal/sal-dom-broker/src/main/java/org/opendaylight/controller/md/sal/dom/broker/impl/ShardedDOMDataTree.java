@@ -119,6 +119,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     private DOMDataTreeProducer findProducer(final DOMDataTreeIdentifier subtree) {
         for (final Entry<DOMDataTreeIdentifier, DOMDataTreeProducer> e : idToProducer.entrySet()) {
             if (e.getKey().contains(subtree)) {
+                LOG.trace("Found: subtree {} is part of {} which is attached to producer {}", subtree, e.getKey(), e.getValue());
                 return e.getValue();
             }
         }
@@ -127,7 +128,9 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     }
 
     synchronized void destroyProducer(final ShardedDOMDataTreeProducer producer) {
+        LOG.debug("Destroying producer {}", producer);
         for (final DOMDataTreeIdentifier s : producer.getSubtrees()) {
+            LOG.trace("Removing subtree {} from map.", s);
             final DOMDataTreeProducer r = idToProducer.remove(s);
             if (!producer.equals(r)) {
                 LOG.error("Removed producer {} on subtree {} while removing {}", r, s, producer);
@@ -139,7 +142,9 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     private DOMDataTreeProducer createProducer(final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap) {
         // Record the producer's attachment points
         final DOMDataTreeProducer ret = ShardedDOMDataTreeProducer.create(this, shardMap);
+        LOG.debug("Creating producer {}", ret);
         for (DOMDataTreeIdentifier s : shardMap.keySet()) {
+            LOG.trace("Adding subtree {} to map.", s);
             idToProducer.put(s, ret);
         }
 
