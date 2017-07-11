@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-parent</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>0.6.1-Carbon</version>
         <relativePath>../../config/config-parent</relativePath>
     </parent>
 
     <artifactId>sal-remoterpc-connector</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1-Carbon</version>
     <packaging>bundle</packaging>
 
     <dependencyManagement>
@@ -18,7 +18,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.5.1-SNAPSHOT</version>
+                <version>1.5.1-Carbon</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

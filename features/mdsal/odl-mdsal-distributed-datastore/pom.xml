@@ -14,13 +14,13 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.8.1-Carbon</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-distributed-datastore</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1-Carbon</version>
     <packaging>feature</packaging>
 
     <dependencyManagement>
@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.5.1-SNAPSHOT</version>
+                <version>1.5.1-Carbon</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

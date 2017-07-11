@@ -12,13 +12,13 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-lite</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.8.1-Carbon</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-config-aggregator</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>0.6.1-Carbon</version>
     <packaging>pom</packaging>
 
     <modules>

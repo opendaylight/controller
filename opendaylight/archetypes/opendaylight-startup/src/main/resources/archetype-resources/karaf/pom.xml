@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.8.1-SNAPSHOT</version>
+    <version>1.8.1-Carbon</version>
   </parent>
 
   <groupId>${groupId}</groupId>

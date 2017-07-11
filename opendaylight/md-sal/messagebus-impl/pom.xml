@@ -14,12 +14,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-parent</artifactId>
-        <version>0.6.1-SNAPSHOT</version>
+        <version>0.6.1-Carbon</version>
         <relativePath>../../config/config-parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1-Carbon</version>
     <artifactId>messagebus-impl</artifactId>
     <name>${project.artifactId}</name>
     <packaging>bundle</packaging>

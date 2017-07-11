@@ -14,20 +14,20 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.8.1-Carbon</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-clustering-test-app</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1-Carbon</version>
     <packaging>feature</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
             <artifactId>odl-mdsal-models</artifactId>
-            <version>0.10.1-SNAPSHOT</version>
+            <version>0.10.1-Carbon</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
