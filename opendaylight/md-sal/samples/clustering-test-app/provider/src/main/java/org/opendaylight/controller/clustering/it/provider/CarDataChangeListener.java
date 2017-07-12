@@ -22,7 +22,10 @@ import org.slf4j.LoggerFactory;
  * of the changes that occurred.
  *
  * @author Ryan Goulding (ryandgoulding@gmail.com)
+ *
+ * @deprecated Scheduled for removal with {@link DataChangeListener}.
  */
+@Deprecated
 public class CarDataChangeListener implements DataChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(CarDataChangeListener.class);
 

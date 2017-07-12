@@ -65,12 +65,12 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistrati
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeLoopException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
@@ -133,7 +133,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     private final DOMDataBroker domDataBroker;
     private final NotificationPublishService notificationPublishService;
     private final NotificationService notificationService;
-    private final SchemaService schemaService;
+    private final DOMSchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
     private final PrefixLeaderHandler prefixLeaderHandler;
@@ -160,7 +160,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
                                      final ClusterSingletonServiceProvider singletonService,
-                                     final SchemaService schemaService,
+                                     final DOMSchemaService schemaService,
                                      final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                                      final NotificationPublishService notificationPublishService,
                                      final NotificationService notificationService,
