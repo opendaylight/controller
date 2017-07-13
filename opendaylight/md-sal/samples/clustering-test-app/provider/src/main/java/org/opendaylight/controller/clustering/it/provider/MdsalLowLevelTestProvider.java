@@ -246,6 +246,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                                 CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID),
                         idIntsListener);
 
+        LOG.debug("ClusteredDOMDataTreeChangeListener registered");
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
@@ -391,14 +392,13 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         idIntsDdtl = new IdIntsDOMDataTreeLIstener();
 
         try {
-            ddtlReg =
-                    domDataTreeService.registerListener(idIntsDdtl,
-                            Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
-                                    ProduceTransactionsHandler.ID_INT_YID))
-                            , true, Collections.emptyList());
+            ddtlReg = domDataTreeService.registerListener(idIntsDdtl,
+                Collections.singleton(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
+                    ProduceTransactionsHandler.ID_INT_YID)), true, Collections.emptyList());
+            LOG.debug("DOMDataTreeListener registered");
         } catch (DOMDataTreeLoopException e) {
             LOG.error("Failed to register DOMDataTreeListener.", e);
-
+            // FIXME: return a failure
         }
 
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
@@ -472,7 +472,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         dtclReg.close();
         dtclReg = null;
 
-        if (!idIntsListener.hasTriggered()) {
+        final Optional<NormalizedNode<?, ?>> localCopyOpt = idIntsListener.getLocalCopy();
+        if (!localCopyOpt.isPresent()) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.APPLICATION, "No notification received.", "id-ints listener has not received" +
                             "any notifications.");
@@ -688,7 +689,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         ddtlReg.close();
         ddtlReg = null;
 
-        if (!idIntsDdtl.hasTriggered()) {
+        final Optional<NormalizedNode<?, ?>> optLocalCopy = idIntsDdtl.getLocalCopy();
+        if (!optLocalCopy.isPresent()) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.APPLICATION, "No notification received.", "id-ints listener has not received" +
                             "any notifications.");
