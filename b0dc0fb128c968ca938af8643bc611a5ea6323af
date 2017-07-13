@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_01f943e9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/AbstractDataListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-07-13T10:30:50Z",
+      "side": 1,
+      "message": "Move this to LOG.trace please.",
+      "range": {
+        "startLine": 99,
+        "startChar": 83,
+        "endLine": 99,
+        "endChar": 89
+      },
+      "revId": "b0dc0fb128c968ca938af8643bc611a5ea6323af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
