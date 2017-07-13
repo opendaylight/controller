@@ -40,7 +40,6 @@ public abstract class AbstractDataBrokerTestCustomizer {
     private final MockSchemaService schemaService;
     private ImmutableMap<LogicalDatastoreType, DOMStore> datastores;
     private final BindingToNormalizedNodeCodec bindingToNormalized;
-    private ListeningExecutorService dataTreeChangeListenerExecutor = MoreExecutors.newDirectExecutorService();
 
     public ImmutableMap<LogicalDatastoreType, DOMStore> createDatastores() {
         return ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
@@ -61,13 +60,13 @@ public abstract class AbstractDataBrokerTestCustomizer {
     }
 
     public DOMStore createConfigurationDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", dataTreeChangeListenerExecutor);
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", getDataTreeChangeListenerExecutor());
         this.schemaService.registerSchemaContextListener(store);
         return store;
     }
 
     public DOMStore createOperationalDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", dataTreeChangeListenerExecutor);
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", getDataTreeChangeListenerExecutor());
         this.schemaService.registerSchemaContextListener(store);
         return store;
     }
@@ -85,6 +84,10 @@ public abstract class AbstractDataBrokerTestCustomizer {
     }
 
     public abstract ListeningExecutorService getCommitCoordinatorExecutor();
+
+    public ListeningExecutorService getDataTreeChangeListenerExecutor() {
+        return MoreExecutors.newDirectExecutorService();
+    }
 
     public DataBroker createDataBroker() {
         return new BindingDOMDataBrokerAdapter(getDOMDataBroker(), this.bindingToNormalized);
@@ -110,10 +113,6 @@ public abstract class AbstractDataBrokerTestCustomizer {
             this.datastores = createDatastores();
         }
         return this.datastores;
-    }
-
-    public void setDataTreeChangeListenerExecutor(ListeningExecutorService executor) {
-        this.dataTreeChangeListenerExecutor = executor;
     }
 
     public void updateSchema(final SchemaContext ctx) {

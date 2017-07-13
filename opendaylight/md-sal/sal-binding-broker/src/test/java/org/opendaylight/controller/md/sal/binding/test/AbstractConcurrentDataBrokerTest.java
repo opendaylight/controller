@@ -31,12 +31,7 @@ public abstract class AbstractConcurrentDataBrokerTest extends AbstractBaseDataB
 
     @Override
     protected AbstractDataBrokerTestCustomizer createDataBrokerTestCustomizer() {
-        ConcurrentDataBrokerTestCustomizer customizer = new ConcurrentDataBrokerTestCustomizer();
-        if (useMTDataTreeChangeListenerExecutor) {
-            customizer.useMTDataTreeChangeListenerExecutor();
-        }
-
-        return customizer;
+        return new ConcurrentDataBrokerTestCustomizer(useMTDataTreeChangeListenerExecutor);
     }
 
 }

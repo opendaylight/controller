@@ -18,6 +18,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class ConstantSchemaAbstractDataBrokerTest extends AbstractConcurrentDataBrokerTest {
 
+    public ConstantSchemaAbstractDataBrokerTest() {
+        super();
+    }
+
+    public ConstantSchemaAbstractDataBrokerTest(final boolean useMTDataTreeChangeListenerExecutor) {
+        super(useMTDataTreeChangeListenerExecutor);
+    }
+
     @Override
     protected SchemaContext getSchemaContext() throws Exception {
         return SchemaContextSingleton.getSchemaContext(super::getSchemaContext);

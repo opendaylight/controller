@@ -21,12 +21,24 @@ import java.util.concurrent.Executors;
  */
 public class ConcurrentDataBrokerTestCustomizer extends AbstractDataBrokerTestCustomizer {
 
+    private final ListeningExecutorService dataTreeChangeListenerExecutorSingleton;
+
+    public ConcurrentDataBrokerTestCustomizer(boolean useMTDataTreeChangeListenerExecutor) {
+        if (useMTDataTreeChangeListenerExecutor) {
+            dataTreeChangeListenerExecutorSingleton = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+        } else {
+            dataTreeChangeListenerExecutorSingleton = MoreExecutors.newDirectExecutorService();
+        }
+    }
+
     @Override
     public ListeningExecutorService getCommitCoordinatorExecutor() {
         return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
     }
 
-    public void useMTDataTreeChangeListenerExecutor() {
-        setDataTreeChangeListenerExecutor(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
+    @Override
+    public ListeningExecutorService getDataTreeChangeListenerExecutor() {
+        return dataTreeChangeListenerExecutorSingleton;
     }
+
 }
