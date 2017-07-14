@@ -22,7 +22,7 @@ public final class ConnectingClientConnection<T extends BackendInfo> extends Abs
 
     // Initial state, never instantiated externally
     ConnectingClientConnection(final ClientActorContext context, final Long cookie) {
-        super(context, cookie, new TransmitQueue.Halted(TARGET_QUEUE_DEPTH));
+        super(context, cookie, TARGET_QUEUE_DEPTH);
     }
 
     @Override

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+//import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
+//import com.google.common.base.Preconditions;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.slf4j.Logger;
@@ -40,14 +41,23 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
 
     private final T backend;
 
-    AbstractReceivingClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
-        super(context, cookie, new TransmitQueue.Transmitting(targetQueueSize(backend), backend));
-        this.backend = Preconditions.checkNotNull(backend);
+//    // TODO: Figure out how to do unit tests without this constructor.
+//    @VisibleForTesting
+//    AbstractReceivingClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
+//        super(context, cookie, new TransmitQueue.Transmitting(targetQueueSize(backend), backend));
+//        this.backend = Preconditions.checkNotNull(backend);
+//    }
+
+    // To be called by ConnectedClientConnection only.
+    AbstractReceivingClientConnection(final AbstractClientConnection<T> oldConnection, final T newBackend) {
+        super(oldConnection, newBackend, targetQueueSize(newBackend));
+        this.backend = newBackend;
     }
 
-    AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
-        super(oldConnection, targetQueueSize(oldConnection.backend));
-        this.backend = oldConnection.backend;
+    // To be called by ReconnectingClientConnection only.
+    AbstractReceivingClientConnection(final ConnectedClientConnection<T> oldConnection) {
+        super(oldConnection);
+        this.backend = ((AbstractReceivingClientConnection<T>) oldConnection).backend;
     }
 
     private static int targetQueueSize(final BackendInfo backend) {

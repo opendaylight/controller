@@ -43,6 +43,10 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
 
     private BackendInfo backendInfo;
 
+    private static long now() {
+        return Ticker.systemTicker().read();
+    }
+
     @Override
     protected int getMaxInFlightMessages() {
         return backendInfo.getMaxMessages();
@@ -51,7 +55,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     @Override
     protected TransmitQueue.Transmitting createQueue() {
         backendInfo = new BackendInfo(probe.ref(), 0L, ABIVersion.BORON, 3);
-        return new TransmitQueue.Transmitting(0, backendInfo);
+        return new TransmitQueue.Transmitting(new TransmitQueue.Halted(0), 0, backendInfo, now());
     }
 
     @Test
@@ -63,8 +67,8 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
         final Request<?, ?> request2 = new TransactionPurgeRequest(transactionIdentifier2, sequence2, probe.ref());
         final Consumer<Response<?, ?>> callback1 = createConsumerMock();
         final Consumer<Response<?, ?>> callback2 = createConsumerMock();
-        final long now1 = Ticker.systemTicker().read();
-        final long now2 = Ticker.systemTicker().read();
+        final long now1 = now();
+        final long now2 = now();
         //enqueue 2 entries
         queue.enqueue(new ConnectionEntry(request1, callback1, now1), now1);
         queue.enqueue(new ConnectionEntry(request2, callback2, now2), now2);
@@ -91,7 +95,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     public void testEnqueueCanTransmit() throws Exception {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
-        final long now = Ticker.systemTicker().read();
+        final long now = now();
         queue.enqueue(new ConnectionEntry(request, callback, now), now);
         final RequestEnvelope requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
         assertEquals(request, requestEnvelope.getMessage());
@@ -101,7 +105,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     public void testEnqueueBackendFull() throws Exception {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
-        final long now = Ticker.systemTicker().read();
+        final long now = now();
         final int sentMessages = getMaxInFlightMessages() + 1;
         for (int i = 0; i < sentMessages; i++) {
             queue.enqueue(new ConnectionEntry(request, callback, now), now);
@@ -127,7 +131,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     public void testTransmit() throws Exception {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
-        final long now = Ticker.systemTicker().read();
+        final long now = now();
         final ConnectionEntry entry = new ConnectionEntry(request, callback, now);
         queue.transmit(entry, now);
         final RequestEnvelope requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
