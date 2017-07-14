@@ -22,6 +22,29 @@
       "revId": "43cf70692e7cfb8c844c452ed0c772bff5d7c69b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_9a0d993a",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractReceivingClientConnection.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-07-14T10:46:57Z",
+      "side": 0,
+      "message": "Deleting this part is an error. If oldConnection is ConnectingClientConnection, we do not want to keep the Halted queue, we want to create a new Transmitting queue.",
+      "range": {
+        "startLine": 48,
+        "startChar": 52,
+        "endLine": 48,
+        "endChar": 61
+      },
+      "revId": "43cf70692e7cfb8c844c452ed0c772bff5d7c69b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
