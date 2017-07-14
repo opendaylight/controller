@@ -43,10 +43,10 @@ public class ReconnectingClientConnectionTest
     @Override
     protected ReconnectingClientConnection<BackendInfo> createConnection() {
         final BackendInfo backend = new BackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON, 10);
-
-        final ConnectedClientConnection<BackendInfo> oldConnection =
-                new ConnectedClientConnection<>(context, 0L, backend);
-        return new ReconnectingClientConnection<>(oldConnection, mock(RequestException.class));
+        final ConnectingClientConnection<BackendInfo> connectingConn = new ConnectingClientConnection<>(context, 0L);
+        final ConnectedClientConnection<BackendInfo> connectedConn =
+                new ConnectedClientConnection<>(connectingConn, backend);
+        return new ReconnectingClientConnection<>(connectedConn, mock(RequestException.class));
     }
 
     @Override

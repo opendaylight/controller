@@ -356,10 +356,12 @@ public class ConnectingClientConnectionTest {
     }
 
     private void setupBackend() {
-        final ConnectedClientConnection<?> newConn = new ConnectedClientConnection<>(mockContext, mockCookie,
-                mockBackendInfo);
-        queue.setForwarder(new SimpleReconnectForwarder(newConn));
-        queue = newConn;
+        final ConnectingClientConnection<BackendInfo> connectingConn =
+                new ConnectingClientConnection<>(mockContext, mockCookie);
+        final ConnectedClientConnection<BackendInfo> connectedConn =
+                new ConnectedClientConnection<>(connectingConn, mockBackendInfo);
+        queue.setForwarder(new SimpleReconnectForwarder(connectedConn));
+        queue = connectedConn;
     }
 
     private void assertTransmit(final Request<?, ?> expected, final long sequence) {
