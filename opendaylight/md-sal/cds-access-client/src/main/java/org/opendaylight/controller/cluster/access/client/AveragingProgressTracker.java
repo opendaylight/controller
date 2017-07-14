@@ -46,7 +46,7 @@ final class AveragingProgressTracker extends ProgressTracker {
      * @param limit of open tasks to avoid exceeding
      * @param ticksPerTask value to use as default
      */
-    private AveragingProgressTracker(final int limit, final long ticksPerTask) {
+    private AveragingProgressTracker(final long limit, final long ticksPerTask) {
         super(ticksPerTask);
         tasksOpenLimit = limit;
         noDelayThreshold = limit / 2;
@@ -57,22 +57,38 @@ final class AveragingProgressTracker extends ProgressTracker {
      *
      * @param limit of open tasks to avoid exceeding
      */
-    AveragingProgressTracker(final int limit) {
+    AveragingProgressTracker(final long limit) {
         this(limit, DEFAULT_TICKS_PER_TASK);
     }
 
     /**
-     * Create a copy of an existing tracker, all future tracking is fully independent.
+     * Construct a new tracker suitable for a new task queue related to a "reconnect".
      *
-     * @param tracker the instance to copy state from
+     * <p>The limit is set independently of the old tracker.
+     *
+     * @param oldTracker the tracker used for the previously used backend
+     * @param limit of open tasks to avoid exceeding
+     * @param now tick number corresponding to caller's present
      */
-    AveragingProgressTracker(final AveragingProgressTracker tracker) {
-        super(tracker);
-        this.tasksOpenLimit = tracker.tasksOpenLimit;
-        this.noDelayThreshold = tracker.noDelayThreshold;
+    AveragingProgressTracker(final ProgressTracker oldTracker, final long limit, final long now) {
+        super(oldTracker, now);
+        tasksOpenLimit = limit;
+        noDelayThreshold = limit / 2;
     }
 
-    // Public shared access (read-only) accessor-like methods
+    /**
+     * Construct a new tracker suitable for a new task queue related to a "reconnect".
+     *
+     * <p>The limit is copied from the old tracker.
+     *
+     * @param oldTracker the tracker used for the previously used backend
+     * @param now tick number corresponding to caller's present
+     */
+    AveragingProgressTracker(final AveragingProgressTracker oldTracker, final long now) {
+        this(oldTracker, oldTracker.tasksOpenLimit, now);
+    }
+
+    // Protected read-only methods
 
     /**
      * Give an estimate of a fair delay, assuming delays caused by other opened tasks are ignored.
@@ -89,7 +105,7 @@ final class AveragingProgressTracker extends ProgressTracker {
      * @return delay (in ticks) after which another openTask() would be fair to be called by the same thread again
      */
     @Override
-    public long estimateIsolatedDelay(final long now) {
+    protected long estimateIsolatedDelay(final long now) {
         final long open = tasksOpen();
         if (open <= noDelayThreshold) {
             return 0L;
@@ -102,7 +118,7 @@ final class AveragingProgressTracker extends ProgressTracker {
          * Calculate the task capacity relative to the limit on open tasks. In real terms this value can be
          * in the open interval (0.0, 0.5).
          */
-        final double relativeRemainingCapacity = 1.0 - (((double) open) / tasksOpenLimit);
+        final double relativeRemainingCapacity = 1.0 - (double) open / tasksOpenLimit;
 
         /*
          * Calculate delay coefficient. It increases in inverse proportion to relative remaining capacity, approaching

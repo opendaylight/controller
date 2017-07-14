@@ -261,22 +261,22 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     @GuardedBy("connectionsLock")
     @Nonnull protected abstract ConnectionConnectCohort connectionUp(@Nonnull ConnectedClientConnection<T> newConn);
 
-    private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> conn,
+    private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,
             final T backend, final Throwable failure) {
         if (failure != null) {
             if (failure instanceof TimeoutException) {
-                if (!conn.equals(connections.get(shard))) {
+                if (!oldConn.equals(connections.get(shard))) {
                     // AbstractClientConnection will remove itself when it decides there is no point in continuing,
                     // at which point we want to stop retrying
-                    LOG.info("{}: stopping resolution of shard {} on stale connection {}", persistenceId(), shard, conn,
-                        failure);
+                    LOG.info("{}: stopping resolution of shard {} on stale connection {}", persistenceId(), shard,
+                        oldConn, failure);
                     return;
                 }
 
                 LOG.debug("{}: timed out resolving shard {}, scheduling retry in {}", persistenceId(), shard,
                     RESOLVE_RETRY_DURATION, failure);
                 context().executeInActor(b -> {
-                    resolveConnection(shard, conn);
+                    resolveConnection(shard, oldConn);
                     return b;
                 }, RESOLVE_RETRY_DURATION);
                 return;
@@ -290,7 +290,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 cause = new RuntimeRequestException("Failed to resolve shard " + shard, failure);
             }
 
-            conn.poison(cause);
+            oldConn.poison(cause);
             return;
         }
 
@@ -300,29 +300,31 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             final Stopwatch sw = Stopwatch.createStarted();
 
             // Create a new connected connection
-            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn.context(),
-                    conn.cookie(), backend);
-            LOG.info("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
+            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(oldConn, backend);
+            LOG.info("{}: resolving connection {} to {}", persistenceId(), oldConn, newConn);
 
             // Start reconnecting without the old connection lock held
             final ConnectionConnectCohort cohort = Verify.verifyNotNull(connectionUp(newConn));
 
             // Lock the old connection and get a reference to its entries
-            final Collection<ConnectionEntry> replayIterable = conn.startReplay();
+            final Collection<ConnectionEntry> replayIterable = oldConn.startReplay();
 
             // Finish the connection attempt
             final ReconnectForwarder forwarder = Verify.verifyNotNull(cohort.finishReconnect(replayIterable));
 
+            // Cancel sleep debt after entries were replayed, before new connection starts receiving.
+            newConn.cancelDebt();
+
             // Install the forwarder, unlocking the old connection
-            conn.finishReplay(forwarder);
+            oldConn.finishReplay(forwarder);
 
             // Make sure new lookups pick up the new connection
-            if (!connections.replace(shard, conn, newConn)) {
-                final AbstractClientConnection<T> existing = connections.get(conn.cookie());
+            if (!connections.replace(shard, oldConn, newConn)) {
+                final AbstractClientConnection<T> existing = connections.get(oldConn.cookie());
                 LOG.warn("{}: old connection {} does not match existing {}, new connection {} in limbo",
-                    persistenceId(), conn, existing, newConn);
+                    persistenceId(), oldConn, existing, newConn);
             } else {
-                LOG.info("{}: replaced connection {} with {} in {}", persistenceId(), conn, newConn, sw);
+                LOG.info("{}: replaced connection {} with {} in {}", persistenceId(), oldConn, newConn, sw);
             }
         } finally {
             connectionsLock.unlockWrite(stamp);

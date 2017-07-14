@@ -54,8 +54,14 @@ import org.slf4j.LoggerFactory;
 @NotThreadSafe
 abstract class TransmitQueue {
     static final class Halted extends TransmitQueue {
+        // For ConnectingClientConnection.
         Halted(final int targetDepth) {
             super(targetDepth);
+        }
+
+        // For ReconnectingClientConnection.
+        Halted(final TransmitQueue oldQueue, final long now) {
+            super(oldQueue, now);
         }
 
         @Override
@@ -73,8 +79,9 @@ abstract class TransmitQueue {
         private final BackendInfo backend;
         private long nextTxSequence;
 
-        Transmitting(final int targetDepth, final BackendInfo backend) {
-            super(targetDepth);
+        // For ConnectedClientConnection.
+        Transmitting(final TransmitQueue oldQueue, final int targetDepth, final BackendInfo backend, final long now) {
+            super(oldQueue, targetDepth, now);
             this.backend = Preconditions.checkNotNull(backend);
         }
 
@@ -99,11 +106,35 @@ abstract class TransmitQueue {
 
     private final Deque<TransmittedConnectionEntry> inflight = new ArrayDeque<>();
     private final Deque<ConnectionEntry> pending = new ArrayDeque<>();
-    private final ProgressTracker tracker;
+    private final AveragingProgressTracker tracker;  // Cannot be just ProgressTracker as we are inheriting limits.
     private ReconnectForwarder successor;
 
+    /**
+     * Construct initial transmitting queue.
+     */
     TransmitQueue(final int targetDepth) {
         tracker = new AveragingProgressTracker(targetDepth);
+    }
+
+    /**
+     * Construct new transmitting queue while inheriting timing data from the previous transmit queue instance.
+     */
+    TransmitQueue(final TransmitQueue oldQueue, final int targetDepth, final long now) {
+        tracker = new AveragingProgressTracker(oldQueue.tracker, targetDepth, now);
+    }
+
+    /**
+     * Construct new transmitting queue while inheriting timing and size data from the previous transmit queue instance.
+     */
+    TransmitQueue(final TransmitQueue oldQueue, final long now) {
+        tracker = new AveragingProgressTracker(oldQueue.tracker, now);
+    }
+
+    /**
+     * Cancel the accumulated sum of delays as we expect the new backend to work now.
+     */
+    void cancelDebt(final long now) {
+        tracker.cancelDebt(now);
     }
 
     /**
