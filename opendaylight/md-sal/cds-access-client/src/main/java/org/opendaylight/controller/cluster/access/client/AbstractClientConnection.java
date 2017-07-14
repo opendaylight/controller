@@ -92,21 +92,33 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     private volatile RequestException poisoned;
 
+    // This constructor is only to be called by ConnectingClientConnection constructor.
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final ClientActorContext context, final Long cookie,
-            final TransmitQueue queue) {
+    AbstractClientConnection(final ClientActorContext context, final Long cookie, final int queueDepth) {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
-        this.queue = Preconditions.checkNotNull(queue);
+        this.queue = new TransmitQueue.Halted(queueDepth);
         this.lastReceivedTicks = currentTime();
     }
 
+    // This constructor is only to be called (indirectly) by ReconnectingClientConnection constructor.
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final AbstractClientConnection<T> oldConnection, final int targetQueueSize) {
-        this.context = oldConnection.context;
-        this.cookie = oldConnection.cookie;
-        this.queue = new TransmitQueue.Halted(targetQueueSize);
-        this.lastReceivedTicks = oldConnection.lastReceivedTicks;
+    AbstractClientConnection(final AbstractClientConnection<T> oldConn) {
+        this(oldConn, new TransmitQueue.Halted(oldConn.queue, currentTime(oldConn)));
+    }
+
+    // This constructor is only to be called (indirectly) by ConnectedClientConnection constructor.
+    // Do not allow subclassing outside of this package
+    AbstractClientConnection(final AbstractClientConnection<T> oldConn, final T newBackend, final int queueDepth) {
+        this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, currentTime(oldConn)));
+    }
+
+    // Private constructor to avoid code duplication.
+    private AbstractClientConnection(final AbstractClientConnection<T> oldConn, final TransmitQueue newQueue) {
+        this.context = oldConn.context;
+        this.cookie = oldConn.cookie;
+        this.queue = newQueue;
+        this.lastReceivedTicks = oldConn.lastReceivedTicks;  // Will be updated in finishReplay if needed.
     }
 
     public final ClientActorContext context() {
@@ -119,6 +131,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     public final ActorRef localActor() {
         return context.self();
+    }
+
+    // We need this for super() argument computation.
+    public static final long currentTime(final AbstractClientConnection conn) {
+        return conn.context.ticker().read();
     }
 
     public final long currentTime() {
@@ -199,6 +216,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
          * perspective of outside world), as that makes it a bit easier to reason about timing of events.
          */
         lastReceivedTicks = currentTime();
+        queue.cancelDebt(lastReceivedTicks);
         lock.unlock();
     }
 
