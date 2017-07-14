@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da2a55be_8506dacc",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 30
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-07-14T15:52:52Z",
+      "side": 1,
+      "message": "This is called on oldConn, which does not help at all.\nNeeds to be called on newConn.",
+      "range": {
+        "startLine": 219,
+        "startChar": 8,
+        "endLine": 219,
+        "endChar": 44
+      },
+      "revId": "990899627cf46165919c4837f2b76439bada6c05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
