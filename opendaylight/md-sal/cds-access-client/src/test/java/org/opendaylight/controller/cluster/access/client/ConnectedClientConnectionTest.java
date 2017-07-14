@@ -35,7 +35,8 @@ public class ConnectedClientConnectionTest
     @Override
     protected ConnectedClientConnection<BackendInfo> createConnection() {
         final BackendInfo backend = new BackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON, 10);
-        return new ConnectedClientConnection<>(context, 0L, backend);
+        final ConnectingClientConnection<BackendInfo> connectingConn = new ConnectingClientConnection<>(context, 0L);
+        return  new ConnectedClientConnection<>(connectingConn, backend);
     }
 
     @Override
