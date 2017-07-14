@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>0.6.2-SNAPSHOT</version>
     <relativePath>../../config/config-plugin-parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
   <artifactId>sal-common-api</artifactId>
   <packaging>bundle</packaging>
 

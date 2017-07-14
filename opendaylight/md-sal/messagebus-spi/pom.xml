@@ -3,13 +3,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>0.6.2-SNAPSHOT</version>
     <relativePath>../../config/config-parent</relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>messagebus-spi</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <packaging>bundle</packaging>
 
@@ -18,7 +18,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.5.1-SNAPSHOT</version>
+                <version>1.5.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

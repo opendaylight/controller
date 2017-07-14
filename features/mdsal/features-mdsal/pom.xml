@@ -4,26 +4,26 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.8.1-SNAPSHOT</version>
+    <version>1.8.2-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-mdsal</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.2-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
   <properties>
-    <blueprint.version>0.6.1-SNAPSHOT</blueprint.version>
-    <yangtools.version>1.1.1-SNAPSHOT</yangtools.version>
-    <mdsal.version>2.2.1-SNAPSHOT</mdsal.version>
-    <mdsal.model.version>0.10.1-SNAPSHOT</mdsal.model.version>
-    <odlparent.version>1.8.1-SNAPSHOT</odlparent.version>
-    <controller.mdsal.version>1.5.1-SNAPSHOT</controller.mdsal.version>
-    <config.version>0.6.1-SNAPSHOT</config.version>
-    <commons.opendaylight.version>1.8.1-SNAPSHOT</commons.opendaylight.version>
-    <akka.features.version>1.8.1-SNAPSHOT</akka.features.version>
+    <blueprint.version>0.6.2-SNAPSHOT</blueprint.version>
+    <yangtools.version>1.1.2-SNAPSHOT</yangtools.version>
+    <mdsal.version>2.2.2-SNAPSHOT</mdsal.version>
+    <mdsal.model.version>0.10.2-SNAPSHOT</mdsal.model.version>
+    <odlparent.version>1.8.2-SNAPSHOT</odlparent.version>
+    <controller.mdsal.version>1.5.2-SNAPSHOT</controller.mdsal.version>
+    <config.version>0.6.2-SNAPSHOT</config.version>
+    <commons.opendaylight.version>1.8.2-SNAPSHOT</commons.opendaylight.version>
+    <akka.features.version>1.8.2-SNAPSHOT</akka.features.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
@@ -38,7 +38,7 @@
       <dependency>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-artifacts</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.8.2-SNAPSHOT</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
