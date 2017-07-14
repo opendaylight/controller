@@ -92,21 +92,22 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     private volatile RequestException poisoned;
 
+    // This constructor is only to be called by ConnectingClientConnection constructor.
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final ClientActorContext context, final Long cookie,
-            final TransmitQueue queue) {
+    AbstractClientConnection(final ClientActorContext context, final Long cookie, final TransmitQueue queue) {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.queue = Preconditions.checkNotNull(queue);
         this.lastReceivedTicks = currentTime();
     }
 
+    // AbstractReceivingClientConnection should call this constructor only.
     // Do not allow subclassing outside of this package
     AbstractClientConnection(final AbstractClientConnection<T> oldConnection, final int targetQueueSize) {
         this.context = oldConnection.context;
         this.cookie = oldConnection.cookie;
-        this.queue = new TransmitQueue.Halted(targetQueueSize);
-        this.lastReceivedTicks = oldConnection.lastReceivedTicks;
+        this.queue = new TransmitQueue.Halted(oldConnection.queue, targetQueueSize, currentTime());
+        this.lastReceivedTicks = oldConnection.lastReceivedTicks;  // Creating new connection is not a forward progress.
     }
 
     public final ClientActorContext context() {
@@ -199,6 +200,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
          * perspective of outside world), as that makes it a bit easier to reason about timing of events.
          */
         lastReceivedTicks = currentTime();
+        queue.cancelDebt(lastReceivedTicks);
         lock.unlock();
     }
 
