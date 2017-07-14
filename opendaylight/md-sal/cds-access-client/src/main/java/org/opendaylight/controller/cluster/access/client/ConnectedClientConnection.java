@@ -8,14 +8,21 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 @Beta
 @NotThreadSafe
 public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
+    // TODO: Figure out how to do unit tests without this constructor.
+    @VisibleForTesting
     ConnectedClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
         super(context, cookie, backend);
+    }
+
+    ConnectedClientConnection(final AbstractClientConnection<T> oldConnection, final T backend) {
+        super(oldConnection, backend);
     }
 
     @Override
