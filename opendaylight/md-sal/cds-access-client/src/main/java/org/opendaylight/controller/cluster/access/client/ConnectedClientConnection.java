@@ -14,8 +14,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 @Beta
 @NotThreadSafe
 public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
-    ConnectedClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
-        super(context, cookie, backend);
+    ConnectedClientConnection(final AbstractClientConnection<T> oldConnection, final T backend) {
+        super(oldConnection, backend);
     }
 
     @Override

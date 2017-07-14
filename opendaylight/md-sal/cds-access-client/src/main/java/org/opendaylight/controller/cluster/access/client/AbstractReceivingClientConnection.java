@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.slf4j.Logger;
@@ -40,14 +39,13 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
 
     private final T backend;
 
-    AbstractReceivingClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
-        super(context, cookie, new TransmitQueue.Transmitting(targetQueueSize(backend), backend));
-        this.backend = Preconditions.checkNotNull(backend);
+    AbstractReceivingClientConnection(final AbstractClientConnection<T> oldConnection, final T newBackend) {
+        super(oldConnection, targetQueueSize(newBackend));
+        this.backend = newBackend;
     }
 
     AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
-        super(oldConnection, targetQueueSize(oldConnection.backend));
-        this.backend = oldConnection.backend;
+        this(oldConnection, oldConnection.backend);
     }
 
     private static int targetQueueSize(final BackendInfo backend) {
