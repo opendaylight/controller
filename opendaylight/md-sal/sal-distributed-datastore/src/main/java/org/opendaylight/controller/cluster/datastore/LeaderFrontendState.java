@@ -60,6 +60,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     private final ClientIdentifier clientId;
     private final String persistenceId;
 
+    private long lastSeenTicks;
     private long expectedTxSequence;
     private Long lastSeenHistory = null;
 
@@ -86,6 +87,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         this.purgedHistories = Preconditions.checkNotNull(purgedHistories);
         this.standaloneHistory = Preconditions.checkNotNull(standaloneHistory);
         this.localHistories = Preconditions.checkNotNull(localHistories);
+        this.lastSeenTicks = tree.readTime();
     }
 
     @Override
@@ -242,9 +244,20 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         standaloneHistory.retire();
     }
 
+    long getLastSeenTicks() {
+        return lastSeenTicks;
+    }
+
+    void touch() {
+        this.lastSeenTicks = tree.readTime();
+    }
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(LeaderFrontendState.class).add("clientId", clientId)
-                .add("purgedHistories", purgedHistories).toString();
+        return MoreObjects.toStringHelper(LeaderFrontendState.class)
+                .add("clientId", clientId)
+                .add("nanosAgo", tree.readTime() - lastSeenTicks)
+                .add("purgedHistories", purgedHistories)
+                .toString();
     }
 }
