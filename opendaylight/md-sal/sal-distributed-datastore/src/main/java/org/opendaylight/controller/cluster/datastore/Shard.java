@@ -397,9 +397,20 @@ public class Shard extends RaftActor {
 
     private Optional<Long> updateAccess(final SimpleShardDataTreeCohort cohort) {
         final FrontendIdentifier frontend = cohort.getIdentifier().getHistoryId().getClientId().getFrontendId();
-        // If this frontend has freshly connected, give it some time to catch up before killing its transactions.
         final LeaderFrontendState state = knownFrontends.get(frontend);
-        return state == null ? Optional.absent() : Optional.of(state.getLastConnectTicks());
+        if (state == null) {
+            // Not tell-based protocol, do nothing
+            return Optional.absent();
+        }
+
+        if (isIsolatedLeader()) {
+            // We are isolated and no new request can come through until we emerge from it. We are still updating
+            // liveness of frontend when we see it attempting to communicate. Use the last access timer.
+            return Optional.of(state.getLastSeenTicks());
+        }
+
+        // If this frontend has freshly connected, give it some time to catch up before killing its transactions.
+        return Optional.of(state.getLastConnectTicks());
     }
 
     private void onMakeLeaderLocal() {
