@@ -56,10 +56,9 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
         actorSystem.actorOf(QuarantinedMonitorActor.props(() -> {
             // restart the entire karaf container
             LOG.warn("Restarting karaf container");
-            System.setProperty("karaf.restart", "true");
+            System.setProperty("karaf.restart.jvm", "true");
             bundleContext.getBundle(0).stop();
         }), QuarantinedMonitorActor.ADDRESS);
-
     }
 
     @Override
