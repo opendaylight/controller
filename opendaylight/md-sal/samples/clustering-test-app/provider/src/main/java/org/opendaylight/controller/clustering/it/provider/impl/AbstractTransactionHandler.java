@@ -124,7 +124,7 @@ abstract class AbstractTransactionHandler {
     }
 
     final void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
-        LOG.debug("Future #{} completed successfully", txId);
+        LOG.debug("Future #{} completed successfully in state {}", txId, state);
         futures.remove(execFuture);
 
         switch (state) {
@@ -141,7 +141,7 @@ abstract class AbstractTransactionHandler {
     }
 
     final void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
-        LOG.debug("Future #{} failed", txId, cause);
+        LOG.debug("Future #{} failed in state {}", txId, cause, state);
         futures.remove(execFuture);
 
         switch (state) {
@@ -160,6 +160,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private void checkComplete() {
+        LOG.trace("Entering checkComplete.");
         final int size = futures.size();
         if (size == 0) {
             return;
@@ -185,6 +186,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private boolean checkSuccessful() {
+        LOG.trace("Entering checkSuccessful.");
         if (futures.isEmpty()) {
             LOG.debug("Completed waiting for all futures");
             state = State.SUCCESSFUL;
@@ -192,6 +194,7 @@ abstract class AbstractTransactionHandler {
             runSuccessful(txCounter);
             return true;
         }
+        LOG.trace("Still {} futures left.", futures.size());
 
         return false;
     }

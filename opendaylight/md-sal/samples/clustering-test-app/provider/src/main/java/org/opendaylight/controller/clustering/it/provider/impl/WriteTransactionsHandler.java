@@ -69,8 +69,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
                 final AsyncTransaction<?, ?> transaction, final Throwable cause) {
             LOG.warn("Transaction chain failed.", cause);
-            completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", cause).build());
+            runFailed(cause);
         }
 
         @Override
@@ -221,12 +220,14 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     @Override
     void runFailed(final Throwable cause) {
+        LOG.trace("Entering runFailed.");
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
     }
 
     @Override
     void runSuccessful(final long allTx) {
+        LOG.trace("Entering runSuccessful.");
         final WriteTransactionsOutput output = new WriteTransactionsOutputBuilder()
                 .setAllTx(allTx)
                 .setInsertTx(insertTx)
@@ -239,6 +240,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     @Override
     void runTimedOut(final Exception cause) {
+        LOG.trace("Entering runTimedOut.");
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,
                     "Final submit was timed out by the test provider or was interrupted", cause).build());
