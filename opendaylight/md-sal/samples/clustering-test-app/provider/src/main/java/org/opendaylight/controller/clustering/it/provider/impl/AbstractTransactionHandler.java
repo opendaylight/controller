@@ -160,6 +160,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private void checkComplete() {
+        LOG.trace("Entering checkComplete.");
         final int size = futures.size();
         if (size == 0) {
             return;
@@ -185,6 +186,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private boolean checkSuccessful() {
+        LOG.trace("Entering checkSuccessful.");
         if (futures.isEmpty()) {
             LOG.debug("Completed waiting for all futures");
             state = State.SUCCESSFUL;
@@ -192,6 +194,7 @@ abstract class AbstractTransactionHandler {
             runSuccessful(txCounter);
             return true;
         }
+        LOG.trace("Still {} futures left.", futures.size());
 
         return false;
     }

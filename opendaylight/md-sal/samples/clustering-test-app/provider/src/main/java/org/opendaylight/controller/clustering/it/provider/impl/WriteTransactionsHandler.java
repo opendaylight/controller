@@ -227,6 +227,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     @Override
     void runSuccessful(final long allTx) {
+        LOG.trace("Entering runSuccessful.");
         final WriteTransactionsOutput output = new WriteTransactionsOutputBuilder()
                 .setAllTx(allTx)
                 .setInsertTx(insertTx)
