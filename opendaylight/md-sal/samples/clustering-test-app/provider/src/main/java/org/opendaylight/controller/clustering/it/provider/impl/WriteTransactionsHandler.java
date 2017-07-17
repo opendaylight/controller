@@ -68,14 +68,13 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         @Override
         public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
                 final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-            LOG.warn("Transaction chain failed.", cause);
-            completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", cause).build());
+            LOG.warn("{} Transaction chain failed.", this, cause);
+            runFailed(cause);
         }
 
         @Override
         public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-            LOG.debug("Transaction chain closed successfully.");
+            LOG.debug("{} Transaction chain closed successfully.", this);
         }
     }
 
@@ -144,7 +143,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         // write only the top list
         tx.merge(LogicalDatastoreType.CONFIGURATION, ID_INTS_YID, containerNode);
         try {
+            LOG.trace("Submitting list merge.");
             tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            LOG.trace("Submitted list merge.");
         } catch (final OptimisticLockFailedException e) {
             // when multiple write-transactions are executed concurrently we need to ignore this.
             // If we get optimistic lock here it means id-ints already exists and we can continue.
@@ -159,7 +160,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         tx.merge(LogicalDatastoreType.CONFIGURATION, idListItem, entry);
 
         try {
+            LOG.trace("Submitting list item merge.");
             tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            LOG.trace("Submitted list item merge.");
         } catch (final Exception e) {
             LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
             return Futures.immediateFuture(RpcResultBuilder.<WriteTransactionsOutput>failed()
@@ -175,7 +178,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         tx.put(LogicalDatastoreType.CONFIGURATION, itemListId, mapBuilder.build());
 
         try {
+            LOG.trace("Submitting initial values put.");
             tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            LOG.trace("Submitted initial values put.");
         } catch (final Exception e) {
             LOG.warn("Unable to fill the initial item list.", e);
             return Futures.immediateFuture(RpcResultBuilder.<WriteTransactionsOutput>failed()
@@ -189,7 +194,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             handler = new Simple(domDataBroker, idListItem, input);
         }
 
+        LOG.trace("Starting handler {}", handler);
         handler.doStart();
+        LOG.trace("Started handler {}", handler);
         return handler.completionFuture;
     }
 
@@ -203,13 +210,13 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         final DOMDataWriteTransaction tx = createTransaction();
 
         if (usedValues.contains(i)) {
-            LOG.debug("Deleting item: {}", i);
+            LOG.debug("{} Deleting item: {}", this, i);
             deleteTx++;
             tx.delete(LogicalDatastoreType.CONFIGURATION, entryId);
             usedValues.remove(i);
 
         } else {
-            LOG.debug("Inserting item: {}", i);
+            LOG.debug("{} Inserting item: {}", this, i);
             insertTx++;
             final MapEntryNode entry = ImmutableNodes.mapEntry(ITEM, NUMBER, i);
             tx.put(LogicalDatastoreType.CONFIGURATION, entryId, entry);
@@ -221,12 +228,14 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     @Override
     void runFailed(final Throwable cause) {
+        LOG.trace("{} Entering runFailed.", this);
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
     }
 
     @Override
     void runSuccessful(final long allTx) {
+        LOG.trace("{} Entering runSuccessful.", this);
         final WriteTransactionsOutput output = new WriteTransactionsOutputBuilder()
                 .setAllTx(allTx)
                 .setInsertTx(insertTx)
@@ -239,6 +248,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     @Override
     void runTimedOut(final Exception cause) {
+        LOG.trace("{} Entering runTimedOut.", this);
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,
                     "Final submit was timed out by the test provider or was interrupted", cause).build());
