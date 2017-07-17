@@ -11,9 +11,7 @@ package org.opendaylight.controller.cluster.common.actor;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.japi.Effect;
-import akka.remote.AssociationErrorEvent;
-import akka.remote.InvalidAssociation;
-import akka.remote.RemotingLifecycleEvent;
+import akka.remote.ThisActorSystemQuarantinedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +32,12 @@ public class QuarantinedMonitorActor extends UntypedActor {
     private final Effect callback;
     private boolean quarantined;
 
-    protected QuarantinedMonitorActor(Effect callback) {
+    protected QuarantinedMonitorActor(final Effect callback) {
         this.callback = callback;
 
         LOG.debug("Created QuarantinedMonitorActor");
 
-        getContext().system().eventStream().subscribe(getSelf(), RemotingLifecycleEvent.class);
+        getContext().system().eventStream().subscribe(getSelf(), ThisActorSystemQuarantinedEvent.class);
     }
 
     @Override
@@ -48,36 +46,22 @@ public class QuarantinedMonitorActor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         LOG.trace("onReceive {} {}", messageType, message);
 
         // check to see if we got quarantined by another node
-
         if (quarantined) {
             return;
         }
 
-        // TODO: follow https://github.com/akka/akka/issues/18758 to see if Akka adds a named
-        // exception for quarantine detection
-        if (message instanceof AssociationErrorEvent) {
-            AssociationErrorEvent event = (AssociationErrorEvent) message;
-            Throwable cause = event.getCause();
-            if (cause instanceof InvalidAssociation) {
-                Throwable cause2 = ((InvalidAssociation) cause).getCause();
-                if (cause2.getMessage().contains("quarantined this system")) {
-                    quarantined = true;
+        if (message instanceof ThisActorSystemQuarantinedEvent) {
+            final ThisActorSystemQuarantinedEvent event = (ThisActorSystemQuarantinedEvent) message;
+            LOG.warn("Got quarantined by {}", event.remoteAddress());
+            quarantined = true;
 
-                    LOG.warn("Got quarantined by {}", event.getRemoteAddress());
-
-                    // execute the callback
-                    callback.apply();
-                } else {
-                    LOG.debug("received AssociationErrorEvent, cause: InvalidAssociation", cause2);
-                }
-            } else {
-                LOG.debug("received AssociationErrorEvent", cause);
-            }
+            // execute the callback
+            callback.apply();
         }
     }
 
