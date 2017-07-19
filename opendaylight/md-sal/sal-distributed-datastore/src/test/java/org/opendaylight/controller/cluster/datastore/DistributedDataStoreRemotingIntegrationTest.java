@@ -1153,11 +1153,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     @Test
-    public void testLargeReadReplySlicing() throws Exception {
+    public void testReadWriteMessageSlicing() throws Exception {
         // The slicing is only implemented for tell-based protocol
         Assume.assumeTrue(testParameter.equals(ClientBackedDataStore.class));
 
-        leaderDatastoreContextBuilder.maximumMessageSliceSize(50);
+        leaderDatastoreContextBuilder.maximumMessageSliceSize(100);
+        followerDatastoreContextBuilder.maximumMessageSliceSize(100);
         initDatastoresWithCars("testLargeReadReplySlicing");
 
         final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
