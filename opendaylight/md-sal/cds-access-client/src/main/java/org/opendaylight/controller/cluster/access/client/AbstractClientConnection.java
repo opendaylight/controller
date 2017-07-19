@@ -43,6 +43,19 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
+    /**
+     * Multiplication factor applied to remote's advertised limit on outstanding messages. Our default strategy
+     * rate-limiting strategy in {@link AveragingProgressTracker} does not penalize threads as long as we have not
+     * reached half of the target.
+     *
+     * <p>
+     * By multiplying the advertised maximum by four, our queue steady-state should end up with:
+     * - the backend pipeline being full,
+     * - another full batch of messages being in the queue while not paying any throttling cost
+     * - another 2 full batches of messages with incremental throttling cost
+     */
+    private static final int MESSAGE_QUEUE_FACTOR = 4;
+
     /*
      * Timers involved in communication with the backend. There are three tiers which are spaced out to allow for
      * recovery at each tier. Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast
@@ -78,6 +91,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @GuardedBy("lock")
     private final TransmitQueue queue;
     private final Long cookie;
+    private final Optional<T> backendInfo;
 
     @GuardedBy("lock")
     private boolean haveTimer;
@@ -96,6 +110,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.cookie = Preconditions.checkNotNull(cookie);
         this.queue = Preconditions.checkNotNull(queue);
         this.lastReceivedTicks = currentTime();
+        this.backendInfo = Optional.empty();
     }
 
     // Do not allow subclassing outside of this package
@@ -104,6 +119,26 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.cookie = oldConnection.cookie;
         this.queue = new TransmitQueue.Halted(targetQueueSize);
         this.lastReceivedTicks = oldConnection.lastReceivedTicks;
+        this.backendInfo = oldConnection.backendInfo;
+    }
+
+    /**
+     * Creates an instance with a Transmitting queue.
+     *
+     * @param context the ClientActorContext
+     * @param cookie the backend cookie
+     */
+    AbstractClientConnection(final ClientActorContext context, final Long cookie, final T backendInfo) {
+        this.context = Preconditions.checkNotNull(context);
+        this.cookie = Preconditions.checkNotNull(cookie);
+
+        this.backendInfo = Optional.of(Preconditions.checkNotNull(backendInfo));
+        this.queue = new TransmitQueue.Transmitting(targetQueueSize(backendInfo), backendInfo, context.messageSlicer());
+        this.lastReceivedTicks = currentTime();
+    }
+
+    static int targetQueueSize(final BackendInfo backend) {
+        return backend.getMaxMessages() * MESSAGE_QUEUE_FACTOR;
     }
 
     public final ClientActorContext context() {
@@ -172,7 +207,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
     }
 
-    public abstract Optional<T> getBackendInfo();
+    public Optional<T> getBackendInfo() {
+        return backendInfo;
+    }
 
     final Collection<ConnectionEntry> startReplay() {
         lock.lock();

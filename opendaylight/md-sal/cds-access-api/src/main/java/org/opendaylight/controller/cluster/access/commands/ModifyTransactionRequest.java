@@ -15,6 +15,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
+import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
@@ -24,7 +25,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 @Beta
-public final class ModifyTransactionRequest extends TransactionRequest<ModifyTransactionRequest> {
+public final class ModifyTransactionRequest extends TransactionRequest<ModifyTransactionRequest>
+        implements SliceableMessage {
     private static final long serialVersionUID = 1L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "

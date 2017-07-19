@@ -92,8 +92,9 @@ public class MessageSlicer implements AutoCloseable {
      * options.
      *
      * @param options the SliceOptions
+     * @return true if the message was sliced, false otherwise
      */
-    public void slice(final SliceOptions options) {
+    public boolean slice(final SliceOptions options) {
         final Identifier identifier = options.getIdentifier();
         final Serializable message = options.getMessage();
         final FileBackedOutputStream fileBackedStream;
@@ -111,16 +112,16 @@ public class MessageSlicer implements AutoCloseable {
                 LOG.debug("{}: Error serializing message for {}", logContext, identifier, e);
                 fileBackedStream.cleanup();
                 options.getOnFailureCallback().accept(e);
-                return;
+                return false;
             }
         } else {
             fileBackedStream = options.getFileBackedStream();
         }
 
-        initializeSlicing(options, fileBackedStream);
+        return initializeSlicing(options, fileBackedStream);
     }
 
-    private void initializeSlicing(final SliceOptions options, final FileBackedOutputStream fileBackedStream) {
+    private boolean initializeSlicing(final SliceOptions options, final FileBackedOutputStream fileBackedStream) {
         final Identifier identifier = options.getIdentifier();
         MessageSliceIdentifier messageSliceId = new MessageSliceIdentifier(identifier, id);
         SlicedMessageState<ActorRef> state = null;
@@ -133,7 +134,7 @@ public class MessageSlicer implements AutoCloseable {
                 LOG.debug("{}: Message does not need to be sliced - sending original message", logContext);
                 state.close();
                 sendTo(options, message, options.getReplyTo());
-                return;
+                return false;
             }
 
             final MessageSlice firstSlice = getNextSliceMessage(state);
@@ -142,6 +143,7 @@ public class MessageSlicer implements AutoCloseable {
 
             stateCache.put(messageSliceId, state);
             sendTo(options, firstSlice, ActorRef.noSender());
+            return true;
         } catch (IOException e) {
             LOG.error("{}: Error initializing SlicedMessageState for {}", logContext, identifier, e);
             if (state != null) {
@@ -151,6 +153,7 @@ public class MessageSlicer implements AutoCloseable {
             }
 
             options.getOnFailureCallback().accept(e);
+            return false;
         }
     }
 

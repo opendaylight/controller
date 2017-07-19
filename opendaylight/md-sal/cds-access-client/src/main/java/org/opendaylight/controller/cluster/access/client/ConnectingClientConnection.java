@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 @Beta
@@ -23,11 +22,6 @@ public final class ConnectingClientConnection<T extends BackendInfo> extends Abs
     // Initial state, never instantiated externally
     ConnectingClientConnection(final ClientActorContext context, final Long cookie) {
         super(context, cookie, new TransmitQueue.Halted(TARGET_QUEUE_DEPTH));
-    }
-
-    @Override
-    public Optional<T> getBackendInfo() {
-        return Optional.empty();
     }
 
     @Override

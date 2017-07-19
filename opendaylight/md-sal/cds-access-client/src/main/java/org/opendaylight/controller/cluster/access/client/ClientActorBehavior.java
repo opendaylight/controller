@@ -151,6 +151,10 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             return this;
         }
 
+        if (context().messageSlicer().handleMessage(command)) {
+            return this;
+        }
+
         return onCommand(command);
     }
 

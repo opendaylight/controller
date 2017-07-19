@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,55 +23,30 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractReceivingClientConnection.class);
 
-    /**
-     * Multiplication factor applied to remote's advertised limit on outstanding messages. Our default strategy
-     * rate-limiting strategy in {@link AveragingProgressTracker} does not penalize threads as long as we have not
-     * reached half of the target.
-     *
-     * <p>
-     * By multiplying the advertised maximum by four, our queue steady-state should end up with:
-     * - the backend pipeline being full,
-     * - another full batch of messages being in the queue while not paying any throttling cost
-     * - another 2 full batches of messages with incremental throttling cost
-     */
-    private static final int MESSAGE_QUEUE_FACTOR = 4;
-
-    private final T backend;
-
     AbstractReceivingClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
-        super(context, cookie, new TransmitQueue.Transmitting(targetQueueSize(backend), backend));
-        this.backend = Preconditions.checkNotNull(backend);
+        super(context, cookie, backend);
     }
 
     AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
-        super(oldConnection, targetQueueSize(oldConnection.backend));
-        this.backend = oldConnection.backend;
-    }
-
-    private static int targetQueueSize(final BackendInfo backend) {
-        return backend.getMaxMessages() * MESSAGE_QUEUE_FACTOR;
-    }
-
-    @Override
-    public final Optional<T> getBackendInfo() {
-        return Optional.of(backend);
+        super(oldConnection, targetQueueSize(oldConnection.getBackendInfo().get()));
     }
 
     @Override
     final void receiveResponse(final ResponseEnvelope<?> envelope) {
-        if (envelope.getSessionId() != backend.getSessionId()) {
-            LOG.debug("Response {} does not match session ID {}, ignoring it", envelope, backend.getSessionId());
-        } else {
-            super.receiveResponse(envelope);
+        if (envelope.getSessionId() != backend().getSessionId()) {
+            LOG.debug("Response {} does not match session ID {}, ignoring it", envelope, backend().getSessionId());
+            return;
         }
+
+        super.receiveResponse(envelope);
     }
 
-    final T backend() {
-        return backend;
+    private T backend() {
+        return getBackendInfo().get();
     }
 
     @Override
     ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("backend", backend);
+        return super.addToStringAttributes(toStringHelper).add("backend", backend());
     }
 }

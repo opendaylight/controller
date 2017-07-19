@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -44,6 +45,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -144,6 +146,8 @@ public class ConnectingClientConnectionTest {
 
         final ClientActorConfig mockConfig = AccessClientUtil.newMockClientActorConfig();
         doReturn(mockConfig).when(mockContext).config();
+
+        doReturn(mock(MessageSlicer.class)).when(mockContext).messageSlicer();
 
         mockActor = TestProbe.apply(actorSystem);
         mockBackendInfo = new BackendInfo(mockActor.ref(), 0, ABIVersion.current(), 5);
