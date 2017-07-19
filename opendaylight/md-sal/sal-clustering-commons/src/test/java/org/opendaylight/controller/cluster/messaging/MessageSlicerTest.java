@@ -13,6 +13,8 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -26,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
@@ -128,6 +131,27 @@ public class MessageSlicerTest extends AbstractMessagingTest {
         slicer.close();
 
         verify(mockFiledBackedStream).cleanup();
+        verifyNoMoreInteractions(mockOnFailureCallback);
+    }
+
+    @Test
+    public void testCancelSlicing() throws IOException {
+        doReturn(1).when(mockInputStream).read(any(byte[].class));
+
+        final MessageSlicer slicer = newMessageSlicer("testCloseAllSlicedMessageState", 1);
+        slicer.slice(SliceOptions.builder().identifier(IDENTIFIER).fileBackedOutputStream(mockFiledBackedStream)
+                .sendTo(testProbe.ref()).replyTo(testProbe.ref()).onFailureCallback(mockOnFailureCallback).build());
+
+        final FileBackedOutputStream mockFiledBackedStream2 = mock(FileBackedOutputStream.class);
+        setupMockFiledBackedStream(mockFiledBackedStream2);
+        slicer.slice(SliceOptions.builder().identifier(new StringIdentifier("test2"))
+                .fileBackedOutputStream(mockFiledBackedStream2).sendTo(testProbe.ref()).replyTo(testProbe.ref())
+                .onFailureCallback(mockOnFailureCallback).build());
+
+        slicer.cancelSlicing(id -> id.equals(IDENTIFIER));
+
+        verify(mockFiledBackedStream).cleanup();
+        verify(mockFiledBackedStream2, never()).cleanup();
         verifyNoMoreInteractions(mockOnFailureCallback);
     }
 
