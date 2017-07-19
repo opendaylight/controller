@@ -43,6 +43,19 @@ import scala.concurrent.duration.FiniteDuration;
 public abstract class AbstractClientConnection<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
+    /**
+     * Multiplication factor applied to remote's advertised limit on outstanding messages. Our default strategy
+     * rate-limiting strategy in {@link AveragingProgressTracker} does not penalize threads as long as we have not
+     * reached half of the target.
+     *
+     * <p>
+     * By multiplying the advertised maximum by four, our queue steady-state should end up with:
+     * - the backend pipeline being full,
+     * - another full batch of messages being in the queue while not paying any throttling cost
+     * - another 2 full batches of messages with incremental throttling cost
+     */
+    private static final int MESSAGE_QUEUE_FACTOR = 4;
+
     /*
      * Timers involved in communication with the backend. There are three tiers which are spaced out to allow for
      * recovery at each tier. Keep these constants in nanoseconds, as that prevents unnecessary conversions in the fast
@@ -116,7 +129,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // This constructor is only to be called (indirectly) by ConnectedClientConnection constructor.
     // Do not allow subclassing outside of this package
     AbstractClientConnection(final AbstractClientConnection<T> oldConn, final T newBackend, final int queueDepth) {
-        this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, oldConn.currentTime()));
+        this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, oldConn.currentTime(),
+                Preconditions.checkNotNull(oldConn.context).messageSlicer()));
     }
 
     public final ClientActorContext context() {
