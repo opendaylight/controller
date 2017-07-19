@@ -14,10 +14,13 @@ import akka.actor.Scheduler;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.duration.FiniteDuration;
@@ -40,6 +43,7 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     private final Scheduler scheduler;
     private final Dispatchers dispatchers;
     private final ClientActorConfig config;
+    private final MessageSlicer messageSlicer;
 
     // Hidden to avoid subclassing
     ClientActorContext(final ActorRef self, final String persistenceId, final ActorSystem system,
@@ -50,6 +54,11 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         this.executionContext = system.dispatcher();
         this.dispatchers = new Dispatchers(system.dispatchers());
         this.config = Preconditions.checkNotNull(config);
+
+        messageSlicer = MessageSlicer.builder().messageSliceSize(config.getMaximumMessageSliceSize())
+            .logContext(persistenceId).expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
+                .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
+                    config.getTempFileDirectory())).build();
     }
 
     @Override
@@ -66,6 +75,11 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     @Nonnull
     public Dispatchers dispatchers() {
         return dispatchers;
+    }
+
+    @Nonnull
+    public MessageSlicer messageSlicer() {
+        return messageSlicer;
     }
 
     /**
