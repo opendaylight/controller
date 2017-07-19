@@ -203,6 +203,10 @@
       <artifactId>yang-data-impl</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>triemap</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>

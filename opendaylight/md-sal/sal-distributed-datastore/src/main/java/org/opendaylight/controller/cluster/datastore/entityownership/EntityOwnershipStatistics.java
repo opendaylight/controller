@@ -12,11 +12,11 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.romix.scala.collection.concurrent.TrieMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import org.opendaylight.yangtools.triemap.TrieMap;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -31,13 +31,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNod
  */
 class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
 
-    private final TrieMap<String, TrieMap<String, Long>> statistics = new TrieMap<>();
+    private final TrieMap<String, TrieMap<String, Long>> statistics = TrieMap.create();
 
     EntityOwnershipStatistics(){
     }
 
     @Override
-    public void onDataTreeChanged(@Nonnull Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
         for (DataTreeCandidate change : changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
             LeafNode<?> ownerLeaf = (LeafNode<?>) changeRoot.getDataAfter().get();
@@ -59,23 +59,23 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
 
     Map<String, Map<String, Long>> all() {
         Map<String, Map<String, Long>> snapshot = new HashMap<>();
-        for (String entityType : statistics.readOnlySnapshot().keySet()) {
+        for (String entityType : statistics.immutableSnapshot().keySet()) {
             snapshot.put(entityType, byEntityType(entityType));
         }
         return snapshot;
     }
 
-    Map<String, Long> byEntityType(String entityType) {
+    Map<String, Long> byEntityType(final String entityType) {
         if (statistics.get(entityType) != null) {
-            return statistics.get(entityType).readOnlySnapshot();
+            return statistics.get(entityType).immutableSnapshot();
         }
         return new HashMap<>();
     }
 
-    private void updateStatistics(String entityType, String candidateName, long count) {
-        Map<String, Long> map = statistics.get(entityType);
+    private void updateStatistics(final String entityType, final String candidateName, final long count) {
+        TrieMap<String, Long> map = statistics.get(entityType);
         if (map == null) {
-            map = new TrieMap<>();
+            map = TrieMap.create();
             map.put(candidateName, count);
             statistics.put(entityType, map);
         } else {
