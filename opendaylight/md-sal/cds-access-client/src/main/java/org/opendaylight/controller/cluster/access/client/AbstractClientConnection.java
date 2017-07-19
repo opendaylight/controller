@@ -116,7 +116,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // This constructor is only to be called (indirectly) by ConnectedClientConnection constructor.
     // Do not allow subclassing outside of this package
     AbstractClientConnection(final AbstractClientConnection<T> oldConn, final T newBackend, final int queueDepth) {
-        this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, oldConn.currentTime()));
+        this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, oldConn.currentTime(),
+                Preconditions.checkNotNull(oldConn.context).messageSlicer()));
     }
 
     public final ClientActorContext context() {

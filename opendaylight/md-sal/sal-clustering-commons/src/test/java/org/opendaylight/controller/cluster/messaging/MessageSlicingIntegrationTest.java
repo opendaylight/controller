@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.messaging;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -119,7 +120,9 @@ public class MessageSlicingIntegrationTest {
 
         final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
         try (MessageSlicer slicer = newMessageSlicer("testSingleSlice", SerializationUtils.serialize(message).length)) {
-            slice(slicer, IDENTIFIER, message, sendToProbe.ref(), replyToProbe.ref(), mockOnFailureCallback);
+            final boolean wasSliced = slice(slicer, IDENTIFIER, message, sendToProbe.ref(), replyToProbe.ref(),
+                    mockOnFailureCallback);
+            assertFalse(wasSliced);
 
             final BytesMessage sentMessage = sendToProbe.expectMsgClass(BytesMessage.class);
             assertEquals("Sent message", message, sentMessage);
@@ -214,7 +217,9 @@ public class MessageSlicingIntegrationTest {
         final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
         final int messageSliceSize = SerializationUtils.serialize(message).length / 2;
         try (MessageSlicer slicer = newMessageSlicer("testSlicingWithFailure", messageSliceSize)) {
-            slice(slicer, IDENTIFIER, message, sendToProbe.ref(), replyToProbe.ref(), mockOnFailureCallback);
+            final boolean wasSliced = slice(slicer, IDENTIFIER, message, sendToProbe.ref(), replyToProbe.ref(),
+                    mockOnFailureCallback);
+            assertTrue(wasSliced);
 
             MessageSlice sliceMessage = sendToProbe.expectMsgClass(MessageSlice.class);
 
@@ -263,7 +268,9 @@ public class MessageSlicingIntegrationTest {
         final BytesMessage message = new BytesMessage(messageData);
 
         try (MessageSlicer slicer = newMessageSlicer(logContext, messageSliceSize)) {
-            slice(slicer, IDENTIFIER, message, sendToProbe.ref(), replyToProbe.ref(), mockOnFailureCallback);
+            final boolean wasSliced = slice(slicer, IDENTIFIER, message, sendToProbe.ref(), replyToProbe.ref(),
+                    mockOnFailureCallback);
+            assertTrue(wasSliced);
 
             Identifier slicingId = null;
             int expLastSliceHashCode = SlicedMessageState.INITIAL_SLICE_HASH_CODE;

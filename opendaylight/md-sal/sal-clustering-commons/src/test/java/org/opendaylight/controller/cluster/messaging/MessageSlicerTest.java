@@ -8,11 +8,14 @@
 package org.opendaylight.controller.cluster.messaging;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -26,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
@@ -71,8 +75,9 @@ public class MessageSlicerTest extends AbstractMessagingTest {
         doThrow(mockFailure).when(mockFiledBackedStream).flush();
 
         try (MessageSlicer slicer = newMessageSlicer("testSliceWithFailedSerialization", 100)) {
-            slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{}), testProbe.ref(), testProbe.ref(),
-                    mockOnFailureCallback);
+            final boolean wasSliced = slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{}), testProbe.ref(),
+                    testProbe.ref(), mockOnFailureCallback);
+            assertFalse(wasSliced);
 
             assertFailureCallback(IOException.class);
             verify(mockFiledBackedStream).cleanup();
@@ -86,8 +91,9 @@ public class MessageSlicerTest extends AbstractMessagingTest {
         doThrow(mockFailure).when(mockByteSource).openBufferedStream();
 
         try (MessageSlicer slicer = newMessageSlicer("testSliceWithByteSourceFailure", 100)) {
-            slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{}), testProbe.ref(), testProbe.ref(),
-                    mockOnFailureCallback);
+            final boolean wasSliced = slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{}), testProbe.ref(),
+                    testProbe.ref(), mockOnFailureCallback);
+            assertFalse(wasSliced);
 
             assertFailureCallback(IOException.class);
             verify(mockFiledBackedStream).cleanup();
@@ -99,8 +105,9 @@ public class MessageSlicerTest extends AbstractMessagingTest {
         doReturn(0).when(mockInputStream).read(any(byte[].class));
 
         try (MessageSlicer slicer = newMessageSlicer("testSliceWithInputStreamFailure", 2)) {
-            slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{}), testProbe.ref(), testProbe.ref(),
-                    mockOnFailureCallback);
+            final boolean wasSliced = slice(slicer, IDENTIFIER, new BytesMessage(new byte[]{}), testProbe.ref(),
+                    testProbe.ref(), mockOnFailureCallback);
+            assertFalse(wasSliced);
 
             assertFailureCallback(IOException.class);
             verify(mockFiledBackedStream).cleanup();
@@ -128,6 +135,27 @@ public class MessageSlicerTest extends AbstractMessagingTest {
         slicer.close();
 
         verify(mockFiledBackedStream).cleanup();
+        verifyNoMoreInteractions(mockOnFailureCallback);
+    }
+
+    @Test
+    public void testCancelSlicing() throws IOException {
+        doReturn(1).when(mockInputStream).read(any(byte[].class));
+
+        final MessageSlicer slicer = newMessageSlicer("testCloseAllSlicedMessageState", 1);
+        slicer.slice(SliceOptions.builder().identifier(IDENTIFIER).fileBackedOutputStream(mockFiledBackedStream)
+                .sendTo(testProbe.ref()).replyTo(testProbe.ref()).onFailureCallback(mockOnFailureCallback).build());
+
+        final FileBackedOutputStream mockFiledBackedStream2 = mock(FileBackedOutputStream.class);
+        setupMockFiledBackedStream(mockFiledBackedStream2);
+        slicer.slice(SliceOptions.builder().identifier(new StringIdentifier("test2"))
+                .fileBackedOutputStream(mockFiledBackedStream2).sendTo(testProbe.ref()).replyTo(testProbe.ref())
+                .onFailureCallback(mockOnFailureCallback).build());
+
+        slicer.cancelSlicing(id -> id.equals(IDENTIFIER));
+
+        verify(mockFiledBackedStream).cleanup();
+        verify(mockFiledBackedStream2, never()).cleanup();
         verifyNoMoreInteractions(mockOnFailureCallback);
     }
 
@@ -162,9 +190,9 @@ public class MessageSlicerTest extends AbstractMessagingTest {
                 .fileBackedStreamFactory(mockFiledBackedStreamFactory).build();
     }
 
-    static void slice(MessageSlicer slicer, Identifier identifier, Serializable message, ActorRef sendTo,
+    static boolean slice(MessageSlicer slicer, Identifier identifier, Serializable message, ActorRef sendTo,
             ActorRef replyTo, Consumer<Throwable> onFailureCallback) {
-        slicer.slice(SliceOptions.builder().identifier(identifier).message(message).sendTo(sendTo).replyTo(replyTo)
-                .onFailureCallback(onFailureCallback).build());
+        return slicer.slice(SliceOptions.builder().identifier(identifier).message(message).sendTo(sendTo)
+                .replyTo(replyTo).onFailureCallback(onFailureCallback).build());
     }
 }

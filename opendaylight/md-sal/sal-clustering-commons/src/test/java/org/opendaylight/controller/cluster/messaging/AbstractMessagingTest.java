@@ -59,12 +59,7 @@ public class AbstractMessagingTest {
         MockitoAnnotations.initMocks(this);
 
         doReturn(mockFiledBackedStream).when(mockFiledBackedStreamFactory).newInstance();
-        doNothing().when(mockFiledBackedStream).write(any(byte[].class), anyInt(), anyInt());
-        doNothing().when(mockFiledBackedStream).write(any(byte[].class));
-        doNothing().when(mockFiledBackedStream).write(anyInt());
-        doNothing().when(mockFiledBackedStream).close();
-        doNothing().when(mockFiledBackedStream).cleanup();
-        doNothing().when(mockFiledBackedStream).flush();
+        setupMockFiledBackedStream(mockFiledBackedStream);
         doReturn(mockByteSource).when(mockFiledBackedStream).asByteSource();
 
         doReturn(mockInputStream).when(mockByteSource).openStream();
@@ -77,5 +72,15 @@ public class AbstractMessagingTest {
     @AfterClass
     public static void tearDownClass() {
         JavaTestKit.shutdownActorSystem(ACTOR_SYSTEM, Boolean.TRUE);
+    }
+
+    void setupMockFiledBackedStream(final FileBackedOutputStream mockFiledBackedStream) throws IOException {
+        doNothing().when(mockFiledBackedStream).write(any(byte[].class), anyInt(), anyInt());
+        doNothing().when(mockFiledBackedStream).write(any(byte[].class));
+        doNothing().when(mockFiledBackedStream).write(anyInt());
+        doNothing().when(mockFiledBackedStream).close();
+        doNothing().when(mockFiledBackedStream).cleanup();
+        doNothing().when(mockFiledBackedStream).flush();
+        doReturn(mockByteSource).when(mockFiledBackedStream).asByteSource();
     }
 }
