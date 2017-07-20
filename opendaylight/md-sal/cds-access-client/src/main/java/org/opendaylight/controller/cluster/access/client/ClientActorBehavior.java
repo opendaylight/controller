@@ -118,6 +118,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     @SuppressWarnings("unchecked")
     @Override
     final ClientActorBehavior<T> onReceiveCommand(final Object command) {
+        LOG.trace("Client actor {} received command {}", this, command);
         if (command instanceof InternalCommand) {
             return ((InternalCommand<T>) command).execute(this);
         }
@@ -263,6 +264,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,
             final T backend, final Throwable failure) {
+        LOG.trace("{} backend connect finished {}", this, backend);
         if (failure != null) {
             if (failure instanceof TimeoutException) {
                 if (!oldConn.equals(connections.get(shard))) {

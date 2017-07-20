@@ -130,6 +130,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     protected final ConnectionConnectCohort connectionUp(final ConnectedClientConnection<ShardBackendInfo> newConn) {
         final long stamp = lock.writeLock();
 
+        LOG.trace("{} connection up starts {}", this, newConn);
+
         // Step 1: Freeze all AbstractProxyHistory instances pointing to that shard. This indirectly means that no
         //         further TransactionProxies can be created and we can safely traverse maps without risking
         //         missing an entry
@@ -139,13 +141,16 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
             startReconnect(h, newConn, cohorts);
         }
 
+        LOG.trace("{} returning continuation", this);
         return previousEntries -> {
             try {
                 // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
                 //         the non-throttling interface to the connection, hence we use a wrapper consumer
+                LOG.trace("{} replaying requests", this);
                 for (HistoryReconnectCohort c : cohorts) {
                     c.replayRequests(previousEntries);
                 }
+                LOG.trace("{} request replay done", this);
 
                 // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
                 //         requests will be immediately sent to it and requests being sent concurrently will get
@@ -154,10 +159,12 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
             } finally {
                 try {
                     // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
+                    LOG.trace("{} closing cohorts", this);
                     for (HistoryReconnectCohort c : cohorts) {
                         c.close();
                     }
                 } finally {
+                    LOG.trace("{} connection up done", this);
                     lock.unlockWrite(stamp);
                 }
             }
