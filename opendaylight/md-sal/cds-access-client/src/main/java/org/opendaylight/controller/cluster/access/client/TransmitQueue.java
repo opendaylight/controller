@@ -212,17 +212,30 @@ abstract class TransmitQueue {
         inflight.addLast(transmit(entry, now));
     }
 
-    /**
-     * Enqueue an entry, possibly also transmitting it.
-     *
-     * @return Delay to be forced on the calling thread, in nanoseconds.
-     */
-    final long enqueue(final ConnectionEntry entry, final long now) {
+    final long enqueueOrForward(final ConnectionEntry entry, final long now) {
         if (successor != null) {
             // This call will pay the enqueuing price, hence the caller does not have to
             successor.forwardEntry(entry, now);
             return 0;
         }
+
+        return enqueue(entry, now);
+    }
+
+    final void enqueueOrReplay(final ConnectionEntry entry, final long now) {
+        if (successor != null) {
+            successor.replayEntry(entry, now);
+        } else {
+            enqueue(entry, now);
+        }
+    }
+
+    /**
+     * Enqueue an entry, possibly also transmitting it.
+     *
+     * @return Delay to be forced on the calling thread, in nanoseconds.
+     */
+    private long enqueue(final ConnectionEntry entry, final long now) {
 
         // XXX: we should place a guard against incorrect entry sequences:
         // entry.getEnqueueTicks() should have non-negative difference from the last entry present in the queues
