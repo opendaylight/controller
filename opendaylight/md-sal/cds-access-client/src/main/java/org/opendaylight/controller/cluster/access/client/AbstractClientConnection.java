@@ -167,21 +167,39 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         enqueueEntry(new ConnectionEntry(request, callback, enqueuedTicks), currentTime());
     }
 
-    public final long enqueueEntry(final ConnectionEntry entry, final long now) {
+    private long enqueueOrForward(final ConnectionEntry entry, final long now) {
         lock.lock();
         try {
-            final RequestException maybePoison = poisoned;
-            if (maybePoison != null) {
-                throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
-            }
-
-            if (queue.isEmpty()) {
-                // The queue is becoming non-empty, schedule a timer.
-                scheduleTimer(entry.getEnqueuedTicks() + context.config().getRequestTimeout() - now);
-            }
-            return queue.enqueue(entry, now);
+            commonEnqueue(entry, now);
+            return queue.enqueueOrForward(entry, now);
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * Enqueue an entry, possibly also transmitting it.
+     */
+    public final void enqueueEntry(final ConnectionEntry entry, final long now) {
+        lock.lock();
+        try {
+            commonEnqueue(entry, now);
+            queue.enqueueOrReplay(entry, now);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @GuardedBy("lock")
+    private void commonEnqueue(final ConnectionEntry entry, final long now) {
+        final RequestException maybePoison = poisoned;
+        if (maybePoison != null) {
+            throw new IllegalStateException("Connection " + this + " has been poisoned", maybePoison);
+        }
+
+        if (queue.isEmpty()) {
+            // The queue is becoming non-empty, schedule a timer.
+            scheduleTimer(entry.getEnqueuedTicks() + context.config().getRequestTimeout() - now);
         }
     }
 
@@ -227,7 +245,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             RequestException runtimeRequestException);
 
     final void sendEntry(final ConnectionEntry entry, final long now) {
-        long delay = enqueueEntry(entry, now);
+        long delay = enqueueOrForward(entry, now);
         try {
             if (delay >= DEBUG_DELAY_NANOS) {
                 if (delay > MAX_DELAY_NANOS) {
