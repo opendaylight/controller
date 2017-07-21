@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,15 +57,27 @@ abstract class AbstractTransactionHandler {
 
     private static final long DEAD_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(15);
 
-    private final ScheduledExecutorService executor = FinalizableScheduledExecutorService.newSingleThread();
-    private final Collection<ListenableFuture<Void>> futures = new HashSet<>();
+    /*
+     * writingExecutor is a single thread executor. Only this thread will write to datastore,
+     * incurring sleep penalties if backend is not responsive. This thread never changes, but reads State.
+     * This thread only adds to futures set.
+     */
+    private final ScheduledExecutorService writingExecutor = FinalizableScheduledExecutorService.newSingleThread();
+    /*
+     * completingExecutor is a single thread executor. Only this thread writes to State.
+     * This thread should never incur any sleep penalty, so RPC response should always come on time.
+     * This thread only removes from futures set.
+     */
+    private final ScheduledExecutorService completingExecutor = FinalizableScheduledExecutorService.newSingleThread();
+    private final Collection<ListenableFuture<Void>> futures = Collections.synchronizedSet(new HashSet<>());
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final long runtimeNanos;
     private final long delayNanos;
 
-    private ScheduledFuture<?> scheduledFuture;
+    private ScheduledFuture<?> writingFuture;
+    private ScheduledFuture<?> completingFuture;
     private long txCounter;
-    private State state;
+    private volatile State state;
 
     AbstractTransactionHandler(final TransactionsParams params) {
         runtimeNanos = TimeUnit.SECONDS.toNanos(params.getSeconds());
@@ -72,12 +85,12 @@ abstract class AbstractTransactionHandler {
     }
 
     final synchronized void doStart() {
-        scheduledFuture = executor.scheduleAtFixedRate(this::execute, 0, delayNanos, TimeUnit.NANOSECONDS);
-        stopwatch.start();
         state = State.RUNNING;
+        writingFuture = writingExecutor.scheduleAtFixedRate(this::execute, 0, delayNanos, TimeUnit.NANOSECONDS);
+        stopwatch.start();
     }
 
-    private synchronized void execute() {
+    private void execute() {
         switch (state) {
             case FAILED:
                 // This could happen due to scheduling artifacts
@@ -94,12 +107,7 @@ abstract class AbstractTransactionHandler {
         final long elapsed = stopwatch.elapsed(TimeUnit.NANOSECONDS);
         if (elapsed >= runtimeNanos) {
             LOG.debug("Reached maximum run time with {} outstanding futures", futures.size());
-            if (!checkSuccessful()) {
-                state = State.WAITING;
-                scheduledFuture.cancel(false);
-                scheduledFuture = executor.schedule(this::checkComplete, DEAD_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            }
-
+            completingExecutor.schedule(this::runtimeUp, 0, TimeUnit.SECONDS);
             return;
         }
 
@@ -120,7 +128,28 @@ abstract class AbstractTransactionHandler {
             public void onFailure(final Throwable cause) {
                 txFailure(execFuture, txId, cause);
             }
-        }, executor);
+        }, completingExecutor);
+    }
+
+    private void runtimeUp() {
+        // checkSuccessful has two call sites, it is simpler to create completingFuture unconditionally.
+        completingFuture = completingExecutor.schedule(this::checkComplete, DEAD_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (!checkSuccessful()) {
+            state = State.WAITING;
+            writingFuture.cancel(false);
+        }
+    }
+
+    private boolean checkSuccessful() {
+        if (futures.isEmpty()) {
+            LOG.debug("Completed waiting for all futures");
+            state = State.SUCCESSFUL;
+            completingFuture.cancel(false);
+            runSuccessful(txCounter);
+            return true;
+        }
+
+        return false;
     }
 
     final void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
@@ -151,7 +180,7 @@ abstract class AbstractTransactionHandler {
             case RUNNING:
             case WAITING:
                 state = State.FAILED;
-                scheduledFuture.cancel(false);
+                writingFuture.cancel(false);
                 runFailed(cause);
                 break;
             default:
@@ -166,34 +195,24 @@ abstract class AbstractTransactionHandler {
         }
 
         int offset = 0;
-        for (ListenableFuture<Void> future : futures) {
-            try {
-                future.get(0, TimeUnit.NANOSECONDS);
-            } catch (final TimeoutException e) {
-                LOG.warn("Future #{}/{} not completed yet", offset, size);
-            } catch (final ExecutionException e) {
-                LOG.warn("Future #{}/{} failed", offset, size, e.getCause());
-            } catch (final InterruptedException e) {
-                LOG.warn("Interrupted while examining future #{}/{}", offset, size, e);
-            }
+        synchronized(futures) {
+            for (ListenableFuture<Void> future : futures) {
+                try {
+                    future.get(0, TimeUnit.NANOSECONDS);
+                } catch (final TimeoutException e) {
+                    LOG.warn("Future #{}/{} not completed yet", offset, size);
+                } catch (final ExecutionException e) {
+                    LOG.warn("Future #{}/{} failed", offset, size, e.getCause());
+                } catch (final InterruptedException e) {
+                    LOG.warn("Interrupted while examining future #{}/{}", offset, size, e);
+                }
 
-            ++offset;
+                ++offset;
+            }
         }
 
         state = State.FAILED;
         runTimedOut(new TimeoutException("Collection did not finish in " + DEAD_TIMEOUT_SECONDS + " seconds"));
-    }
-
-    private boolean checkSuccessful() {
-        if (futures.isEmpty()) {
-            LOG.debug("Completed waiting for all futures");
-            state = State.SUCCESSFUL;
-            scheduledFuture.cancel(false);
-            runSuccessful(txCounter);
-            return true;
-        }
-
-        return false;
     }
 
     abstract ListenableFuture<Void> execWrite(final long txId);
