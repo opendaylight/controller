@@ -68,9 +68,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         @Override
         public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
                 final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-            LOG.warn("Transaction chain failed.", cause);
-            completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", cause).build());
+            // This is expected to happen frequently in isolation testing.
+            LOG.debug("Transaction chain failed.", cause);
+            // Do not return RPC here, rely on transaction failure to call runFailed.
         }
 
         @Override
