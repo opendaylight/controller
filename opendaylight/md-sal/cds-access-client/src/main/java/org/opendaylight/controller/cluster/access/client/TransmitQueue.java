@@ -213,8 +213,10 @@ abstract class TransmitQueue {
     }
 
     final long enqueueOrForward(final ConnectionEntry entry, final long now) {
+        LOG.trace("{} enqueueOrForward {}", this, entry);
         if (successor != null) {
             // This call will pay the enqueuing price, hence the caller does not have to
+            LOG.trace("{} calls forwardEntry {} on successor {}", this, entry, successor);
             successor.forwardEntry(entry, now);
             return 0;
         }
@@ -223,9 +225,12 @@ abstract class TransmitQueue {
     }
 
     final void enqueueOrReplay(final ConnectionEntry entry, final long now) {
+        LOG.trace("{} enqueueOrReplay {}", this, entry);
         if (successor != null) {
+            LOG.trace("{} calls replayEntry {} on successor {}", this, entry, successor);
             successor.replayEntry(entry, now);
         } else {
+            LOG.trace("{} calls enqueue {}", this, entry);
             enqueue(entry, now);
         }
     }
@@ -237,6 +242,7 @@ abstract class TransmitQueue {
      */
     private long enqueue(final ConnectionEntry entry, final long now) {
 
+        LOG.trace("{} enqueue {} starts", this, entry);
         // XXX: we should place a guard against incorrect entry sequences:
         // entry.getEnqueueTicks() should have non-negative difference from the last entry present in the queues
 
@@ -261,6 +267,7 @@ abstract class TransmitQueue {
 
         pending.addLast(entry);
         transmitEntries(toSend, now);
+        LOG.trace("{} enqueue {} returns delay {}", this, entry, delay);
         return delay;
     }
 
