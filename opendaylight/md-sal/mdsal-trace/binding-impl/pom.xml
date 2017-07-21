@@ -11,10 +11,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-parent</artifactId>
-    <version>0.6.2-SNAPSHOT</version>
-    <relativePath/>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>bundle-parent</artifactId>
+    <version>1.8.2-SNAPSHOT</version>
+    <relativePath />
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
