@@ -9,11 +9,14 @@
 package org.opendaylight.controller.cluster.sharding;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
@@ -36,26 +39,27 @@ import org.slf4j.LoggerFactory;
  * Proxy implementation of a shard that creates forwarding producers to the backend shard.
  */
 class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
-
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardFrontend.class);
 
-    private final DataStoreClient client;
     private final DOMDataTreeIdentifier shardRoot;
-    @GuardedBy("this")
-    private final Map<DOMDataTreeIdentifier, ChildShardContext> childShards = new HashMap<>();
+    private final AbstractDataStore frontend;
+    private final DataStoreClient client;
+
     @GuardedBy("this")
     private final List<ShardProxyProducer> producers = new ArrayList<>();
 
-    private final DistributedShardChangePublisher publisher;
+    @GuardedBy("this")
+    private Map<DOMDataTreeIdentifier, ChildShardContext> childShards = ImmutableMap.of();
+    @GuardedBy("this")
+    private AbstractShardChangePublisher publisher;
 
-    DistributedShardFrontend(final AbstractDataStore distributedDataStore,
-                             final DataStoreClient client,
-                             final DOMDataTreeIdentifier shardRoot) {
+    DistributedShardFrontend(final AbstractDataStore frontend, final DataStoreClient client,
+            final DOMDataTreeIdentifier shardRoot) {
+        this.frontend = Preconditions.checkNotNull(frontend);
         this.client = Preconditions.checkNotNull(client);
         this.shardRoot = Preconditions.checkNotNull(shardRoot);
 
-        publisher = new DistributedShardChangePublisher(client, Preconditions.checkNotNull(distributedDataStore),
-                shardRoot, childShards);
+        this.publisher = new LeafShardChangePublisher(frontend, shardRoot);
     }
 
     @Override
@@ -75,21 +79,40 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     public synchronized void onChildAttached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
         LOG.debug("{} : Child shard attached at {}", shardRoot, prefix);
         Preconditions.checkArgument(child != this, "Attempted to attach child %s onto self", this);
-        addChildShard(prefix, child);
+        Preconditions.checkArgument(child instanceof WriteableDOMDataTreeShard);
+
+        final ChildShardContext ctx = new ChildShardContext(prefix, (WriteableDOMDataTreeShard) child);
+
+        final Builder<DOMDataTreeIdentifier, ChildShardContext> builder = ImmutableMap.builder();
+        builder.putAll(childShards);
+        builder.put(prefix, ctx);
+        childShards = builder.build();
+
+        publisher = publisher.addChild(ctx, childShards);
         updateProducers();
     }
 
     @Override
     public synchronized void onChildDetached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
         LOG.debug("{} : Child shard detached at {}", shardRoot, prefix);
-        childShards.remove(prefix);
+
+        final ChildShardContext ctx = childShards.get(prefix);
+        if (ctx == null) {
+            // No-op
+            return;
+        }
+
+        final Builder<DOMDataTreeIdentifier, ChildShardContext> builder = ImmutableMap.builder();
+        for (Entry<DOMDataTreeIdentifier, ChildShardContext> entry : childShards.entrySet()) {
+            if (!prefix.equals(entry.getKey())) {
+                builder.put(entry);
+            }
+        }
+        childShards = builder.build();
+
+        publisher = publisher.removeChild(ctx, childShards);
         updateProducers();
         // TODO we should grab the dataTreeSnapshot that's in the shard and apply it to this shard
-    }
-
-    private void addChildShard(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
-        Preconditions.checkArgument(child instanceof WriteableDOMDataTreeShard);
-        childShards.put(prefix, new ChildShardContext(prefix, (WriteableDOMDataTreeShard) child));
     }
 
     DistributedShardModificationFactory createModificationFactory(final Collection<DOMDataTreeIdentifier> prefixes) {
