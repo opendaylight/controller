@@ -50,6 +50,7 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
 
     @Override
     public final void onReceiveCommand(final Object command) {
+        LOG.trace("Abstract actor {} is processing command {}", this, command);
         if (command == null) {
             LOG.debug("{}: ignoring null command", persistenceId());
             return;
