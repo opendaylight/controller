@@ -118,6 +118,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     @SuppressWarnings("unchecked")
     @Override
     final ClientActorBehavior<T> onReceiveCommand(final Object command) {
+        LOG.trace("Client actor {} received command {}", this, command);
         if (command instanceof InternalCommand) {
             return ((InternalCommand<T>) command).execute(this);
         }
@@ -263,6 +264,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,
             final T backend, final Throwable failure) {
+        LOG.trace("{} backend connect finished {}", this, backend);
         if (failure != null) {
             if (failure instanceof TimeoutException) {
                 if (!oldConn.equals(connections.get(shard))) {
@@ -276,6 +278,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
                 LOG.debug("{}: timed out resolving shard {}, scheduling retry in {}", persistenceId(), shard,
                     RESOLVE_RETRY_DURATION, failure);
                 context().executeInActor(b -> {
+                    LOG.trace("{} context {} lambda calling resolveConnection {}", this, context(), oldConn);
                     resolveConnection(shard, oldConn);
                     return b;
                 }, RESOLVE_RETRY_DURATION);
@@ -376,6 +379,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         LOG.info("{}: refreshing backend for shard {}", persistenceId(), shard);
         resolver().refreshBackendInfo(shard, conn.getBackendInfo().get()).whenComplete(
             (backend, failure) -> context().executeInActor(behavior -> {
+                LOG.trace("{} context {} lambda calling backendConnectFinished {}", this, context(), backend);
                 backendConnectFinished(shard, conn, backend, failure);
                 return behavior;
             }));
@@ -383,6 +387,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
     private ConnectingClientConnection<T> createConnection(final Long shard) {
         final ConnectingClientConnection<T> conn = new ConnectingClientConnection<>(context(), shard);
+        LOG.trace("{} createConnection calls resolveConnection {}", this, conn);
         resolveConnection(shard, conn);
         return conn;
     }
@@ -390,6 +395,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     private void resolveConnection(final Long shard, final AbstractClientConnection<T> conn) {
         LOG.debug("{}: resolving shard {} connection {}", persistenceId(), shard, conn);
         resolver().getBackendInfo(shard).whenComplete((backend, failure) -> context().executeInActor(behavior -> {
+            LOG.trace("{} context {} lambda calls backendConnectFinished {}", this, context(), backend);
             backendConnectFinished(shard, conn, backend, failure);
             return behavior;
         }));
