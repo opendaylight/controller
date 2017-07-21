@@ -11,10 +11,8 @@ package org.opendaylight.controller.cluster.sharding;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +46,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFai
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DistributedShardChangePublisher
+class DistributedShardChangePublisher
         extends AbstractRegistrationTree<AbstractDOMDataTreeChangeListenerRegistration<?>>
         implements DOMStoreTreeChangePublisher {
 
@@ -120,10 +118,8 @@ public class DistributedShardChangePublisher
             setupListenerContext(final YangInstanceIdentifier listenerPath, final L listener) {
         // we need to register the listener registration path based on the shards root
         // we have to strip the shard path from the listener path and then register
-        YangInstanceIdentifier strippedIdentifier = listenerPath;
-        if (!shardPath.isEmpty()) {
-            strippedIdentifier = YangInstanceIdentifier.create(stripShardPath(shardPath, listenerPath));
-        }
+        final YangInstanceIdentifier strippedIdentifier = AbstractShardChangePublisher.stripShardPath(shardPath,
+            listenerPath);
 
         final DOMDataTreeListenerWithSubshards subshardListener =
                 new DOMDataTreeListenerWithSubshards(strippedIdentifier, listener);
@@ -177,27 +173,6 @@ public class DistributedShardChangePublisher
         addRegistration(node, registration);
 
         return registration;
-    }
-
-    private static Iterable<PathArgument> stripShardPath(final YangInstanceIdentifier shardPath,
-                                                         final YangInstanceIdentifier listenerPath) {
-        if (shardPath.isEmpty()) {
-            return listenerPath.getPathArguments();
-        }
-
-        final List<PathArgument> listenerPathArgs = new ArrayList<>(listenerPath.getPathArguments());
-        final Iterator<PathArgument> shardIter = shardPath.getPathArguments().iterator();
-        final Iterator<PathArgument> listenerIter = listenerPathArgs.iterator();
-
-        while (shardIter.hasNext()) {
-            if (shardIter.next().equals(listenerIter.next())) {
-                listenerIter.remove();
-            } else {
-                break;
-            }
-        }
-
-        return listenerPathArgs;
     }
 
     private static class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
@@ -309,8 +284,8 @@ public class DistributedShardChangePublisher
 
         synchronized void onDataTreeChanged(final YangInstanceIdentifier pathFromRoot,
                                             final Collection<DataTreeCandidate> changes) {
-            final YangInstanceIdentifier changeId =
-                    YangInstanceIdentifier.create(stripShardPath(dataTree.getRootPath(), pathFromRoot));
+            final YangInstanceIdentifier changeId = AbstractShardChangePublisher.stripShardPath(dataTree.getRootPath(),
+                pathFromRoot);
 
             final List<DataTreeCandidate> newCandidates = changes.stream()
                     .map(candidate -> DataTreeCandidates.newDataTreeCandidate(changeId, candidate.getRootNode()))
