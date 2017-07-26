@@ -102,7 +102,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private final Cluster cluster;
 
-    private Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
+    private final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
 
     ShardedDataTreeActor(final ShardedDataTreeActorCreator builder) {
         LOG.debug("Creating ShardedDataTreeActor on {}", builder.getClusterWrapper().getCurrentMemberName());
@@ -364,7 +364,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         // schedule a notification task for the reply
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
                 new ConfigShardLookupTask(
-                        actorSystem, getSender(), context, clusterWrapper, message, lookupTaskMaxRetries),
+                        actorSystem, getSender(), context, message, lookupTaskMaxRetries),
                 actorSystem.dispatcher());
     }
 
@@ -664,21 +664,16 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         private final ActorSystem system;
         private final ActorRef replyTo;
         private final ActorContext context;
-        private final ClusterWrapper clusterWrapper;
-        private final int lookupTaskMaxRetries;
 
         ConfigShardLookupTask(final ActorSystem system,
                               final ActorRef replyTo,
                               final ActorContext context,
-                              final ClusterWrapper clusterWrapper,
                               final StartConfigShardLookup message,
                               final int lookupMaxRetries) {
             super(replyTo, lookupMaxRetries);
             this.system = system;
             this.replyTo = replyTo;
             this.context = context;
-            this.clusterWrapper = clusterWrapper;
-            this.lookupTaskMaxRetries = lookupMaxRetries;
         }
 
         @Override
@@ -696,12 +691,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             if (!localShard.isPresent()) {
                 tryReschedule(null);
             } else {
-                LOG.debug("Local backend for prefix configuration shard lookup successful, starting leader lookup..");
-                system.scheduler().scheduleOnce(
-                        SHARD_LOOKUP_TASK_INTERVAL,
-                        new ConfigShardReadinessTask(
-                                system, replyTo, context, clusterWrapper, localShard.get(), lookupTaskMaxRetries),
-                        system.dispatcher());
+                LOG.debug("Local backend for prefix configuration shard lookup successful");
+                replyTo.tell(new Status.Success(null), noSender());
             }
         }
     }

@@ -87,7 +87,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.compat.java8.FutureConverters;
-import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.FiniteDuration;
@@ -122,9 +121,6 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     @GuardedBy("shards")
     private final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shards =
             DOMDataTreePrefixTable.create();
-
-    private final EnumMap<LogicalDatastoreType, DistributedShardRegistration> defaultShardRegistrations =
-            new EnumMap<>(LogicalDatastoreType.class);
 
     private final EnumMap<LogicalDatastoreType, Entry<DataStoreClient, ActorRef>> configurationShardMap =
             new EnumMap<>(LogicalDatastoreType.class);
@@ -196,21 +192,17 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     public void init() {
         // create our writers to the configuration
         try {
-            LOG.debug("{} - starting config shard lookup.",
-                    distributedConfigDatastore.getActorContext().getCurrentMemberName());
+            LOG.debug("{} - starting config shard lookup.", memberName);
 
             // We have to wait for prefix config shards to be up and running
             // so we can create datastore clients for them
             handleConfigShardLookup().get(SHARD_FUTURE_TIMEOUT_DURATION.length(), SHARD_FUTURE_TIMEOUT_DURATION.unit());
-
-            LOG.debug("Prefix configuration shards ready - creating clients");
-
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new IllegalStateException("Prefix config shards not found", e);
         }
 
         try {
-            LOG.debug("Prefix configuration shards ready - creating clients");
+            LOG.debug("{}: Prefix configuration shards ready - creating clients", memberName);
             configurationShardMap.put(LogicalDatastoreType.CONFIGURATION,
                     createDatastoreClient(ClusterUtils.PREFIX_CONFIG_SHARD_ID,
                             distributedConfigDatastore.getActorContext()));
@@ -244,15 +236,13 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         //create shard registration for DEFAULT_SHARD
         try {
-            defaultShardRegistrations.put(LogicalDatastoreType.CONFIGURATION,
-                    initDefaultShard(LogicalDatastoreType.CONFIGURATION));
+            initDefaultShard(LogicalDatastoreType.CONFIGURATION);
         } catch (final InterruptedException | ExecutionException e) {
             throw new IllegalStateException("Unable to create default shard frontend for config shard", e);
         }
 
         try {
-            defaultShardRegistrations.put(LogicalDatastoreType.OPERATIONAL,
-                    initDefaultShard(LogicalDatastoreType.OPERATIONAL));
+            initDefaultShard(LogicalDatastoreType.OPERATIONAL);
         } catch (final InterruptedException | ExecutionException e) {
             throw new IllegalStateException("Unable to create default shard frontend for operational shard", e);
         }
@@ -298,15 +288,13 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     @Nonnull
     @Override
     public DOMDataTreeProducer createProducer(@Nonnull final Collection<DOMDataTreeIdentifier> subtrees) {
-        LOG.debug("{} - Creating producer for {}",
-                distributedConfigDatastore.getActorContext().getClusterWrapper().getCurrentMemberName(), subtrees);
+        LOG.debug("{} - Creating producer for {}", memberName, subtrees);
         final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(subtrees);
 
         final Object response = distributedConfigDatastore.getActorContext()
                 .executeOperation(shardedDataTreeActor, new ProducerCreated(subtrees));
         if (response == null) {
-            LOG.debug("{} - Received success from remote nodes, creating producer:{}",
-                    distributedConfigDatastore.getActorContext().getClusterWrapper().getCurrentMemberName(), subtrees);
+            LOG.debug("{} - Received success from remote nodes, creating producer:{}", memberName, subtrees);
             return new ProxyProducer(producer, subtrees, shardedDataTreeActor,
                     distributedConfigDatastore.getActorContext(), shards);
         }
@@ -375,7 +363,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     void resolveShardAdditions(final Set<DOMDataTreeIdentifier> additions) {
-        LOG.debug("Member {}: Resolving additions : {}", memberName, additions);
+        LOG.debug("{}: Resolving additions : {}", memberName, additions);
         final ArrayList<DOMDataTreeIdentifier> list = new ArrayList<>(additions);
         // we need to register the shards from top to bottom, so we need to atleast make sure the ordering reflects that
         Collections.sort(list, (o1, o2) -> {
@@ -392,14 +380,14 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     void resolveShardRemovals(final Set<DOMDataTreeIdentifier> removals) {
-        LOG.debug("Member {}: Resolving removals : {}", memberName, removals);
+        LOG.debug("{}: Resolving removals : {}", memberName, removals);
 
         // do we need to go from bottom to top?
         removals.forEach(this::despawnShardFrontend);
     }
 
     private void createShardFrontend(final DOMDataTreeIdentifier prefix) {
-        LOG.debug("Member {}: Creating CDS shard for prefix: {}", memberName, prefix);
+        LOG.debug("{}: Creating CDS shard for prefix: {}", memberName, prefix);
         final String shardName = ClusterUtils.getCleanShardName(prefix.getRootIdentifier());
         final AbstractDataStore distributedDataStore =
                 prefix.getDatastoreType().equals(org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION)
@@ -430,14 +418,14 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     private void despawnShardFrontend(final DOMDataTreeIdentifier prefix) {
-        LOG.debug("Member {}: Removing CDS shard for prefix: {}", memberName, prefix);
+        LOG.debug("{}: Removing CDS shard for prefix: {}", memberName, prefix);
         final DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> lookup;
         synchronized (shards) {
             lookup = shards.lookup(prefix);
         }
 
         if (lookup == null || !lookup.getValue().getPrefix().equals(prefix)) {
-            LOG.debug("Member {}: Received despawn for non-existing CDS shard frontend, prefix: {}, ignoring..",
+            LOG.debug("{}: Received despawn for non-existing CDS shard frontend, prefix: {}, ignoring..",
                     memberName, prefix);
             return;
         }
@@ -497,7 +485,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final String shardName, final ActorContext actorContext)
             throws DOMDataTreeShardCreationFailedException {
 
-        LOG.debug("Creating distributed datastore client for shard {}", shardName);
+        LOG.debug("{}: Creating distributed datastore client for shard {}", memberName, shardName);
         final Props distributedDataStoreClientProps =
                 SimpleDataStoreClientActor.props(memberName, "Shard-" + shardName, actorContext, shardName);
 
@@ -506,7 +494,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             return new SimpleEntry<>(SimpleDataStoreClientActor
                     .getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS), clientActor);
         } catch (final Exception e) {
-            LOG.error("Failed to get actor for {}", distributedDataStoreClientProps, e);
+            LOG.error("{}: Failed to get actor for {}", distributedDataStoreClientProps, memberName, e);
             clientActor.tell(PoisonPill.getInstance(), noSender());
             throw new DOMDataTreeShardCreationFailedException(
                     "Unable to create datastore client for shard{" + shardName + "}", e);
@@ -514,26 +502,21 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private DistributedShardRegistration initDefaultShard(final LogicalDatastoreType logicalDatastoreType)
+    private void initDefaultShard(final LogicalDatastoreType logicalDatastoreType)
             throws ExecutionException, InterruptedException {
-        final Collection<MemberName> names =
-                distributedConfigDatastore.getActorContext().getConfiguration().getUniqueMemberNamesForAllShards();
 
         final PrefixedShardConfigWriter writer = writerMap.get(logicalDatastoreType);
 
         if (writer.checkDefaultIsPresent()) {
-            LOG.debug("Default shard for {} is already present in the config. Possibly saved in snapshot.",
-                    logicalDatastoreType);
-            return new DistributedShardRegistrationImpl(
-                    new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY),
-                    shardedDataTreeActor, this);
+            LOG.debug("{}: Default shard for {} is already present in the config. Possibly saved in snapshot.",
+                    memberName, logicalDatastoreType);
         } else {
             try {
-                // There can be situation when there is already started default shard
-                // because it is present in modules.conf. In that case we have to create
-                // just frontend for default shard, but not shard itself
-                // TODO we don't have to do it for config and operational default shard
-                // separately. Just one of them should be enough
+                // Currently the default shard configuration is present in the out-of-box modules.conf and is
+                // expected to be present. So look up the local default shard here and create the frontend.
+
+                // TODO we don't have to do it for config and operational default shard separately. Just one of them
+                // should be enough
                 final ActorContext actorContext = logicalDatastoreType == LogicalDatastoreType.CONFIGURATION
                         ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
 
@@ -541,24 +524,27 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                         actorContext.findLocalShard(ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
 
                 if (defaultLocalShardOptional.isPresent()) {
-                    LOG.debug("{} Default shard is already started, creating just frontend", logicalDatastoreType);
+                    LOG.debug("{}: Default shard for {} is already started, creating just frontend", memberName,
+                            logicalDatastoreType);
                     createShardFrontend(new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY));
-                    return new DistributedShardRegistrationImpl(
-                            new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY),
-                            shardedDataTreeActor, this);
                 }
 
-                // we should probably only have one node create the default shards
-                return Await.result(FutureConverters.toScala(createDistributedShard(
-                        new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY), names)),
-                        SHARD_FUTURE_TIMEOUT_DURATION);
-            } catch (DOMDataTreeShardingConflictException e) {
-                LOG.debug("Default shard already registered, possibly due to other node doing it faster");
-                return new DistributedShardRegistrationImpl(
-                        new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY),
-                        shardedDataTreeActor, this);
+                // The local shard isn't present - we assume that means the local member isn't in the replica list
+                // and will be dynamically created later via an explicit add-shard-replica request. This is the
+                // bootstrapping mechanism to add a new node into an existing cluster. The following code to create
+                // the default shard as a prefix shard is problematic in this scenario so it is commented out. Since
+                // the default shard is a module-based shard by default, it makes sense to always treat it as such,
+                // ie bootstrap it in the same manner as the special prefix-configuration and EOS shards.
+//                final Collection<MemberName> names = distributedConfigDatastore.getActorContext().getConfiguration()
+//                        .getUniqueMemberNamesForAllShards();
+//                Await.result(FutureConverters.toScala(createDistributedShard(
+//                        new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY), names)),
+//                        SHARD_FUTURE_TIMEOUT_DURATION);
+//            } catch (DOMDataTreeShardingConflictException e) {
+//                LOG.debug("{}: Default shard for {} already registered, possibly due to other node doing it faster",
+//                        memberName, logicalDatastoreType);
             } catch (Exception e) {
-                LOG.error("{} default shard initialization failed", logicalDatastoreType, e);
+                LOG.error("{}: Default shard initialization for {} failed", memberName, logicalDatastoreType, e);
                 throw new RuntimeException(e);
             }
         }
