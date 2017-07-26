@@ -55,7 +55,7 @@ abstract class AbstractTransactionHandler {
 
     static final long INIT_TX_TIMEOUT_SECONDS = 125;
 
-    private static final long DEAD_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(15);
+    private static final long DEAD_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(3);
 
     /*
      * writingExecutor is a single thread executor. Only this thread will write to datastore,
