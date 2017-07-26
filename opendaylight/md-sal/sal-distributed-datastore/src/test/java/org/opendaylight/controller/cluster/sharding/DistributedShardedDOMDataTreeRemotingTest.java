@@ -136,13 +136,17 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     }
 
     private void initEmptyDatastores() throws Exception {
+        initEmptyDatastores(MODULE_SHARDS_CONFIG);
+    }
+
+    private void initEmptyDatastores(String moduleShardsConfig) throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
         leaderConfigDatastore = leaderTestKit.setupDistributedDataStore(
-                "config", MODULE_SHARDS_CONFIG, true,
+                "config", moduleShardsConfig, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
         leaderOperDatastore = leaderTestKit.setupDistributedDataStore(
-                "operational", MODULE_SHARDS_CONFIG, true,
+                "operational", moduleShardsConfig, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
         leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystemProvider,
@@ -152,9 +156,9 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
 
         followerConfigDatastore = followerTestKit.setupDistributedDataStore(
-                "config", MODULE_SHARDS_CONFIG, true, SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
+                "config", moduleShardsConfig, true, SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
         followerOperDatastore = followerTestKit.setupDistributedDataStore(
-                "operational", MODULE_SHARDS_CONFIG, true,
+                "operational", moduleShardsConfig, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
         followerShardFactory = new DistributedShardedDOMDataTree(followerSystemProvider,
@@ -163,14 +167,17 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         followerTestKit.waitForMembersUp("member-1");
 
+        LOG.info("Initializing leader DistributedShardedDOMDataTree");
         leaderShardFactory.init();
-        followerShardFactory.init();
 
         leaderTestKit.waitUntilLeader(leaderConfigDatastore.getActorContext(),
                 ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
 
         leaderTestKit.waitUntilLeader(leaderOperDatastore.getActorContext(),
                 ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
+
+        LOG.info("Initializing follower DistributedShardedDOMDataTree");
+        followerShardFactory.init();
     }
 
     @Test
@@ -418,5 +425,13 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         }
 
         LOG.info("testMultipleRegistrationsAtOnePrefix ending");
+    }
+
+    @Test
+    public void testInitialBootstrappingWithNoModuleShards() throws Exception {
+        LOG.info("testInitialBootstrappingWithNoModuleShards starting");
+        initEmptyDatastores("module-shards-default-member-1.conf");
+
+        // We just verify the DistributedShardedDOMDataTree initialized without error.
     }
 }

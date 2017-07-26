@@ -1151,7 +1151,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void findPrimary(final FindPrimary message) {
-        LOG.debug("{}: In findPrimary: {}", persistenceId(), message);
+        LOG.debug("{}: : {}", persistenceId(), message);
 
         final String shardName = message.getShardName();
         final boolean canReturnLocalShardState = !(message instanceof RemoteFindPrimary);
