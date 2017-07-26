@@ -102,7 +102,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private final Cluster cluster;
 
-    private Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
+    private final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
 
     ShardedDataTreeActor(final ShardedDataTreeActorCreator builder) {
         LOG.debug("Creating ShardedDataTreeActor on {}", builder.getClusterWrapper().getCurrentMemberName());
@@ -696,12 +696,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             if (!localShard.isPresent()) {
                 tryReschedule(null);
             } else {
-                LOG.debug("Local backend for prefix configuration shard lookup successful, starting leader lookup..");
-                system.scheduler().scheduleOnce(
-                        SHARD_LOOKUP_TASK_INTERVAL,
-                        new ConfigShardReadinessTask(
-                                system, replyTo, context, clusterWrapper, localShard.get(), lookupTaskMaxRetries),
-                        system.dispatcher());
+                LOG.debug("Local backend for prefix configuration shard lookup successful");
+                replyTo.tell(new Status.Success(null), noSender());
             }
         }
     }
