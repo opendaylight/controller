@@ -93,6 +93,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private void execute() {
+        LOG.trace("{} Entering execute", this);
         // Single volatile access
         final State local = state;
 
@@ -109,6 +110,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private void runningExecute() {
+        LOG.trace("{} Entering runningExecute", this);
         final long elapsed = stopwatch.elapsed(TimeUnit.NANOSECONDS);
         if (elapsed >= runtimeNanos) {
             LOG.debug("Reached maximum run time with {} outstanding futures", futures.size());
@@ -119,7 +121,7 @@ abstract class AbstractTransactionHandler {
         // Not completed yet: create a transaction and hook it up
         final long txId = txCounter++;
         final ListenableFuture<Void> execFuture = execWrite(txId);
-        LOG.debug("New future #{} allocated", txId);
+        LOG.debug("{} New future #{} allocated", this, txId);
 
         // Ordering is important: we need to add the future before hooking the callback
         futures.add(execFuture);
@@ -146,6 +148,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private boolean checkSuccessful() {
+        LOG.trace("{} Entering checkSuccessful.", this);
         if (futures.isEmpty()) {
             LOG.debug("Completed waiting for all futures");
             state = State.SUCCESSFUL;
@@ -153,12 +156,13 @@ abstract class AbstractTransactionHandler {
             runSuccessful(txCounter);
             return true;
         }
+        LOG.trace("{} Still {} futures left.", this, futures.size());
 
         return false;
     }
 
     final void txSuccess(final ListenableFuture<Void> execFuture, final long txId) {
-        LOG.debug("Future #{} completed successfully", txId);
+        LOG.debug("{} Future #{} completed successfully in state {}", this, txId, state);
         futures.remove(execFuture);
 
         final State local = state;
@@ -176,18 +180,24 @@ abstract class AbstractTransactionHandler {
     }
 
     final void txFailure(final ListenableFuture<Void> execFuture, final long txId, final Throwable cause) {
-        LOG.debug("Future #{} failed", txId, cause);
+        LOG.debug("{} Future #{} failed in state {} cause {}", this, txId, state, cause);
+        LOG.trace("Removing the future.");
         futures.remove(execFuture);
+        LOG.trace("The future has been removed.");
 
         final State local = state;
+        LOG.trace("Local state {}", local);
         switch (local) {
             case FAILED:
                 // no-op
                 break;
             case RUNNING:
             case WAITING:
+                LOG.trace("Setting state to FAILED.");
                 state = State.FAILED;
+                LOG.trace("Cancelling writingFuture.");
                 writingFuture.cancel(false);
+                LOG.trace("Calling runFailed");
                 runFailed(cause);
                 break;
             default:
@@ -196,6 +206,7 @@ abstract class AbstractTransactionHandler {
     }
 
     private void checkComplete() {
+        LOG.trace("{} Entering checkComplete.", this);
         final int size = futures.size();
         if (size == 0) {
             return;

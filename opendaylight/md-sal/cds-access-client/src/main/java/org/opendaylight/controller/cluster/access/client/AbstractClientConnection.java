@@ -171,9 +171,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     private long enqueueOrForward(final ConnectionEntry entry, final long now) {
+        LOG.trace("{} enqueueOrForward {}", this, entry);
         lock.lock();
         try {
             commonEnqueue(entry, now);
+            LOG.trace("{} calls enqueueOrForward {}", this, entry);
             return queue.enqueueOrForward(entry, now);
         } finally {
             lock.unlock();
@@ -184,9 +186,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      * Enqueue an entry, possibly also transmitting it.
      */
     public final void enqueueEntry(final ConnectionEntry entry, final long now) {
+        LOG.trace("{} enqueueEntry {}", this, entry);
         lock.lock();
         try {
             commonEnqueue(entry, now);
+            LOG.trace("{} calls enqueueOrReplay {}", this, entry);
             queue.enqueueOrReplay(entry, now);
         } finally {
             lock.unlock();
@@ -208,6 +212,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     // To be called from ClientActorBehavior on ConnectedClientConnection after entries are replayed.
     final void cancelDebt() {
+        LOG.trace("{} cancelling debt", this);
         queue.cancelDebt(currentTime());
     }
 
@@ -248,6 +253,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             RequestException runtimeRequestException);
 
     final void sendEntry(final ConnectionEntry entry, final long now) {
+        LOG.trace("{} sendEntry {}", this, entry);
         long delay = enqueueOrForward(entry, now);
         try {
             if (delay >= DEBUG_DELAY_NANOS) {
@@ -269,6 +275,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     final ClientActorBehavior<T> reconnect(final ClientActorBehavior<T> current, final RequestException cause) {
+        LOG.trace("{} reconnect", this);
         lock.lock();
         try {
             return lockedReconnect(current, cause);
@@ -442,12 +449,14 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     void receiveResponse(final ResponseEnvelope<?> envelope) {
+        LOG.trace("{} receiveResponse {}", this, envelope);
         final long now = currentTime();
         lastReceivedTicks = now;
 
         final Optional<TransmittedConnectionEntry> maybeEntry;
         lock.lock();
         try {
+            LOG.trace("{} calls complete {}", this, envelope);
             maybeEntry = queue.complete(envelope, now);
         } finally {
             lock.unlock();

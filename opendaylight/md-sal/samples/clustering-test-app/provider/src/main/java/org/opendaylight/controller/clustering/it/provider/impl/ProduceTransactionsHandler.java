@@ -131,14 +131,19 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
 
     @Override
     void runFailed(final Throwable cause) {
+        LOG.trace("{} Entering runFailed.", this);
         closeProducer(itemProducer);
+        LOG.trace("Producer closed");
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
+        LOG.trace("RPC future set.");
     }
 
     @Override
     void runSuccessful(final long allTx) {
+        LOG.trace("{} Entering runSuccessful.", this);
         closeProducer(itemProducer);
+        LOG.trace("Producer closed");
         final ProduceTransactionsOutput output = new ProduceTransactionsOutputBuilder()
                 .setAllTx(allTx)
                 .setInsertTx(insertTx)
@@ -146,13 +151,17 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
                 .build();
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>success()
                 .withResult(output).build());
+        LOG.trace("RPC future set.");
     }
 
     @Override
     void runTimedOut(final Exception cause) {
+        LOG.trace("{} Entering runTimedOut.", this);
         closeProducer(itemProducer);
+        LOG.trace("Producer closed");
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
             .withError(RpcError.ErrorType.APPLICATION,
                     "Final submit was timed out by the test provider or was interrupted", cause).build());
+        LOG.trace("RPC future set.");
     }
 }
