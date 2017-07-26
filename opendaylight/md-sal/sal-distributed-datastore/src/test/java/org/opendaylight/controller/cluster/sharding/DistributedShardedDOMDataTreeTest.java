@@ -110,7 +110,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                             .node(TestModel.INNER_LIST_QNAME));
     private static final Set<MemberName> SINGLE_MEMBER = Collections.singleton(AbstractTest.MEMBER_NAME);
 
-    private static final String MODULE_SHARDS_CONFIG = "module-shards-cars-member-1.conf";
+    private static final String MODULE_SHARDS_CONFIG = "module-shards-default-member-1.conf";
 
     private ActorSystem leaderSystem;
 
