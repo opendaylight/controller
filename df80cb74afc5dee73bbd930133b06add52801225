@@ -22,6 +22,30 @@
       "revId": "df80cb74afc5dee73bbd930133b06add52801225",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_db008903",
+        "filename": "opendaylight/config/logback-config-loader/src/test/java/org/opendaylight/controller/logback/config/loader/test/TestAppender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-07-27T19:29:39Z",
+      "side": 0,
+      "message": "Would you mind sharing WHICH test? ;) Let\u0027s see if the build passes...",
+      "parentUuid": "da2a55be_1bbb4273",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 53
+      },
+      "revId": "df80cb74afc5dee73bbd930133b06add52801225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
