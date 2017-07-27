@@ -27,7 +27,6 @@
     <module>yang-jmx-generator</module>
     <module>yang-jmx-generator-plugin</module>
     <module>yang-test</module>
-    <module>logback-config</module>
     <module>threadpool-config-api</module>
     <module>netty-config-api</module>
     <module>threadpool-config-impl</module>

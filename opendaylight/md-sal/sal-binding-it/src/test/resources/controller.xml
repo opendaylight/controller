@@ -23,7 +23,6 @@
                 <capability>
                     urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28
                 </capability>
-                <capability>urn:opendaylight:params:xml:ns:yang:controller:logback:config?module=config-logging&amp;revision=2013-07-16</capability>
                 <capability>urn:opendaylight:yang:extension:yang-ext?module=yang-ext&amp;revision=2013-07-09
                 </capability>
                 <capability>
