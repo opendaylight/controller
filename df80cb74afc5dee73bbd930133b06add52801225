@@ -46,6 +46,30 @@
       "revId": "df80cb74afc5dee73bbd930133b06add52801225",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_7e8ceb7f",
+        "filename": "opendaylight/config/logback-config-loader/src/test/java/org/opendaylight/controller/logback/config/loader/test/TestAppender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-07-28T06:24:27Z",
+      "side": 0,
+      "message": "I\u0027ve done a grep of \"TestAppender\" on the projects I have on disk, and only found something in aaa/aaa-shiro/impl - but that\u0027s another new class also name \"TestAppender\", not a use of this one.  And no other hit.\n\nBuild failed but not due to this but due to netconf and openflowplugin having dependencies to logback-config - I\u0027ll try to look closer at that some time, and raise patch to wean them off it.",
+      "parentUuid": "da2a55be_db008903",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 53
+      },
+      "revId": "df80cb74afc5dee73bbd930133b06add52801225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
