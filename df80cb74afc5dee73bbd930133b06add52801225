@@ -70,6 +70,30 @@
       "revId": "df80cb74afc5dee73bbd930133b06add52801225",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_be3b039b",
+        "filename": "opendaylight/config/logback-config-loader/src/test/java/org/opendaylight/controller/logback/config/loader/test/TestAppender.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-07-28T06:46:17Z",
+      "side": 0,
+      "message": "https://git.opendaylight.org/gerrit/#/c/60853/ will fix the build failure due to netconf\u0027s use of logback-config (and c/60854 has the same for openflowplugin, but that probably won\u0027t matter).  We can re build this after c/60853 has been merged, and this should pass.",
+      "parentUuid": "da2a55be_7e8ceb7f",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 53
+      },
+      "revId": "df80cb74afc5dee73bbd930133b06add52801225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
