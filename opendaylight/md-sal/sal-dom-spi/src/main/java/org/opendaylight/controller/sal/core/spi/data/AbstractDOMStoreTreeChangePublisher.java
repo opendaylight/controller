@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -63,8 +62,7 @@ public abstract class AbstractDOMStoreTreeChangePublisher extends AbstractRegist
         }
 
         try (final RegistrationTreeSnapshot<AbstractDOMDataTreeChangeListenerRegistration<?>> snapshot = takeSnapshot()) {
-            final List<PathArgument> toLookup = ImmutableList.copyOf(candidate.getRootPath().getPathArguments());
-            lookupAndNotify(toLookup, 0, snapshot.getRootNode(), candidate);
+            lookupAndNotify(candidate.getRootPath().getPathArguments(), 0, snapshot.getRootNode(), candidate);
         }
     }
 
