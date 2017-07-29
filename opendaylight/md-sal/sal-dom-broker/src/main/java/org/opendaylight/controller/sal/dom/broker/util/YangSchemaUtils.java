@@ -10,13 +10,10 @@ package org.opendaylight.controller.sal.dom.broker.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-
+import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -38,28 +35,20 @@ import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
 public final class YangSchemaUtils {
-
-    private static final Function<PathArgument, QName> QNAME_FROM_PATH_ARGUMENT = input -> {
-        if (input == null) {
-            return null;
-        }
-        return input.getNodeType();
-    };
-
     private YangSchemaUtils() {
         throw new UnsupportedOperationException("Utility class.");
     }
 
-    public static DataSchemaNode getSchemaNode(final SchemaContext schema,final YangInstanceIdentifier path) {
-        checkArgument(schema != null,"YANG Schema must not be null.");
-        checkArgument(path != null,"Path must not be null.");
-        return getSchemaNode(schema, FluentIterable.from(path.getPathArguments()).transform(QNAME_FROM_PATH_ARGUMENT));
+    public static DataSchemaNode getSchemaNode(final SchemaContext schema, final YangInstanceIdentifier path) {
+        checkArgument(schema != null, "YANG Schema must not be null.");
+        checkArgument(path != null, "Path must not be null.");
+        return getSchemaNode(schema, Lists.transform(path.getPathArguments(), PathArgument::getNodeType));
     }
 
-    public static DataSchemaNode getSchemaNode(final SchemaContext schema,final Iterable<QName> path) {
-        checkArgument(schema != null,"YANG Schema must not be null.");
-        checkArgument(path != null,"Path must not be null.");
-        if(!path.iterator().hasNext()){
+    public static DataSchemaNode getSchemaNode(final SchemaContext schema, final Iterable<QName> path) {
+        checkArgument(schema != null, "YANG Schema must not be null.");
+        checkArgument(path != null, "Path must not be null.");
+        if (!path.iterator().hasNext()){
             return toRootDataNode(schema);
         }
 
@@ -69,10 +58,10 @@ public final class YangSchemaUtils {
         Iterator<QName> iterator = path.iterator();
 
         while (iterator.hasNext()) {
-            checkArgument(previous!= null, "Supplied path does not resolve into valid schema node.");
+            checkArgument(previous != null, "Supplied path does not resolve into valid schema node.");
             QName arg = iterator.next();
             DataSchemaNode currentNode = previous.getDataChildByName(arg);
-            if (currentNode == null && previous instanceof DataNodeContainer) {
+            if (currentNode == null) {
                 currentNode = searchInChoices(previous, arg);
             }
             if (currentNode instanceof DataNodeContainer) {
@@ -83,7 +72,8 @@ public final class YangSchemaUtils {
             }
             checkState(currentNode != null, "Current node should not be null for %s",path);
         }
-        checkState(previous instanceof DataSchemaNode, "Schema node for %s should be instance of DataSchemaNode. Found %s",path,previous);
+        checkState(previous instanceof DataSchemaNode,
+            "Schema node for %s should be instance of DataSchemaNode. Found %s",path,previous);
         return (DataSchemaNode) previous;
     }
 
