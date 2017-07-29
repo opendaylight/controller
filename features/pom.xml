@@ -18,7 +18,6 @@
     <module>config-persister</module>
     <module>config-netty</module>
     <module>mdsal</module>
-    <module>protocol-framework</module>
     <module>extras</module>
     <module>benchmark</module>
   </modules>
