@@ -10,9 +10,13 @@ package org.opendaylight.controller.blueprint.ext;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
@@ -20,8 +24,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
-import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -51,7 +53,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     @FunctionalInterface
     public interface FallbackConfigProvider {
-        NormalizedNode<?,?> get(SchemaContext schemaContext, DataSchemaNode dataSchema);
+        NormalizedNode<?,?> get(SchemaContext schemaContext, DataSchemaNode dataSchema) throws IOException,
+                XMLStreamException, ParserConfigurationException, SAXException, URISyntaxException;
     }
 
     @FunctionalInterface
@@ -90,7 +93,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         return Resources.getResource(testClass, defaultAppConfigFileName);
     }
 
-    public T createDefaultInstance() throws ConfigXMLReaderException {
+    public T createDefaultInstance() throws ConfigXMLReaderException, ParserConfigurationException, XMLStreamException,
+            IOException, SAXException, URISyntaxException {
         return createDefaultInstance((schemaContext, dataSchema) -> {
             throw new IllegalArgumentException("Failed to read XML "
                     + "(not creating model from defaults as runtime would, for better clarity in tests)");
@@ -98,7 +102,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     }
 
     @SuppressWarnings("unchecked")
-    public T createDefaultInstance(FallbackConfigProvider fallback) throws ConfigXMLReaderException {
+    public T createDefaultInstance(FallbackConfigProvider fallback) throws ConfigXMLReaderException, URISyntaxException,
+            ParserConfigurationException, XMLStreamException, SAXException, IOException {
         YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
 
         LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName, yangPath,
@@ -148,6 +153,8 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final SchemaContext schemaContext,
             final DataSchemaNode dataSchema) throws ConfigXMLReaderException {
 
@@ -156,9 +163,6 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
             String moduleName = findYangModuleName(bindingContext.bindingQName, schemaContext);
             appConfigFileName = moduleName + "_" + bindingContext.bindingQName.getLocalName() + ".xml";
         }
-
-        DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
-                XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
 
         Optional<URL> optionalURL;
         try {
@@ -175,12 +179,12 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         try (InputStream is = url.openStream()) {
             Document root = UntrustedXML.newDocumentBuilder().parse(is);
             NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
-                    parserFactory);
+                    schemaContext);
 
             LOG.debug("{}: Parsed data node: {}", logName, dataNode);
 
             return dataNode;
-        } catch (SAXException | IOException e) {
+        } catch (Exception e) {
             String msg = String.format("%s: Could not read/parse app config %s", logName, url);
             LOG.error(msg, e);
             throw new ConfigXMLReaderException(msg, e);
