@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da2a55be_70b53430",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/BindingContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 4561
+      },
+      "writtenOn": "2017-07-30T14:34:16Z",
+      "side": 1,
+      "message": "Well, originally, the old XML parser code returned a MapEntryNode in case of a root XML list element. The new XML parser returns a MapNode with one MapEntryNode in such a case. The distribution check job was failing, so I uploaded this code to find out if the MapNode/MapEntryNode behaviour change is really the cause of the issue. And it turned out it was. I will remove the comment so that it won\u0027t confuse anyone.",
+      "parentUuid": "da2a55be_904c2872",
+      "revId": "ac935e594fd46a8f53457a99a419c6c8c5c33a7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da2a55be_7047f44b",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
         "patchSetId": 6
