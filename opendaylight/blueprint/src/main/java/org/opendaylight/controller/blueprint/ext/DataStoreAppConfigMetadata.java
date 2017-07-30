@@ -12,11 +12,15 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader.ConfigURLProvider;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
@@ -33,14 +37,13 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
-import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Factory metadata corresponding to the "clustered-app-config" element that obtains an application's
@@ -269,7 +272,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 }
             });
 
-        } catch (final ConfigXMLReaderException e) {
+        } catch (final ConfigXMLReaderException | IOException | SAXException | XMLStreamException
+                | ParserConfigurationException | URISyntaxException e) {
             if (e.getCause() == null) {
                 setFailureMessage(e.getMessage());
             } else {
@@ -281,21 +285,18 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     @Nullable
     private NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(final SchemaContext schemaContext,
-            final DataSchemaNode dataSchema) {
+            final DataSchemaNode dataSchema) throws URISyntaxException, IOException, ParserConfigurationException,
+            SAXException, XMLStreamException {
         if (defaultAppConfigElement == null) {
             return null;
         }
 
         LOG.debug("{}: parsePossibleDefaultAppConfigElement for {}", logName(), bindingContext.bindingQName);
 
-        DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
-                XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
-
-
         LOG.debug("{}: Got app config schema: {}", logName(), dataSchema);
 
         NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(defaultAppConfigElement, dataSchema,
-                parserFactory);
+                schemaContext);
 
         LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
 
