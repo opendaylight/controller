@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "da2a55be_90e8a811",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 4561
+      },
+      "writtenOn": "2017-07-30T14:36:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da2a55be_7047f44b",
+      "revId": "ac935e594fd46a8f53457a99a419c6c8c5c33a7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da2a55be_d0750099",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
         "patchSetId": 6
@@ -65,6 +83,24 @@
       "writtenOn": "2017-07-30T12:09:35Z",
       "side": 1,
       "message": "I\u0027d prefer to enumerate the possible exception types (as it did before) rather than catching Exception and suppressing warnings.",
+      "revId": "ac935e594fd46a8f53457a99a419c6c8c5c33a7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da2a55be_d0d18058",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 4561
+      },
+      "writtenOn": "2017-07-30T14:36:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da2a55be_d0750099",
       "revId": "ac935e594fd46a8f53457a99a419c6c8c5c33a7f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
