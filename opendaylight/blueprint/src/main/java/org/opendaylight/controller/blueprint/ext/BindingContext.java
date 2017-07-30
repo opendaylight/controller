@@ -9,23 +9,34 @@ package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
+import java.net.URISyntaxException;
 import java.util.List;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.codec.xml.XmlParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Base class to abstract binding type-specific behavior.
@@ -72,8 +83,23 @@ public abstract class BindingContext {
         bindingQName = BindingReflections.findQName(appConfigBindingClass);
     }
 
-    public abstract NormalizedNode<?, ?> parseDataElement(Element element, DataSchemaNode dataSchema,
-            DomToNormalizedNodeParserFactory parserFactory);
+    public NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
+            final SchemaContext schemaContext) throws XMLStreamException, IOException, ParserConfigurationException,
+            SAXException, URISyntaxException {
+        final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
+        final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+        final XmlParserStream xmlParser = XmlParserStream.create(writer, schemaContext, dataSchema);
+        xmlParser.traverse(new DOMSource(element));
+
+        final NormalizedNode<?, ?> result = resultHolder.getResult();
+        if (result instanceof MapNode) {
+            final MapNode mapNode = (MapNode) result;
+            final MapEntryNode mapEntryNode = mapNode.getValue().iterator().next();
+            return mapEntryNode;
+        }
+
+        return result;
+    }
 
     public abstract NormalizedNode<?, ?> newDefaultNode(DataSchemaNode dataSchema);
 
@@ -90,13 +116,6 @@ public abstract class BindingContext {
         @Override
         public NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
             return ImmutableNodes.containerNode(bindingQName);
-        }
-
-        @Override
-        public NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
-                final DomToNormalizedNodeParserFactory parserFactory) {
-            return parserFactory.getContainerNodeParser().parse(Collections.singletonList(element),
-                    (ContainerSchemaNode)dataSchema);
         }
     }
 
@@ -132,13 +151,6 @@ public abstract class BindingContext {
             Preconditions.checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);
             QName listKeyQName = keys.get(0);
             return ImmutableNodes.mapEntryBuilder(bindingQName, listKeyQName, appConfigListKeyValue).build();
-        }
-
-        @Override
-        public NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
-                final DomToNormalizedNodeParserFactory parserFactory) {
-            return parserFactory.getMapEntryNodeParser().parse(Collections.singletonList(element),
-                    (ListSchemaNode)dataSchema);
         }
     }
 }
