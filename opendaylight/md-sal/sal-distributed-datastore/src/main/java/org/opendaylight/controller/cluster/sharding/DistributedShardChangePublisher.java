@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +39,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
@@ -52,7 +55,7 @@ public class DistributedShardChangePublisher
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardChangePublisher.class);
 
     private final AbstractDataStore distributedDataStore;
-    private final YangInstanceIdentifier shardPath;
+    private final DOMDataTreeIdentifier prefix;
 
     // This will be useful for signaling back pressure
     private final DataStoreClient client;
@@ -62,21 +65,39 @@ public class DistributedShardChangePublisher
     @GuardedBy("this")
     private final DataTree dataTree;
 
-    public DistributedShardChangePublisher(final DataStoreClient client,
-                                           final AbstractDataStore distributedDataStore,
-                                           final DOMDataTreeIdentifier prefix,
-                                           final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
-        this.client = client;
-        this.distributedDataStore = distributedDataStore;
+    DistributedShardChangePublisher(final DataStoreClient client, final AbstractDataStore distributedDataStore,
+            final DOMDataTreeIdentifier prefix, final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
+        this.client = requireNonNull(client);
+        this.distributedDataStore = requireNonNull(distributedDataStore);
+        this.prefix = requireNonNull(prefix);
+
         // TODO keeping the whole dataTree thats contained in subshards doesn't seem like a good idea
         // maybe the whole listener logic would be better in the backend shards where we have direct access to the
         // dataTree and wont have to cache it redundantly.
-        this.dataTree = InMemoryDataTreeFactory.getInstance().create(
-                TreeType.valueOf(prefix.getDatastoreType().name()), prefix.getRootIdentifier());
+        /*
+         * FIXME: yes it is. The data tree should be instantiated only for listeners that require merging of state.
+         * We essentially have three cases to deal with:
+         *
+         * 1) A subtree which is not affected by sub-shards. This is the simplest one, where we just request
+         *    the backend to take care of it.
+         * 2) A subtree which is affected only by sub-shards. This is a straight-forward aggregation, for which
+         *    we have an SPI class for.
+         * 3) A subtree affected both by local shard and subshards. This is the hardest case which we need to handle.
+         *
+         * Since listener trees are not allowed to overlap, each collection of specified subtrees can be turned into
+         * a state-aggregated lister of those basic types.
+         *
+         * Only the third kind requires a DataTree, but it can actually be rooted at that listener, which combines a
+         * type-1 listener (providing the baseline root) and a type-2 listener (being merged on top).
+         */
+        // This data tree is used for minimal validation, hence we can keep validation off
+        this.dataTree = InMemoryDataTreeFactory.getInstance().create(new DataTreeConfiguration.Builder(
+            TreeType.valueOf(prefix.getDatastoreType().name()))
+            .setRootPath(prefix.getRootIdentifier())
+            .setMandatoryNodesValidation(false)
+            .setUniqueIndexes(false)
+            .build(), distributedDataStore.getActorContext().getSchemaContext());
 
-        dataTree.setSchemaContext(distributedDataStore.getActorContext().getSchemaContext());
-
-        this.shardPath = prefix.getRootIdentifier();
         this.childShards = childShards;
     }
 
@@ -100,8 +121,9 @@ public class DistributedShardChangePublisher
         // we need to register the listener registration path based on the shards root
         // we have to strip the shard path from the listener path and then register
         YangInstanceIdentifier strippedIdentifier = listenerPath;
-        if (!shardPath.isEmpty()) {
-            strippedIdentifier = YangInstanceIdentifier.create(stripShardPath(shardPath, listenerPath));
+        if (!prefix.getRootIdentifier().isEmpty()) {
+            strippedIdentifier = YangInstanceIdentifier.create(stripShardPath(prefix.getRootIdentifier(),
+                        listenerPath));
         }
 
         final DOMDataTreeListenerWithSubshards subshardListener =
@@ -251,8 +273,8 @@ public class DistributedShardChangePublisher
 
         DOMDataTreeListenerWithSubshards(final YangInstanceIdentifier listenerPath,
                                          final DOMDataTreeChangeListener delegate) {
-            this.listenerPath = Preconditions.checkNotNull(listenerPath);
-            this.delegate = Preconditions.checkNotNull(delegate);
+            this.listenerPath = requireNonNull(listenerPath);
+            this.delegate = requireNonNull(delegate);
         }
 
         @Override
@@ -309,7 +331,7 @@ public class DistributedShardChangePublisher
         }
 
         void addSubshard(final ChildShardContext context) {
-            Preconditions.checkState(context.getShard() instanceof DOMStoreTreeChangePublisher,
+            checkState(context.getShard() instanceof DOMStoreTreeChangePublisher,
                     "All subshards that are initialDataChangeEvent part of ListenerContext need to be listenable");
 
             final DOMStoreTreeChangePublisher listenableShard = (DOMStoreTreeChangePublisher) context.getShard();
