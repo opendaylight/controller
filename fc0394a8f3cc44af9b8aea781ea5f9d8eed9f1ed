@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_08bfe7d1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangSchemaUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-07-31T08:10:02Z",
+      "side": 1,
+      "message": "The current Javadocs in Collections2 recommend using Lists instead, and the latter recommend using streams instead...\n\n    Lists.transform(path.getPathArguments(), PathArgument::getNodeType)\n\nThis does change the semantics slightly since null values will cause errors, but as I understand it there shouldn’t be null values in a path anyway.",
+      "revId": "fc0394a8f3cc44af9b8aea781ea5f9d8eed9f1ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
