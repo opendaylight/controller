@@ -7,17 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import akka.dispatch.ControlMessage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * This interface is used to pass the unit of work via the actors mailbox. The command can alter behavior of the actor
- * by returning a new behavior.
+ * by returning a new behavior. This work will be prioritized before other messages.
  *
  * @author Robert Varga
  */
 @FunctionalInterface
-public interface InternalCommand<T extends BackendInfo> {
+public interface InternalCommand<T extends BackendInfo> extends ControlMessage {
     /**
      * Run command actions.
      *
