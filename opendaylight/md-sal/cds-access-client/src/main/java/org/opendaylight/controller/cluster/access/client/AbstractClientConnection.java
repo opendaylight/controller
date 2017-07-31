@@ -403,9 +403,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             queue.remove(now);
             LOG.debug("{}: Connection {} timed out entry {}", context.persistenceId(), this, head);
 
-            final double time = beenOpen * 1.0 / 1_000_000_000;
-            head.complete(head.getRequest().toRequestFailure(
-                new RequestTimeoutException("Timed out after " + time + "seconds")));
+            timeoutEntry(head, beenOpen);
         }
 
         LOG.debug("Connection {} timed out {} tasks", this, tasksTimedOut);
@@ -414,6 +412,19 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
 
         return Optional.empty();
+    }
+
+    private void timeoutEntry(final ConnectionEntry entry, final long beenOpen) {
+        // Timeouts needs to be re-scheduled on actor thread because we are holding the lock on the current queue,
+        // which may be the tail of a successor chain. This is a problem if the callback attempts to send a request
+        // because that will attempt to lock the chain from the start, potentially causing a deadlock if there is
+        // a concurrent attempt to transmit.
+        context.executeInActor(current -> {
+            final double time = beenOpen * 1.0 / 1_000_000_000;
+            entry.complete(entry.getRequest().toRequestFailure(
+                new RequestTimeoutException("Timed out after " + time + "seconds")));
+            return current;
+        });
     }
 
     final void poison(final RequestException cause) {
