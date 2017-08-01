@@ -9,6 +9,9 @@
 package org.opendaylight.controller.cluster.sharding;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -24,10 +29,12 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeListener;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.AbstractRegistrationTree;
 import org.opendaylight.mdsal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.mdsal.dom.spi.shard.ChildShardContext;
+import org.opendaylight.mdsal.dom.spi.shard.DOMDataTreeListenerAggregator;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -91,6 +98,62 @@ final class DistributedShardChangePublisher
         } finally {
             releaseLock();
         }
+    }
+
+    <L extends DOMDataTreeListener> ListenerRegistration<L> registerDataTreeListener(final L listener,
+            final Collection<DOMDataTreeIdentifier> subtrees, final boolean allowRxMerges) {
+
+        final Collection<DOMDataTreeIdentifier> mySubtrees;
+        final Multimap<ChildShardContext, DOMDataTreeIdentifier> childSubtrees;
+        if (!childShards.isEmpty()) {
+            mySubtrees = new ArrayList<>(subtrees.size());
+            childSubtrees = ArrayListMultimap.create();
+
+            for (DOMDataTreeIdentifier subtree : subtrees) {
+                final Optional<ChildShardContext> subShard = findChildShard(subtree);
+                if (subShard.isPresent()) {
+                    childSubtrees.put(subShard.get(), subtree);
+                } else {
+                    mySubtrees.add(subtree);
+                }
+            }
+        } else {
+            mySubtrees = subtrees;
+            childSubtrees = ImmutableMultimap.of();
+        }
+
+        // 1) Simple aggregator
+        if (mySubtrees.isEmpty()) {
+            return DOMDataTreeListenerAggregator.aggregateIfNeeded(listener, childSubtrees.asMap(), allowRxMerges,
+                ChildShardContext::getShard);
+        }
+
+        // Check if there is some overlap between mySubtrees and child shards and produce
+        // a subtree -> subshard prefix map.
+        final Multimap<DOMDataTreeIdentifier, DOMDataTreeIdentifier> mergeSubtrees;
+        if (!childShards.isEmpty()) {
+            mergeSubtrees = ArrayListMultimap.create();
+
+            for (DOMDataTreeIdentifier subtree : mySubtrees) {
+                for (DOMDataTreeIdentifier subShard : childShards.keySet()) {
+                    if (subtree.contains(subShard)) {
+                        mergeSubtrees.put(subtree, subShard);
+                    }
+                }
+            }
+        } else {
+            mergeSubtrees = ImmutableMultimap.of();
+        }
+
+        // We have all the information we need to instantiate local and remote listeners.
+        // FIXME: decide what to do next
+
+        return null;
+    }
+
+    private Optional<ChildShardContext> findChildShard(final DOMDataTreeIdentifier subtree) {
+        return childShards.entrySet().stream().filter(entry -> entry.getKey().contains(subtree))
+                .findAny().map(Entry::getValue);
     }
 
     private <L extends DOMDataTreeChangeListener> AbstractDOMDataTreeChangeListenerRegistration<L>
