@@ -34,6 +34,24 @@
       "revId": "fc0394a8f3cc44af9b8aea781ea5f9d8eed9f1ed",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_2f174aa5",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangSchemaUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-08-01T16:43:56Z",
+      "side": 1,
+      "message": "So we are bound by the Iterable\u003cQName\u003e variant just below. This class is going away at some point in the future, as it was moved to mdsal, so I don\u0027t think it is worth investing more time into it...",
+      "parentUuid": "ba1f61a0_6f030274",
+      "revId": "fc0394a8f3cc44af9b8aea781ea5f9d8eed9f1ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
