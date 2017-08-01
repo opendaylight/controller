@@ -85,7 +85,7 @@ public class DatastoreContext implements ClientActorConfig {
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
-    private boolean useTellBasedProtocol = false;
+    private boolean useTellBasedProtocol = true;
     private boolean transactionDebugContextEnabled = false;
     private String shardManagerPersistenceId;
     private int maximumMessageSliceSize = DEFAULT_MAX_MESSAGE_SLICE_SIZE;
