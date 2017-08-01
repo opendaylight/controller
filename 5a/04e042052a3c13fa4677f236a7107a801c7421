@@ -1,0 +1,7 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 01 Aug 2017 14:12:19 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/60980
+Project: controller
+Branch: refs/heads/master
