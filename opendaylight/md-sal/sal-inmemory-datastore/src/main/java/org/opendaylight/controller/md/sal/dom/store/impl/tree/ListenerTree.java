@@ -9,9 +9,9 @@ package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.spi.AbstractRegistrationTree;
-import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
+import org.opendaylight.mdsal.dom.spi.AbstractRegistrationTree;
+import org.opendaylight.mdsal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -83,28 +83,5 @@ public final class ListenerTree extends AbstractRegistrationTree<DataChangeListe
             // Always release the lock
             releaseLock();
         }
-    }
-
-    /**
-     * Obtain a tree walking context. This context ensures a consistent view of
-     * the listener registrations. The context should be closed as soon as it
-     * is not required, because each unclosed instance blocks modification of
-     * the listener tree.
-     *
-     * @return A walker instance.
-     *
-     * @deprecated Use {@link #takeSnapshot()} instead.
-     */
-    @Deprecated
-    public ListenerWalker getWalker() {
-        /*
-         * TODO: The only current user of this method is local to the datastore.
-         *       Since this class represents a read-lock, losing a reference to
-         *       it is a _major_ problem, as the registration process will get
-         *       wedged, eventually grinding the system to a halt. Should an
-         *       external user exist, make the Walker a phantom reference, which
-         *       will cleanup the lock if not told to do so.
-         */
-        return new ListenerWalker(takeSnapshot());
     }
 }

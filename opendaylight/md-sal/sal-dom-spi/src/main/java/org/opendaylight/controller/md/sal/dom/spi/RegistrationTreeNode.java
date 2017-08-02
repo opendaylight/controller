@@ -33,7 +33,10 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> registration type
  * @author Robert Varga
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.RegistrationTreeNode} instead.
  */
+@Deprecated
 public final class RegistrationTreeNode<T> implements Identifiable<PathArgument> {
     private static final Logger LOG = LoggerFactory.getLogger(RegistrationTreeNode.class);
 

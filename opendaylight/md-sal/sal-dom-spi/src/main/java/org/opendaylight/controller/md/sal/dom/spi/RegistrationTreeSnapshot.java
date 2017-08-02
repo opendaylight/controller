@@ -15,10 +15,14 @@ import java.util.concurrent.locks.Lock;
  * A stable read-only snapshot of a {@link AbstractRegistrationTree}.
  *
  * @author Robert Varga
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.RegistrationTreeSnapshot} instead.
  */
+@Deprecated
 public final class RegistrationTreeSnapshot<T> implements AutoCloseable {
     @SuppressWarnings("rawtypes")
-    private static final AtomicIntegerFieldUpdater<RegistrationTreeSnapshot> CLOSED_UPDATER = AtomicIntegerFieldUpdater.newUpdater(RegistrationTreeSnapshot.class, "closed");
+    private static final AtomicIntegerFieldUpdater<RegistrationTreeSnapshot> CLOSED_UPDATER =
+            AtomicIntegerFieldUpdater.newUpdater(RegistrationTreeSnapshot.class, "closed");
     private final RegistrationTreeNode<T> node;
     private final Lock lock;
 
