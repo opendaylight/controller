@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_48c71413",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-08-02T10:22:52Z",
+      "side": 1,
+      "message": "This part is now untrue :)",
+      "range": {
+        "startLine": 86,
+        "startChar": 76,
+        "endLine": 86,
+        "endChar": 100
+      },
+      "revId": "7a0f62c315a7b6d24f4b93b12ed58962f85a6807",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
