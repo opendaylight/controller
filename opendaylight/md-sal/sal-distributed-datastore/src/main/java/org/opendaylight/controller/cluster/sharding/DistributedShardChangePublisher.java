@@ -139,8 +139,8 @@ public class DistributedShardChangePublisher
                 findNodeFor(listenerPath.getPathArguments());
 
         // register listener in CDS
-        final ProxyRegistration proxyReg = new ProxyRegistration(distributedDataStore
-                .registerProxyListener(shardLookup, listenerPath, listener), listener);
+        final ListenerRegistration<?> dsReg = distributedDataStore.registerProxyListener(shardLookup, listenerPath,
+            listener);
 
         @SuppressWarnings("unchecked")
         final AbstractDOMDataTreeChangeListenerRegistration<L> registration =
@@ -150,7 +150,7 @@ public class DistributedShardChangePublisher
                     listener.close();
                     DistributedShardChangePublisher.this.removeRegistration(node, this);
                     registrationRemoved(this);
-                    proxyReg.close();
+                    dsReg.close();
                 }
             };
         addRegistration(node, registration);
@@ -177,30 +177,6 @@ public class DistributedShardChangePublisher
         }
 
         return listenerPathArgs;
-    }
-
-    private static class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
-
-        private final ListenerRegistration<org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy;
-        private final DOMDataTreeChangeListener listener;
-
-        private ProxyRegistration(
-                final ListenerRegistration<
-                        org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy,
-                final DOMDataTreeChangeListener listener) {
-            this.proxy = proxy;
-            this.listener = listener;
-        }
-
-        @Override
-        public DOMDataTreeChangeListener getInstance() {
-            return listener;
-        }
-
-        @Override
-        public void close() {
-            proxy.close();
-        }
     }
 
     synchronized DataTreeCandidate applyChanges(final YangInstanceIdentifier listenerPath,
