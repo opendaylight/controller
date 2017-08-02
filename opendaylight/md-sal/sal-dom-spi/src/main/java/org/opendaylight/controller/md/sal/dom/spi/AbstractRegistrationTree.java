@@ -16,7 +16,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
  * An abstract tree of registrations. Allows a read-only snapshot to be taken.
  *
  * @param <T> Type of registered object
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.spi.AbstractRegistrationTree} instead.
  */
+@Deprecated
 public abstract class AbstractRegistrationTree<T> {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final RegistrationTreeNode<T> rootNode = new RegistrationTreeNode<>(null, null);
