@@ -45,7 +45,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFai
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DistributedShardChangePublisher
+final class DistributedShardChangePublisher
         extends AbstractRegistrationTree<AbstractDOMDataTreeChangeListenerRegistration<?>>
         implements DOMStoreTreeChangePublisher {
 
@@ -62,10 +62,8 @@ public class DistributedShardChangePublisher
     @GuardedBy("this")
     private final DataTree dataTree;
 
-    public DistributedShardChangePublisher(final DataStoreClient client,
-                                           final AbstractDataStore distributedDataStore,
-                                           final DOMDataTreeIdentifier prefix,
-                                           final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
+    DistributedShardChangePublisher(final DataStoreClient client, final AbstractDataStore distributedDataStore,
+            final DOMDataTreeIdentifier prefix, final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
         this.client = client;
         this.distributedDataStore = distributedDataStore;
         // TODO keeping the whole dataTree thats contained in subshards doesn't seem like a good idea
@@ -139,8 +137,8 @@ public class DistributedShardChangePublisher
                 findNodeFor(listenerPath.getPathArguments());
 
         // register listener in CDS
-        final ProxyRegistration proxyReg = new ProxyRegistration(distributedDataStore
-                .registerProxyListener(shardLookup, listenerPath, listener), listener);
+        final ListenerRegistration<?> dsReg = distributedDataStore.registerProxyListener(shardLookup, listenerPath,
+            listener);
 
         @SuppressWarnings("unchecked")
         final AbstractDOMDataTreeChangeListenerRegistration<L> registration =
@@ -150,7 +148,7 @@ public class DistributedShardChangePublisher
                     listener.close();
                     DistributedShardChangePublisher.this.removeRegistration(node, this);
                     registrationRemoved(this);
-                    proxyReg.close();
+                    dsReg.close();
                 }
             };
         addRegistration(node, registration);
@@ -177,30 +175,6 @@ public class DistributedShardChangePublisher
         }
 
         return listenerPathArgs;
-    }
-
-    private static class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
-
-        private final ListenerRegistration<org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy;
-        private final DOMDataTreeChangeListener listener;
-
-        private ProxyRegistration(
-                final ListenerRegistration<
-                        org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy,
-                final DOMDataTreeChangeListener listener) {
-            this.proxy = proxy;
-            this.listener = listener;
-        }
-
-        @Override
-        public DOMDataTreeChangeListener getInstance() {
-            return listener;
-        }
-
-        @Override
-        public void close() {
-            proxy.close();
-        }
     }
 
     synchronized DataTreeCandidate applyChanges(final YangInstanceIdentifier listenerPath,
