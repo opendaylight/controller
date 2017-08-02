@@ -23,7 +23,10 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  *
  * Whenever a parent/child relationship is changed, the parent is notified, so it can
  * understand that a logical child has been attached.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService} instead.
  */
+@Deprecated
 public interface DOMDataTreeShardingService extends DOMService {
     /**
      * Register a shard as responsible for a particular subtree prefix.

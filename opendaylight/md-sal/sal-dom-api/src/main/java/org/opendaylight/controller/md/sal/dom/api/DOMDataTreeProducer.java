@@ -37,7 +37,10 @@ import javax.annotation.Nonnull;
  * callback on that particular instance. Any transaction which is not submitted by the
  * time the callback returns will be implicitly cancelled. A producer becomes unbound
  * when the listener it is bound to becomes unregistered.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeProducer} instead.
  */
+@Deprecated
 public interface DOMDataTreeProducer extends DOMDataTreeProducerFactory, AutoCloseable {
     /**
      * Allocate a new open transaction on this producer. Any and all transactions

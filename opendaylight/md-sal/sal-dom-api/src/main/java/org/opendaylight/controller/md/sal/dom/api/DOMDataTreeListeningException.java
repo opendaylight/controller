@@ -10,7 +10,10 @@ package org.opendaylight.controller.md.sal.dom.api;
 /**
  * Base exception for various causes why and {@link DOMDataTreeListener}
  * may be terminated by the {@link DOMDataTreeService} implementation.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeListeningException} instead.
  */
+@Deprecated
 public class DOMDataTreeListeningException extends Exception {
     private static final long serialVersionUID = 1L;
 

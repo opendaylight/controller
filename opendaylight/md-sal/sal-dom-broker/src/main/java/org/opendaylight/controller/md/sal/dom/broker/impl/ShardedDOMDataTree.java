@@ -27,6 +27,10 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree} instead.
+ */
+@Deprecated
 public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTreeShardingService {
     private static final Logger LOG = LoggerFactory.getLogger(ShardedDOMDataTree.class);
     private final Map<LogicalDatastoreType, ShardingTableEntry> shardingTables = new EnumMap<>(LogicalDatastoreType.class);

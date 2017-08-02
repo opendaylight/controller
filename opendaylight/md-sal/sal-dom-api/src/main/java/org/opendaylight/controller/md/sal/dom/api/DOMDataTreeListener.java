@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 /**
  * Interface implemented by data consumers, e.g. processes wanting to act on data
  * after it has been introduced to the conceptual data tree.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeListener} instead.
  */
+@Deprecated
 public interface DOMDataTreeListener extends EventListener {
     /**
      * Invoked whenever one or more registered subtrees change. The logical changes are reported,

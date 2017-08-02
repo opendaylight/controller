@@ -9,7 +9,10 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 /**
  * Base exception for all exceptions related to {@link DOMDataTreeProducer}s.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException} instead.
  */
+@Deprecated
 public class DOMDataTreeProducerException extends Exception {
     private static final long serialVersionUID = 1L;
 

@@ -34,6 +34,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated To be removed with {@link ShardedDOMDataTree}.
+ */
+@Deprecated
 @NotThreadSafe
 final class ShardedDOMDataWriteTransaction implements DOMDataWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(ShardedDOMDataWriteTransaction.class);

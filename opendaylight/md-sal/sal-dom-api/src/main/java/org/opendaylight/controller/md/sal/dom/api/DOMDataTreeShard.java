@@ -15,7 +15,10 @@ import javax.annotation.Nonnull;
  * a shard can receive. Each shard implementation is expected to also implement some of the
  * datastore-level APIs. Which interfaces are required depends on the {@link DOMDataTreeShardingService}
  * implementation.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeShard} instead.
  */
+@Deprecated
 public interface DOMDataTreeShard extends EventListener {
     /**
      * Invoked whenever a child is getting attached as a more specific prefix under this shard.

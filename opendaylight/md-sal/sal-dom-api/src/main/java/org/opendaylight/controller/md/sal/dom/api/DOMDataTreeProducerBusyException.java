@@ -10,7 +10,10 @@ package org.opendaylight.controller.md.sal.dom.api;
 /**
  * Exception indicating that the {@link DOMDataTreeProducer} has an open user
  * transaction and cannot be closed.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeProducerBusyException} instead.
  */
+@Deprecated
 public class DOMDataTreeProducerBusyException extends DOMDataTreeProducerException {
     private static final long serialVersionUID = 1L;
 

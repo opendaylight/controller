@@ -17,6 +17,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated To be removed with {@link ShardedDOMDataTree}.
+ */
+@Deprecated
 final class ShardingTableEntry implements Identifiable<PathArgument> {
     private static final Logger LOG = LoggerFactory.getLogger(ShardingTableEntry.class);
     private final Map<PathArgument, ShardingTableEntry> children = Collections.emptyMap();

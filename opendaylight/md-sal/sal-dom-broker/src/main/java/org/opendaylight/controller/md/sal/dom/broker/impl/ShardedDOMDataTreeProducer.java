@@ -34,6 +34,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated To be removed with {@link ShardedDOMDataTree}.
+ */
+@Deprecated
 final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
     private static final Logger LOG = LoggerFactory.getLogger(ShardedDOMDataTreeProducer.class);
     private final BiMap<DOMDataTreeShard, DOMStoreTransactionChain> shardToChain;

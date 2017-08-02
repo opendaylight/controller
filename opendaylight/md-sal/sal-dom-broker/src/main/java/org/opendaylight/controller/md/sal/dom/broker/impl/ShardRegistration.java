@@ -12,6 +12,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeShard;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 
+/**
+ * @deprecated To be removed with {@link ShardedDOMDataTree}.
+ */
+@Deprecated
 final class ShardRegistration<T extends DOMDataTreeShard> extends AbstractListenerRegistration<T> {
     private final DOMDataTreeIdentifier prefix;
     private final ShardedDOMDataTree tree;

@@ -9,10 +9,12 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import com.google.common.base.Preconditions;
 
-
 /**
  * Failure reported when a data tree is no longer accessible.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataTreeInaccessibleException} instead.
  */
+@Deprecated
 public class DOMDataTreeInaccessibleException extends DOMDataTreeListeningException {
     private static final long serialVersionUID = 1L;
     private final DOMDataTreeIdentifier treeIdentifier;
