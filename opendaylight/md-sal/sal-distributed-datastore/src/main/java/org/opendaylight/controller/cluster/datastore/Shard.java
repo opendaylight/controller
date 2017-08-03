@@ -311,7 +311,7 @@ public class Shard extends RaftActor {
 
             if (message instanceof RequestEnvelope) {
                 handleRequestEnvelope((RequestEnvelope)message);
-            } else if (requestMessageAssembler.isHandledMessage(message)) {
+            } else if (MessageAssembler.isHandledMessage(message)) {
                 handleRequestAssemblerMessage(message);
             } else if (message instanceof ConnectClientRequest) {
                 handleConnectClient((ConnectClientRequest)message);
@@ -373,7 +373,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleRequestAssemblerMessage(Object message) {
+    private void handleRequestAssemblerMessage(final Object message) {
         dispatchers.getDispatcher(DispatcherType.Serialization).execute(() -> {
             JavaSerializer.currentSystem().value_$eq((ExtendedActorSystem) context().system());
             requestMessageAssembler.handleMessage(message, self());
