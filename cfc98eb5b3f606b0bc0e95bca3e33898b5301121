@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_dd857dae",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-08-03T10:19:19Z",
+      "side": 1,
+      "message": "Does this imply that after applying this patch,\nwe will be doing less unnecessary work when we are doing a lot unnecessary work?",
+      "range": {
+        "startLine": 9,
+        "startChar": 17,
+        "endLine": 10,
+        "endChar": 32
+      },
+      "revId": "cfc98eb5b3f606b0bc0e95bca3e33898b5301121",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
