@@ -73,7 +73,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("testLeaderTransferOnShutDown ending");
     }
 
-    private void sendShutDown(ActorRef actor) throws Exception {
+    private void sendShutDown(final ActorRef actor) throws Exception {
         testLog.info("sendShutDown for {} starting", actor.path());
 
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
@@ -199,12 +199,12 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("createRaftActors starting");
     }
 
-    private static void verifyRaftState(ActorRef raftActor, final RaftState expState) {
+    private static void verifyRaftState(final ActorRef raftActor, final RaftState expState) {
         verifyRaftState(raftActor, rs -> assertEquals("getRaftState", expState.toString(), rs.getRaftState()));
     }
 
-    private void verifyLeaderStateChangedMessages(TestActorRef<MessageCollectorActor> notifierActor,
-            String... expLeaderIds) {
+    private static void verifyLeaderStateChangedMessages(final TestActorRef<MessageCollectorActor> notifierActor,
+            final String... expLeaderIds) {
         List<LeaderStateChanged> leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class,
                 expLeaderIds.length);
 
