@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -25,8 +24,6 @@ import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -76,9 +73,8 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             final ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
-            BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker =
-                    new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE,
-                            moduleInfoBundleTracker);
+            BundleTracker<?> moduleInfoResolvedBundleTracker = new BundleTracker<>(context,
+                    Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE, moduleInfoBundleTracker);
             ExtensibleBundleTracker<?> moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
                     moduleFactoryTracker);
             moduleInfoBundleTracker.open(moduleInfoResolvedBundleTracker);
