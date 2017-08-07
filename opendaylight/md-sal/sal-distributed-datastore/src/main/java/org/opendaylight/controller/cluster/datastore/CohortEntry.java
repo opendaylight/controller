@@ -102,11 +102,27 @@ final class CohortEntry {
     }
 
     void commit(final FutureCallback<UnsignedLong> callback) {
-        cohort.commit(callback);
+        cohort.commit(decoratePurge(callback));
     }
 
     void abort(final FutureCallback<Void> callback) {
-        cohort.abort(callback);
+        cohort.abort(decoratePurge(callback));
+    }
+
+    // Transactions which have been aborted/committed need to purged, too. Tell-based protocol does that through
+    // frontend. Ask-based protocol needs to do it on the backend.
+    private <T> FutureCallback<T> decoratePurge(final FutureCallback<T> callback) {
+        return new FutureCallback<T>() {
+            @Override
+            public void onSuccess(final T result) {
+                shard.getDataStore().purgeTransaction(transactionId, () -> callback.onSuccess(result));
+            }
+
+            @Override
+            public void onFailure(final Throwable cause) {
+                shard.getDataStore().purgeTransaction(transactionId, () -> callback.onFailure(cause));
+            }
+        };
     }
 
     void ready(final CohortDecorator cohortDecorator) {
