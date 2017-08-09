@@ -20,7 +20,7 @@ public class ShardStrategyFactory {
     private final Configuration configuration;
     private final LogicalDatastoreType logicalStoreType;
 
-    public ShardStrategyFactory(final Configuration configuration, final LogicalDatastoreType logicalStoreType) {
+    public ShardStrategyFactory(final Configuration configuration, LogicalDatastoreType logicalStoreType) {
         Preconditions.checkState(configuration != null, "configuration should not be missing");
         this.configuration = configuration;
         this.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
@@ -45,8 +45,8 @@ public class ShardStrategyFactory {
         return shardStrategy;
     }
 
-    public static ShardStrategy newShardStrategyInstance(final String moduleName, final String strategyName,
-            final Configuration configuration) {
+    public static ShardStrategy newShardStrategyInstance(String moduleName, String strategyName,
+            Configuration configuration) {
         if (ModuleShardStrategy.NAME.equals(strategyName)) {
             return new ModuleShardStrategy(moduleName, configuration);
         }
@@ -59,7 +59,7 @@ public class ShardStrategyFactory {
             return UNKNOWN_MODULE_NAME;
         }
 
-        String namespace = path.getPathArguments().get(0).getNodeType().getNamespace().toASCIIString();
+        String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
         String moduleName = configuration.getModuleNameFromNameSpace(namespace);
         return moduleName != null ? moduleName : UNKNOWN_MODULE_NAME;
     }
