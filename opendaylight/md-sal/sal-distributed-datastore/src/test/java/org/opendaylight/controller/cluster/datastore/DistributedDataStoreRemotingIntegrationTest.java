@@ -786,10 +786,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Wait for the commit to be replicated to the follower.
 
         MemberNode.verifyRaftState(followerDistributedDataStore, "cars",
-            raftState -> assertEquals("getLastApplied", 0, raftState.getLastApplied()));
+            raftState -> assertEquals("getLastApplied", 1, raftState.getLastApplied()));
 
         MemberNode.verifyRaftState(followerDistributedDataStore, "people",
-            raftState -> assertEquals("getLastApplied", 0, raftState.getLastApplied()));
+            raftState -> assertEquals("getLastApplied", 1, raftState.getLastApplied()));
 
         // Prepare, ready and canCommit a WO tx that writes to 2 shards. This will become the current tx in
         // the leader shard.
