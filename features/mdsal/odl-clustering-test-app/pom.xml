@@ -20,14 +20,14 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-clustering-test-app</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
+    <version>1.7.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
             <artifactId>odl-mdsal-models</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
+            <version>0.12.0-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

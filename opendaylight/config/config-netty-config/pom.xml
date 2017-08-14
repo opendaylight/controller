@@ -19,7 +19,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-netty-config</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
     <description>Configuration files for sal-rest-connector</description>
     <packaging>bundle</packaging>
 

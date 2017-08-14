@@ -10,7 +10,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>distribution.opendaylight-karaf</artifactId>
-  <version>1.9.0-SNAPSHOT</version>
+  <version>1.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <dependencies>
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>1.6.0-SNAPSHOT</version>
+      <version>1.7.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>2.3.0-SNAPSHOT</version>
+      <version>2.4.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -56,7 +56,7 @@
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>features-mdsal-model</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.12.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
