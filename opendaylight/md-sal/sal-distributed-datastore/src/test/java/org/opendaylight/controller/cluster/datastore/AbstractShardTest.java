@@ -95,11 +95,14 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
+    protected static final int HEARTBEAT_MILLIS = 100;
+
     protected final ShardIdentifier shardID = ShardIdentifier.create("inventory", MemberName.forName("member-1"),
         "config" + NEXT_SHARD_NUM.getAndIncrement());
 
     protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder()
-            .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).shardHeartbeatIntervalInMillis(100);
+            .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000)
+            .shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS);
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 

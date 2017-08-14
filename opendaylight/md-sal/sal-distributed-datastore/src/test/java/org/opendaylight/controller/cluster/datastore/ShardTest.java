@@ -1192,6 +1192,10 @@ public class ShardTest extends AbstractShardTest {
                 inOrder.verify(dataTree).prepare(any(DataTreeModification.class));
                 inOrder.verify(dataTree).commit(any(DataTreeCandidate.class));
 
+                // Purge request is scheduled as asynchronous, wait for two heartbeats to let it propagate into
+                // the journal
+                Thread.sleep(HEARTBEAT_MILLIS * 2);
+
                 shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, getRef());
                 final ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
 
