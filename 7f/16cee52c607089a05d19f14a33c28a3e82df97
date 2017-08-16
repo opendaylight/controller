@@ -1,0 +1,8 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Code-Review+1: Anil Belur <abelur@linuxfoundation.org>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Wed, 16 Aug 2017 13:11:22 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/61757
+Project: controller
+Branch: refs/heads/stable/nitrogen
