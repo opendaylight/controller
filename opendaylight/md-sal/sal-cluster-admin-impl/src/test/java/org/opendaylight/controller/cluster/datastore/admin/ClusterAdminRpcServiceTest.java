@@ -376,12 +376,12 @@ public class ClusterAdminRpcServiceTest {
         // Write data to member-3's oper datastore and read/verify via member-2
         writeCarsNodeAndVerify(newReplicaNode3.operDataStore(), newReplicaNode2.operDataStore());
 
-        // Verify all data has been replicated. We expect 4 log entries and thus last applied index of 3 -
-        // 2 ServerConfigurationPayload entries,  the transaction payload entry plus a purge payload.
+        // Verify all data has been replicated. We expect 3 log entries and thus last applied index of 2 -
+        // 2 ServerConfigurationPayload entries and the transaction payload entry.
 
         RaftStateVerifier verifier = raftState -> {
-            assertEquals("Commit index", 3, raftState.getCommitIndex());
-            assertEquals("Last applied index", 3, raftState.getLastApplied());
+            assertEquals("Commit index", 2, raftState.getCommitIndex());
+            assertEquals("Last applied index", 2, raftState.getLastApplied());
         };
 
         verifyRaftState(leaderNode1.configDataStore(), "cars", verifier);

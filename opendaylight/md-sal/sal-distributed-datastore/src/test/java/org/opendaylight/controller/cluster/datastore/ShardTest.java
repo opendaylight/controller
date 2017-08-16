@@ -697,7 +697,7 @@ public class ShardTest extends AbstractShardTest {
 
                 verifyOuterListEntry(shard, 1);
 
-                verifyLastApplied(shard, 5);
+                verifyLastApplied(shard, 2);
             }
         };
     }
@@ -1201,7 +1201,7 @@ public class ShardTest extends AbstractShardTest {
 
                 // Commit index should advance as we do not have an empty
                 // modification
-                assertEquals(1, shardStats.getCommitIndex());
+                assertEquals(0, shardStats.getCommitIndex());
             }
         };
     }
