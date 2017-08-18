@@ -311,7 +311,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     @Override
     public void endNode() throws IOException, IllegalStateException {
         LOG.trace("Ending the node");
-
+        lastLeafSetQName = null;
         output.writeByte(NodeTypes.END_NODE);
     }
 
