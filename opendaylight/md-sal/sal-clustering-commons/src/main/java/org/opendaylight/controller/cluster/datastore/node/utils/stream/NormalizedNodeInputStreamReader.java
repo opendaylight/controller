@@ -108,6 +108,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
         if (nodeType == NodeTypes.END_NODE) {
             LOG.trace("End node reached. return");
+            lastLeafSetQName = null;
             return null;
         }
 
