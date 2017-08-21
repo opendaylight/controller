@@ -123,8 +123,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private boolean shuttingDown;
 
-    protected RaftActor(String id, Map<String, String> peerAddresses,
-         Optional<ConfigParams> configParams, short payloadVersion) {
+    protected RaftActor(final String id, final Map<String, String> peerAddresses,
+         final Optional<ConfigParams> configParams, final short payloadVersion) {
 
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
@@ -157,7 +157,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    protected void handleRecover(Object message) {
+    protected void handleRecover(final Object message) {
         if (raftRecovery == null) {
             raftRecovery = newRaftActorRecoverySupport();
         }
@@ -183,7 +183,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:IllegalCatch")
-    protected void changeCurrentBehavior(RaftActorBehavior newBehavior) {
+    protected void changeCurrentBehavior(final RaftActorBehavior newBehavior) {
         final RaftActorBehavior currentBehavior = getCurrentBehavior();
         if (currentBehavior != null) {
             try {
@@ -327,7 +327,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete,
-            @Nullable final String followerId, long newLeaderTimeoutInMillis) {
+            @Nullable final String followerId, final long newLeaderTimeoutInMillis) {
         LOG.debug("{}: Initiating leader transfer", persistenceId());
 
         RaftActorLeadershipTransferCohort leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
@@ -336,12 +336,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             leadershipTransferInProgress.setNewLeaderTimeoutInMillis(newLeaderTimeoutInMillis);
             leadershipTransferInProgress.addOnComplete(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
-                public void onSuccess(ActorRef raftActorRef) {
+                public void onSuccess(final ActorRef raftActorRef) {
                     context.setRaftActorLeadershipTransferCohort(null);
                 }
 
                 @Override
-                public void onFailure(ActorRef raftActorRef) {
+                public void onFailure(final ActorRef raftActorRef) {
                     context.setRaftActorLeadershipTransferCohort(null);
                 }
             });
@@ -376,13 +376,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (context.hasFollowers()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
-                public void onSuccess(ActorRef raftActorRef) {
+                public void onSuccess(final ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer succeeded - sending PoisonPill", persistenceId());
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
 
                 @Override
-                public void onFailure(ActorRef raftActorRef) {
+                public void onFailure(final ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer failed - sending PoisonPill", persistenceId());
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
@@ -412,7 +412,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void switchBehavior(SwitchBehavior message) {
+    private void switchBehavior(final SwitchBehavior message) {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
             if (newState == RaftState.Leader || newState == RaftState.Follower) {
@@ -494,7 +494,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return OnDemandRaftState.builder();
     }
 
-    private void handleBehaviorChange(BehaviorState oldBehaviorState, RaftActorBehavior currentBehavior) {
+    private void handleBehaviorChange(final BehaviorState oldBehaviorState, final RaftActorBehavior currentBehavior) {
         RaftActorBehavior oldBehavior = oldBehaviorState.getBehavior();
 
         if (oldBehavior != currentBehavior) {
@@ -532,7 +532,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void handleApplyState(ApplyState applyState) {
+    private void handleApplyState(final ApplyState applyState) {
         long startTime = System.nanoTime();
 
         Payload payload = applyState.getReplicatedLogEntry().getData();
@@ -555,7 +555,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         self().tell(applyState, self());
     }
 
-    protected LeaderStateChanged newLeaderStateChanged(String memberId, String leaderId, short leaderPayloadVersion) {
+    protected LeaderStateChanged newLeaderStateChanged(final String memberId, final String leaderId, final short leaderPayloadVersion) {
         return new LeaderStateChanged(memberId, leaderId, leaderPayloadVersion);
     }
 
@@ -581,45 +581,63 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      */
     protected final void persistData(final ActorRef clientActor, final Identifier identifier, final Payload data,
             final boolean batchHint) {
-        ReplicatedLogEntry replicatedLogEntry = new SimpleReplicatedLogEntry(
+        final ReplicatedLogEntry replicatedLogEntry = new SimpleReplicatedLogEntry(
             context.getReplicatedLog().lastIndex() + 1,
             context.getTermInformation().getCurrentTerm(), data);
         replicatedLogEntry.setPersistencePending(true);
 
-        LOG.debug("{}: Persist data {}", persistenceId(), replicatedLogEntry);
+        // If we do not have followers we will not be invoking replication at the end of this method
+        replicatedLogEntry.setReplicationPending(hasFollowers());
 
-        final RaftActorContext raftContext = getRaftActorContext();
+        LOG.debug("{}: Persist data {}", persistenceId(), replicatedLogEntry);
 
         boolean wasAppended = replicatedLog().appendAndPersist(replicatedLogEntry, persistedLogEntry -> {
             // Clear the persistence pending flag in the log entry.
             persistedLogEntry.setPersistencePending(false);
 
-            if (!hasFollowers()) {
-                // Increment the Commit Index and the Last Applied values
-                raftContext.setCommitIndex(persistedLogEntry.getIndex());
-                raftContext.setLastApplied(persistedLogEntry.getIndex());
-
-                // Apply the state immediately.
-                handleApplyState(new ApplyState(clientActor, identifier, persistedLogEntry));
-
-                // Send a ApplyJournalEntries message so that we write the fact that we applied
-                // the state to durable storage
-                self().tell(new ApplyJournalEntries(persistedLogEntry.getIndex()), self());
-
-            } else {
-                context.getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry);
-
-                // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
-                // normally should still be the leader) to check if consensus has now been reached in conjunction with
-                // follower replication.
-                getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
+            // We must not make immediate forward progress if this entry is to be
+            // replicated. If this callback is invoked on-stack, replication will
+            // be still pending.
+            if (!persistedLogEntry.isReplicationPending()) {
+                finishPersistence(clientActor, identifier, persistedLogEntry);
             }
         }, true);
 
-        if (wasAppended && hasFollowers()) {
+        if (wasAppended && replicatedLogEntry.isReplicationPending()) {
+            replicatedLogEntry.setReplicationPending(false);
             // Send log entry for replication.
             getCurrentBehavior().handleMessage(getSelf(), new Replicate(clientActor, identifier, replicatedLogEntry,
                     !batchHint));
+
+            if (!replicatedLogEntry.isPersistencePending()) {
+                // appendAndPersist() completed immediately and invoked the callback on-stack,
+                // observing our intent to replicate. We need to finish calling persistence callback
+                finishPersistence(clientActor, identifier, replicatedLogEntry);
+            }
+        }
+    }
+
+    private void finishPersistence(final ActorRef clientActor, final Identifier identifier,
+            final ReplicatedLogEntry logEntry) {
+        final RaftActorContext raftContext = getRaftActorContext();
+        if (!hasFollowers()) {
+            // Increment the Commit Index and the Last Applied values
+            raftContext.setCommitIndex(logEntry.getIndex());
+            raftContext.setLastApplied(logEntry.getIndex());
+
+            // Apply the state immediately.
+            handleApplyState(new ApplyState(clientActor, identifier, logEntry));
+
+            // Send a ApplyJournalEntries message so that we write the fact that we applied
+            // the state to durable storage
+            self().tell(new ApplyJournalEntries(logEntry.getIndex()), self());
+        } else {
+            context.getReplicatedLog().captureSnapshotIfReady(logEntry);
+
+            // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
+            // normally should still be the leader) to check if consensus has now been reached in conjunction with
+            // follower replication.
+            getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
         }
     }
 
@@ -632,7 +650,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    void setCurrentBehavior(RaftActorBehavior behavior) {
+    void setCurrentBehavior(final RaftActorBehavior behavior) {
         context.setCurrentBehavior(behavior);
     }
 
@@ -699,7 +717,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return context;
     }
 
-    protected void updateConfigParams(ConfigParams configParams) {
+    protected void updateConfigParams(final ConfigParams configParams) {
 
         // obtain the RaftPolicy for oldConfigParams and the updated one.
         String oldRaftPolicy = context.getConfigParams().getCustomRaftPolicyImplementationClass();
@@ -731,11 +749,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return delegatingPersistenceProvider.getDelegate();
     }
 
-    public void setPersistence(DataPersistenceProvider provider) {
+    public void setPersistence(final DataPersistenceProvider provider) {
         delegatingPersistenceProvider.setDelegate(provider);
     }
 
-    protected void setPersistence(boolean persistent) {
+    protected void setPersistence(final boolean persistent) {
         DataPersistenceProvider currentPersistence = persistence();
         if (persistent && (currentPersistence == null || !currentPersistence.isRecoveryApplicable())) {
             setPersistence(new PersistentDataProvider(this));
@@ -758,7 +776,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                  * </ol>
                  */
                 @Override
-                public void saveSnapshot(Object object) {
+                public void saveSnapshot(final Object object) {
                     // Make saving Snapshot successful
                     // Committing the snapshot here would end up calling commit in the creating state which would
                     // be a state violation. That's why now we send a message to commit the snapshot.
@@ -781,7 +799,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * Note that if the peerId does not match the list of peers passed to
      * this actor during construction an IllegalStateException will be thrown.
      */
-    protected void setPeerAddress(String peerId, String peerAddress) {
+    protected void setPeerAddress(final String peerId, final String peerAddress) {
         context.setPeerAddress(peerId, peerAddress);
     }
 
@@ -847,7 +865,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *
      * @param operation the operation to run
      */
-    protected void pauseLeader(Runnable operation) {
+    protected void pauseLeader(final Runnable operation) {
         operation.run();
     }
 
@@ -862,7 +880,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     }
 
-    protected void onLeaderChanged(String oldLeader, String newLeader) {
+    protected void onLeaderChanged(final String oldLeader, final String newLeader) {
     }
 
     private String getLeaderAddress() {
@@ -903,13 +921,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (isLeader()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
-                public void onSuccess(ActorRef raftActorRef) {
+                public void onSuccess(final ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer succeeded after change to non-voting", persistenceId());
                     ensureFollowerState();
                 }
 
                 @Override
-                public void onFailure(ActorRef raftActorRef) {
+                public void onFailure(final ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer failed after change to non-voting", persistenceId());
                     ensureFollowerState();
                 }

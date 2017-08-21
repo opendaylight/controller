@@ -60,10 +60,12 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Migra
     private final long index;
     private final long term;
     private final Payload payload;
-    private boolean persistencePending;
     private final boolean migrated;
 
-    private SimpleReplicatedLogEntry(long index, long term, Payload payload, boolean migrated) {
+    private boolean persistencePending;
+    private boolean replicationPending;
+
+    private SimpleReplicatedLogEntry(final long index, final long term, final Payload payload, final boolean migrated) {
         this.index = index;
         this.term = term;
         this.payload = Preconditions.checkNotNull(payload);
@@ -112,8 +114,18 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Migra
     }
 
     @Override
-    public void setPersistencePending(boolean pending) {
+    public void setPersistencePending(final boolean pending) {
         persistencePending = pending;
+    }
+
+    @Override
+    public boolean isReplicationPending() {
+        return replicationPending;
+    }
+
+    @Override
+    public void setReplicationPending(final boolean pending) {
+        this.replicationPending = pending;
     }
 
     @Override
@@ -137,7 +149,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Migra
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

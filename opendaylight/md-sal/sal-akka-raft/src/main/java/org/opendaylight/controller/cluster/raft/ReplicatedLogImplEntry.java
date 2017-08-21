@@ -25,6 +25,7 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable 
     private final long term;
     private final Payload payload;
     private transient boolean persistencePending = false;
+    private transient boolean replicationPending = false;
 
     /**
      * Constructs an instance.
@@ -70,8 +71,18 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable 
     }
 
     @Override
-    public void setPersistencePending(boolean pending) {
+    public void setPersistencePending(final boolean pending) {
         persistencePending = pending;
+    }
+
+    @Override
+    public boolean isReplicationPending() {
+        return replicationPending;
+    }
+
+    @Override
+    public void setReplicationPending(final boolean pending) {
+        this.replicationPending = pending;
     }
 
     @Override
@@ -85,7 +96,7 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable 
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

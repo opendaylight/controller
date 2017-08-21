@@ -55,4 +55,18 @@ public interface ReplicatedLogEntry {
      * @param pending the new setting.
      */
     void setPersistencePending(boolean pending);
+
+    /**
+     * Checks if replication is pending for this entry.
+     *
+     * @return true if replication is pending, false otherwise.
+     */
+    boolean isReplicationPending();
+
+    /**
+     * Sets whether or not replication is pending for this entry.
+     *
+     * @param pending the new setting.
+     */
+    void setReplicationPending(boolean pending);
 }
