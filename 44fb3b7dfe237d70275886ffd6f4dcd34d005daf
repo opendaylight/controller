@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_bbb5df32",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-08-21T20:00:11Z",
+      "side": 1,
+      "message": "So if this is called on the stack then we will send CheckConsensusReached below. But what if it\u0027s async - it seems we wouldn\u0027t send CheckConsensusReached.",
+      "revId": "44fb3b7dfe237d70275886ffd6f4dcd34d005daf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
