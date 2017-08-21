@@ -79,7 +79,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
                     flapCount = -flapCount - 1;
                 }
 
-            }, 200, TimeUnit.MILLISECONDS);
+            }, 0, TimeUnit.MILLISECONDS);
         }
 
         return Futures.immediateFuture(null);
