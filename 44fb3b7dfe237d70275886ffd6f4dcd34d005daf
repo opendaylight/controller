@@ -34,6 +34,24 @@
       "revId": "44fb3b7dfe237d70275886ffd6f4dcd34d005daf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_a99476e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-08-22T14:42:26Z",
+      "side": 1,
+      "message": "OK - I missed that part, ie replicationPending is cleared below so the async callback here will see that and call finishPersistence.",
+      "parentUuid": "ba1f61a0_29d366d7",
+      "revId": "44fb3b7dfe237d70275886ffd6f4dcd34d005daf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
