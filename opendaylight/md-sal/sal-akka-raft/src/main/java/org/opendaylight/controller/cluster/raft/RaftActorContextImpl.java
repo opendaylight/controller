@@ -183,7 +183,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setLastApplied(long lastApplied) {
-        log.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied);
+        log.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied, new Throwable());
         this.lastApplied = lastApplied;
     }
 
