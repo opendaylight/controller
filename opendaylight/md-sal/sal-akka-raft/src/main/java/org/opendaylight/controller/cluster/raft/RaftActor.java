@@ -745,7 +745,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 captureSnapshot();
             }
         } else if (!persistent && (currentPersistence == null || currentPersistence.isRecoveryApplicable())) {
-            setPersistence(new NonPersistentDataProvider() {
+            setPersistence(new NonPersistentDataProvider(this) {
                 /**
                  * The way snapshotting works is,
                  * <ol>
