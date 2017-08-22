@@ -28,8 +28,6 @@ public class FlappingSingletonService implements ClusterSingletonService {
     private static final ServiceGroupIdentifier SERVICE_GROUP_IDENTIFIER =
             ServiceGroupIdentifier.create("flapping-singleton-service");
 
-    private static final ScheduledExecutorService EXECUTOR = FinalizableScheduledExecutorService.newSingleThread();
-
     private final ClusterSingletonServiceProvider singletonServiceProvider;
     private final AtomicBoolean active = new AtomicBoolean(true);
 
@@ -47,21 +45,16 @@ public class FlappingSingletonService implements ClusterSingletonService {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void instantiateServiceInstance() {
         LOG.debug("Instantiating flapping-singleton-service.");
+        try {
+            registration.close();
+            registration = null;
+        } catch (Exception e) {
+            LOG.warn("There was a problem closing flapping singleton service.", e);
+            setInactive();
 
-        // TODO direct registration/close seem to trigger a bug in singleton state transitions,
-        // remove the whole executor shenanigans after it's fixed.
-        EXECUTOR.submit(() -> {
-            try {
-                registration.close();
-                registration = null;
-            } catch (Exception e) {
-                LOG.warn("There was a problem closing flapping singleton service.", e);
-                setInactive();
-
-                final long count = flapCount.get();
-                flapCount.compareAndSet(count, -count);
-            }
-        });
+            final long count = flapCount.get();
+            flapCount.compareAndSet(count, -count);
+        }
     }
 
     @Override
@@ -71,22 +64,16 @@ public class FlappingSingletonService implements ClusterSingletonService {
 
         flapCount.incrementAndGet();
         if (active.get()) {
-            // TODO direct registration/close seem to trigger a bug in singleton state transitions,
-            // remove  whole executor shenanigans after it's fixed.
-            // Needs to be delayed slightly otherwise it's triggered as well.
-            EXECUTOR.schedule(() -> {
-                LOG.debug("Running re-registration");
-                try {
-                    registration = singletonServiceProvider.registerClusterSingletonService(this);
-                } catch (RuntimeException e) {
-                    LOG.warn("There was a problem re-registering flapping singleton service.", e);
-                    setInactive();
+            LOG.debug("Running re-registration");
+            try {
+                registration = singletonServiceProvider.registerClusterSingletonService(this);
+            } catch (RuntimeException e) {
+                LOG.warn("There was a problem re-registering flapping singleton service.", e);
+                setInactive();
 
-                    final long count = flapCount.get();
-                    flapCount.compareAndSet(count, -count - 1);
-                }
-
-            }, 200, TimeUnit.MILLISECONDS);
+                final long count = flapCount.get();
+                flapCount.compareAndSet(count, -count - 1);
+            }
         }
 
         return Futures.immediateFuture(null);
