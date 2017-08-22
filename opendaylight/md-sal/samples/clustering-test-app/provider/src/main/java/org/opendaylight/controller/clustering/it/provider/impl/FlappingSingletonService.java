@@ -10,8 +10,6 @@ package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
@@ -26,8 +24,6 @@ public class FlappingSingletonService implements ClusterSingletonService {
 
     private static final ServiceGroupIdentifier SERVICE_GROUP_IDENTIFIER =
             ServiceGroupIdentifier.create("flapping-singleton-service");
-
-    private static final ScheduledExecutorService EXECUTOR = FinalizableScheduledExecutorService.newSingleThread();
 
     private final ClusterSingletonServiceProvider singletonServiceProvider;
     private final AtomicBoolean active = new AtomicBoolean(true);
@@ -45,19 +41,14 @@ public class FlappingSingletonService implements ClusterSingletonService {
     @Override
     public void instantiateServiceInstance() {
         LOG.debug("Instantiating flapping-singleton-service.");
-
-        // TODO direct registration/close seem to trigger a bug in singleton state transitions,
-        // remove the whole executor shenanigans after it's fixed.
-        EXECUTOR.submit(() -> {
-            try {
-                registration.close();
-                registration = null;
-            } catch (final Exception e) {
-                LOG.warn("There was a problem closing flapping singleton service.", e);
-                setInactive();
-                flapCount = -flapCount;
-            }
-        });
+        try {
+            registration.close();
+            registration = null;
+        } catch (final Exception e) {
+            LOG.warn("There was a problem closing flapping singleton service.", e);
+            setInactive();
+            flapCount = -flapCount;
+        }
     }
 
     @Override
@@ -66,20 +57,14 @@ public class FlappingSingletonService implements ClusterSingletonService {
 
         flapCount++;
         if (active.get()) {
-            // TODO direct registration/close seem to trigger a bug in singleton state transitions,
-            // remove  whole executor shenanigans after it's fixed.
-            // Needs to be delayed slightly otherwise it's triggered as well.
-            EXECUTOR.schedule(() -> {
-                LOG.debug("Running re-registration");
-                try {
-                    registration = singletonServiceProvider.registerClusterSingletonService(this);
-                } catch (final Exception e) {
-                    LOG.warn("There was a problem re-registering flapping singleton service.", e);
-                    setInactive();
-                    flapCount = -flapCount - 1;
-                }
-
-            }, 200, TimeUnit.MILLISECONDS);
+            LOG.debug("Running re-registration");
+            try {
+                registration = singletonServiceProvider.registerClusterSingletonService(this);
+            } catch (final Exception e) {
+                LOG.warn("There was a problem re-registering flapping singleton service.", e);
+                setInactive();
+                flapCount = -flapCount - 1;
+            }
         }
 
         return Futures.immediateFuture(null);
