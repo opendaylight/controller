@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.FileModuleShardConfigProvider;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -31,18 +32,20 @@ public class ShardStrategyFactoryTest {
     @Before
     public void setUp() {
         factory = new ShardStrategyFactory(
-                new ConfigurationImpl("module-shards.conf", "modules.conf"), LogicalDatastoreType.CONFIGURATION);
+                new ConfigurationImpl(new FileModuleShardConfigProvider("./configuration/initial/module-shards.conf",
+                        "./configuration/initial/modules.conf")),
+                LogicalDatastoreType.CONFIGURATION);
     }
 
     @Test
     public void testGetStrategy() {
-        ShardStrategy strategy = factory.getStrategy(TestModel.TEST_PATH);
+        final ShardStrategy strategy = factory.getStrategy(TestModel.TEST_PATH);
         assertNotNull(strategy);
     }
 
     @Test
     public void testGetStrategyForKnownModuleName() {
-        ShardStrategy strategy = factory.getStrategy(YangInstanceIdentifier.of(CarsModel.BASE_QNAME));
+        final ShardStrategy strategy = factory.getStrategy(YangInstanceIdentifier.of(CarsModel.BASE_QNAME));
         assertTrue(strategy instanceof ModuleShardStrategy);
     }
 

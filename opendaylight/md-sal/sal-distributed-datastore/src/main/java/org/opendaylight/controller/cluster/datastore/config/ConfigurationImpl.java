@@ -43,13 +43,9 @@ public class ConfigurationImpl implements Configuration {
     private volatile Map<String, String> namespaceToModuleName;
     private volatile Set<String> allShardNames;
 
-    public ConfigurationImpl(final String moduleShardsConfigPath, final String modulesConfigPath) {
-        this(new FileModuleShardConfigProvider(moduleShardsConfigPath, modulesConfigPath));
-    }
-
     public ConfigurationImpl(final ModuleShardConfigProvider provider) {
-        ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
-        for (Map.Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
+        final ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
+        for (final Map.Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
             mapBuilder.put(e.getKey(), e.getValue().build());
         }
 
@@ -59,18 +55,18 @@ public class ConfigurationImpl implements Configuration {
         this.namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
     }
 
-    private static Set<String> createAllShardNames(Iterable<ModuleConfig> moduleConfigs) {
+    private static Set<String> createAllShardNames(final Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for (ModuleConfig moduleConfig : moduleConfigs) {
+        for (final ModuleConfig moduleConfig : moduleConfigs) {
             builder.addAll(moduleConfig.getShardNames());
         }
 
         return builder.build();
     }
 
-    private static Map<String, String> createNamespaceToModuleName(Iterable<ModuleConfig> moduleConfigs) {
+    private static Map<String, String> createNamespaceToModuleName(final Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        for (ModuleConfig moduleConfig : moduleConfigs) {
+        for (final ModuleConfig moduleConfig : moduleConfigs) {
             if (moduleConfig.getNamespace() != null) {
                 builder.put(moduleConfig.getNamespace(), moduleConfig.getName());
             }
@@ -83,9 +79,9 @@ public class ConfigurationImpl implements Configuration {
     public Collection<String> getMemberShardNames(final MemberName memberName) {
         Preconditions.checkNotNull(memberName, "memberName should not be null");
 
-        List<String> shards = new ArrayList<>();
-        for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            for (ShardConfig shardConfig: moduleConfig.getShardConfigs()) {
+        final List<String> shards = new ArrayList<>();
+        for (final ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            for (final ShardConfig shardConfig: moduleConfig.getShardConfigs()) {
                 if (shardConfig.getReplicas().contains(memberName)) {
                     shards.add(shardConfig.getName());
                 }
@@ -103,10 +99,10 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public ShardStrategy getStrategyForModule(String moduleName) {
+    public ShardStrategy getStrategyForModule(final String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
-        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        final ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
         return moduleConfig != null ? moduleConfig.getShardStrategy() : null;
     }
 
@@ -114,8 +110,8 @@ public class ConfigurationImpl implements Configuration {
     public String getShardNameForModule(final String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
-        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
-        Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
+        final ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        final Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
             Collections.<ShardConfig>emptySet();
         return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName() : null;
     }
@@ -129,7 +125,7 @@ public class ConfigurationImpl implements Configuration {
                 new SimpleEntry<>(
                         new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
 
-        for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
+        for (final Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
             if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()
                     > bestMatchEntry.getKey().getRootIdentifier().getPathArguments().size()) {
                 bestMatchEntry = entry;
@@ -144,8 +140,8 @@ public class ConfigurationImpl implements Configuration {
     public Collection<MemberName> getMembersFromShardName(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
-        for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+        for (final ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if (shardConfig != null) {
                 return shardConfig.getReplicas();
             }
@@ -167,8 +163,8 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public Collection<MemberName> getUniqueMemberNamesForAllShards() {
-        Set<MemberName> allNames = new HashSet<>();
-        for (String shardName: getAllShardNames()) {
+        final Set<MemberName> allNames = new HashSet<>();
+        for (final String shardName: getAllShardNames()) {
             allNames.addAll(getMembersFromShardName(shardName));
         }
 
@@ -176,10 +172,10 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public synchronized void addModuleShardConfiguration(ModuleShardConfiguration config) {
+    public synchronized void addModuleShardConfiguration(final ModuleShardConfiguration config) {
         Preconditions.checkNotNull(config, "ModuleShardConfiguration should not be null");
 
-        ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName())
+        final ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName())
                 .nameSpace(config.getNamespace().toASCIIString())
                 .shardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName()))
                 .shardConfig(config.getShardName(), config.getShardMemberNames()).build();
@@ -228,25 +224,25 @@ public class ConfigurationImpl implements Configuration {
         prefixConfigMap = ImmutableMap.copyOf(newPrefixConfigMap);
     }
 
-    private ShardStrategy createShardStrategy(String moduleName, String shardStrategyName) {
+    private ShardStrategy createShardStrategy(final String moduleName, final String shardStrategyName) {
         return ShardStrategyFactory.newShardStrategyInstance(moduleName, shardStrategyName, this);
     }
 
     @Override
-    public boolean isShardConfigured(String shardName) {
+    public boolean isShardConfigured(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         return allShardNames.contains(shardName);
     }
 
     @Override
-    public void addMemberReplicaForShard(String shardName, MemberName newMemberName) {
+    public void addMemberReplicaForShard(final String shardName, final MemberName newMemberName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
-        for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+        for (final ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if (shardConfig != null) {
-                Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
+                final Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.add(newMemberName);
                 updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
@@ -255,14 +251,14 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void removeMemberReplicaForShard(String shardName, MemberName newMemberName) {
+    public void removeMemberReplicaForShard(final String shardName, final MemberName newMemberName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
-        for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+        for (final ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if (shardConfig != null) {
-                Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
+                final Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.remove(newMemberName);
                 updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
@@ -278,7 +274,7 @@ public class ConfigurationImpl implements Configuration {
                 new SimpleEntry<>(
                         new DOMDataTreeIdentifier(prefix.getDatastoreType(), YangInstanceIdentifier.EMPTY), null);
 
-        for (Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
+        for (final Entry<DOMDataTreeIdentifier, PrefixShardConfiguration> entry : prefixConfigMap.entrySet()) {
             if (entry.getKey().contains(prefix) && entry.getKey().getRootIdentifier().getPathArguments().size()
                     > bestMatchEntry.getKey().getRootIdentifier().getPathArguments().size()) {
                 bestMatchEntry = entry;

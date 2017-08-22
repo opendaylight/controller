@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.FileModuleShardConfigProvider;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -28,16 +29,18 @@ public class ModuleShardStrategyTest {
 
     @BeforeClass
     public static void setUpClass() {
-        configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
+        configuration =
+                new ConfigurationImpl(new FileModuleShardConfigProvider("./configuration/initial/module-shards.conf",
+                        "./configuration/initial/modules.conf"));
     }
 
 
     @Test
     public void testFindShard() throws Exception {
-        ModuleShardStrategy moduleShardStrategy =
+        final ModuleShardStrategy moduleShardStrategy =
             new ModuleShardStrategy("cars", configuration);
 
-        String shard = moduleShardStrategy.findShard(CarsModel.BASE_PATH);
+        final String shard = moduleShardStrategy.findShard(CarsModel.BASE_PATH);
 
         assertEquals("cars-1", shard);
     }
@@ -50,10 +53,10 @@ public class ModuleShardStrategyTest {
 
         final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(baseQName);
 
-        ModuleShardStrategy moduleShardStrategy =
+        final ModuleShardStrategy moduleShardStrategy =
             new ModuleShardStrategy("missing", configuration);
 
-        String shard = moduleShardStrategy.findShard(BASE_PATH);
+        final String shard = moduleShardStrategy.findShard(BASE_PATH);
 
         assertEquals(DefaultShardStrategy.DEFAULT_SHARD, shard);
 

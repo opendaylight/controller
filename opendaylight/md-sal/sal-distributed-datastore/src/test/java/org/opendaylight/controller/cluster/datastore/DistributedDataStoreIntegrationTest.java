@@ -122,7 +122,7 @@ public class DistributedDataStoreIntegrationTest {
         InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
-        Address member1Address = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
+        final Address member1Address = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
         Cluster.get(system).join(member1Address);
     }
 
@@ -285,7 +285,7 @@ public class DistributedDataStoreIntegrationTest {
                     doCommit(readWriteTx.ready());
 
                     // Verify the data in the store
-                    DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                    final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
                     optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
                     assertEquals("isPresent", true, optional.isPresent());
@@ -316,7 +316,7 @@ public class DistributedDataStoreIntegrationTest {
 
                     writeTx = txChain.newWriteOnlyTransaction();
 
-                    int numCars = 5;
+                    final int numCars = 5;
                     for (int i = 0; i < numCars; i++) {
                         writeTx.write(CarsModel.newCarPath("car" + i),
                                 CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
@@ -379,7 +379,7 @@ public class DistributedDataStoreIntegrationTest {
                                 writeTx.delete(listEntryPath);
 
                                 txCohort.set(writeTx.ready());
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 caughtEx.set(e);
                             } finally {
                                 txReady.countDown();
@@ -471,7 +471,7 @@ public class DistributedDataStoreIntegrationTest {
                                 txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
 
                                 txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 caughtEx.set(e);
                             } finally {
                                 txReadsDone.countDown();
@@ -482,7 +482,7 @@ public class DistributedDataStoreIntegrationTest {
                     txThread.start();
 
                     // Wait for the Tx operations to complete.
-                    boolean done = Uninterruptibles.awaitUninterruptibly(txReadsDone, 5, TimeUnit.SECONDS);
+                    final boolean done = Uninterruptibles.awaitUninterruptibly(txReadsDone, 5, TimeUnit.SECONDS);
                     if (caughtEx.get() != null) {
                         throw caughtEx.get();
                     }
@@ -540,7 +540,7 @@ public class DistributedDataStoreIntegrationTest {
                         writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
                         txCohort.set(writeTx.ready());
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         caughtEx.set(e);
                     } finally {
                         txReady.countDown();
@@ -550,7 +550,7 @@ public class DistributedDataStoreIntegrationTest {
                 txThread.start();
 
                 // Wait for the Tx operations to complete.
-                boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+                final boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
                 if (caughtEx.get() != null) {
                     throw caughtEx.get();
                 }
@@ -611,7 +611,7 @@ public class DistributedDataStoreIntegrationTest {
                             txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
 
                             readWriteTx.close();
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             caughtEx.set(e);
                         } finally {
                             txReadDone.countDown();
@@ -621,7 +621,7 @@ public class DistributedDataStoreIntegrationTest {
                     txThread.start();
 
                     // Wait for the Tx operations to complete.
-                    boolean done = Uninterruptibles.awaitUninterruptibly(txReadDone, 5, TimeUnit.SECONDS);
+                    final boolean done = Uninterruptibles.awaitUninterruptibly(txReadDone, 5, TimeUnit.SECONDS);
                     if (caughtEx.get() != null) {
                         throw caughtEx.get();
                     }
@@ -687,7 +687,7 @@ public class DistributedDataStoreIntegrationTest {
                                         ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
 
                                 txCohort.set(writeTx.ready());
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 caughtEx.set(e);
                             } finally {
                                 txReady.countDown();
@@ -697,7 +697,7 @@ public class DistributedDataStoreIntegrationTest {
                         txThread.start();
 
                         // Wait for the Tx operations to complete.
-                        boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+                        final boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
                         if (caughtEx.get() != null) {
                             throw caughtEx.get();
                         }
@@ -714,7 +714,7 @@ public class DistributedDataStoreIntegrationTest {
                         } catch (final ExecutionException e) {
                             assertTrue(Throwables.getRootCause(e) instanceof NoShardLeaderException);
                             assertEquals(DistributedDataStore.class, testParameter);
-                        } catch (TimeoutException e) {
+                        } catch (final TimeoutException e) {
                             // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
                             assertEquals(ClientBackedDataStore.class, testParameter);
                         }
@@ -723,7 +723,7 @@ public class DistributedDataStoreIntegrationTest {
                             if (writeTxToClose != null) {
                                 writeTxToClose.close();
                             }
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             // FIXME TransactionProxy.close throws IllegalStateException:
                             // Transaction is ready, it cannot be closed
                         }
@@ -799,7 +799,7 @@ public class DistributedDataStoreIntegrationTest {
                         try {
                             continueCommit1.await();
                             doCommit(cohort1);
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             commit1Error.set(e);
                         } finally {
                             commit1Done.countDown();
@@ -935,7 +935,7 @@ public class DistributedDataStoreIntegrationTest {
                             MoreExecutors.directExecutor());
 
                     final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
-                    DOMTransactionChain txChain = broker.createTransactionChain(listener);
+                    final DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
                     final List<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
 
@@ -944,7 +944,7 @@ public class DistributedDataStoreIntegrationTest {
                     writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
                     futures.add(writeTx.submit());
 
-                    int numCars = 100;
+                    final int numCars = 100;
                     for (int i = 0; i < numCars; i++) {
                         final DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
@@ -1052,14 +1052,14 @@ public class DistributedDataStoreIntegrationTest {
                     final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
                     // Create read-only tx's and issue a read.
-                    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture1 = txChain
+                    final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture1 = txChain
                             .newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
-                    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture2 = txChain
+                    final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture2 = txChain
                             .newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
                     // Create another write tx and issue the write.
-                    DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
+                    final DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
                     writeTx2.write(TestModel.OUTER_LIST_PATH,
                             ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
@@ -1069,7 +1069,7 @@ public class DistributedDataStoreIntegrationTest {
                     assertEquals("isPresent", true, readFuture2.checkedGet(5, TimeUnit.SECONDS).isPresent());
 
                     // Ensure the writes succeed.
-                    DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
+                    final DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
 
                     doCommit(cohort1);
                     doCommit(cohort2);
@@ -1199,7 +1199,7 @@ public class DistributedDataStoreIntegrationTest {
                     testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                             ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
-                    YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+                    final YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                             .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
                     testWriteTransaction(dataStore, listPath,
                             ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
@@ -1235,7 +1235,7 @@ public class DistributedDataStoreIntegrationTest {
 
                     final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
 
-                    ListenerRegistration<MockDataTreeChangeListener> listenerReg = dataStore
+                    final ListenerRegistration<MockDataTreeChangeListener> listenerReg = dataStore
                             .registerTreeChangeListener(TestModel.TEST_PATH, listener);
 
                     assertNotNull("registerTreeChangeListener returned null", listenerReg);
@@ -1252,7 +1252,7 @@ public class DistributedDataStoreIntegrationTest {
                     testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                             ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
-                    YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+                    final YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                             .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
                     testWriteTransaction(dataStore, listPath,
                             ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
@@ -1312,7 +1312,8 @@ public class DistributedDataStoreIntegrationTest {
                         new DatastoreSnapshot.ShardSnapshot("people", peopleSnapshot)));
 
                 try (AbstractDataStore dataStore = setupAbstractDataStore(
-                        testParameter, name, "module-shards-member1.conf", true, "cars", "people")) {
+                        testParameter, name, "./configuration/initial/module-shards-member1.conf", true, "cars",
+                        "people")) {
 
                     final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
@@ -1340,12 +1341,12 @@ public class DistributedDataStoreIntegrationTest {
                         CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
                                 CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
 
-                DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
+                final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
                 dataTree.setSchemaContext(SchemaContextHelper.full());
                 AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
-                NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
+                final NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-                MetadataShardDataTreeSnapshot shardSnapshot = new MetadataShardDataTreeSnapshot(root);
+                final MetadataShardDataTreeSnapshot shardSnapshot = new MetadataShardDataTreeSnapshot(root);
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try (DataOutputStream dos = new DataOutputStream(bos)) {
                     PayloadVersion.BORON.writeTo(dos);
@@ -1361,11 +1362,12 @@ public class DistributedDataStoreIntegrationTest {
                 InMemorySnapshotStore.addSnapshot("member-1-shard-cars-" + name, snapshot);
 
                 try (AbstractDataStore dataStore = setupAbstractDataStore(
-                        testParameter, name, "module-shards-member1.conf", true, "cars")) {
+                        testParameter, name, "./configuration/initial/module-shards-member1.conf", true, "cars")) {
 
-                    DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                    final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-                    Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+                    final Optional<NormalizedNode<?, ?>> optional =
+                            readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
                     assertEquals("isPresent", true, optional.isPresent());
                     assertEquals("Data node", carsNode, optional.get());
                 }

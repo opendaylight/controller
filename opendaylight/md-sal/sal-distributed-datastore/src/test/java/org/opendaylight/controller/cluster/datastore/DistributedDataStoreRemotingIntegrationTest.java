@@ -136,9 +136,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static final Address MEMBER_2_ADDRESS = AddressFromURIString.parse(
             "akka://cluster-test@127.0.0.1:2559");
 
-    private static final String MODULE_SHARDS_CARS_ONLY_1_2 = "module-shards-cars-member-1-and-2.conf";
-    private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 = "module-shards-member1-and-2.conf";
-    private static final String MODULE_SHARDS_CARS_PEOPLE_1_2_3 = "module-shards-member1-and-2-and-3.conf";
+    private static final String MODULE_SHARDS_CARS_ONLY_1_2 =
+            "./configuration/initial/module-shards-cars-member-1-and-2.conf";
+    private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 =
+            "./configuration/initial/module-shards-member1-and-2.conf";
+    private static final String MODULE_SHARDS_CARS_PEOPLE_1_2_3 =
+            "./configuration/initial/module-shards-member1-and-2-and-3.conf";
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
@@ -298,12 +301,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // tell-based persists additional payloads which could be replicated and applied in a batch resulting in
         // either 2 or 3 ApplyJournalEntries. To handle this we read the follower's persisted ApplyJournalEntries
         // until we find the one that encompasses the leader's lastAppliedIndex.
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         boolean done = false;
         while (!done) {
             final List<ApplyJournalEntries> entries = InMemoryJournal.get(followerCarShardName,
                     ApplyJournalEntries.class);
-            for (ApplyJournalEntries aje: entries) {
+            for (final ApplyJournalEntries aje: entries) {
                 if (aje.getToIndex() >= leaderLastAppliedIndex.get()) {
                     done = true;
                     break;
@@ -607,7 +610,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final DatastoreContext.Builder newMember1Builder = DatastoreContext.newBuilder()
                 .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
-        IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder, commitTimeout);
+        final IntegrationTestKit newMember1TestKit =
+                new IntegrationTestKit(leaderSystem, newMember1Builder, commitTimeout);
 
         try (AbstractDataStore ds =
                 newMember1TestKit.setupAbstractDataStore(
@@ -619,8 +623,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
 
-            MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-            YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
+            final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
             writeTx.merge(car1Path, car1);
 
             followerTestKit.doCommit(writeTx.ready());
@@ -667,7 +671,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Send another tx without immediate commit.
 
         modification = dataTree.takeSnapshot().newModification();
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
         modification.ready();
 
@@ -686,7 +690,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
-        ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
+        final ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
                 leaderDistributedDataStore.getActorContext(), Arrays.asList(
                         new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), tx2);
         cohort.canCommit().get(5, TimeUnit.SECONDS);
@@ -735,7 +739,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Send another tx without immediate commit.
 
         modification = dataTree.takeSnapshot().newModification();
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
 
         forwardedReady = new ForwardedReadyTransaction(tx2,
@@ -750,7 +754,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
 
-        ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
+        final ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
                 ((ReadyTransactionReply)resp).getCohortPath());
 
         final Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
@@ -807,7 +811,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
         writeTx2.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
-        NormalizedNode<?, ?> people = PeopleModel.newPersonMapNode();
+        final NormalizedNode<?, ?> people = PeopleModel.newPersonMapNode();
         writeTx2.write(PeopleModel.PERSON_LIST_PATH, people);
         final DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
 
@@ -871,7 +875,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerTestKit.doCommit(writeTx4Cohort);
         followerTestKit.doCommit(rwTxCohort);
 
-        DOMStoreReadTransaction readTx = leaderDistributedDataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = leaderDistributedDataStore.newReadOnlyTransaction();
         verifyCars(readTx, cars.toArray(new MapEntryNode[cars.size()]));
         verifyNode(readTx, PeopleModel.PERSON_LIST_PATH, people);
     }
@@ -1063,7 +1067,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                     + Throwables.getStackTraceAsString(e.getCause());
             assertTrue(msg, Throwables.getRootCause(e) instanceof NoShardLeaderException);
             assertEquals(DistributedDataStore.class, testParameter);
-        } catch (TimeoutException e) {
+        } catch (final TimeoutException e) {
             // ClientBackedDataStore doesn't set cause to ExecutionException, future just time outs
             assertEquals(ClientBackedDataStore.class, testParameter);
         }
@@ -1071,7 +1075,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionRetryWithInitialAskTimeoutExOnCreateTx() throws Exception {
-        String testName = "testTransactionRetryWithInitialAskTimeoutExOnCreateTx";
+        final String testName = "testTransactionRetryWithInitialAskTimeoutExOnCreateTx";
         initDatastores(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, CARS);
 
         final DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder()
@@ -1117,7 +1121,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Setup a saved snapshot on the leader. The follower will startup with no data and the leader should
         // install a snapshot to sync the follower.
 
-        TipProducingDataTree tree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
+        final TipProducingDataTree tree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
         tree.setSchemaContext(SchemaContextHelper.full());
 
         final ContainerNode carsNode = CarsModel.newCarsNode(
@@ -1154,7 +1158,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals("Snapshot getLastTerm", expected.getLastTerm(), actual.getLastTerm());
         assertEquals("Snapshot getLastIndex", expected.getLastIndex(), actual.getLastIndex());
         assertEquals("Snapshot state type", ShardSnapshotState.class, actual.getState().getClass());
-        MetadataShardDataTreeSnapshot shardSnapshot =
+        final MetadataShardDataTreeSnapshot shardSnapshot =
                 (MetadataShardDataTreeSnapshot) ((ShardSnapshotState)actual.getState()).getSnapshot();
         assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().get());
     }

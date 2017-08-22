@@ -66,7 +66,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     private static final DOMDataTreeIdentifier TEST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
 
-    private static final String MODULE_SHARDS_CONFIG = "module-shards-default.conf";
+    private static final String MODULE_SHARDS_CONFIG = "./configuration/initial/module-shards-default.conf";
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;

@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
+import org.opendaylight.controller.cluster.datastore.config.FileModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -64,7 +65,8 @@ public class IntegrationTestKit extends ShardTestKit {
         this(actorSystem, datastoreContextBuilder, 7);
     }
 
-    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder, int commitTimeout) {
+    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder,
+            final int commitTimeout) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
         this.commitTimeout = commitTimeout;
@@ -92,14 +94,15 @@ public class IntegrationTestKit extends ShardTestKit {
     public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
                                                     final String typeName, final String... shardNames)
             throws Exception {
-        return setupAbstractDataStore(implementation, typeName, "module-shards.conf", true,
+        return setupAbstractDataStore(implementation, typeName, "./configuration/initial/module-shards.conf", true,
                 SchemaContextHelper.full(), shardNames);
     }
 
     public AbstractDataStore setupAbstractDataStore(final Class<? extends AbstractDataStore> implementation,
                                                     final String typeName, final boolean waitUntilLeader,
                                                     final String... shardNames) throws Exception {
-        return setupAbstractDataStore(implementation, typeName, "module-shards.conf", waitUntilLeader,
+        return setupAbstractDataStore(implementation, typeName, "./configuration/initial/module-shards.conf",
+                waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
@@ -116,7 +119,8 @@ public class IntegrationTestKit extends ShardTestKit {
                                                     final boolean waitUntilLeader,
                                                     final SchemaContext schemaContext,
                                                     final String... shardNames) throws Exception {
-        return setupAbstractDataStore(implementation, typeName, moduleShardsConfig, "modules.conf", waitUntilLeader,
+        return setupAbstractDataStore(implementation, typeName, moduleShardsConfig,
+                "./configuration/initial/modules.conf", waitUntilLeader,
                 schemaContext, shardNames);
     }
 
@@ -126,7 +130,8 @@ public class IntegrationTestKit extends ShardTestKit {
                                                      final SchemaContext schemaContext, final String... shardNames)
             throws Exception {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
-        final Configuration config = new ConfigurationImpl(moduleShardsConfig, modulesConfig);
+        final FileModuleShardConfigProvider prov = new FileModuleShardConfigProvider(moduleShardsConfig, modulesConfig);
+        final Configuration config = new ConfigurationImpl(prov);
 
         setDataStoreName(typeName);
 
@@ -152,7 +157,7 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
-    private void setDataStoreName(String typeName) {
+    private void setDataStoreName(final String typeName) {
         if ("config".equals(typeName)) {
             datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.CONFIGURATION);
         } else if ("operational".equals(typeName)) {
@@ -209,8 +214,8 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public void waitUntilLeader(final ActorContext actorContext, final String... shardNames) {
-        for (String shardName: shardNames) {
-            ActorRef shard = findLocalShard(actorContext, shardName);
+        for (final String shardName: shardNames) {
+            final ActorRef shard = findLocalShard(actorContext, shardName);
 
             assertNotNull("Shard was not created for " + shardName, shard);
 
@@ -219,8 +224,8 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public void waitUntilNoLeader(final ActorContext actorContext, final String... shardNames) {
-        for (String shardName: shardNames) {
-            ActorRef shard = findLocalShard(actorContext, shardName);
+        for (final String shardName: shardNames) {
+            final ActorRef shard = findLocalShard(actorContext, shardName);
             assertNotNull("No local shard found for " + shardName, shard);
 
             waitUntilNoLeader(shard);
@@ -228,11 +233,11 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public void waitForMembersUp(final String... otherMembers) {
-        Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
-        Stopwatch sw = Stopwatch.createStarted();
+        final Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
+        final Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
-            CurrentClusterState state = Cluster.get(getSystem()).state();
-            for (Member m: state.getMembers()) {
+            final CurrentClusterState state = Cluster.get(getSystem()).state();
+            for (final Member m: state.getMembers()) {
                 if (m.status() == MemberStatus.up() && otherMembersSet.remove(m.getRoles().iterator().next())
                         && otherMembersSet.isEmpty()) {
                     return;
@@ -249,7 +254,7 @@ public class IntegrationTestKit extends ShardTestKit {
         ActorRef shard = null;
         for (int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            final Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
             if (shardReply.isPresent()) {
                 shard = shardReply.get();
             }
@@ -261,7 +266,7 @@ public class IntegrationTestKit extends ShardTestKit {
         for (int i = 0; i < 20 * 5 ; i++) {
             LOG.debug("Waiting for shard down {}", shardName);
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            final Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
             if (!shardReply.isPresent()) {
                 return;
             }
@@ -272,21 +277,21 @@ public class IntegrationTestKit extends ShardTestKit {
 
     public static void verifyShardStats(final AbstractDataStore datastore, final String shardName,
             final ShardStatsVerifier verifier) throws Exception {
-        ActorContext actorContext = datastore.getActorContext();
+        final ActorContext actorContext = datastore.getActorContext();
 
-        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
-        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+        final Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        final ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            ShardStats shardStats = (ShardStats)actorContext
+            final ShardStats shardStats = (ShardStats)actorContext
                     .executeOperation(shardActor, Shard.GET_SHARD_MBEAN_MESSAGE);
 
             try {
                 verifier.verify(shardStats);
                 return;
-            } catch (AssertionError e) {
+            } catch (final AssertionError e) {
                 lastError = e;
                 Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             }
@@ -297,21 +302,21 @@ public class IntegrationTestKit extends ShardTestKit {
 
     public static void verifyShardState(final AbstractDataStore datastore, final String shardName,
             final Consumer<OnDemandShardState> verifier) throws Exception {
-        ActorContext actorContext = datastore.getActorContext();
+        final ActorContext actorContext = datastore.getActorContext();
 
-        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
-        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+        final Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        final ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            OnDemandShardState shardState = (OnDemandShardState)actorContext
+            final OnDemandShardState shardState = (OnDemandShardState)actorContext
                     .executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
 
             try {
                 verifier.accept(shardState);
                 return;
-            } catch (AssertionError e) {
+            } catch (final AssertionError e) {
                 lastError = e;
                 Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             }
@@ -325,7 +330,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
         // 1. Create a write-only Tx
 
-        DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
         // 2. Write some data
@@ -334,7 +339,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
         // 3. Ready the Tx for commit
 
-        DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
+        final DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
         // 4. Commit the Tx
 
@@ -342,15 +347,15 @@ public class IntegrationTestKit extends ShardTestKit {
 
         // 5. Verify the data in the store
 
-        DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-        Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
+        final Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, optional.isPresent());
         assertEquals("Data node", nodeToWrite, optional.get());
     }
 
     public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
-        Boolean canCommit = cohort.canCommit().get(commitTimeout, TimeUnit.SECONDS);
+        final Boolean canCommit = cohort.canCommit().get(commitTimeout, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
@@ -358,7 +363,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
     void doCommit(final ListenableFuture<Boolean> canCommitFuture, final DOMStoreThreePhaseCommitCohort cohort)
             throws Exception {
-        Boolean canCommit = canCommitFuture.get(commitTimeout, TimeUnit.SECONDS);
+        final Boolean canCommit = canCommitFuture.get(commitTimeout, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
@@ -370,7 +375,7 @@ public class IntegrationTestKit extends ShardTestKit {
         try {
             callable.call();
             fail("Expected " + expType.getSimpleName());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             assertEquals("Exception type", expType, e.getClass());
         }
     }

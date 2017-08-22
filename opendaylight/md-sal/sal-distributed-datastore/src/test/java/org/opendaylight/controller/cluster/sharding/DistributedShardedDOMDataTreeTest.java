@@ -110,7 +110,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                             .node(TestModel.INNER_LIST_QNAME));
     private static final Set<MemberName> SINGLE_MEMBER = Collections.singleton(AbstractTest.MEMBER_NAME);
 
-    private static final String MODULE_SHARDS_CONFIG = "module-shards-cars-member-1.conf";
+    private static final String MODULE_SHARDS_CONFIG = "./configuration/initial/module-shards-cars-member-1.conf";
 
     private ActorSystem leaderSystem;
 
@@ -168,11 +168,11 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
         leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(
-                "config", MODULE_SHARDS_CONFIG, "empty-modules.conf", true,
+                "config", MODULE_SHARDS_CONFIG, "./configuration/initial/empty-modules.conf", true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
         operDistributedDatastore = leaderTestKit.setupDistributedDataStore(
-                "operational", MODULE_SHARDS_CONFIG, "empty-modules.conf",true,
+                "operational", MODULE_SHARDS_CONFIG, "./configuration/initial/empty-modules.conf", true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
         leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystemProvider,
@@ -317,7 +317,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 tx.createCursor(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, oid1));
         assertNotNull(cursor);
 
-        MapNode innerList = ImmutableMapNodeBuilder
+        final MapNode innerList = ImmutableMapNodeBuilder
                 .create()
                 .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
                 .build();

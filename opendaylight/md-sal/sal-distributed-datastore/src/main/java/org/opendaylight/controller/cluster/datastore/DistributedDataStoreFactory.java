@@ -11,7 +11,6 @@ import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
-import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
@@ -23,7 +22,8 @@ public class DistributedDataStoreFactory {
 
     public static AbstractDataStore createInstance(final SchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
-            final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
+            final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext,
+            final Configuration config) {
 
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
@@ -34,7 +34,6 @@ public class DistributedDataStoreFactory {
         final DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        final Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
         final DatastoreContextFactory contextFactory = introspector.newContextFactory();
 
