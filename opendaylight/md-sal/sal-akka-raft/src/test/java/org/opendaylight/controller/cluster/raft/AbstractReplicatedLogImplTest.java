@@ -325,17 +325,16 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback,
-                boolean doAsync) {
-            return true;
+        public void persist(final ReplicatedLogEntry replicatedLogEntry, final Procedure<ReplicatedLogEntry> callback,
+                final boolean doAsync) {
         }
 
         @Override
-        public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
+        public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
         }
 
         @Override
-        public boolean shouldCaptureSnapshot(long logIndex) {
+        public boolean shouldCaptureSnapshot(final long logIndex) {
             return false;
         }
     }

@@ -54,7 +54,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public boolean shouldCaptureSnapshot(long logIndex) {
+    public boolean shouldCaptureSnapshot(final long logIndex) {
         final ConfigParams config = context.getConfigParams();
         final long journalSize = logIndex + 1;
         final long dataThreshold = context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
@@ -87,37 +87,29 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
             // the real size of data by the DATA_SIZE_DIVIDER so that we do not snapshot as often
             // as if we were maintaining a real snapshot
             return dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
-        } else {
-            return dataSize();
         }
+
+        return dataSize();
     }
 
     @Override
-    public boolean appendAndPersist(@Nonnull final ReplicatedLogEntry replicatedLogEntry,
-            @Nullable final Procedure<ReplicatedLogEntry> callback, boolean doAsync)  {
-
-        context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
-
-        if (!append(replicatedLogEntry)) {
-            return false;
-        }
-
-        Procedure<ReplicatedLogEntry> persistCallback = persistedLogEntry -> {
-            context.getLogger().debug("{}: persist complete {}", context.getId(), persistedLogEntry);
-
-            dataSizeSinceLastSnapshot += persistedLogEntry.size();
-
-            if (callback != null) {
-                callback.apply(persistedLogEntry);
-            }
-        };
-
+    public void persist(@Nonnull final ReplicatedLogEntry replicatedLogEntry,
+            @Nullable final Procedure<ReplicatedLogEntry> callback, final boolean doAsync)  {
+        context.getLogger().debug("{}: Persist log entry {} ", context.getId(), replicatedLogEntry);
         if (doAsync) {
-            context.getPersistenceProvider().persistAsync(replicatedLogEntry, persistCallback);
+            context.getPersistenceProvider().persistAsync(replicatedLogEntry, entry -> entryPersisted(entry, callback));
         } else {
-            context.getPersistenceProvider().persist(replicatedLogEntry, persistCallback);
+            context.getPersistenceProvider().persist(replicatedLogEntry, entry -> entryPersisted(entry, callback));
         }
+    }
 
-        return true;
+    private void entryPersisted(final ReplicatedLogEntry entry, @Nullable final Procedure<ReplicatedLogEntry> callback)
+            throws Exception {
+        context.getLogger().debug("{}: persist complete {}", context.getId(), entry);
+        dataSizeSinceLastSnapshot += entry.size();
+
+        if (callback != null) {
+            callback.apply(entry);
+        }
     }
 }

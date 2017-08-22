@@ -81,24 +81,22 @@ public interface ReplicatedLog {
     boolean append(ReplicatedLogEntry replicatedLogEntry);
 
     /**
+     * Persists an entry. The entry needs to be {@link #append(ReplicatedLogEntry)}ed first to retain correct operation.
+     *
+     * @param entry the entry to append
+     * @param callback the Procedure to be notified when persistence is complete (optional).
+     * @param async if true, the persistent actor can receive subsequent messages to process in between the persist
+     *        call and the execution of the associated callback. If false, subsequent messages are stashed and get
+     *        delivered after persistence is complete and the associated callback is executed.
+     */
+    void persist(@Nonnull ReplicatedLogEntry entry, @Nullable Procedure<ReplicatedLogEntry> callback, boolean async);
+
+    /**
      * Optimization method to increase the capacity of the journal log prior to appending entries.
      *
      * @param amount the amount to increase by
      */
     void increaseJournalLogCapacity(int amount);
-
-    /**
-     * Appends an entry to the in-memory log and persists it as well.
-     *
-     * @param replicatedLogEntry the entry to append
-     * @param callback the Procedure to be notified when persistence is complete (optional).
-     * @param doAsync if true, the persistent actor can receive subsequent messages to process in between the persist
-     *        call and the execution of the associated callback. If false, subsequent messages are stashed and get
-     *        delivered after persistence is complete and the associated callback is executed.
-     * @return true if the entry was successfully appended, false otherwise.
-     */
-    boolean appendAndPersist(@Nonnull ReplicatedLogEntry replicatedLogEntry,
-            @Nullable Procedure<ReplicatedLogEntry> callback, boolean doAsync);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.
