@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
@@ -61,12 +62,12 @@ public class ReplicatedLogImplTest {
                 configParams, mockPersistence, applyState -> { }, LOG);
     }
 
-    private void verifyPersist(Object message) throws Exception {
+    private void verifyPersist(final Object message) throws Exception {
         verifyPersist(message, new Same(message), true);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void verifyPersist(Object message, Matcher<?> matcher, boolean async) throws Exception {
+    private void verifyPersist(final Object message, final Matcher<?> matcher, final boolean async) throws Exception {
         ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         if (async) {
             verify(mockPersistence).persistAsync(Matchers.argThat(matcher), procedure.capture());
@@ -84,7 +85,8 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry1, null, true);
+        assertTrue(log.append(logEntry1));
+        log.persist(logEntry1, null, true);
 
         verifyPersist(logEntry1);
 
@@ -94,7 +96,8 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
-        log.appendAndPersist(logEntry2, mockCallback, true);
+        assertTrue(log.append(logEntry2));
+        log.persist(logEntry2, mockCallback, true);
 
         verifyPersist(logEntry2);
 
@@ -111,7 +114,8 @@ public class ReplicatedLogImplTest {
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry, mockCallback, true);
+        assertTrue(log.append(logEntry));
+        log.persist(logEntry, mockCallback, true);
 
         verifyPersist(logEntry);
 
@@ -119,7 +123,8 @@ public class ReplicatedLogImplTest {
 
         reset(mockPersistence, mockCallback);
 
-        log.appendAndPersist(logEntry, mockCallback, true);
+        assertTrue(log.append(logEntry));
+        log.persist(logEntry, mockCallback, true);
 
         verifyNoMoreInteractions(mockPersistence, mockCallback);
 
@@ -137,14 +142,15 @@ public class ReplicatedLogImplTest {
         final ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         final ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
 
-        log.appendAndPersist(logEntry1, null, true);
+        assertTrue(log.append(logEntry2));
+        log.persist(logEntry1, null, true);
         verifyPersist(logEntry1);
 
         reset(mockPersistence);
 
-        log.appendAndPersist(logEntry2, null, true);
+        assertTrue(log.append(logEntry2));
+        log.persist(logEntry2, null, true);
         verifyPersist(logEntry2);
-
 
         assertEquals("size", 2, log.size());
     }
@@ -160,14 +166,16 @@ public class ReplicatedLogImplTest {
         int dataSize = 600;
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
 
-        log.appendAndPersist(logEntry, null, true);
+        assertTrue(log.append(logEntry));
+        log.persist(logEntry, null, true);
         verifyPersist(logEntry);
 
         reset(mockPersistence);
 
         logEntry = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3", 5));
 
-        log.appendAndPersist(logEntry, null, true);
+        assertTrue(log.append(logEntry));
+        log.persist(logEntry, null, true);
         verifyPersist(logEntry);
 
         assertEquals("size", 2, log.size());
@@ -199,13 +207,13 @@ public class ReplicatedLogImplTest {
     public Matcher<DeleteEntries> match(final DeleteEntries actual) {
         return new BaseMatcher<DeleteEntries>() {
             @Override
-            public boolean matches(Object obj) {
+            public boolean matches(final Object obj) {
                 DeleteEntries other = (DeleteEntries) obj;
                 return actual.getFromIndex() == other.getFromIndex();
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendText("DeleteEntries: fromIndex: " + actual.getFromIndex());
             }
         };

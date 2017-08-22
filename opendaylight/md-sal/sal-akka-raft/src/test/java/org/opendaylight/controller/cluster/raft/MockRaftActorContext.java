@@ -187,10 +187,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
+        public void persist(final ReplicatedLogEntry replicatedLogEntry,
                 final Procedure<ReplicatedLogEntry> callback, final boolean doAsync) {
-            append(replicatedLogEntry);
-
             if (callback != null) {
                 try {
                     callback.apply(replicatedLogEntry);
@@ -198,8 +196,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
                     Throwables.propagate(e);
                 }
             }
-
-            return true;
         }
     }
 

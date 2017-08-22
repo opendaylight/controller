@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLog;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -259,10 +260,11 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 log.debug("{}: Append entry to log {}", logName(), entry.getData());
 
-                context.getReplicatedLog().appendAndPersist(entry, appendAndPersistCallback, false);
+                final ReplicatedLog replicatedLog = context.getReplicatedLog();
+                replicatedLog.append(entry);
+                replicatedLog.persist(entry, appendAndPersistCallback, false);
 
-                shouldCaptureSnapshot.compareAndSet(false,
-                        context.getReplicatedLog().shouldCaptureSnapshot(entry.getIndex()));
+                shouldCaptureSnapshot.compareAndSet(false, replicatedLog.shouldCaptureSnapshot(entry.getIndex()));
 
                 if (entry.getData() instanceof ServerConfigurationPayload) {
                     context.updatePeerIds((ServerConfigurationPayload)entry.getData());
