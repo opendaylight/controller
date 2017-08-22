@@ -16,6 +16,24 @@
       "revId": "44fb3b7dfe237d70275886ffd6f4dcd34d005daf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_29d366d7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-08-22T14:35:19Z",
+      "side": 1,
+      "message": "We actually should -- isReplicationPending() is indicating if this method is executing *and* it will go into the Replicate block.\n\nIf the callback executes on-stack, it will clear persistencePending and will also call out to finishPersistence() if replicationPending is *not* set. If it executes asynchronously (i.e. some time in future), this method is no longer executing, hence it will have cleared replicationPending and thus we will move to finishPersistence() and check the state of followers, etc.",
+      "parentUuid": "ba1f61a0_bbb5df32",
+      "revId": "44fb3b7dfe237d70275886ffd6f4dcd34d005daf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
