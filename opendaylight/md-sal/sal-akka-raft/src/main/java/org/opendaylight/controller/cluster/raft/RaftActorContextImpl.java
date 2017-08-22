@@ -183,7 +183,9 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setLastApplied(long lastApplied) {
-        log.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied);
+        log.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied,
+            // Dump stacks only on trace level
+            log.isTraceEnabled() ? new Throwable() : null);
         this.lastApplied = lastApplied;
     }
 
@@ -197,11 +199,13 @@ public class RaftActorContextImpl implements RaftActorContext {
         return replicatedLog;
     }
 
-    @Override public ActorSystem getActorSystem() {
+    @Override
+    public ActorSystem getActorSystem() {
         return context.system();
     }
 
-    @Override public Logger getLogger() {
+    @Override
+    public Logger getLogger() {
         return this.log;
     }
 
