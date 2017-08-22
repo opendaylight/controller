@@ -45,19 +45,14 @@ public class FlappingSingletonService implements ClusterSingletonService {
     @Override
     public void instantiateServiceInstance() {
         LOG.debug("Instantiating flapping-singleton-service.");
-
-        // TODO direct registration/close seem to trigger a bug in singleton state transitions,
-        // remove the whole executor shenanigans after it's fixed.
-        EXECUTOR.submit(() -> {
-            try {
-                registration.close();
-                registration = null;
-            } catch (final Exception e) {
-                LOG.warn("There was a problem closing flapping singleton service.", e);
-                setInactive();
-                flapCount = -flapCount;
-            }
-        });
+        try {
+            registration.close();
+            registration = null;
+        } catch (final Exception e) {
+            LOG.warn("There was a problem closing flapping singleton service.", e);
+            setInactive();
+            flapCount = -flapCount;
+        }
     }
 
     @Override
@@ -66,20 +61,14 @@ public class FlappingSingletonService implements ClusterSingletonService {
 
         flapCount++;
         if (active.get()) {
-            // TODO direct registration/close seem to trigger a bug in singleton state transitions,
-            // remove  whole executor shenanigans after it's fixed.
-            // Needs to be delayed slightly otherwise it's triggered as well.
-            EXECUTOR.schedule(() -> {
-                LOG.debug("Running re-registration");
-                try {
-                    registration = singletonServiceProvider.registerClusterSingletonService(this);
-                } catch (final Exception e) {
-                    LOG.warn("There was a problem re-registering flapping singleton service.", e);
-                    setInactive();
-                    flapCount = -flapCount - 1;
-                }
-
-            }, 200, TimeUnit.MILLISECONDS);
+            LOG.debug("Running re-registration");
+            try {
+                registration = singletonServiceProvider.registerClusterSingletonService(this);
+            } catch (final Exception e) {
+                LOG.warn("There was a problem re-registering flapping singleton service.", e);
+                setInactive();
+                flapCount = -flapCount - 1;
+            }
         }
 
         return Futures.immediateFuture(null);
