@@ -10,10 +10,11 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractUntypedActor extends UntypedActor {
+public abstract class AbstractUntypedActor extends UntypedActor implements ExecuteInSelfActor {
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -24,8 +25,18 @@ public abstract class AbstractUntypedActor extends UntypedActor {
     }
 
     @Override
-    public final void onReceive(Object message) throws Exception {
-        handleReceive(message);
+    public final void executeInSelf(@NonNull final Runnable runnable) {
+        final ExecuteInSelfMessage message = new ExecuteInSelfMessage(runnable);
+        self().tell(message, ActorRef.noSender());
+    }
+
+    @Override
+    public final void onReceive(final Object message) throws Exception {
+        if (message instanceof ExecuteInSelfMessage) {
+            ((ExecuteInSelfMessage) message).run();
+        } else {
+            handleReceive(message);
+        }
     }
 
     /**
@@ -37,16 +48,16 @@ public abstract class AbstractUntypedActor extends UntypedActor {
      */
     protected abstract void handleReceive(Object message) throws Exception;
 
-    protected final void ignoreMessage(Object message) {
+    protected final void ignoreMessage(final Object message) {
         LOG.debug("Ignoring unhandled message {}", message);
     }
 
-    protected final void unknownMessage(Object message) {
+    protected final void unknownMessage(final Object message) {
         LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }
 
-    protected boolean isValidSender(ActorRef sender) {
+    protected boolean isValidSender(final ActorRef sender) {
         // If the caller passes in a null sender (ActorRef.noSender()), akka translates that to the
         // deadLetters actor.
         return sender != null && !getContext().system().deadLetters().equals(sender);
