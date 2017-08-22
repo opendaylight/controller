@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_a12650cc",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-08-22T09:54:32Z",
+      "side": 1,
+      "message": "tell\nBut I think users would want to know what \"use-tell-based-protocol\u003dfalse\" setting does instead.",
+      "range": {
+        "startLine": 86,
+        "startChar": 81,
+        "endLine": 86,
+        "endChar": 84
+      },
+      "revId": "4b80c285f9d8f287e10bee920a1266d0768d0f50",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
