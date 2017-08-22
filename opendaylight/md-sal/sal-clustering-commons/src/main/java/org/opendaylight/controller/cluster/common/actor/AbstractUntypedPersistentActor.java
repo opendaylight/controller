@@ -8,11 +8,13 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
+import akka.actor.ActorRef;
 import akka.persistence.UntypedPersistentActor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractUntypedPersistentActor extends UntypedPersistentActor {
+public abstract class AbstractUntypedPersistentActor extends UntypedPersistentActor implements ExecuteInSelfActor {
 
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
@@ -24,17 +26,29 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     }
 
     @Override
-    public final void onReceiveCommand(Object message) throws Exception {
+    public final void executeInSelf(@NonNull final Runnable runnable) {
+        final ExecuteInSelfMessage message = new ExecuteInSelfMessage(runnable);
+        LOG.trace("Scheduling execution of {}", message);
+        self().tell(message, ActorRef.noSender());
+    }
+
+    @Override
+    public final void onReceiveCommand(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         LOG.trace("Received message {}", messageType);
 
-        handleCommand(message);
+        if (message instanceof ExecuteInSelfMessage) {
+            LOG.trace("Executing {}", message);
+            ((ExecuteInSelfMessage) message).run();
+        } else {
+            handleCommand(message);
+        }
 
         LOG.trace("Done handling message {}", messageType);
     }
 
     @Override
-    public final void onReceiveRecover(Object message) throws Exception {
+    public final void onReceiveRecover(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         LOG.trace("Received message {}", messageType);
         handleRecover(message);
@@ -45,11 +59,11 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
 
     protected abstract void handleCommand(Object message) throws Exception;
 
-    protected void ignoreMessage(Object message) {
+    protected void ignoreMessage(final Object message) {
         LOG.debug("Unhandled message {} ", message);
     }
 
-    protected void unknownMessage(Object message) throws Exception {
+    protected void unknownMessage(final Object message) throws Exception {
         LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }

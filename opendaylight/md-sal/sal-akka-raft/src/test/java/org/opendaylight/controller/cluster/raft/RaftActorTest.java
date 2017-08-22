@@ -222,7 +222,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId,
                 ImmutableMap.<String, String>builder().put("member1", "address").build(),
-                config, new NonPersistentDataProvider()), persistenceId);
+                config, createProvider()), persistenceId);
 
         MockRaftActor mockRaftActor = ref.underlyingActor();
 
@@ -245,7 +245,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId,
                 ImmutableMap.<String, String>builder().put("member1", "address").build(),
-                config, new NonPersistentDataProvider())
+                config, createProvider())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
 
         InMemoryJournal.waitForWriteMessagesComplete(persistenceId);
@@ -258,7 +258,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
         ref = factory.createTestActor(MockRaftActor.props(persistenceId,
                 ImmutableMap.<String, String>builder().put("member1", "address").build(), config,
-                new NonPersistentDataProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                createProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 factory.generateActorId("follower-"));
 
         MockRaftActor actor = ref.underlyingActor();
@@ -433,7 +433,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
                 .id(persistenceId).config(config).roleChangeNotifier(notifierActor).dataPersistenceProvider(
-                        new NonPersistentDataProvider()).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    createProvider()).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 persistenceId);
 
         List<RoleChanged> matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
@@ -470,7 +470,7 @@ public class RaftActorTest extends AbstractActorTest {
         final short newLeaderVersion = 6;
         Follower follower = new Follower(raftActor.getRaftActorContext()) {
             @Override
-            public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+            public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
                 setLeaderId(newLeaderId);
                 setLeaderPayloadVersion(newLeaderVersion);
                 return this;
@@ -820,7 +820,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
         config.setSnapshotBatchCount(5);
 
-        DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
+        DataPersistenceProvider dataPersistenceProvider = createProvider();
 
         Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
 
@@ -864,7 +864,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
         config.setSnapshotBatchCount(5);
 
-        DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
+        DataPersistenceProvider dataPersistenceProvider = createProvider();
 
         Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
 
@@ -897,6 +897,10 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(3, leader.getReplicatedToAllIndex());
     }
 
+    private static DataPersistenceProvider createProvider() {
+        return new NonPersistentDataProvider(Runnable::run);
+    }
+
     @Test
     public void testSwitchBehavior() {
         String persistenceId = factory.generateActorId("leader-");
@@ -906,7 +910,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
         config.setSnapshotBatchCount(5);
 
-        DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
+        DataPersistenceProvider dataPersistenceProvider = createProvider();
 
         Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().build();
 
@@ -938,7 +942,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
     }
 
-    public static ByteString fromObject(Object snapshot) throws Exception {
+    public static ByteString fromObject(final Object snapshot) throws Exception {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream os = null;
         try {
