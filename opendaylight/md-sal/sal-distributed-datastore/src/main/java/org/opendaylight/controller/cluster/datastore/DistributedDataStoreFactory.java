@@ -24,6 +24,14 @@ public class DistributedDataStoreFactory {
     public static AbstractDataStore createInstance(final SchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
+        return createInstance(schemaService, initialDatastoreContext, datastoreSnapshotRestore, actorSystemProvider,
+                bundleContext, null);
+    }
+
+    public static AbstractDataStore createInstance(final SchemaService schemaService,
+            final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext,
+            final Configuration orgConfig) {
 
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
@@ -34,7 +42,14 @@ public class DistributedDataStoreFactory {
         final DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        final Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
+        Configuration config;
+        if (orgConfig == null) {
+            config = new ConfigurationImpl("./configuration/initial/module-shards.conf",
+                    "./configuration/initial/modules.conf");
+        } else {
+            config = orgConfig;
+        }
+
         final ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
         final DatastoreContextFactory contextFactory = introspector.newContextFactory();
 
