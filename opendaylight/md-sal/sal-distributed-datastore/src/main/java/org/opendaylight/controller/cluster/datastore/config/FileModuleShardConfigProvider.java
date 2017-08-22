@@ -31,15 +31,15 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
     private final String moduleShardsConfigPath;
     private final String modulesConfigPath;
 
-    public FileModuleShardConfigProvider(String moduleShardsConfigPath, String modulesConfigPath) {
+    public FileModuleShardConfigProvider(final String moduleShardsConfigPath, final String modulesConfigPath) {
         this.moduleShardsConfigPath = moduleShardsConfigPath;
         this.modulesConfigPath = modulesConfigPath;
     }
 
     @Override
-    public Map<String, ModuleConfig.Builder> retrieveModuleConfigs(Configuration configuration) {
-        File moduleShardsFile = new File("./configuration/initial/" + moduleShardsConfigPath);
-        File modulesFile = new File("./configuration/initial/" + modulesConfigPath);
+    public Map<String, ModuleConfig.Builder> retrieveModuleConfigs(final Configuration configuration) {
+        final File moduleShardsFile = new File(moduleShardsConfigPath);
+        final File modulesFile = new File(modulesConfigPath);
 
         Config moduleShardsConfig = null;
         if (moduleShardsFile.exists()) {
@@ -47,7 +47,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             moduleShardsConfig = ConfigFactory.parseFile(moduleShardsFile);
         } else {
             LOG.warn("module shards configuration read from resource");
-            moduleShardsConfig = ConfigFactory.load(moduleShardsConfigPath);
+            moduleShardsConfig = ConfigFactory.load(moduleShardsFile.getName());
         }
 
         Config modulesConfig = null;
@@ -56,23 +56,23 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             modulesConfig = ConfigFactory.parseFile(modulesFile);
         } else {
             LOG.warn("modules configuration read from resource");
-            modulesConfig = ConfigFactory.load(modulesConfigPath);
+            modulesConfig = ConfigFactory.load(modulesFile.getName());
         }
 
-        Map<String, ModuleConfig.Builder> moduleConfigMap = readModuleShardsConfig(moduleShardsConfig);
+        final Map<String, ModuleConfig.Builder> moduleConfigMap = readModuleShardsConfig(moduleShardsConfig);
         readModulesConfig(modulesConfig, moduleConfigMap, configuration);
 
         return moduleConfigMap;
     }
 
-    private static void readModulesConfig(final Config modulesConfig, Map<String, ModuleConfig.Builder> moduleConfigMap,
-            Configuration configuration) {
-        List<? extends ConfigObject> modulesConfigObjectList = modulesConfig.getObjectList("modules");
+    private static void readModulesConfig(final Config modulesConfig,
+            final Map<String, ModuleConfig.Builder> moduleConfigMap, final Configuration configuration) {
+        final List<? extends ConfigObject> modulesConfigObjectList = modulesConfig.getObjectList("modules");
 
-        for (ConfigObject o : modulesConfigObjectList) {
-            ConfigObjectWrapper wrapper = new ConfigObjectWrapper(o);
+        for (final ConfigObject o : modulesConfigObjectList) {
+            final ConfigObjectWrapper wrapper = new ConfigObjectWrapper(o);
 
-            String moduleName = wrapper.stringValue("name");
+            final String moduleName = wrapper.stringValue("name");
             ModuleConfig.Builder builder = moduleConfigMap.get(moduleName);
             if (builder == null) {
                 builder = ModuleConfig.builder(moduleName);
@@ -86,20 +86,20 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
     }
 
     private static Map<String, ModuleConfig.Builder> readModuleShardsConfig(final Config moduleShardsConfig) {
-        List<? extends ConfigObject> moduleShardsConfigObjectList =
+        final List<? extends ConfigObject> moduleShardsConfigObjectList =
             moduleShardsConfig.getObjectList("module-shards");
 
-        Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
-        for (ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList) {
-            String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
-            ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
+        final Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
+        for (final ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList) {
+            final String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
+            final ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
 
-            List<? extends ConfigObject> shardsConfigObjectList =
+            final List<? extends ConfigObject> shardsConfigObjectList =
                 moduleShardConfigObject.toConfig().getObjectList("shards");
 
-            for (ConfigObject shard : shardsConfigObjectList) {
-                String shardName = shard.get("name").unwrapped().toString();
-                List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
+            for (final ConfigObject shard : shardsConfigObjectList) {
+                final String shardName = shard.get("name").unwrapped().toString();
+                final List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
                         .map(MemberName::forName).collect(Collectors.toList());
                 builder.shardConfig(shardName, replicas);
             }

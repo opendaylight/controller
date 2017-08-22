@@ -20,10 +20,20 @@ import org.slf4j.LoggerFactory;
 
 public class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
+    private static final String DEFAULT_MODULE_SHARDS_PATH = "./configuration/initial/module-shards.conf";
+    private static final String DEFAULT_MODULES_PATH = "./configuration/initial/modules.conf";
 
     public static AbstractDataStore createInstance(final SchemaService schemaService,
             final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
             final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
+        return createInstance(schemaService, initialDatastoreContext, datastoreSnapshotRestore, actorSystemProvider,
+                bundleContext, null);
+    }
+
+    public static AbstractDataStore createInstance(final SchemaService schemaService,
+            final DatastoreContext initialDatastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext,
+            final Configuration orgConfig) {
 
         final String datastoreName = initialDatastoreContext.getDataStoreName();
         LOG.info("Create data store instance of type : {}", datastoreName);
@@ -34,7 +44,13 @@ public class DistributedDataStoreFactory {
         final DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        final Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
+        Configuration config;
+        if (orgConfig == null) {
+            config = new ConfigurationImpl(DEFAULT_MODULE_SHARDS_PATH, DEFAULT_MODULES_PATH);
+        } else {
+            config = orgConfig;
+        }
+
         final ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
         final DatastoreContextFactory contextFactory = introspector.newContextFactory();
 
