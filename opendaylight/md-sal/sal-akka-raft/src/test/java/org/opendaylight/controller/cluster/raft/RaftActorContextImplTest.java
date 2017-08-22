@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
@@ -58,8 +59,8 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         peerMap.put("peer2", null);
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
-                peerMap, configParams, new NonPersistentDataProvider(), applyState -> { }, log);
+                "test", new ElectionTermImpl(createProvider(), "test", log), -1, -1,
+                peerMap, configParams, createProvider(), applyState -> { }, log);
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
@@ -82,9 +83,9 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     public void testSetPeerAddress() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
+                "test", new ElectionTermImpl(createProvider(), "test", log), -1, -1,
                 Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")), configParams,
-                new NonPersistentDataProvider(), applyState -> { }, log);
+                createProvider(), applyState -> { }, log);
 
         context.setPeerAddress("peer1", "peerAddress1_1");
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
@@ -96,9 +97,9 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     @Test
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                "self", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
+                "self", new ElectionTermImpl(createProvider(), "test", log), -1, -1,
                 Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")),
-                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), applyState -> { }, log);
+                new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, log);
 
         context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", false),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", false))));
@@ -120,7 +121,11 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         assertEquals("isVotingMember", false, context.isVotingMember());
     }
 
-    private static void verifyPeerInfo(RaftActorContextImpl context, String peerId, Boolean voting) {
+    private static DataPersistenceProvider createProvider() {
+        return new NonPersistentDataProvider(Runnable::run);
+    }
+
+    private static void verifyPeerInfo(final RaftActorContextImpl context, final String peerId, final Boolean voting) {
         PeerInfo peerInfo = context.getPeerInfo(peerId);
         if (voting != null) {
             assertNotNull("Expected peer " + peerId, peerInfo);
