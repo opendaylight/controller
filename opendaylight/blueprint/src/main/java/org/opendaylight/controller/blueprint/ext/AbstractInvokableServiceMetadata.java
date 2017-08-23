@@ -91,7 +91,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
         final Collection<SchemaPath> schemaPaths = RpcUtil.decomposeRpcService(rpcInterface, schemaContext,
             rpcFilter());
         if (schemaPaths.isEmpty()) {
-            log.warn("{}: interface {} has no accptable entries, assuming it is satisfied");
+            log.warn("{}: interface {} has no accptable entries, assuming it is satisfied", logName(), rpcInterface);
             setSatisfied();
             return;
         }
