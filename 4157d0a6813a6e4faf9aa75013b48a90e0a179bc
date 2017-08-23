@@ -52,6 +52,24 @@
       "revId": "4157d0a6813a6e4faf9aa75013b48a90e0a179bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_42702fa5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-08-23T08:34:10Z",
+      "side": 1,
+      "message": "Yeah, and ElectionTerm being mutable makes it non-obvious :(",
+      "parentUuid": "ba1f61a0_ec64bc23",
+      "revId": "4157d0a6813a6e4faf9aa75013b48a90e0a179bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
