@@ -28,6 +28,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker;
+import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltrace.rev160908.Config;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -99,6 +100,11 @@ public class TracingBroker implements TracingDOMDataBroker {
     private final List<Watch> registrationWatches = new ArrayList<>();
     private final List<Watch> writeWatches = new ArrayList<>();
 
+    private final boolean isDebugging;
+    private final CloseTrackedRegistry<TracingTransactionChain> transactionChainsRegistry;
+    private final CloseTrackedRegistry<TracingReadOnlyTransaction> readOnlyTransactionsRegistry;
+    private final CloseTrackedRegistry<TracingWriteTransaction> writeTransactionsRegistry;
+    private final CloseTrackedRegistry<TracingReadWriteTransaction> readWriteTransactionsRegistry;
 
     private class Watch {
         final String iidString;
@@ -161,6 +167,16 @@ public class TracingBroker implements TracingDOMDataBroker {
         this.delegate = Objects.requireNonNull(delegate);
         this.codec = Objects.requireNonNull(codec);
         configure(config);
+
+        if (config.isTransactionDebugContextEnabled() != null) {
+            this.isDebugging = config.isTransactionDebugContextEnabled();
+        } else {
+            this.isDebugging = false;
+        }
+        this.transactionChainsRegistry     = new CloseTrackedRegistry<>(this, "createTransactionChain", isDebugging);
+        this.readOnlyTransactionsRegistry  = new CloseTrackedRegistry<>(this, "newReadOnlyTransaction", isDebugging);
+        this.writeTransactionsRegistry     = new CloseTrackedRegistry<>(this, "newWriteOnlyTransaction", isDebugging);
+        this.readWriteTransactionsRegistry = new CloseTrackedRegistry<>(this, "newReadWriteTransaction", isDebugging);
     }
 
     private void configure(Config config) {
@@ -244,8 +260,8 @@ public class TracingBroker implements TracingDOMDataBroker {
     }
 
 
-    void toPathString(YangInstanceIdentifier yiid, StringBuilder sb) {
-        InstanceIdentifier iid = codec.fromYangInstanceIdentifier(yiid);
+    private void toPathString(YangInstanceIdentifier yiid, StringBuilder sb) {
+        InstanceIdentifier<?> iid = codec.fromYangInstanceIdentifier(yiid);
         if (null == iid) {
             reconstructIidPathString(yiid, sb);
         } else {
@@ -278,12 +294,12 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     @Override
     public DOMDataReadWriteTransaction newReadWriteTransaction() {
-        return new TracingReadWriteTransaction(delegate.newReadWriteTransaction(), this);
+        return new TracingReadWriteTransaction(delegate.newReadWriteTransaction(), this, readWriteTransactionsRegistry);
     }
 
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
-        return new TracingWriteTransaction(delegate.newWriteOnlyTransaction(), this);
+        return new TracingWriteTransaction(delegate.newWriteOnlyTransaction(), this, writeTransactionsRegistry);
     }
 
     @Override
@@ -299,12 +315,13 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     @Override
     public DOMTransactionChain createTransactionChain(TransactionChainListener transactionChainListener) {
-        return new TracingTransactionChain(delegate.createTransactionChain(transactionChainListener), this);
+        return new TracingTransactionChain(
+                delegate.createTransactionChain(transactionChainListener), this, transactionChainsRegistry);
     }
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return new TracingReadOnlyTransaction(delegate.newReadOnlyTransaction(), this);
+        return new TracingReadOnlyTransaction(delegate.newReadOnlyTransaction(), this, readOnlyTransactionsRegistry);
     }
 
     @Nonnull
