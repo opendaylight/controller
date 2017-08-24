@@ -304,7 +304,7 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return delegate.newReadOnlyTransaction();
+        return new TracingReadOnlyTransaction(delegate.newReadOnlyTransaction(), this);
     }
 
     @Nonnull
