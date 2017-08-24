@@ -25,7 +25,7 @@ class TracingTransactionChain implements DOMTransactionChain {
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return delegate.newReadOnlyTransaction();
+        return new TracingReadOnlyTransaction(delegate.newReadOnlyTransaction(), tracingBroker);
     }
 
     @Override
