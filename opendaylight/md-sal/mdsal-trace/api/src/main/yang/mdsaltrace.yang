@@ -18,11 +18,18 @@ module mdsaltrace {
     }
 
     container config {
+        // TODO leaf enabled ...
         leaf-list registration-watches {
             type string;
         }
         leaf-list write-watches {
             type string;
+        }
+        leaf transaction-debug-context-enabled {
+            default false;
+            type boolean;
+            description "Enable or disable transaction context debug. This will preserve the call site trace for
+                         transactions, so that the original caller of un-close'd() transaction can be identified";
         }
     }
 }
