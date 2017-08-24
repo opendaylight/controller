@@ -47,6 +47,14 @@
   </service>
 
   <!-- Distributed Operational Datastore -->
+  <bean id="fileModuleShardConfigProvider" class="org.opendaylight.controller.cluster.datastore.config.FileModuleShardConfigProvider">
+    <argument value="./configuration/initial/module-shards.conf"/>
+    <argument value="./configuration/initial/modules.conf"/>
+  </bean>
+
+  <bean id="configurationImpl" class="org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl">
+    <argument ref="fileModuleShardConfigProvider"/>
+  </bean>
 
   <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
           factory-method="newDatastoreContext" />
@@ -58,6 +66,7 @@
     <argument ref="datastoreSnapshotRestore"/>
     <argument ref="actorSystemProvider"/>
     <argument ref="blueprintBundleContext"/>
+    <argument ref="configurationImpl" />
   </bean>
 
   <service ref="operDatastore" odl:type="distributed-operational">
