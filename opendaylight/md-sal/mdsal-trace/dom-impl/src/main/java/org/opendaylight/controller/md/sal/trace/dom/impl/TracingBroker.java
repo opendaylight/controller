@@ -96,8 +96,8 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     private final BindingNormalizedNodeSerializer codec;
     private final DOMDataBroker delegate;
-    private List<Watch> registrationWatches = new ArrayList<>();
-    private List<Watch> writeWatches = new ArrayList<>();
+    private final List<Watch> registrationWatches = new ArrayList<>();
+    private final List<Watch> writeWatches = new ArrayList<>();
 
 
     private class Watch {
@@ -299,7 +299,7 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     @Override
     public DOMTransactionChain createTransactionChain(TransactionChainListener transactionChainListener) {
-        return delegate.createTransactionChain(transactionChainListener);
+        return new TracingTransactionChain(delegate.createTransactionChain(transactionChainListener), this);
     }
 
     @Override
