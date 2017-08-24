@@ -12,15 +12,21 @@ import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.trace.closetracker.impl.AbstractCloseTracked;
+import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-class TracingReadOnlyTransaction implements DOMDataReadOnlyTransaction {
+class TracingReadOnlyTransaction
+        extends AbstractCloseTracked<TracingReadOnlyTransaction>
+        implements DOMDataReadOnlyTransaction {
 
     private final DOMDataReadOnlyTransaction delegate;
     private final TracingBroker tracingBroker;
 
-    TracingReadOnlyTransaction(DOMDataReadOnlyTransaction delegate, TracingBroker tracingBroker) {
+    TracingReadOnlyTransaction(DOMDataReadOnlyTransaction delegate, TracingBroker tracingBroker,
+            CloseTrackedRegistry<TracingReadOnlyTransaction> readOnlyTransactionsRegistry) {
+        super(readOnlyTransactionsRegistry);
         this.delegate = delegate;
         this.tracingBroker = tracingBroker;
     }
@@ -44,6 +50,7 @@ class TracingReadOnlyTransaction implements DOMDataReadOnlyTransaction {
     @Override
     public void close() {
         delegate.close();
+        super.removeFromTrackedRegistry();
     }
 
 }
