@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_87023209",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-08-24T12:31:30Z",
+      "side": 1,
+      "message": "oops - trailing space",
+      "revId": "b602d5fdc4ee4e390200d86346d49a38704440b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
