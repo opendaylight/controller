@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
@@ -242,7 +243,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
             public void onFailure(final Throwable t) {
                 transactionFailed(tx, t);
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     /*
@@ -329,7 +330,6 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      * @param tx Backend shared transaction
      * @param frontendTx
      * @param isOpen indicator whether the transaction was already closed
-     * @return True if cancellation succeeded, false otherwise
      */
     synchronized void cancelTransaction(final PingPongTransaction tx, final DOMDataReadWriteTransaction frontendTx) {
         // Attempt to unlock the operation.
@@ -370,7 +370,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     @Override
     public synchronized void close() {
         final PingPongTransaction notLocked = lockedTx;
-        Preconditions.checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s", notLocked);
+        Preconditions.checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s",
+                notLocked);
 
         // This is not reliable, but if we observe it to be null and the process has already completed,
         // the backend transaction chain will throw the appropriate error.
@@ -409,8 +410,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
         return new DOMDataReadOnlyTransaction() {
             @Override
-            public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
-                    final YangInstanceIdentifier path) {
+            public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+                    final LogicalDatastoreType store, final YangInstanceIdentifier path) {
                 return tx.getTransaction().read(store, path);
             }
 
