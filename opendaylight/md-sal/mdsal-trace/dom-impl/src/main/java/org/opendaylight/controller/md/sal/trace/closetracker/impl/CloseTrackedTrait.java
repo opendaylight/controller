@@ -24,13 +24,15 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
 
     private final @Nullable Throwable allocationContext;
     private final CloseTrackedRegistry<T> closeTrackedRegistry;
+    private final CloseTracked<T> realCloseTracked;
 
-    public CloseTrackedTrait(CloseTrackedRegistry<T> transactionChainRegistry) {
+    public CloseTrackedTrait(CloseTrackedRegistry<T> transactionChainRegistry, CloseTracked<T> realCloseTracked) {
         if (transactionChainRegistry.isDebugContextEnabled()) {
             this.allocationContext = new Throwable("allocated at");
         } else {
             this.allocationContext = null;
         }
+        this.realCloseTracked = Objects.requireNonNull(realCloseTracked, "realCloseTracked");
         this.closeTrackedRegistry = Objects.requireNonNull(transactionChainRegistry, "transactionChainRegistry");
         this.closeTrackedRegistry.add(this);
     }
@@ -42,6 +44,11 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
 
     public void removeFromTrackedRegistry() {
         closeTrackedRegistry.remove(this);
+    }
+
+    @Override
+    public CloseTracked<T> getRealCloseTracked() {
+        return realCloseTracked;
     }
 
 }

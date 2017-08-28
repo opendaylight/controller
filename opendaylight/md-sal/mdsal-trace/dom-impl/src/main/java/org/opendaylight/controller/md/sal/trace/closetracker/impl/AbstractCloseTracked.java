@@ -19,7 +19,7 @@ public abstract class AbstractCloseTracked<T extends AbstractCloseTracked<T>> im
     private final CloseTrackedTrait<T> closeTracker;
 
     protected AbstractCloseTracked(CloseTrackedRegistry<T> transactionChainRegistry) {
-        this.closeTracker = new CloseTrackedTrait<>(transactionChainRegistry);
+        this.closeTracker = new CloseTrackedTrait<>(transactionChainRegistry, this);
     }
 
     protected void removeFromTrackedRegistry() {
@@ -29,5 +29,10 @@ public abstract class AbstractCloseTracked<T extends AbstractCloseTracked<T>> im
     @Override
     public @Nullable StackTraceElement[] getAllocationContextStackTrace() {
         return closeTracker.getAllocationContextStackTrace();
+    }
+
+    @Override
+    public final CloseTracked<T> getRealCloseTracked() {
+        return this;
     }
 }

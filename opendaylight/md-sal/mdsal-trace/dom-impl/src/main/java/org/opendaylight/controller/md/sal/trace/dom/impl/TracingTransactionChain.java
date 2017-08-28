@@ -29,10 +29,11 @@ class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionCha
         this.delegate = Objects.requireNonNull(delegate);
         this.tracingBroker = Objects.requireNonNull(tracingBroker);
 
-        final boolean isDebugging = transactionChainsRegistry.isDebugContextEnabled();
-        this.readOnlyTransactionsRegistry  = new CloseTrackedRegistry<>(this, "newReadOnlyTransaction", isDebugging);
-        this.writeTransactionsRegistry     = new CloseTrackedRegistry<>(this, "newWriteOnlyTransaction", isDebugging);
-        this.readWriteTransactionsRegistry = new CloseTrackedRegistry<>(this, "newReadWriteTransaction", isDebugging);
+        final boolean isDebug = transactionChainsRegistry.isDebugContextEnabled();
+        String pf = "TransactionChain_" + toString();
+        this.readOnlyTransactionsRegistry  = new CloseTrackedRegistry<>(this, pf + "newReadOnlyTransaction", isDebug);
+        this.writeTransactionsRegistry     = new CloseTrackedRegistry<>(this, pf + "newWriteOnlyTransaction", isDebug);
+        this.readWriteTransactionsRegistry = new CloseTrackedRegistry<>(this, pf + "newReadWriteTransaction", isDebug);
     }
 
     @Override
@@ -60,4 +61,15 @@ class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionCha
         super.removeFromTrackedRegistry();
     }
 
+    public CloseTrackedRegistry<TracingReadOnlyTransaction> getReadOnlyTransactionsRegistry() {
+        return readOnlyTransactionsRegistry;
+    }
+
+    public CloseTrackedRegistry<TracingReadWriteTransaction> getReadWriteTransactionsRegistry() {
+        return readWriteTransactionsRegistry;
+    }
+
+    public CloseTrackedRegistry<TracingWriteTransaction> getWriteTransactionsRegistry() {
+        return writeTransactionsRegistry;
+    }
 }
