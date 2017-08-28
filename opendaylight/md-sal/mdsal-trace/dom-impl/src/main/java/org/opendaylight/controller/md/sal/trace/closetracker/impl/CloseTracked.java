@@ -21,6 +21,6 @@ public interface CloseTracked<T extends CloseTracked<T>> {
 
     Instant getObjectCreated();
 
-    @Nullable Throwable getAllocationContext();
+    @Nullable StackTraceElement[] getAllocationContextStackTrace();
 
 }

@@ -46,13 +46,18 @@ import org.slf4j.LoggerFactory;
  * the objects themselves, as well as the stack trace of the call invoking the registration or write operation.
  * It works by operating as a "bump on the stack" between the application and actual DataBroker, intercepting write
  * and registration calls and writing to the log.
+ *
+ * <p>In addition, it (optionally) can also keep track of the stack trace of all new transaction allocations
+ * (including TransactionChains, and transactions created in turn from them), in order to detect and report leaks
+ *  results from transactions which were not closed.
+ *
  * <h1>Wiring:</h1>
  * TracingBroker is designed to be easy to use. In fact, for bundles using Blueprint to inject their DataBroker
  * TracingBroker can be used without modifying your code at all in two simple steps:
  * <ol>
  * <li>
  * Simply add the dependency "mdsaltrace-features" to
- * your karaf pom:
+ * your Karaf pom:
  * <pre>
  * {@code
  *  <dependency>
