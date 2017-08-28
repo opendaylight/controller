@@ -44,8 +44,8 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
     }
 
     @Override
-    public Throwable getAllocationContext() {
-        return allocationContext;
+    public StackTraceElement[] getAllocationContextStackTrace() {
+        return allocationContext != null ? allocationContext.getStackTrace() : null;
     }
 
     public void removeFromTrackedRegistry() {

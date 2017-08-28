@@ -73,7 +73,7 @@ class TracingReadWriteTransaction
     }
 
     @Override
-    public Throwable getAllocationContext() {
-        return closeTracker.getAllocationContext();
+    public StackTraceElement[] getAllocationContextStackTrace() {
+        return closeTracker.getAllocationContextStackTrace();
     }
 }
