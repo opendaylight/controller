@@ -10,12 +10,12 @@ package org.opendaylight.controller.md.sal.trace.closetracker.impl.tests;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.AbstractCloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
+import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistryReportEntry;
 
 public class CloseTrackedRegistryTest {
 
@@ -43,18 +43,21 @@ public class CloseTrackedRegistryTest {
         @SuppressWarnings({ "resource", "unused" })
         SomethingClosable forgotToCloseOnce = new SomethingClosable(registry);
 
-        Map<List<StackTraceElement>, Long> uniqueNonClosed = registry.getAllUnique();
-        assertThat(uniqueNonClosed.values()).containsExactly(100L, 1L);
-        uniqueNonClosed.forEach((stackTraceElements, occurrences) -> {
-            if (occurrences == 100) {
-                assertThatIterableContains(stackTraceElements,
+        Set<CloseTrackedRegistryReportEntry<SomethingClosable>> uniqueNonClosed = registry.getAllUnique();
+        assertThat(uniqueNonClosed).hasSize(2);
+        assertThatIterableContains(uniqueNonClosed, entry ->
+            entry.getNumberAddedNotRemoved() == 100 || entry.getNumberAddedNotRemoved() == 1);
+        uniqueNonClosed.forEach(entry -> {
+            if (entry.getNumberAddedNotRemoved() == 100) {
+                assertThatIterableContains(entry.getStackTraceElements(),
                     element -> element.getMethodName().equals("someOtherMethodWhichDoesNotClose"));
-            } else { // occurrences == 1
-                assertThatIterableContains(stackTraceElements,
+            } else if (entry.getNumberAddedNotRemoved() == 1) {
+                assertThatIterableContains(entry.getStackTraceElements(),
                     element -> element.getMethodName().equals("testDuplicateAllocationContexts"));
+            } else {
+                fail("Unexpected number of added, not removed: " + entry.getNumberAddedNotRemoved());
             }
         });
-        // one of the two has a StackTraceElement containing
     }
 
     // Something like this really should be in Google Truth...
@@ -80,8 +83,13 @@ public class CloseTrackedRegistryTest {
 
         SomethingClosable forgotToCloseOnce = new SomethingClosable(debugContextDisabledRegistry);
 
-        assertThat(debugContextDisabledRegistry.getAllUnique()).hasSize(1);
-        assertThat(debugContextDisabledRegistry.getAllUnique().values().iterator().next()).isEqualTo(1);
-        assertThat(debugContextDisabledRegistry.getAllUnique().keySet().iterator().next()).isEmpty();
+        Set<CloseTrackedRegistryReportEntry<SomethingClosable>>
+            closeRegistryReport = debugContextDisabledRegistry.getAllUnique();
+        assertThat(closeRegistryReport).hasSize(1);
+
+        CloseTrackedRegistryReportEntry<SomethingClosable>
+            closeRegistryReportEntry1 = closeRegistryReport.iterator().next();
+        assertThat(closeRegistryReportEntry1.getNumberAddedNotRemoved()).isEqualTo(1);
+        assertThat(closeRegistryReportEntry1.getStackTraceElements()).isEmpty();
     }
 }

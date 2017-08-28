@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.md.sal.trace.dom.impl;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
@@ -355,5 +355,48 @@ public class TracingBroker implements TracingDOMDataBroker {
         });
 
         return res;
+    }
+
+    public boolean printOpenTransactions(PrintStream ps) {
+        if (transactionChainsRegistry.getAllUnique().isEmpty()
+            && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
+            && writeTransactionsRegistry.getAllUnique().isEmpty()
+            && readWriteTransactionsRegistry.getAllUnique().isEmpty()) {
+
+            return false;
+        }
+
+        ps.println(getClass().getSimpleName() + " found not yet (or never..) closed transaction[chain]s");
+        ps.println();
+        printRegistryOpenTransactions(readOnlyTransactionsRegistry, ps, "");
+        printRegistryOpenTransactions(writeTransactionsRegistry, ps, "");
+        printRegistryOpenTransactions(readWriteTransactionsRegistry, ps, "");
+
+        // Now print details for each non-closed TransactionChain
+        // incl. in turn each ones own read/Write[Only]TransactionsRegistry
+        ps.println(transactionChainsRegistry.getCreateDescription());
+        transactionChainsRegistry.getAllUnique().forEach(entry -> {
+            ps.println("  " + entry.getNumberAddedNotRemoved() + "x TransactionChains opened, which are not closed:");
+            entry.getStackTraceElements().forEach(line -> ps.println("    " + line));
+            @SuppressWarnings("resource")
+            TracingTransactionChain txChain = (TracingTransactionChain) entry
+                .getExampleCloseTracked().getRealCloseTracked();
+            printRegistryOpenTransactions(txChain.getReadOnlyTransactionsRegistry(), ps, "    ");
+            printRegistryOpenTransactions(txChain.getWriteTransactionsRegistry(), ps, "    ");
+            printRegistryOpenTransactions(txChain.getReadWriteTransactionsRegistry(), ps, "    ");
+        });
+        ps.println();
+
+        return true;
+    }
+
+    private void printRegistryOpenTransactions(CloseTrackedRegistry<?> registry, PrintStream ps, String indent) {
+        ps.println(indent + registry.getCreateDescription());
+        registry.getAllUnique().forEach(entry -> {
+            ps.println(indent + "  " + entry.getNumberAddedNotRemoved()
+                + "x transactions opened here, which are not closed:");
+            entry.getStackTraceElements().forEach(line -> ps.print("    " + line));
+        });
+        ps.println();
     }
 }

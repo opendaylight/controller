@@ -25,7 +25,7 @@ class TracingWriteTransaction extends AbstractTracingWriteTransaction
     TracingWriteTransaction(DOMDataWriteTransaction delegate, TracingBroker tracingBroker,
             CloseTrackedRegistry<TracingWriteTransaction> writeTransactionsRegistry) {
         super(delegate, tracingBroker);
-        this.closeTracker = new CloseTrackedTrait<>(writeTransactionsRegistry);
+        this.closeTracker = new CloseTrackedTrait<>(writeTransactionsRegistry, this);
     }
 
     @Override
@@ -49,6 +49,11 @@ class TracingWriteTransaction extends AbstractTracingWriteTransaction
     @Override
     public StackTraceElement[] getAllocationContextStackTrace() {
         return closeTracker.getAllocationContextStackTrace();
+    }
+
+    @Override
+    public CloseTracked<TracingWriteTransaction> getRealCloseTracked() {
+        return this;
     }
 
 }
