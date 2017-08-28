@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
-import java.time.Instant;
 import javax.annotation.Nullable;
 
 /**
@@ -25,11 +24,6 @@ public abstract class AbstractCloseTracked<T extends AbstractCloseTracked<T>> im
 
     protected void removeFromTrackedRegistry() {
         closeTracker.removeFromTrackedRegistry();
-    }
-
-    @Override
-    public final Instant getObjectCreated() {
-        return closeTracker.getObjectCreated();
     }
 
     @Override
