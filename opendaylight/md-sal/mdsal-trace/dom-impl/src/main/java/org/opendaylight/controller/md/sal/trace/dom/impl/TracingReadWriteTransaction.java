@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.time.Instant;
 import java.util.Objects;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -65,11 +64,6 @@ class TracingReadWriteTransaction
     public boolean cancel() {
         closeTracker.removeFromTrackedRegistry();
         return super.cancel();
-    }
-
-    @Override
-    public Instant getObjectCreated() {
-        return closeTracker.getObjectCreated();
     }
 
     @Override

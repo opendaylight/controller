@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
-import java.time.Instant;
 import javax.annotation.Nullable;
 
 /**
@@ -18,8 +17,6 @@ import javax.annotation.Nullable;
  * @author Michael Vorburger.ch
  */
 public interface CloseTracked<T extends CloseTracked<T>> {
-
-    Instant getObjectCreated();
 
     @Nullable StackTraceElement[] getAllocationContextStackTrace();
 
