@@ -253,10 +253,13 @@ public class Follower extends AbstractRaftActorBehavior {
                 }
 
                 if (!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
-                    log.info("{}: Removing entries from log starting at {}", logName(), matchEntry.getIndex());
+                    log.info("{}: Removing entries from log starting at {}, commitIndex: {}, lastApplied: {}",
+                            logName(), matchEntry.getIndex(), context.getCommitIndex(), context.getLastApplied());
 
-                    // Entries do not match so remove all subsequent entries
-                    if (!context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
+                    // Entries do not match so remove all subsequent entries but only if the existing entries haven't
+                    // been applied to the state yet.
+                    if (matchEntry.getIndex() <= context.getLastApplied()
+                            || !context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
                         // Could not remove the entries - this means the matchEntry index must be in the
                         // snapshot and not the log. In this case the prior entries are part of the state
                         // so we must send back a reply to force a snapshot to completely re-sync the
