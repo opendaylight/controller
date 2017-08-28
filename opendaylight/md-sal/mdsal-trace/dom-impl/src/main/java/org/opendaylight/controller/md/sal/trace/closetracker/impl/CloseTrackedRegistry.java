@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,9 +28,8 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public class CloseTrackedRegistry<T extends CloseTracked<T>> {
 
-    // unused OK for now, at least we'll be able to see this in HPROF heap dumps and know what is which
-    private final @SuppressWarnings("unused") Object anchor;
-    private final @SuppressWarnings("unused") String createDescription;
+    private final Object anchor;
+    private final String createDescription;
 
     private final Set<CloseTracked<T>> tracked = new ConcurrentSkipListSet<>(
         (o1, o2) -> Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2)));
@@ -58,6 +60,14 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
         return isDebugContextEnabled;
     }
 
+    public Object getAnchor() {
+        return anchor;
+    }
+
+    public String getCreateDescription() {
+        return createDescription;
+    }
+
     // package protected, not public; only CloseTrackedTrait invokes this
     void add(CloseTracked<T> closeTracked) {
         tracked.add(closeTracked);
@@ -72,20 +82,33 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
      * Creates and returns a "report" of (currently) tracked but not (yet) closed
      * instances.
      *
-     * @return Map where key is the StackTraceElement[] identifying a unique
-     *         allocation contexts (or an empty List if debugContextEnabled is false),
-     *         and value is the number of open instances created at that point.
+     * @return Set of CloseTrackedRegistryReportEntry, of which each the stack trace
+     *         element identifies a unique allocation context (or an empty List if
+     *         debugContextEnabled is false), and value is the number of open
+     *         instances created at that place in the code.
      */
-    public Map<List<StackTraceElement>, Long> getAllUnique() {
-        Map<List<StackTraceElement>,Long> mapToReturn = new HashMap<>();
+    public Set<CloseTrackedRegistryReportEntry<T>> getAllUnique() {
+        Map<List<StackTraceElement>, Long> map = new HashMap<>();
         Set<CloseTracked<T>> copyOfTracked = new HashSet<>(tracked);
         for (CloseTracked<T> closeTracked : copyOfTracked) {
             final StackTraceElement[] stackTraceArray = closeTracked.getAllocationContextStackTrace();
             List<StackTraceElement> stackTraceElements =
                     stackTraceArray != null ? Arrays.asList(stackTraceArray) : Collections.emptyList();
-            mapToReturn.merge(stackTraceElements, 1L, (oldValue, value) -> oldValue + 1);
+            map.merge(stackTraceElements, 1L, (oldValue, value) -> oldValue + 1);
         }
-        return mapToReturn;
+
+        Set<CloseTrackedRegistryReportEntry<T>> report = new HashSet<>();
+        map.forEach((stackTraceElements, number) -> {
+            copyOfTracked.stream().filter(closeTracked -> {
+                StackTraceElement[] closeTrackedStackTraceArray = closeTracked.getAllocationContextStackTrace();
+                List<StackTraceElement> closeTrackedStackTraceElements =
+                        closeTrackedStackTraceArray != null ? asList(closeTrackedStackTraceArray) : emptyList();
+                return closeTrackedStackTraceElements.equals(stackTraceElements);
+            }).findAny().ifPresent(exampleCloseTracked -> {
+                report.add(new CloseTrackedRegistryReportEntry<>(exampleCloseTracked, number, stackTraceElements));
+            });
+        });
+        return report;
     }
 
 }
