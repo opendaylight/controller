@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_99c0cee1",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "Done, BUT I\u0027m not sure you realized that you are reviewing code here which I\u0027ve not touched - this is a refactoring moved over as-is from the existing TracingWriteTransaction, where it\u0027s like this... In order to move forward here and get your +1, I\u0027ll nevertheless exceptionally fix it anyway here in this change...",
+      "parentUuid": "ba1f61a0_39972292",
+      "range": {
+        "startLine": 37,
+        "startChar": 75,
+        "endLine": 37,
+        "endChar": 115
+      },
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_598c967f",
         "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-28T11:39:32Z",
       "side": 1,
       "message": "final Object value \u003d node !\u003d null ? node.getValue() : null;",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 9
+      },
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_39b1e28f",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "Done, but please see above; this is not related to this change.",
+      "parentUuid": "ba1f61a0_598c967f",
       "range": {
         "startLine": 42,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_79ab5a1d",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "As above: This code is just moved, not introduced in this change.. and I\u0027ve no idea why it\u0027s like this, and would rather not touch this as part of this change - Josh, do you want to reply to this?",
+      "parentUuid": "ba1f61a0_19d97e83",
+      "range": {
+        "startLine": 47,
+        "startChar": 29,
+        "endLine": 47,
+        "endChar": 58
+      },
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_b9eaf20c",
         "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2017-08-28T11:39:32Z",
       "side": 1,
       "message": "why do we leak the logger cross-class?",
+      "range": {
+        "startLine": 48,
+        "startChar": 16,
+        "endLine": 48,
+        "endChar": 33
+      },
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_99672e25",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "As above: This code is just moved, not introduced in this change.. I suspect the idea here was that we (Josh) wanted to have a single looger for the entire thing, easy to enable and disable. I and would rather not touch this as part of this change, it could be changed by someone else in another propose change - Josh, do you want to reply to this?",
+      "parentUuid": "ba1f61a0_b9eaf20c",
       "range": {
         "startLine": 48,
         "startChar": 16,
@@ -140,6 +236,47 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_3978c2c3",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "Done, but please see above; this is not related to this change.",
+      "parentUuid": "ba1f61a0_f9f46af3",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 9
+      },
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_19733ee8",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "here we\u0027re not synchronized either! ;) Fixed..",
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_39de026e",
         "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
         "patchSetId": 2
@@ -151,6 +288,30 @@
       "writtenOn": "2017-08-28T11:39:32Z",
       "side": 1,
       "message": "... and here we are not.",
+      "range": {
+        "startLine": 90,
+        "startChar": 8,
+        "endLine": 90,
+        "endChar": 21
+      },
+      "revId": "e5c3e7c6d6597967b774758495167bd75238d046",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_79823a95",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/AbstractTracingWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-08-28T13:51:21Z",
+      "side": 1,
+      "message": "Done, but please see above; this is not related to this change.  PS: How do you see something like this so easily? Tooling, or eyes? I\u0027m impressed.",
+      "parentUuid": "ba1f61a0_39de026e",
       "range": {
         "startLine": 90,
         "startChar": 8,
