@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
-import java.time.Instant;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -23,12 +22,10 @@ import javax.annotation.Nullable;
  */
 public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracked<T> {
 
-    private final Instant created;
     private final @Nullable Throwable allocationContext;
     private final CloseTrackedRegistry<T> closeTrackedRegistry;
 
     public CloseTrackedTrait(CloseTrackedRegistry<T> transactionChainRegistry) {
-        this.created = Instant.now();
         if (transactionChainRegistry.isDebugContextEnabled()) {
             this.allocationContext = new Throwable("allocated at");
         } else {
@@ -36,11 +33,6 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
         }
         this.closeTrackedRegistry = Objects.requireNonNull(transactionChainRegistry, "transactionChainRegistry");
         this.closeTrackedRegistry.add(this);
-    }
-
-    @Override
-    public Instant getObjectCreated() {
-        return created;
     }
 
     @Override

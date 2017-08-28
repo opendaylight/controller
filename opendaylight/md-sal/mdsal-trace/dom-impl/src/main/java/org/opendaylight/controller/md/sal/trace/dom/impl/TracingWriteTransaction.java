@@ -9,7 +9,6 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.time.Instant;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -45,11 +44,6 @@ class TracingWriteTransaction extends AbstractTracingWriteTransaction
     public boolean cancel() {
         closeTracker.removeFromTrackedRegistry();
         return super.cancel();
-    }
-
-    @Override
-    public Instant getObjectCreated() {
-        return closeTracker.getObjectCreated();
     }
 
     @Override
