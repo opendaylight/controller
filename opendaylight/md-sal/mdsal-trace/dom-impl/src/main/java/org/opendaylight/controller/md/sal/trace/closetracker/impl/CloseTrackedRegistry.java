@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.concurrent.ThreadSafe;
@@ -62,8 +63,11 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
         tracked.remove(closeTracked);
     }
 
-    // TODO Later add methods to dump & query what's not closed, by creation time, incl. creation stack trace
+    public List<CloseTracked<T>> getAllUnique() {
+        // TODO ...
+        return null;
+    }
 
-    // TODO we could even support add/close of Object instead of CloseTracked, by creating a wrapper?
+    // TODO Later add methods to dump & query what's not closed, by creation time, incl. creation stack trace
 
 }
