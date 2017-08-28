@@ -7,6 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.concurrent.ThreadSafe;
@@ -24,7 +30,7 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
     private final @SuppressWarnings("unused") String createDescription;
 
     private final Set<CloseTracked<T>> tracked = new ConcurrentSkipListSet<>(
-        (o1, o2) -> o1.getObjectCreated().compareTo(o2.getObjectCreated()));
+        (o1, o2) -> Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2)));
 
     private final boolean isDebugContextEnabled;
 
@@ -62,8 +68,24 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
         tracked.remove(closeTracked);
     }
 
-    // TODO Later add methods to dump & query what's not closed, by creation time, incl. creation stack trace
-
-    // TODO we could even support add/close of Object instead of CloseTracked, by creating a wrapper?
+    /**
+     * Creates and returns a "report" of (currently) tracked but not (yet) closed
+     * instances.
+     *
+     * @return Map where key is the StackTraceElement[] identifying a unique
+     *         allocation contexts (or an empty List if debugContextEnabled is false),
+     *         and value is the number of open instances created at that point.
+     */
+    public Map<List<StackTraceElement>, Long> getAllUnique() {
+        Map<List<StackTraceElement>,Long> mapToReturn = new HashMap<>();
+        Set<CloseTracked<T>> copyOfTracked = new HashSet<>(tracked);
+        for (CloseTracked<T> closeTracked : copyOfTracked) {
+            final StackTraceElement[] stackTraceArray = closeTracked.getAllocationContextStackTrace();
+            List<StackTraceElement> stackTraceElements =
+                    stackTraceArray != null ? Arrays.asList(stackTraceArray) : Collections.emptyList();
+            mapToReturn.merge(stackTraceElements, 1L, (oldValue, value) -> oldValue + 1);
+        }
+        return mapToReturn;
+    }
 
 }

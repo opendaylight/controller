@@ -11,7 +11,7 @@ import java.time.Instant;
 import javax.annotation.Nullable;
 
 /**
- * Object which can track where it has been created, and if it has been correctly closed.
+ * Object which can track where it has been created, and if it has been correctly "closed".
  *
  * <p>Includes preserving the context of the call stack which created this object, and the instant it was created.
  *
@@ -21,6 +21,6 @@ public interface CloseTracked<T extends CloseTracked<T>> {
 
     Instant getObjectCreated();
 
-    @Nullable Throwable getAllocationContext();
+    @Nullable StackTraceElement[] getAllocationContextStackTrace();
 
 }

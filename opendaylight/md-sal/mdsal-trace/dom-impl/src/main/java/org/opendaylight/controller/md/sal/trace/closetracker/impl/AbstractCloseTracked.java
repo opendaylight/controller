@@ -33,7 +33,7 @@ public abstract class AbstractCloseTracked<T extends AbstractCloseTracked<T>> im
     }
 
     @Override
-    public @Nullable Throwable getAllocationContext() {
-        return closeTracker.getAllocationContext();
+    public @Nullable StackTraceElement[] getAllocationContextStackTrace() {
+        return closeTracker.getAllocationContextStackTrace();
     }
 }
