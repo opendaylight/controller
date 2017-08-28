@@ -7,11 +7,19 @@
  */
 package org.opendaylight.controller.md.sal.trace.api;
 
+import java.io.PrintStream;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 /**
  * Tagging interface so that the tracing broker service can be more explicitly imported.
  */
 public interface TracingDOMDataBroker extends DOMDataBroker {
+
+    /**
+     * Prints a human-readable "report" of all opened but not closed transactions,
+     * including transactions chains and transactions opened by them, onto the printStream.
+     * @return true if there were any open transactions, false if none
+     */
+    boolean printOpenTransactions(PrintStream printStream);
 
 }
