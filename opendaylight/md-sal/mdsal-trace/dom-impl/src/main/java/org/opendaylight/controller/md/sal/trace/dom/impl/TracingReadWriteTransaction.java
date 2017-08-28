@@ -33,7 +33,7 @@ class TracingReadWriteTransaction
     TracingReadWriteTransaction(DOMDataReadWriteTransaction delegate, TracingBroker tracingBroker,
             CloseTrackedRegistry<TracingReadWriteTransaction> readWriteTransactionsRegistry) {
         super(delegate, tracingBroker);
-        this.closeTracker = new CloseTrackedTrait<>(readWriteTransactionsRegistry);
+        this.closeTracker = new CloseTrackedTrait<>(readWriteTransactionsRegistry, this);
         this.delegate = Objects.requireNonNull(delegate);
     }
 
@@ -69,5 +69,10 @@ class TracingReadWriteTransaction
     @Override
     public StackTraceElement[] getAllocationContextStackTrace() {
         return closeTracker.getAllocationContextStackTrace();
+    }
+
+    @Override
+    public CloseTracked<TracingReadWriteTransaction> getRealCloseTracked() {
+        return this;
     }
 }

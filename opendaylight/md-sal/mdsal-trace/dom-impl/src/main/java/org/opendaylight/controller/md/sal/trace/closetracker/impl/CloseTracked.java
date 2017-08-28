@@ -10,9 +10,9 @@ package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 import javax.annotation.Nullable;
 
 /**
- * Object which can track where it has been created, and if it has been correctly "closed".
+ * Object which can track where something has been created, and if it has been correctly "closed".
  *
- * <p>Includes preserving the context of the call stack which created this object, and the instant it was created.
+ * <p>Includes preserving the context of the call stack which created an object, and the instant it was created.
  *
  * @author Michael Vorburger.ch
  */
@@ -20,4 +20,5 @@ public interface CloseTracked<T extends CloseTracked<T>> {
 
     @Nullable StackTraceElement[] getAllocationContextStackTrace();
 
+    CloseTracked<T> getRealCloseTracked();
 }
