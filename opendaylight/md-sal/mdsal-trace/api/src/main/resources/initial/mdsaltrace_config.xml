@@ -2,4 +2,5 @@
     <!-- <registration-watches>/neutron-router-dpns/router-dpn-list</registration-watches> -->
     <!-- <registration-watches>/tunnels_state/state-tunnel-list</registration-watches> -->
     <!-- <write-watches> /NetworkTopology/Topology</write-watches> -->
+    <transaction-debug-context-enabled>true</transaction-debug-context-enabled>
 </config>

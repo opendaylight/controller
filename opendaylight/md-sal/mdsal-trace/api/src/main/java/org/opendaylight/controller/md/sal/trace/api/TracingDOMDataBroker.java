@@ -11,7 +11,7 @@ import java.io.PrintStream;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 /**
- * Tagging interface so that the tracing broker service can be more explicitly imported.
+ * Interface so that the tracing broker service can be more explicitly imported.
  */
 public interface TracingDOMDataBroker extends DOMDataBroker {
 
