@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_d8b99d7a",
+        "filename": "opendaylight/md-sal/messagebus-impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-08-29T15:50:05Z",
+      "side": 1,
+      "message": "Also remove this",
+      "range": {
+        "startLine": 68,
+        "startChar": 8,
+        "endLine": 71,
+        "endChar": 21
+      },
+      "revId": "ad3ef5d519b6518cdbda380d659dfb80491c51b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
