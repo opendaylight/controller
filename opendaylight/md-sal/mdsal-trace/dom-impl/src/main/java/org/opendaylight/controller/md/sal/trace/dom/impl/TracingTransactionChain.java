@@ -30,10 +30,10 @@ class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionCha
         this.tracingBroker = Objects.requireNonNull(tracingBroker);
 
         final boolean isDebug = transactionChainsRegistry.isDebugContextEnabled();
-        String pf = "TransactionChain_" + toString();
-        this.readOnlyTransactionsRegistry  = new CloseTrackedRegistry<>(this, pf + "newReadOnlyTransaction", isDebug);
-        this.writeTransactionsRegistry     = new CloseTrackedRegistry<>(this, pf + "newWriteOnlyTransaction", isDebug);
-        this.readWriteTransactionsRegistry = new CloseTrackedRegistry<>(this, pf + "newReadWriteTransaction", isDebug);
+        String anchor = "TransactionChain@" + Integer.toHexString(hashCode());
+        this.readOnlyTransactionsRegistry  = new CloseTrackedRegistry<>(anchor, "newReadOnlyTransaction()", isDebug);
+        this.writeTransactionsRegistry     = new CloseTrackedRegistry<>(anchor, "newWriteOnlyTransaction()", isDebug);
+        this.readWriteTransactionsRegistry = new CloseTrackedRegistry<>(anchor, "newReadWriteTransaction()", isDebug);
     }
 
     @Override
