@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>In addition, it (optionally) can also keep track of the stack trace of all new transaction allocations
  * (including TransactionChains, and transactions created in turn from them), in order to detect and report leaks
- *  results from transactions which were not closed.
+ * from transactions which were not closed.
  *
  * <h1>Wiring:</h1>
  * TracingBroker is designed to be easy to use. In fact, for bundles using Blueprint to inject their DataBroker
@@ -62,17 +62,17 @@ import org.slf4j.LoggerFactory;
  * {@code
  *  <dependency>
  *    <groupId>org.opendaylight.controller</groupId>
- *    <artifactId>mdsal-trace-features</artifactId>
+ *    <artifactId>features-mdsal-trace</artifactId>
+ *    <version>1.7.0-SNAPSHOT</version>
  *    <classifier>features</classifier>
  *    <type>xml</type>
  *    <scope>runtime</scope>
- *    <version>0.1.6-SNAPSHOT</version>
  *  </dependency>
  * }
  * </pre>
  * </li>
  * <li>
- * Then just load the odl-mdsal-trace feature before your feature and you're done.
+ * Then just "feature:install odl-mdsal-trace" before you install your "real" feature(s) and you're done.
  * </li>
  * </ol>
  * This works because the mdsaltrace-impl bundle registers its service implementing DOMDataBroker with a higher
@@ -357,6 +357,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         return res;
     }
 
+    @Override
     public boolean printOpenTransactions(PrintStream ps) {
         if (transactionChainsRegistry.getAllUnique().isEmpty()
             && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
