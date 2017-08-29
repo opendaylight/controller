@@ -60,5 +60,10 @@
             <artifactId>mdsal-trace-binding-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>mdsal-trace-cli</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

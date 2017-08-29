@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>In addition, it (optionally) can also keep track of the stack trace of all new transaction allocations
  * (including TransactionChains, and transactions created in turn from them), in order to detect and report leaks
- *  results from transactions which were not closed.
+ * from transactions which were not closed.
  *
  * <h1>Wiring:</h1>
  * TracingBroker is designed to be easy to use. In fact, for bundles using Blueprint to inject their DataBroker
@@ -62,17 +62,19 @@ import org.slf4j.LoggerFactory;
  * {@code
  *  <dependency>
  *    <groupId>org.opendaylight.controller</groupId>
- *    <artifactId>mdsal-trace-features</artifactId>
+ *    <artifactId>features-mdsal-trace</artifactId>
+ *    <version>1.7.0-SNAPSHOT</version>
  *    <classifier>features</classifier>
  *    <type>xml</type>
  *    <scope>runtime</scope>
- *    <version>0.1.6-SNAPSHOT</version>
  *  </dependency>
  * }
  * </pre>
  * </li>
  * <li>
- * Then just load the odl-mdsal-trace feature before your feature and you're done.
+ * Then just "feature:install odl-mdsal-trace" before you install your "real" feature(s) and you're done.
+ * Beware that with Karaf 4 due to <a href="https://bugs.opendaylight.org/show_bug.cgi?id=9068">Bug 9068</a>
+ * you'll probably have to use feature:install's --no-auto-refresh flag when installing your "real" feature.
  * </li>
  * </ol>
  * This works because the mdsaltrace-impl bundle registers its service implementing DOMDataBroker with a higher
@@ -357,6 +359,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         return res;
     }
 
+    @Override
     public boolean printOpenTransactions(PrintStream ps) {
         if (transactionChainsRegistry.getAllUnique().isEmpty()
             && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
@@ -366,7 +369,9 @@ public class TracingBroker implements TracingDOMDataBroker {
             return false;
         }
 
-        ps.println(getClass().getSimpleName() + " found not yet (or never..) closed transaction[chain]s");
+        ps.println(getClass().getSimpleName() + " found not yet (or never..) closed transaction[chain]s!");
+        ps.println("NB: If no stack traces are shown below, then "
+                 + "enable transaction-debug-context-enabled in mdsaltrace_config.xml");
         ps.println();
         printRegistryOpenTransactions(readOnlyTransactionsRegistry, ps, "");
         printRegistryOpenTransactions(writeTransactionsRegistry, ps, "");
@@ -395,7 +400,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         registry.getAllUnique().forEach(entry -> {
             ps.println(indent + "  " + entry.getNumberAddedNotRemoved()
                 + "x transactions opened here, which are not closed:");
-            entry.getStackTraceElements().forEach(line -> ps.print("    " + line));
+            entry.getStackTraceElements().forEach(line -> ps.println("    " + line));
         });
         ps.println();
     }
