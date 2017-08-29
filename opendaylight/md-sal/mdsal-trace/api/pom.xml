@@ -36,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-broker-impl</artifactId>
+      <artifactId>sal-core-api</artifactId>
     </dependency>
   </dependencies>
   <build>
