@@ -60,5 +60,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <groupId>${project.groupId}</groupId>
       <artifactId>mdsal-trace-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mdsal-trace-cli</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

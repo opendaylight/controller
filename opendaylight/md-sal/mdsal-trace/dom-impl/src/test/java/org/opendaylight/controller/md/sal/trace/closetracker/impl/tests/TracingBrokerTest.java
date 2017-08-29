@@ -38,8 +38,9 @@ public class TracingBrokerTest {
         BindingNormalizedNodeSerializer codec = mock(BindingNormalizedNodeSerializer.class);
         TracingBroker tracingBroker = new TracingBroker(domDataBroker, config, codec);
 
+        DOMDataReadWriteTransaction tx = tracingBroker.newReadWriteTransaction();
         DOMTransactionChain txChain = tracingBroker.createTransactionChain(null);
-        DOMDataReadWriteTransaction tx = txChain.newReadWriteTransaction();
+        DOMDataReadWriteTransaction txFromChain = txChain.newReadWriteTransaction();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
