@@ -12,10 +12,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-parent</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
-        <relativePath>../../config/config-parent</relativePath>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>binding-parent</artifactId>
+        <version>0.12.0-SNAPSHOT</version>
+        <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
@@ -23,6 +23,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <artifactId>messagebus-impl</artifactId>
     <name>${project.artifactId}</name>
     <packaging>bundle</packaging>
+
+    <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>mdsal-artifacts</artifactId>
+          <version>${project.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+      </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -40,10 +52,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
