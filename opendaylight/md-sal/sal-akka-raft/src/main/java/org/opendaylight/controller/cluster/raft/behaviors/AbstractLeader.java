@@ -301,8 +301,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 log.info("{}: follower {} appears to be behind the leader from the last snapshot - "
                     + "updated: matchIndex: {}, nextIndex: {}", logName(), followerId,
-                    appendEntriesReply.getLogLastTerm(), followerLogInformation.getMatchIndex(),
-                    followerLogInformation.getNextIndex());
+                    followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
             } else {
                 // The follower's log conflicts with leader's log so decrement follower's next index by 1
                 // in an attempt to find where the logs match.
