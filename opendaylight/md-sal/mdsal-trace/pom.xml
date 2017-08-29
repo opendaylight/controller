@@ -25,6 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <module>api</module>
     <module>dom-impl</module>
     <module>binding-impl</module>
+    <module>cli</module>
     <module>features</module>
   </modules>
 
@@ -76,13 +77,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
                 <phase>package</phase>
             </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <configuration>
-              <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
-            </configuration>
           </plugin>
         </plugins>
       </build>
