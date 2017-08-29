@@ -95,11 +95,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-dom-config</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>

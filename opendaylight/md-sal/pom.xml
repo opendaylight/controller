@@ -35,11 +35,6 @@
 
     <module>sal-binding-util</module>
 
-    <!-- Config subsystem bindings -->
-    <module>sal-dom-config</module>
-    <module>sal-dom-broker-config</module>
-    <module>sal-binding-config</module>
-
     <!-- Configuration File -->
     <module>md-sal-config</module>
 

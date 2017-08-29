@@ -65,10 +65,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>messagebus-spi</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-binding-config</artifactId>
-        </dependency>
 
         <!-- Testing Dependencies -->
         <dependency>

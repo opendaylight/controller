@@ -101,15 +101,12 @@ public class TestHelper {
 
                 mavenBundle("com.lmax", "disruptor").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
-                mavenBundle(CONTROLLER, "sal-dom-config").versionAsInProject(), // //
 
                 mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "sal-dom-broker-config").versionAsInProject(), // //
 
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 
                 mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), // //
-                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
 
                 systemProperty("netconf.config.persister.active").value("1"), //
                 systemProperty("netconf.config.persister.1.storageAdapterClass").value(
