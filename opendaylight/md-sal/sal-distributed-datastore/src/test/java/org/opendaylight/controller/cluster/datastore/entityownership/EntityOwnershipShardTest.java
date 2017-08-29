@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import org.junit.After;
 import org.junit.Test;
@@ -629,6 +630,16 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(peer1, ENTITY_TYPE, ENTITY_ID2, PEER_MEMBER_2_NAME);
         verifyOwner(peer1, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
         verifyOwner(peer1, ENTITY_TYPE, ENTITY_ID4, "");
+
+        AtomicLong leaderLastApplied = new AtomicLong();
+        verifyRaftState(leader, rs -> {
+            assertEquals("LastApplied up-to-date", rs.getLastApplied(), rs.getLastIndex());
+            leaderLastApplied.set(rs.getLastApplied());
+        });
+
+        verifyRaftState(peer2, rs -> {
+            assertEquals("LastApplied", leaderLastApplied.get(), rs.getLastIndex());
+        });
 
         // Kill the local leader and elect peer2 the leader. This should cause a new owner to be selected for
         // the entities (1 and 3) previously owned by the local leader member.
