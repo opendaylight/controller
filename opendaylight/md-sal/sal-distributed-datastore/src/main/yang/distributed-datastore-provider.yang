@@ -5,7 +5,6 @@ module distributed-datastore-provider {
     namespace "urn:opendaylight:params:xml:ns:yang:controller:config:distributed-datastore-provider";
     prefix "distributed-datastore-provider";
 
-    import config { prefix config; revision-date 2013-04-05; }
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
     import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
@@ -20,22 +19,6 @@ module distributed-datastore-provider {
         description
             "Initial revision.";
     }
-
-    // This is the definition of the service implementation as a module identity.
-    identity distributed-config-datastore-provider {
-            base config:module-type;
-            config:provided-service config-dom-store-spi:config-dom-datastore;
-            // Specifies the prefix for generated java classes.
-            config:java-name-prefix DistributedConfigDataStoreProvider;
-    }
-
-     // This is the definition of the service implementation as a module identity.
-     identity distributed-operational-datastore-provider {
-                base config:module-type;
-                config:provided-service operational-dom-store-spi:operational-dom-datastore;
-                // Specifies the prefix for generated java classes.
-                config:java-name-prefix DistributedOperationalDataStoreProvider;
-     }
 
     typedef non-zero-uint32-type {
         type uint32 {
@@ -283,62 +266,6 @@ module distributed-datastore-provider {
             type non-zero-uint32-type;
             description "The timeout interval whereby the client front-end hasn't made progress with the
                          back-end on any request and terminates.";
-        }
-    }
-
-    // Augments the 'configuration' choice node under modules/module.
-    augment "/config:modules/config:module/config:configuration" {
-        case distributed-config-datastore-provider {
-            when "/config:modules/config:module/config:type = 'distributed-config-datastore-provider'";
-                container config-schema-service {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity sal:schema-service;
-                        }
-                    }
-                }
-
-                container config-actor-system-provider {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity actor-system:actor-system-provider-service;
-                        }
-                    }
-                }
-
-                container config-properties {
-                    uses data-store-properties;
-                }
-        }
-    }
-
-    // Augments the 'configuration' choice node under modules/module.
-    augment "/config:modules/config:module/config:configuration" {
-        case distributed-operational-datastore-provider {
-            when "/config:modules/config:module/config:type = 'distributed-operational-datastore-provider'";
-                container operational-schema-service {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity sal:schema-service;
-                        }
-                    }
-                }
-
-                container operational-actor-system-provider {
-                    uses config:service-ref {
-                        refine type {
-                            mandatory false;
-                            config:required-identity actor-system:actor-system-provider-service;
-                        }
-                    }
-                }
-
-                container operational-properties {
-                    uses data-store-properties;
-                }
         }
     }
 }
