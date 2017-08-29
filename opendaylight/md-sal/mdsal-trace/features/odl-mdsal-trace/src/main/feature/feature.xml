@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="odl-mdsal-trace-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+    <feature name="odl-mdsal-trace" version="${project.version}">
+        <configfile finalname="etc/opendaylight/datastore/initial/config/mdsaltrace_config.xml">mvn:org.opendaylight.controller/mdsal-trace-api/${project.version}/xml/config</configfile>
+    </feature>
+</features>
