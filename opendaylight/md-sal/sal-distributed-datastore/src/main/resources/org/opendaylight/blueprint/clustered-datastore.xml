@@ -14,9 +14,27 @@
 
   <!-- ActorSystemProvider -->
 
+  <bean id="bundleClassLoader" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.osgi.BundleClassLoaderFactory"
+          factory-method="createClassLoader">
+    <argument ref="blueprintBundleContext" />
+  </bean>
+
+  <bean id="actorSystemProps" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.osgi.QuarantinedMonitorActorPropsFactory"
+          factory-method="createProps">
+    <argument ref="blueprintBundleContext" />
+  </bean>
+
+  <bean id="akkaReader" class="org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader"/>
+  <bean id="akkaConfig" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.AkkaConfigFactory"
+          factory-method="createAkkaConfig">
+    <argument ref="akkaReader" />
+  </bean>
+
   <bean id="actorSystemProvider" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.ActorSystemProviderImpl"
           destroy-method="close">
-    <argument ref="blueprintBundleContext"/>
+    <argument ref="bundleClassLoader" />
+    <argument ref="actorSystemProps"/>
+    <argument ref="akkaConfig"/>
   </bean>
 
   <service ref="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
