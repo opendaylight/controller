@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +61,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -469,7 +471,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void selectNewOwnerForEntitiesOwnedBy(final Set<String> ownedBy) {
-        final BatchedModifications modifications = commitCoordinator.newBatchedModifications();
+        final List<Modification> modifications = new ArrayList<>();
         searchForEntitiesOwnedBy(ownedBy, (entityTypeNode, entityNode) -> {
             YangInstanceIdentifier entityPath = YangInstanceIdentifier.builder(ENTITY_TYPES_PATH)
                     .node(entityTypeNode.getIdentifier()).node(ENTITY_NODE_ID).node(entityNode.getIdentifier())
@@ -480,8 +482,8 @@ class EntityOwnershipShard extends Shard {
             if (!newOwner.isEmpty()) {
                 LOG.debug("{}: Found entity {}, writing new owner {}", persistenceId(), entityPath, newOwner);
 
-                modifications.addModification(new WriteModification(entityPath,
-                        ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)));
+                modifications.add(new WriteModification(entityPath,
+                    ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)));
 
             } else {
                 LOG.debug("{}: Found entity {} but no other candidates - not clearing owner", persistenceId(),
@@ -538,7 +540,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void removeCandidateFromEntities(final MemberName member) {
-        final BatchedModifications modifications = commitCoordinator.newBatchedModifications();
+        final List<Modification> modifications = new ArrayList<>();
         searchForEntities((entityTypeNode, entityNode) -> {
             if (hasCandidate(entityNode, member)) {
                 YangInstanceIdentifier entityId =
@@ -550,7 +552,7 @@ class EntityOwnershipShard extends Shard {
                 LOG.info("{}: Found entity {}, removing candidate {}, path {}", persistenceId(), entityId,
                         member, candidatePath);
 
-                modifications.addModification(new DeleteModification(candidatePath));
+                modifications.add(new DeleteModification(candidatePath));
             }
         });
 

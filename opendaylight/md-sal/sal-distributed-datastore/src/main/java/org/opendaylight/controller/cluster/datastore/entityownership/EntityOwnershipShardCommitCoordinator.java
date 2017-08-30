@@ -13,8 +13,10 @@ import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Status.Failure;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -158,13 +160,11 @@ class EntityOwnershipShardCommitCoordinator {
     }
 
     void commitModification(Modification modification, EntityOwnershipShard shard) {
-        BatchedModifications modifications = newBatchedModifications();
-        modifications.addModification(modification);
-        commitModifications(modifications, shard);
+        commitModifications(ImmutableList.of(modification), shard);
     }
 
-    void commitModifications(BatchedModifications modifications, EntityOwnershipShard shard) {
-        if (modifications.getModifications().isEmpty()) {
+    void commitModifications(List<Modification> modifications, EntityOwnershipShard shard) {
+        if (modifications.isEmpty()) {
             return;
         }
 
@@ -175,9 +175,10 @@ class EntityOwnershipShardCommitCoordinator {
                         inflightCommit != null ? "A commit is inflight" : "No shard leader");
             }
 
-            pendingModifications.addAll(modifications.getModifications());
+            pendingModifications.addAll(modifications);
         } else {
-            inflightCommit = modifications;
+            inflightCommit = newBatchedModifications();
+            inflightCommit.addModifications(modifications);
             shard.tryCommitModifications(inflightCommit);
         }
     }
@@ -270,7 +271,7 @@ class EntityOwnershipShardCommitCoordinator {
         inflightCommit = newBatchedModifications;
     }
 
-    BatchedModifications newBatchedModifications() {
+    private BatchedModifications newBatchedModifications() {
         BatchedModifications modifications = new BatchedModifications(
             new TransactionIdentifier(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
         modifications.setDoCommitOnReady(true);
