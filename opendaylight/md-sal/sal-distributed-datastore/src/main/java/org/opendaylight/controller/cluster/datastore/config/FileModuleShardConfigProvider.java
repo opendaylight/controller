@@ -47,7 +47,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             moduleShardsConfig = ConfigFactory.parseFile(moduleShardsFile);
         } else {
             LOG.warn("module shards configuration read from resource");
-            moduleShardsConfig = ConfigFactory.load(moduleShardsFile.getName());
+            moduleShardsConfig = ConfigFactory.load(moduleShardsFile.getPath());
         }
 
         Config modulesConfig = null;
@@ -56,7 +56,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             modulesConfig = ConfigFactory.parseFile(modulesFile);
         } else {
             LOG.warn("modules configuration read from resource");
-            modulesConfig = ConfigFactory.load(modulesFile.getName());
+            modulesConfig = ConfigFactory.load(modulesFile.getPath());
         }
 
         final Map<String, ModuleConfig.Builder> moduleConfigMap = readModuleShardsConfig(moduleShardsConfig);
