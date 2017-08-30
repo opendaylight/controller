@@ -14,9 +14,20 @@
 
   <!-- ActorSystemProvider -->
 
+  <bean id="bundleClassLoader" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.BundleClassLoaderFactory"
+          factory-method="createClassLoader">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <bean id="actorSystemProps" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.ActorSystemPropsFactory"
+          factory-method="createProps">
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
   <bean id="actorSystemProvider" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.ActorSystemProviderImpl"
           destroy-method="close">
-    <argument ref="blueprintBundleContext"/>
+    <argument ref="bundleClassLoader" />
+    <argument ref="actorSystemProps"/>
   </bean>
 
   <service ref="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
