@@ -29,7 +29,11 @@ module mdsaltrace {
             default false;
             type boolean;
             description "Enable or disable transaction context debug. This will preserve the call site trace for
-                         transactions, so that the original caller of un-close'd() transaction can be identified";
+                         transactions, so that the original caller of un-close'd() transaction can be identified.
+                         NB: This is a different property from the equally named one in etc/org.opendaylight.controller.cluster.datastore.cfg;
+                         that one does something somewhat similar, but serves to include the stack trace on failed transaction submit,
+                         whereas this one is specific to odl-mdsal-trace's trace:transaction leak troubleshooting command.";
+            // This ^^^ description is also copy/pasted in mdsaltrace_config.xml, and should be kept in line.]
         }
     }
 }

@@ -2,5 +2,12 @@
     <!-- <registration-watches>/neutron-router-dpns/router-dpn-list</registration-watches> -->
     <!-- <registration-watches>/tunnels_state/state-tunnel-list</registration-watches> -->
     <!-- <write-watches> /NetworkTopology/Topology</write-watches> -->
+
+    <!-- Enable or disable transaction context debug. This will preserve the call site trace for
+         transactions, so that the original caller of un-close'd() transaction can be identified.
+         NB: This is a different property from the equally named one in etc/org.opendaylight.controller.cluster.datastore.cfg;
+         that one does something somewhat similar, but serves to include the stack trace on failed transaction submit,
+         whereas this one is specific to odl-mdsal-trace's trace:transaction leak troubleshooting command.
+         [This documentation has been copy/pasted from mdsaltrace.yang, and should be kept in line.] -->
     <transaction-debug-context-enabled>true</transaction-debug-context-enabled>
 </config>
