@@ -22,13 +22,13 @@ import javax.annotation.Nullable;
  */
 public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracked<T> {
 
-    private final @Nullable Throwable allocationContext;
+    private final @Nullable StackTraceElement[] allocationContext;
     private final CloseTrackedRegistry<T> closeTrackedRegistry;
     private final CloseTracked<T> realCloseTracked;
 
     public CloseTrackedTrait(CloseTrackedRegistry<T> transactionChainRegistry, CloseTracked<T> realCloseTracked) {
         if (transactionChainRegistry.isDebugContextEnabled()) {
-            this.allocationContext = new Throwable("allocated at");
+            this.allocationContext = Thread.currentThread().getStackTrace();
         } else {
             this.allocationContext = null;
         }
@@ -38,8 +38,9 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
     }
 
     @Override
+    @Nullable
     public StackTraceElement[] getAllocationContextStackTrace() {
-        return allocationContext != null ? allocationContext.getStackTrace() : null;
+        return allocationContext != null ? allocationContext : null;
     }
 
     public void removeFromTrackedRegistry() {
