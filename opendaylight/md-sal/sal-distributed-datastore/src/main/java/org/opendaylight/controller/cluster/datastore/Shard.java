@@ -839,8 +839,11 @@ public class Shard extends RaftActor {
     @Override
     @Nonnull
     protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
-        return new ShardRecoveryCoordinator(store,
-            restoreFromSnapshot != null ? restoreFromSnapshot.getSnapshot() : null, persistenceId(), LOG);
+        if (restoreFromSnapshot == null) {
+            return ShardRecoveryCoordinator.create(store, persistenceId(), LOG);
+        }
+
+        return ShardRecoveryCoordinator.forSnapshot(store, persistenceId(), LOG, restoreFromSnapshot.getSnapshot());
     }
 
     @Override
