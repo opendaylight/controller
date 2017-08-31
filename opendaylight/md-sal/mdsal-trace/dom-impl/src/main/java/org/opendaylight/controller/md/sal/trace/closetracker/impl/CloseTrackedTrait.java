@@ -22,13 +22,19 @@ import javax.annotation.Nullable;
  */
 public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracked<T> {
 
+    // NB: It's important that we keep a Throwable here, and not directly the StackTraceElement[] !
+    // This is because creating a new Throwable() is a lot less expensive in terms of runtime overhead
+    // than actually calling its getStackTrace(), which we can delay until we really need to.
+    // see also e.g. https://stackoverflow.com/a/26122232/421602
     private final @Nullable Throwable allocationContext;
     private final CloseTrackedRegistry<T> closeTrackedRegistry;
     private final CloseTracked<T> realCloseTracked;
 
     public CloseTrackedTrait(CloseTrackedRegistry<T> transactionChainRegistry, CloseTracked<T> realCloseTracked) {
         if (transactionChainRegistry.isDebugContextEnabled()) {
-            this.allocationContext = new Throwable("allocated at");
+            // NB: We're NOT doing the (expensive) getStackTrace() here just yet (only below)
+            // TODO When we're on Java 9, then instead use the new java.lang.StackWalker API..
+            this.allocationContext = new Throwable();
         } else {
             this.allocationContext = null;
         }
@@ -38,6 +44,7 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
     }
 
     @Override
+    @Nullable
     public StackTraceElement[] getAllocationContextStackTrace() {
         return allocationContext != null ? allocationContext.getStackTrace() : null;
     }
