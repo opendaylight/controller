@@ -13,16 +13,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
@@ -37,19 +38,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.LoggerFactory;
 
-public class EventSourceTopic implements DataChangeListener, AutoCloseable {
+public class EventSourceTopic implements DataTreeChangeListener<Node>, AutoCloseable {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EventSourceTopic.class);
     private final NotificationPattern notificationPattern;
     private final EventSourceService sourceService;
     private final Pattern nodeIdPattern;
     private final TopicId topicId;
-    private ListenerRegistration<DataChangeListener> listenerRegistration;
+    private ListenerRegistration<?> listenerRegistration;
     private final CopyOnWriteArraySet<InstanceIdentifier<?>> joinedEventSources = new CopyOnWriteArraySet<>();
 
     public static EventSourceTopic create(final NotificationPattern notificationPattern, final String nodeIdRegexPattern, final EventSourceTopology eventSourceTopology){
@@ -73,25 +73,19 @@ public class EventSourceTopic implements DataChangeListener, AutoCloseable {
     }
 
     @Override
-    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
-
-        for (final Map.Entry<InstanceIdentifier<?>, DataObject> createdEntry : event.getCreatedData().entrySet()) {
-            if (createdEntry.getValue() instanceof Node) {
-                final Node node = (Node) createdEntry.getValue();
-                LOG.debug("Create node...");
-                if (getNodeIdRegexPattern().matcher(node.getNodeId().getValue()).matches()) {
-                    LOG.debug("Matched...");
-                    notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey()));
-                }
-            }
-        }
-
-        for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getUpdatedData().entrySet()) {
-            if (changeEntry.getValue() instanceof Node) {
-                final Node node = (Node) changeEntry.getValue();
-                if (getNodeIdRegexPattern().matcher(node.getNodeId().getValue()).matches()) {
-                    notifyNode(changeEntry.getKey());
-                }
+    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+        for (DataTreeModification<Node> change: changes) {
+            final DataObjectModification<Node> rootNode = change.getRootNode();
+            switch (rootNode.getModificationType()) {
+                case WRITE:
+                case SUBTREE_MODIFIED:
+                    final Node node = rootNode.getDataAfter();
+                    if (getNodeIdRegexPattern().matcher(node.getNodeId().getValue()).matches()) {
+                        notifyNode(change.getRootPath().getRootIdentifier());
+                    }
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -173,11 +167,10 @@ public class EventSourceTopic implements DataChangeListener, AutoCloseable {
 
     private void registerListner(final EventSourceTopology eventSourceTopology) {
         this.listenerRegistration =
-                eventSourceTopology.getDataBroker().registerDataChangeListener(
+                eventSourceTopology.getDataBroker().registerDataTreeChangeListener(new DataTreeIdentifier<>(
                         LogicalDatastoreType.OPERATIONAL,
-                        EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH,
-                        this,
-                        DataBroker.DataChangeScope.SUBTREE);
+                        EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class)),
+                        this);
     }
 
     @Override

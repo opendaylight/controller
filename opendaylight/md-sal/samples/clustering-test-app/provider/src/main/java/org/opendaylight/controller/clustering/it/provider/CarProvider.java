@@ -27,7 +27,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -245,20 +244,6 @@ public class CarProvider implements CarService {
     }
 
     @Override
-    public Future<RpcResult<java.lang.Void>> registerLoggingDcl() {
-        LOG_CAR_PROVIDER.info("Registering a new CarDataChangeListener");
-        final ListenerRegistration carsDclRegistration = dataProvider.registerDataChangeListener(
-                LogicalDatastoreType.CONFIGURATION, CARS_IID, new CarDataChangeListener(),
-                AsyncDataBroker.DataChangeScope.SUBTREE);
-
-        if (carsDclRegistration != null) {
-            carsDclRegistrations.add(carsDclRegistration);
-            return RpcResultBuilder.<Void>success().buildFuture();
-        }
-        return RpcResultBuilder.<Void>failed().buildFuture();
-    }
-
-    @Override
     public Future<RpcResult<java.lang.Void>> registerLoggingDtcl() {
         LOG_CAR_PROVIDER.info("Registering a new CarDataTreeChangeListener");
         final ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration =
@@ -269,21 +254,6 @@ public class CarProvider implements CarService {
             return RpcResultBuilder.<Void>success().buildFuture();
         }
         return RpcResultBuilder.<Void>failed().buildFuture();
-    }
-
-    @Override
-    public Future<RpcResult<java.lang.Void>> unregisterLoggingDcls() {
-        LOG_CAR_PROVIDER.info("Unregistering the CarDataChangeListener(s)");
-        synchronized (carsDclRegistrations) {
-            int numListeners = 0;
-            for (ListenerRegistration<?> carsDclRegistration : carsDclRegistrations) {
-                carsDclRegistration.close();
-                numListeners++;
-            }
-            carsDclRegistrations.clear();
-            LOG_CAR_PROVIDER.info("Unregistered {} CarDataChangeListener(s)", numListeners);
-        }
-        return RpcResultBuilder.<Void>success().buildFuture();
     }
 
     @Override

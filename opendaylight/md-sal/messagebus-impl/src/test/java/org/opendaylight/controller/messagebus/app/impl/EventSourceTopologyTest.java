@@ -16,14 +16,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -49,16 +51,13 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 public class EventSourceTopologyTest {
 
     EventSourceTopology eventSourceTopology;
     DataBroker dataBrokerMock;
     RpcProviderRegistry rpcProviderRegistryMock;
     CreateTopicInput createTopicInputMock;
-    ListenerRegistration listenerRegistrationMock;
+    ListenerRegistration<?> listenerRegistrationMock;
     NodeKey nodeKey;
     RpcRegistration<EventAggregatorService> aggregatorRpcReg;
 
@@ -116,10 +115,8 @@ public class EventSourceTopologyTest {
         doReturn(pattern).when(createTopicInputMock).getNodeIdPattern();
 
         listenerRegistrationMock = mock(ListenerRegistration.class);
-        doReturn(listenerRegistrationMock).when(dataBrokerMock).registerDataChangeListener(eq(LogicalDatastoreType.OPERATIONAL),
-                any(InstanceIdentifier.class),
-                any(EventSourceTopic.class),
-                eq(DataBroker.DataChangeScope.SUBTREE));
+        doReturn(listenerRegistrationMock).when(dataBrokerMock).registerDataTreeChangeListener(
+                any(DataTreeIdentifier.class), any(EventSourceTopic.class));
 
         ReadOnlyTransaction readOnlyTransactionMock = mock(ReadOnlyTransaction.class);
         doReturn(readOnlyTransactionMock).when(dataBrokerMock).newReadOnlyTransaction();
@@ -180,7 +177,7 @@ public class EventSourceTopologyTest {
         Map<NodeKey, BindingAwareBroker.RoutedRpcRegistration<EventSourceService>> localMap = getRoutedRpcRegistrations();
         NodeKey nodeKeyMock = mock(NodeKey.class);
         doReturn(nodeKeyMock).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock = (BindingAwareBroker.RoutedRpcRegistration<EventSourceService>) mock(BindingAwareBroker.RoutedRpcRegistration.class);
+        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock = mock(BindingAwareBroker.RoutedRpcRegistration.class);
         localMap.put(nodeKeyMock, routedRpcRegistrationMock);
         eventSourceTopology.unRegister(eventSourceMock);
         verify(routedRpcRegistrationMock, times(1)).close();

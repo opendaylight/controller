@@ -16,16 +16,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
@@ -36,13 +37,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.CheckedFuture;
-
 public class EventSourceTopicTest {
 
     EventSourceTopic eventSourceTopic;
-    Node dataObjectNodeMock;
-    NodeId nodeIdMock;
     DataBroker dataBrokerMock;
     EventSourceService eventSourceServiceMock;
     EventSourceTopology eventSourceTopologyMock;
@@ -83,26 +80,28 @@ public class EventSourceTopicTest {
         assertNotNull("Topic has not been created correctly.", eventSourceTopic.getTopicId());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void onDataChangedTest() {
-        AsyncDataChangeEvent asyncDataChangeEventMock = mock(AsyncDataChangeEvent.class);
-        onDataChangedTestHelper(asyncDataChangeEventMock);
-        eventSourceTopic.onDataChanged(asyncDataChangeEventMock);
-        verify(dataObjectNodeMock, times(2)).getNodeId();
-        verify(nodeIdMock, times(2)).getValue();
-    }
+    public void onDataTreeChangedTest() {
+        InstanceIdentifier<Node> instanceIdentifierMock = mock(InstanceIdentifier.class);
+        DataTreeModification<Node> mockDataTreeModification = mock(DataTreeModification.class);
+        DataObjectModification<Node> mockModification = mock(DataObjectModification.class);
+        doReturn(mockModification).when(mockDataTreeModification).getRootNode();
+        doReturn(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, instanceIdentifierMock))
+                .when(mockDataTreeModification).getRootPath();
+        doReturn(DataObjectModification.ModificationType.WRITE).when(mockModification).getModificationType();
 
-    private void onDataChangedTestHelper(AsyncDataChangeEvent asyncDataChangeEventMock){
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
-        InstanceIdentifier instanceIdentifierMock = mock(InstanceIdentifier.class);
-        dataObjectNodeMock = mock(Node.class);
+        Node dataObjectNodeMock = mock(Node.class);
         doReturn(getNodeKey("testNodeId01")).when(dataObjectNodeMock).getKey();
-        map.put(instanceIdentifierMock, dataObjectNodeMock);
-        doReturn(map).when(asyncDataChangeEventMock).getUpdatedData();
-        doReturn(map).when(asyncDataChangeEventMock).getCreatedData();
-        nodeIdMock = mock(NodeId.class);
+        NodeId nodeIdMock = mock(NodeId.class);
         doReturn(nodeIdMock).when(dataObjectNodeMock).getNodeId();
         doReturn("nodeIdPattern1").when(nodeIdMock).getValue();
+
+        doReturn(dataObjectNodeMock).when(mockModification).getDataAfter();
+
+        eventSourceTopic.onDataTreeChanged(Collections.singletonList(mockDataTreeModification));
+        verify(dataObjectNodeMock).getNodeId();
+        verify(nodeIdMock).getValue();
     }
 
     @Test
