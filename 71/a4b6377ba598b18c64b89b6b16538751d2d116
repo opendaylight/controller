@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Michael Vorburger <vorburger@redhat.com>
+Code-Review+2: Tom Pantelis <tompantelis@gmail.com>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Fri, 01 Sep 2017 06:07:43 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/62453
+Project: controller
+Branch: refs/heads/stable/carbon
