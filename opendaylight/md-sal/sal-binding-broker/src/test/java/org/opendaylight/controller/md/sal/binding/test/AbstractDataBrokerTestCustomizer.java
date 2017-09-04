@@ -26,11 +26,11 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.test.util.MockSchemaService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.opendaylight.mdsal.binding.dom.codec.gen.impl.DataObjectSerializerGenerator;
+import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
+import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
-import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerGenerator;
-import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class AbstractDataBrokerTestCustomizer {
