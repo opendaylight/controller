@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.trace.closetracker.impl.tests;
+package org.opendaylight.controller.md.sal.trace.tests;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -48,7 +48,9 @@ public class TracingBrokerTest {
         String output = new String(baos.toByteArray(), UTF_8);
 
         assertThat(printReturnValue).isTrue();
-        assertThat(output).contains("testPrintOpenTransactions(TracingBrokerTest.java:41)"); // in a stack trace
+        // Assert expections about stack trace
+        assertThat(output).contains("testPrintOpenTransactions(TracingBrokerTest.java:41)");
+        assertThat(output).doesNotContain(TracingBroker.class.getName());
 
         // We don't do any verify/times on the mocks,
         // because the main point of the test is just to verify that

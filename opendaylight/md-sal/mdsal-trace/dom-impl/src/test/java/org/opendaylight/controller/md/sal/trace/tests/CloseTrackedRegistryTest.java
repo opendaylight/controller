@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.trace.closetracker.impl.tests;
+package org.opendaylight.controller.md.sal.trace.tests;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
