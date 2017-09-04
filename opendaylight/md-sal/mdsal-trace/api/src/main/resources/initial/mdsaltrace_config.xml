@@ -1,5 +1,13 @@
 <config xmlns="urn:opendaylight:params:xml:ns:yang:mdsaltrace">
+    <!--  Both registration-watches as well as write-watches will
+          log EVERYTHING by default, if we do not constrain any paths;
+          therefore we set a fake one to get nothing out-of-the-box;
+          please remove this first fake one when you configure this
+          to watch what you are really interested in instead: -->
+    <registration-watches>/this/will/never/exist</registration-watches>
     <!-- <registration-watches>/neutron-router-dpns/router-dpn-list</registration-watches> -->
     <!-- <registration-watches>/tunnels_state/state-tunnel-list</registration-watches> -->
+
+    <write-watches>/this/will/never/exist</write-watches>
     <!-- <write-watches> /NetworkTopology/Topology</write-watches> -->
 </config>
