@@ -391,7 +391,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         }
         entries.forEach(entry -> {
             ps.println("    " + entry.getNumberAddedNotRemoved() + "x TransactionChains opened but not closed here:");
-            entry.getStackTraceElements().forEach(line -> ps.println("      " + line));
+            printStackTraceElements(ps, "      ", entry.getStackTraceElements());
             @SuppressWarnings("resource")
             TracingTransactionChain txChain = (TracingTransactionChain) entry
                 .getExampleCloseTracked().getRealCloseTracked();
@@ -413,10 +413,33 @@ public class TracingBroker implements TracingDOMDataBroker {
         entries.forEach(entry -> {
             ps.println(indent + "  " + entry.getNumberAddedNotRemoved()
                 + "x transactions opened here, which are not closed:");
-            entry.getStackTraceElements().forEach(line -> ps.println(indent + "    " + line));
+            printStackTraceElements(ps, indent + "    ", entry.getStackTraceElements());
         });
         if (!entries.isEmpty()) {
             ps.println();
         }
+    }
+
+    private void printStackTraceElements(PrintStream ps, String indent, List<StackTraceElement> stackTraceElements) {
+        stackTraceElements.forEach(line -> {
+            if (isStackTraceElementInteresting(line)) {
+                ps.println(indent + line);
+            } else {
+                ps.println(indent + "(...)");
+            }
+        });
+    }
+
+    private boolean isStackTraceElementInteresting(StackTraceElement element) {
+        final String className = element.getClassName();
+        return !className.startsWith(getClass().getPackage().getName())
+            && !className.startsWith(CloseTracked.class.getPackage().getName())
+            && !className.startsWith("Proxy")
+            && !className.startsWith("akka")
+            && !className.startsWith("scala")
+            && !className.startsWith("sun.reflect")
+            && !className.startsWith("java.lang.reflect")
+            && !className.startsWith("org.apache.aries.blueprint")
+            && !className.startsWith("org.osgi.util.tracker");
     }
 }
