@@ -18,7 +18,6 @@ module mdsaltrace {
     }
 
     container config {
-        // TODO leaf enabled ...
         leaf-list registration-watches {
             type string;
         }
