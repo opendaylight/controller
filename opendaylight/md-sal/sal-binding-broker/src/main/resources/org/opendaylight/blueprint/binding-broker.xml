@@ -21,8 +21,6 @@
 
   <service ref="mappingCodec" odl:type="default">
     <interfaces>
-      <value>org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory</value>
-      <value>org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer</value>
       <value>org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer</value>
       <value>org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory</value>
     </interfaces>
