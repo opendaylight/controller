@@ -38,13 +38,13 @@ module opendaylight-md-sal-binding {
 
     identity binding-codec-tree-factory {
         base "config:service-type";
-        config:java-class "org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory";
+        config:java-class "org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory";
         config:disable-osgi-service-registration;
     }
 
     identity binding-normalized-node-serializer {
         base "config:service-type";
-        config:java-class "org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer";
+        config:java-class "org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer";
         config:disable-osgi-service-registration;
     }
 

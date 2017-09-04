@@ -12,7 +12,7 @@ import org.opendaylight.controller.md.sal.binding.impl.LazySerializedDOMNotifica
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
-import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 final class FunctionalNotificationListenerAdapter<N extends Notification> implements DOMNotificationListener {
