@@ -82,6 +82,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
 
     private static void checkInstanceIdentifierReferencesData(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
+        Preconditions.checkArgument(data != null, "Attempted to store null data at %s", path);
         final PathArgument lastArg = path.getLastPathArgument();
         Preconditions.checkArgument(
                 lastArg == data.getIdentifier() || lastArg != null && lastArg.equals(data.getIdentifier()),
