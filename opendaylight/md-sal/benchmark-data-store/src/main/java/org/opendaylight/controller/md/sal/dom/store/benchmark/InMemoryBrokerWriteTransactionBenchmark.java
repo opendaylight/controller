@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -37,9 +37,10 @@ public class InMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryBro
     @Setup(Level.Trial)
     @Override
     public void setUp() throws Exception {
-        ListeningExecutorService dsExec = MoreExecutors.sameThreadExecutor();
+        ListeningExecutorService dsExec = MoreExecutors.newDirectExecutorService();
         executor = MoreExecutors.listeningDecorator(
-            MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newFixedThreadPool(1), 1L, TimeUnit.SECONDS));
+                MoreExecutors.getExitingExecutorService((ThreadPoolExecutor) Executors.newFixedThreadPool(1), 1L,
+                        TimeUnit.SECONDS));
 
         InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", dsExec);
         InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", dsExec);

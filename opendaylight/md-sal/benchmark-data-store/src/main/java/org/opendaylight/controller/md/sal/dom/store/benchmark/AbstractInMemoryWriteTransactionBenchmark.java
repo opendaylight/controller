@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,8 +31,7 @@ public abstract class AbstractInMemoryWriteTransactionBenchmark {
 
         for (int outerListKey = 0; outerListKey < outerListPathsCount; ++outerListKey) {
             paths[outerListKey] = YangInstanceIdentifier.builder(BenchmarkModel.OUTER_LIST_PATH)
-                .nodeWithKey(BenchmarkModel.OUTER_LIST_QNAME, BenchmarkModel.ID_QNAME, outerListKey)
-                .build();
+                    .nodeWithKey(BenchmarkModel.OUTER_LIST_QNAME, BenchmarkModel.ID_QNAME, outerListKey).build();
         }
         return paths;
     }
@@ -46,40 +45,43 @@ public abstract class AbstractInMemoryWriteTransactionBenchmark {
 
     private static MapNode initInnerListItems(final int count) {
         final CollectionNodeBuilder<MapEntryNode, MapNode> mapEntryBuilder = ImmutableNodes
-            .mapNodeBuilder(BenchmarkModel.INNER_LIST_QNAME);
+                .mapNodeBuilder(BenchmarkModel.INNER_LIST_QNAME);
 
         for (int i = 1; i <= count; ++i) {
             mapEntryBuilder
-                .withChild(ImmutableNodes.mapEntry(BenchmarkModel.INNER_LIST_QNAME, BenchmarkModel.NAME_QNAME, i));
+                    .withChild(ImmutableNodes.mapEntry(BenchmarkModel.INNER_LIST_QNAME, BenchmarkModel.NAME_QNAME, i));
         }
         return mapEntryBuilder.build();
     }
 
-    protected static final NormalizedNode<?, ?>[] OUTER_LIST_ONE_ITEM_INNER_LIST = initOuterListItems(OUTER_LIST_100K, ONE_ITEM_INNER_LIST);
-    protected static final NormalizedNode<?, ?>[] OUTER_LIST_TWO_ITEM_INNER_LIST = initOuterListItems(OUTER_LIST_50K, TWO_ITEM_INNER_LIST);
-    protected static final NormalizedNode<?, ?>[] OUTER_LIST_TEN_ITEM_INNER_LIST = initOuterListItems(OUTER_LIST_10K, TEN_ITEM_INNER_LIST);
+    protected static final NormalizedNode<?, ?>[] OUTER_LIST_ONE_ITEM_INNER_LIST = initOuterListItems(OUTER_LIST_100K,
+            ONE_ITEM_INNER_LIST);
+    protected static final NormalizedNode<?, ?>[] OUTER_LIST_TWO_ITEM_INNER_LIST = initOuterListItems(OUTER_LIST_50K,
+            TWO_ITEM_INNER_LIST);
+    protected static final NormalizedNode<?, ?>[] OUTER_LIST_TEN_ITEM_INNER_LIST = initOuterListItems(OUTER_LIST_10K,
+            TEN_ITEM_INNER_LIST);
 
-    private static NormalizedNode<?,?>[] initOuterListItems(final int outerListItemsCount, final MapNode innerList) {
-        final NormalizedNode<?,?>[] outerListItems = new NormalizedNode[outerListItemsCount];
+    private static NormalizedNode<?, ?>[] initOuterListItems(final int outerListItemsCount, final MapNode innerList) {
+        final NormalizedNode<?, ?>[] outerListItems = new NormalizedNode[outerListItemsCount];
 
         for (int i = 0; i < outerListItemsCount; ++i) {
             int outerListKey = i;
-            outerListItems[i] = ImmutableNodes.mapEntryBuilder(BenchmarkModel.OUTER_LIST_QNAME, BenchmarkModel.ID_QNAME, outerListKey)
-                .withChild(innerList).build();
+            outerListItems[i] = ImmutableNodes
+                    .mapEntryBuilder(BenchmarkModel.OUTER_LIST_QNAME, BenchmarkModel.ID_QNAME, outerListKey)
+                    .withChild(innerList).build();
         }
         return outerListItems;
     }
 
     protected SchemaContext schemaContext;
-    abstract public void setUp() throws Exception;
-    abstract public void tearDown();
+
+    public abstract void setUp() throws Exception;
+
+    public abstract void tearDown();
 
     protected static DataContainerChild<?, ?> provideOuterListNode() {
-        return ImmutableContainerNodeBuilder
-            .create()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BenchmarkModel.TEST_QNAME))
-            .withChild(
-                ImmutableNodes.mapNodeBuilder(BenchmarkModel.OUTER_LIST_QNAME)
-                    .build()).build();
+        return ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BenchmarkModel.TEST_QNAME))
+                .withChild(ImmutableNodes.mapNodeBuilder(BenchmarkModel.OUTER_LIST_QNAME).build()).build();
     }
 }
