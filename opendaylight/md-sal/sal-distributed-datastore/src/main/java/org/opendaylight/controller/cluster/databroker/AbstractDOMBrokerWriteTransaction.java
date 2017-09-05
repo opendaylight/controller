@@ -83,6 +83,10 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     private static void checkInstanceIdentifierReferencesData(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
         final PathArgument lastArg = path.getLastPathArgument();
+        LOG.info("ciirs: path={}", path);
+        LOG.info("ciirs: lastArg={}", lastArg);
+        LOG.info("ciirs: data={}", data);
+        LOG.info("ciirs: did={}", data.getIdentifier());
         Preconditions.checkArgument(
                 lastArg == data.getIdentifier() || lastArg != null && lastArg.equals(data.getIdentifier()),
                 "Instance identifier references %s but data identifier is %s", lastArg, data);
