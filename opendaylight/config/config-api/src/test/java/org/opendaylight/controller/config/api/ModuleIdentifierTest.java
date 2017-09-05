@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,12 +19,12 @@ public class ModuleIdentifierTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor() throws Exception {
-        ModuleIdentifier m = new ModuleIdentifier(null, "instance");
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier(null, "instance");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor2() throws Exception {
-        ModuleIdentifier m = new ModuleIdentifier("name", null);
+        ModuleIdentifier moduleIdentifier = new ModuleIdentifier("name", null);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ModuleIdentifierTest {
 
     @Test
     public void testToString() throws Exception {
-        assertEquals( new ModuleIdentifier("factory", "instance").toString(),
+        assertEquals(new ModuleIdentifier("factory", "instance").toString(),
                 new ModuleIdentifier("factory", "instance").toString());
     }
 }

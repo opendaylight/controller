@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,7 +15,8 @@ public class CommitJMXNotification extends ConfigJMXNotification {
     private static final String AFTER_COMMIT_MESSAGE_TEMPLATE = "Commit successful: %s";
 
     CommitJMXNotification(final NotificationBroadcasterSupport source, final String message) {
-        super(ConfigJMXNotification.NotificationType.COMMIT,  source, String.format(AFTER_COMMIT_MESSAGE_TEMPLATE, message));
+        super(ConfigJMXNotification.NotificationType.COMMIT, source,
+                String.format(AFTER_COMMIT_MESSAGE_TEMPLATE, message));
     }
 
     @Override
@@ -23,9 +24,5 @@ public class CommitJMXNotification extends ConfigJMXNotification {
         return "CommitJMXNotification{}";
     }
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -8587623362011695514L;
-
 }

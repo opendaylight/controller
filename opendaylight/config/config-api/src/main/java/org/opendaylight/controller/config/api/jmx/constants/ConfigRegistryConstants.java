@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,7 +25,8 @@ public class ConfigRegistryConstants {
 
     public static final ObjectName OBJECT_NAME = createONWithDomainAndType(TYPE_CONFIG_REGISTRY);
 
-    public static final ObjectName OBJECT_NAME_NO_NOTIFICATIONS = createONWithDomainAndType(TYPE_CONFIG_REGISTRY_NO_NOTIFICATIONS);
+    public static final ObjectName OBJECT_NAME_NO_NOTIFICATIONS = createONWithDomainAndType(
+            TYPE_CONFIG_REGISTRY_NO_NOTIFICATIONS);
 
     public static final String GET_AVAILABLE_MODULE_NAMES_ATTRIBUT_NAME = "AvailableModuleNames";
 

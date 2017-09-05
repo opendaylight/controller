@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,42 +15,36 @@ import javax.management.ObjectName;
 
 @Immutable
 public class CommitStatus {
-    private final List<ObjectName> newInstances, reusedInstances,
-        recreatedInstances;
+    private final List<ObjectName> newInstances;
+    private final List<ObjectName> reusedInstances;
+    private final List<ObjectName> recreatedInstances;
 
     /**
-     * @param newInstances       newly created instances
-     * @param reusedInstances    reused instances
-     * @param recreatedInstances recreated instances
+     * Constructor.
+     *
+     * @param newInstances
+     *            newly created instances
+     * @param reusedInstances
+     *            reused instances
+     * @param recreatedInstances
+     *            recreated instances
      */
-    @ConstructorProperties({"newInstances", "reusedInstances",
-            "recreatedInstances"})
-    public CommitStatus(final List<ObjectName> newInstances,
-                        final List<ObjectName> reusedInstances,
-                        final List<ObjectName> recreatedInstances) {
+    @ConstructorProperties({ "newInstances", "reusedInstances", "recreatedInstances" })
+    public CommitStatus(final List<ObjectName> newInstances, final List<ObjectName> reusedInstances,
+            final List<ObjectName> recreatedInstances) {
         this.newInstances = Collections.unmodifiableList(newInstances);
         this.reusedInstances = Collections.unmodifiableList(reusedInstances);
-        this.recreatedInstances = Collections
-                .unmodifiableList(recreatedInstances);
+        this.recreatedInstances = Collections.unmodifiableList(recreatedInstances);
     }
 
-    /**
-     * @return list of objectNames representing newly created instances
-     */
     public List<ObjectName> getNewInstances() {
         return newInstances;
     }
 
-    /**
-     * @return list of objectNames representing reused instances
-     */
     public List<ObjectName> getReusedInstances() {
         return reusedInstances;
     }
 
-    /**
-     * @return list of objectNames representing recreated instances
-     */
     public List<ObjectName> getRecreatedInstances() {
         return recreatedInstances;
     }
@@ -59,14 +53,9 @@ public class CommitStatus {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result
-                + ((newInstances == null) ? 0 : newInstances.hashCode());
-        result = prime
-                * result
-                + ((recreatedInstances == null) ? 0 : recreatedInstances
-                .hashCode());
-        result = prime * result
-                + ((reusedInstances == null) ? 0 : reusedInstances.hashCode());
+        result = prime * result + (newInstances == null ? 0 : newInstances.hashCode());
+        result = prime * result + (recreatedInstances == null ? 0 : recreatedInstances.hashCode());
+        result = prime * result + (reusedInstances == null ? 0 : reusedInstances.hashCode());
         return result;
     }
 
@@ -108,8 +97,7 @@ public class CommitStatus {
 
     @Override
     public String toString() {
-        return "CommitStatus [newInstances=" + newInstances
-                + ", reusedInstances=" + reusedInstances
+        return "CommitStatus [newInstances=" + newInstances + ", reusedInstances=" + reusedInstances
                 + ", recreatedInstances=" + recreatedInstances + "]";
     }
 
