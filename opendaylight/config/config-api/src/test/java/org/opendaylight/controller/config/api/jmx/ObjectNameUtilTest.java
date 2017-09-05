@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -45,7 +45,8 @@ public class ObjectNameUtilTest {
         assertEquals(serviceQName, ObjectNameUtil.getServiceQName(serviceReferenceON));
         assertEquals(refName, ObjectNameUtil.getReferenceName(serviceReferenceON));
         assertEquals(transaction, ObjectNameUtil.getTransactionName(serviceReferenceON));
-        assertEquals(ObjectNameUtil.createReadOnlyServiceON(serviceQName, refName), ObjectNameUtil.withoutTransactionName(serviceReferenceON));
+        assertEquals(ObjectNameUtil.createReadOnlyServiceON(serviceQName, refName),
+                ObjectNameUtil.withoutTransactionName(serviceReferenceON));
 
         serviceReferenceON = ObjectNameUtil.createReadOnlyServiceON(serviceQName, refName);
         assertFalse(serviceReferenceON.isPattern());
@@ -124,20 +125,23 @@ public class ObjectNameUtilTest {
 
     @Test
     public void testChecks() throws Exception {
-        final ObjectName on = ObjectNameUtil.createON("customDomain", ObjectNameUtil.TYPE_KEY, ObjectNameUtil.TYPE_MODULE);
+        final ObjectName on = ObjectNameUtil.createON("customDomain", ObjectNameUtil.TYPE_KEY,
+                ObjectNameUtil.TYPE_MODULE);
 
-        assertFailure(
-                () -> ObjectNameUtil.checkTypeOneOf(on, ObjectNameUtil.TYPE_RUNTIME_BEAN, ObjectNameUtil.TYPE_CONFIG_TRANSACTION), IllegalArgumentException.class);
+        assertFailure(() -> ObjectNameUtil.checkTypeOneOf(on, ObjectNameUtil.TYPE_RUNTIME_BEAN,
+                ObjectNameUtil.TYPE_CONFIG_TRANSACTION), IllegalArgumentException.class);
 
-        assertFailure(() -> ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_RUNTIME_BEAN), IllegalArgumentException.class);
+        assertFailure(() -> ObjectNameUtil.checkType(on, ObjectNameUtil.TYPE_RUNTIME_BEAN),
+                IllegalArgumentException.class);
 
         assertFailure(() -> ObjectNameUtil.checkDomain(on), IllegalArgumentException.class);
     }
 
+    @SuppressWarnings("IllegalCatch")
     private void assertFailure(final Runnable test, final Class<? extends Exception> ex) {
         try {
             test.run();
-        } catch(final Exception e) {
+        } catch (final Exception e) {
             assertTrue("Failed with wrong exception: " + Throwables.getStackTraceAsString(e),
                     e.getClass().isAssignableFrom(ex));
             return;

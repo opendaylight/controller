@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,20 +15,17 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 public abstract class ConfigJMXNotification extends Notification {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 6754474563863772845L;
 
     private static long sequenceNumber = 1;
 
-    public static String TYPE_NAME = "configfNotificationProvider";
-    public static ObjectName OBJECT_NAME = ObjectNameUtil.createONWithDomainAndType(TYPE_NAME);
+    public static final String TYPE_NAME = "configfNotificationProvider";
+    public static final ObjectName OBJECT_NAME = ObjectNameUtil.createONWithDomainAndType(TYPE_NAME);
 
     private final NotificationType type;
 
-    protected ConfigJMXNotification(final NotificationType type,
-                                    final NotificationBroadcasterSupport source, final String message) {
+    protected ConfigJMXNotification(final NotificationType type, final NotificationBroadcasterSupport source,
+            final String message) {
         super(type.toString(), source, sequenceNumber++, System.nanoTime(), message);
         this.type = type;
     }
@@ -39,23 +36,22 @@ public abstract class ConfigJMXNotification extends Notification {
     }
 
     /**
-     * Sends this notification using source that created it
+     * Sends this notification using source that created it.
      */
     public void send() {
         ((NotificationBroadcasterSupport) getSource()).sendNotification(this);
     }
 
     /**
-     * Creates notification about successful commit execution.
-     *
-     * Intended for config-persister.
+     * Creates notification about successful commit execution. Intended for
+     * config-persister.
      */
-    public static CommitJMXNotification afterCommit(final NotificationBroadcasterSupport source, final String messages) {
+    public static CommitJMXNotification afterCommit(final NotificationBroadcasterSupport source,
+            final String messages) {
         return new CommitJMXNotification(source, messages);
     }
 
     enum NotificationType {
         COMMIT
     }
-
 }

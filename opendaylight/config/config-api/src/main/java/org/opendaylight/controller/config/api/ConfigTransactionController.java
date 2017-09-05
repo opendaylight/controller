@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,13 +21,14 @@ public interface ConfigTransactionController extends LookupRegistry, ServiceRefe
      * Create new configuration bean.
      *
      * @param moduleName
+     *            name of the module
      * @param instanceName
+     *            name of the instance
      * @return ObjectName of newly created module
      * @throws InstanceAlreadyExistsException
      *             if given ifcName and instanceName is already registered
      */
-    ObjectName createModule(String moduleName, String instanceName)
-            throws InstanceAlreadyExistsException;
+    ObjectName createModule(String moduleName, String instanceName) throws InstanceAlreadyExistsException;
 
     /**
      * Re-creates an existing module configuration bean.
@@ -49,8 +50,7 @@ public interface ConfigTransactionController extends LookupRegistry, ServiceRefe
      * @param objectName
      *            can be either read-only module name that can be obtained using
      *            {@link ConfigRegistry#lookupConfigBean(String, String)} or
-     *            writable module name that must contain current transaction
-     *            name.
+     *            writable module name that must contain current transaction name.
      * @throws InstanceNotFoundException
      *             if module is not found
      * @throws IllegalArgumentException
@@ -72,14 +72,17 @@ public interface ConfigTransactionController extends LookupRegistry, ServiceRefe
     void validateConfig() throws ValidationException;
 
     /**
+     * Get the name of the transaction.
      *
      * @return transactionName
      */
     String getTransactionName();
 
     /**
-     * @return all known module factory names as reported by {@link org.opendaylight.controller.config.spi.ModuleFactory#getImplementationName()}
+     * Get the names of all available modules.
+     *
+     * @return all known module factory names as reported by
+     *         {@link org.opendaylight.controller.config.spi.ModuleFactory#getImplementationName()}
      */
     Set<String> getAvailableModuleNames();
-
 }

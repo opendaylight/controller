@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,6 +24,7 @@ public interface LookupRegistry {
      * Find modules with given module name.
      *
      * @param moduleName
+     *            name of module
      * @return objectNames
      */
     Set<ObjectName> lookupConfigBeans(String moduleName);
@@ -32,11 +33,11 @@ public interface LookupRegistry {
      * Find read modules.
      *
      * @param moduleName
-     *            exact match for searched module name, can contain '*' to match
-     *            all values.
+     *            exact match for searched module name, can contain '*' to match all
+     *            values.
      * @param instanceName
-     *            exact match for searched instance name, can contain '*' to
-     *            match all values.
+     *            exact match for searched instance name, can contain '*' to match
+     *            all values.
      * @return objectNames
      */
     Set<ObjectName> lookupConfigBeans(String moduleName, String instanceName);
@@ -45,17 +46,16 @@ public interface LookupRegistry {
      * Find read module.
      *
      * @param moduleName
-     *            exact match for searched module name, can contain '*' to match
-     *            all values.
+     *            exact match for searched module name, can contain '*' to match all
+     *            values.
      * @param instanceName
-     *            exact match for searched instance name, can contain '*' to
-     *            match all values.
+     *            exact match for searched instance name, can contain '*' to match
+     *            all values.
      * @return objectNames
      * @throws InstanceNotFoundException
      *             if search did not find exactly one instance
      */
-    ObjectName lookupConfigBean(String moduleName, String instanceName)
-            throws InstanceNotFoundException;
+    ObjectName lookupConfigBean(String moduleName, String instanceName) throws InstanceNotFoundException;
 
     /**
      * Check that object name corresponds with existing module.
@@ -65,21 +65,22 @@ public interface LookupRegistry {
      */
     void checkConfigBeanExists(ObjectName objectName) throws InstanceNotFoundException;
 
-
     /**
+     * Get the qNames  of all ModuleFactory instances in the system.
+     *
      * @return qNames of all ModuleFactory instances in the system
      */
     Set<String> getAvailableModuleFactoryQNames();
 
     /**
-     * Find all runtime beans
+     * Find all runtime beans.
      *
      * @return objectNames
      */
     Set<ObjectName> lookupRuntimeBeans();
 
     /**
-     * Find all runtime of specified module
+     * Find all runtime of specified module.
      *
      * @param moduleName
      *            of bean

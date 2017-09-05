@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,8 +39,8 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      *
      * @param transactionControllerON
      *            {@link ObjectName} of
-     *            {@link org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean} that was
-     *            received in {@link #beginConfig()} method call.
+     *            {@link org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean}
+     *            that was received in {@link #beginConfig()} method call.
      * @return CommitStatus
      * @throws ValidationException
      *             if validation fails
@@ -51,20 +51,23 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
             throws ConflictingVersionException, ValidationException;
 
     /**
+     * List of open configuration transactions.
+     *
      * @return list of open configuration transactions.
      */
     List<ObjectName> getOpenConfigs();
 
     /**
      * Will return true unless there was a transaction that succeeded during
-     * validation but failed in second phase of commit. In this case the server
-     * is unstable and its state is undefined.
+     * validation but failed in second phase of commit. In this case the server is
+     * unstable and its state is undefined.
      */
     boolean isHealthy();
 
     /**
+     * Get the module names available in the system.
+     *
      * @return module factory names available in the system
      */
     Set<String> getAvailableModuleNames();
-
 }

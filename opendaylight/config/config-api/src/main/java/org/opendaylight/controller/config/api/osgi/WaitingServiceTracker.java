@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -36,34 +36,39 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
     /**
      * Waits for an OSGi services.
      *
-     * @param timeoutInMillis the timeout in millis
+     * @param timeoutInMillis
+     *            the timeout in millis
      * @return the service instance
-     * @throws ServiceNotFoundException if it times out or is interrupted
+     * @throws ServiceNotFoundException
+     *             if it times out or is interrupted
      */
     @SuppressWarnings("unchecked")
     public T waitForService(final long timeoutInMillis) throws ServiceNotFoundException {
         try {
             T service = (T) tracker.waitForService(timeoutInMillis);
-            if(service == null) {
-                throw new ServiceNotFoundException(String.format("OSGi Service %s was not found after %d ms",
-                        serviceInterface, timeoutInMillis));
+            if (service == null) {
+                throw new ServiceNotFoundException(
+                        String.format("OSGi Service %s was not found after %d ms", serviceInterface, timeoutInMillis));
             }
 
             return service;
-        } catch(final InterruptedException e) {
-            throw new ServiceNotFoundException(String.format("Wait for OSGi service %s was interrrupted",
-                    serviceInterface));
+        } catch (final InterruptedException e) {
+            throw new ServiceNotFoundException(
+                    String.format("Wait for OSGi service %s was interrrupted", serviceInterface));
         }
     }
 
     /**
      * Creates an instance.
      *
-     * @param serviceInterface the service interface
-     * @param context the BundleContext
+     * @param serviceInterface
+     *            the service interface
+     * @param context
+     *            the BundleContext
      * @return new WaitingServiceTracker instance
      */
-    public static <T> WaitingServiceTracker<T> create(@Nonnull final Class<T> serviceInterface, @Nonnull final BundleContext context) {
+    public static <T> WaitingServiceTracker<T> create(@Nonnull final Class<T> serviceInterface,
+            @Nonnull final BundleContext context) {
         ServiceTracker<T, ?> tracker = new ServiceTracker<>(context, serviceInterface, null);
         tracker.open();
         return new WaitingServiceTracker<>(serviceInterface, tracker);
@@ -72,31 +77,28 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
     /**
      * Creates an instance.
      *
-     * @param serviceInterface the service interface
-     * @param context the BundleContext
-     * @param filter the OSGi service filter
+     * @param serviceInterface
+     *            the service interface
+     * @param context
+     *            the BundleContext
+     * @param filter
+     *            the OSGi service filter
      * @return new WaitingServiceTracker instance
      */
-    public static <T> WaitingServiceTracker<T> create(@Nonnull final Class<T> serviceInterface, @Nonnull final BundleContext context,
-            @Nonnull final String filter) {
+    public static <T> WaitingServiceTracker<T> create(@Nonnull final Class<T> serviceInterface,
+            @Nonnull final BundleContext context, @Nonnull final String filter) {
         String newFilter = String.format("(&(%s=%s)%s)", Constants.OBJECTCLASS, serviceInterface.getName(), filter);
         try {
             ServiceTracker<T, ?> tracker = new ServiceTracker<>(context, context.createFilter(newFilter), null);
             tracker.open();
             return new WaitingServiceTracker<>(serviceInterface, tracker);
-        } catch(final InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
             throw new IllegalArgumentException(String.format("Invalid OSGi filter %s", newFilter), e);
         }
     }
 
     @Override
     public void close() {
-        try {
-            tracker.close();
-        } catch(final RuntimeException e) {
-            // The ServiceTracker could throw IllegalStateException if the BundleContext is already closed.
-            // This is benign so ignore it.
-            LOG.debug("Error closing ServiceTracker", e);
-        }
+        tracker.close();
     }
 }

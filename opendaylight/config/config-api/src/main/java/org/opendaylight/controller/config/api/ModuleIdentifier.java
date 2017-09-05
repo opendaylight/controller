@@ -11,7 +11,8 @@ import org.opendaylight.yangtools.concepts.Identifier;
 
 public class ModuleIdentifier implements Identifier {
     private static final long serialVersionUID = 1L;
-    private final String factoryName, instanceName;
+    private final String factoryName;
+    private final String instanceName;
 
     public ModuleIdentifier(final String factoryName, final String instanceName) {
         if (factoryName == null) {
@@ -33,15 +34,15 @@ public class ModuleIdentifier implements Identifier {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object object) {
+        if (this == object) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (object == null || getClass() != object.getClass()) {
             return false;
         }
 
-        ModuleIdentifier that = (ModuleIdentifier) o;
+        ModuleIdentifier that = (ModuleIdentifier) object;
 
         if (!factoryName.equals(that.factoryName)) {
             return false;

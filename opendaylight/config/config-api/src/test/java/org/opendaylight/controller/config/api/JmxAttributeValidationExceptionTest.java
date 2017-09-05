@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,8 +26,9 @@ public class JmxAttributeValidationExceptionTest {
     @Test
     public void testJmxAttributeValidationExceptionElement() throws Exception {
         JmxAttribute attributeName = new JmxAttribute("attr_name");
-        JmxAttributeValidationException e = new JmxAttributeValidationException(attributeName);
-        assertThat(e.getAttributeNames(), CoreMatchers.hasItem(attributeName));
+        JmxAttributeValidationException jmxAttributeValidationException = new JmxAttributeValidationException(
+                attributeName);
+        assertThat(jmxAttributeValidationException.getAttributeNames(), CoreMatchers.hasItem(attributeName));
     }
 
     @Test
@@ -36,8 +37,9 @@ public class JmxAttributeValidationExceptionTest {
         attributeNames.add(new JmxAttribute("att1"));
         attributeNames.add(new JmxAttribute("att2"));
         attributeNames.add(new JmxAttribute("att3"));
-        JmxAttributeValidationException e = new JmxAttributeValidationException(attributeNames);
-        assertEquals(e.getAttributeNames(), attributeNames);
+        JmxAttributeValidationException jmxAttributeValidationException = new JmxAttributeValidationException(
+                attributeNames);
+        assertEquals(jmxAttributeValidationException.getAttributeNames(), attributeNames);
     }
 
     @Test
@@ -46,17 +48,17 @@ public class JmxAttributeValidationExceptionTest {
         attributeNames.add(new JmxAttribute("att1"));
         attributeNames.add(new JmxAttribute("att2"));
         attributeNames.add(new JmxAttribute("att3"));
-        JmxAttributeValidationException e = new JmxAttributeValidationException("exception str",
-                new AccessDeniedException(""), attributeNames);
-        assertEquals(e.getAttributeNames(), attributeNames);
+        JmxAttributeValidationException jmxAttributeValidationException = new JmxAttributeValidationException(
+                "exception str", new AccessDeniedException(""), attributeNames);
+        assertEquals(jmxAttributeValidationException.getAttributeNames(), attributeNames);
     }
 
     @Test
     public void testJmxAttributeValidationExceptionJmxElement() throws Exception {
         JmxAttribute attributeName = new JmxAttribute("attr_name");
-        JmxAttributeValidationException e = new JmxAttributeValidationException("exception str",
-                new AccessDeniedException(""), attributeName);
-        assertEquals(e.getAttributeNames(), Arrays.asList(attributeName));
+        JmxAttributeValidationException jmxAttributeValidationException = new JmxAttributeValidationException(
+                "exception str", new AccessDeniedException(""), attributeName);
+        assertEquals(jmxAttributeValidationException.getAttributeNames(), Arrays.asList(attributeName));
     }
 
     @Test
@@ -88,8 +90,9 @@ public class JmxAttributeValidationExceptionTest {
         JmxAttributeValidationException.checkCondition(false, "message", jmxAttribute);
     }
 
-    private void assertJmxEx(final JmxAttributeValidationException e, final String message, final JmxAttribute... attrNames) {
-        assertEquals(message, e.getMessage());
-        assertEquals(Lists.newArrayList(attrNames), e.getAttributeNames());
+    private void assertJmxEx(final JmxAttributeValidationException jmxAttributeValidationException,
+            final String message, final JmxAttribute... attrNames) {
+        assertEquals(message, jmxAttributeValidationException.getMessage());
+        assertEquals(Lists.newArrayList(attrNames), jmxAttributeValidationException.getAttributeNames());
     }
 }
