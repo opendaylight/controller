@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_1468071c",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/TracingBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-05T14:47:08Z",
+      "side": 1,
+      "message": "Doesn\u0027t this print multiple (...), one per line? It would be more interesting IMO to print (...) once per skipped group.",
+      "revId": "574431e3ec89bf879210638c084ac4263c745378",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
