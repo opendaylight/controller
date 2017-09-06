@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,6 +15,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+
 import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +63,8 @@ public abstract class AbstractConfigTestBase {
     private static final String KARAF_DISTRO_GROUPID = "org.opendaylight.odlparent";
 
     /*
-     * Property names to override defaults for karaf distro artifactId, groupId, version, and type
+     * Property names to override defaults for karaf distro artifactId, groupId,
+     * version, and type
      */
     private static final String KARAF_DISTRO_VERSION_PROP = "karaf.distro.version";
     private static final String KARAF_DISTRO_TYPE_PROP = "karaf.distro.type";
@@ -70,7 +72,7 @@ public abstract class AbstractConfigTestBase {
     private static final String KARAF_DISTRO_GROUPID_PROP = "karaf.distro.groupId";
 
     /**
-     * Property file used to store the Karaf distribution version
+     * Property file used to store the Karaf distribution version.
      */
     private static final String PROPERTIES_FILENAME = "abstractconfigtestbase.properties";
 
@@ -82,6 +84,8 @@ public abstract class AbstractConfigTestBase {
     /**
      * This method need only be overridden if using the config system.
      *
+     * @deprecated
+     *
      * @return the config module name
      */
     @Deprecated
@@ -91,6 +95,8 @@ public abstract class AbstractConfigTestBase {
 
     /**
      * This method need only be overridden if using the config system.
+     *
+     * @deprecated
      *
      * @return the config module instance name
      */
@@ -104,14 +110,12 @@ public abstract class AbstractConfigTestBase {
     public abstract String getFeatureName();
 
     public Option getLoggingOption() {
-        Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        logConfiguration(AbstractConfigTestBase.class),
-                        LogLevel.INFO.name());
-        return option;
+        return editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG, logConfiguration(AbstractConfigTestBase.class),
+                LogLevel.INFO.name());
     }
 
     /**
-     * Override this method to provide more options to config
+     * Override this method to provide more options to config.
      *
      * @return An array of additional config options
      */
@@ -124,12 +128,13 @@ public abstract class AbstractConfigTestBase {
     }
 
     public String getKarafDistro() {
-        String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP,KARAF_DISTRO_GROUPID);
-        String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP,KARAF_DISTRO_ARTIFACTID);
+        String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP, KARAF_DISTRO_GROUPID);
+        String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP, KARAF_DISTRO_ARTIFACTID);
         String version = System.getProperty(KARAF_DISTRO_VERSION_PROP);
-        String type = System.getProperty(KARAF_DISTRO_TYPE_PROP,KARAF_DISTRO_TYPE);
+        String type = System.getProperty(KARAF_DISTRO_TYPE_PROP, KARAF_DISTRO_TYPE);
         if (version == null) {
-            // We use a properties file to retrieve ${karaf.version}, instead of .versionAsInProject()
+            // We use a properties file to retrieve ${karaf.version}, instead of
+            // .versionAsInProject()
             // This avoids forcing all users to depend on Karaf in their POMs
             Properties abstractConfigTestBaseProps = new Properties();
             try (InputStream abstractConfigTestBaseInputStream = Thread.currentThread().getContextClassLoader()
@@ -140,10 +145,7 @@ public abstract class AbstractConfigTestBase {
             }
             version = abstractConfigTestBaseProps.getProperty(KARAF_DISTRO_VERSION_PROP);
         }
-        MavenArtifactUrlReference karafUrl = maven()
-                .groupId(groupId)
-                .artifactId(artifactId)
-                .version(version)
+        MavenArtifactUrlReference karafUrl = maven().groupId(groupId).artifactId(artifactId).version(version)
                 .type(type);
         return karafUrl.getURL();
     }
@@ -161,39 +163,36 @@ public abstract class AbstractConfigTestBase {
                 when(Boolean.getBoolean(KARAF_DEBUG_PROP))
                         .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
                 karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
-                        .useDeployFolder(false),
+                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY)).useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
-                mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"),
-                getLoggingOption(),
+                mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"), getLoggingOption(),
                 mvnLocalRepoOption(),
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*") };
         return OptionUtils.combine(options, getAdditionalOptions());
     }
 
     @Before
+    @SuppressWarnings("IllegalCatch")
     public void setup() throws Exception {
         String moduleName = getModuleName();
         String instanceName = getInstanceName();
-        if(moduleName == null || instanceName == null) {
+        if (moduleName == null || instanceName == null) {
             return;
         }
 
-        LOG.info("Module: {} Instance: {} attempting to configure.",
-                moduleName, instanceName);
+        LOG.info("Module: {} Instance: {} attempting to configure.", moduleName, instanceName);
         Stopwatch stopWatch = Stopwatch.createStarted();
         ObjectName objectName = null;
-        for(int i = 0;i<MODULE_TIMEOUT_MILLIS;i++) {
+        for (int i = 0; i < MODULE_TIMEOUT_MILLIS; i++) {
             try {
-                ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(ManagementFactory
-                        .getPlatformMBeanServer());
+                ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(
+                        ManagementFactory.getPlatformMBeanServer());
                 objectName = configRegistryClient.lookupConfigBean(moduleName, instanceName);
-                LOG.info("Module: {} Instance: {} ObjectName: {}.",
-                        moduleName,instanceName,objectName);
+                LOG.info("Module: {} Instance: {} ObjectName: {}.", moduleName, instanceName, objectName);
                 break;
             } catch (final Exception e) {
-                if(i<MODULE_TIMEOUT_MILLIS) {
+                if (i < MODULE_TIMEOUT_MILLIS) {
                     Thread.sleep(1);
                     continue;
                 } else {
@@ -201,19 +200,17 @@ public abstract class AbstractConfigTestBase {
                 }
             }
         }
-        if(objectName != null) {
-            LOG.info("Module: {} Instance: {} configured after {} ms",
-                moduleName,instanceName,
-                stopWatch.elapsed(TimeUnit.MILLISECONDS));
+        if (objectName != null) {
+            LOG.info("Module: {} Instance: {} configured after {} ms", moduleName, instanceName,
+                    stopWatch.elapsed(TimeUnit.MILLISECONDS));
         } else {
-            throw new RuntimeException("NOT FOUND Module: " +moduleName + " Instance: " + instanceName +
-                    " configured after " + stopWatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
+            throw new RuntimeException("NOT FOUND Module: " + moduleName + " Instance: " + instanceName
+                    + " configured after " + stopWatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
         }
     }
 
     @Rule
     public TestRule watcher = new TestWatcher() {
-
         @Override
         protected void starting(final Description description) {
             LOG.info("TestWatcher: Starting test: {}", description.getDisplayName());
@@ -239,5 +236,4 @@ public abstract class AbstractConfigTestBase {
             LOG.info("TestWatcher: Test skipped: {} ", description.getDisplayName(), ex);
         }
     };
-
 }
