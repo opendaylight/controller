@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 
 import akka.actor.ActorRef;
-import akka.dispatch.Dispatchers;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -358,9 +357,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
     public void testFollowerLeaderStateChanges() {
         testLog.info("testFollowerLeaderStateChanges");
 
-        ActorRef roleChangeNotifier = factory.<MessageCollectorActor>createTestActor(
-                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                factory.generateActorId("roleChangeNotifier"));
+        ActorRef roleChangeNotifier = factory.createActor(
+                MessageCollectorActor.props(), factory.generateActorId("roleChangeNotifier"));
         follower1Builder.roleChangeNotifier(roleChangeNotifier);
 
         setupLeaderAndNonVotingFollower();

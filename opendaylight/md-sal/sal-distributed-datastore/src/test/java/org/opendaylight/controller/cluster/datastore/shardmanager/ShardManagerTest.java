@@ -141,10 +141,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     private ActorRef newMockShardActor(final ActorSystem system, final String shardName, final String memberName) {
         String name = ShardIdentifier.create(shardName, MemberName.forName(memberName), "config").toString();
         if (system == getSystem()) {
-            return actorFactory.createActor(Props.create(MessageCollectorActor.class), name);
+            return actorFactory.createActor(MessageCollectorActor.props(), name);
         }
 
-        return system.actorOf(Props.create(MessageCollectorActor.class), name);
+        return system.actorOf(MessageCollectorActor.props(), name);
     }
 
     private Props newShardMgrProps() {
@@ -246,9 +246,9 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         };
 
         final ActorRef defaultShardActor = actorFactory.createActor(
-                Props.create(MessageCollectorActor.class), actorFactory.generateActorId("default"));
+                MessageCollectorActor.props(), actorFactory.generateActorId("default"));
         final ActorRef topologyShardActor = actorFactory.createActor(
-                Props.create(MessageCollectorActor.class), actorFactory.generateActorId("topology"));
+                MessageCollectorActor.props(), actorFactory.generateActorId("topology"));
 
         final Map<String, Entry<ActorRef, DatastoreContext>> shardInfoMap = Collections.synchronizedMap(
                 new HashMap<String, Entry<ActorRef, DatastoreContext>>());

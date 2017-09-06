@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {
             {
                 String memberId = "testHandleRegisterRoleChangeListener";
-                ActorRef listenerActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+                ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
 
                 TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
                         RoleChangeNotifier.getProps(memberId), memberId);
@@ -56,7 +55,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {
             {
                 String memberId = "testHandleRegisterRoleChangeListenerWithNotificationSet";
-                ActorRef listenerActor = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+                ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
                 ActorRef shardActor = getTestActor();
 
                 TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),

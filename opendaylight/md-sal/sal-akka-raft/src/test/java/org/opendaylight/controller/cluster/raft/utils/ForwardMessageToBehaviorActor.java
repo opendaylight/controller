@@ -49,9 +49,8 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
         return behaviorChanges;
     }
 
-    @Override
     public void clear() {
-        super.clear();
+        clearMessages(getSelf());
         behaviorChanges.clear();
     }
 }
