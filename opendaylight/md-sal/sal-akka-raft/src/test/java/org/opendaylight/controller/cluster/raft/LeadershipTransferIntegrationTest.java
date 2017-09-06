@@ -14,7 +14,6 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.actor.Status;
 import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
@@ -50,10 +49,10 @@ import scala.concurrent.duration.FiniteDuration;
 public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest {
 
     private final String follower3Id = factory.generateActorId("follower");
-    private TestActorRef<MessageCollectorActor> leaderNotifierActor;
-    private TestActorRef<MessageCollectorActor> follower1NotifierActor;
-    private TestActorRef<MessageCollectorActor> follower2NotifierActor;
-    private TestActorRef<MessageCollectorActor> follower3NotifierActor;
+    private ActorRef leaderNotifierActor;
+    private ActorRef follower1NotifierActor;
+    private ActorRef follower2NotifierActor;
+    private ActorRef follower3NotifierActor;
     private TestActorRef<TestRaftActor> follower3Actor;
     private ActorRef follower3CollectorActor;
     private ActorRef requestLeadershipResultCollectorActor;
@@ -154,21 +153,21 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         InMemorySnapshotStore.addSnapshot(follower2Id, snapshot);
         InMemorySnapshotStore.addSnapshot(follower3Id, snapshot);
 
-        follower1NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower1Id + "-notifier"));
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
                         follower3Id, testActorPath(follower3Id)))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
 
-        follower2NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        follower2NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower2Id + "-notifier"));
         follower2Actor = newTestRaftActor(follower2Id,TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
                         follower3Id, testActorPath(follower3Id)))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
 
-        follower3NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        follower3NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower3Id + "-notifier"));
         follower3Actor = newTestRaftActor(follower3Id,TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
@@ -182,7 +181,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setElectionTimeoutFactor(3);
-        leaderNotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(leaderId + "-notifier"));
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
                 .config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
@@ -203,7 +202,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         verifyRaftState(raftActor, rs -> assertEquals("getRaftState", expState.toString(), rs.getRaftState()));
     }
 
-    private static void verifyLeaderStateChangedMessages(final TestActorRef<MessageCollectorActor> notifierActor,
+    private static void verifyLeaderStateChangedMessages(final ActorRef notifierActor,
             final String... expLeaderIds) {
         List<LeaderStateChanged> leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class,
                 expLeaderIds.length);

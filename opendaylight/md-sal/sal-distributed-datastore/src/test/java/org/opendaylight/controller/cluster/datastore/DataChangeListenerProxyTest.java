@@ -75,8 +75,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
     @Test
     public void testOnDataChanged() throws Exception {
-        final Props props = Props.create(MessageCollectorActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = getSystem().actorOf(MessageCollectorActor.props());
 
         DataChangeListenerProxy dataChangeListenerProxy = new DataChangeListenerProxy(
                 getSystem().actorSelection(actorRef.path()));

@@ -92,7 +92,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     public static class TestRaftActor extends MockRaftActor {
 
-        private final TestActorRef<MessageCollectorActor> collectorActor;
+        private final ActorRef collectorActor;
         private final Map<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
 
         private TestRaftActor(Builder builder) {
@@ -172,9 +172,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         public static class Builder extends AbstractBuilder<Builder, TestRaftActor> {
-            private TestActorRef<MessageCollectorActor> collectorActor;
+            private ActorRef collectorActor;
 
-            public Builder collectorActor(TestActorRef<MessageCollectorActor> newCollectorActor) {
+            public Builder collectorActor(ActorRef newCollectorActor) {
                 this.collectorActor = newCollectorActor;
                 return this;
             }
@@ -256,9 +256,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected TestActorRef<TestRaftActor> newTestRaftActor(String id, TestRaftActor.Builder builder) {
-        builder.collectorActor(factory.<MessageCollectorActor>createTestActor(
-                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                        factory.generateActorId(id + "-collector"))).id(id);
+        builder.collectorActor(factory.createActor(
+                MessageCollectorActor.props(), factory.generateActorId(id + "-collector"))).id(id);
 
         InvalidActorNameException lastEx = null;
         for (int i = 0; i < 10; i++) {

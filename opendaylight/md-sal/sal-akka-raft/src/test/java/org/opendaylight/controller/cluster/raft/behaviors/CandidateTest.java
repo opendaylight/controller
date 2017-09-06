@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
+import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
@@ -49,9 +49,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     static final Logger LOG = LoggerFactory.getLogger(CandidateTest.class);
 
     private final TestActorRef<MessageCollectorActor> candidateActor = actorFactory.createTestActor(
-            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("candidate"));
+            MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            actorFactory.generateActorId("candidate"));
 
-    private TestActorRef<MessageCollectorActor>[] peerActors;
+    private ActorRef[] peerActors;
 
     private RaftActorBehavior candidate;
 
@@ -352,12 +353,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         return new MockRaftActorContext("candidate", getSystem(), candidateActor);
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, String> setupPeers(final int count) {
         Map<String, String> peerMap = new HashMap<>();
-        peerActors = new TestActorRef[count];
+        peerActors = new ActorRef[count];
         for (int i = 0; i < count; i++) {
-            peerActors[i] = actorFactory.createTestActor(Props.create(MessageCollectorActor.class),
+            peerActors[i] = actorFactory.createActor(MessageCollectorActor.props(),
                     actorFactory.generateActorId("peer"));
             peerMap.put("peer" + (i + 1), peerActors[i].path().toString());
         }

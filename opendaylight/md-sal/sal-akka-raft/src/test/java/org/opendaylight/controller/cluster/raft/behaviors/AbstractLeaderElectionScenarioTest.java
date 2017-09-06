@@ -151,12 +151,11 @@ public class AbstractLeaderElectionScenarioTest {
             dropMessagesToBehavior.clear();
         }
 
-        @Override
         public void clear() {
             behaviorStateChangeLatch = null;
             clearDropMessagesToBehavior();
             messagesReceivedLatches.clear();
-            super.clear();
+            clearMessages(getSelf());
         }
 
         void forwardCapturedMessageToBehavior(final Class<?> msgClass, final ActorRef sender) {

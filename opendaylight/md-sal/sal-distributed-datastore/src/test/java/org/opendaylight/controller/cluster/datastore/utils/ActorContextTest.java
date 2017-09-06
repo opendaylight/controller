@@ -349,8 +349,7 @@ public class ActorContextTest extends AbstractActorTest {
     @Test
     public void testFindPrimaryShardAsyncRemotePrimaryFound() throws Exception {
 
-        TestActorRef<MessageCollectorActor> shardManager = TestActorRef.create(getSystem(),
-                Props.create(MessageCollectorActor.class));
+        ActorRef shardManager = getSystem().actorOf(MessageCollectorActor.props());
 
         DatastoreContext dataStoreContext = DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
@@ -391,8 +390,7 @@ public class ActorContextTest extends AbstractActorTest {
     @Test
     public void testFindPrimaryShardAsyncLocalPrimaryFound() throws Exception {
 
-        TestActorRef<MessageCollectorActor> shardManager = TestActorRef.create(getSystem(),
-                Props.create(MessageCollectorActor.class));
+        ActorRef shardManager = getSystem().actorOf(MessageCollectorActor.props());
 
         DatastoreContext dataStoreContext = DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
@@ -443,8 +441,7 @@ public class ActorContextTest extends AbstractActorTest {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void testFindPrimaryExceptions(final Object expectedException) throws Exception {
-        TestActorRef<MessageCollectorActor> shardManager =
-            TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
+        ActorRef shardManager = getSystem().actorOf(MessageCollectorActor.props());
 
         DatastoreContext dataStoreContext = DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
@@ -479,8 +476,8 @@ public class ActorContextTest extends AbstractActorTest {
     public void testBroadcast() {
         new JavaTestKit(getSystem()) {
             {
-                ActorRef shardActorRef1 = getSystem().actorOf(Props.create(MessageCollectorActor.class));
-                ActorRef shardActorRef2 = getSystem().actorOf(Props.create(MessageCollectorActor.class));
+                ActorRef shardActorRef1 = getSystem().actorOf(MessageCollectorActor.props());
+                ActorRef shardActorRef2 = getSystem().actorOf(MessageCollectorActor.props());
 
                 TestActorRef<MockShardManager> shardManagerActorRef = TestActorRef.create(getSystem(),
                         MockShardManager.props());

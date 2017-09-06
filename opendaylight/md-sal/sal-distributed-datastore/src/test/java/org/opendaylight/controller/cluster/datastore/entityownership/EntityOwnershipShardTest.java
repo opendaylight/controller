@@ -257,7 +257,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         ShardIdentifier localId = newShardId(LOCAL_MEMBER_NAME);
         TestActorRef<TestEntityOwnershipShard> leader = actorFactory.createTestActor(TestEntityOwnershipShard.props(
                 newShardBuilder(leaderId, peerMap(localId.toString()), PEER_MEMBER_1_NAME),
-                actorFactory.createTestActor(MessageCollectorActor.props())), leaderId.toString());
+                actorFactory.createActor(MessageCollectorActor.props())), leaderId.toString());
         final TestEntityOwnershipShard leaderShard = leader.underlyingActor();
 
         TestActorRef<TestEntityOwnershipShard> local = actorFactory.createTestActor(TestEntityOwnershipShard.props(
@@ -871,7 +871,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<TestEntityOwnershipShard> peer1 = actorFactory.createTestActor(TestEntityOwnershipShard.props(
                 newShardBuilder(peerId1, peerMap(leaderId.toString(), peerId2.toString()), PEER_MEMBER_1_NAME),
-                actorFactory.createTestActor(MessageCollectorActor.props())), peerId1.toString());
+                actorFactory.createActor(MessageCollectorActor.props())), peerId1.toString());
         peer1.underlyingActor().startDroppingMessagesOfType(ElectionTimeout.class);
 
         TestActorRef<TestEntityOwnershipShard> peer2 = actorFactory.createTestActor(TestEntityOwnershipShard.props(
@@ -1263,10 +1263,10 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     private static class TestEntityOwnershipShard extends EntityOwnershipShard {
-        private final TestActorRef<MessageCollectorActor> collectorActor;
+        private final ActorRef collectorActor;
         private final Map<Class<?>, Predicate<?>> dropMessagesOfType = new ConcurrentHashMap<>();
 
-        TestEntityOwnershipShard(final Builder builder, final TestActorRef<MessageCollectorActor> collectorActor) {
+        TestEntityOwnershipShard(final Builder builder, final ActorRef collectorActor) {
             super(builder);
             this.collectorActor = collectorActor;
         }
@@ -1296,7 +1296,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
             dropMessagesOfType.remove(msgClass);
         }
 
-        TestActorRef<MessageCollectorActor> collectorActor() {
+        ActorRef collectorActor() {
             return collectorActor;
         }
 
@@ -1304,7 +1304,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
             return props(builder, null);
         }
 
-        static Props props(final Builder builder, final TestActorRef<MessageCollectorActor> collectorActor) {
+        static Props props(final Builder builder, final ActorRef collectorActor) {
             return Props.create(TestEntityOwnershipShard.class, builder, collectorActor)
                     .withDispatcher(Dispatchers.DefaultDispatcherId());
         }

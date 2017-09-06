@@ -13,8 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,8 +47,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
-    private final TestActorRef<MessageCollectorActor> behaviorActor = actorFactory.createTestActor(
-            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("behavior"));
+    private final ActorRef behaviorActor = actorFactory.createActor(
+            MessageCollectorActor.props(), actorFactory.generateActorId("behavior"));
 
     RaftActorBehavior behavior;
 
@@ -156,7 +154,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         handleAppendEntriesAddSameEntryToLogReply(behaviorActor);
     }
 
-    protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor) {
+    protected void handleAppendEntriesAddSameEntryToLogReply(final ActorRef replyActor) {
         AppendEntriesReply reply = MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class);
         Assert.assertNull("Expected no AppendEntriesReply", reply);
     }
