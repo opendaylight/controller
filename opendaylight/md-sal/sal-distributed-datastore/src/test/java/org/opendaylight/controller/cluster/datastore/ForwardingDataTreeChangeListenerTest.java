@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import java.util.Arrays;
 import java.util.Collection;
 import org.junit.Assert;
@@ -22,8 +21,7 @@ public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
 
     @Test
     public void testOnDataChanged() throws Exception {
-        final Props props = Props.create(MessageCollectorActor.class);
-        final ActorRef actorRef = getSystem().actorOf(props);
+        final ActorRef actorRef = getSystem().actorOf(MessageCollectorActor.props());
 
         ForwardingDataTreeChangeListener forwardingListener = new ForwardingDataTreeChangeListener(
                 getSystem().actorSelection(actorRef.path()));

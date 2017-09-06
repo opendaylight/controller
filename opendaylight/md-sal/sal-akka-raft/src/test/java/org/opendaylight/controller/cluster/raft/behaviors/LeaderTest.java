@@ -2029,8 +2029,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActorContext.setLastApplied(-1);
 
         String nonVotingFollowerId = "nonvoting-follower";
-        TestActorRef<ForwardMessageToBehaviorActor> nonVotingFollowerActor = actorFactory.createTestActor(
-                Props.create(MessageCollectorActor.class), actorFactory.generateActorId(nonVotingFollowerId));
+        ActorRef nonVotingFollowerActor = actorFactory.createActor(
+                MessageCollectorActor.props(), actorFactory.generateActorId(nonVotingFollowerId));
 
         leaderActorContext.addToPeers(nonVotingFollowerId, nonVotingFollowerActor.path().toString(),
                 VotingState.NON_VOTING);

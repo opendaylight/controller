@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.persistence.SnapshotSelectionCriteria;
-import akka.testkit.TestActorRef;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Optional;
@@ -77,7 +76,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     private TestActorFactory factory;
 
-    private TestActorRef<MessageCollectorActor> actorRef;
+    private ActorRef actorRef;
 
     @Before
     public void setUp() {
@@ -103,7 +102,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager = new SnapshotManager(mockRaftActorContext, LoggerFactory.getLogger(this.getClass()));
         factory = new TestActorFactory(getSystem());
 
-        actorRef = factory.createTestActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
+        actorRef = factory.createActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
         doReturn(actorRef).when(mockRaftActorContext).getActor();
 
         snapshotManager.setCreateSnapshotConsumer(mockProcedure);
@@ -146,7 +145,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         //
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
         assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
-        actorRef.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(actorRef);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -177,8 +176,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
         assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
 
-        actorRef.underlyingActor().clear();
-
+        MessageCollectorActor.clearMessages(actorRef);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -207,8 +205,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         //
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
         assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
-        actorRef.underlyingActor().clear();
-
+        MessageCollectorActor.clearMessages(actorRef);
     }
 
     @Test

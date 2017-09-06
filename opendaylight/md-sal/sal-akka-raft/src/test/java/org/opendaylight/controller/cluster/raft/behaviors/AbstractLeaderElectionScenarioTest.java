@@ -151,12 +151,11 @@ public class AbstractLeaderElectionScenarioTest {
             dropMessagesToBehavior.clear();
         }
 
-        @Override
         public void clear() {
             behaviorStateChangeLatch = null;
             clearDropMessagesToBehavior();
             messagesReceivedLatches.clear();
-            super.clear();
+            clearMessages(getSelf());
         }
 
         void forwardCapturedMessageToBehavior(final Class<?> msgClass, final ActorRef sender) {
@@ -173,7 +172,8 @@ public class AbstractLeaderElectionScenarioTest {
 
         <T> T getCapturedMessage(final Class<T> msgClass) {
             T message = getFirstMatching(getSelf(), msgClass);
-            assertNotNull("Message of type " + msgClass + " not received", message);
+            assertNotNull("Message of type " + msgClass + " not received. Actual received: "
+                + getAllMessages(getSelf()), message);
             return message;
         }
     }

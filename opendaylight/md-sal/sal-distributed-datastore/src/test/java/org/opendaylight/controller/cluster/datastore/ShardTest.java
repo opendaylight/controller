@@ -2076,8 +2076,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final TestActorRef<MessageCollectorActor> listener =
-                        TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
+                final ActorRef listener = getSystem().actorOf(MessageCollectorActor.props());
 
                 shard.tell(new RegisterRoleChangeListener(), listener);
 
@@ -2324,7 +2323,8 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testServerRemoved() throws Exception {
-        final TestActorRef<MessageCollectorActor> parent = actorFactory.createTestActor(MessageCollectorActor.props());
+        final TestActorRef<MessageCollectorActor> parent = actorFactory.createTestActor(MessageCollectorActor.props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         final ActorRef shard = parent.underlyingActor().context().actorOf(
                 newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
