@@ -15,10 +15,7 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.getAllMatching;
 
-import akka.actor.Actor;
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -41,8 +38,8 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
-    private TestActorRef<Actor> follower1NotifierActor;
-    private TestActorRef<Actor> leaderNotifierActor;
+    private ActorRef follower1NotifierActor;
+    private ActorRef leaderNotifierActor;
 
     /**
      * Isolates the leader after all initial payload entries have been committed and applied on all nodes. While
@@ -424,7 +421,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        follower1NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower1Id + "-notifier"));
 
         DefaultConfigParamsImpl followerConfigParams = new DefaultConfigParamsImpl();
@@ -444,7 +441,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setIsolatedLeaderCheckInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
 
-        leaderNotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(leaderId + "-notifier"));
 
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)

@@ -14,7 +14,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.testkit.TestActorRef;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -34,7 +33,7 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
     protected static final MemberName MEMBER_1 = MemberName.forName("member-1");
 
     protected static int ID_COUNTER = 1;
-    protected static TestActorRef<MessageCollectorActor> mockShardActor;
+    protected static ActorRef mockShardActor;
     protected static ShardIdentifier mockShardName;
 
     protected final String shardMrgIDSuffix = "config" + ID_COUNTER++;
@@ -68,11 +67,10 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
 
         if (mockShardActor == null) {
             mockShardName = ShardIdentifier.create(Shard.DEFAULT_NAME, MEMBER_1, "config");
-            mockShardActor = TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class),
-                    mockShardName.toString());
+            mockShardActor = getSystem().actorOf(MessageCollectorActor.props(), mockShardName.toString());
         }
 
-        mockShardActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(mockShardActor);
     }
 
     @After

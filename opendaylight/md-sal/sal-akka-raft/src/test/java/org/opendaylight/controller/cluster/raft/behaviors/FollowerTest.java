@@ -20,7 +20,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
@@ -78,11 +77,11 @@ import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
-    private final TestActorRef<MessageCollectorActor> followerActor = actorFactory.createTestActor(
-            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("follower"));
+    private final ActorRef followerActor = actorFactory.createActor(
+            MessageCollectorActor.props(), actorFactory.generateActorId("follower"));
 
-    private final TestActorRef<MessageCollectorActor> leaderActor = actorFactory.createTestActor(
-            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("leader"));
+    private final ActorRef leaderActor = actorFactory.createActor(
+            MessageCollectorActor.props(), actorFactory.generateActorId("leader"));
 
     private Follower follower;
 
@@ -356,7 +355,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertFalse(syncStatus.isInitialSyncDone());
 
         // Clear all the messages
-        followerActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(followerActor);
 
         context.setLastApplied(101);
         context.setCommitIndex(101);
@@ -372,7 +371,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertTrue(syncStatus.isInitialSyncDone());
 
-        followerActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(followerActor);
 
         // Sending the same message again should not generate another message
 
@@ -404,7 +403,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertFalse(syncStatus.isInitialSyncDone());
 
         // Clear all the messages
-        followerActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(followerActor);
 
         context.setLastApplied(100);
         setLastLogEntry(context, 1, 100,
@@ -444,7 +443,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertFalse(syncStatus.isInitialSyncDone());
 
         // Clear all the messages
-        followerActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(followerActor);
 
         context.setLastApplied(101);
         context.setCommitIndex(101);
@@ -463,7 +462,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertTrue(syncStatus.isInitialSyncDone());
 
         // Clear all the messages
-        followerActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(followerActor);
 
         context.setLastApplied(100);
         setLastLogEntry(context, 1, 100,
@@ -749,7 +748,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         entries = Arrays.asList(newReplicatedLogEntry(1, 1, "one"), newReplicatedLogEntry(1, 2, "two"));
 
-        leaderActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(leaderActor);
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 2, -1, (short)0));
 
         assertEquals("Next index", 3, log.last().getIndex() + 1);
@@ -977,7 +976,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertFalse(syncStatus.isInitialSyncDone());
 
         // Clear all the messages
-        followerActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(followerActor);
 
         context.setLastApplied(101);
         context.setCommitIndex(101);
@@ -1378,7 +1377,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor) {
+    protected void handleAppendEntriesAddSameEntryToLogReply(final ActorRef replyActor) {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(replyActor, AppendEntriesReply.class);
         assertEquals("isSuccess", true, reply.isSuccess());
     }

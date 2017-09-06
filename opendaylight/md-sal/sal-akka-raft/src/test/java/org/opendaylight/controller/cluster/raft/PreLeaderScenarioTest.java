@@ -12,10 +12,7 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
-import akka.actor.Actor;
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +34,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
-    private TestActorRef<Actor> follower1NotifierActor;
+    private ActorRef follower1NotifierActor;
     private DefaultConfigParamsImpl followerConfigParams;
 
     @Test
@@ -130,7 +127,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        follower1NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+        follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower1Id + "-notifier"));
 
         followerConfigParams = newFollowerConfigParams();
@@ -171,6 +168,6 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
         follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
 
-        testLog.info("createRaftActors ending");
+        testLog.info("createRaftActors ending - follower1: {}, follower2: {}", follower1Id, follower2Id);
     }
 }

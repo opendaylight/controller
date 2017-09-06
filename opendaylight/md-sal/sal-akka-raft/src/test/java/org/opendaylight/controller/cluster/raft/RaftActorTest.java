@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
-import akka.actor.Props;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
@@ -420,8 +419,7 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRaftRoleChangeNotifierWhenRaftActorHasNoPeers() throws Exception {
-        TestActorRef<MessageCollectorActor> notifierActor = factory.createTestActor(
-                Props.create(MessageCollectorActor.class));
+        ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());
         MessageCollectorActor.waitUntilReady(notifierActor);
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -463,7 +461,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(raftRoleChanged.getMemberId(), leaderStateChange.getLeaderId());
         assertEquals(MockRaftActor.PAYLOAD_VERSION, leaderStateChange.getLeaderPayloadVersion());
 
-        notifierActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(notifierActor);
 
         MockRaftActor raftActor = raftActorRef.underlyingActor();
         final String newLeaderId = "new-leader";
@@ -487,7 +485,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(RaftState.Leader.name(), raftRoleChanged.getOldRole());
         assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
 
-        notifierActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(notifierActor);
 
         raftActor.handleCommand("any");
 
@@ -496,7 +494,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(newLeaderId, leaderStateChange.getLeaderId());
         assertEquals(newLeaderVersion, leaderStateChange.getLeaderPayloadVersion());
 
-        notifierActor.underlyingActor().clear();
+        MessageCollectorActor.clearMessages(notifierActor);
 
         raftActor.handleCommand("any");
 
@@ -507,7 +505,7 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRaftRoleChangeNotifierWhenRaftActorHasPeers() throws Exception {
-        ActorRef notifierActor = factory.createActor(Props.create(MessageCollectorActor.class));
+        ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());
         MessageCollectorActor.waitUntilReady(notifierActor);
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -552,8 +550,7 @@ public class RaftActorTest extends AbstractActorTest {
         final String persistenceId = factory.generateActorId("leader-");
         final String follower1Id = factory.generateActorId("follower-");
 
-        ActorRef followerActor1 =
-                factory.createActor(Props.create(MessageCollectorActor.class));
+        ActorRef followerActor1 = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
@@ -642,9 +639,7 @@ public class RaftActorTest extends AbstractActorTest {
         final String persistenceId = factory.generateActorId("follower-");
         final String leaderId = factory.generateActorId("leader-");
 
-
-        ActorRef leaderActor1 =
-                factory.createActor(Props.create(MessageCollectorActor.class));
+        ActorRef leaderActor1 = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
@@ -734,8 +729,8 @@ public class RaftActorTest extends AbstractActorTest {
         final String follower1Id = factory.generateActorId("follower-");
         final String follower2Id = factory.generateActorId("follower-");
 
-        final ActorRef followerActor1 = factory.createActor(Props.create(MessageCollectorActor.class), follower1Id);
-        final ActorRef followerActor2 = factory.createActor(Props.create(MessageCollectorActor.class), follower2Id);
+        final ActorRef followerActor1 = factory.createActor(MessageCollectorActor.props(), follower1Id);
+        final ActorRef followerActor2 = factory.createActor(MessageCollectorActor.props(), follower2Id);
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
@@ -1242,8 +1237,7 @@ public class RaftActorTest extends AbstractActorTest {
     public void testLeaderTransitioning() throws Exception {
         TEST_LOG.info("testLeaderTransitioning starting");
 
-        TestActorRef<MessageCollectorActor> notifierActor = factory.createTestActor(
-                Props.create(MessageCollectorActor.class));
+        ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
@@ -1280,7 +1274,7 @@ public class RaftActorTest extends AbstractActorTest {
         final String leaderId = factory.generateActorId("leader-");
         final String followerId = factory.generateActorId("follower-");
 
-        final ActorRef followerActor = factory.createActor(Props.create(MessageCollectorActor.class));
+        final ActorRef followerActor = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
@@ -1325,7 +1319,7 @@ public class RaftActorTest extends AbstractActorTest {
         final String leaderId = factory.generateActorId("leader-");
         final String followerId = factory.generateActorId("follower-");
 
-        final ActorRef followerActor = factory.createActor(Props.create(MessageCollectorActor.class));
+        final ActorRef followerActor = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));

@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;
@@ -25,11 +23,11 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
-    private final TestActorRef<MessageCollectorActor> leaderActor = actorFactory.createTestActor(
-            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("leader"));
+    private final ActorRef leaderActor = actorFactory.createActor(
+            MessageCollectorActor.props(), actorFactory.generateActorId("leader"));
 
-    private final TestActorRef<MessageCollectorActor> senderActor = actorFactory.createTestActor(
-            Props.create(MessageCollectorActor.class), actorFactory.generateActorId("sender"));
+    private final ActorRef senderActor = actorFactory.createActor(
+            MessageCollectorActor.props(), actorFactory.generateActorId("sender"));
 
     private AbstractLeader isolatedLeader;
 
