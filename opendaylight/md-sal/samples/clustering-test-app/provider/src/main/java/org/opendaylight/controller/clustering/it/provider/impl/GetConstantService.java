@@ -50,7 +50,7 @@ public class GetConstantService implements DOMRpcImplementation {
     public static DOMRpcImplementationRegistration<GetConstantService> registerNew(
             final DOMRpcProviderService rpcProviderService, final String constant) {
 
-        LOG.debug("Registering get-constant service, constant value: {}", constant);
+        LOG.debug("Registering get-constant service, provider: {}, constant value: {}", rpcProviderService, constant);
         final DOMRpcIdentifier id = DOMRpcIdentifier.create(SchemaPath.create(true, GET_CONSTANT));
 
         return rpcProviderService.registerRpcImplementation(new GetConstantService(constant), id);
