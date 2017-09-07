@@ -26,24 +26,6 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class BindingToNormalizedNodeCodecFactory {
     /**
-     * This method is deprecated in favor of newInstance/registerInstance.
-     *
-     * @param classLoadingStrategy
-     * @param schemaService
-     * @return BindingToNormalizedNodeCodec instance
-     */
-    @Deprecated
-    public static BindingToNormalizedNodeCodec getOrCreateInstance(final ClassLoadingStrategy classLoadingStrategy,
-                            final DOMSchemaService schemaService) {
-        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
-                StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
-        final BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(
-                               classLoadingStrategy, codecRegistry, true);
-        schemaService.registerSchemaContextListener(instance);
-        return instance;
-    }
-
-    /**
      * Creates a new BindingToNormalizedNodeCodec instance.
      *
      * @param classLoadingStrategy
