@@ -15,16 +15,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataChangeListener;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -45,7 +44,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     private final BindingToNormalizedNodeCodec codec;
 
     protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec,
-            final SchemaService schemaService) {
+            final DOMSchemaService schemaService) {
         this.domDataBroker = domDataBroker;
         this.codec = codec;
     }
@@ -156,9 +155,9 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     private class TranslatingClusteredDataChangeInvoker extends TranslatingDataChangeInvoker implements
         ClusteredDOMDataChangeListener {
 
-        public TranslatingClusteredDataChangeInvoker(LogicalDatastoreType store, InstanceIdentifier<?> path,
-                                                     DataChangeListener bindingDataChangeListener,
-                                                     DataChangeScope triggeringScope) {
+        public TranslatingClusteredDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
+                                                     final DataChangeListener bindingDataChangeListener,
+                                                     final DataChangeScope triggeringScope) {
             super(store, path, bindingDataChangeListener, triggeringScope);
         }
     }
