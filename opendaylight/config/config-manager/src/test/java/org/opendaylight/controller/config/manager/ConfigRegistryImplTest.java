@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,31 +24,26 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigRegistryImplTest extends
-        AbstractLockedPlatformMBeanServerTest {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(ConfigRegistryImplTest.class);
+public class ConfigRegistryImplTest extends AbstractLockedPlatformMBeanServerTest {
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigRegistryImplTest.class);
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testFailOnTwoFactoriesExportingSameImpl() {
         ModuleFactory factory = new TestingFixedThreadPoolModuleFactory();
         BundleContext context = mock(BundleContext.class);
         ConfigRegistryImpl configRegistry = null;
         try {
-            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(mock(BundleContext.class),
-                    factory, factory);
+            ModuleFactoriesResolver resolver = new HardcodedModuleFactoriesResolver(mock(BundleContext.class), factory,
+                    factory);
 
-            configRegistry = new ConfigRegistryImpl(resolver,
-                    ManagementFactory.getPlatformMBeanServer(), null);
+            configRegistry = new ConfigRegistryImpl(resolver, ManagementFactory.getPlatformMBeanServer(), null);
 
             configRegistry.beginConfig();
             fail();
         } catch (final IllegalArgumentException e) {
-            assertTrue(
-                    e.getMessage(),
-                    e.getMessage()
-                            .startsWith("Module name is not unique. Found two conflicting factories with same name " +
-                                    "'fixed':"));
+            assertTrue(e.getMessage(), e.getMessage().startsWith(
+                    "Module name is not unique. Found two conflicting factories with same name " + "'fixed':"));
             verifyZeroInteractions(context);
         } finally {
             try {
@@ -59,5 +54,4 @@ public class ConfigRegistryImplTest extends
             }
         }
     }
-
 }

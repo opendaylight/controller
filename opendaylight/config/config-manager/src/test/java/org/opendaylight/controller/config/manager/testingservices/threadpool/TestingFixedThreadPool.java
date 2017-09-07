@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,14 +26,14 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
     private final String uniqueName;
 
     public static void cleanUp() {
-        for (ExecutorService executorService : allExecutors) {
+        for (ExecutorService executorService : ALL_EXECUTORS) {
             executorService.shutdown();
         }
-        allExecutors.clear();
+        ALL_EXECUTORS.clear();
     }
 
     // for verification purposes:
-    public static final List<ThreadPoolExecutor> allExecutors = Collections
+    public static final List<ThreadPoolExecutor> ALL_EXECUTORS = Collections
             .synchronizedList(Lists.<ThreadPoolExecutor>newLinkedList());
 
     public TestingFixedThreadPool(final int threadCount, final String uniqueName) {
@@ -41,7 +41,7 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
         this.uniqueName = uniqueName;
         executorService = (ThreadPoolExecutor) Executors
                 .newFixedThreadPool(threadCount);
-        allExecutors.add(executorService);
+        ALL_EXECUTORS.add(executorService);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
     @Override
     public void close() throws IOException {
         executorService.shutdown();
-        allExecutors.remove(executorService);
+        ALL_EXECUTORS.remove(executorService);
 
     }
 
@@ -70,5 +70,4 @@ public class TestingFixedThreadPool implements TestingThreadPoolIfc, Closeable,
         checkArgument(activeCount > 0);
         executorService.setMaximumPoolSize(activeCount);
     }
-
 }

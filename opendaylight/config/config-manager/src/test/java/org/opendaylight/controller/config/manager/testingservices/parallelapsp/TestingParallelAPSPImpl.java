@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,7 +18,7 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 @NotThreadSafe
 public class TestingParallelAPSPImpl implements TestingAPSP, Closeable {
     public static final int MINIMAL_NUMBER_OF_THREADS = 10;
-    private TestingThreadPoolIfc threadPool;
+    private final TestingThreadPoolIfc threadPool;
     private String someParam;
 
     public TestingParallelAPSPImpl(final TestingThreadPoolIfc threadPool,
@@ -46,14 +46,13 @@ public class TestingParallelAPSPImpl implements TestingAPSP, Closeable {
         return threadPool;
     }
 
-    void setSomeParam(final String s) {
+    void setSomeParam(final String string) {
         checkArgument(Strings.isNullOrEmpty(someParam) == false,
                 "Parameter 'someParam' is blank");
-        this.someParam = s;
+        this.someParam = string;
     }
 
     public String getSomeParam() {
         return someParam;
     }
-
 }

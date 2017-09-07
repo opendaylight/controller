@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -29,26 +29,21 @@ import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.HierarchicalRuntimeBeanRegistrationImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 
-public class RuntimeBeanRegistratorImplTest extends
-        AbstractLockedPlatformMBeanServerTest {
-    static final String module1 = "module1";
-    static final String INSTANCE_NAME = "instanceName";
+public class RuntimeBeanRegistratorImplTest extends AbstractLockedPlatformMBeanServerTest {
+    private static final String MODULE1 = "module1";
+    private static final String INSTANCE_NAME = "instanceName";
     String additionalKey = "key";
     String additionalValue = "value";
-    Map<String, String> additionalProperties = ImmutableMap.of(additionalKey,
-            additionalValue);
+    Map<String, String> additionalProperties = ImmutableMap.of(additionalKey, additionalValue);
 
     private BaseJMXRegistrator baseJMXRegistrator;
     private RootRuntimeBeanRegistratorImpl tested;
-    private final ModuleIdentifier moduleIdentifier = new ModuleIdentifier(
-            module1, INSTANCE_NAME);
+    private final ModuleIdentifier moduleIdentifier = new ModuleIdentifier(MODULE1, INSTANCE_NAME);
 
     @Before
     public void setUp() {
-        baseJMXRegistrator = new BaseJMXRegistrator(
-                ManagementFactory.getPlatformMBeanServer());
-        tested = baseJMXRegistrator
-                .createRuntimeBeanRegistrator(moduleIdentifier);
+        baseJMXRegistrator = new BaseJMXRegistrator(ManagementFactory.getPlatformMBeanServer());
+        tested = baseJMXRegistrator.createRuntimeBeanRegistrator(moduleIdentifier);
     }
 
     @After
@@ -66,7 +61,7 @@ public class RuntimeBeanRegistratorImplTest extends
             platformMBeanServer.getMBeanInfo(on);
             fail();
         } catch (final InstanceNotFoundException e) {
-
+            // FIXME: should it be empty?
         }
     }
 
@@ -75,13 +70,11 @@ public class RuntimeBeanRegistratorImplTest extends
         createRoot();
     }
 
-    private HierarchicalRuntimeBeanRegistrationImpl createRoot()
-            throws Exception {
-        HierarchicalRuntimeBeanRegistrationImpl rootRegistration = tested
-                .registerRoot(new TestingRuntimeBean());
+    private HierarchicalRuntimeBeanRegistrationImpl createRoot() throws Exception {
+        HierarchicalRuntimeBeanRegistrationImpl rootRegistration = tested.registerRoot(new TestingRuntimeBean());
 
-        ObjectName expectedON1 = ObjectNameUtil.createRuntimeBeanName(module1,
-                INSTANCE_NAME, Maps.<String, String> newHashMap());
+        ObjectName expectedON1 = ObjectNameUtil.createRuntimeBeanName(MODULE1, INSTANCE_NAME,
+                Maps.<String, String>newHashMap());
 
         assertEquals(expectedON1, rootRegistration.getObjectName());
         checkExists(rootRegistration.getObjectName());
@@ -95,14 +88,12 @@ public class RuntimeBeanRegistratorImplTest extends
     }
 
     private HierarchicalRuntimeBeanRegistration createAdditional(
-            final HierarchicalRuntimeBeanRegistrationImpl rootRegistration)
-            throws Exception {
+            final HierarchicalRuntimeBeanRegistrationImpl rootRegistration) throws Exception {
 
-        HierarchicalRuntimeBeanRegistrationImpl registration = rootRegistration
-                .register(additionalKey, additionalValue, new TestingRuntimeBean());
+        HierarchicalRuntimeBeanRegistrationImpl registration = rootRegistration.register(additionalKey, additionalValue,
+                new TestingRuntimeBean());
 
-        ObjectName expectedON1 = ObjectNameUtil.createRuntimeBeanName(module1,
-                INSTANCE_NAME, additionalProperties);
+        ObjectName expectedON1 = ObjectNameUtil.createRuntimeBeanName(MODULE1, INSTANCE_NAME, additionalProperties);
 
         assertEquals(expectedON1, registration.getObjectName());
         checkExists(registration.getObjectName());
@@ -138,12 +129,9 @@ public class RuntimeBeanRegistratorImplTest extends
             createRoot();
             fail();
         } catch (final IllegalStateException e) {
-            assertThat(e.getMessage(), containsString(rootRegistration
-                    .getObjectName().toString()));
-            assertThat(e.getMessage(),
-                    containsString("Could not register runtime bean"));
-            assertThat(e.getMessage(),
-                    containsString(moduleIdentifier.toString()));
+            assertThat(e.getMessage(), containsString(rootRegistration.getObjectName().toString()));
+            assertThat(e.getMessage(), containsString("Could not register runtime bean"));
+            assertThat(e.getMessage(), containsString(moduleIdentifier.toString()));
         }
     }
 
@@ -153,5 +141,4 @@ public class RuntimeBeanRegistratorImplTest extends
         platformMBeanServer.unregisterMBean(rootRegistration.getObjectName());
         rootRegistration.close();
     }
-
 }

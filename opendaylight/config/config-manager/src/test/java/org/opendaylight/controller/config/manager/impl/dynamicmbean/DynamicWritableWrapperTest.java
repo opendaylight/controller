@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -29,22 +30,17 @@ import org.opendaylight.controller.config.spi.Module;
 public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
     private final int newThreadCount = 10;
     private final AtomicBoolean atomicBoolean = new AtomicBoolean();
-    private final ReadOnlyAtomicBoolean readOnlyAtomicBoolean = new ReadOnlyAtomicBooleanImpl(
-            atomicBoolean);
+    private final ReadOnlyAtomicBoolean readOnlyAtomicBoolean = new ReadOnlyAtomicBooleanImpl(atomicBoolean);
 
     @Override
-    protected AbstractDynamicWrapper getDynamicWrapper(final Module module,
-            final ModuleIdentifier moduleIdentifier) {
-        return new DynamicWritableWrapper(module, moduleIdentifier,
-                "transaction-1",
-                readOnlyAtomicBoolean, MBeanServerFactory.createMBeanServer(),
-                platformMBeanServer);
+    protected AbstractDynamicWrapper getDynamicWrapper(final Module module, final ModuleIdentifier moduleIdentifier) {
+        return new DynamicWritableWrapper(module, moduleIdentifier, "transaction-1", readOnlyAtomicBoolean,
+                MBeanServerFactory.createMBeanServer(), platformMBeanServer);
     }
 
     @Test
     public void testSetAttribute() throws Exception {
-        DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer,
-                threadPoolDynamicWrapperON, DynamicMBean.class);
+        DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer, threadPoolDynamicWrapperON, DynamicMBean.class);
 
         proxy.setAttribute(new Attribute(THREAD_COUNT, newThreadCount));
 
@@ -63,40 +59,31 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
 
     @Test
     public void testSettersWithMXBeanProxy() {
-        TestingFixedThreadPoolConfigMXBean proxy = JMX.newMXBeanProxy(
-                platformMBeanServer, threadPoolDynamicWrapperON,
+        TestingFixedThreadPoolConfigMXBean proxy = JMX.newMXBeanProxy(platformMBeanServer, threadPoolDynamicWrapperON,
                 TestingFixedThreadPoolConfigMXBean.class);
         proxy.setThreadCount(newThreadCount);
         assertEquals(newThreadCount, threadPoolConfigBean.getThreadCount());
     }
 
     /*
-     * Try to call setter with ObjectName containing transaction name. Verify
-     * that ObjectName without transaction name was actually passed on the
-     * config bean.
+     * Try to call setter with ObjectName containing transaction name. Verify that
+     * ObjectName without transaction name was actually passed on the config bean.
      */
     @Test
-    public void testObjectNameSetterWithONContainingTransaction_shouldBeTranslatedToReadOnlyON()
-            throws Exception {
+    public void testObjectNameSetterWithONContainingTransaction_shouldBeTranslatedToReadOnlyON() throws Exception {
         TestingParallelAPSPModuleFactory testingParallelAPSPConfigBeanFactory = new TestingParallelAPSPModuleFactory();
-        TestingParallelAPSPModule apspConfigBean = testingParallelAPSPConfigBeanFactory
-                .createModule("", null, null);
-        ModuleIdentifier moduleIdentifier2 = new ModuleIdentifier("apsp",
-                "parallel");
-        ObjectName dynON2 = ObjectNameUtil
-                .createReadOnlyModuleON(moduleIdentifier2);
-        AbstractDynamicWrapper dyn = getDynamicWrapper(apspConfigBean,
-                moduleIdentifier2);
+        TestingParallelAPSPModule apspConfigBean = testingParallelAPSPConfigBeanFactory.createModule("", null, null);
+        ModuleIdentifier moduleIdentifier2 = new ModuleIdentifier("apsp", "parallel");
+        ObjectName dynON2 = ObjectNameUtil.createReadOnlyModuleON(moduleIdentifier2);
+        AbstractDynamicWrapper dyn = getDynamicWrapper(apspConfigBean, moduleIdentifier2);
         platformMBeanServer.registerMBean(dyn, dynON2);
         try {
-            TestingParallelAPSPConfigMXBean proxy = JMX.newMBeanProxy(
-                    platformMBeanServer, dynON2,
+            TestingParallelAPSPConfigMXBean proxy = JMX.newMBeanProxy(platformMBeanServer, dynON2,
                     TestingParallelAPSPConfigMXBean.class);
-            ObjectName withTransactionName = ObjectNameUtil
-                    .createTransactionModuleON("transaction1", "moduleName", "instanceName");
+            ObjectName withTransactionName = ObjectNameUtil.createTransactionModuleON("transaction1", "moduleName",
+                    "instanceName");
             proxy.setThreadPool(withTransactionName);
-            ObjectName withoutTransactionName = ObjectNameUtil
-                    .withoutTransactionName(withTransactionName);
+            ObjectName withoutTransactionName = ObjectNameUtil.withoutTransactionName(withTransactionName);
             assertEquals(withoutTransactionName, proxy.getThreadPool());
         } finally {
             platformMBeanServer.unregisterMBean(dynON2);
@@ -104,8 +91,7 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
     }
 
     private void setNumberOfThreads(final int numberOfThreads) throws Exception {
-        DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer,
-                threadPoolDynamicWrapperON, DynamicMBean.class);
+        DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer, threadPoolDynamicWrapperON, DynamicMBean.class);
 
         proxy.setAttribute(new Attribute(THREAD_COUNT, numberOfThreads));
 
@@ -123,7 +109,5 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
         } finally {
             atomicBoolean.set(false);
         }
-
     }
-
 }

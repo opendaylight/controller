@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -34,10 +34,8 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
 
     final ModuleIdentifier apspName = new ModuleIdentifier("apsp", "apsp"); // depends
                                                                             // on:
-    final ModuleIdentifier threadPoolName = new ModuleIdentifier("threadpool",
-            "threadpool"); // depends on:
-    final ModuleIdentifier threadFactoryName = new ModuleIdentifier(
-            "threadfactory", "threadfactory");
+    final ModuleIdentifier threadPoolName = new ModuleIdentifier("threadpool", "threadpool"); // depends on:
+    final ModuleIdentifier threadFactoryName = new ModuleIdentifier("threadfactory", "threadfactory");
 
     private DependencyResolverManager tested;
     TransactionStatus transactionStatus;
@@ -54,10 +52,9 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
 
     @Test
     public void testOrdering() {
-        DependencyResolverImpl apspDRI = tested.getOrCreate(apspName);
+        final DependencyResolverImpl apspDRI = tested.getOrCreate(apspName);
         mockGetInstance(tested, apspName);
-        DependencyResolverImpl threadPoolDRI = tested
-                .getOrCreate(threadPoolName);
+        final DependencyResolverImpl threadPoolDRI = tested.getOrCreate(threadPoolName);
         mockGetInstance(tested, threadPoolName);
         tested.getOrCreate(threadFactoryName);
         mockGetInstance(tested, threadFactoryName);
@@ -73,12 +70,8 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
         doNothing().when(transactionStatus).checkCommitted();
         doNothing().when(transactionStatus).checkNotCommitted();
 
-        List<ModuleIdentifier> sortedModuleIdentifiers = tested
-                .getSortedModuleIdentifiers();
-        assertEquals(
-                Arrays.asList(threadFactoryName, threadPoolName, apspName),
-                sortedModuleIdentifiers);
-
+        List<ModuleIdentifier> sortedModuleIdentifiers = tested.getSortedModuleIdentifiers();
+        assertEquals(Arrays.asList(threadFactoryName, threadPoolName, apspName), sortedModuleIdentifiers);
     }
 
     /**
@@ -88,8 +81,7 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
     private static void declareDependency(final DependencyResolverImpl dependerResolver,
             final ModuleIdentifier dependentName) {
         JmxAttribute dummyAttribute = new JmxAttribute("dummy");
-        dependerResolver.resolveInstance(Object.class,
-                ObjectNameUtil.createReadOnlyModuleON(dependentName),
+        dependerResolver.resolveInstance(Object.class, ObjectNameUtil.createReadOnlyModuleON(dependentName),
                 dummyAttribute);
     }
 
@@ -101,12 +93,8 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
         TransactionModuleJMXRegistration transactionModuleJMXRegistration = null;
         boolean isDefaultBean = false;
 
-        tested.put(moduleIdentifier,
-            mockedModule(),
-            moduleFactory,
-            maybeOldInternalInfo,
-            transactionModuleJMXRegistration,
-            isDefaultBean, mock(BundleContext.class));
+        tested.put(moduleIdentifier, mockedModule(), moduleFactory, maybeOldInternalInfo,
+                transactionModuleJMXRegistration, isDefaultBean, mock(BundleContext.class));
     }
 
     private static Module mockedModule() {
@@ -115,5 +103,4 @@ public class DependencyResolverManagerTest extends AbstractLockedPlatformMBeanSe
         doReturn(new ModuleIdentifier("fact", "instance")).when(mockedModule).getIdentifier();
         return mockedModule;
     }
-
 }
