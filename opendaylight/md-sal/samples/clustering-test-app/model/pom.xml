@@ -25,6 +25,7 @@
                     <configuration>
                         <instructions>
                             <Bundle-Name>org.opendaylight.controller.sal-clustering-it-model</Bundle-Name>
+                            <Import-Package>*</Import-Package>
                         </instructions>
                     </configuration>
                 </plugin>
