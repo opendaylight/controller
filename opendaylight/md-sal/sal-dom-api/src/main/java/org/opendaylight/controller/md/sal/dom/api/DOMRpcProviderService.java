@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 
@@ -41,10 +40,8 @@ public interface DOMRpcProviderService extends DOMService {
      * @throws NullPointerException if implementation or types is null
      * @throws IllegalArgumentException if types is empty or contains a null element.
      */
-    default @Nonnull <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
-            @Nonnull final T implementation, @Nonnull final DOMRpcIdentifier... rpcs) {
-        return registerRpcImplementation(implementation, ImmutableSet.copyOf(rpcs));
-    }
+    @Nonnull <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            @Nonnull T implementation, @Nonnull DOMRpcIdentifier... rpcs);
 
     /**
      * Register an {@link DOMRpcImplementation} object with this service.
