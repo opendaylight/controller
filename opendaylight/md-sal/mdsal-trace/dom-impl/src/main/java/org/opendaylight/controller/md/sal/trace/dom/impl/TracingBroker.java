@@ -421,13 +421,16 @@ public class TracingBroker implements TracingDOMDataBroker {
     }
 
     private void printStackTraceElements(PrintStream ps, String indent, List<StackTraceElement> stackTraceElements) {
-        stackTraceElements.forEach(line -> {
-            if (isStackTraceElementInteresting(line)) {
-                ps.println(indent + line);
-            } else {
+        boolean ellipsis = false;
+        for (final StackTraceElement stackTraceElement : stackTraceElements) {
+            if (isStackTraceElementInteresting(stackTraceElement)) {
+                ps.println(indent + stackTraceElement);
+                ellipsis = false;
+            } else if (!ellipsis) {
                 ps.println(indent + "(...)");
+                ellipsis = true;
             }
-        });
+        }
     }
 
     private boolean isStackTraceElementInteresting(StackTraceElement element) {

@@ -49,8 +49,16 @@ public class TracingBrokerTest {
 
         assertThat(printReturnValue).isTrue();
         // Assert expections about stack trace
-        assertThat(output).contains("testPrintOpenTransactions(TracingBrokerTest.java:41)");
+        assertThat(output).contains("testPrintOpenTransactions(TracingBrokerTest.java");
         assertThat(output).doesNotContain(TracingBroker.class.getName());
+
+        String previousLine = "";
+        for (String line : output.split("\n")) {
+            if (line.contains("(...")) {
+                assertThat(previousLine.contains("(...)")).isFalse();
+            }
+            previousLine = line;
+        }
 
         // We don't do any verify/times on the mocks,
         // because the main point of the test is just to verify that
