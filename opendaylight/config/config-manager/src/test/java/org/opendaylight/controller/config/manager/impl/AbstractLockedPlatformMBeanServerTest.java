@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,26 +17,23 @@ import org.junit.Before;
  * Each test that works with platform MBeanServer should extend this class.
  */
 public abstract class AbstractLockedPlatformMBeanServerTest {
-    private static final ReentrantLock lock = new ReentrantLock();
+    private static final ReentrantLock LOCK = new ReentrantLock();
     protected static MBeanServer platformMBeanServer = ManagementFactory
             .getPlatformMBeanServer();
 
     @Before
     public void acquireLock() {
-        lock.lock();
+        LOCK.lock();
     }
 
     @After
     public void unlock() {
-        lock.unlock();
+        LOCK.unlock();
     }
 
     public static class SimpleBean implements SimpleBeanMBean {
-
     }
 
     public interface SimpleBeanMBean {
-
     }
-
 }

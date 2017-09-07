@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,12 +15,16 @@ import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnota
 
 public interface SearchableServiceReferenceWritableRegistry extends ServiceReferenceWritableRegistry {
     /**
-     * Return mapping between service ref names and service interface annotation for given
-     * module.
+     * Return mapping between service ref names and service interface annotation for
+     * given module.
      *
-     * @throws java.lang.IllegalArgumentException if any of service qNames is not found
-     * @throws java.lang.NullPointerException     if parameter is null
+     * @param moduleIdentifier module id
+     * @return map
+     * @throws java.lang.IllegalArgumentException
+     *             if any of service qNames is not found
+     * @throws java.lang.NullPointerException
+     *             if parameter is null
      */
-    Map<ServiceInterfaceAnnotation, String /* service ref name */> findServiceInterfaces(ModuleIdentifier moduleIdentifier);
-
+    Map<ServiceInterfaceAnnotation, String /* service ref name */> findServiceInterfaces(
+            ModuleIdentifier moduleIdentifier);
 }

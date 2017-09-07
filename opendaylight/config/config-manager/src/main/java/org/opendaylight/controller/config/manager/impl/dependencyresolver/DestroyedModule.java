@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,7 +31,7 @@ public class DestroyedModule implements AutoCloseable,
     private final ModuleJMXRegistrator oldJMXRegistrator;
     private final OsgiRegistration osgiRegistration;
     private final int orderingIdx;
-    private RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator;
+    private final RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator;
 
     public DestroyedModule(final ModuleIdentifier identifier, final AutoCloseable instance,
                            final ModuleJMXRegistrator oldJMXRegistrator,
@@ -46,6 +46,7 @@ public class DestroyedModule implements AutoCloseable,
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public void close() {
         LOG.trace("Destroying {}", identifier);
         try {
@@ -73,8 +74,8 @@ public class DestroyedModule implements AutoCloseable,
     }
 
     @Override
-    public int compareTo(final DestroyedModule o) {
-        return Integer.compare(orderingIdx, o.orderingIdx);
+    public int compareTo(final DestroyedModule destroyedModule) {
+        return Integer.compare(orderingIdx, destroyedModule.orderingIdx);
     }
 
     @Override

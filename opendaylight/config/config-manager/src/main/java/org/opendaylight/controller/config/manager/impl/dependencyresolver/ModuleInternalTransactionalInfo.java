@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -34,7 +34,9 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
                                            final ModuleFactory moduleFactory,
                                            final ModuleInternalInfo maybeOldInternalInfo,
                                            final TransactionModuleJMXRegistration transactionModuleJMXRegistration,
-                                           final boolean isDefaultBean, final Module realModule, final BundleContext bundleContext) {
+                                           final boolean isDefaultBean,
+                                           final Module realModule,
+                                           final BundleContext bundleContext) {
         this.name = name;
         this.proxiedModule = proxiedModule;
         this.moduleFactory = moduleFactory;

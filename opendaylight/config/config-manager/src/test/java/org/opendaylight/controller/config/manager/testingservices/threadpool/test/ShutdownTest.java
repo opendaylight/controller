@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -29,7 +29,8 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.osgi.framework.BundleContext;
 
 public class ShutdownTest extends AbstractConfigTest {
-    private final TestingFixedThreadPoolModuleFactory testingFixedThreadPoolModuleFactory = new TestingFixedThreadPoolModuleFactory();
+    private final TestingFixedThreadPoolModuleFactory testingFixedThreadPoolModuleFactory =
+            new TestingFixedThreadPoolModuleFactory();
 
     @Mock
     ModuleFactoriesResolver mockedResolver;
@@ -44,7 +45,6 @@ public class ShutdownTest extends AbstractConfigTest {
         super.initConfigTransactionManagerImpl(mockedResolver);
     }
 
-
     @Test
     public void testCreateAndDestroyBeanInSameTransaction() throws Exception {
         {
@@ -52,12 +52,12 @@ public class ShutdownTest extends AbstractConfigTest {
             SimpleConfigurationTest.createFixedThreadPool(transaction);
             transaction.commit();
         }
-        assertEquals(1, TestingFixedThreadPool.allExecutors.size());
+        assertEquals(1, TestingFixedThreadPool.ALL_EXECUTORS.size());
         doReturn(Collections.emptyMap()).when(mockedResolver).getAllFactories();
         {
             ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
             transaction.commit();
         }
-        assertEquals(1, TestingFixedThreadPool.allExecutors.size());
+        assertEquals(1, TestingFixedThreadPool.ALL_EXECUTORS.size());
     }
 }

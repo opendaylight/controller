@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -79,7 +79,7 @@ public class DeadlockMonitor implements AutoCloseable {
             ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos();
             while (!this.isInterrupted()) {
                 ModuleIdentifierWithNanos copy;
-                synchronized(this) {
+                synchronized (this) {
                     copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.top);
                 }
 
@@ -116,7 +116,7 @@ public class DeadlockMonitor implements AutoCloseable {
         private final long nanoTime;
 
         private ModuleIdentifierWithNanos() {
-            this((ModuleIdentifier)null);
+            this((ModuleIdentifier) null);
         }
 
         private ModuleIdentifierWithNanos(final ModuleIdentifier moduleIdentifier) {
@@ -130,20 +130,21 @@ public class DeadlockMonitor implements AutoCloseable {
         }
 
         @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
+        public boolean equals(final Object object) {
+            if (this == object) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()) {
+            if (object == null || getClass() != object.getClass()) {
                 return false;
             }
 
-            ModuleIdentifierWithNanos that = (ModuleIdentifierWithNanos) o;
+            ModuleIdentifierWithNanos that = (ModuleIdentifierWithNanos) object;
 
             if (nanoTime != that.nanoTime) {
                 return false;
             }
-            if (moduleIdentifier != null ? !moduleIdentifier.equals(that.moduleIdentifier) : that.moduleIdentifier != null) {
+            if (moduleIdentifier != null ? !moduleIdentifier.equals(that.moduleIdentifier)
+                    : that.moduleIdentifier != null) {
                 return false;
             }
 
@@ -153,15 +154,13 @@ public class DeadlockMonitor implements AutoCloseable {
         @Override
         public int hashCode() {
             int result = moduleIdentifier != null ? moduleIdentifier.hashCode() : 0;
-            result = 31 * result + (int) (nanoTime ^ (nanoTime >>> 32));
+            result = 31 * result + (int) (nanoTime ^ nanoTime >>> 32);
             return result;
         }
 
         @Override
         public String toString() {
-            return "ModuleIdentifierWithNanos{" +
-                    moduleIdentifier +
-                    '}';
+            return "ModuleIdentifierWithNanos{" + moduleIdentifier + '}';
         }
     }
 }
