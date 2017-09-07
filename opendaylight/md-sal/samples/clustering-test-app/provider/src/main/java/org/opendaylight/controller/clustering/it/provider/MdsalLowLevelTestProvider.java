@@ -642,7 +642,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     @Override
     public Future<RpcResult<Void>> registerConstant(final RegisterConstantInput input) {
 
-        LOG.debug("Received register-constant rpc, input: {}", input);
+        LOG.debug("Received register-constant rpc, service: {}, input: {}", domRpcService, input);
 
         if (input.getConstant() == null) {
             final RpcError error = RpcResultBuilder.newError(
