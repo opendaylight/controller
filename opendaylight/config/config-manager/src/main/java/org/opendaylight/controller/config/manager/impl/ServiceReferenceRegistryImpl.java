@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,29 +39,35 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceReadableRegistry, SearchableServiceReferenceWritableRegistry {
+public class ServiceReferenceRegistryImpl
+        implements CloseableServiceReferenceReadableRegistry, SearchableServiceReferenceWritableRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceReferenceRegistryImpl.class);
 
     private final Map<String, ModuleFactory> factories;
     private final Map<String, Set<String>> factoryNamesToQNames;
-    // validator of incoming ObjectNames - throws InstanceNotFoundException if not found either in registry or transaction
+    // validator of incoming ObjectNames - throws InstanceNotFoundException if not
+    // found either in registry or transaction
     private final LookupRegistry lookupRegistry;
     private final ServiceReferenceRegistrator serviceReferenceRegistrator;
     // helper method for getting QName of SI from namespace + local name
-    private final Map<String /* namespace */, Map<String /* local name */, ServiceInterfaceAnnotation>> namespacesToAnnotations;
+    private final Map<String /* namespace */, Map<String /* local name */, ServiceInterfaceAnnotation>>
+        namespacesToAnnotations;
     private final Map<String /* service qName */, ServiceInterfaceAnnotation> serviceQNamesToAnnotations;
     // all Service Interface qNames for sanity checking
     private final Set<String /* qName */> allQNames;
-    Map<ModuleIdentifier, Map<ServiceInterfaceAnnotation, String /* service ref name */>> modulesToServiceRef = new HashMap<>();
-
+    Map<ModuleIdentifier, Map<ServiceInterfaceAnnotation, String /* service ref name */>> modulesToServiceRef =
+            new HashMap<>();
 
     // actual reference database
     private final Map<ServiceReference, ModuleIdentifier> refNames = new HashMap<>();
     private final boolean writable;
-    private final Map<ServiceReference, Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration>> mBeans = new HashMap<>();
+    private final Map<ServiceReference, Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration>>
+        managementBeans = new HashMap<>();
 
-    private ServiceReferenceRegistryImpl(final Map<String, ModuleFactory> factories, final LookupRegistry lookupRegistry,
-            final ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory, final boolean writable) {
+    private ServiceReferenceRegistryImpl(final Map<String, ModuleFactory> factories,
+            final LookupRegistry lookupRegistry,
+            final ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory,
+            final boolean writable) {
         this.factories = factories;
         this.writable = writable;
         this.lookupRegistry = lookupRegistry;
@@ -75,27 +81,33 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         for (Entry<String, ModuleFactory> entry : factories.entrySet()) {
             if (!entry.getKey().equals(entry.getValue().getImplementationName())) {
                 LOG.error("Possible error in code: Mismatch between supplied and actual name of {}", entry);
-                throw new IllegalArgumentException("Possible error in code: Mismatch between supplied and actual name of " + entry);
+                throw new IllegalArgumentException(
+                        "Possible error in code: Mismatch between supplied and actual name of " + entry);
             }
-            Set<ServiceInterfaceAnnotation> siAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(entry.getValue());
-            Set<String> qNames = InterfacesHelper.getQNames(siAnnotations);
+            Set<ServiceInterfaceAnnotation> siAnnotations = InterfacesHelper
+                    .getServiceInterfaceAnnotations(entry.getValue());
+            Set<String> names = InterfacesHelper.getQNames(siAnnotations);
             allAnnotations.addAll(siAnnotations);
-            allQNameSet.addAll(qNames);
-            modifiableFactoryNamesToQNames.put(entry.getKey(), qNames);
+            allQNameSet.addAll(names);
+            modifiableFactoryNamesToQNames.put(entry.getKey(), names);
         }
         this.factoryNamesToQNames = ImmutableMap.copyOf(modifiableFactoryNamesToQNames);
         this.allQNames = ImmutableSet.copyOf(allQNameSet);
         // fill namespacesToAnnotations
-        Map<String /* namespace */, Map<String /* localName */, ServiceInterfaceAnnotation>> modifiableNamespacesToAnnotations = new HashMap<>();
-        Map<String /* service qName*/, ServiceInterfaceAnnotation> modifiableServiceQNamesToAnnotations = new HashMap<>();
+        Map<String /* namespace */, Map<String /* localName */, ServiceInterfaceAnnotation>>
+            modifiableNamespacesToAnnotations = new HashMap<>();
+        Map<String /* service qName */, ServiceInterfaceAnnotation>
+            modifiableServiceQNamesToAnnotations = new HashMap<>();
         for (ServiceInterfaceAnnotation sia : allAnnotations) {
-            Map<String, ServiceInterfaceAnnotation> ofNamespace =
-                    modifiableNamespacesToAnnotations.computeIfAbsent(sia.namespace(), k -> new HashMap<>());
+            Map<String, ServiceInterfaceAnnotation> ofNamespace = modifiableNamespacesToAnnotations
+                    .computeIfAbsent(sia.namespace(), k -> new HashMap<>());
             if (ofNamespace.containsKey(sia.localName())) {
                 LOG.error(
-                        "Cannot construct namespacesToAnnotations map, conflict between local names in {}, offending local name: {}, map so far {}",
+                        "Cannot construct namespacesToAnnotations map, conflict between local names in {},"
+                        + " offending local name: {}, map so far {}",
                         sia.namespace(), sia.localName(), modifiableNamespacesToAnnotations);
-                throw new IllegalArgumentException("Conflict between local names in " + sia.namespace() + " : " + sia.localName());
+                throw new IllegalArgumentException(
+                        "Conflict between local names in " + sia.namespace() + " : " + sia.localName());
             }
             ofNamespace.put(sia.localName(), sia);
             modifiableServiceQNamesToAnnotations.put(sia.value(), sia);
@@ -106,8 +118,10 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     /**
-     * Static constructor for config registry. Since only transaction can write to this registry, it will
-     * return blank state.
+     * Static constructor for config registry. Since only transaction can write to
+     * this registry, it will return blank state.
+     *
+     * @return service reference registry
      */
     public static CloseableServiceReferenceReadableRegistry createInitialSRLookupRegistry() {
         // since this is initial state, just throw exception:
@@ -128,7 +142,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             }
 
             @Override
-            public ObjectName lookupConfigBean(final String moduleName, final String instanceName) throws InstanceNotFoundException {
+            public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
+                    throws InstanceNotFoundException {
                 throw new UnsupportedOperationException();
             }
 
@@ -157,40 +172,41 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                 return "initial";
             }
         };
-        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory = () -> new ServiceReferenceRegistrator() {
-            @Override
-            public String getNullableTransactionName() {
-                throw new UnsupportedOperationException();
-            }
 
-            @Override
-            public ServiceReferenceJMXRegistration registerMBean(final ServiceReferenceMXBeanImpl object, final ObjectName on) throws InstanceAlreadyExistsException {
-                throw new UnsupportedOperationException();
-            }
+        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory =
+            () -> new ServiceReferenceRegistrator() {
+                @Override
+                public String getNullableTransactionName() {
+                    throw new UnsupportedOperationException();
+                }
 
-            @Override
-            public void close() {
+                @Override
+                public ServiceReferenceJMXRegistration registerMBean(final ServiceReferenceMXBeanImpl object,
+                         final ObjectName on) throws InstanceAlreadyExistsException {
+                    throw new UnsupportedOperationException();
+                }
 
-            }
-        };
+                @Override
+                public void close() {
+                }
+            };
         return new ServiceReferenceRegistryImpl(Collections.<String, ModuleFactory>emptyMap(), lookupRegistry,
                 serviceReferenceRegistratorFactory, false);
     }
 
-    /**
-     * Static constructor for transaction controller. Take current state as seen by config registry, allow writing new data.
-     */
-    public static SearchableServiceReferenceWritableRegistry createSRWritableRegistry(final ServiceReferenceReadableRegistry oldReadableRegistry,
-                                                    final ConfigTransactionLookupRegistry txLookupRegistry,
-                                                    final Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories) {
+    public static SearchableServiceReferenceWritableRegistry createSRWritableRegistry(
+            final ServiceReferenceReadableRegistry oldReadableRegistry,
+            final ConfigTransactionLookupRegistry txLookupRegistry,
+            final Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories) {
 
         if (txLookupRegistry == null) {
             throw new IllegalArgumentException("txLookupRegistry is null");
         }
         ServiceReferenceRegistryImpl old = (ServiceReferenceRegistryImpl) oldReadableRegistry;
         Map<String, ModuleFactory> factories = extractFactoriesMap(currentlyRegisteredFactories);
-        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory = new ServiceReferenceTransactionRegistratorFactoryImpl(
-                txLookupRegistry.getTxModuleJMXRegistrator(), txLookupRegistry.getTxModuleJMXRegistrator().getTransactionName());
+        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory =
+                new ServiceReferenceTransactionRegistratorFactoryImpl(txLookupRegistry.getTxModuleJMXRegistrator(),
+                        txLookupRegistry.getTxModuleJMXRegistrator().getTransactionName());
         ServiceReferenceRegistryImpl newRegistry = new ServiceReferenceRegistryImpl(factories, txLookupRegistry,
                 serviceReferenceRegistratorFactory, true);
         copy(old, newRegistry, txLookupRegistry.getTransactionIdentifier().getName());
@@ -199,28 +215,39 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
     /**
      * Copy back state to config registry after commit.
+     *
+     * @param oldWritableRegistry
+     *            old registry
+     * @param lookupRegistry
+     *            lookup registry
+     * @param baseJMXRegistrator
+     *            JMX registrator
+     * @return service reference
      */
-    public static CloseableServiceReferenceReadableRegistry createSRReadableRegistry(final ServiceReferenceWritableRegistry oldWritableRegistry,
-                                                                            final LookupRegistry lookupRegistry, final BaseJMXRegistrator baseJMXRegistrator) {
+    public static CloseableServiceReferenceReadableRegistry createSRReadableRegistry(
+            final ServiceReferenceWritableRegistry oldWritableRegistry, final LookupRegistry lookupRegistry,
+            final BaseJMXRegistrator baseJMXRegistrator) {
         ServiceReferenceRegistryImpl old = (ServiceReferenceRegistryImpl) oldWritableRegistry;
 
-        // even if factories do change, nothing in the mapping can change between transactions
-        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory = new ServiceReferenceTransactionRegistratorFactoryImpl(baseJMXRegistrator);
+        // even if factories do change, nothing in the mapping can change between
+        // transactions
+        ServiceReferenceTransactionRegistratorFactory serviceReferenceRegistratorFactory =
+                new ServiceReferenceTransactionRegistratorFactoryImpl(baseJMXRegistrator);
         ServiceReferenceRegistryImpl newRegistry = new ServiceReferenceRegistryImpl(old.factories, lookupRegistry,
                 serviceReferenceRegistratorFactory, false);
         copy(old, newRegistry, null);
         return newRegistry;
     }
 
-    /**
-     * Fill refNames and mBeans maps from old instance
-     */
-    private static void copy(final ServiceReferenceRegistryImpl old, final ServiceReferenceRegistryImpl newRegistry, final String nullableDstTransactionName) {
-        for (Entry<ServiceReference, Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration>> refNameEntry : old.mBeans.entrySet()) {
+    private static void copy(final ServiceReferenceRegistryImpl old, final ServiceReferenceRegistryImpl newRegistry,
+            final String nullableDstTransactionName) {
+        for (Entry<ServiceReference, Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration>>
+            refNameEntry : old.managementBeans.entrySet()) {
             ObjectName currentImplementation;
             ObjectName currentImplementationSrc = refNameEntry.getValue().getKey().getCurrentImplementation();
             if (nullableDstTransactionName != null) {
-                currentImplementation = ObjectNameUtil.withTransactionName(currentImplementationSrc, nullableDstTransactionName);
+                currentImplementation = ObjectNameUtil.withTransactionName(currentImplementationSrc,
+                        nullableDstTransactionName);
             } else {
                 currentImplementation = ObjectNameUtil.withoutTransactionName(currentImplementationSrc);
             }
@@ -234,7 +261,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         }
     }
 
-    private static Map<String, ModuleFactory> extractFactoriesMap(final Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories) {
+    private static Map<String, ModuleFactory> extractFactoriesMap(
+            final Map<String, Map.Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories) {
         Map<String, ModuleFactory> result = new HashMap<>();
         for (Entry<String, Entry<ModuleFactory, BundleContext>> entry : currentlyRegisteredFactories.entrySet()) {
             result.put(entry.getKey(), entry.getValue().getKey());
@@ -243,8 +271,10 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public Map<ServiceInterfaceAnnotation, String /* service ref name */> findServiceInterfaces(final ModuleIdentifier moduleIdentifier) {
-        Map<ServiceInterfaceAnnotation, String /* service ref name */> result = modulesToServiceRef.get(moduleIdentifier);
+    public Map<ServiceInterfaceAnnotation, String /* service ref name */> findServiceInterfaces(
+            final ModuleIdentifier moduleIdentifier) {
+        Map<ServiceInterfaceAnnotation, String /* service ref name */> result = modulesToServiceRef
+                .get(moduleIdentifier);
         if (result == null) {
             return Collections.emptyMap();
         }
@@ -252,7 +282,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public synchronized Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
+    public synchronized Set<String> lookupServiceInterfaceNames(final ObjectName objectName)
+            throws InstanceNotFoundException {
         lookupRegistry.checkConfigBeanExists(objectName);
 
         String factoryName = ObjectNameUtil.getFactoryName(objectName);
@@ -283,11 +314,11 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     // reading:
 
     @Override
-    public synchronized Map<String /* serviceInterfaceName */, Map<String/* refName */, ObjectName>> getServiceMapping() {
+    public synchronized Map<String, Map<String/* refName */, ObjectName>> getServiceMapping() {
         Map<String /* serviceInterfaceName */, Map<String/* refName */, ObjectName>> result = new HashMap<>();
-        for (Entry<ServiceReference, ModuleIdentifier> entry: refNames.entrySet()) {
-            String qName = entry.getKey().getServiceInterfaceQName();
-            Map<String /* refName */, ObjectName> innerMap = result.computeIfAbsent(qName, k -> new HashMap<>());
+        for (Entry<ServiceReference, ModuleIdentifier> entry : refNames.entrySet()) {
+            String name = entry.getKey().getServiceInterfaceQName();
+            Map<String /* refName */, ObjectName> innerMap = result.computeIfAbsent(name, k -> new HashMap<>());
             innerMap.put(entry.getKey().getRefName(), getObjectName(entry.getValue()));
         }
         return result;
@@ -305,7 +336,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
+    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName,
+            final String refName) {
         ServiceReference serviceReference = new ServiceReference(serviceInterfaceQName, refName);
         ModuleIdentifier moduleIdentifier = refNames.get(serviceReference);
         if (moduleIdentifier == null) {
@@ -316,7 +348,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public synchronized Map<String /* refName */, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
+    public synchronized Map<String /* refName */, ObjectName> lookupServiceReferencesByServiceInterfaceName(
+            final String serviceInterfaceQName) {
         Map<String, Map<String, ObjectName>> serviceMapping = getServiceMapping();
         Map<String, ObjectName> innerMap = serviceMapping.get(serviceInterfaceQName);
         if (innerMap == null) {
@@ -327,9 +360,10 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public synchronized ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
+    public synchronized ObjectName getServiceReference(final String serviceInterfaceQName, final String refName)
+            throws InstanceNotFoundException {
         ServiceReference serviceReference = new ServiceReference(serviceInterfaceQName, refName);
-        if (!mBeans.containsKey(serviceReference)) {
+        if (!managementBeans.containsKey(serviceReference)) {
             throw new InstanceNotFoundException("Cannot find " + serviceReference);
         }
         return getServiceON(serviceReference);
@@ -339,7 +373,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     public synchronized void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         String actualTransactionName = ObjectNameUtil.getTransactionName(objectName);
         String expectedTransactionName = serviceReferenceRegistrator.getNullableTransactionName();
-        if (writable && actualTransactionName == null || writable && !actualTransactionName.equals(expectedTransactionName)) {
+        if (writable && actualTransactionName == null
+                || writable && !actualTransactionName.equals(expectedTransactionName)) {
             throw new IllegalArgumentException("Mismatched transaction name in " + objectName);
         }
         String serviceQName = ObjectNameUtil.getServiceQName(objectName);
@@ -359,19 +394,20 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public synchronized ObjectName saveServiceReference(final String serviceInterfaceName, final String refName, final ObjectName moduleON)  throws InstanceNotFoundException {
+    public synchronized ObjectName saveServiceReference(final String serviceInterfaceName, final String refName,
+            final ObjectName moduleON) throws InstanceNotFoundException {
         assertWritable();
         ServiceReference serviceReference = new ServiceReference(serviceInterfaceName, refName);
         return saveServiceReference(serviceReference, moduleON);
     }
 
-    private synchronized ObjectName saveServiceReference(final ServiceReference serviceReference, final ObjectName moduleON)
-            throws InstanceNotFoundException{
+    private synchronized ObjectName saveServiceReference(final ServiceReference serviceReference,
+            final ObjectName moduleON) throws InstanceNotFoundException {
         return saveServiceReference(serviceReference, moduleON, false);
     }
 
-    private synchronized ObjectName saveServiceReference(final ServiceReference serviceReference, final ObjectName moduleON,
-                                                         final boolean skipChecks) throws InstanceNotFoundException {
+    private synchronized ObjectName saveServiceReference(final ServiceReference serviceReference,
+            final ObjectName moduleON, final boolean skipChecks) throws InstanceNotFoundException {
 
         // make sure it is found
         if (!skipChecks) {
@@ -386,18 +422,23 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         if (serviceInterfaceQNames == null) {
             LOG.error("Possible error in code: cannot find factoryName {} in {}, {}", moduleIdentifier.getFactoryName(),
                     factoryNamesToQNames, moduleIdentifier);
-            throw new IllegalStateException("Possible error in code: cannot find annotations of existing factory " + moduleIdentifier.getFactoryName());
+            throw new IllegalStateException("Possible error in code: cannot find annotations of existing factory "
+                    + moduleIdentifier.getFactoryName());
         }
         // supplied serviceInterfaceName must exist in this collection
         if (!serviceInterfaceQNames.contains(serviceReference.getServiceInterfaceQName())) {
-            LOG.error("Cannot find qName {} with factory name {}, found {}", serviceReference.getServiceInterfaceQName(), moduleIdentifier.getFactoryName(), serviceInterfaceQNames);
-            throw new IllegalArgumentException("Cannot find service interface " + serviceReference.getServiceInterfaceQName() + " within factory " + moduleIdentifier.getFactoryName());
+            LOG.error("Cannot find qName {} with factory name {}, found {}",
+                    serviceReference.getServiceInterfaceQName(), moduleIdentifier.getFactoryName(),
+                    serviceInterfaceQNames);
+            throw new IllegalArgumentException(
+                    "Cannot find service interface " + serviceReference.getServiceInterfaceQName() + " within factory "
+                            + moduleIdentifier.getFactoryName());
         }
-
 
         // create service reference object name, put to mBeans
         ObjectName result = getServiceON(serviceReference);
-        Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration> mxBeanEntry = mBeans.get(serviceReference);
+        Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration> mxBeanEntry =
+                managementBeans.get(serviceReference);
         if (mxBeanEntry == null) {
             // create dummy mx bean
             ServiceReferenceMXBeanImpl dummyMXBean = new ServiceReferenceMXBeanImpl(moduleON);
@@ -407,18 +448,20 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             } catch (final InstanceAlreadyExistsException e) {
                 throw new IllegalStateException("Possible error in code. Cannot register " + result, e);
             }
-            mBeans.put(serviceReference, new SimpleImmutableEntry<>(dummyMXBean, dummyMXBeanRegistration));
+            managementBeans.put(serviceReference, new SimpleImmutableEntry<>(dummyMXBean, dummyMXBeanRegistration));
         } else {
             // update
             mxBeanEntry.getKey().setCurrentImplementation(moduleON);
         }
         // save to refNames
         refNames.put(serviceReference, moduleIdentifier);
-        Map<ServiceInterfaceAnnotation, String /* service ref name */> refNamesToAnnotations =
-                modulesToServiceRef.computeIfAbsent(moduleIdentifier, k -> new HashMap<>());
+        Map<ServiceInterfaceAnnotation, String /* service ref name */> refNamesToAnnotations = modulesToServiceRef
+                .computeIfAbsent(moduleIdentifier, k -> new HashMap<>());
 
-        ServiceInterfaceAnnotation annotation = serviceQNamesToAnnotations.get(serviceReference.getServiceInterfaceQName());
-        Preconditions.checkNotNull(annotation, "Possible error in code, cannot find annotation for " + serviceReference);
+        ServiceInterfaceAnnotation annotation = serviceQNamesToAnnotations
+                .get(serviceReference.getServiceInterfaceQName());
+        Preconditions.checkNotNull(annotation,
+                "Possible error in code, cannot find annotation for " + serviceReference);
         refNamesToAnnotations.put(annotation, serviceReference.getRefName());
         return result;
     }
@@ -429,28 +472,33 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                     serviceReference.getServiceInterfaceQName(), serviceReference.getRefName());
         }
 
-        return ObjectNameUtil.createReadOnlyServiceON(serviceReference.getServiceInterfaceQName(), serviceReference.getRefName());
+        return ObjectNameUtil.createReadOnlyServiceON(serviceReference.getServiceInterfaceQName(),
+                serviceReference.getRefName());
     }
 
     @Override
-    public synchronized void removeServiceReference(final String serviceInterfaceName, final String refName) throws InstanceNotFoundException{
+    public synchronized void removeServiceReference(final String serviceInterfaceName, final String refName)
+            throws InstanceNotFoundException {
         ServiceReference serviceReference = new ServiceReference(serviceInterfaceName, refName);
         removeServiceReference(serviceReference);
     }
 
-    private synchronized void removeServiceReference(final ServiceReference serviceReference) throws InstanceNotFoundException {
+    private synchronized void removeServiceReference(final ServiceReference serviceReference)
+            throws InstanceNotFoundException {
         LOG.debug("Removing service reference {} from {}", serviceReference, this);
         assertWritable();
         // is the qName known?
         if (!allQNames.contains(serviceReference.getServiceInterfaceQName())) {
             LOG.error("Cannot find qname {} in {}", serviceReference.getServiceInterfaceQName(), allQNames);
-            throw new IllegalArgumentException("Cannot find service interface " + serviceReference.getServiceInterfaceQName());
+            throw new IllegalArgumentException(
+                    "Cannot find service interface " + serviceReference.getServiceInterfaceQName());
         }
         ModuleIdentifier removed = refNames.remove(serviceReference);
-        if (removed == null){
+        if (removed == null) {
             throw new InstanceNotFoundException("Cannot find " + serviceReference.getServiceInterfaceQName());
         }
-        Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration> entry = mBeans.remove(serviceReference);
+        Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration> entry =
+                managementBeans.remove(serviceReference);
         if (entry == null) {
             throw new IllegalStateException("Possible code error: cannot remove from mBeans: " + serviceReference);
         }
@@ -460,7 +508,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     @Override
     public synchronized void removeAllServiceReferences() {
         assertWritable();
-        for (ServiceReference serviceReference: mBeans.keySet()) {
+        for (ServiceReference serviceReference : managementBeans.keySet()) {
             try {
                 removeServiceReference(serviceReference);
             } catch (final InstanceNotFoundException e) {
@@ -470,7 +518,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     }
 
     @Override
-    public synchronized boolean removeServiceReferences(final ObjectName moduleObjectName) throws InstanceNotFoundException {
+    public synchronized boolean removeServiceReferences(final ObjectName moduleObjectName)
+            throws InstanceNotFoundException {
         lookupRegistry.checkConfigBeanExists(moduleObjectName);
         String factoryName = ObjectNameUtil.getFactoryName(moduleObjectName);
         // check that service interface name exist
@@ -478,22 +527,25 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         return removeServiceReferences(moduleObjectName, serviceInterfaceQNames);
     }
 
-
-    private boolean removeServiceReferences(final ObjectName moduleObjectName, final Set<String> qNames) throws InstanceNotFoundException {
+    private boolean removeServiceReferences(final ObjectName moduleObjectName, final Set<String> names)
+            throws InstanceNotFoundException {
         ObjectNameUtil.checkType(moduleObjectName, ObjectNameUtil.TYPE_MODULE);
         assertWritable();
-        Set<ServiceReference> serviceReferencesLinkingTo = findServiceReferencesLinkingTo(moduleObjectName, qNames);
+        Set<ServiceReference> serviceReferencesLinkingTo = findServiceReferencesLinkingTo(moduleObjectName, names);
         for (ServiceReference sr : serviceReferencesLinkingTo) {
             removeServiceReference(sr);
         }
         return !serviceReferencesLinkingTo.isEmpty();
     }
 
-    private Set<ServiceReference> findServiceReferencesLinkingTo(final ObjectName moduleObjectName, final Set<String> serviceInterfaceQNames) {
+    private Set<ServiceReference> findServiceReferencesLinkingTo(final ObjectName moduleObjectName,
+            final Set<String> serviceInterfaceQNames) {
         String factoryName = ObjectNameUtil.getFactoryName(moduleObjectName);
         if (serviceInterfaceQNames == null) {
-            LOG.warn("Possible error in code: cannot find factoryName {} in {}, object name {}", factoryName, factoryNamesToQNames, moduleObjectName);
-            throw new IllegalStateException("Possible error in code: cannot find annotations of existing factory " + factoryName);
+            LOG.warn("Possible error in code: cannot find factoryName {} in {}, object name {}", factoryName,
+                    factoryNamesToQNames, moduleObjectName);
+            throw new IllegalStateException(
+                    "Possible error in code: cannot find annotations of existing factory " + factoryName);
         }
         String instanceName = ObjectNameUtil.getInstanceName(moduleObjectName);
         ModuleIdentifier moduleIdentifier = new ModuleIdentifier(factoryName, instanceName);
@@ -508,11 +560,8 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
     @Override
     public String toString() {
-        return "ServiceReferenceRegistryImpl{" +
-                "lookupRegistry=" + lookupRegistry +
-                "refNames=" + refNames +
-                ", factoryNamesToQNames=" + factoryNamesToQNames +
-                '}';
+        return "ServiceReferenceRegistryImpl{" + "lookupRegistry=" + lookupRegistry + "refNames=" + refNames
+                + ", factoryNamesToQNames=" + factoryNamesToQNames + '}';
     }
 
     @Override

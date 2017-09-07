@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,8 +26,7 @@ public class BundleContextBackedModuleFactoriesResolver implements ModuleFactori
     private static final Logger LOG = LoggerFactory.getLogger(BundleContextBackedModuleFactoriesResolver.class);
     private final BundleContext bundleContext;
 
-    public BundleContextBackedModuleFactoriesResolver(
-            final BundleContext bundleContext) {
+    public BundleContextBackedModuleFactoriesResolver(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
@@ -47,13 +46,13 @@ public class BundleContextBackedModuleFactoriesResolver implements ModuleFactori
             // implement the classes under which it was registered or the
             // ServiceFactory threw an exception.
             if (factory == null) {
-                throw new NullPointerException("ServiceReference of class" + serviceReference.getClass() + "not found.");
+                throw new NullPointerException(
+                        "ServiceReference of class" + serviceReference.getClass() + "not found.");
             }
 
             String moduleName = factory.getImplementationName();
             if (moduleName == null || moduleName.isEmpty()) {
-                throw new IllegalStateException(
-                        "Invalid implementation name for " + factory);
+                throw new IllegalStateException("Invalid implementation name for " + factory);
             }
             if (serviceReference.getBundle() == null || serviceReference.getBundle().getBundleContext() == null) {
                 throw new NullPointerException("Bundle context of " + factory + " ModuleFactory not found.");
@@ -63,14 +62,14 @@ public class BundleContextBackedModuleFactoriesResolver implements ModuleFactori
             Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
             if (conflicting != null) {
                 String error = String.format(
-                    "Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
-                    moduleName, conflicting.getKey(), factory);
+                        "Module name is not unique. Found two conflicting factories with same name '%s': '%s' '%s'",
+                        moduleName, conflicting.getKey(), factory);
                 LOG.error(error);
                 throw new IllegalArgumentException(error);
             }
 
-            result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,
-                    serviceReference.getBundle().getBundleContext()));
+            result.put(moduleName,
+                    new AbstractMap.SimpleImmutableEntry<>(factory, serviceReference.getBundle().getBundleContext()));
         }
         return result;
     }

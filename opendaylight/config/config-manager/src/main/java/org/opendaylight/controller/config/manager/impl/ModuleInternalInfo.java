@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,8 +21,7 @@ import org.osgi.framework.BundleContext;
 /**
  * Provides metadata about Module from controller to registry.
  */
-public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
-                Identifiable<ModuleIdentifier>{
+public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>, Identifiable<ModuleIdentifier> {
 
     private final ModuleIdentifier name;
     // this registrator is passed to runtime bean registrator and config
@@ -41,16 +40,14 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     private final ModuleFactory moduleFactory;
     private final BundleContext bundleContext;
 
-    public ModuleInternalInfo(final ModuleIdentifier name,
-            @Nullable final DynamicReadableWrapper readableModule,
+    public ModuleInternalInfo(final ModuleIdentifier name, @Nullable final DynamicReadableWrapper readableModule,
             final OsgiRegistration osgiRegistration,
             @Nullable final RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
-            final ModuleJMXRegistrator moduleJMXRegistrator, final int orderingIdx,
-            final boolean isDefaultBean, final ModuleFactory moduleFactory, final BundleContext bundleContext) {
+            final ModuleJMXRegistrator moduleJMXRegistrator, final int orderingIdx, final boolean isDefaultBean,
+            final ModuleFactory moduleFactory, final BundleContext bundleContext) {
 
         if (osgiRegistration == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'osgiRegistration' is missing");
+            throw new IllegalArgumentException("Parameter 'osgiRegistration' is missing");
         }
         this.readableModule = readableModule;
         this.osgiRegistration = osgiRegistration;
@@ -72,8 +69,9 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     }
 
     /**
+     * Tells if a running instance exists in the system.
      *
-     * @return iif an running instance exists in the system.
+     * @return is there any running instance in the system.
      */
     public boolean hasReadableModule() {
         return readableModule != null;
@@ -94,22 +92,20 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
 
     /**
      * Get index representing dependency ordering within a transaction.
+     *
+     * @return index
      */
     public int getOrderingIdx() {
         return orderingIdx;
     }
 
-    /**
-     * Compare using orderingIdx
-     */
     @Override
-    public int compareTo(final ModuleInternalInfo o) {
-        return Integer.compare(orderingIdx, o.orderingIdx);
+    public int compareTo(final ModuleInternalInfo moduleInternalInfo) {
+        return Integer.compare(orderingIdx, moduleInternalInfo.orderingIdx);
     }
 
     public DestroyedModule toDestroyedModule() {
-        return new DestroyedModule(getIdentifier(),
-                getReadableModule().getInstance(), getModuleJMXRegistrator(),
+        return new DestroyedModule(getIdentifier(), getReadableModule().getInstance(), getModuleJMXRegistrator(),
                 getOsgiRegistration(), getOrderingIdx(), runtimeBeanRegistrator);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,10 +14,11 @@ import org.opendaylight.controller.config.api.ConfigRegistry;
  */
 public interface ConfigRegistryImplMXBean extends ConfigRegistry {
     /**
-     * @return version of last committed transaction that is now used as base
+     * Get the version of last committed transaction that is now used as base
      *         version. Transactions can only be committed if their parent
      *         version matches this value, that means, transaction must be
      *         started after last one has been committed.
+     * @return version
      */
     long getVersion();
 

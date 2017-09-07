@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,7 +26,7 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
 
     private static Set<Class<? extends AbstractServiceInterface>> ifc = ImmutableSet.of(
             (Class<? extends AbstractServiceInterface>) TestingScheduledThreadPoolServiceInterface.class,
-                    TestingThreadPoolServiceInterface.class);
+            TestingThreadPoolServiceInterface.class);
 
     @Override
     public boolean isModuleImplementingServiceInterface(
@@ -40,33 +40,32 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Module createModule(final String instanceName,
-            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
-        return new TestingScheduledThreadPoolModule(new ModuleIdentifier(NAME,
-                instanceName), null, null);
+    public Module createModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final BundleContext bundleContext) {
+        return new TestingScheduledThreadPoolModule(new ModuleIdentifier(NAME, instanceName), null, null);
     }
 
     @Override
-    public Module createModule(final String instanceName,
-            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext bundleContext)
-            throws Exception {
+    public Module createModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final DynamicMBeanWithInstance old, final BundleContext bundleContext) throws Exception {
         TestingScheduledThreadPoolImpl oldInstance;
         try {
             oldInstance = (TestingScheduledThreadPoolImpl) old.getInstance();
-        } catch (final ClassCastException e) {// happens after OSGi update
+        } catch (final ClassCastException e) {
+            // happens after OSGi update
             oldInstance = null;
         }
 
         TestingScheduledThreadPoolModule configBean = new TestingScheduledThreadPoolModule(
-                new ModuleIdentifier(NAME, instanceName), old.getInstance(),
-                oldInstance);
+                new ModuleIdentifier(NAME, instanceName), old.getInstance(), oldInstance);
         // copy attributes
         configBean.setRecreate((Boolean) old.getAttribute("Recreate"));
         return configBean;
     }
 
     @Override
-    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory,
+            final BundleContext bundleContext) {
         return new HashSet<>();
     }
 
@@ -74,6 +73,4 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
     public Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces() {
         return ifc;
     }
-
-
 }

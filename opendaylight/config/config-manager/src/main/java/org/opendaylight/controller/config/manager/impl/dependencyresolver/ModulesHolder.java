@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -40,41 +40,41 @@ class ModulesHolder implements AutoCloseable {
         this.transactionIdentifier = transactionIdentifier;
     }
 
-
     public CommitInfo toCommitInfo() {
         List<DestroyedModule> orderedDestroyedFromPreviousTransactions = new ArrayList<>(
                 unorderedDestroyedFromPreviousTransactions.size());
         for (ModuleInternalTransactionalInfo toBeDestroyed : unorderedDestroyedFromPreviousTransactions) {
-            orderedDestroyedFromPreviousTransactions.add(toBeDestroyed
-                    .toDestroyedModule());
+            orderedDestroyedFromPreviousTransactions.add(toBeDestroyed.toDestroyedModule());
         }
         Collections.sort(orderedDestroyedFromPreviousTransactions);
-        return new CommitInfo(orderedDestroyedFromPreviousTransactions,
-                commitMap);
+        return new CommitInfo(orderedDestroyedFromPreviousTransactions, commitMap);
     }
 
-    private ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(
-            final ModuleIdentifier moduleIdentifier,
+    private ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(final ModuleIdentifier moduleIdentifier,
             final JmxAttribute jmxAttributeForReporting) {
-        ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = commitMap
-                .get(moduleIdentifier);
-        JmxAttributeValidationException.checkNotNull(
-                moduleInternalTransactionalInfo, "Module " + moduleIdentifier
-                        + "" + " not found in transaction " + transactionIdentifier,
+        ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = commitMap.get(moduleIdentifier);
+        JmxAttributeValidationException.checkNotNull(moduleInternalTransactionalInfo,
+                "Module " + moduleIdentifier + "" + " not found in transaction " + transactionIdentifier,
                 jmxAttributeForReporting);
         return moduleInternalTransactionalInfo;
     }
 
-    public Module findModule(final ModuleIdentifier moduleIdentifier,
-            final JmxAttribute jmxAttributeForReporting) {
-        return findModuleInternalTransactionalInfo(moduleIdentifier,
-                jmxAttributeForReporting).getProxiedModule();
+    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(
+            final ModuleIdentifier moduleIdentifier) {
+        ModuleInternalTransactionalInfo found = commitMap.get(moduleIdentifier);
+        if (found == null) {
+            throw new IllegalStateException("Not found:" + moduleIdentifier);
+        }
+        return found;
+    }
+
+    public Module findModule(final ModuleIdentifier moduleIdentifier, final JmxAttribute jmxAttributeForReporting) {
+        return findModuleInternalTransactionalInfo(moduleIdentifier, jmxAttributeForReporting).getProxiedModule();
     }
 
     public ModuleFactory findModuleFactory(final ModuleIdentifier moduleIdentifier,
             final JmxAttribute jmxAttributeForReporting) {
-        return findModuleInternalTransactionalInfo(moduleIdentifier,
-                jmxAttributeForReporting).getModuleFactory();
+        return findModuleInternalTransactionalInfo(moduleIdentifier, jmxAttributeForReporting).getModuleFactory();
     }
 
     public Map<ModuleIdentifier, Module> getAllModules() {
@@ -86,14 +86,11 @@ class ModulesHolder implements AutoCloseable {
         return result;
     }
 
-    public void put(
-            final ModuleInternalTransactionalInfo moduleInternalTransactionalInfo) {
-        commitMap.put(moduleInternalTransactionalInfo.getIdentifier(),
-                moduleInternalTransactionalInfo);
+    public void put(final ModuleInternalTransactionalInfo moduleInternalTransactionalInfo) {
+        commitMap.put(moduleInternalTransactionalInfo.getIdentifier(), moduleInternalTransactionalInfo);
     }
 
-    public ModuleInternalTransactionalInfo destroyModule(
-            final ModuleIdentifier moduleIdentifier) {
+    public ModuleInternalTransactionalInfo destroyModule(final ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo found = commitMap.remove(moduleIdentifier);
         if (found == null) {
             throw new IllegalStateException("Not found:" + moduleIdentifier);
@@ -104,24 +101,14 @@ class ModulesHolder implements AutoCloseable {
         return found;
     }
 
-    public void assertNotExists(final ModuleIdentifier moduleIdentifier)
-            throws InstanceAlreadyExistsException {
+    public void assertNotExists(final ModuleIdentifier moduleIdentifier) throws InstanceAlreadyExistsException {
         if (commitMap.containsKey(moduleIdentifier)) {
-            throw new InstanceAlreadyExistsException(
-                    "There is an instance registered with name " + moduleIdentifier);
+            throw new InstanceAlreadyExistsException("There is an instance registered with name " + moduleIdentifier);
         }
     }
 
-    public Collection<ModuleInternalTransactionalInfo> getAllInfos(){
+    public Collection<ModuleInternalTransactionalInfo> getAllInfos() {
         return commitMap.values();
-    }
-
-    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(final ModuleIdentifier moduleIdentifier) {
-        ModuleInternalTransactionalInfo found = commitMap.get(moduleIdentifier);
-        if (found == null) {
-            throw new IllegalStateException("Not found:" + moduleIdentifier);
-        }
-        return found;
     }
 
     @Override

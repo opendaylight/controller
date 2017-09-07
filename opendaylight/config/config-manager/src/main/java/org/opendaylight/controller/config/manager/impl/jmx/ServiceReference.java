@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,15 +25,15 @@ public class ServiceReference {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object object) {
+        if (this == object) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (object == null || getClass() != object.getClass()) {
             return false;
         }
 
-        ServiceReference that = (ServiceReference) o;
+        ServiceReference that = (ServiceReference) object;
 
         if (!refName.equals(that.refName)) {
             return false;
@@ -54,9 +54,7 @@ public class ServiceReference {
 
     @Override
     public String toString() {
-        return "ServiceReference{" +
-                "serviceInterfaceName='" + serviceInterfaceName + '\'' +
-                ", refName='" + refName + '\'' +
-                '}';
+        return "ServiceReference{" + "serviceInterfaceName='" + serviceInterfaceName + '\'' + ", refName='" + refName
+                + '\'' + '}';
     }
 }

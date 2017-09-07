@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,10 +38,8 @@ class AttributeHolder {
         PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(List.class);
     }
 
-    public AttributeHolder(final String name, final Object object, final String returnType,
-                           final boolean writable,
-                           @Nullable final RequireInterface requireInterfaceAnnotation,
-                           final String description) {
+    AttributeHolder(final String name, final Object object, final String returnType, final boolean writable,
+            @Nullable final RequireInterface requireInterfaceAnnotation, final String description) {
         if (name == null) {
             throw new NullPointerException();
         }
@@ -57,13 +55,14 @@ class AttributeHolder {
     }
 
     public MBeanAttributeInfo toMBeanAttributeInfo() {
-        return new MBeanAttributeInfo(name, attributeType,
-                description, true, true, false);
+        return new MBeanAttributeInfo(name, attributeType, description, true, true, false);
     }
 
     /**
+     * Anotation.
+     *
      * @return annotation if setter sets ObjectName or ObjectName[], and is
-     * annotated. Return null otherwise.
+     *         annotated. Return null otherwise.
      */
     RequireInterface getRequireInterfaceOrNull() {
         return requireInterfaceAnnotation;
@@ -93,34 +92,37 @@ class AttributeHolder {
      * Find @Description annotations in method class and all its exported
      * interfaces.
      *
-     * @param setter
-     * @param jmxInterfaces
+     * @param setter setter method
+     * @param jmxInterfaces JMX interfaces
      * @return empty string if no annotation is found, or list of descriptions
-     * separated by newline
+     *         separated by newline
      */
     static String findDescription(final Method setter, final Set<Class<?>> jmxInterfaces) {
-        List<Description> descriptions = AnnotationsHelper
-                .findMethodAnnotationInSuperClassesAndIfcs(setter, Description.class, jmxInterfaces);
+        List<Description> descriptions = AnnotationsHelper.findMethodAnnotationInSuperClassesAndIfcs(setter,
+                Description.class, jmxInterfaces);
         return AnnotationsHelper.aggregateDescriptions(descriptions);
     }
 
     /**
-     * Find @RequireInterface annotation by searching method class and all
-     * exported interfaces.
+     * Find @RequireInterface annotation by searching method class and all exported
+     * interfaces.
      *
-     * @param setter
-     * @param inspectedInterfaces
+     * @param setter setter method
+     * @param inspectedInterfaces interfaces
      * @return null if no annotation is found, otherwise return the annotation
-     * @throws IllegalStateException    if more than one value is specified by found annotations
-     * @throws IllegalArgumentException if set of exported interfaces contains non interface type
+     * @throws IllegalStateException
+     *             if more than one value is specified by found annotations
+     * @throws IllegalArgumentException
+     *             if set of exported interfaces contains non interface type
      */
     static RequireInterface findRequireInterfaceAnnotation(final Method setter,
-                                                           final Set<Class<?>> inspectedInterfaces) {
+            final Set<Class<?>> inspectedInterfaces) {
 
-        // only allow setX(ObjectName y) or setX(ObjectName[] y) or setX(List<ObjectName> y) to continue
+        // only allow setX(ObjectName y) or setX(ObjectName[] y) or
+        // setX(List<ObjectName> y) to continue
 
-        if (setter.getParameterTypes().length > 1 ||
-                !PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0])) {
+        if (setter.getParameterTypes().length > 1
+                || !PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0])) {
             return null;
         }
 
@@ -135,10 +137,9 @@ class AttributeHolder {
         if (foundValues.isEmpty()) {
             return null;
         } else if (foundValues.size() > 1) {
-            throw new IllegalStateException("Error finding @RequireInterface. "
-                    + "More than one value specified as required interface "
-                    + foundValues + " of " + setter + " of "
-                    + setter.getDeclaringClass());
+            throw new IllegalStateException(
+                    "Error finding @RequireInterface. " + "More than one value specified as required interface "
+                            + foundValues + " of " + setter + " of " + setter.getDeclaringClass());
         } else {
             return foundRequireInterfaces.get(0);
         }

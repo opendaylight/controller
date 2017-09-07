@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,14 +19,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+
 import java.util.Dictionary;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
@@ -50,12 +49,8 @@ public class ModuleFactoryBundleTrackerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(final InvocationOnMock invocation) throws Throwable {
-                return getClass().getClassLoader().loadClass((String) invocation.getArguments()[0]);
-            }
-        }).when(bundle).loadClass(anyString());
+        doAnswer(invocation -> getClass().getClassLoader().loadClass((String) invocation.getArguments()[0]))
+                .when(bundle).loadClass(anyString());
         doReturn("mockBundle").when(bundle).toString();
         doReturn(context).when(bundle).getBundleContext();
         doReturn(reg).when(context).registerService(anyString(), anyObject(), any(Dictionary.class));
@@ -68,6 +63,7 @@ public class ModuleFactoryBundleTrackerTest {
     }
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testRegisterFactoryInstantiateEx() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory(WrongConstructorTestingFactory.class.getName(), bundle);
@@ -82,6 +78,7 @@ public class ModuleFactoryBundleTrackerTest {
     }
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testRegisterFactoryInstantiateExAccess() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory(NoAccessConstructorTestingFactory.class.getName(), bundle);
@@ -96,6 +93,7 @@ public class ModuleFactoryBundleTrackerTest {
     }
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testRegisterFactoryNotExtending() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory(NotExtendingTestingFactory.class.getName(), bundle);
@@ -108,6 +106,7 @@ public class ModuleFactoryBundleTrackerTest {
     }
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testRegisterFactoryNotExisting() throws Exception {
         try {
             ModuleFactoryBundleTracker.registerFactory("Unknown class", bundle);
@@ -133,6 +132,7 @@ public class ModuleFactoryBundleTrackerTest {
     }
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testAddingBundleError() throws Exception {
         final ModuleFactoryBundleTracker tracker = new ModuleFactoryBundleTracker(blankTxTracker);
         doReturn(getClass().getResource("/module-factories/module-factory-fail")).when(bundle).getEntry(anyString());
@@ -151,7 +151,8 @@ public class ModuleFactoryBundleTrackerTest {
         }
     }
 
-    static class NotExtendingTestingFactory {}
+    static class NotExtendingTestingFactory {
+    }
 
     static class NoAccessConstructorTestingFactory extends TestingFactory {
         private NoAccessConstructorTestingFactory() {
@@ -172,17 +173,20 @@ public class ModuleFactoryBundleTrackerTest {
         }
 
         @Override
-        public Module createModule(final String instanceName, final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
+        public Module createModule(final String instanceName, final DependencyResolver dependencyResolver,
+                final BundleContext bundleContext) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Module createModule(final String instanceName, final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext bundleContext) throws Exception {
+        public Module createModule(final String instanceName, final DependencyResolver dependencyResolver,
+                final DynamicMBeanWithInstance old, final BundleContext bundleContext) throws Exception {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean isModuleImplementingServiceInterface(final Class<? extends AbstractServiceInterface> serviceInterface) {
+        public boolean isModuleImplementingServiceInterface(
+                final Class<? extends AbstractServiceInterface> serviceInterface) {
             throw new UnsupportedOperationException();
         }
 
@@ -192,7 +196,8 @@ public class ModuleFactoryBundleTrackerTest {
         }
 
         @Override
-        public Set<? extends Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
+        public Set<? extends Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory,
+                final BundleContext bundleContext) {
             throw new UnsupportedOperationException();
         }
     }
