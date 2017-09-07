@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,24 +18,21 @@ import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.runtimebeans.TestingScheduledRuntimeBean;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingThreadPoolIfc;
 
-public class TestingScheduledThreadPoolImpl implements TestingThreadPoolIfc,
-        TestingScheduledThreadPoolIfc, Closeable {
+public class TestingScheduledThreadPoolImpl implements TestingThreadPoolIfc, TestingScheduledThreadPoolIfc, Closeable {
     private static volatile int numberOfCloseMethodCalls = 0;
     private final ScheduledThreadPoolExecutor executor;
     private final RootRuntimeBeanRegistrator runtimeBeanRegistrator;
 
-    public static final List<ScheduledThreadPoolExecutor> allExecutors = Lists
-            .newLinkedList();
+    public static final List<ScheduledThreadPoolExecutor> ALLEXECUTORS = Lists.newLinkedList();
 
-    public TestingScheduledThreadPoolImpl(
-            final RootRuntimeBeanRegistrator runtimeBeanRegistrator, final int corePoolSize) {
+    public TestingScheduledThreadPoolImpl(final RootRuntimeBeanRegistrator runtimeBeanRegistrator,
+            final int corePoolSize) {
         this.runtimeBeanRegistrator = runtimeBeanRegistrator;
         executor = new ScheduledThreadPoolExecutor(corePoolSize);
-        allExecutors.add(executor);
+        ALLEXECUTORS.add(executor);
         HierarchicalRuntimeBeanRegistration hierarchicalRuntimeBeanRegistration = runtimeBeanRegistrator
                 .registerRoot(new TestingScheduledRuntimeBean());
-        hierarchicalRuntimeBeanRegistration.register("a", "b",
-                new TestingScheduledRuntimeBean());
+        hierarchicalRuntimeBeanRegistration.register("a", "b", new TestingScheduledRuntimeBean());
     }
 
     @Override
@@ -61,15 +58,14 @@ public class TestingScheduledThreadPoolImpl implements TestingThreadPoolIfc,
     }
 
     public static void cleanUp() {
-        for (ScheduledThreadPoolExecutor executor : allExecutors) {
+        for (ScheduledThreadPoolExecutor executor : ALLEXECUTORS) {
             executor.shutdown();
         }
-        allExecutors.clear();
+        ALLEXECUTORS.clear();
         numberOfCloseMethodCalls = 0;
     }
 
     public static int getNumberOfCloseMethodCalls() {
         return numberOfCloseMethodCalls;
     }
-
 }

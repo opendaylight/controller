@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -79,6 +79,7 @@ public class BundleContextBackedModuleFactoriesResolverTest {
     }
 
     @Test
+    @SuppressWarnings("IllegalCatch")
     public void testDuplicateFactories() throws Exception {
         doReturn(f1).when(bundleContext).getService(s2);
         try {

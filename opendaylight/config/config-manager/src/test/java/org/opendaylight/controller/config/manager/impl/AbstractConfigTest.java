@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -57,7 +57,8 @@ import org.osgi.framework.ServiceRegistration;
  * needs to subclass this test.
  * {@link org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl} is
  * registered to platform MBean Server using
- * {@link #initConfigTransactionManagerImpl(org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver)}
+ * {@link #initConfigTransactionManagerImpl(org.opendaylight.controller
+ * .config.manager.impl.factoriesresolver.ModuleFactoriesResolver)}
  * typically during setting up the each test.
  */
 public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServerTest {
@@ -78,10 +79,13 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     }
 
     // Default handler for OSGi service registration
-    protected static class RecordingBundleContextServiceRegistrationHandler implements BundleContextServiceRegistrationHandler {
+    protected static class RecordingBundleContextServiceRegistrationHandler
+            implements BundleContextServiceRegistrationHandler {
         private final List<RegistrationHolder> registrations = new LinkedList<>();
+
         @Override
-        public void handleServiceRegistration(final Class<?> clazz, final Object serviceInstance, final Dictionary<String, ?> props) {
+        public void handleServiceRegistration(final Class<?> clazz, final Object serviceInstance,
+                final Dictionary<String, ?> props) {
             this.registrations.add(new RegistrationHolder(clazz, serviceInstance, props));
         }
 
@@ -102,7 +106,8 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
         }
     }
 
-    protected BundleContextServiceRegistrationHandler getBundleContextServiceRegistrationHandler(final Class<?> serviceType) {
+    protected BundleContextServiceRegistrationHandler getBundleContextServiceRegistrationHandler(
+            final Class<?> serviceType) {
         return this.currentBundleContextServiceRegistrationHandler;
     }
 
@@ -116,17 +121,19 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
 
         this.baseJmxRegistrator = new BaseJMXRegistrator(platformMBeanServer);
 
-        this.configRegistry = new ConfigRegistryImpl(resolver, platformMBeanServer, this.baseJmxRegistrator, new BindingContextProvider() {
-            @Override
-            public synchronized void update(final ClassLoadingStrategy classLoadingStrategy, final SchemaContextProvider ctxProvider) {
-                // NOOP
-            }
+        this.configRegistry = new ConfigRegistryImpl(resolver, platformMBeanServer, this.baseJmxRegistrator,
+                new BindingContextProvider() {
+                    @Override
+                    public synchronized void update(final ClassLoadingStrategy classLoadingStrategy,
+                            final SchemaContextProvider ctxProvider) {
+                        // NOOP
+                    }
 
-            @Override
-            public synchronized BindingRuntimeContext getBindingContext() {
-                return getBindingRuntimeContext();
-            }
-        });
+                    @Override
+                    public synchronized BindingRuntimeContext getBindingContext() {
+                        return getBindingRuntimeContext();
+                    }
+                });
         this.notifyingConfigRegistry = new JMXNotifierConfigRegistry(this.configRegistry, platformMBeanServer);
 
         try {
@@ -142,8 +149,10 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     private void initBundleContext() {
         doNothing().when(this.mockedServiceRegistration).unregister();
         final RegisterServiceAnswer answer = new RegisterServiceAnswer();
-        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<String>any(), any(), Matchers.<Dictionary<String, ?>>any());
-        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<Class<?>>any(), any(), Matchers.<Dictionary<String, ?>>any());
+        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<String>any(), any(),
+                Matchers.<Dictionary<String, ?>>any());
+        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<Class<?>>any(), any(),
+                Matchers.<Dictionary<String, ?>>any());
     }
 
     @After
@@ -156,12 +165,11 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     }
 
     /**
-     * Can be called in @After of tests if some other cleanup is needed that
-     * would be discarded by closing config beans in this method
+     * Can be called in @After of tests if some other cleanup is needed that would
+     * be discarded by closing config beans in this method.
      */
     protected void destroyAllConfigBeans() throws Exception {
-        final ConfigTransactionJMXClient transaction = this.configRegistryClient
-                .createTransaction();
+        final ConfigTransactionJMXClient transaction = this.configRegistryClient.createTransaction();
         Set<ObjectName> all = transaction.lookupConfigBeans();
         // workaround for getting same Module more times
         while (all.size() > 0) {
@@ -175,23 +183,23 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
             final int expectedRecreatedInstances, final int expectedReusedInstances) {
         assertEquals("New instances mismatch in " + status, expectedNewInstances, status.getNewInstances().size());
         assertEquals("Recreated instances mismatch in " + status, expectedRecreatedInstances,
-            status.getRecreatedInstances().size());
+                status.getRecreatedInstances().size());
         assertEquals("Reused instances mismatch in " + status, expectedReusedInstances,
-            status.getReusedInstances().size());
+                status.getReusedInstances().size());
     }
 
-
-    protected void assertBeanCount(final int i, final String configMXBeanName) {
-        assertEquals(i, this.configRegistry.lookupConfigBeans(configMXBeanName).size());
+    protected void assertBeanCount(final int index, final String configMXBeanName) {
+        assertEquals(index, this.configRegistry.lookupConfigBeans(configMXBeanName).size());
     }
 
     /**
+     * Empty constructor.
      *
      * @param configBeanClass
-     *            Empty constructor class of config bean to be instantiated
-     *            whenever create
-     * @param implementationName
-     * @return
+     *            Empty constructor class of config bean to be instantiated whenever
+     *            create
+     * @param implementationName name
+     * @return factory
      */
     protected ClassBasedModuleFactory createClassBasedCBF(final Class<? extends Module> configBeanClass,
             final String implementationName) {
@@ -216,8 +224,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
             final Object serviceTypeRaw = args[0];
             final Object serviceInstance = args[1];
             @SuppressWarnings("unchecked")
-            final
-            Dictionary<String, ?> props = (Dictionary<String, ?>) args[2];
+            final Dictionary<String, ?> props = (Dictionary<String, ?>) args[2];
 
             if (serviceTypeRaw instanceof Class) {
                 final Class<?> serviceType = (Class<?>) serviceTypeRaw;
@@ -229,23 +236,27 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
             } else if (serviceTypeRaw instanceof String) {
                 invokeServiceHandler(serviceInstance, (String) serviceTypeRaw, props);
             } else {
-                throw new IllegalStateException("Not handling service registration of type, Unknown type" +  serviceTypeRaw);
+                throw new IllegalStateException(
+                        "Not handling service registration of type, Unknown type" + serviceTypeRaw);
             }
 
             return AbstractConfigTest.this.mockedServiceRegistration;
         }
 
-        public void invokeServiceHandler(final Object serviceInstance, final String className, final Dictionary<String, ?> props) {
+        public void invokeServiceHandler(final Object serviceInstance, final String className,
+                final Dictionary<String, ?> props) {
             try {
                 final Class<?> serviceType = Class.forName(className);
                 invokeServiceHandler(serviceInstance, serviceType, props);
             } catch (final ClassNotFoundException e) {
-                throw new IllegalStateException("Not handling service registration of type " +  className, e);
+                throw new IllegalStateException("Not handling service registration of type " + className, e);
             }
         }
 
-        private void invokeServiceHandler(final Object serviceInstance, final Class<?> serviceType, final Dictionary<String, ?> props) {
-            final BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandler(serviceType);
+        private void invokeServiceHandler(final Object serviceInstance, final Class<?> serviceType,
+                final Dictionary<String, ?> props) {
+            final BundleContextServiceRegistrationHandler serviceRegistrationHandler =
+                    getBundleContextServiceRegistrationHandler(serviceType);
 
             if (serviceRegistrationHandler != null) {
                 serviceRegistrationHandler.handleServiceRegistration(serviceType, serviceInstance, props);
@@ -254,32 +265,34 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     }
 
     /**
-     * Expand inner exception wrapped by JMX
+     * Expand inner exception wrapped by JMX.
      *
-     * @param innerObject jmx proxy which will be wrapped and returned
+     * @param innerObject
+     *            jmx proxy which will be wrapped and returned
      */
     protected <T> T rethrowCause(final T innerObject) {
         @SuppressWarnings("unchecked")
-        final T proxy = (T)Proxy.newProxyInstance(innerObject.getClass().getClassLoader(),
+        final T proxy = (T) Proxy.newProxyInstance(innerObject.getClass().getClassLoader(),
                 innerObject.getClass().getInterfaces(), (proxy1, method, args) -> {
+                try {
+                    return method.invoke(innerObject, args);
+                } catch (final InvocationTargetException e) {
                     try {
-                        return method.invoke(innerObject, args);
-                    } catch (final InvocationTargetException e) {
-                        try {
-                            throw e.getTargetException();
-                        } catch (final RuntimeMBeanException e2) {
-                            throw e2.getTargetException();
-                        }
+                        throw e.getTargetException();
+                    } catch (final RuntimeMBeanException e2) {
+                        throw e2.getTargetException();
                     }
                 }
-        );
+            });
         return proxy;
     }
 
     /**
-     * removes contents of the directory
-     * @param dir to be cleaned
-     * @throws IOException
+     * removes contents of the directory.
+     *
+     * @param dir
+     *            to be cleaned
+     * @throws IOException IO exception
      */
     protected void cleanDirectory(final File dir) throws IOException {
         if (!dir.isDirectory()) {

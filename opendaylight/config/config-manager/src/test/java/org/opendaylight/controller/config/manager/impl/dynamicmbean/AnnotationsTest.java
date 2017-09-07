@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -36,8 +36,7 @@ public class AnnotationsTest {
     private static void assertRequireInterfaceAnnotationHasCorrectValue(final Class<?> clazz, final String methodName,
             final Set<Class<?>> inspectedInterfaces, final Class<? extends AbstractServiceInterface> expectedValue) {
         Method setter = findMethod(clazz, methodName);
-        RequireInterface found = AttributeHolder
-                .findRequireInterfaceAnnotation(setter, inspectedInterfaces);
+        RequireInterface found = AttributeHolder.findRequireInterfaceAnnotation(setter, inspectedInterfaces);
         if (expectedValue == null) {
             assertNull(found);
         } else {
@@ -50,7 +49,7 @@ public class AnnotationsTest {
         Method setter;
         try {
             setter = clazz.getMethod(methodName, new Class[] { ObjectName.class });
-        } catch (final Exception e) {
+        } catch (final NoSuchMethodException e) {
             throw Throwables.propagate(e);
         }
         return setter;
@@ -59,8 +58,7 @@ public class AnnotationsTest {
     private static void assertDescription(final Class<?> clazz, final String methodName,
             final Set<Class<?>> exportedInterfaces, final String expectedValue) {
         Method setter = findMethod(clazz, methodName);
-        String found = AttributeHolder.findDescription(setter,
-                exportedInterfaces);
+        String found = AttributeHolder.findDescription(setter, exportedInterfaces);
         if (expectedValue == null) {
             assertNull(found);
         } else {
@@ -88,10 +86,10 @@ public class AnnotationsTest {
     static final String SIMPLE = "simple";
     static final String SUBCLASS2 = "subclass2";
 
-    @ServiceInterfaceAnnotation(value = SIMPLE, osgiRegistrationType = Executor.class,
-        namespace = "ns", revision = "rev", localName = SIMPLE)
+    @ServiceInterfaceAnnotation(value = SIMPLE,
+            osgiRegistrationType = Executor.class,
+            namespace = "ns", revision = "rev", localName = SIMPLE)
     interface SimpleSI extends AbstractServiceInterface {
-
     }
 
     @Description("class")
@@ -109,12 +107,10 @@ public class AnnotationsTest {
 
     @Test
     public void testFindAnnotation_directly() throws Exception {
-        assertRequireInterfaceAnnotationHasCorrectValue(SuperClass.class,
-                setSomethingString, emptySetOfInterfaces(), SimpleSI.class);
-        assertDescription(SuperClass.class, setSomethingString,
-                emptySetOfInterfaces(), "descr");
-        assertDescriptionOnClass(SuperClass.class, emptySetOfInterfaces(),
-                "class");
+        assertRequireInterfaceAnnotationHasCorrectValue(SuperClass.class, setSomethingString, emptySetOfInterfaces(),
+                SimpleSI.class);
+        assertDescription(SuperClass.class, setSomethingString, emptySetOfInterfaces(), "descr");
+        assertDescriptionOnClass(SuperClass.class, emptySetOfInterfaces(), "class");
     }
 
     public static class SubClassWithout extends SuperClass {
@@ -123,12 +119,10 @@ public class AnnotationsTest {
 
     @Test
     public void testFindAnnotation_subclassWithout() throws Exception {
-        assertRequireInterfaceAnnotationHasCorrectValue(SubClassWithout.class,
-                setSomethingString, emptySetOfInterfaces(), SimpleSI.class);
-        assertDescription(SubClassWithout.class, setSomethingString,
-                emptySetOfInterfaces(), "descr");
-        assertDescriptionOnClass(SuperClass.class, emptySetOfInterfaces(),
-                "class");
+        assertRequireInterfaceAnnotationHasCorrectValue(SubClassWithout.class, setSomethingString,
+                emptySetOfInterfaces(), SimpleSI.class);
+        assertDescription(SubClassWithout.class, setSomethingString, emptySetOfInterfaces(), "descr");
+        assertDescriptionOnClass(SuperClass.class, emptySetOfInterfaces(), "class");
     }
 
     public static class SubClassWithEmptyMethod extends SuperClass {
@@ -140,23 +134,19 @@ public class AnnotationsTest {
 
     @Test
     public void testOverridingWithoutAnnotation() throws Exception {
-        assertRequireInterfaceAnnotationHasCorrectValue(
-                SubClassWithEmptyMethod.class, setSomethingString,
+        assertRequireInterfaceAnnotationHasCorrectValue(SubClassWithEmptyMethod.class, setSomethingString,
                 emptySetOfInterfaces(), SimpleSI.class);
-        assertDescription(SubClassWithEmptyMethod.class, setSomethingString,
-                emptySetOfInterfaces(), "descr");
-        assertDescriptionOnClass(SubClassWithEmptyMethod.class,
-                emptySetOfInterfaces(), "class");
+        assertDescription(SubClassWithEmptyMethod.class, setSomethingString, emptySetOfInterfaces(), "descr");
+        assertDescriptionOnClass(SubClassWithEmptyMethod.class, emptySetOfInterfaces(), "class");
     }
 
     interface SubSI extends SimpleSI {
 
     }
 
-    @ServiceInterfaceAnnotation(value = SUBCLASS2, osgiRegistrationType = ExecutorService.class,
-        namespace = "ns", revision = "rev", localName = SUBCLASS2)
+    @ServiceInterfaceAnnotation(value = SUBCLASS2,
+            osgiRegistrationType = ExecutorService.class, namespace = "ns", revision = "rev", localName = SUBCLASS2)
     interface SubSI2 extends SubSI {
-
     }
 
     public static class SubClassWithAnnotation extends SuperClass {
@@ -173,11 +163,11 @@ public class AnnotationsTest {
         assertDescription(SubClassWithAnnotation.class, setSomethingString, emptySetOfInterfaces(), "descr2\ndescr");
         try {
             assertRequireInterfaceAnnotationHasCorrectValue(SubClassWithAnnotation.class, setSomethingString,
-                emptySetOfInterfaces(), SubSI2.class);
+                    emptySetOfInterfaces(), SubSI2.class);
             fail();
         } catch (final IllegalStateException e) {
             assertTrue(e.getMessage(),
-                e.getMessage().startsWith("Error finding @RequireInterface. More than one value specified"));
+                    e.getMessage().startsWith("Error finding @RequireInterface. More than one value specified"));
         }
     }
 
@@ -190,39 +180,31 @@ public class AnnotationsTest {
     }
 
     @Test
-    public void testFindAnnotation_SubClassWithoutMethodWithInterface()
-            throws Exception {
-        assertRequireInterfaceAnnotationHasCorrectValue(
-                SubClassWithoutMethodWithInterface.class, setSomethingString,
+    public void testFindAnnotation_SubClassWithoutMethodWithInterface() throws Exception {
+        assertRequireInterfaceAnnotationHasCorrectValue(SubClassWithoutMethodWithInterface.class, setSomethingString,
                 emptySetOfInterfaces(), SimpleSI.class);
-        assertDescription(SubClassWithoutMethodWithInterface.class,
-                setSomethingString, emptySetOfInterfaces(), "descr");
+        assertDescription(SubClassWithoutMethodWithInterface.class, setSomethingString, emptySetOfInterfaces(),
+                "descr");
     }
 
-    static abstract class SuperClassWithInterface implements HasSomeMethod {
+    abstract static class SuperClassWithInterface implements HasSomeMethod {
         @Override
         @RequireInterface(SubSI2.class)
         @Description("descr")
         public void setSomething(final ObjectName objectName) {
-
         }
     }
 
     @Description("class")
     public static class SubClassOfSuperClassWithInterface extends SuperClassWithInterface {
-
     }
 
     @Test
-    public void testFindAnnotation_SubClassOfSuperClassWithInterface()
-            throws Exception {
-        assertRequireInterfaceAnnotationHasCorrectValue(
-                SubClassOfSuperClassWithInterface.class, setSomethingString,
+    public void testFindAnnotation_SubClassOfSuperClassWithInterface() throws Exception {
+        assertRequireInterfaceAnnotationHasCorrectValue(SubClassOfSuperClassWithInterface.class, setSomethingString,
                 emptySetOfInterfaces(), SubSI2.class);
-        assertDescription(SubClassOfSuperClassWithInterface.class,
-                setSomethingString, emptySetOfInterfaces(), "descr");
-        assertDescriptionOnClass(SubClassOfSuperClassWithInterface.class,
-                emptySetOfInterfaces(), "class");
+        assertDescription(SubClassOfSuperClassWithInterface.class, setSomethingString, emptySetOfInterfaces(), "descr");
+        assertDescriptionOnClass(SubClassOfSuperClassWithInterface.class, emptySetOfInterfaces(), "class");
     }
 
     @Test
@@ -245,8 +227,7 @@ public class AnnotationsTest {
 
     @Test
     public void testHasSomeMethodWithAnnotationsImpl() {
-        HashSet<Class<?>> exportedInterfaces = Sets
-                .<Class<?>> newHashSet(HasSomeMethodWithAnnotations.class);
+        HashSet<Class<?>> exportedInterfaces = Sets.<Class<?>>newHashSet(HasSomeMethodWithAnnotations.class);
         assertRequireInterfaceAnnotationHasCorrectValue(HasSomeMethodWithAnnotationsImpl.class, setSomethingString,
                 exportedInterfaces, SubSI2.class);
 

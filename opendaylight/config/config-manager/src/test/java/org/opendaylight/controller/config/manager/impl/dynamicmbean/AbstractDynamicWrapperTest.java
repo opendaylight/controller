@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -30,35 +30,31 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory;
 import org.opendaylight.controller.config.spi.Module;
 
-public abstract class AbstractDynamicWrapperTest extends
-        AbstractLockedPlatformMBeanServerTest {
-    protected final MBeanServer platformMBeanServer = ManagementFactory
-            .getPlatformMBeanServer();
-    private static final String moduleName = "impl";
-    protected final ObjectName threadPoolDynamicWrapperON = ObjectNameUtil
-            .createReadOnlyModuleON(moduleName, "fixed1");
+public abstract class AbstractDynamicWrapperTest extends AbstractLockedPlatformMBeanServerTest {
+    protected final MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
+    private static final String MODULE_NAME = "impl";
+    protected final ObjectName threadPoolDynamicWrapperON =
+            ObjectNameUtil.createReadOnlyModuleON(MODULE_NAME, "fixed1");
     protected static final String THREAD_COUNT = "ThreadCount";
     protected static final String TRIGGER_NEW_INSTANCE_CREATION = "TriggerNewInstanceCreation";
 
     protected final int threadCount = 5;
     protected TestingFixedThreadPoolModule threadPoolConfigBean;
-    private static final ModuleIdentifier moduleIdentifier = new ModuleIdentifier(
-            moduleName, "clientname2");
+    private static final ModuleIdentifier MODULE_IDENTIFIER =
+            new ModuleIdentifier(MODULE_NAME, "clientname2");
 
     protected MBeanServer internalServer;
 
     @Before
     public void registerToJMX() throws Exception {
         internalServer = MBeanServerFactory.createMBeanServer();
-        TestingFixedThreadPoolModuleFactory testingFixedThreadPoolConfigBeanFactory = new TestingFixedThreadPoolModuleFactory();
-        threadPoolConfigBean = testingFixedThreadPoolConfigBeanFactory
-                .createModule("", null, null);
+        TestingFixedThreadPoolModuleFactory testingFixedThreadPoolConfigBeanFactory =
+                new TestingFixedThreadPoolModuleFactory();
+        threadPoolConfigBean = testingFixedThreadPoolConfigBeanFactory.createModule("", null, null);
 
         threadPoolConfigBean.setThreadCount(threadCount);
-        AbstractDynamicWrapper dynamicWrapper = getDynamicWrapper(
-                threadPoolConfigBean, moduleIdentifier);
-        platformMBeanServer.registerMBean(dynamicWrapper,
-                threadPoolDynamicWrapperON);
+        AbstractDynamicWrapper dynamicWrapper = getDynamicWrapper(threadPoolConfigBean, MODULE_IDENTIFIER);
+        platformMBeanServer.registerMBean(dynamicWrapper, threadPoolDynamicWrapperON);
     }
 
     @After
@@ -68,42 +64,34 @@ public abstract class AbstractDynamicWrapperTest extends
         MBeanServerFactory.releaseMBeanServer(internalServer);
     }
 
-    protected abstract AbstractDynamicWrapper getDynamicWrapper(Module module,
-            ModuleIdentifier moduleIdentifier);
+    protected abstract AbstractDynamicWrapper getDynamicWrapper(Module module, ModuleIdentifier moduleIdentifier);
 
     @Test
     public void testReadAttributes() throws Exception {
-
-        DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer,
-                threadPoolDynamicWrapperON, DynamicMBean.class);
+        DynamicMBean proxy = JMX.newMBeanProxy(platformMBeanServer, threadPoolDynamicWrapperON, DynamicMBean.class);
 
         assertEquals(threadCount, proxy.getAttribute(THREAD_COUNT));
 
         assertEquals(threadPoolConfigBean.isTriggerNewInstanceCreation(),
                 proxy.getAttribute(TRIGGER_NEW_INSTANCE_CREATION));
 
-        AttributeList attributes = proxy.getAttributes(new String[] {
-            THREAD_COUNT, TRIGGER_NEW_INSTANCE_CREATION });
+        AttributeList attributes = proxy.getAttributes(new String[] { THREAD_COUNT, TRIGGER_NEW_INSTANCE_CREATION });
         assertEquals(2, attributes.size());
         Attribute threadCountAttr = (Attribute) attributes.get(0);
         assertEquals(THREAD_COUNT, threadCountAttr.getName());
         assertEquals(threadCount, threadCountAttr.getValue());
         Attribute boolTestAttr = (Attribute) attributes.get(1);
         assertEquals(TRIGGER_NEW_INSTANCE_CREATION, boolTestAttr.getName());
-        assertEquals(threadPoolConfigBean.isTriggerNewInstanceCreation(),
-                boolTestAttr.getValue());
+        assertEquals(threadPoolConfigBean.isTriggerNewInstanceCreation(), boolTestAttr.getValue());
 
-        MBeanInfo mBeanInfo = proxy.getMBeanInfo();
-        assertEquals(2, mBeanInfo.getAttributes().length);
-
+        MBeanInfo beanInfo = proxy.getMBeanInfo();
+        assertEquals(2, beanInfo.getAttributes().length);
     }
 
     @Test
     public void testGettersWithMXBeanProxy() {
-        TestingFixedThreadPoolConfigMXBean proxy = JMX.newMXBeanProxy(
-                platformMBeanServer, threadPoolDynamicWrapperON,
+        TestingFixedThreadPoolConfigMXBean proxy = JMX.newMXBeanProxy(platformMBeanServer, threadPoolDynamicWrapperON,
                 TestingFixedThreadPoolConfigMXBean.class);
         assertEquals(threadCount, proxy.getThreadCount());
     }
-
 }

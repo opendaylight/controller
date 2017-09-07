@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -62,13 +62,14 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext,
                     bindingContextProvider, context);
 
-            final ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
+            final ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(
+                    moduleInfoRegistryWrapper);
 
             // start config registry
             final BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver =
                     new BundleContextBackedModuleFactoriesResolver(context);
             this.configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver,
-                this.configMBeanServer, bindingContextProvider);
+                    this.configMBeanServer, bindingContextProvider);
 
             // track bundles containing factories
             final BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
@@ -78,7 +79,7 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
 
             BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker =
                     new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE,
-                            moduleInfoBundleTracker);
+                    moduleInfoBundleTracker);
             ExtensibleBundleTracker<?> moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
                     moduleFactoryTracker);
             moduleInfoBundleTracker.open(moduleInfoResolvedBundleTracker);
@@ -87,18 +88,18 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             moduleFactoryBundleTracker.open();
 
             // Wrap config registry with JMX notification publishing adapter
-            final JMXNotifierConfigRegistry notifyingConfigRegistry =
-                    new JMXNotifierConfigRegistry(this.configRegistry, this.configMBeanServer);
+            final JMXNotifierConfigRegistry notifyingConfigRegistry = new JMXNotifierConfigRegistry(this.configRegistry,
+                    this.configMBeanServer);
 
             // register config registry to OSGi
             final AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext,
-                ClassLoadingStrategy.class);
+                    ClassLoadingStrategy.class);
             final AutoCloseable configRegReg = OsgiRegistrationUtil.registerService(context, notifyingConfigRegistry,
-                ConfigRegistry.class);
+                    ConfigRegistry.class);
 
             // register config registry to jmx
-            final ConfigRegistryJMXRegistrator configRegistryJMXRegistrator =
-                    new ConfigRegistryJMXRegistrator(this.configMBeanServer);
+            final ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(
+                    this.configMBeanServer);
             try {
                 configRegistryJMXRegistrator.registerToJMXNoNotifications(this.configRegistry);
             } catch (final InstanceAlreadyExistsException e) {
@@ -123,23 +124,18 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
             serviceTracker.open();
 
             final AutoCloseable configMgrReg = OsgiRegistrationUtil.registerService(context, this,
-                ConfigSystemService.class);
+                    ConfigSystemService.class);
 
             final List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
-                    OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
-                    configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
+                    OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker, configRegReg,
+                    configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
                     OsgiRegistrationUtil.wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry,
                     configMgrReg);
             this.autoCloseable = OsgiRegistrationUtil.aggregate(list);
 
             context.addBundleListener(this);
-        } catch(final Exception e) {
+        } catch (final IllegalStateException e) {
             LOG.error("Error starting config manager", e);
-        } catch(final Error e) {
-            // Log JVM Error and re-throw. The OSGi container may silently fail the bundle and not always log
-            // the exception. This has been seen on initial feature install.
-            LOG.error("Error starting config manager", e);
-            throw e;
         }
 
         LOG.info("Config manager start complete");
@@ -154,20 +150,21 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
 
     @Override
     public void bundleChanged(final BundleEvent event) {
-        if(this.configRegistry == null) {
+        if (this.configRegistry == null) {
             return;
         }
 
-        // If the system bundle (id 0) is stopping close the ConfigRegistry so it destroys all modules. On
+        // If the system bundle (id 0) is stopping close the ConfigRegistry so it
+        // destroys all modules. On
         // shutdown the system bundle is stopped first.
-        if(event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
+        if (event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
             this.configRegistry.close();
         }
     }
 
     @Override
     public void closeAllConfigModules() {
-        if(this.configRegistry != null) {
+        if (this.configRegistry != null) {
             this.configRegistry.close();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.binding.annotations.ModuleQName;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.osgi.framework.BundleContext;
 
-public class ModuleQNameUtil {
+public final class ModuleQNameUtil {
 
     private ModuleQNameUtil() {
     }
@@ -29,7 +29,7 @@ public class ModuleQNameUtil {
                 throw new IllegalArgumentException("Unexpected interface " + inspected);
             }
             ModuleQName annotation = null;
-            while(annotation == null && inspected != null) {
+            while (annotation == null && inspected != null) {
                 annotation = inspected.getAnnotation(ModuleQName.class);
                 inspected = inspected.getSuperclass();
             }
@@ -39,5 +39,4 @@ public class ModuleQNameUtil {
         }
         return result;
     }
-
 }
