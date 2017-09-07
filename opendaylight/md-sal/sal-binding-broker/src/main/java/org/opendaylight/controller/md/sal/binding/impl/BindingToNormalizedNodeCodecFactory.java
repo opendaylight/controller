@@ -10,10 +10,10 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
@@ -34,7 +34,7 @@ public class BindingToNormalizedNodeCodecFactory {
      */
     @Deprecated
     public static BindingToNormalizedNodeCodec getOrCreateInstance(final ClassLoadingStrategy classLoadingStrategy,
-                            final SchemaService schemaService) {
+                            final DOMSchemaService schemaService) {
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
                 StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
         final BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(
@@ -63,7 +63,7 @@ public class BindingToNormalizedNodeCodecFactory {
      * @return the ListenerRegistration
      */
     public static ListenerRegistration<SchemaContextListener> registerInstance(final BindingToNormalizedNodeCodec instance,
-            final SchemaService schemaService) {
+            final DOMSchemaService schemaService) {
         return schemaService.registerSchemaContextListener(instance);
     }
 
