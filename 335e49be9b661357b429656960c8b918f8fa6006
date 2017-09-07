@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_9a241961",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/karaf/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-07T07:55:27Z",
+      "side": 1,
+      "message": "Is this a TODO for the end-user, or a TODO for us?",
+      "revId": "335e49be9b661357b429656960c8b918f8fa6006",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_da21714e",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-07T07:55:27Z",
+      "side": 1,
+      "message": "Why disable this?",
+      "revId": "335e49be9b661357b429656960c8b918f8fa6006",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
