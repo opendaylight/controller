@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
  * line should contain an implementation of ModuleFactory interface. Creates new
  * instance with default constructor and registers it into OSGi service
  * registry. There is no need for listening for implementing removedBundle as
- * the services are unregistered automatically.
- * Code based on http://www.toedter.com/blog/?p=236
+ * the services are unregistered automatically. Code based on
+ * http://www.toedter.com/blog/?p=236
  */
 public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boolean> {
     private final BlankTransactionServiceTracker blankTransactionServiceTracker;
@@ -40,8 +40,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
     @Override
     public Boolean addingBundle(final Bundle bundle, final BundleEvent event) {
         URL resource = bundle.getEntry("META-INF/services/" + ModuleFactory.class.getName());
-        LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}",
-                bundle, resource, event);
+        LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}", bundle, resource, event);
         if (resource != null) {
             try {
                 for (String factoryClassName : Resources.readLines(resource, StandardCharsets.UTF_8)) {
@@ -65,7 +64,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
 
     @Override
     public void removedBundle(final Bundle bundle, final BundleEvent event, final Boolean hasFactory) {
-        if(hasFactory) {
+        if (hasFactory) {
             // workaround for service tracker not getting removed service event
             blankTransactionServiceTracker.blankTransactionSync();
         }
@@ -79,31 +78,24 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
             Class<?> clazz = bundle.loadClass(factoryClassName);
             if (ModuleFactory.class.isAssignableFrom(clazz)) {
                 try {
-                    LOG.debug("Registering {} in bundle {}",
-                            clazz.getName(), bundle);
-                    return bundle.getBundleContext().registerService(
-                            ModuleFactory.class.getName(), clazz.newInstance(),
+                    LOG.debug("Registering {} in bundle {}", clazz.getName(), bundle);
+                    return bundle.getBundleContext().registerService(ModuleFactory.class.getName(), clazz.newInstance(),
                             null);
                 } catch (final InstantiationException e) {
-                    errorMessage = logMessage(
-                            "Could not instantiate {} in bundle {}, reason {}",
-                            factoryClassName, bundle, e);
+                    errorMessage = logMessage("Could not instantiate {} in bundle {}, reason {}", factoryClassName,
+                            bundle, e);
                     ex = e;
                 } catch (final IllegalAccessException e) {
-                    errorMessage = logMessage(
-                            "Illegal access during instantiation of class {} in bundle {}, reason {}",
+                    errorMessage = logMessage("Illegal access during instantiation of class {} in bundle {}, reason {}",
                             factoryClassName, bundle, e);
                     ex = e;
                 }
             } else {
-                errorMessage = logMessage(
-                        "Class {} does not implement {} in bundle {}", clazz,
-                        ModuleFactory.class, bundle);
+                errorMessage = logMessage("Class {} does not implement {} in bundle {}", clazz, ModuleFactory.class,
+                        bundle);
             }
         } catch (final ClassNotFoundException e) {
-            errorMessage = logMessage(
-                    "Could not find class {} in bundle {}, reason {}",
-                    factoryClassName, bundle, e);
+            errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", factoryClassName, bundle, e);
             ex = e;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,7 +14,11 @@ import com.google.common.base.Strings;
 import java.io.Closeable;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.JmxAttribute;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
@@ -30,10 +34,8 @@ import org.slf4j.LoggerFactory;
  * Represents service that has dependency to thread pool.
  */
 @NotThreadSafe
-public class TestingParallelAPSPModule implements Module,
-        TestingParallelAPSPConfigMXBean {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(TestingParallelAPSPModule.class);
+public class TestingParallelAPSPModule implements Module, TestingParallelAPSPConfigMXBean {
+    private static final Logger LOG = LoggerFactory.getLogger(TestingParallelAPSPModule.class);
 
     private final DependencyResolver dependencyResolver;
     private final AutoCloseable oldCloseable;
@@ -43,10 +45,8 @@ public class TestingParallelAPSPModule implements Module,
     private TestingParallelAPSPImpl instance;
     private String someParam;
 
-    public TestingParallelAPSPModule(final ModuleIdentifier identifier,
-            final DependencyResolver dependencyResolver,
-            @Nullable final AutoCloseable oldCloseable,
-            @Nullable final TestingParallelAPSPImpl oldInstance) {
+    public TestingParallelAPSPModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver,
+            @Nullable final AutoCloseable oldCloseable, @Nullable final TestingParallelAPSPImpl oldInstance) {
         this.identifier = identifier;
         this.dependencyResolver = dependencyResolver;
         this.oldCloseable = oldCloseable;
@@ -76,50 +76,50 @@ public class TestingParallelAPSPModule implements Module,
 
     @Override
     public Integer getMaxNumberOfThreads() {
-        if (instance == null)
+        if (instance == null) {
             return null;
+        }
         return instance.getMaxNumberOfThreads();
     }
 
     // this would be generated:
-    private final JmxAttribute threadPoolONJMXAttribute = new JmxAttribute("threadPoolON");
+    private final JmxAttribute threadPoolOnJMXAttribute = new JmxAttribute("threadPoolON");
 
     @Override
     public void validate() {
         checkNotNull(threadPoolON, "Parameter 'threadPool' must be set");
-        dependencyResolver.validateDependency(
-                TestingThreadPoolServiceInterface.class, threadPoolON,
-                threadPoolONJMXAttribute);
+        dependencyResolver.validateDependency(TestingThreadPoolServiceInterface.class, threadPoolON,
+                threadPoolOnJMXAttribute);
 
-        checkState(Strings.isNullOrEmpty(someParam) == false,
-                "Parameter 'SomeParam' is blank");
+        checkState(Strings.isNullOrEmpty(someParam) == false, "Parameter 'SomeParam' is blank");
         // check that calling resolveInstance fails
         try {
-            dependencyResolver.resolveInstance(TestingThreadPoolIfc.class,
-                    threadPoolON, threadPoolONJMXAttribute);
+            dependencyResolver.resolveInstance(TestingThreadPoolIfc.class, threadPoolON, threadPoolOnJMXAttribute);
             throw new RuntimeException("fail");
         } catch (final IllegalStateException e) {
-            checkState("Commit was not triggered".equals(e.getMessage()),
-                    e.getMessage());
+            checkState("Commit was not triggered".equals(e.getMessage()), e.getMessage());
         }
 
         // test retrieving dependent module's attribute
         int threadCount;
         try {
-            threadCount = (Integer)dependencyResolver.getAttribute(threadPoolON, "ThreadCount");
-        } catch (final Exception e) {
+            threadCount = (Integer) dependencyResolver.getAttribute(threadPoolON, "ThreadCount");
+        } catch (final ReflectionException | InstanceNotFoundException | AttributeNotFoundException
+                | MBeanException e) {
             throw new IllegalStateException(e);
         }
         checkState(threadCount > 0);
-        TestingThreadPoolConfigMXBean proxy = dependencyResolver.newMXBeanProxy(threadPoolON, TestingThreadPoolConfigMXBean.class);
+        TestingThreadPoolConfigMXBean proxy = dependencyResolver.newMXBeanProxy(threadPoolON,
+                TestingThreadPoolConfigMXBean.class);
         checkState(threadCount == proxy.getThreadCount());
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public Closeable getInstance() {
         if (instance == null) {
-            TestingThreadPoolIfc threadPoolInstance = dependencyResolver
-                    .resolveInstance(TestingThreadPoolIfc.class, threadPoolON, threadPoolONJMXAttribute);
+            TestingThreadPoolIfc threadPoolInstance = dependencyResolver.resolveInstance(TestingThreadPoolIfc.class,
+                    threadPoolON, threadPoolOnJMXAttribute);
 
             if (oldInstance != null) {
                 // changing thread pool is not supported
@@ -139,8 +139,7 @@ public class TestingParallelAPSPModule implements Module,
                         throw new RuntimeException(e);
                     }
                 }
-                instance = new TestingParallelAPSPImpl(threadPoolInstance,
-                        someParam);
+                instance = new TestingParallelAPSPImpl(threadPoolInstance, someParam);
             }
         }
         return instance;
@@ -155,6 +154,4 @@ public class TestingParallelAPSPModule implements Module,
     public ModuleIdentifier getIdentifier() {
         return identifier;
     }
-
-
 }

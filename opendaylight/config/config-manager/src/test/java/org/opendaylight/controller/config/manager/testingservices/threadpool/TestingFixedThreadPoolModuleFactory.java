@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,10 +21,11 @@ import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
-public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThreadPoolModuleFactory implements ModuleFactory {
+public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThreadPoolModuleFactory
+        implements ModuleFactory {
     public static final String NAME = "fixed";
 
-    private static final Set<Class<? extends AbstractServiceInterface>> ifc = ImmutableSet.of(
+    private static final Set<Class<? extends AbstractServiceInterface>> IFC = ImmutableSet.of(
             (Class<? extends AbstractServiceInterface>) ModifiableThreadPoolServiceInterface.class,
             TestingThreadPoolServiceInterface.class);
 
@@ -36,14 +37,12 @@ public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThr
     @Override
     public TestingFixedThreadPoolModule createModule(final String instanceName,
             final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
-        return new TestingFixedThreadPoolModule(new ModuleIdentifier(NAME,
-                instanceName), null, null);
+        return new TestingFixedThreadPoolModule(new ModuleIdentifier(NAME, instanceName), null, null);
     }
 
     @Override
-    public Module createModule(final String instanceName,
-            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext bundleContext)
-            throws Exception {
+    public Module createModule(final String instanceName, final DependencyResolver dependencyResolver,
+            final DynamicMBeanWithInstance old, final BundleContext bundleContext) throws Exception {
         int threadCount = (Integer) old.getAttribute("ThreadCount");
         // is the instance compatible?
         TestingFixedThreadPool oldInstance;
@@ -54,9 +53,8 @@ public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThr
             // old instance will be closed, new needs to be created
             oldInstance = null;
         }
-        TestingFixedThreadPoolModule result = new TestingFixedThreadPoolModule(
-                new ModuleIdentifier(NAME, instanceName), old.getInstance(),
-                oldInstance);
+        TestingFixedThreadPoolModule result = new TestingFixedThreadPoolModule(new ModuleIdentifier(NAME, instanceName),
+                old.getInstance(), oldInstance);
         result.setThreadCount(threadCount);
         return result;
     }
@@ -64,16 +62,17 @@ public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThr
     @Override
     public boolean isModuleImplementingServiceInterface(
             final Class<? extends AbstractServiceInterface> serviceInterface) {
-        return ifc.contains(serviceInterface);
+        return IFC.contains(serviceInterface);
     }
 
     @Override
-    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory,
+            final BundleContext bundleContext) {
         return new HashSet<>();
     }
 
     @Override
     public Set<Class<? extends AbstractServiceInterface>> getImplementedServiceIntefaces() {
-        return ifc;
+        return IFC;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -49,14 +49,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a JMX bean representing current transaction. It contains
- * transaction identifier, unique version and parent version for
- * optimistic locking.
+ * This is a JMX bean representing current transaction. It contains transaction
+ * identifier, unique version and parent version for optimistic locking.
  */
-class ConfigTransactionControllerImpl implements
-        ConfigTransactionControllerInternal,
-        ConfigTransactionControllerImplMXBean,
-        Identifiable<TransactionIdentifier> {
+public class ConfigTransactionControllerImpl implements ConfigTransactionControllerInternal,
+        ConfigTransactionControllerImplMXBean, Identifiable<TransactionIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigTransactionControllerImpl.class);
 
     private final ConfigTransactionLookupRegistry txLookupRegistry;
@@ -75,8 +72,7 @@ class ConfigTransactionControllerImpl implements
      * during validation.
      */
     @GuardedBy("this")
-    private final AtomicBoolean configBeanModificationDisabled = new AtomicBoolean(
-            false);
+    private final AtomicBoolean configBeanModificationDisabled = new AtomicBoolean(false);
     private final ReadOnlyAtomicBoolean readOnlyAtomicBoolean = new ReadOnlyAtomicBooleanImpl(
             configBeanModificationDisabled);
     private final MBeanServer configMBeanServer;
@@ -87,10 +83,10 @@ class ConfigTransactionControllerImpl implements
     private final SearchableServiceReferenceWritableRegistry writableSRRegistry;
 
     public ConfigTransactionControllerImpl(final ConfigTransactionLookupRegistry txLookupRegistry,
-                                           final long parentVersion, final BindingContextProvider bindingContextProvider, final long currentVersion,
-                                           final Map<String, Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
-                                           final MBeanServer transactionsMBeanServer, final MBeanServer configMBeanServer,
-                                           final boolean blankTransaction, final SearchableServiceReferenceWritableRegistry  writableSRRegistry) {
+            final long parentVersion, final BindingContextProvider bindingContextProvider, final long currentVersion,
+            final Map<String, Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
+            final MBeanServer transactionsMBeanServer, final MBeanServer configMBeanServer,
+            final boolean blankTransaction, final SearchableServiceReferenceWritableRegistry writableSRRegistry) {
         this.txLookupRegistry = txLookupRegistry;
         String transactionName = txLookupRegistry.getTransactionIdentifier().getName();
         this.controllerON = ObjectNameUtil.createTransactionControllerON(transactionName);
@@ -108,7 +104,8 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public void copyExistingModulesAndProcessFactoryDiff(final Collection<ModuleInternalInfo> existingModules, final List<ModuleFactory> lastListOfFactories) {
+    public void copyExistingModulesAndProcessFactoryDiff(final Collection<ModuleInternalInfo> existingModules,
+            final List<ModuleFactory> lastListOfFactories) {
         // copy old configuration to this server
         for (ModuleInternalInfo oldConfigInfo : existingModules) {
             try {
@@ -145,7 +142,8 @@ class ConfigTransactionControllerImpl implements
             Set<? extends Module> defaultModules = moduleFactory.getDefaultModules(dependencyResolverManager,
                     bundleContext);
             for (Module module : defaultModules) {
-                // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
+                // ensure default module to be registered to jmx even if its module factory does
+                // not use dependencyResolverFactory
                 DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
                 final ObjectName objectName;
                 try {
@@ -155,14 +153,16 @@ class ConfigTransactionControllerImpl implements
                 } catch (final InstanceAlreadyExistsException e) {
                     throw new IllegalStateException(e);
                 }
-
                 // register default module as every possible service
-                final Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(moduleFactory);
+                final Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = InterfacesHelper
+                        .getServiceInterfaceAnnotations(moduleFactory);
                 for (String qname : InterfacesHelper.getQNames(serviceInterfaceAnnotations)) {
                     try {
                         saveServiceReference(qname, module.getIdentifier().getInstanceName(), objectName);
                     } catch (final InstanceNotFoundException e) {
-                        throw new IllegalStateException("Unable to register default module instance " + module + " as a service of " + qname, e);
+                        throw new IllegalStateException(
+                                "Unable to register default module instance " + module + " as a service of " + qname,
+                                e);
                     }
                 }
             }
@@ -173,23 +173,26 @@ class ConfigTransactionControllerImpl implements
             List<ModuleIdentifier> modulesOfRemovedFactory = dependencyResolverManager.findAllByFactory(removedFactory);
             for (ModuleIdentifier name : modulesOfRemovedFactory) {
                 // remove service refs
-                final ModuleFactory moduleFactory = dependencyResolverManager.findModuleInternalTransactionalInfo(name).getModuleFactory();
-                final Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(moduleFactory);
+                final ModuleFactory moduleFactory = dependencyResolverManager.findModuleInternalTransactionalInfo(name)
+                        .getModuleFactory();
+                final Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = InterfacesHelper
+                        .getServiceInterfaceAnnotations(moduleFactory);
                 for (String qname : InterfacesHelper.getQNames(serviceInterfaceAnnotations)) {
                     try {
                         removeServiceReference(qname, name.getInstanceName());
                     } catch (final InstanceNotFoundException e) {
-                        throw new IllegalStateException("Unable to UNregister default module instance " + name + " as a service of " + qname, e);
+                        throw new IllegalStateException(
+                                "Unable to UNregister default module instance " + name + " as a service of " + qname,
+                                e);
                     }
                 }
-
                 // close module
                 destroyModule(name);
             }
         }
     }
 
-
+    @SuppressWarnings("IllegalCatch")
     private synchronized void copyExistingModule(final ModuleInternalInfo oldConfigBeanInfo)
             throws InstanceAlreadyExistsException {
 
@@ -211,16 +214,14 @@ class ConfigTransactionControllerImpl implements
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
         try {
 
-            module = moduleFactory.createModule(
-                    moduleIdentifier.getInstanceName(), dependencyResolver,
+            module = moduleFactory.createModule(moduleIdentifier.getInstanceName(), dependencyResolver,
                     oldConfigBeanInfo.getReadableModule(), bc);
         } catch (final Exception e) {
-            throw new IllegalStateException(String.format(
-                    "Error while copying old configuration from %s to %s",
+            throw new IllegalStateException(String.format("Error while copying old configuration from %s to %s",
                     oldConfigBeanInfo, moduleFactory), e);
         }
-        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo, dependencyResolver,
-                oldConfigBeanInfo.isDefaultBean(), bc);
+        putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, oldConfigBeanInfo,
+                dependencyResolver, oldConfigBeanInfo.isDefaultBean(), bc);
     }
 
     @Override
@@ -237,11 +238,10 @@ class ConfigTransactionControllerImpl implements
 
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
         BundleContext bundleContext = getModuleFactoryBundleContext(moduleFactory.getImplementationName());
-        Module module = moduleFactory.createModule(instanceName, dependencyResolver,
-                bundleContext);
+        Module module = moduleFactory.createModule(instanceName, dependencyResolver, bundleContext);
         boolean defaultBean = false;
-        return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
-                moduleFactory, null, dependencyResolver, defaultBean, bundleContext);
+        return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module, moduleFactory, null, dependencyResolver,
+                defaultBean, bundleContext);
     }
 
     @Override
@@ -252,43 +252,40 @@ class ConfigTransactionControllerImpl implements
         ObjectNameUtil.checkDomain(objectName);
         ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(objectName, ObjectNameUtil.TYPE_MODULE);
 
-        ModuleInternalTransactionalInfo txInfo = dependencyResolverManager.findModuleInternalTransactionalInfo(moduleIdentifier);
+        ModuleInternalTransactionalInfo txInfo = dependencyResolverManager
+                .findModuleInternalTransactionalInfo(moduleIdentifier);
         Module realModule = txInfo.getRealModule();
-        if(realModule instanceof AbstractModule) {
-            ((AbstractModule<?>)realModule).setCanReuseInstance(false);
+        if (realModule instanceof AbstractModule) {
+            ((AbstractModule<?>) realModule).setCanReuseInstance(false);
         }
     }
 
-    private synchronized ObjectName putConfigBeanToJMXAndInternalMaps(
-            final ModuleIdentifier moduleIdentifier, final Module module,
-            final ModuleFactory moduleFactory,
+    private synchronized ObjectName putConfigBeanToJMXAndInternalMaps(final ModuleIdentifier moduleIdentifier,
+            final Module module, final ModuleFactory moduleFactory,
             @Nullable final ModuleInternalInfo maybeOldConfigBeanInfo, final DependencyResolver dependencyResolver,
-            final boolean isDefaultBean, final BundleContext bundleContext)
-            throws InstanceAlreadyExistsException {
+            final boolean isDefaultBean, final BundleContext bundleContext) throws InstanceAlreadyExistsException {
 
         LOG.debug("Adding module {} to transaction {}", moduleIdentifier, this);
         if (!moduleIdentifier.equals(module.getIdentifier())) {
-            throw new IllegalStateException("Incorrect name reported by module. Expected "
-                    + moduleIdentifier + ", got " + module.getIdentifier());
+            throw new IllegalStateException("Incorrect name reported by module. Expected " + moduleIdentifier + ", got "
+                    + module.getIdentifier());
         }
         if (!dependencyResolver.getIdentifier().equals(moduleIdentifier)) {
             throw new IllegalStateException("Incorrect name reported by dependency resolver. Expected "
                     + moduleIdentifier + ", got " + dependencyResolver.getIdentifier());
         }
-        DynamicMBean writableDynamicWrapper = new DynamicWritableWrapper(
-                module, moduleIdentifier, getTransactionIdentifier().getName(),
-                readOnlyAtomicBoolean, transactionsMBeanServer,
+        DynamicMBean writableDynamicWrapper = new DynamicWritableWrapper(module, moduleIdentifier,
+                getTransactionIdentifier().getName(), readOnlyAtomicBoolean, transactionsMBeanServer,
                 configMBeanServer);
 
-        ObjectName writableON = ObjectNameUtil.createTransactionModuleON(
-                getTransactionIdentifier().getName(), moduleIdentifier);
+        ObjectName writableON = ObjectNameUtil.createTransactionModuleON(getTransactionIdentifier().getName(),
+                moduleIdentifier);
         // put wrapper to jmx
         TransactionModuleJMXRegistration transactionModuleJMXRegistration = getTxModuleJMXRegistrator()
                 .registerMBean(writableDynamicWrapper, writableON);
 
-        dependencyResolverManager.put(
-                moduleIdentifier, module, moduleFactory,
-                maybeOldConfigBeanInfo, transactionModuleJMXRegistration, isDefaultBean, bundleContext);
+        dependencyResolverManager.put(moduleIdentifier, module, moduleFactory, maybeOldConfigBeanInfo,
+                transactionModuleJMXRegistration, isDefaultBean, bundleContext);
         return writableON;
     }
 
@@ -296,27 +293,17 @@ class ConfigTransactionControllerImpl implements
     public synchronized void destroyModule(final ObjectName objectName) throws InstanceNotFoundException {
         checkTransactionName(objectName);
         ObjectNameUtil.checkDomain(objectName);
-        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(objectName,
-                ObjectNameUtil.TYPE_MODULE);
+        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(objectName, ObjectNameUtil.TYPE_MODULE);
         destroyModule(moduleIdentifier);
-    }
-
-    private void checkTransactionName(final ObjectName objectName) {
-        String foundTransactionName = ObjectNameUtil
-                .getTransactionName(objectName);
-        if (!getTransactionIdentifier().getName().equals(foundTransactionName)) {
-            throw new IllegalArgumentException("Wrong transaction name "
-                    + objectName);
-        }
     }
 
     private synchronized void destroyModule(final ModuleIdentifier moduleIdentifier) {
         LOG.debug("Destroying module {} in transaction {}", moduleIdentifier, this);
         transactionStatus.checkNotAborted();
 
-        ModuleInternalTransactionalInfo found = dependencyResolverManager.findModuleInternalTransactionalInfo(moduleIdentifier);
-        if (!blankTransaction &&
-                found.isDefaultBean()) {
+        ModuleInternalTransactionalInfo found = dependencyResolverManager
+                .findModuleInternalTransactionalInfo(moduleIdentifier);
+        if (!blankTransaction && found.isDefaultBean()) {
             LOG.warn("Warning: removing default bean. This will be forbidden in next version of config-subsystem");
         }
         // first remove refNames, it checks for objectname existence
@@ -332,6 +319,13 @@ class ConfigTransactionControllerImpl implements
         ModuleInternalTransactionalInfo removedTInfo = dependencyResolverManager.destroyModule(moduleIdentifier);
         // remove from jmx
         removedTInfo.getTransactionModuleJMXRegistration().close();
+    }
+
+    private void checkTransactionName(final ObjectName objectName) {
+        String foundTransactionName = ObjectNameUtil.getTransactionName(objectName);
+        if (!getTransactionIdentifier().getName().equals(foundTransactionName)) {
+            throw new IllegalArgumentException("Wrong transaction name " + objectName);
+        }
     }
 
     @Override
@@ -357,27 +351,24 @@ class ConfigTransactionControllerImpl implements
         }
     }
 
+    @SuppressWarnings("IllegalCatch")
     private void validateNoLocks() throws ValidationException {
         transactionStatus.checkNotAborted();
         LOG.trace("Validating transaction {}", getTransactionIdentifier());
         // call validate()
         List<ValidationException> collectedExceptions = new ArrayList<>();
-        for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager
-                .getAllModules().entrySet()) {
+        for (Entry<ModuleIdentifier, Module> entry : dependencyResolverManager.getAllModules().entrySet()) {
             ModuleIdentifier name = entry.getKey();
             Module module = entry.getValue();
             try {
                 module.validate();
             } catch (final Exception e) {
-                LOG.warn("Validation exception in {}", getTransactionName(),
-                        e);
-                collectedExceptions.add(ValidationException
-                        .createForSingleException(name, e));
+                LOG.warn("Validation exception in {}", getTransactionName(), e);
+                collectedExceptions.add(ValidationException.createForSingleException(name, e));
             }
         }
         if (!collectedExceptions.isEmpty()) {
-            throw ValidationException
-                    .createFromCollectedValidationExceptions(collectedExceptions);
+            throw ValidationException.createFromCollectedValidationExceptions(collectedExceptions);
         }
         LOG.trace("Validated transaction {}", getTransactionIdentifier());
     }
@@ -385,13 +376,12 @@ class ConfigTransactionControllerImpl implements
     /**
      * If this method passes validation, it will grab
      * {@link TransactionStatus#secondPhaseCommitStarted} lock. This lock will
-     * prevent calling @{link #validateBeforeCommitAndLockTransaction},
-     * effectively only allowing to call {@link #secondPhaseCommit} after
-     * successful return of this method.
+     * prevent calling @{link #validateBeforeCommitAndLockTransaction}, effectively
+     * only allowing to call {@link #secondPhaseCommit} after successful return of
+     * this method.
      */
     @Override
-    public synchronized CommitInfo validateBeforeCommitAndLockTransaction()
-            throws ValidationException {
+    public synchronized CommitInfo validateBeforeCommitAndLockTransaction() throws ValidationException {
         transactionStatus.checkNotAborted();
         transactionStatus.checkNotCommitStarted();
         configBeanModificationDisabled.set(true);
@@ -418,34 +408,28 @@ class ConfigTransactionControllerImpl implements
         transactionStatus.checkCommitStarted();
         if (!configBeanModificationDisabled.get()) {
             throw new IllegalStateException(
-                    "Internal error - validateBeforeCommitAndLockTransaction should be called "
-                            + "to obtain a lock");
+                    "Internal error - validateBeforeCommitAndLockTransaction should be called " + "to obtain a lock");
         }
 
         LOG.trace("Committing transaction {}", getTransactionIdentifier());
 
         Map<ModuleIdentifier, Module> allModules = dependencyResolverManager.getAllModules();
 
-        // call getInstance() on all Modules from top to bottom (from source to target of the dependency relation)
-        // The source of a dependency closes itself and calls getInstance recursively on the dependencies (in case of reconfiguration)
-        // This makes close() calls from top to bottom while createInstance() calls are performed bottom to top
-        List<ModuleIdentifier> sortedModuleIdentifiers = Lists.reverse(dependencyResolverManager.getSortedModuleIdentifiers());
+        // call getInstance() on all Modules from top to bottom (from source to target
+        // of the dependency relation)
+        // The source of a dependency closes itself and calls getInstance recursively on
+        // the dependencies (in case of reconfiguration)
+        // This makes close() calls from top to bottom while createInstance() calls are
+        // performed bottom to top
+        List<ModuleIdentifier> sortedModuleIdentifiers = Lists
+                .reverse(dependencyResolverManager.getSortedModuleIdentifiers());
         for (ModuleIdentifier moduleIdentifier : sortedModuleIdentifiers) {
             Module module = allModules.get(moduleIdentifier);
 
-            try {
-                LOG.debug("About to commit {} in transaction {}",
-                        moduleIdentifier, getTransactionIdentifier());
-                AutoCloseable instance = module.getInstance();
-                Preconditions.checkNotNull(instance, "Instance is null:%s in transaction %s", moduleIdentifier, getTransactionIdentifier());
-            } catch (Exception e) {
-                LOG.error("Commit failed on {} in transaction {}", moduleIdentifier,
-                        getTransactionIdentifier(), e);
-                internalAbort();
-                throw new IllegalStateException(
-                        String.format("Error - getInstance() failed for %s in transaction %s",
-                                moduleIdentifier, getTransactionIdentifier()), e);
-            }
+            LOG.debug("About to commit {} in transaction {}", moduleIdentifier, getTransactionIdentifier());
+            AutoCloseable instance = module.getInstance();
+            Preconditions.checkNotNull(instance, "Instance is null:%s in transaction %s", moduleIdentifier,
+                    getTransactionIdentifier());
         }
 
         LOG.trace("Committed configuration {}", getTransactionIdentifier());
@@ -503,6 +487,14 @@ class ConfigTransactionControllerImpl implements
      * {@inheritDoc}
      */
     @Override
+    public Set<ObjectName> lookupConfigBeans(final String moduleName, final String instanceName) {
+        return txLookupRegistry.lookupConfigBeans(moduleName, instanceName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
             throws InstanceNotFoundException {
         return txLookupRegistry.lookupConfigBean(moduleName, instanceName);
@@ -512,18 +504,9 @@ class ConfigTransactionControllerImpl implements
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupConfigBeans(final String moduleName, final String instanceName) {
-        return txLookupRegistry.lookupConfigBeans(moduleName, instanceName);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void checkConfigBeanExists(final ObjectName objectName) throws InstanceNotFoundException {
         txLookupRegistry.checkConfigBeanExists(objectName);
     }
-
 
     /**
      * {@inheritDoc}
@@ -537,8 +520,7 @@ class ConfigTransactionControllerImpl implements
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupRuntimeBeans(final String moduleName,
-                                              final String instanceName) {
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName, final String instanceName) {
         return txLookupRegistry.lookupRuntimeBeans(moduleName, instanceName);
     }
 
@@ -587,7 +569,8 @@ class ConfigTransactionControllerImpl implements
 
     @Override
     public BundleContext getModuleFactoryBundleContext(final String factoryName) {
-        Map.Entry<ModuleFactory, BundleContext> factoryBundleContextEntry = this.currentlyRegisteredFactories.get(factoryName);
+        Map.Entry<ModuleFactory, BundleContext> factoryBundleContextEntry = this.currentlyRegisteredFactories
+                .get(factoryName);
         if (factoryBundleContextEntry == null || factoryBundleContextEntry.getValue() == null) {
             throw new NullPointerException("Bundle context of " + factoryName + " ModuleFactory not found.");
         }
@@ -596,9 +579,9 @@ class ConfigTransactionControllerImpl implements
 
     // service reference functionality:
 
-
     @Override
-    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
+    public synchronized ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName,
+            final String refName) {
         return writableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
     }
 
@@ -608,12 +591,14 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
+    public synchronized Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(
+            final String serviceInterfaceQName) {
         return writableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
     }
 
     @Override
-    public synchronized Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
+    public synchronized Set<String> lookupServiceInterfaceNames(final ObjectName objectName)
+            throws InstanceNotFoundException {
         return writableSRRegistry.lookupServiceInterfaceNames(objectName);
     }
 
@@ -623,12 +608,14 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public synchronized ObjectName saveServiceReference(final String serviceInterfaceName, final String refName, final ObjectName moduleON) throws InstanceNotFoundException {
+    public synchronized ObjectName saveServiceReference(final String serviceInterfaceName, final String refName,
+            final ObjectName moduleON) throws InstanceNotFoundException {
         return writableSRRegistry.saveServiceReference(serviceInterfaceName, refName, moduleON);
     }
 
     @Override
-    public synchronized void removeServiceReference(final String serviceInterfaceName, final String refName) throws InstanceNotFoundException {
+    public synchronized void removeServiceReference(final String serviceInterfaceName, final String refName)
+            throws InstanceNotFoundException {
         writableSRRegistry.removeServiceReference(serviceInterfaceName, refName);
     }
 
@@ -643,7 +630,7 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public SearchableServiceReferenceWritableRegistry  getWritableRegistry() {
+    public SearchableServiceReferenceWritableRegistry getWritableRegistry() {
         return writableSRRegistry;
     }
 
@@ -663,7 +650,8 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName)
+            throws InstanceNotFoundException {
         return writableSRRegistry.getServiceReference(serviceInterfaceQName, refName);
     }
 }

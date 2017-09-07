@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,17 +31,17 @@ public class HierarchicalConfigMBeanFactoriesHolder {
     /**
      * Create instance.
      *
+     * @param factoriesMap map of factories
      * @throws IllegalArgumentException
      *             if unique constraint on module names is violated
      */
     public HierarchicalConfigMBeanFactoriesHolder(
             final Map<String, Map.Entry<ModuleFactory, BundleContext>> factoriesMap) {
-        this.moduleNamesToConfigBeanFactories = Collections
-                .unmodifiableMap(factoriesMap);
-        moduleNames = Collections.unmodifiableSet(new TreeSet<>(
-                moduleNamesToConfigBeanFactories.keySet()));
+        this.moduleNamesToConfigBeanFactories = Collections.unmodifiableMap(factoriesMap);
+        moduleNames = Collections.unmodifiableSet(new TreeSet<>(moduleNamesToConfigBeanFactories.keySet()));
         List<ModuleFactory> factories = new ArrayList<>(this.moduleNamesToConfigBeanFactories.size());
-        Collection<Map.Entry<ModuleFactory, BundleContext>> entryCollection = this.moduleNamesToConfigBeanFactories.values();
+        Collection<Map.Entry<ModuleFactory, BundleContext>> entryCollection = this.moduleNamesToConfigBeanFactories
+                .values();
         for (Map.Entry<ModuleFactory, BundleContext> entry : entryCollection) {
             factories.add(entry.getKey());
         }
@@ -51,6 +51,9 @@ public class HierarchicalConfigMBeanFactoriesHolder {
     /**
      * Get ModuleFactory by their name.
      *
+     * @param moduleName
+     *            module name
+     * @return module factory
      * @throws IllegalArgumentException
      *             if factory is not found
      */
@@ -69,5 +72,4 @@ public class HierarchicalConfigMBeanFactoriesHolder {
     public List<ModuleFactory> getModuleFactories() {
         return moduleFactories;
     }
-
 }

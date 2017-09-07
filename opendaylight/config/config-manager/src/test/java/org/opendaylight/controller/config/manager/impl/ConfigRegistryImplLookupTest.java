@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -29,75 +29,65 @@ import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegistratorImpl;
 import org.opendaylight.controller.config.manager.impl.runtimembean.TestingRuntimeBean;
 
-public class ConfigRegistryImplLookupTest extends
-        AbstractLockedPlatformMBeanServerTest {
+public class ConfigRegistryImplLookupTest extends AbstractLockedPlatformMBeanServerTest {
 
     private ConfigRegistryImpl configRegistryImpl;
     private BaseJMXRegistrator baseJMXRegistrator;
 
-    private static final String moduleNameA = "moduleA";
-    private static final String moduleNameB = "moduleB";
+    private static final String MODULE_NAMEA = "moduleA";
+    private static final String MODULE_NAMEB = "moduleB";
 
-    private static final String instanceNameA = "instA";
-    private static final String instanceNameB = "instB";
-    private static final String instanceNameC = "instC";
+    private static final String INSTANCE_NAMEA = "instA";
+    private static final String INSTANCE_NAMEB = "instB";
+    private static final String INSTANCE_NAMEC = "instC";
 
-    private static final ObjectName name1 = ObjectNameUtil
-            .createReadOnlyModuleON(moduleNameA, instanceNameA);
-    private static final ObjectName name2 = ObjectNameUtil
-            .createReadOnlyModuleON(moduleNameA, instanceNameB);
-    private static final ObjectName name3 = ObjectNameUtil
-            .createReadOnlyModuleON(moduleNameA, instanceNameC);
-    private static final ObjectName name4 = ObjectNameUtil
-            .createReadOnlyModuleON(moduleNameB, instanceNameA);
+    private static final ObjectName NAME1 = ObjectNameUtil.createReadOnlyModuleON(MODULE_NAMEA, INSTANCE_NAMEA);
+    private static final ObjectName NAME2 = ObjectNameUtil.createReadOnlyModuleON(MODULE_NAMEA, INSTANCE_NAMEB);
+    private static final ObjectName NAME3 = ObjectNameUtil.createReadOnlyModuleON(MODULE_NAMEA, INSTANCE_NAMEC);
+    private static final ObjectName NAME4 = ObjectNameUtil.createReadOnlyModuleON(MODULE_NAMEB, INSTANCE_NAMEA);
 
-    private static final ObjectName name5 = ObjectNameUtil
-            .createRuntimeBeanName(moduleNameA, instanceNameA, Collections.<String, String>emptyMap());
-    private static final ObjectName name6 = ObjectNameUtil
-            .createRuntimeBeanName(moduleNameA, instanceNameB, Collections.<String, String>emptyMap());
-    private static final ObjectName name8 = ObjectNameUtil
-            .createRuntimeBeanName(moduleNameB, instanceNameA, Collections.<String, String>emptyMap());
+    private static final ObjectName NAME5 = ObjectNameUtil.createRuntimeBeanName(MODULE_NAMEA, INSTANCE_NAMEA,
+            Collections.<String, String>emptyMap());
+    private static final ObjectName NAME6 = ObjectNameUtil.createRuntimeBeanName(MODULE_NAMEA, INSTANCE_NAMEB,
+            Collections.<String, String>emptyMap());
+    private static final ObjectName NAME8 = ObjectNameUtil.createRuntimeBeanName(MODULE_NAMEB, INSTANCE_NAMEA,
+            Collections.<String, String>emptyMap());
 
-    private static final ObjectName name9 = ObjectNameUtil
-            .createTransactionModuleON("transaction", moduleNameA, instanceNameA);
+    private static final ObjectName NAME9 = ObjectNameUtil.createTransactionModuleON("transaction", MODULE_NAMEA,
+            INSTANCE_NAMEA);
 
     @Before
     public void setUp() throws Exception {
-        configRegistryImpl = new ConfigRegistryImpl(null,
-                ManagementFactory.getPlatformMBeanServer(), null);
-        Field field = configRegistryImpl.getClass().getDeclaredField(
-                "baseJMXRegistrator");
+        configRegistryImpl = new ConfigRegistryImpl(null, ManagementFactory.getPlatformMBeanServer(), null);
+        Field field = configRegistryImpl.getClass().getDeclaredField("baseJMXRegistrator");
         field.setAccessible(true);
         baseJMXRegistrator = (BaseJMXRegistrator) field.get(configRegistryImpl);
 
-        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, name1);
-        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, name2);
-        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, name3);
-        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, name4);
+        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME1);
+        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME2);
+        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME3);
+        registerModuleBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME4);
 
-        registerRuntimeBean(new TestingRuntimeBean(), baseJMXRegistrator, name5);
-        registerRuntimeBean(new TestingRuntimeBean(), baseJMXRegistrator, name6);
-        registerRuntimeBean(new TestingRuntimeBean(), baseJMXRegistrator, name8);
+        registerRuntimeBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME5);
+        registerRuntimeBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME6);
+        registerRuntimeBean(new TestingRuntimeBean(), baseJMXRegistrator, NAME8);
 
-        baseJMXRegistrator.createTransactionJMXRegistrator("transaction")
-                .createTransactionModuleJMXRegistrator()
-                .registerMBean(new TestingRuntimeBean(), name9);
+        baseJMXRegistrator.createTransactionJMXRegistrator("transaction").createTransactionModuleJMXRegistrator()
+                .registerMBean(new TestingRuntimeBean(), NAME9);
 
     }
 
     private static void registerModuleBean(final TestingRuntimeBean testingRuntimeBean,
             final BaseJMXRegistrator baseJMXRegistrator, final ObjectName objectName)
             throws InstanceAlreadyExistsException {
-        baseJMXRegistrator.createModuleJMXRegistrator().registerMBean(
-                testingRuntimeBean, objectName);
+        baseJMXRegistrator.createModuleJMXRegistrator().registerMBean(testingRuntimeBean, objectName);
     }
 
     private static void registerRuntimeBean(final RuntimeBean object, final BaseJMXRegistrator baseJMXRegistrator,
             final ObjectName runtimeON) throws InstanceAlreadyExistsException {
         String factoryName = ObjectNameUtil.getFactoryName(runtimeON);
         String instanceName = ObjectNameUtil.getInstanceName(runtimeON);
-        Map<String, String> properties = ObjectNameUtil
-                .getAdditionalPropertiesOfRuntimeBeanName(runtimeON);
+        Map<String, String> properties = ObjectNameUtil.getAdditionalPropertiesOfRuntimeBeanName(runtimeON);
 
         RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = baseJMXRegistrator
                 .createRuntimeBeanRegistrator(new ModuleIdentifier(factoryName, instanceName));
@@ -115,39 +105,34 @@ public class ConfigRegistryImplLookupTest extends
     @Test
     public void testLookupConfigBeans() throws Exception {
         Set<ObjectName> beans = configRegistryImpl.lookupConfigBeans();
-        assertEquals(Sets.newHashSet(name1, name2, name3, name4), beans);
+        assertEquals(Sets.newHashSet(NAME1, NAME2, NAME3, NAME4), beans);
         beans = configRegistryImpl.lookupConfigBeans();
-        assertEquals(Sets.newHashSet(name1, name2, name3, name4), beans);
+        assertEquals(Sets.newHashSet(NAME1, NAME2, NAME3, NAME4), beans);
     }
 
     @Test
     public void testLookupConfigBeanWithModuleName() throws Exception {
-        Set<ObjectName> bean = configRegistryImpl
-                .lookupConfigBeans(moduleNameA);
-        assertEquals(Sets.newHashSet(name1, name2, name3), bean);
+        Set<ObjectName> bean = configRegistryImpl.lookupConfigBeans(MODULE_NAMEA);
+        assertEquals(Sets.newHashSet(NAME1, NAME2, NAME3), bean);
     }
 
     @Test
-    public void testLookupConfigBeanWithModuleNameAndInstanceName()
-            throws Exception {
-        Set<ObjectName> bean = configRegistryImpl.lookupConfigBeans(
-                moduleNameA, instanceNameA);
-        assertEquals(Sets.newHashSet(name1), bean);
+    public void testLookupConfigBeanWithModuleNameAndInstanceName() throws Exception {
+        Set<ObjectName> bean = configRegistryImpl.lookupConfigBeans(MODULE_NAMEA, INSTANCE_NAMEA);
+        assertEquals(Sets.newHashSet(NAME1), bean);
     }
 
     @Test
     public void testLookupRuntimeBeans() throws Exception {
         Set<ObjectName> beans = configRegistryImpl.lookupRuntimeBeans();
-        assertEquals(Sets.newHashSet(name5, name6, name8), beans);
+        assertEquals(Sets.newHashSet(NAME5, NAME6, NAME8), beans);
         beans = configRegistryImpl.lookupRuntimeBeans(null, null);
-        assertEquals(Sets.newHashSet(name5, name6, name8), beans);
+        assertEquals(Sets.newHashSet(NAME5, NAME6, NAME8), beans);
     }
 
     @Test
     public void testLookupRuntimeBeansWithIFcNameAndImplName() throws Exception {
-        Set<ObjectName> beans = configRegistryImpl.lookupRuntimeBeans(
-                moduleNameA, instanceNameA);
-        assertEquals(Sets.newHashSet(name5), beans);
+        Set<ObjectName> beans = configRegistryImpl.lookupRuntimeBeans(MODULE_NAMEA, INSTANCE_NAMEA);
+        assertEquals(Sets.newHashSet(NAME5), beans);
     }
-
 }

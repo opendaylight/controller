@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import java.util.Dictionary;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,8 @@ public class RefreshingSCPModuleInfoRegistryTest {
     @Mock
     SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -48,7 +50,8 @@ public class RefreshingSCPModuleInfoRegistryTest {
         doReturn("string").when(prov).toString();
         final BundleContext ctxt = mock(BundleContext.class);
         final ServiceRegistration<?> servReg = mock(ServiceRegistration.class);
-        doReturn(servReg).when(ctxt).registerService(any(Class.class), any(SchemaContextProvider.class), any(Dictionary.class));
+        doReturn(servReg).when(ctxt).registerService(any(Class.class), any(SchemaContextProvider.class),
+                any(Dictionary.class));
         doReturn(servReg).when(ctxt).registerService(Mockito.anyString(), any(Object.class), any(Dictionary.class));
         doNothing().when(servReg).setProperties(any(Dictionary.class));
 
@@ -59,7 +62,8 @@ public class RefreshingSCPModuleInfoRegistryTest {
         doReturn("B-runtime-context").when(bindingRuntimeContext).toString();
         doReturn(bindingRuntimeContext).when(codecRegistryProvider).getBindingContext();
 
-        final RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, classLoadingStrat, this.sourceProvider, codecRegistryProvider, ctxt);
+        final RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, classLoadingStrat,
+                this.sourceProvider, codecRegistryProvider, ctxt);
 
         doNothing().when(servReg).unregister();
 
