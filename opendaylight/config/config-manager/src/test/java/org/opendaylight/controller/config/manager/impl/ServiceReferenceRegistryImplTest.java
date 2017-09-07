@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,14 +38,11 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
 public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
 
-
     @Before
     public void setUp() {
-        super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(
-                mockedContext,
-                new TestingFixedThreadPoolModuleFactory(),
-                new TestingParallelAPSPModuleFactory(),
-                new TestingScheduledThreadPoolModuleFactory()));
+        super.initConfigTransactionManagerImpl(
+                new HardcodedModuleFactoriesResolver(mockedContext, new TestingFixedThreadPoolModuleFactory(),
+                        new TestingParallelAPSPModuleFactory(), new TestingScheduledThreadPoolModuleFactory()));
     }
 
     @Override
@@ -57,19 +54,19 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
     public void test() throws Exception {
         ConfigTransactionJMXClient transaction1 = configRegistryClient.createTransaction();
         // create fixed1
-        int fixedNrOfThreads = 20, scheduledNrOfThreads = 30;
+        int fixedNrOfThreads = 20;
+        int scheduledNrOfThreads = 30;
 
         ObjectName fixedTPTransactionON = transaction1.createModule(getThreadPoolImplementationName(), fixed1);
         platformMBeanServer.setAttribute(fixedTPTransactionON, new Attribute("ThreadCount", fixedNrOfThreads));
 
-        ObjectName scheduledTPTransactionON = transaction1.createModule(
-                TestingScheduledThreadPoolModuleFactory.NAME, "scheduled1");
-        platformMBeanServer.setAttribute(scheduledTPTransactionON, new Attribute("ThreadCount",
-                scheduledNrOfThreads));
+        ObjectName scheduledTPTransactionON = transaction1.createModule(TestingScheduledThreadPoolModuleFactory.NAME,
+                "scheduled1");
+        platformMBeanServer.setAttribute(scheduledTPTransactionON, new Attribute("ThreadCount", scheduledNrOfThreads));
 
         String refName = "ref";
-        ObjectName serviceReference = transaction1.saveServiceReference(TestingThreadPoolServiceInterface.QNAME, refName,
-                fixedTPTransactionON);
+        ObjectName serviceReference = transaction1.saveServiceReference(TestingThreadPoolServiceInterface.QNAME,
+                refName, fixedTPTransactionON);
         // create apsp-parallel
         createParallelAPSP(transaction1, serviceReference);
         transaction1.commit();
@@ -81,11 +78,12 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
         checkApspThreadCount(fixedNrOfThreads);
         // check OSGi SR
         List<RegistrationHolder> registrations =
-                ((RecordingBundleContextServiceRegistrationHandler) currentBundleContextServiceRegistrationHandler).getRegistrations();
+                ((RecordingBundleContextServiceRegistrationHandler) currentBundleContextServiceRegistrationHandler)
+                .getRegistrations();
         assertEquals(1, registrations.size());
         RegistrationHolder record = registrations.get(0);
         assertEquals(TestingThreadPoolIfc.class, record.clazz);
-        assertEquals(ImmutableMap.of("name","ref"), record.props);
+        assertEquals(ImmutableMap.of("name", "ref"), record.props);
 
         // switch reference to scheduled
         ConfigTransactionJMXClient transaction2 = configRegistryClient.createTransaction();
@@ -95,21 +93,22 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
         // check scheduled is used
         checkApspThreadCount(scheduledNrOfThreads);
         // check that dummy MXBean points to scheduled
-        assertEquals(withoutTransactionName(scheduledTPTransactionON), serviceReferenceMXBean.getCurrentImplementation());
+        assertEquals(withoutTransactionName(scheduledTPTransactionON),
+                serviceReferenceMXBean.getCurrentImplementation());
 
         // empty transaction
         configRegistryClient.createTransaction().commit();
 
         // get service mapping
-        Map<String,Map<String,ObjectName>> serviceMapping = configRegistryClient.getServiceMapping();
-        Map<String,Map<String,ObjectName>> expectedMapping = ImmutableMap.of(TestingThreadPoolServiceInterface.QNAME,
-                (Map<String, ObjectName>)ImmutableMap.of(refName, withoutTransactionName(scheduledTPTransactionON)));
+        Map<String, Map<String, ObjectName>> serviceMapping = configRegistryClient.getServiceMapping();
+        Map<String, Map<String, ObjectName>> expectedMapping = ImmutableMap.of(TestingThreadPoolServiceInterface.QNAME,
+                (Map<String, ObjectName>) ImmutableMap.of(refName, withoutTransactionName(scheduledTPTransactionON)));
         assertEquals(expectedMapping, serviceMapping);
 
         // destroy all
         ConfigTransactionJMXClient transaction4 = configRegistryClient.createTransaction();
         Set<ObjectName> objectNames = transaction4.lookupConfigBeans();
-        for(ObjectName on: objectNames) {
+        for (ObjectName on : objectNames) {
             transaction4.destroyModule(on);
         }
         transaction4.commit();
@@ -118,8 +117,8 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
         assertTrue(serviceMapping.isEmpty());
     }
 
-    private void checkApspThreadCount(final int fixedNrOfThreads) throws MBeanException, AttributeNotFoundException,
-            InstanceNotFoundException, ReflectionException {
+    private void checkApspThreadCount(final int fixedNrOfThreads)
+            throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         ObjectName apspON = ObjectNameUtil.createReadOnlyModuleON(TestingParallelAPSPModuleFactory.NAME, apsp1);
         assertEquals(fixedNrOfThreads, platformMBeanServer.getAttribute(apspON, "MaxNumberOfThreads"));
     }

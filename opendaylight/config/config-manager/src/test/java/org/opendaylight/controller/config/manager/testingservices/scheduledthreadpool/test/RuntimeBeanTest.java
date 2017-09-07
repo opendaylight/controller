@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -30,9 +30,11 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
 /**
  * TestingScheduledThreadPool exports 2 interfaces: <br>
- * {@link org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolModuleFactory#NAME}
+ * {@link org.opendaylight.controller.config.manager.testingservices
+ * .scheduledthreadpool.TestingScheduledThreadPoolModuleFactory#NAME}
  * ,<br>
- * {@link org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPoolModuleFactory#NAME}
+ * {@link org.opendaylight.controller.config.manager
+ * .testingservices.threadpool.TestingFixedThreadPoolModuleFactory#NAME}
  * <br>
  * <br>
  * It also exports 2 runtime beans, one default and one with additional
@@ -40,25 +42,21 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
  */
 public class RuntimeBeanTest extends AbstractScheduledTest {
 
-    ObjectName ifc1runtimeON1 = ObjectNameUtil.createRuntimeBeanName(
-            TestingScheduledThreadPoolModuleFactory.NAME, scheduled1,
-            Maps.<String, String> newHashMap());
+    ObjectName ifc1runtimeON1 = ObjectNameUtil.createRuntimeBeanName(TestingScheduledThreadPoolModuleFactory.NAME,
+            SCHEDULED1, Maps.<String, String>newHashMap());
     // additional runtime bean
-    ObjectName ifc1runtimeON2 = ObjectNameUtil.createRuntimeBeanName(
-            TestingScheduledThreadPoolModuleFactory.NAME, scheduled1,
-            ImmutableMap.of("a", "b"));
+    ObjectName ifc1runtimeON2 = ObjectNameUtil.createRuntimeBeanName(TestingScheduledThreadPoolModuleFactory.NAME,
+            SCHEDULED1, ImmutableMap.of("a", "b"));
 
-    List<ObjectName> allObjectNames = Lists.newArrayList(ifc1runtimeON1,
-            ifc1runtimeON2);
+    List<ObjectName> allObjectNames = Lists.newArrayList(ifc1runtimeON1, ifc1runtimeON2);
 
-    private ObjectName createScheduled() throws InstanceAlreadyExistsException,
-            ConflictingVersionException, ValidationException {
-        ConfigTransactionJMXClient transaction = configRegistryClient
-                .createTransaction();
+    private ObjectName createScheduled()
+            throws InstanceAlreadyExistsException, ConflictingVersionException, ValidationException {
+        ConfigTransactionJMXClient transaction = configRegistryClient.createTransaction();
 
         // create using TestingThreadPoolIfc:
-        ObjectName createdConfigBean = transaction.createModule(
-                TestingScheduledThreadPoolModuleFactory.NAME, scheduled1);
+        ObjectName createdConfigBean = transaction.createModule(TestingScheduledThreadPoolModuleFactory.NAME,
+                SCHEDULED1);
         // commit
         transaction.commit();
         return createdConfigBean;
@@ -93,27 +91,21 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
     @Test
     public void testLookup() throws Exception {
         createScheduled();
-        assertEquals(Sets.newHashSet(ifc1runtimeON1, ifc1runtimeON2),
-                configRegistryClient.lookupRuntimeBeans());
+        assertEquals(Sets.newHashSet(ifc1runtimeON1, ifc1runtimeON2), configRegistryClient.lookupRuntimeBeans());
     }
 
     @Test
     public void testReuse() throws Exception {
         ObjectName createdConfigBean = createScheduled();
         // empty transaction
-        CommitStatus commitInfo = configRegistryClient.createTransaction()
-                .commit();
+        CommitStatus commitInfo = configRegistryClient.createTransaction().commit();
 
         // check that it was reused
-        ObjectName readableConfigBean = ObjectNameUtil
-                .withoutTransactionName(createdConfigBean);
-        List<ObjectName> newInstances = Collections.<ObjectName> emptyList();
-        List<ObjectName> reusedInstances = Lists
-                .newArrayList(readableConfigBean);
-        List<ObjectName> recreatedInstaces = Collections
-                .<ObjectName> emptyList();
-        assertEquals(new CommitStatus(newInstances, reusedInstances,
-                recreatedInstaces), commitInfo);
+        ObjectName readableConfigBean = ObjectNameUtil.withoutTransactionName(createdConfigBean);
+        List<ObjectName> newInstances = Collections.<ObjectName>emptyList();
+        List<ObjectName> reusedInstances = Lists.newArrayList(readableConfigBean);
+        List<ObjectName> recreatedInstaces = Collections.<ObjectName>emptyList();
+        assertEquals(new CommitStatus(newInstances, reusedInstances, recreatedInstaces), commitInfo);
         checkRuntimeBeans();
     }
 
@@ -121,37 +113,31 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
     public void testRecreate() throws Exception {
         ObjectName createdConfigBean = createScheduled();
         // empty transaction
-        ConfigTransactionJMXClient configTransaction = configRegistryClient
-                .createTransaction();
-        ObjectName scheduledWritableON = configTransaction.lookupConfigBean(
-                TestingScheduledThreadPoolModuleFactory.NAME, scheduled1);
+        ConfigTransactionJMXClient configTransaction = configRegistryClient.createTransaction();
+        ObjectName scheduledWritableON = configTransaction
+                .lookupConfigBean(TestingScheduledThreadPoolModuleFactory.NAME, SCHEDULED1);
         TestingScheduledThreadPoolConfigBeanMXBean scheduledWritableProxy = configTransaction
                 .newMXBeanProxy(scheduledWritableON, TestingScheduledThreadPoolConfigBeanMXBean.class);
         scheduledWritableProxy.setRecreate(true);
         CommitStatus commitInfo = configTransaction.commit();
         // check that it was recreated
-        ObjectName readableConfigBean = ObjectNameUtil
-                .withoutTransactionName(createdConfigBean);
-        List<ObjectName> newInstances = Collections.<ObjectName> emptyList();
-        List<ObjectName> reusedInstances = Collections.<ObjectName> emptyList();
-        List<ObjectName> recreatedInstaces = Lists
-                .newArrayList(readableConfigBean);
-        assertEquals(new CommitStatus(newInstances, reusedInstances,
-                recreatedInstaces), commitInfo);
+        ObjectName readableConfigBean = ObjectNameUtil.withoutTransactionName(createdConfigBean);
+        List<ObjectName> newInstances = Collections.<ObjectName>emptyList();
+        List<ObjectName> reusedInstances = Collections.<ObjectName>emptyList();
+        List<ObjectName> recreatedInstaces = Lists.newArrayList(readableConfigBean);
+        assertEquals(new CommitStatus(newInstances, reusedInstances, recreatedInstaces), commitInfo);
         checkRuntimeBeans();
     }
 
     @Test
     public void testDestroy_shouldUnregisterRuntimeBeans() throws Exception {
         ObjectName createdConfigBean = createScheduled();
-        ConfigTransactionJMXClient configTransaction = configRegistryClient
-                .createTransaction();
-        configTransaction.destroyModule(ObjectNameUtil
-                .createTransactionModuleON(configTransaction.getTransactionName(), createdConfigBean));
+        ConfigTransactionJMXClient configTransaction = configRegistryClient.createTransaction();
+        configTransaction.destroyModule(
+                ObjectNameUtil.createTransactionModuleON(configTransaction.getTransactionName(), createdConfigBean));
         configTransaction.commit();
         for (ObjectName on : allObjectNames) {
             checkRuntimeBeanDoesNotExist(on);
         }
     }
-
 }

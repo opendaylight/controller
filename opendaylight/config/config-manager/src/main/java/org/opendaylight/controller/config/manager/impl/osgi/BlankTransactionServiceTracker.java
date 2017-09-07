@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,9 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Every time factory is added or removed, blank transaction is triggered to handle
- * {@link org.opendaylight.controller.config.spi.ModuleFactory#getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory, org.osgi.framework.BundleContext)}
- * functionality.
+ * Every time factory is added or removed, blank transaction is triggered to
+ * handle
  */
 public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<ModuleFactory, Object> {
     private static final Logger LOG = LoggerFactory.getLogger(BlankTransactionServiceTracker.class);
@@ -40,12 +39,12 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
         this(() -> {
             ObjectName tx = configRegistry.beginConfig(true);
             return configRegistry.commitConfig(tx);
-         });
+        });
     }
 
     public BlankTransactionServiceTracker(final BlankTransaction blankTransaction) {
-        this(blankTransaction, DEFAULT_MAX_ATTEMPTS, Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-                .setNameFormat("config-blank-txn-%d").build()));
+        this(blankTransaction, DEFAULT_MAX_ATTEMPTS, Executors
+                .newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("config-blank-txn-%d").build()));
     }
 
     @VisibleForTesting
@@ -67,7 +66,8 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     void blankTransactionSync() {
-        // race condition check: config-persister might push new configuration while server is starting up.
+        // race condition check: config-persister might push new configuration while
+        // server is starting up.
         ConflictingVersionException lastException = null;
         for (int i = 0; i < maxAttempts; i++) {
             try {
@@ -94,12 +94,14 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     @Override
-    public void modifiedService(final ServiceReference <ModuleFactory> moduleFactoryServiceReference, final Object o) {
+    public void modifiedService(final ServiceReference<ModuleFactory> moduleFactoryServiceReference,
+            final Object object) {
         blankTransactionAsync();
     }
 
     @Override
-    public void removedService(final ServiceReference<ModuleFactory> moduleFactoryServiceReference, final Object o) {
+    public void removedService(final ServiceReference<ModuleFactory> moduleFactoryServiceReference,
+            final Object object) {
         blankTransactionAsync();
     }
 

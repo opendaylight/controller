@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
@@ -22,7 +23,7 @@
       <artifactId>guava</artifactId>
     </dependency>
 
-    <!--Dependencies regardign RuntimeGeneratedMappingService-->
+    <!--Dependencies regarding RuntimeGeneratedMappingService-->
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-binding-generator-impl</artifactId>
@@ -67,13 +68,20 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.config.manager.impl.osgi.ConfigManagerActivator</Bundle-Activator>
             <Private-Package>org.opendaylight.controller.config.manager.*,
-                            javax.annotation.*,</Private-Package>
+              javax.annotation.*,</Private-Package>
             <Export-Package></Export-Package>
           </instructions>
         </configuration>

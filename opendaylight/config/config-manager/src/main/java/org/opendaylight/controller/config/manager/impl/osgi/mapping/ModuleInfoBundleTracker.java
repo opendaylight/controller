@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,10 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tracks bundles and attempts to retrieve YangModuleInfo, which is then fed into ModuleInfoRegistry
+ * Tracks bundles and attempts to retrieve YangModuleInfo, which is then fed
+ * into ModuleInfoRegistry.
  */
-public final class ModuleInfoBundleTracker implements AutoCloseable,
-        BundleTrackerCustomizer<Collection<ObjectRegistration<YangModuleInfo>>> {
+public final class ModuleInfoBundleTracker
+        implements AutoCloseable, BundleTrackerCustomizer<Collection<ObjectRegistration<YangModuleInfo>>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ModuleInfoBundleTracker.class);
 
@@ -72,6 +73,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(final Bundle bundle, final BundleEvent event) {
         URL resource = bundle.getEntry(YANG_MODULE_INFO_SERVICE_PATH);
         LOG.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
@@ -87,7 +89,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
                 registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));
             }
 
-            if(!starting) {
+            if (!starting) {
                 moduleInfoRegistry.updateService();
             }
         } catch (final IOException e) {
@@ -106,6 +108,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public void removedBundle(final Bundle bundle, final BundleEvent event,
             final Collection<ObjectRegistration<YangModuleInfo>> regs) {
         if (regs == null) {
@@ -127,7 +130,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
 
         if (!YangModelBindingProvider.class.isAssignableFrom(clazz)) {
             errorMessage = logMessage("Class {} does not implement {} in bundle {}", clazz,
-                YangModelBindingProvider.class, bundle);
+                    YangModelBindingProvider.class, bundle);
             throw new IllegalStateException(errorMessage);
         }
         final YangModelBindingProvider instance;
@@ -143,7 +146,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
             throw new IllegalStateException(errorMessage, e);
         }
 
-        try{
+        try {
             return instance.getModuleInfo();
         } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
             throw new IllegalStateException("Error while executing getModuleInfo on " + instance, e);
@@ -154,8 +157,8 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         try {
             return bundle.loadClass(moduleInfoClass);
         } catch (final ClassNotFoundException e) {
-            String errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", moduleInfoClass,
-                bundle, e);
+            String errorMessage = logMessage("Could not find class {} in bundle {}, reason {}", moduleInfoClass, bundle,
+                    e);
             throw new IllegalStateException(errorMessage);
         }
     }

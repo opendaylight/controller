@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,10 +23,8 @@ import org.opendaylight.controller.config.spi.Module;
  * This class has two exported interfaces and two runtime beans. Recreation is
  * triggered by setting Recreate attribute to true.
  */
-public class TestingScheduledThreadPoolModule implements Module,
-        TestingScheduledThreadPoolConfigBeanMXBean,
-        RuntimeBeanRegistratorAwareModule,
-        TestingScheduledThreadPoolServiceInterface {
+public class TestingScheduledThreadPoolModule implements Module, TestingScheduledThreadPoolConfigBeanMXBean,
+        RuntimeBeanRegistratorAwareModule, TestingScheduledThreadPoolServiceInterface {
 
     private final ModuleIdentifier identifier;
     @Nullable
@@ -40,16 +38,14 @@ public class TestingScheduledThreadPoolModule implements Module,
     private boolean recreate;
 
     public TestingScheduledThreadPoolModule(final ModuleIdentifier identifier,
-            @Nullable final AutoCloseable oldCloseable,
-            @Nullable final TestingScheduledThreadPoolImpl oldInstance) {
+            @Nullable final AutoCloseable oldCloseable, @Nullable final TestingScheduledThreadPoolImpl oldInstance) {
         this.identifier = identifier;
         this.oldCloseable = oldCloseable;
         this.oldInstance = oldInstance;
     }
 
     @Override
-    public void setRuntimeBeanRegistrator(
-            final RootRuntimeBeanRegistrator runtimeBeanRegistrator) {
+    public void setRuntimeBeanRegistrator(final RootRuntimeBeanRegistrator runtimeBeanRegistrator) {
         this.runtimeBeanRegistrator = runtimeBeanRegistrator;
     }
 
@@ -57,14 +53,13 @@ public class TestingScheduledThreadPoolModule implements Module,
     public void validate() {
         assertNull(runtimeBeanRegistrator);
         // check thread count
-        checkState(threadCount > 0,
-                "Parameter 'ThreadCount' must be greater than 0");
+        checkState(threadCount > 0, "Parameter 'ThreadCount' must be greater than 0");
     }
 
     @Override
     public boolean canReuse(final Module oldModule) {
-        return getClass().isInstance(oldModule) && getThreadCount() ==
-                ((TestingScheduledThreadPoolModule) oldModule).getThreadCount();
+        return getClass().isInstance(oldModule)
+                && getThreadCount() == ((TestingScheduledThreadPoolModule) oldModule).getThreadCount();
     }
 
     @Override
@@ -78,6 +73,7 @@ public class TestingScheduledThreadPoolModule implements Module,
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public Closeable getInstance() {
         assertNotNull(runtimeBeanRegistrator);
         if (instance == null) {
@@ -94,8 +90,7 @@ public class TestingScheduledThreadPoolModule implements Module,
                     }
                 }
                 // close old threadpool and esp. unregister runtime beans
-                instance = new TestingScheduledThreadPoolImpl(
-                        runtimeBeanRegistrator, threadCount);
+                instance = new TestingScheduledThreadPoolImpl(runtimeBeanRegistrator, threadCount);
             }
         }
         return instance;
@@ -116,6 +111,4 @@ public class TestingScheduledThreadPoolModule implements Module,
     public ModuleIdentifier getIdentifier() {
         return identifier;
     }
-
-
 }
