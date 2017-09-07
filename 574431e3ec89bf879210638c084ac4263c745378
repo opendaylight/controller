@@ -16,6 +16,24 @@
       "revId": "574431e3ec89bf879210638c084ac4263c745378",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_dd420b3d",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/TracingBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-09-07T11:11:52Z",
+      "side": 1,
+      "message": "\u003e Doesn\u0027t this print multiple (...), one per line?\n\nYes.\n\n\u003e It would be more interesting IMO to print (...) once per skipped group.\n\nThat would be prettier, but this is not a time for niceness... any chance you would remove your -1 and get this in as is?  It will much simplify trace:transactions output as is already.\n\nYour contribution to further improve this would be most welcome! ;)  BTW: There are already 2 other places in the code doing things like this (Josh\u0027s trace stuff and TOm\u0027s debug), so perhaps a neat little general StackTraceElementCompressor kinda util thing would be useful, some time...",
+      "parentUuid": "ba1f61a0_1468071c",
+      "revId": "574431e3ec89bf879210638c084ac4263c745378",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
