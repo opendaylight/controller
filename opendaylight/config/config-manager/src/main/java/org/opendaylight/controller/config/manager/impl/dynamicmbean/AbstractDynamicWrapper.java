@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -53,7 +53,31 @@ import org.slf4j.LoggerFactory;
  * provides additional functionality - namely it disallows setting attribute on
  * a read only wrapper.
  */
-abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
+public abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
+
+    protected final Module module;
+    private final MBeanInfo mbeanInfo;
+    protected final ObjectName objectNameInternal;
+    protected final Map<String, AttributeHolder> attributeHolderMap;
+    protected final ModuleIdentifier moduleIdentifier;
+    protected final MBeanServer internalServer;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDynamicWrapper.class);
+
+    public AbstractDynamicWrapper(final Module module, final boolean writable, final ModuleIdentifier moduleIdentifier,
+            final ObjectName thisWrapperObjectName, final MBeanOperationInfo[] operations,
+            final MBeanServer internalServer, final MBeanServer configMBeanServer) {
+        this.module = module;
+        this.moduleIdentifier = moduleIdentifier;
+        this.internalServer = internalServer;
+        this.objectNameInternal = thisWrapperObjectName;
+        // register the actual instance into an mbean server.
+        registerActualModule(objectNameInternal, configMBeanServer);
+        Set<Class<?>> jmxInterfaces = InterfacesHelper.getMXInterfaces(module.getClass());
+        this.attributeHolderMap = buildMBeanInfo(writable, moduleIdentifier, jmxInterfaces, objectNameInternal);
+        this.mbeanInfo = generateMBeanInfo(module, attributeHolderMap, operations, jmxInterfaces);
+    }
+
     private static final class ModuleNotificationListener implements NotificationListener {
         private final ObjectName objectNameInternal;
         private final MBeanServer internalServer;
@@ -67,51 +91,18 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         }
 
         @Override
-        public void handleNotification(final Notification n, final Object handback) {
-            if (n instanceof MBeanServerNotification
-                    && n.getType()
-                        .equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)
-                        && ((MBeanServerNotification) n).getMBeanName().equals(
-                        objectNameInternal)) {
+        public void handleNotification(final Notification notification, final Object handback) {
+            if (notification instanceof MBeanServerNotification
+                    && notification.getType().equals(MBeanServerNotification.UNREGISTRATION_NOTIFICATION)
+                    && ((MBeanServerNotification) notification).getMBeanName().equals(objectNameInternal)) {
                 try {
                     internalServer.unregisterMBean(objectNameInternal);
-                    configMBeanServer.removeNotificationListener(
-                            MBeanServerDelegate.DELEGATE_NAME, this);
-                } catch (MBeanRegistrationException
-                        | ListenerNotFoundException
-                        | InstanceNotFoundException e) {
+                    configMBeanServer.removeNotificationListener(MBeanServerDelegate.DELEGATE_NAME, this);
+                } catch (MBeanRegistrationException | ListenerNotFoundException | InstanceNotFoundException e) {
                     throw new IllegalStateException(e);
                 }
             }
         }
-    }
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractDynamicWrapper.class);
-    protected final Module module;
-
-    private final MBeanInfo mbeanInfo;
-    protected final ObjectName objectNameInternal;
-    protected final Map<String, AttributeHolder> attributeHolderMap;
-    protected final ModuleIdentifier moduleIdentifier;
-    protected final MBeanServer internalServer;
-
-    public AbstractDynamicWrapper(final Module module, final boolean writable,
-                                  final ModuleIdentifier moduleIdentifier,
-                                  final ObjectName thisWrapperObjectName, final MBeanOperationInfo[] dOperations,
-                                  final MBeanServer internalServer, final MBeanServer configMBeanServer) {
-
-        this.module = module;
-        this.moduleIdentifier = moduleIdentifier;
-        this.internalServer = internalServer;
-        this.objectNameInternal = thisWrapperObjectName;
-        // register the actual instance into an mbean server.
-        registerActualModule(objectNameInternal, configMBeanServer);
-        Set<Class<?>> jmxInterfaces = InterfacesHelper.getMXInterfaces(module
-                .getClass());
-        this.attributeHolderMap = buildMBeanInfo(writable,
-                moduleIdentifier, jmxInterfaces, objectNameInternal);
-        this.mbeanInfo = generateMBeanInfo(module,
-                attributeHolderMap, dOperations, jmxInterfaces);
     }
 
     /**
@@ -119,20 +110,20 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
      * platform mbean server. Wait until this wrapper gets unregistered, in that
      * case unregister the module and remove listener.
      */
-    private final NotificationListener registerActualModule(final ObjectName objectNameInternal,
-                                                            final MBeanServer configMBeanServer) {
+    private NotificationListener registerActualModule(final ObjectName objectNameInternal,
+            final MBeanServer configMBeanServer) {
         try {
             internalServer.registerMBean(module, objectNameInternal);
-        } catch (InstanceAlreadyExistsException | MBeanRegistrationException
-                | NotCompliantMBeanException | IllegalStateException e) {
-            throw new IllegalStateException(
-                    "Error occured during mbean registration with name " + objectNameInternal, e);
+        } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException
+                | IllegalStateException e) {
+            throw new IllegalStateException("Error occured during mbean registration with name " + objectNameInternal,
+                    e);
         }
 
-        NotificationListener listener = new ModuleNotificationListener(objectNameInternal, internalServer, configMBeanServer);
+        NotificationListener listener = new ModuleNotificationListener(objectNameInternal, internalServer,
+                configMBeanServer);
         try {
-            configMBeanServer.addNotificationListener(
-                    MBeanServerDelegate.DELEGATE_NAME, listener, null, null);
+            configMBeanServer.addNotificationListener(MBeanServerDelegate.DELEGATE_NAME, listener, null, null);
         } catch (final InstanceNotFoundException e) {
             throw new RuntimeException("Could not add notification listener", e);
         }
@@ -140,24 +131,22 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
     }
 
     private static MBeanInfo generateMBeanInfo(final Module module,
-                                               final Map<String, AttributeHolder> attributeHolderMap,
-                                               final MBeanOperationInfo[] dOperations, final Set<Class<?>> jmxInterfaces) {
+            final Map<String, AttributeHolder> attributeHolderMap, final MBeanOperationInfo[] operations,
+            final Set<Class<?>> jmxInterfaces) {
 
-        String dDescription = findDescription(module.getClass(), jmxInterfaces);
-        MBeanConstructorInfo[] dConstructors = new MBeanConstructorInfo[0];
-        List<MBeanAttributeInfo> attributes = new ArrayList<>(
-                attributeHolderMap.size());
+        String description = findDescription(module.getClass(), jmxInterfaces);
+        MBeanConstructorInfo[] constructors = new MBeanConstructorInfo[0];
+        List<MBeanAttributeInfo> attributes = new ArrayList<>(attributeHolderMap.size());
         for (AttributeHolder attributeHolder : attributeHolderMap.values()) {
             attributes.add(attributeHolder.toMBeanAttributeInfo());
         }
-        return new MBeanInfo(module.getClass().getName(), dDescription,
-                attributes.toArray(new MBeanAttributeInfo[0]), dConstructors,
-                dOperations, new MBeanNotificationInfo[0]);
+        return new MBeanInfo(module.getClass().getName(), description, attributes.toArray(new MBeanAttributeInfo[0]),
+                constructors, operations, new MBeanNotificationInfo[0]);
     }
 
     static String findDescription(final Class<?> clazz, final Set<Class<?>> jmxInterfaces) {
-        List<Description> descriptions = AnnotationsHelper
-                .findClassAnnotationInSuperClassesAndIfcs(clazz, Description.class, jmxInterfaces);
+        List<Description> descriptions = AnnotationsHelper.findClassAnnotationInSuperClassesAndIfcs(clazz,
+                Description.class, jmxInterfaces);
         return AnnotationsHelper.aggregateDescriptions(descriptions);
     }
 
@@ -168,8 +157,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
     // inspect all exported interfaces ending with MXBean, extract getters &
     // setters into attribute holder
     private Map<String, AttributeHolder> buildMBeanInfo(final boolean writable, final ModuleIdentifier moduleIdentifier,
-                                                               final Set<Class<?>> jmxInterfaces,
-                                                               final ObjectName internalObjectName) {
+            final Set<Class<?>> jmxInterfaces, final ObjectName internalObjectName) {
 
         // internal variables for describing MBean elements
         Set<Method> methods = new HashSet<>();
@@ -182,8 +170,7 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         MBeanInfo internalInfo;
         try {
             internalInfo = internalServer.getMBeanInfo(internalObjectName);
-        } catch (InstanceNotFoundException | ReflectionException
-                | IntrospectionException e) {
+        } catch (InstanceNotFoundException | ReflectionException | IntrospectionException e) {
             throw new RuntimeException("MBean info not found", e);
         }
 
@@ -194,27 +181,21 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
         Map<String, AttributeHolder> attributeHolderMapLocal = new HashMap<>();
         for (Method method : methods) {
 
-            if (method.getParameterTypes().length == 1
-                    && method.getName().startsWith("set")) {
+            if (method.getParameterTypes().length == 1 && method.getName().startsWith("set")) {
                 Method setter;
                 String attribName = method.getName().substring(3);
                 try {
-                    setter = module.getClass().getMethod(method.getName(),
-                            method.getParameterTypes());
+                    setter = module.getClass().getMethod(method.getName(), method.getParameterTypes());
                 } catch (final NoSuchMethodException e) {
-                    throw new RuntimeException("No such method on "
-                            + moduleIdentifier, e);
+                    throw new RuntimeException("No such method on " + moduleIdentifier, e);
                 }
-                RequireInterface ifc = AttributeHolder
-                        .findRequireInterfaceAnnotation(setter, jmxInterfaces);
+                RequireInterface ifc = AttributeHolder.findRequireInterfaceAnnotation(setter, jmxInterfaces);
                 String description = null;
                 if (ifc != null) {
-                    description = AttributeHolder.findDescription(setter,
-                            jmxInterfaces);
+                    description = AttributeHolder.findDescription(setter, jmxInterfaces);
                 }
-                AttributeHolder attributeHolder = new AttributeHolder(
-                        attribName, module, attributeMap.get(attribName)
-                            .getType(), writable, ifc, description);
+                AttributeHolder attributeHolder = new AttributeHolder(attribName, module,
+                        attributeMap.get(attribName).getType(), writable, ifc, description);
                 attributeHolderMapLocal.put(attribName, attributeHolder);
             }
         }
@@ -230,29 +211,25 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
 
     @Override
     public Object getAttribute(final String attributeName)
-            throws AttributeNotFoundException, MBeanException,
-            ReflectionException {
+            throws AttributeNotFoundException, MBeanException, ReflectionException {
         if ("MBeanInfo".equals(attributeName)) {
             return getMBeanInfo();
         }
 
         Object obj = null;
         try {
-            obj = internalServer
-                    .getAttribute(objectNameInternal, attributeName);
+            obj = internalServer.getAttribute(objectNameInternal, attributeName);
         } catch (final InstanceNotFoundException e) {
-            new MBeanException(e);
+            throw new MBeanException(e);
         }
 
         if (obj instanceof ObjectName) {
-            AttributeHolder attributeHolder = attributeHolderMap
-                    .get(attributeName);
+            AttributeHolder attributeHolder = attributeHolderMap.get(attributeName);
             if (attributeHolder.getRequireInterfaceOrNull() != null) {
                 obj = fixObjectName((ObjectName) obj);
             }
             return obj;
         }
-
 
         if (isDependencyListAttr(attributeName, obj)) {
             obj = fixDependencyListAttribute(obj);
@@ -263,14 +240,16 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
 
     private Object fixDependencyListAttribute(final Object attribute) {
         if (!attribute.getClass().isArray()) {
-            throw new IllegalArgumentException("Unexpected attribute type, should be an array, but was " + attribute.getClass());
+            throw new IllegalArgumentException(
+                    "Unexpected attribute type, should be an array, but was " + attribute.getClass());
         }
 
         for (int i = 0; i < Array.getLength(attribute); i++) {
 
             Object on = Array.get(attribute, i);
             if (!(on instanceof ObjectName)) {
-                throw new IllegalArgumentException("Unexpected attribute type, should be an ObjectName, but was " + on.getClass());
+                throw new IllegalArgumentException(
+                        "Unexpected attribute type, should be an ObjectName, but was " + on.getClass());
             }
             on = fixObjectName((ObjectName) on);
 
@@ -295,8 +274,8 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
 
     protected ObjectName fixObjectName(final ObjectName on) {
         if (!ObjectNameUtil.ON_DOMAIN.equals(on.getDomain())) {
-            throw new IllegalArgumentException("Wrong domain, expected "
-                    + ObjectNameUtil.ON_DOMAIN + " setter on " + on);
+            throw new IllegalArgumentException(
+                    "Wrong domain, expected " + ObjectNameUtil.ON_DOMAIN + " setter on " + on);
         }
         // if on contains transaction name, remove it
         String transactionName = ObjectNameUtil.getTransactionName(on);
@@ -311,11 +290,11 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
     public AttributeList getAttributes(final String[] attributes) {
         AttributeList result = new AttributeList();
         for (String attributeName : attributes) {
+            Object value;
             try {
-                Object value = getAttribute(attributeName);
+                value = getAttribute(attributeName);
                 result.add(new Attribute(attributeName, value));
-
-            } catch (final Exception e) {
+            } catch (AttributeNotFoundException | MBeanException | ReflectionException e) {
                 LOG.debug("Getting attribute {} failed", attributeName, e);
             }
         }
@@ -325,13 +304,11 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
     @Override
     public Object invoke(final String actionName, final Object[] params, final String[] signature)
             throws MBeanException, ReflectionException {
-        if ("getAttribute".equals(actionName) && params.length == 1
-                && signature[0].equals(String.class.getName())) {
+        if ("getAttribute".equals(actionName) && params.length == 1 && signature[0].equals(String.class.getName())) {
             try {
                 return getAttribute((String) params[0]);
             } catch (final AttributeNotFoundException e) {
-                throw new MBeanException(e, "Attribute not found on "
-                        + moduleIdentifier);
+                throw new MBeanException(e, "Attribute not found on " + moduleIdentifier);
             }
         } else if ("getAttributes".equals(actionName) && params.length == 1
                 && signature[0].equals(String[].class.getName())) {
@@ -341,10 +318,10 @@ abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrapper {
             return setAttributes((AttributeList) params[0]);
         } else {
             LOG.debug("Operation not found {} ", actionName);
-            throw new UnsupportedOperationException(
-                    String.format("Operation not found on %s. Method invoke is only supported for getInstance and getAttribute(s) "
+            throw new UnsupportedOperationException(String.format(
+                    "Operation not found on %s. Method invoke is only supported for getInstance and getAttribute(s) "
                             + "method, got actionName %s, params %s, signature %s ",
-                            moduleIdentifier, actionName, params, signature));
+                    moduleIdentifier, actionName, params, signature));
         }
     }
 

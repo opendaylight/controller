@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -34,23 +34,21 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
     @Override
     public TestingParallelAPSPModule createModule(final String instanceName,
             final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
-        return new TestingParallelAPSPModule(new ModuleIdentifier(NAME,
-                instanceName), dependencyResolver, null, null);
+        return new TestingParallelAPSPModule(new ModuleIdentifier(NAME, instanceName), dependencyResolver, null, null);
     }
 
     @Override
     public TestingParallelAPSPModule createModule(final String instanceName,
-            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old, final BundleContext context)
-            throws Exception {
+            final DependencyResolver dependencyResolver, final DynamicMBeanWithInstance old,
+            final BundleContext context) throws Exception {
         TestingParallelAPSPImpl oldInstance;
         try {
             oldInstance = (TestingParallelAPSPImpl) old.getInstance();
         } catch (final ClassCastException e) {
             oldInstance = null;
         }
-        TestingParallelAPSPModule result = new TestingParallelAPSPModule(
-                new ModuleIdentifier(NAME, instanceName), dependencyResolver,
-                old.getInstance(), oldInstance);
+        TestingParallelAPSPModule result = new TestingParallelAPSPModule(new ModuleIdentifier(NAME, instanceName),
+                dependencyResolver, old.getInstance(), oldInstance);
         // copy attributes
         String someParam = (String) old.getAttribute("SomeParam");
         result.setSomeParam(someParam);
@@ -66,7 +64,8 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
     }
 
     @Override
-    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext context) {
+    public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory,
+            final BundleContext context) {
         return new HashSet<>();
     }
 

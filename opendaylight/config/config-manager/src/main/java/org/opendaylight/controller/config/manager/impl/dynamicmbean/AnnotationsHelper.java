@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,29 +16,27 @@ import java.util.List;
 import java.util.Set;
 import org.opendaylight.controller.config.api.annotations.Description;
 
-public class AnnotationsHelper {
+public final class AnnotationsHelper {
 
     private AnnotationsHelper() {
     }
 
     /**
      * Look for annotation specified by annotationType on method. First observe
-     * method's class, then its super classes, then all provided interfaces.
-     * Used for finding @Description and @RequireInterface
+     * method's class, then its super classes, then all provided interfaces. Used
+     * for finding @Description and @RequireInterface
      *
      * @param <T>
      *            generic type of annotation
      * @return list of found annotations
      */
-    static <T extends Annotation> List<T> findMethodAnnotationInSuperClassesAndIfcs(
-            final Method setter, final Class<T> annotationType,
-            final Set<Class<?>> inspectedInterfaces) {
+    static <T extends Annotation> List<T> findMethodAnnotationInSuperClassesAndIfcs(final Method setter,
+            final Class<T> annotationType, final Set<Class<?>> inspectedInterfaces) {
         Builder<T> result = ImmutableSet.builder();
         Class<?> inspectedClass = setter.getDeclaringClass();
         do {
             try {
-                Method foundSetter = inspectedClass.getMethod(setter.getName(),
-                        setter.getParameterTypes());
+                Method foundSetter = inspectedClass.getMethod(setter.getName(), setter.getParameterTypes());
                 T annotation = foundSetter.getAnnotation(annotationType);
                 if (annotation != null) {
                     result.add(annotation);
@@ -57,28 +55,27 @@ public class AnnotationsHelper {
                 throw new IllegalArgumentException(ifc + " is not an interface");
             }
             try {
-                Method foundSetter = ifc.getMethod(setter.getName(),
-                        setter.getParameterTypes());
+                Method foundSetter = ifc.getMethod(setter.getName(), setter.getParameterTypes());
                 T annotation = foundSetter.getAnnotation(annotationType);
                 if (annotation != null) {
                     result.add(annotation);
                 }
             } catch (final NoSuchMethodException e) {
-
+                break; // FIXME: is this ok?
             }
         }
         return new ArrayList<>(result.build());
     }
 
     /**
-     * Look for annotation specified by annotationType on type. First observe
-     * class clazz, then its super classes, then all exported interfaces with
-     * their super types. Used for finding @Description of modules.
+     * Look for annotation specified by annotationType on type. First observe class
+     * clazz, then its super classes, then all exported interfaces with their super
+     * types. Used for finding @Description of modules.
      *
      * @return list of found annotations
      */
-    static <T extends Annotation> List<T> findClassAnnotationInSuperClassesAndIfcs(
-            final Class<?> clazz, final Class<T> annotationType, final Set<Class<?>> interfaces) {
+    static <T extends Annotation> List<T> findClassAnnotationInSuperClassesAndIfcs(final Class<?> clazz,
+            final Class<T> annotationType, final Set<Class<?>> interfaces) {
         List<T> result = new ArrayList<>();
         Class<?> declaringClass = clazz;
         do {
@@ -102,6 +99,8 @@ public class AnnotationsHelper {
     }
 
     /**
+     * Lists aggregate descriptions.
+     *
      * @return empty string if no annotation is found, or list of descriptions
      *         separated by newline
      */

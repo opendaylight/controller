@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,17 +24,22 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
 /**
- * Responsible for creating TransactionJMXRegistrator, registering transaction and all its beans,
- * lookup of beans, closing of TransactionJMXRegistrator.
+ * Responsible for creating TransactionJMXRegistrator, registering transaction
+ * and all its beans, lookup of beans, closing of TransactionJMXRegistrator.
  */
-class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
+class ConfigTransactionLookupRegistry implements LookupRegistry, Closeable {
     private final TransactionJMXRegistrator transactionJMXRegistrator;
     private final TransactionIdentifier transactionIdentifier;
     private final TransactionModuleJMXRegistrator txModuleJMXRegistrator;
     private final Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories;
 
+    interface TransactionJMXRegistratorFactory {
+        TransactionJMXRegistrator create();
+    }
+
     ConfigTransactionLookupRegistry(final TransactionIdentifier transactionIdentifier,
-                                    final TransactionJMXRegistratorFactory factory, final Map<String, Entry<ModuleFactory, BundleContext>> allCurrentFactories) {
+            final TransactionJMXRegistratorFactory factory,
+            final Map<String, Entry<ModuleFactory, BundleContext>> allCurrentFactories) {
         this.transactionIdentifier = transactionIdentifier;
         this.transactionJMXRegistrator = factory.create();
         this.txModuleJMXRegistrator = transactionJMXRegistrator.createTransactionModuleJMXRegistrator();
@@ -42,11 +47,9 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
     }
 
     private void checkTransactionName(final ObjectName objectName) {
-        String foundTransactionName = ObjectNameUtil
-                .getTransactionName(objectName);
+        String foundTransactionName = ObjectNameUtil.getTransactionName(objectName);
         if (!transactionIdentifier.getName().equals(foundTransactionName)) {
-            throw new IllegalArgumentException("Wrong transaction name "
-                    + objectName);
+            throw new IllegalArgumentException("Wrong transaction name " + objectName);
         }
     }
 
@@ -70,20 +73,19 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
      * {@inheritDoc}
      */
     @Override
-    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
-            throws InstanceNotFoundException {
-        return LookupBeansUtil.lookupConfigBean(this, moduleName, instanceName);
+    public Set<ObjectName> lookupConfigBeans(final String moduleName, final String instanceName) {
+        ObjectName namePattern = ObjectNameUtil.createModulePattern(moduleName, instanceName,
+                transactionIdentifier.getName());
+        return txModuleJMXRegistrator.queryNames(namePattern, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupConfigBeans(final String moduleName,
-                                             final String instanceName) {
-        ObjectName namePattern = ObjectNameUtil.createModulePattern(moduleName,
-                instanceName, transactionIdentifier.getName());
-        return txModuleJMXRegistrator.queryNames(namePattern, null);
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
+            throws InstanceNotFoundException {
+        return LookupBeansUtil.lookupConfigBean(this, moduleName, instanceName);
     }
 
     @Override
@@ -92,7 +94,8 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         ObjectNameUtil.checkType(objectName, ObjectNameUtil.TYPE_MODULE);
         checkTransactionName(objectName);
         // make sure exactly one match is found:
-        LookupBeansUtil.lookupConfigBean(this, ObjectNameUtil.getFactoryName(objectName), ObjectNameUtil.getInstanceName(objectName));
+        LookupBeansUtil.lookupConfigBean(this, ObjectNameUtil.getFactoryName(objectName),
+                ObjectNameUtil.getInstanceName(objectName));
     }
 
     TransactionIdentifier getTransactionIdentifier() {
@@ -108,7 +111,8 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         transactionJMXRegistrator.close();
     }
 
-    public void registerMBean(final ConfigTransactionControllerInternal transactionController, final ObjectName controllerObjectName) throws InstanceAlreadyExistsException {
+    public void registerMBean(final ConfigTransactionControllerInternal transactionController,
+            final ObjectName controllerObjectName) throws InstanceAlreadyExistsException {
         transactionJMXRegistrator.registerMBean(transactionController, controllerObjectName);
     }
 
@@ -129,23 +133,15 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupRuntimeBeans(final String moduleName,
-                                              final String instanceName) {
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName, final String instanceName) {
         String finalModuleName = moduleName == null ? "*" : moduleName;
         String finalInstanceName = instanceName == null ? "*" : instanceName;
-        ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
-                finalModuleName, finalInstanceName);
+        ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(finalModuleName, finalInstanceName);
         return transactionJMXRegistrator.queryNames(namePattern, null);
     }
 
     @Override
     public String toString() {
-        return "ConfigTransactionLookupRegistry{" +
-                "transactionIdentifier=" + transactionIdentifier +
-                '}';
+        return "ConfigTransactionLookupRegistry{" + "transactionIdentifier=" + transactionIdentifier + '}';
     }
-}
-
-interface TransactionJMXRegistratorFactory {
-    TransactionJMXRegistrator create();
 }

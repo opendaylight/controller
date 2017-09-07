@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -30,13 +30,13 @@ public class BeanToOsgiServiceManager {
     private static final String SERVICE_NAME_OSGI_PROP = "name";
 
     /**
-     * To be called for every created, reconfigured and recreated config bean.
-     * It is expected that before using this method OSGi service registry will
-     * be cleaned from previous registrations.
+     * To be called for every created, reconfigured and recreated config bean. It is
+     * expected that before using this method OSGi service registry will be cleaned
+     * from previous registrations.
      */
     public OsgiRegistration registerToOsgi(final AutoCloseable instance, final ModuleIdentifier moduleIdentifier,
-                                           final BundleContext bundleContext,
-                                           final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
+            final BundleContext bundleContext,
+            final Map<ServiceInterfaceAnnotation, String> serviceNamesToAnnotations) {
         return new OsgiRegistration(instance, moduleIdentifier, bundleContext, serviceNamesToAnnotations);
     }
 
@@ -49,34 +49,36 @@ public class BeanToOsgiServiceManager {
         @GuardedBy("this")
         private final Set<ServiceRegistration<?>> serviceRegistrations;
         @GuardedBy("this")
-        private final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations;
+        private final Map<ServiceInterfaceAnnotation, String> serviceNamesToAnnotations;
 
         public OsgiRegistration(final AutoCloseable instance, final ModuleIdentifier moduleIdentifier,
-                                final BundleContext bundleContext,
-                                final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
+                final BundleContext bundleContext,
+                final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
             this.instance = instance;
             this.moduleIdentifier = moduleIdentifier;
             this.serviceNamesToAnnotations = serviceNamesToAnnotations;
             this.serviceRegistrations = registerToSR(instance, bundleContext, serviceNamesToAnnotations);
         }
 
-        private static Set<ServiceRegistration<?>> registerToSR(final AutoCloseable instance, final BundleContext bundleContext,
-                                                                final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
+        private static Set<ServiceRegistration<?>> registerToSR(final AutoCloseable instance,
+                final BundleContext bundleContext,
+                final Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
             Set<ServiceRegistration<?>> serviceRegistrations = new HashSet<>();
-            for (Entry<ServiceInterfaceAnnotation, String /* service ref name */> entry : serviceNamesToAnnotations.entrySet()) {
+            for (Entry<ServiceInterfaceAnnotation, String /* service ref name */> entry : serviceNamesToAnnotations
+                    .entrySet()) {
                 ServiceInterfaceAnnotation annotation = entry.getKey();
                 Class<?> requiredInterface = annotation.osgiRegistrationType();
 
-                if(!annotation.registerToOsgi()) {
+                if (!annotation.registerToOsgi()) {
                     LOG.debug("registerToOsgi for service interface {} is false - not registering", requiredInterface);
                     continue;
                 }
 
-                Preconditions.checkState(requiredInterface.isInstance(instance), instance.getClass().getName() +
-                        " instance should implement " + requiredInterface.getName());
+                Preconditions.checkState(requiredInterface.isInstance(instance),
+                        instance.getClass().getName() + " instance should implement " + requiredInterface.getName());
                 Dictionary<String, String> propertiesForOsgi = createProps(entry.getValue());
-                ServiceRegistration<?> serviceRegistration = bundleContext
-                        .registerService(requiredInterface.getName(), instance, propertiesForOsgi);
+                ServiceRegistration<?> serviceRegistration = bundleContext.registerService(requiredInterface.getName(),
+                        instance, propertiesForOsgi);
                 serviceRegistrations.add(serviceRegistration);
             }
             return serviceRegistrations;
@@ -87,19 +89,21 @@ public class BeanToOsgiServiceManager {
             for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
                 try {
                     serviceRegistration.unregister();
-                } catch(final IllegalStateException e) {
+                } catch (final IllegalStateException e) {
                     LOG.trace("Cannot unregister {}", serviceRegistration, e);
                 }
             }
             serviceRegistrations.clear();
         }
 
-        public synchronized void updateRegistrations(final Map<ServiceInterfaceAnnotation, String /* service ref name */> newAnnotationMapping,
-                                                     final BundleContext bundleContext, final AutoCloseable newInstance) {
+        public synchronized void updateRegistrations(
+                final Map<ServiceInterfaceAnnotation, String /* service ref name */> newAnnotationMapping,
+                final BundleContext bundleContext, final AutoCloseable newInstance) {
             boolean notEquals = !this.instance.equals(newInstance);
             notEquals |= !newAnnotationMapping.equals(serviceNamesToAnnotations);
             if (notEquals) {
-                // FIXME: changing from old state to new state can be improved by computing the diff
+                // FIXME: changing from old state to new state can be improved by computing the
+                // diff
                 LOG.debug("Detected change in service registrations for {}: old: {}, new: {}", moduleIdentifier,
                         serviceNamesToAnnotations, newAnnotationMapping);
                 close();

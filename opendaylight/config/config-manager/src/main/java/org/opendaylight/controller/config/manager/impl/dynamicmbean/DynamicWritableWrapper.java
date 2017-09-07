@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -47,31 +47,27 @@ import org.slf4j.LoggerFactory;
  */
 @ThreadSafe
 public class DynamicWritableWrapper extends AbstractDynamicWrapper {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(DynamicWritableWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DynamicWritableWrapper.class);
 
     private final ReadOnlyAtomicBoolean configBeanModificationDisabled;
 
-    public DynamicWritableWrapper(final Module module,
-                                  final ModuleIdentifier moduleIdentifier,
-                                  final String transactionIdentifier,
-                                  final ReadOnlyAtomicBoolean configBeanModificationDisabled,
-                                  final MBeanServer internalServer, final MBeanServer configMBeanServer) {
-        super(module, true, moduleIdentifier, ObjectNameUtil
-                        .createTransactionModuleON(transactionIdentifier, moduleIdentifier), getOperations(moduleIdentifier),
-                internalServer, configMBeanServer);
+    public DynamicWritableWrapper(final Module module, final ModuleIdentifier moduleIdentifier,
+            final String transactionIdentifier, final ReadOnlyAtomicBoolean configBeanModificationDisabled,
+            final MBeanServer internalServer, final MBeanServer configMBeanServer) {
+        super(module, true, moduleIdentifier,
+                ObjectNameUtil.createTransactionModuleON(transactionIdentifier, moduleIdentifier),
+                getOperations(moduleIdentifier), internalServer, configMBeanServer);
         this.configBeanModificationDisabled = configBeanModificationDisabled;
     }
 
-    private static MBeanOperationInfo[] getOperations(
-            final ModuleIdentifier moduleIdentifier) {
+    private static MBeanOperationInfo[] getOperations(final ModuleIdentifier moduleIdentifier) {
         Method validationMethod;
         try {
             validationMethod = DynamicWritableWrapper.class.getMethod("validate");
         } catch (final NoSuchMethodException e) {
             throw new IllegalStateException("No such method exception on " + moduleIdentifier, e);
         }
-        return new MBeanOperationInfo[]{new MBeanOperationInfo("Validation", validationMethod)};
+        return new MBeanOperationInfo[] { new MBeanOperationInfo("Validation", validationMethod) };
     }
 
     @Override
@@ -105,7 +101,8 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
         Attribute newAttribute = attribute;
         AttributeHolder attributeHolder = attributeHolderMap.get(newAttribute.getName());
         if (attributeHolder.getRequireInterfaceOrNull() != null) {
-            newAttribute = new Attribute(newAttribute.getName(), fixObjectNames((ObjectName[]) newAttribute.getValue()));
+            newAttribute = new Attribute(newAttribute.getName(),
+                    fixObjectNames((ObjectName[]) newAttribute.getValue()));
         }
         return newAttribute;
     }
@@ -122,10 +119,10 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
     }
 
     private ObjectName[] fixObjectNames(final ObjectName[] dependencies) {
-        int i = 0;
+        int index = 0;
 
         for (ObjectName dependencyOn : dependencies) {
-            dependencies[i++] = fixObjectName(dependencyOn);
+            dependencies[index++] = fixObjectName(dependencyOn);
         }
 
         return dependencies;
@@ -139,28 +136,26 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
             try {
                 setAttribute(attribute);
                 result.add(attribute);
-            } catch (final Exception e) {
+            } catch (final InvalidAttributeValueException | AttributeNotFoundException | MBeanException
+                    | ReflectionException e) {
                 LOG.warn("Setting attribute {} failed on {}", attribute.getName(), moduleIdentifier, e);
                 throw new IllegalArgumentException(
-                        "Setting attribute failed - " + attribute.getName()
-                                + " on " + moduleIdentifier, e);
+                        "Setting attribute failed - " + attribute.getName() + " on " + moduleIdentifier, e);
             }
         }
         return result;
     }
 
+    @SuppressWarnings("IllegalCatch")
     @Override
     public Object invoke(final String actionName, final Object[] params, final String[] signature)
             throws MBeanException, ReflectionException {
-        if ("validate".equals(actionName)
-                && (params == null || params.length == 0)
+        if ("validate".equals(actionName) && (params == null || params.length == 0)
                 && (signature == null || signature.length == 0)) {
             try {
                 validate();
             } catch (final Exception e) {
-
-                throw new MBeanException(ValidationException.createForSingleException(
-                        moduleIdentifier, e));
+                throw new MBeanException(ValidationException.createForSingleException(moduleIdentifier, e));
             }
             return Void.TYPE;
         }

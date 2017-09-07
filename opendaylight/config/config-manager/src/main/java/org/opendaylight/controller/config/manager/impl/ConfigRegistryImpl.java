@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2013, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +38,7 @@ import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
+import org.opendaylight.controller.config.manager.impl.ConfigTransactionLookupRegistry.TransactionJMXRegistratorFactory;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DestroyedModule;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.ModuleInternalTransactionalInfo;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.DynamicReadableWrapper;
@@ -75,22 +75,22 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     private volatile long versionCounter = 0;
 
     /**
-     * Contains current configuration in form of {moduleName:{instanceName,read
-     * only module}} for copying state to new transaction. Each running module
-     * is present just once, no matter how many interfaces it exposes.
+     * Contains current configuration in form of {moduleName:{instanceName,read only
+     * module}} for copying state to new transaction. Each running module is present
+     * just once, no matter how many interfaces it exposes.
      */
     private final ConfigHolder currentConfig = new ConfigHolder();
 
     /**
      * Will return true unless there was a transaction that succeeded during
-     * validation but failed in second phase of commit. In this case the server
-     * is unstable and its state is undefined.
+     * validation but failed in second phase of commit. In this case the server is
+     * unstable and its state is undefined.
      */
     private volatile boolean isHealthy = true;
 
     /**
-     * Holds Map<transactionName, transactionController> and purges it each time
-     * its content is requested.
+     * Holds the map of transactions and purges it each time its content is
+     * requested.
      */
     private final TransactionsHolder transactionsHolder = new TransactionsHolder();
 
@@ -115,20 +115,18 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     // switched in every 2ndPC
     @GuardedBy("readableSRRegistryLock")
-    private CloseableServiceReferenceReadableRegistry readableSRRegistry =
-            ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
+    private CloseableServiceReferenceReadableRegistry readableSRRegistry = ServiceReferenceRegistryImpl
+            .createInitialSRLookupRegistry();
 
     // constructor
-    public ConfigRegistryImpl(final ModuleFactoriesResolver resolver,
-                              final MBeanServer configMBeanServer, final BindingContextProvider bindingContextProvider) {
-        this(resolver, configMBeanServer,
-                new BaseJMXRegistrator(configMBeanServer), bindingContextProvider);
+    public ConfigRegistryImpl(final ModuleFactoriesResolver resolver, final MBeanServer configMBeanServer,
+            final BindingContextProvider bindingContextProvider) {
+        this(resolver, configMBeanServer, new BaseJMXRegistrator(configMBeanServer), bindingContextProvider);
     }
 
     // constructor
-    public ConfigRegistryImpl(final ModuleFactoriesResolver resolver,
-                              final MBeanServer configMBeanServer,
-                              final BaseJMXRegistrator baseJMXRegistrator, final BindingContextProvider bindingContextProvider) {
+    public ConfigRegistryImpl(final ModuleFactoriesResolver resolver, final MBeanServer configMBeanServer,
+            final BaseJMXRegistrator baseJMXRegistrator, final BindingContextProvider bindingContextProvider) {
         this.resolver = resolver;
         this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.configMBeanServer = configMBeanServer;
@@ -141,7 +139,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     }
 
     /**
-     * Create new {@link ConfigTransactionControllerImpl }
+     * Create new {@link ConfigTransactionControllerImpl }.
      */
     @Override
     public ObjectName beginConfig() {
@@ -149,32 +147,43 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     }
 
     /**
-     * @param blankTransaction true if this transaction is created automatically by
-     *                         org.opendaylight.controller.config.manager.impl.osgi.BlankTransactionServiceTracker
+     * It returns true if this transaction is created automatically by
+     * org.opendaylight.controller.config.manager.impl.osgi.BlankTransactionServiceTracker.
+     *
+     * @param blankTransaction
+     *            true if this transaction is created automatically by
+     *            org.opendaylight.controller.config.manager.impl.osgi.BlankTransactionServiceTracker
      */
     public ObjectName beginConfig(final boolean blankTransaction) {
-        // If we're closed or in the process of closing then all modules are destroyed or being destroyed
-        // so there's no point in trying to acquire the lock and beginning an actual transaction. Also we want
-        // to avoid trying to lock as it may block the shutdown process if there is an outstanding transaction
+        // If we're closed or in the process of closing then all modules are destroyed
+        // or being destroyed
+        // so there's no point in trying to acquire the lock and beginning an actual
+        // transaction. Also we want
+        // to avoid trying to lock as it may block the shutdown process if there is an
+        // outstanding transaction
         // attempting to be committed.
         //
-        // We could throw an exception here to indicate this but that's not part of the original API contract
-        // and callers may not be expecting an unchecked exception. Therefore we return a special transaction
+        // We could throw an exception here to indicate this but that's not part of the
+        // original API contract
+        // and callers may not be expecting an unchecked exception. Therefore we return
+        // a special transaction
         // handle that signifies a "no-op".
-        if(closed.get()) {
+        if (closed.get()) {
             return NOOP_TX_NAME;
         }
 
-        if(blankTransaction) {
+        if (blankTransaction) {
             try {
-                // For a "blank" transaction, we'll try to obtain the config lock but "blank" transactions
-                // are initiated via OSGi events so we don't want to block indefinitely or for a long period
+                // For a "blank" transaction, we'll try to obtain the config lock but "blank"
+                // transactions
+                // are initiated via OSGi events so we don't want to block indefinitely or for a
+                // long period
                 // of time.
-                if(!configTransactionLock.tryLock(5, TimeUnit.SECONDS)) {
+                if (!configTransactionLock.tryLock(5, TimeUnit.SECONDS)) {
                     LOG.debug("Timed out trying to obtain configTransactionLock");
                     return NOOP_TX_NAME;
                 }
-            } catch(final InterruptedException e) {
+            } catch (final InterruptedException e) {
                 LOG.debug("Interrupted trying to obtain configTransactionLock", e);
                 Thread.currentThread().interrupt();
                 return NOOP_TX_NAME;
@@ -195,8 +204,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         versionCounter++;
         final String transactionName = "ConfigTransaction-" + version + "-" + versionCounter;
 
-        TransactionJMXRegistratorFactory factory =
-                () -> baseJMXRegistrator.createTransactionJMXRegistrator(transactionName);
+        TransactionJMXRegistratorFactory factory = () -> baseJMXRegistrator
+                .createTransactionJMXRegistrator(transactionName);
 
         Map<String, Map.Entry<ModuleFactory, BundleContext>> allCurrentFactories = new HashMap<>(
                 resolver.getAllFactories());
@@ -206,22 +215,21 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             String name = moduleInternalInfo.getModuleFactory().getImplementationName();
             if (!allCurrentFactories.containsKey(name)) {
                 LOG.trace("Factory {} not found in SR, using reference from previous commit", name);
-                allCurrentFactories.put(name,
-                        Maps.immutableEntry(moduleInternalInfo.getModuleFactory(), moduleInternalInfo.getBundleContext()));
+                allCurrentFactories.put(name, Maps.immutableEntry(moduleInternalInfo.getModuleFactory(),
+                        moduleInternalInfo.getBundleContext()));
             }
         }
         allCurrentFactories = Collections.unmodifiableMap(allCurrentFactories);
 
         // closed by transaction controller
-        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(new TransactionIdentifier(
-                transactionName), factory, allCurrentFactories);
-        SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl.createSRWritableRegistry(
-                readableSRRegistry, txLookupRegistry, allCurrentFactories);
+        ConfigTransactionLookupRegistry txLookupRegistry = new ConfigTransactionLookupRegistry(
+                new TransactionIdentifier(transactionName), factory, allCurrentFactories);
+        SearchableServiceReferenceWritableRegistry writableRegistry = ServiceReferenceRegistryImpl
+                .createSRWritableRegistry(readableSRRegistry, txLookupRegistry, allCurrentFactories);
 
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
-                txLookupRegistry, version, bindingContextProvider,
-                versionCounter, allCurrentFactories, transactionsMBeanServer,
-                configMBeanServer, blankTransaction, writableRegistry);
+                txLookupRegistry, version, bindingContextProvider, versionCounter, allCurrentFactories,
+                transactionsMBeanServer, configMBeanServer, blankTransaction, writableRegistry);
         try {
             txLookupRegistry.registerMBean(transactionController, transactionController.getControllerObjectName());
         } catch (final InstanceAlreadyExistsException e) {
@@ -232,14 +240,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         return transactionController;
     }
 
-    /**
-     * {@inheritDoc}
-     * @throws ConflictingVersionException
-     */
     @Override
     public CommitStatus commitConfig(final ObjectName transactionControllerON)
             throws ValidationException, ConflictingVersionException {
-        if(NOOP_TX_NAME.equals(transactionControllerON) || closed.get()) {
+        if (NOOP_TX_NAME.equals(transactionControllerON) || closed.get()) {
             return new CommitStatus(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
 
@@ -254,50 +258,40 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     @GuardedBy("configTransactionLock")
     private CommitStatus commitConfigSafe(final ObjectName transactionControllerON)
             throws ConflictingVersionException, ValidationException {
-        final String transactionName = ObjectNameUtil
-                .getTransactionName(transactionControllerON);
-        LOG.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version, versionCounter);
+        final String transactionName = ObjectNameUtil.getTransactionName(transactionControllerON);
+        LOG.trace("About to commit {}. Current parentVersion: {}, versionCounter {}", transactionName, version,
+                versionCounter);
 
         // find ConfigTransactionController
-        Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions = transactionsHolder.getCurrentTransactions();
-        Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry> configTransactionControllerEntry = transactions.get(transactionName);
+        Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions =
+                transactionsHolder.getCurrentTransactions();
+        Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry> configTransactionControllerEntry =
+                transactions.get(transactionName);
         if (configTransactionControllerEntry == null) {
-            throw new IllegalArgumentException(String.format(
-                    "Transaction with name '%s' not found", transactionName));
+            throw new IllegalArgumentException(String.format("Transaction with name '%s' not found", transactionName));
         }
         ConfigTransactionControllerInternal configTransactionController = configTransactionControllerEntry.getKey();
         // check optimistic lock
         if (version != configTransactionController.getParentVersion()) {
             throw new ConflictingVersionException(
-                    String.format(
-                            "Optimistic lock failed. Expected parent version %d, was %d",
-                            version,
+                    String.format("Optimistic lock failed. Expected parent version %d, was %d", version,
                             configTransactionController.getParentVersion()));
         }
         // optimistic lock ok
 
         CommitInfo commitInfo = configTransactionController.validateBeforeCommitAndLockTransaction();
-        lastListOfFactories = Collections.unmodifiableList(configTransactionController.getCurrentlyRegisteredFactories());
-        // non recoverable from here:
-        try {
-            return secondPhaseCommit(configTransactionController, commitInfo, configTransactionControllerEntry.getValue());
-            // some libs throw Errors: e.g.
-            // javax.xml.ws.spi.FactoryFinder$ConfigurationError
-        } catch (final Throwable t) {
-            isHealthy = false;
-            LOG.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
-            throw Throwables.propagate(t);
-        }
+        lastListOfFactories = Collections
+                .unmodifiableList(configTransactionController.getCurrentlyRegisteredFactories());
+        return secondPhaseCommit(configTransactionController, commitInfo, configTransactionControllerEntry.getValue());
     }
 
     @GuardedBy("configTransactionLock")
     private CommitStatus secondPhaseCommit(final ConfigTransactionControllerInternal configTransactionController,
-                                           final CommitInfo commitInfo, final ConfigTransactionLookupRegistry txLookupRegistry) {
+            final CommitInfo commitInfo, final ConfigTransactionLookupRegistry txLookupRegistry) {
 
         // close instances which were destroyed by the user, including
         // (hopefully) runtime beans
-        for (DestroyedModule toBeDestroyed : commitInfo
-                .getDestroyedFromPreviousTransactions()) {
+        for (DestroyedModule toBeDestroyed : commitInfo.getDestroyedFromPreviousTransactions()) {
             // closes instance (which should close
             // runtime jmx registrator),
             // also closes osgi registration and ModuleJMXRegistrator
@@ -309,17 +303,16 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // set RuntimeBeanRegistrators on beans implementing
         // RuntimeBeanRegistratorAwareModule
         Map<ModuleIdentifier, RootRuntimeBeanRegistratorImpl> runtimeRegistrators = new HashMap<>();
-        for (ModuleInternalTransactionalInfo entry : commitInfo.getCommitted()
-                .values()) {
+        for (ModuleInternalTransactionalInfo entry : commitInfo.getCommitted().values()) {
             // set runtime jmx registrator if required
             Module module = entry.getProxiedModule();
             RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = null;
 
             if (module instanceof RuntimeBeanRegistratorAwareModule) {
 
-                if(entry.hasOldModule()) {
+                if (entry.hasOldModule()) {
 
-                    if(module.canReuse(entry.getOldInternalInfo().getReadableModule().getModule())) {
+                    if (module.canReuse(entry.getOldInternalInfo().getReadableModule().getModule())) {
                         runtimeBeanRegistrator = entry.getOldInternalInfo().getRuntimeBeanRegistrator();
                         ((RuntimeBeanRegistratorAwareModule) module).setRuntimeBeanRegistrator(runtimeBeanRegistrator);
                     } else {
@@ -333,7 +326,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 }
             }
             // save it to info so it is accessible afterwards
-            if(runtimeBeanRegistrator != null) {
+            if (runtimeBeanRegistrator != null) {
                 runtimeRegistrators.put(entry.getIdentifier(), runtimeBeanRegistrator);
             }
         }
@@ -353,15 +346,12 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         int orderingIdx = 0;
         for (ModuleIdentifier moduleIdentifier : orderedModuleIdentifiers) {
             LOG.trace("Registering {}", moduleIdentifier);
-            ModuleInternalTransactionalInfo entry = commitInfo.getCommitted()
-                    .get(moduleIdentifier);
+            ModuleInternalTransactionalInfo entry = commitInfo.getCommitted().get(moduleIdentifier);
             if (entry == null) {
-                throw new NullPointerException("Module not found "
-                        + moduleIdentifier);
+                throw new NullPointerException("Module not found " + moduleIdentifier);
             }
 
-            ObjectName primaryReadOnlyON = ObjectNameUtil
-                    .createReadOnlyModuleON(moduleIdentifier);
+            ObjectName primaryReadOnlyON = ObjectNameUtil.createReadOnlyModuleON(moduleIdentifier);
 
             // determine if current instance was recreated or reused or is new
 
@@ -372,8 +362,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             // runtime jmx registration - should be taken care of by module
             // itself
             // instance - is closed only if it was destroyed
-            ModuleJMXRegistrator newModuleJMXRegistrator = baseJMXRegistrator
-                    .createModuleJMXRegistrator();
+            ModuleJMXRegistrator newModuleJMXRegistrator = baseJMXRegistrator.createModuleJMXRegistrator();
 
             OsgiRegistration osgiRegistration = null;
             AutoCloseable instance = entry.getProxiedModule().getInstance();
@@ -401,9 +390,12 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 // close old module jmx registrator
                 oldInternalInfo.getModuleJMXRegistrator().close();
 
-                // We no longer need old internal info. Clear it out, so we do not create a serial leak evidenced
-                // by BUG-4514. The reason is that modules retain their resolver, which retains modules. If we retain
-                // the old module, we would have the complete reconfiguration history held in heap for no good reason.
+                // We no longer need old internal info. Clear it out, so we do not create a
+                // serial leak evidenced
+                // by BUG-4514. The reason is that modules retain their resolver, which retains
+                // modules. If we retain
+                // the old module, we would have the complete reconfiguration history held in
+                // heap for no good reason.
                 entry.clearOldInternalInfo();
             } else {
                 // new instance:
@@ -412,34 +404,32 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
             }
             Module realModule = entry.getRealModule();
 
-            DynamicReadableWrapper newReadableConfigBean = new DynamicReadableWrapper(
-                    realModule, instance, moduleIdentifier,
-                    registryMBeanServer, configMBeanServer);
+            DynamicReadableWrapper newReadableConfigBean = new DynamicReadableWrapper(realModule, instance,
+                    moduleIdentifier, registryMBeanServer, configMBeanServer);
 
             // register to JMX
             try {
                 newModuleJMXRegistrator.registerMBean(newReadableConfigBean, primaryReadOnlyON);
             } catch (final InstanceAlreadyExistsException e) {
-                throw new IllegalStateException("Possible code error, already registered:" + primaryReadOnlyON,e);
+                throw new IllegalStateException("Possible code error, already registered:" + primaryReadOnlyON, e);
             }
 
             // register services to OSGi
-            Map<ServiceInterfaceAnnotation, String /* service ref name */> annotationMapping = configTransactionController.getWritableRegistry().findServiceInterfaces(moduleIdentifier);
-            BundleContext bc = configTransactionController.getModuleFactoryBundleContext(
-                    entry.getModuleFactory().getImplementationName());
+            Map<ServiceInterfaceAnnotation, String> annotationMapping = configTransactionController
+                    .getWritableRegistry().findServiceInterfaces(moduleIdentifier);
+            BundleContext bc = configTransactionController
+                    .getModuleFactoryBundleContext(entry.getModuleFactory().getImplementationName());
             if (osgiRegistration == null) {
-                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(
-                        newReadableConfigBean.getInstance(), moduleIdentifier, bc, annotationMapping);
+                osgiRegistration = beanToOsgiServiceManager.registerToOsgi(newReadableConfigBean.getInstance(),
+                        moduleIdentifier, bc, annotationMapping);
             } else {
                 osgiRegistration.updateRegistrations(annotationMapping, bc, instance);
             }
 
-            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators
-                    .get(entry.getIdentifier());
-            ModuleInternalInfo newInfo = new ModuleInternalInfo(
-                    entry.getIdentifier(), newReadableConfigBean, osgiRegistration,
-                    runtimeBeanRegistrator, newModuleJMXRegistrator,
-                    orderingIdx, entry.isDefaultBean(), entry.getModuleFactory(), entry.getBundleContext());
+            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = runtimeRegistrators.get(entry.getIdentifier());
+            ModuleInternalInfo newInfo = new ModuleInternalInfo(entry.getIdentifier(), newReadableConfigBean,
+                    osgiRegistration, runtimeBeanRegistrator, newModuleJMXRegistrator, orderingIdx,
+                    entry.isDefaultBean(), entry.getModuleFactory(), entry.getBundleContext());
 
             newConfigEntries.put(realModule, newInfo);
             orderingIdx++;
@@ -450,14 +440,13 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         version = configTransactionController.getVersion();
 
         // switch readable Service Reference Registry
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             readableSRRegistry.close();
             readableSRRegistry = ServiceReferenceRegistryImpl.createSRReadableRegistry(
                     configTransactionController.getWritableRegistry(), this, baseJMXRegistrator);
         }
 
-        return new CommitStatus(newInstances, reusedInstances,
-                recreatedInstances);
+        return new CommitStatus(newInstances, reusedInstances, recreatedInstances);
     }
 
     /**
@@ -465,44 +454,40 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      */
     @Override
     public List<ObjectName> getOpenConfigs() {
-        Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions = transactionsHolder
-                .getCurrentTransactions();
+        Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions =
+                transactionsHolder.getCurrentTransactions();
         List<ObjectName> result = new ArrayList<>(transactions.size());
-        for (Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry> configTransactionControllerEntry : transactions
-                .values()) {
+        for (Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>
+            configTransactionControllerEntry : transactions.values()) {
             result.add(configTransactionControllerEntry.getKey().getControllerObjectName());
         }
         return result;
     }
 
     /**
-     * Abort open transactions and unregister read only modules. Since this
-     * class is not responsible for registering itself under
-     * {@link org.opendaylight.controller.config.api.ConfigRegistry#OBJECT_NAME}, it will not unregister itself
-     * here.
+     * Abort open transactions and unregister read only modules. Since this class is
+     * not responsible for registering itself under
+     * {@link org.opendaylight.controller.config.api.ConfigRegistry#OBJECT_NAME}, it
+     * will not unregister itself here.
      */
     @Override
     public void close() {
-        if(!closed.compareAndSet(false, true)) {
+        if (!closed.compareAndSet(false, true)) {
             return;
         }
 
         // abort transactions
-        Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions = transactionsHolder
-                .getCurrentTransactions();
-        for (Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry> configTransactionControllerEntry : transactions
-                .values()) {
-
+        Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions =
+                transactionsHolder.getCurrentTransactions();
+        for (Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>
+            configTransactionControllerEntry : transactions.values()) {
             ConfigTransactionControllerInternal configTransactionController = configTransactionControllerEntry.getKey();
-            try {
-                configTransactionControllerEntry.getValue().close();
-                configTransactionController.abortConfig();
-            } catch (final RuntimeException e) {
-                LOG.debug("Ignoring exception while aborting {}", configTransactionController, e);
-            }
+            configTransactionControllerEntry.getValue().close();
+            configTransactionController.abortConfig();
         }
 
-        // destroy all live objects one after another in order of the dependency hierarchy, from top to bottom
+        // destroy all live objects one after another in order of the dependency
+        // hierarchy, from top to bottom
         List<DestroyedModule> destroyedModules = currentConfig.getModulesToBeDestroyed();
 
         LOG.info("ConfigRegistry closing - destroying {} modules", destroyedModules.size());
@@ -532,8 +517,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      */
     @Override
     public Set<String> getAvailableModuleNames() {
-        return new HierarchicalConfigMBeanFactoriesHolder(
-                resolver.getAllFactories()).getModuleNames();
+        return new HierarchicalConfigMBeanFactoriesHolder(resolver.getAllFactories()).getModuleNames();
     }
 
     /**
@@ -566,20 +550,18 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      * {@inheritDoc}
      */
     @Override
-    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
-            throws InstanceNotFoundException {
-        return LookupBeansUtil.lookupConfigBean(this, moduleName, instanceName);
+    public Set<ObjectName> lookupConfigBeans(final String moduleName, final String instanceName) {
+        ObjectName namePattern = ObjectNameUtil.createModulePattern(moduleName, instanceName);
+        return baseJMXRegistrator.queryNames(namePattern, null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupConfigBeans(final String moduleName,
-                                             final String instanceName) {
-        ObjectName namePattern = ObjectNameUtil.createModulePattern(moduleName,
-                instanceName);
-        return baseJMXRegistrator.queryNames(namePattern, null);
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
+            throws InstanceNotFoundException {
+        return LookupBeansUtil.lookupConfigBean(this, moduleName, instanceName);
     }
 
     /**
@@ -594,12 +576,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectName> lookupRuntimeBeans(final String moduleName,
-                                              final String instanceName) {
+    public Set<ObjectName> lookupRuntimeBeans(final String moduleName, final String instanceName) {
         String finalModuleName = moduleName == null ? "*" : moduleName;
         String finalInstanceName = instanceName == null ? "*" : instanceName;
-        ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(
-                finalModuleName, finalInstanceName);
+        ObjectName namePattern = ObjectNameUtil.createRuntimeBeanPattern(finalModuleName, finalInstanceName);
         return baseJMXRegistrator.queryNames(namePattern, null);
     }
 
@@ -609,58 +589,61 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         ObjectNameUtil.checkType(objectName, ObjectNameUtil.TYPE_MODULE);
         String transactionName = ObjectNameUtil.getTransactionName(objectName);
         if (transactionName != null) {
-            throw new IllegalArgumentException("Transaction attribute not supported in registry, wrong ObjectName: " + objectName);
+            throw new IllegalArgumentException(
+                    "Transaction attribute not supported in registry, wrong ObjectName: " + objectName);
         }
         // make sure exactly one match is found:
-        LookupBeansUtil.lookupConfigBean(this, ObjectNameUtil.getFactoryName(objectName), ObjectNameUtil.getInstanceName(objectName));
+        LookupBeansUtil.lookupConfigBean(this, ObjectNameUtil.getFactoryName(objectName),
+                ObjectNameUtil.getInstanceName(objectName));
     }
 
     // service reference functionality:
     @Override
     public ObjectName lookupConfigBeanByServiceInterfaceName(final String serviceInterfaceQName, final String refName) {
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             return readableSRRegistry.lookupConfigBeanByServiceInterfaceName(serviceInterfaceQName, refName);
         }
     }
 
     @Override
     public Map<String, Map<String, ObjectName>> getServiceMapping() {
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             return readableSRRegistry.getServiceMapping();
         }
     }
 
     @Override
     public Map<String, ObjectName> lookupServiceReferencesByServiceInterfaceName(final String serviceInterfaceQName) {
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             return readableSRRegistry.lookupServiceReferencesByServiceInterfaceName(serviceInterfaceQName);
         }
     }
 
     @Override
     public Set<String> lookupServiceInterfaceNames(final ObjectName objectName) throws InstanceNotFoundException {
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             return readableSRRegistry.lookupServiceInterfaceNames(objectName);
         }
     }
 
     @Override
     public String getServiceInterfaceName(final String namespace, final String localName) {
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             return readableSRRegistry.getServiceInterfaceName(namespace, localName);
         }
     }
 
     @Override
     public void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
-        synchronized(readableSRRegistryLock) {
+        synchronized (readableSRRegistryLock) {
             readableSRRegistry.checkServiceReferenceExists(objectName);
         }
     }
 
     @Override
-    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
-        synchronized(readableSRRegistryLock) {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName)
+            throws InstanceNotFoundException {
+        synchronized (readableSRRegistryLock) {
             return readableSRRegistry.getServiceReference(serviceInterfaceQName, refName);
         }
     }
@@ -672,110 +655,103 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     @Override
     public String toString() {
-        return "ConfigRegistryImpl{" +
-                "versionCounter=" + versionCounter +
-                ", version=" + version +
-                '}';
-    }
-}
-
-/**
- * Holds currently running modules
- */
-class ConfigHolder {
-    private final ConcurrentMap<ModuleIdentifier, ModuleInternalInfo> currentConfig = new ConcurrentHashMap<>();
-
-    /**
-     * Add all modules to the internal map. Also add service instance to OSGi
-     * Service Registry.
-     */
-    public void addAll(final Collection<ModuleInternalInfo> configInfos) {
-        if (!currentConfig.isEmpty()) {
-            throw new IllegalStateException(
-                    "Error - some config entries were not removed: "
-                            + currentConfig);
-        }
-        for (ModuleInternalInfo configInfo : configInfos) {
-            add(configInfo);
-        }
-    }
-
-    private void add(final ModuleInternalInfo configInfo) {
-        ModuleInternalInfo oldValue = currentConfig.putIfAbsent(configInfo.getIdentifier(), configInfo);
-        if (oldValue != null) {
-            throw new IllegalStateException(
-                    "Cannot overwrite module with same name:"
-                            + configInfo.getIdentifier() + ":" + configInfo);
-        }
+        return "ConfigRegistryImpl{" + "versionCounter=" + versionCounter + ", version=" + version + '}';
     }
 
     /**
-     * Remove entry from current config.
+     * Inner class holding transactions and purges it each time its content is
+     * requested.
      */
-    public void remove(final ModuleIdentifier name) {
-        ModuleInternalInfo removed = currentConfig.remove(name);
-        if (removed == null) {
-            throw new IllegalStateException(
-                    "Cannot remove from ConfigHolder - name not found:" + name);
-        }
-    }
+    class TransactionsHolder {
+        /**
+         * This map keeps transaction names and
+         * {@link ConfigTransactionControllerInternal} instances, because platform
+         * MBeanServer transforms mbeans into another representation. Map is cleaned
+         * every time current transactions are requested.
+         */
+        private final ConcurrentMap<String /* transactionName */,
+            Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>>
+            transactions = new ConcurrentHashMap<>();
 
-    public Collection<ModuleInternalInfo> getEntries() {
-        return currentConfig.values();
-    }
-
-    public List<DestroyedModule> getModulesToBeDestroyed() {
-        List<DestroyedModule> result = new ArrayList<>();
-        for (ModuleInternalInfo moduleInternalInfo : getEntries()) {
-            result.add(moduleInternalInfo.toDestroyedModule());
-        }
-        Collections.sort(result);
-        return result;
-    }
-
-
-}
-
-/**
- * Holds Map<transactionName, transactionController> and purges it each time its
- * content is requested.
- */
-class TransactionsHolder {
-    /**
-     * This map keeps transaction names and
-     * {@link ConfigTransactionControllerInternal} instances, because platform
-     * MBeanServer transforms mbeans into another representation. Map is cleaned
-     * every time current transactions are requested.
-     */
-    private final ConcurrentMap<String /* transactionName */,
-            Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> transactions = new ConcurrentHashMap<>();
-
-    public void add(final String transactionName,
-                    final ConfigTransactionControllerInternal transactionController, final ConfigTransactionLookupRegistry txLookupRegistry) {
-        Object oldValue = transactions.putIfAbsent(transactionName,
-                Maps.immutableEntry(transactionController, txLookupRegistry));
-        if (oldValue != null) {
-            throw new IllegalStateException(
-                    "Error: two transactions with same name");
-        }
-    }
-
-    /**
-     * Purges closed transactions from transactions map. Calling this method more than once within the
-     * method can modify the resulting map that was obtained in previous calls.
-     *
-     * @return current view on transactions map.
-     */
-    public Map<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> getCurrentTransactions() {
-        // first, remove closed transaction
-        for (Iterator<Entry<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>>> it = transactions
-                .entrySet().iterator(); it.hasNext(); ) {
-            Entry<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> entry = it
-                    .next();
-            if (entry.getValue().getKey().isClosed()) {
-                it.remove();
+        public void add(final String transactionName, final ConfigTransactionControllerInternal transactionController,
+                final ConfigTransactionLookupRegistry txLookupRegistry) {
+            Object oldValue = transactions.putIfAbsent(transactionName,
+                    Maps.immutableEntry(transactionController, txLookupRegistry));
+            if (oldValue != null) {
+                throw new IllegalStateException("Error: two transactions with same name");
             }
         }
-        return Collections.unmodifiableMap(transactions);
+
+        /**
+         * Purges closed transactions from transactions map. Calling this method more
+         * than once within the method can modify the resulting map that was obtained in
+         * previous calls.
+         *
+         * @return current view on transactions map.
+         */
+        public Map<String, Entry<ConfigTransactionControllerInternal,
+            ConfigTransactionLookupRegistry>> getCurrentTransactions() {
+            // first, remove closed transaction
+            for (Iterator<Entry<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>>>
+                it = transactions.entrySet().iterator(); it.hasNext();) {
+                Entry<String, Entry<ConfigTransactionControllerInternal, ConfigTransactionLookupRegistry>> entry = it
+                        .next();
+                if (entry.getValue().getKey().isClosed()) {
+                    it.remove();
+                }
+            }
+            return Collections.unmodifiableMap(transactions);
+        }
+    }
+
+    /**
+     * Inner class that holds currently running modules.
+     */
+    class ConfigHolder {
+        private final ConcurrentMap<ModuleIdentifier, ModuleInternalInfo> currentConfig = new ConcurrentHashMap<>();
+
+        /**
+         * Add all modules to the internal map. Also add service instance to OSGi
+         * Service Registry.
+         */
+        public void addAll(final Collection<ModuleInternalInfo> configInfos) {
+            if (!currentConfig.isEmpty()) {
+                throw new IllegalStateException("Error - some config entries were not removed: " + currentConfig);
+            }
+            for (ModuleInternalInfo configInfo : configInfos) {
+                add(configInfo);
+            }
+        }
+
+        private void add(final ModuleInternalInfo configInfo) {
+            ModuleInternalInfo oldValue = currentConfig.putIfAbsent(configInfo.getIdentifier(), configInfo);
+            if (oldValue != null) {
+                throw new IllegalStateException(
+                        "Cannot overwrite module with same name:" + configInfo.getIdentifier() + ":" + configInfo);
+            }
+        }
+
+        /**
+         * Remove entry from current config.
+         */
+        public void remove(final ModuleIdentifier name) {
+            ModuleInternalInfo removed = currentConfig.remove(name);
+            if (removed == null) {
+                throw new IllegalStateException("Cannot remove from ConfigHolder - name not found:" + name);
+            }
+        }
+
+        public Collection<ModuleInternalInfo> getEntries() {
+            return currentConfig.values();
+        }
+
+        public List<DestroyedModule> getModulesToBeDestroyed() {
+            List<DestroyedModule> result = new ArrayList<>();
+            for (ModuleInternalInfo moduleInternalInfo : getEntries()) {
+                result.add(moduleInternalInfo.toDestroyedModule());
+            }
+            Collections.sort(result);
+            return result;
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,19 +26,19 @@ import org.opendaylight.controller.config.api.jmx.notifications.ConfigJMXNotific
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImplMXBean;
 
 /**
- * Thin wrapper over ConfigRegistry emitting JMX notifications
+ * Thin wrapper over ConfigRegistry emitting JMX notifications.
  */
 public class JMXNotifierConfigRegistry implements ConfigRegistryImplMXBean, AutoCloseable {
 
     private final ConfigRegistryImplMXBean delegate;
     private final NotifierMXBeanImpl notifier;
-    private final MBeanServer mBeanServer;
+    private final MBeanServer beanServer;
 
-    public JMXNotifierConfigRegistry(final ConfigRegistryImplMXBean delegate, final MBeanServer mBeanServer) {
+    public JMXNotifierConfigRegistry(final ConfigRegistryImplMXBean delegate, final MBeanServer beanServer) {
         this.delegate = delegate;
         notifier = new NotifierMXBeanImpl();
-        this.mBeanServer = mBeanServer;
-        registerMBean(notifier, this.mBeanServer, ConfigJMXNotification.OBJECT_NAME);
+        this.beanServer = beanServer;
+        registerMBean(notifier, this.beanServer, ConfigJMXNotification.OBJECT_NAME);
     }
 
     private static void registerMBean(final Object instance, final MBeanServer mbs, final ObjectName on) {
@@ -60,7 +60,8 @@ public class JMXNotifierConfigRegistry implements ConfigRegistryImplMXBean, Auto
     }
 
     @Override
-    public CommitStatus commitConfig(final ObjectName transactionControllerON) throws ConflictingVersionException, ValidationException {
+    public CommitStatus commitConfig(final ObjectName transactionControllerON)
+            throws ConflictingVersionException, ValidationException {
         final CommitStatus commitStatus = delegate.commitConfig(transactionControllerON);
         notifier.notifyCommit(ObjectNameUtil.getTransactionName(transactionControllerON));
         return commitStatus;
@@ -97,7 +98,8 @@ public class JMXNotifierConfigRegistry implements ConfigRegistryImplMXBean, Auto
     }
 
     @Override
-    public ObjectName lookupConfigBean(final String moduleName, final String instanceName) throws InstanceNotFoundException {
+    public ObjectName lookupConfigBean(final String moduleName, final String instanceName)
+            throws InstanceNotFoundException {
         return delegate.lookupConfigBean(moduleName, instanceName);
     }
 
@@ -147,7 +149,8 @@ public class JMXNotifierConfigRegistry implements ConfigRegistryImplMXBean, Auto
     }
 
     @Override
-    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
+    public ObjectName getServiceReference(final String serviceInterfaceQName, final String refName)
+            throws InstanceNotFoundException {
         return delegate.getServiceReference(serviceInterfaceQName, refName);
     }
 
@@ -159,13 +162,15 @@ public class JMXNotifierConfigRegistry implements ConfigRegistryImplMXBean, Auto
     @Override
     public void close() {
         try {
-            mBeanServer.unregisterMBean(ConfigJMXNotification.OBJECT_NAME);
+            beanServer.unregisterMBean(ConfigJMXNotification.OBJECT_NAME);
         } catch (InstanceNotFoundException | MBeanRegistrationException e) {
-            throw new IllegalStateException("Notifier: " + ConfigJMXNotification.OBJECT_NAME + " not found in JMX when closing");
+            throw new IllegalStateException(
+                    "Notifier: " + ConfigJMXNotification.OBJECT_NAME + " not found in JMX when closing");
         }
     }
 
-    public interface NotifierMXBean {}
+    public interface NotifierMXBean {
+    }
 
     public static class NotifierMXBeanImpl extends NotificationBroadcasterSupport implements NotifierMXBean {
 
