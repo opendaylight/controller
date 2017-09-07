@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_3ac36dee",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/karaf/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-09-07T10:26:24Z",
+      "side": 1,
+      "message": "FYI this is a TODO for \"us\", controller contributors (anyone, really) - I\u0027ve noticed it doesn\u0027t work (during archetype self validation for some reason, perhaps related to the SFT failure itself so possibly fixed when I sort that out, as per the repro procedure posted on the controller-dev list yesterday - but for now, it\u0027s No Go.",
+      "parentUuid": "ba1f61a0_9a241961",
+      "revId": "335e49be9b661357b429656960c8b918f8fa6006",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_da21714e",
         "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/pom.xml",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2017-09-07T07:55:27Z",
       "side": 1,
       "message": "Why disable this?",
+      "revId": "335e49be9b661357b429656960c8b918f8fa6006",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_faa4354c",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-09-07T10:26:24Z",
+      "side": 1,
+      "message": "because it doesn\u0027t work during the archetype self test, as per updated commit message.  NB: It will still be \"in\" the archetype - and can be sorted out later.  The point of this change is to go from an abysmal current state to of the archetype to one where at least it builds again; then we (anyone) can improve it.",
+      "parentUuid": "ba1f61a0_da21714e",
       "revId": "335e49be9b661357b429656960c8b918f8fa6006",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
