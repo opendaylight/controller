@@ -69,6 +69,24 @@
       "revId": "335e49be9b661357b429656960c8b918f8fa6006",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_5d01fb03",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-07T10:52:19Z",
+      "side": 1,
+      "message": "Yeah, I understand, and thanks for fixing all this stuff. I just wanted to avoid someone (perhaps even you) coming back to this in three months\u0027 time and wondering what all the disabled stuff was about ;-).",
+      "parentUuid": "ba1f61a0_faa4354c",
+      "revId": "335e49be9b661357b429656960c8b918f8fa6006",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
