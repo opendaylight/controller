@@ -45,6 +45,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
     @Override
     public void instantiateServiceInstance() {
         LOG.debug("Instantiating flapping-singleton-service.");
+        throw new RuntimeException("Intentionally thrown to test resilence of instantiateServiceInstance");
         try {
             registration.close();
             registration = null;
