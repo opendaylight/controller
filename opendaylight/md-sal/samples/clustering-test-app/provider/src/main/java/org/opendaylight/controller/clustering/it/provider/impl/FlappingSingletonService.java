@@ -58,6 +58,8 @@ public class FlappingSingletonService implements ClusterSingletonService {
                 flapCount = -flapCount;
             }
         });
+
+        throw new RuntimeException("Intentionally thrown to test resilence of instantiateServiceInstance");
     }
 
     @Override
