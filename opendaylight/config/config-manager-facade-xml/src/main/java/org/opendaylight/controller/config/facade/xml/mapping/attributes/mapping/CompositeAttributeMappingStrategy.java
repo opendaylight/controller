@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,8 +18,8 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.config.facade.xml.util.Util;
 
-public class CompositeAttributeMappingStrategy extends
-        AbstractAttributeMappingStrategy<Map<String, Object>, CompositeType> {
+public class CompositeAttributeMappingStrategy
+        extends AbstractAttributeMappingStrategy<Map<String, Object>, CompositeType> {
 
     private final Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies;
     private final Map<String, String> jmxToJavaNameMapping;
@@ -34,7 +34,7 @@ public class CompositeAttributeMappingStrategy extends
 
     @Override
     public Optional<Map<String, Object>> mapAttribute(final Object value) {
-        if (value == null){
+        if (value == null) {
             return Optional.absent();
         }
 
@@ -54,7 +54,7 @@ public class CompositeAttributeMappingStrategy extends
 
         for (String jmxName : jmxToJavaNameMapping.keySet()) {
             Optional<?> mapped = mapInnerAttribute(compositeData, jmxName, expectedType.getDescription(jmxName));
-            if(mapped.isPresent()){
+            if (mapped.isPresent()) {
                 retVal.put(jmxToJavaNameMapping.get(jmxName), mapped.get());
             }
         }
@@ -62,12 +62,11 @@ public class CompositeAttributeMappingStrategy extends
         return Optional.of(retVal);
     }
 
-    protected Optional<?> mapInnerAttribute(final CompositeDataSupport compositeData, final String jmxName, final String description) {
+    protected Optional<?> mapInnerAttribute(final CompositeDataSupport compositeData, final String jmxName,
+            final String description) {
         Object innerValue = compositeData.get(jmxName);
 
-        AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies
-                .get(jmxName);
+        AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = innerStrategies.get(jmxName);
         return attributeMappingStrategy.mapAttribute(innerValue);
     }
-
 }

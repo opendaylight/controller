@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -33,12 +33,14 @@ public class ModuleConfig {
         this.instanceConfig = mbeanMapping;
     }
 
-    public Element toXml(final ObjectName instanceON, final Document document, final String namespace, final EnumResolver enumResolver) {
-        final Optional<String> configNs =
-                Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+    public Element toXml(final ObjectName instanceON, final Document document, final String namespace,
+            final EnumResolver enumResolver) {
+        final Optional<String> configNs = Optional
+                .of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         Element root = XmlUtil.createElement(document, XmlMappingConstants.MODULE_KEY, configNs);
 
-        // type belongs to config.yang namespace, but needs to be <type prefix:moduleNS>prefix:moduleName</type>
+        // type belongs to config.yang namespace, but needs to be <type
+        // prefix:moduleNS>prefix:moduleName</type>
 
         Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document, XmlMappingConstants.TYPE_KEY,
                 XmlMappingConstants.PREFIX, namespace, moduleName, configNs);
@@ -55,10 +57,13 @@ public class ModuleConfig {
         return root;
     }
 
-    public ModuleElementResolved fromXml(final XmlElement moduleElement, final ServiceRegistryWrapper depTracker, final String instanceName,
-                                         final String moduleNamespace, final EditStrategyType defaultStrategy, final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) throws DocumentedException {
+    public ModuleElementResolved fromXml(final XmlElement moduleElement, final ServiceRegistryWrapper depTracker,
+            final String instanceName, final String moduleNamespace, final EditStrategyType defaultStrategy,
+            final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver)
+            throws DocumentedException {
 
-        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, identityMap, enumResolver);
+        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace,
+                defaultStrategy, identityMap, enumResolver);
         return new ModuleElementResolved(instanceName, ice);
     }
 

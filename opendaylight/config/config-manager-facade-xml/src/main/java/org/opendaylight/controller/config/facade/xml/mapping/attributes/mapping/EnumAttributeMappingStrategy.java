@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,12 +23,11 @@ public class EnumAttributeMappingStrategy extends AbstractAttributeMappingStrate
 
     @Override
     public Optional<String> mapAttribute(final Object value) {
-        if (value == null){
+        if (value == null) {
             return Optional.absent();
         }
 
         String expectedClass = getOpenType().getTypeName();
         return Optional.of(enumResolver.toYang(expectedClass, value.toString()));
     }
-
 }

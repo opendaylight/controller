@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016, 2017 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,7 +17,8 @@ import org.opendaylight.controller.config.util.ConfigTransactionClient;
 import org.opendaylight.controller.config.util.xml.DocumentedException;
 
 /**
- * Edit strategy that forces re-creation of a module instance even if the config didn't change.
+ * Edit strategy that forces re-creation of a module instance even if the config
+ * didn't change.
  *
  * @author Thomas Pantelis
  */
@@ -28,8 +29,7 @@ public class ReCreateEditConfigStrategy extends AbstractEditConfigStrategy {
             String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
         throw new ConfigHandlingException(
                 String.format("Unable to recreate %s : %s, Existing module instance not found", module, instance),
-                DocumentedException.ErrorType.APPLICATION,
-                DocumentedException.ErrorTag.OPERATION_FAILED,
+                DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                 DocumentedException.ErrorSeverity.ERROR);
     }
 
@@ -38,10 +38,9 @@ public class ReCreateEditConfigStrategy extends AbstractEditConfigStrategy {
             ObjectName objectName, ServiceRegistryWrapper services) throws ConfigHandlingException {
         try {
             ta.reCreateModule(objectName);
-        } catch(InstanceNotFoundException e) {
+        } catch (InstanceNotFoundException e) {
             throw new ConfigHandlingException(String.format("Unable to recreate instance for %s", objectName),
-                    DocumentedException.ErrorType.APPLICATION,
-                    DocumentedException.ErrorTag.OPERATION_FAILED,
+                    DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                     DocumentedException.ErrorSeverity.ERROR);
         }
     }

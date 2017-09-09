@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,14 +10,17 @@ package org.opendaylight.controller.config.facade.xml;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
+
 import java.io.Closeable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -58,7 +61,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Config subsystem facade for xml format
+ * Config subsystem facade for xml format.
+ *
  * <p>
  * TODO extract generic interface for config subsystem facades
  */
@@ -71,7 +75,10 @@ public class ConfigSubsystemFacade implements Closeable {
     private final ConfigRegistryClient configRegistryClientNoNotifications;
     private final RpcFacade rpcFacade;
 
-    public ConfigSubsystemFacade(final ConfigRegistryClient configRegistryClient, final ConfigRegistryClient configRegistryClientNoNotifications, final YangStoreService yangStoreService, final String id) {
+    public ConfigSubsystemFacade(final ConfigRegistryClient configRegistryClient,
+                                 final ConfigRegistryClient configRegistryClientNoNotifications,
+                                 final YangStoreService yangStoreService,
+                                 final String id) {
         this.configRegistryClient = configRegistryClient;
         this.configRegistryClientNoNotifications = configRegistryClientNoNotifications;
         this.yangStoreService = yangStoreService;
@@ -79,7 +86,10 @@ public class ConfigSubsystemFacade implements Closeable {
         rpcFacade = new RpcFacade(yangStoreService, configRegistryClient);
     }
 
-    public ConfigSubsystemFacade(final ConfigRegistryClient configRegistryClient, final ConfigRegistryClient configRegistryClientNoNotifications, final YangStoreService yangStoreService, final TransactionProvider txProvider) {
+    public ConfigSubsystemFacade(final ConfigRegistryClient configRegistryClient,
+                                 final ConfigRegistryClient configRegistryClientNoNotifications,
+                                 final YangStoreService yangStoreService,
+                                 final TransactionProvider txProvider) {
         this.configRegistryClient = configRegistryClient;
         this.configRegistryClientNoNotifications = configRegistryClientNoNotifications;
         this.yangStoreService = yangStoreService;
@@ -87,25 +97,30 @@ public class ConfigSubsystemFacade implements Closeable {
         rpcFacade = new RpcFacade(yangStoreService, configRegistryClient);
     }
 
-    public Element getConfiguration(final Document document, final Datastore source, final Optional<String> maybeNamespace) {
+    public Element getConfiguration(final Document document, final Datastore source,
+                                    final Optional<String> maybeNamespace) {
 
         final ConfigTransactionClient registryClient;
-        // Read current state from a transaction, if running is source, then start new transaction just for reading
+        // Read current state from a transaction, if running is source, then start new
+        // transaction just for reading
         // in case of candidate, get current transaction representing candidate
         if (source == Datastore.running) {
             final ObjectName readTx = transactionProvider.getOrCreateReadTransaction();
             registryClient = configRegistryClient.getConfigTransactionClient(readTx);
         } else {
-            registryClient = configRegistryClient.getConfigTransactionClient(transactionProvider.getOrCreateTransaction());
+            registryClient = configRegistryClient
+                    .getConfigTransactionClient(transactionProvider.getOrCreateTransaction());
         }
 
         try {
-            Element dataElement = XmlUtil.createElement(document, XmlMappingConstants.DATA_KEY, Optional.<String>absent());
+            Element dataElement = XmlUtil.createElement(document, XmlMappingConstants.DATA_KEY,
+                    Optional.<String>absent());
             final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
                     .queryInstances(configRegistryClient);
 
-            final Config configMapping =
-                    new Config(transformMbeToModuleConfigs(yangStoreService.getModuleMXBeanEntryMap()), yangStoreService.getEnumResolver());
+            final Config configMapping = new Config(
+                    transformMbeToModuleConfigs(yangStoreService.getModuleMXBeanEntryMap()),
+                    yangStoreService.getEnumResolver());
 
             ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(registryClient);
             dataElement = configMapping.toXml(instances, maybeNamespace, document, dataElement, serviceTracker);
@@ -118,7 +133,8 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    public void executeConfigExecution(final ConfigExecution configExecution) throws DocumentedException, ValidationException {
+    public void executeConfigExecution(final ConfigExecution configExecution)
+            throws DocumentedException, ValidationException {
         if (configExecution.shouldTest()) {
             executeTests(configExecution);
         }
@@ -128,13 +144,15 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    public CommitStatus commitTransaction() throws DocumentedException, ValidationException, ConflictingVersionException {
+    public CommitStatus commitTransaction()
+            throws DocumentedException, ValidationException, ConflictingVersionException {
         final CommitStatus status = this.transactionProvider.commitTransaction();
         LOG.trace("Transaction committed successfully: {}", status);
         return status;
     }
 
-    public CommitStatus commitSilentTransaction() throws DocumentedException, ValidationException, ConflictingVersionException {
+    public CommitStatus commitSilentTransaction()
+            throws DocumentedException, ValidationException, ConflictingVersionException {
         final CommitStatus status = this.transactionProvider.commitTransaction(configRegistryClientNoNotifications);
         LOG.trace("Transaction committed successfully: {}", status);
         return status;
@@ -142,15 +160,18 @@ public class ConfigSubsystemFacade implements Closeable {
 
     private void executeSet(final ConfigExecution configExecution) throws DocumentedException {
         set(configExecution);
-        LOG.debug("Set phase for {} operation successful, element: ", configExecution.getDefaultStrategy(), configExecution.getConfigElement());
+        LOG.debug("Set phase for {} operation successful, element: ", configExecution.getDefaultStrategy(),
+                configExecution.getConfigElement());
     }
 
     private void executeTests(final ConfigExecution configExecution) throws DocumentedException, ValidationException {
         test(configExecution, configExecution.getDefaultStrategy());
-        LOG.debug("Test phase for {} operation successful, element: ", configExecution.getDefaultStrategy(), configExecution.getConfigElement());
+        LOG.debug("Test phase for {} operation successful, element: ", configExecution.getDefaultStrategy(),
+                configExecution.getConfigElement());
     }
 
-    private void test(final ConfigExecution execution, final EditStrategyType editStrategyType) throws ValidationException, DocumentedException {
+    private void test(final ConfigExecution execution, final EditStrategyType editStrategyType)
+            throws ValidationException, DocumentedException {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
             // default strategy = replace wipes config
@@ -169,31 +190,33 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    private void set(final ConfigExecution ConfigExecution) throws DocumentedException {
+    private void set(final ConfigExecution configExecution) throws DocumentedException {
         ObjectName taON = transactionProvider.getOrCreateTransaction();
 
         // default strategy = replace wipes config
-        if (ConfigExecution.getDefaultStrategy() == EditStrategyType.replace) {
+        if (configExecution.getDefaultStrategy() == EditStrategyType.replace) {
             transactionProvider.wipeTransaction();
         }
 
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
 
-        handleMisssingInstancesOnTransaction(ta, ConfigExecution);
-        setServicesOnTransaction(ta, ConfigExecution);
-        setOnTransaction(ta, ConfigExecution);
+        handleMisssingInstancesOnTransaction(ta, configExecution);
+        setServicesOnTransaction(ta, configExecution);
+        setOnTransaction(ta, configExecution);
     }
 
-    private void setServicesOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution) throws DocumentedException {
-
+    private void setServicesOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
+            throws DocumentedException {
         Services services = execution.getServices();
 
-        Map<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = services
-                .getNamespaceToServiceNameToRefNameToInstance();
+        Map<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceNameToRefNameToInstance =
+                services.getNamespaceToServiceNameToRefNameToInstance();
 
-        for (Map.Entry<String, Map<String, Map<String, Services.ServiceInstance>>> namespaceToServiceToRefEntry : namespaceToServiceNameToRefNameToInstance.entrySet()) {
-            for (Map.Entry<String, Map<String, Services.ServiceInstance>> serviceToRefEntry : namespaceToServiceToRefEntry.getValue().entrySet()) {
-
+        for (Map.Entry<String, Map<String, Map<String, Services.ServiceInstance>>>
+                namespaceToServiceToRefEntry : namespaceToServiceNameToRefNameToInstance
+                .entrySet()) {
+            for (Map.Entry<String, Map<String, Services.ServiceInstance>> serviceToRefEntry
+                    : namespaceToServiceToRefEntry.getValue().entrySet()) {
                 String qnameOfService = getQname(ta, namespaceToServiceToRefEntry.getKey(), serviceToRefEntry.getKey());
                 Map<String, Services.ServiceInstance> refNameToInstance = serviceToRefEntry.getValue();
 
@@ -202,17 +225,19 @@ public class ConfigSubsystemFacade implements Closeable {
                     try {
                         if (Services.ServiceInstance.EMPTY_SERVICE_INSTANCE == refNameToServiceEntry.getValue()) {
                             ta.removeServiceReference(qnameOfService, refNameToServiceEntry.getKey());
-                            LOG.debug("Removing service {} with name {}", qnameOfService, refNameToServiceEntry.getKey());
+                            LOG.debug("Removing service {} with name {}", qnameOfService,
+                                    refNameToServiceEntry.getKey());
                         } else {
-                            ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(), on);
+                            ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(),
+                                    on);
                             LOG.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
                                     on, refNameToServiceEntry.getKey(), saved);
                         }
                     } catch (final InstanceNotFoundException e) {
-                        throw new DocumentedException(String.format("Unable to edit ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
-                                ErrorType.APPLICATION,
-                                ErrorTag.OPERATION_FAILED,
-                                ErrorSeverity.ERROR);
+                        throw new DocumentedException(
+                                String.format("Unable to edit ref name " + refNameToServiceEntry.getKey()
+                                        + " for instance " + on, e),
+                                ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, ErrorSeverity.ERROR);
                     }
                 }
             }
@@ -223,9 +248,11 @@ public class ConfigSubsystemFacade implements Closeable {
         return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
-    private void setOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution) throws DocumentedException {
+    private void setOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
+            throws DocumentedException {
 
-        for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta).values()) {
+        for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta)
+                .values()) {
 
             for (Map.Entry<String, ModuleElementResolved> moduleToResolved : modulesToResolved.entries()) {
                 String moduleName = moduleToResolved.getKey();
@@ -235,29 +262,33 @@ public class ConfigSubsystemFacade implements Closeable {
 
                 InstanceConfigElementResolved ice = moduleElementResolved.getInstanceConfigElementResolved();
                 EditConfigStrategy strategy = ice.getEditStrategy();
-                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta, execution.getServiceRegistryWrapper(ta));
+                strategy.executeConfiguration(moduleName, instanceName, ice.getConfiguration(), ta,
+                        execution.getServiceRegistryWrapper(ta));
             }
         }
     }
 
-    private void handleMisssingInstancesOnTransaction(final ConfigTransactionClient ta,
-                                                      final ConfigExecution execution) throws DocumentedException {
+    private void handleMisssingInstancesOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
+            throws DocumentedException {
 
-        for (Multimap<String, ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta).values()) {
+        for (Multimap<String, ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta)
+                .values()) {
             for (Map.Entry<String, ModuleElementDefinition> moduleToResolved : modulesToResolved.entries()) {
                 String moduleName = moduleToResolved.getKey();
 
                 ModuleElementDefinition moduleElementDefinition = moduleToResolved.getValue();
 
                 EditConfigStrategy strategy = moduleElementDefinition.getEditStrategy();
-                strategy.executeConfiguration(moduleName, moduleElementDefinition.getInstanceName(), null, ta, execution.getServiceRegistryWrapper(ta));
+                strategy.executeConfiguration(moduleName, moduleElementDefinition.getInstanceName(), null, ta,
+                        execution.getServiceRegistryWrapper(ta));
             }
         }
     }
 
     public Config getConfigMapping() {
         final YangStoreContext snapshot = yangStoreService.getCurrentSnapshot();
-        Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(snapshot.getModuleMXBeanEntryMap());
+        Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(
+                snapshot.getModuleMXBeanEntryMap());
         Map<String, Map<Date, IdentityMapping>> identitiesMap = transformIdentities(snapshot.getModules());
         return new Config(factories, identitiesMap, snapshot.getEnumResolver());
     }
@@ -266,13 +297,13 @@ public class ConfigSubsystemFacade implements Closeable {
         Map<String, Map<Date, IdentityMapping>> mappedIds = new HashMap<>();
         for (Module module : modules) {
             String namespace = module.getNamespace().toString();
-            Map<Date, IdentityMapping> revisionsByNamespace =
-                    mappedIds.computeIfAbsent(namespace, k -> new HashMap<>());
+            Map<Date, IdentityMapping> revisionsByNamespace = mappedIds.computeIfAbsent(namespace,
+                k -> new HashMap<>());
 
             Date revision = module.getRevision();
 
-            IdentityMapping identityMapping =
-                    revisionsByNamespace.computeIfAbsent(revision, k -> new IdentityMapping());
+            IdentityMapping identityMapping = revisionsByNamespace.computeIfAbsent(revision,
+                k -> new IdentityMapping());
 
             for (IdentitySchemaNode identitySchemaNode : module.getIdentities()) {
                 identityMapping.addIdSchemaNode(identitySchemaNode);
@@ -284,31 +315,32 @@ public class ConfigSubsystemFacade implements Closeable {
     }
 
     public Map<String/* Namespace from yang file */,
-            Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs(
+                    Map<String /* Name of module entry from yang file */,
+                    ModuleConfig>> transformMbeToModuleConfigs(
             final Map<String/* Namespace from yang file */,
-                    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
-        return transformMbeToModuleConfigs(configRegistryClient, mBeanEntries);
+                    Map<String /* Name of module entry from yang file */,
+                            ModuleMXBeanEntry>> mbeanentries) {
+        return transformMbeToModuleConfigs(configRegistryClient, mbeanentries);
     }
 
     public Map<String/* Namespace from yang file */,
-            Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs(
+            Map<String /* Name of module entry from yang file */,
+                    ModuleConfig>> transformMbeToModuleConfigs(
             final BeanReader reader,
-                                                                                                             final Map<String/* Namespace from yang file */,
-                                                                                                                     Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
-
+            final Map<String/* Namespace from yang file */,
+                    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mbeanentries) {
         Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = new HashMap<>();
 
-        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleToMbe : mBeanEntries.entrySet()) {
+        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleToMbe : mbeanentries.entrySet()) {
             for (Map.Entry<String, ModuleMXBeanEntry> moduleNameToMbe : namespaceToModuleToMbe.getValue().entrySet()) {
                 String moduleName = moduleNameToMbe.getKey();
                 ModuleMXBeanEntry moduleMXBeanEntry = moduleNameToMbe.getValue();
 
-                ModuleConfig moduleConfig = new ModuleConfig(moduleName,
-                        new InstanceConfig(reader, moduleMXBeanEntry.getAttributes(), moduleMXBeanEntry.getNullableDummyContainerName()));
+                ModuleConfig moduleConfig = new ModuleConfig(moduleName, new InstanceConfig(reader,
+                        moduleMXBeanEntry.getAttributes(), moduleMXBeanEntry.getNullableDummyContainerName()));
 
-                Map<String, ModuleConfig> moduleNameToModuleConfig =
-                        namespaceToModuleNameToModuleConfig.computeIfAbsent(namespaceToModuleToMbe.getKey(),
-                                k -> new HashMap<>());
+                Map<String, ModuleConfig> moduleNameToModuleConfig = namespaceToModuleNameToModuleConfig
+                        .computeIfAbsent(namespaceToModuleToMbe.getKey(), k -> new HashMap<>());
 
                 moduleNameToModuleConfig.put(moduleName, moduleConfig);
             }
@@ -317,15 +349,18 @@ public class ConfigSubsystemFacade implements Closeable {
         return namespaceToModuleNameToModuleConfig;
     }
 
-    public ConfigExecution getConfigExecution(final Config configMapping, final Element xmlToBePersisted) throws DocumentedException {
-        return new ConfigExecution(configMapping, XmlElement.fromDomElement(xmlToBePersisted), TestOption.testThenSet, EditStrategyType.getDefaultStrategy());
+    public ConfigExecution getConfigExecution(final Config configMapping, final Element xmlToBePersisted)
+            throws DocumentedException {
+        return new ConfigExecution(configMapping, XmlElement.fromDomElement(xmlToBePersisted), TestOption.testThenSet,
+                EditStrategyType.getDefaultStrategy());
     }
 
-    private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(final ConfigRegistryClient configRegistryClient,
-                                                                         final Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
+    private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(
+            final ConfigRegistryClient configRegistryClient,
+            final Map<String, Map<String, ModuleMXBeanEntry>> mbeanentries) {
         Map<String, Map<String, ModuleRuntime>> retVal = new HashMap<>();
 
-        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : mBeanEntries.entrySet()) {
+        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : mbeanentries.entrySet()) {
 
             Map<String, ModuleRuntime> innerMap = new HashMap<>();
             Map<String, ModuleMXBeanEntry> entriesFromNamespace = namespaceToModuleEntry.getValue();
@@ -336,7 +371,8 @@ public class ConfigSubsystemFacade implements Closeable {
                 Map<RuntimeBeanEntry, InstanceConfig> cache = new HashMap<>();
                 RuntimeBeanEntry root = null;
                 for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
-                    cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap(), mbe.getNullableDummyContainerName()));
+                    cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap(),
+                            mbe.getNullableDummyContainerName()));
                     if (rbe.isRoot()) {
                         root = rbe;
                     }
@@ -356,7 +392,8 @@ public class ConfigSubsystemFacade implements Closeable {
         return retVal;
     }
 
-    private InstanceRuntime createInstanceRuntime(final RuntimeBeanEntry root, final Map<RuntimeBeanEntry, InstanceConfig> cache) {
+    private InstanceRuntime createInstanceRuntime(final RuntimeBeanEntry root,
+                                                  final Map<RuntimeBeanEntry, InstanceConfig> cache) {
         Map<String, InstanceRuntime> children = new HashMap<>();
         for (RuntimeBeanEntry child : root.getChildren()) {
             children.put(child.getJavaNamePrefix(), createInstanceRuntime(child, cache));
@@ -378,10 +415,12 @@ public class ConfigSubsystemFacade implements Closeable {
         final ConfigTransactionClient txClient = configRegistryClient.getConfigTransactionClient(testTransaction);
 
         try {
-            // Runtime beans are not parts of transactions and have to be queried against the central registry
+            // Runtime beans are not parts of transactions and have to be queried against
+            // the central registry
             final Set<ObjectName> runtimeBeans = configRegistryClient.lookupRuntimeBeans();
 
-            final Set<ObjectName> configBeans = Datastore.getInstanceQueryStrategy(Datastore.running, transactionProvider)
+            final Set<ObjectName> configBeans = Datastore
+                    .getInstanceQueryStrategy(Datastore.running, transactionProvider)
                     .queryInstances(configRegistryClient);
 
             final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(configRegistryClient,
@@ -391,7 +430,8 @@ public class ConfigSubsystemFacade implements Closeable {
             final Map<String, Map<String, ModuleConfig>> moduleConfigs = transformMbeToModuleConfigs(txClient,
                     yangStoreSnapshot.getModuleMXBeanEntryMap());
 
-            final org.opendaylight.controller.config.facade.xml.runtime.Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
+            final org.opendaylight.controller.config.facade.xml.runtime.Runtime runtime = new Runtime(moduleRuntimes,
+                    moduleConfigs);
 
             return runtime.toXml(runtimeBeans, configBeans, document, yangStoreSnapshot.getEnumResolver());
         } finally {
@@ -419,4 +459,3 @@ public class ConfigSubsystemFacade implements Closeable {
     }
 
 }
-

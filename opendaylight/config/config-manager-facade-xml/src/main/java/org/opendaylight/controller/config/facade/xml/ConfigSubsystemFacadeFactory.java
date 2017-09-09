@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,19 +19,21 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 
 public class ConfigSubsystemFacadeFactory {
 
-    private ConfigRegistryClient cfgRegClient;
-    private ConfigRegistryJMXClient cfgRegClientNoNotifications;
-    private YangStoreService yangStoreService;
+    private final ConfigRegistryClient cfgRegClient;
+    private final ConfigRegistryJMXClient cfgRegClientNoNotifications;
+    private final YangStoreService yangStoreService;
 
-    public ConfigSubsystemFacadeFactory(final ConfigRegistryClient cfgRegClient, final ConfigRegistryJMXClient jmxClientNoNotifications, final YangStoreService yangStoreService) {
+    public ConfigSubsystemFacadeFactory(final ConfigRegistryClient cfgRegClient,
+            final ConfigRegistryJMXClient jmxClientNoNotifications, final YangStoreService yangStoreService) {
         this.cfgRegClient = cfgRegClient;
         this.cfgRegClientNoNotifications = jmxClientNoNotifications;
         this.yangStoreService = yangStoreService;
     }
 
     /**
-     * Create new instance of ConfigSubsystemFacade. Each instance works with a dedicated transaction provider, making
-     * the instances suitable for facade-per-client use.
+     * Create new instance of ConfigSubsystemFacade. Each instance works with a
+     * dedicated transaction provider, making the instances suitable for
+     * facade-per-client use.
      */
     public ConfigSubsystemFacade createFacade(final String id) {
         return new ConfigSubsystemFacade(cfgRegClient, cfgRegClientNoNotifications, yangStoreService, id);
@@ -47,9 +49,6 @@ public class ConfigSubsystemFacadeFactory {
         for (Module module : modules) {
             capabilities.add(new YangModuleCapability(module, yangStoreService.getModuleSource(module)));
         }
-
         return capabilities;
     }
-
-
 }

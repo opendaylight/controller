@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,7 +21,7 @@ import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<Object, ArrayType<?>> {
+public final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<Object, ArrayType<?>> {
 
     private final AttributeResolvingStrategy<?, ? extends OpenType<?>> innerTypeResolvingStrategy;
 
@@ -50,8 +50,8 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
             try {
                 innerTypeClass = Class.forName(getOpenType().getElementOpenType().getClassName());
             } catch (final ClassNotFoundException e) {
-                throw new IllegalStateException("Unable to locate class for "
-                        + getOpenType().getElementOpenType().getClassName(), e);
+                throw new IllegalStateException(
+                        "Unable to locate class for " + getOpenType().getElementOpenType().getClassName(), e);
             }
         }
 
@@ -64,21 +64,21 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
             parsedArray = Array.newInstance(innerTypeClass, valueList.size());
         }
 
-        int i = 0;
+        int index = 0;
         for (Object innerValue : valueList) {
-            Optional<?> parsedElement = innerTypeResolvingStrategy.parseAttribute(attrName + "_" + i, innerValue);
-            if (!parsedElement.isPresent()){
+            Optional<?> parsedElement = innerTypeResolvingStrategy.parseAttribute(attrName + "_" + index, innerValue);
+            if (!parsedElement.isPresent()) {
                 continue;
             }
-            Array.set(parsedArray, i, parsedElement.get());
-            i++;
+            Array.set(parsedArray, index, parsedElement.get());
+            index++;
         }
 
         // Rebuild open type. Underlying composite types might have changed
         if (innerTypeResolvingStrategy.getOpenType() instanceof CompositeType) {
             try {
-                final ArrayType<?> openType =
-                        new ArrayType<>(getOpenType().getDimension(), innerTypeResolvingStrategy.getOpenType());
+                final ArrayType<?> openType = new ArrayType<>(getOpenType().getDimension(),
+                        innerTypeResolvingStrategy.getOpenType());
                 setOpenType(openType);
             } catch (final OpenDataException e) {
                 throw new IllegalStateException("An error occurred during restoration of array type " + this
@@ -106,7 +106,7 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
     private static Class<?> getPrimitiveType(final Class<?> innerTypeClass) {
         try {
             return (Class<?>) innerTypeClass.getField("TYPE").get(null);
-        } catch (final Exception e) {
+        } catch (final IllegalAccessException | IllegalArgumentException | NoSuchFieldException e) {
             throw new IllegalStateException("Unable to determine primitive type to " + innerTypeClass);
         }
     }
