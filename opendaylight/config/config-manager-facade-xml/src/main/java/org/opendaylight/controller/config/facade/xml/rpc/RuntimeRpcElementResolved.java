@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,7 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.modules.Module;
 
 /**
- * Represents parsed xpath to runtime bean instance
+ * Represents parsed xpath to runtime bean instance.
  */
 public final class RuntimeRpcElementResolved {
     private final String moduleName;
@@ -33,9 +33,9 @@ public final class RuntimeRpcElementResolved {
     private final Map<String, String> additionalAttributes;
 
     private RuntimeRpcElementResolved(String namespace, String moduleName, String instanceName, String runtimeBeanName,
-                                      Map<String, String> additionalAttributes) {
+            Map<String, String> additionalAttributes) {
         this.moduleName = Preconditions.checkNotNull(moduleName, "Module name");
-        this.instanceName =  Preconditions.checkNotNull(instanceName, "Instance name");
+        this.instanceName = Preconditions.checkNotNull(instanceName, "Instance name");
         this.additionalAttributes = additionalAttributes;
         this.namespace = Preconditions.checkNotNull(namespace, "Namespace");
         this.runtimeBeanName = Preconditions.checkNotNull(runtimeBeanName, "Runtime bean name");
@@ -75,52 +75,60 @@ public final class RuntimeRpcElementResolved {
     }
 
     /**
-     * Pattern for an absolute instance identifier xpath pointing to a runtime bean instance e.g:
+     * Pattern for an absolute instance identifier xpath pointing to a runtime bean.
+     * For instance e.g:
+     *
      * <pre>
      * /modules/module[name=instanceName][type=moduleType]
      * </pre>
+     *
+     *<p>
      * or
+     *
      * <pre>
      * /a:modules/a:module[a:name=instanceName][a:type=moduleType]
      * </pre>
      */
-    private static final String xpathPatternBlueprint =
-            "/" + getRegExForPrefixedName(Modules.QNAME.getLocalName())+ "/" + getRegExForPrefixedName(Module.QNAME.getLocalName())
+    private static final String XPATH_PATTERN_BLUEPRINT = "/" + getRegExForPrefixedName(Modules.QNAME.getLocalName())
+            + "/" + getRegExForPrefixedName(Module.QNAME.getLocalName())
 
-                    + "\\["
-                    + "(?<key1>" + getRegExForPrefixedName(XmlMappingConstants.TYPE_KEY) + "|" + getRegExForPrefixedName(XmlMappingConstants.NAME_KEY) + ")"
-                    + "=('|\")?(?<value1>[^'\"\\]]+)('|\")?"
-                    + "( and |\\]\\[)"
-                    + "(?<key2>" + getRegExForPrefixedName(XmlMappingConstants.TYPE_KEY) + "|" + getRegExForPrefixedName(XmlMappingConstants.NAME_KEY) + ")"
-                    + "=('|\")?(?<value2>[^'\"\\]]+)('|\")?"
-                    + "\\]"
+            + "\\[" + "(?<key1>" + getRegExForPrefixedName(XmlMappingConstants.TYPE_KEY) + "|"
+            + getRegExForPrefixedName(XmlMappingConstants.NAME_KEY) + ")" + "=('|\")?(?<value1>[^'\"\\]]+)('|\")?"
+            + "( and |\\]\\[)" + "(?<key2>" + getRegExForPrefixedName(XmlMappingConstants.TYPE_KEY) + "|"
+            + getRegExForPrefixedName(XmlMappingConstants.NAME_KEY) + ")" + "=('|\")?(?<value2>[^'\"\\]]+)('|\")?"
+            + "\\]"
 
-                    + "(?<additional>.*)";
+            + "(?<additional>.*)";
 
     /**
-     * Return reg ex that matches either the name with or without a prefix
+     * Return reg ex that matches either the name with or without a prefix.
      */
     private static String getRegExForPrefixedName(final String name) {
         return "([^:]+:)?" + name;
     }
 
-    private static final Pattern xpathPattern = Pattern.compile(xpathPatternBlueprint);
+    private static final Pattern XPATH_PATTERN = Pattern.compile(XPATH_PATTERN_BLUEPRINT);
 
     /**
-     * Pattern for additional path elements inside xpath for instance identifier pointing to an inner runtime bean e.g:
+     * Pattern for additional path elements inside xpath for instance identifier
+     * pointing to an inner runtime bean. E.g:
+     *
      * <pre>
      * /modules/module[name=instanceName and type=moduleType]/inner[key=b]
      * </pre>
      */
-    private static final String additionalPatternBlueprint = getRegExForPrefixedName("(?<additionalKey>.+)") + "\\[(?<prefixedKey>" + getRegExForPrefixedName("(.+)") + ")=('|\")?(?<additionalValue>[^'\"\\]]+)('|\")?\\]";
-    private static final Pattern additionalPattern = Pattern.compile(additionalPatternBlueprint);
+    private static final String ADDITIONAL_PATTERN_BLUEPRINT = getRegExForPrefixedName("(?<additionalKey>.+)")
+            + "\\[(?<prefixedKey>" + getRegExForPrefixedName("(.+)")
+            + ")=('|\")?(?<additionalValue>[^'\"\\]]+)('|\")?\\]";
+    private static final Pattern ADDITIONAL_PATTERN = Pattern.compile(ADDITIONAL_PATTERN_BLUEPRINT);
 
     public static RuntimeRpcElementResolved fromXpath(String xpath, String elementName, String namespace) {
-        Matcher matcher = xpathPattern.matcher(xpath);
+        Matcher matcher = XPATH_PATTERN.matcher(xpath);
         Preconditions.checkState(matcher.matches(),
                 "Node %s with value '%s' not in required form on rpc element %s, required format is %s",
-                //TODO refactor this string, and/or unify with RPR.CONTEXT_INSTANCE from netconf
-                "context-instance", xpath, elementName, xpathPatternBlueprint);
+                // TODO refactor this string, and/or unify with RPR.CONTEXT_INSTANCE from
+                // netconf
+                "context-instance", xpath, elementName, XPATH_PATTERN_BLUEPRINT);
 
         PatternGroupResolver groups = new PatternGroupResolver(matcher.group("key1"), matcher.group("value1"),
                 matcher.group("value2"), matcher.group("additional"));
@@ -136,11 +144,13 @@ public final class RuntimeRpcElementResolved {
 
     private static final class PatternGroupResolver {
 
-        private final String key1, value1, value2;
+        private final String key1;
+        private final String value1;
+        private final String value2;
         private final String additional;
         private String runtimeBeanYangName;
 
-        PatternGroupResolver(String key1, String value1,  String value2, String additional) {
+        PatternGroupResolver(String key1, String value1, String value2, String additional) {
             this.key1 = Preconditions.checkNotNull(key1);
             this.value1 = Preconditions.checkNotNull(value1);
             this.value2 = Preconditions.checkNotNull(value2);
@@ -155,21 +165,19 @@ public final class RuntimeRpcElementResolved {
             return key1.contains(XmlMappingConstants.NAME_KEY) ? value1 : value2;
         }
 
-
         Map<String, String> getAdditionalKeys(String elementName, String moduleName) {
             HashMap<String, String> additionalAttributes = Maps.newHashMap();
 
             runtimeBeanYangName = moduleName;
             for (String additionalKeyValue : additional.split("/")) {
-                if (Strings.isNullOrEmpty(additionalKeyValue)){
+                if (Strings.isNullOrEmpty(additionalKeyValue)) {
                     continue;
                 }
-                Matcher matcher = additionalPattern.matcher(additionalKeyValue);
-                Preconditions
-                        .checkState(
-                                matcher.matches(),
-                                "Attribute %s not in required form on rpc element %s, required format for additional attributes is: %s",
-                                additionalKeyValue, elementName, additionalPatternBlueprint);
+                Matcher matcher = ADDITIONAL_PATTERN.matcher(additionalKeyValue);
+                Preconditions.checkState(matcher.matches(),
+                        "Attribute %s not in required form on rpc element %s,"
+                                + " required format for additional attributes is: %s",
+                        additionalKeyValue, elementName, ADDITIONAL_PATTERN_BLUEPRINT);
                 String name = matcher.group("additionalKey");
                 runtimeBeanYangName = name;
                 additionalAttributes.put(name, matcher.group("additionalValue"));
@@ -178,7 +186,7 @@ public final class RuntimeRpcElementResolved {
         }
 
         private String getRuntimeBeanYangName() {
-            Preconditions.checkState(runtimeBeanYangName!=null);
+            Preconditions.checkState(runtimeBeanYangName != null);
             return runtimeBeanYangName;
         }
     }

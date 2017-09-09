@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -32,13 +32,13 @@ public abstract class AttributeIfcSwitchStatement<T> {
 
         if (attributeIfc instanceof JavaAttribute) {
             try {
-                if(((JavaAttribute)attributeIfc).getTypeDefinition() instanceof BinaryTypeDefinition) {
+                if (((JavaAttribute) attributeIfc).getTypeDefinition() instanceof BinaryTypeDefinition) {
                     return caseJavaBinaryAttribute(openType);
-                } else if(((JavaAttribute)attributeIfc).isUnion()) {
+                } else if (((JavaAttribute) attributeIfc).isUnion()) {
                     return caseJavaUnionAttribute(openType);
-                } else if(((JavaAttribute)attributeIfc).isIdentityRef()) {
+                } else if (((JavaAttribute) attributeIfc).isIdentityRef()) {
                     return caseJavaIdentityRefAttribute(openType);
-                } else if(((JavaAttribute)attributeIfc).isEnum()) {
+                } else if (((JavaAttribute) attributeIfc).isEnum()) {
                     return caseJavaEnumAttribute(openType);
                 } else {
                     return caseJavaAttribute(openType);
@@ -114,7 +114,7 @@ public abstract class AttributeIfcSwitchStatement<T> {
     private static class UnknownOpenTypeException extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
-        public UnknownOpenTypeException(final String message) {
+        UnknownOpenTypeException(final String message) {
             super(message);
         }
     }

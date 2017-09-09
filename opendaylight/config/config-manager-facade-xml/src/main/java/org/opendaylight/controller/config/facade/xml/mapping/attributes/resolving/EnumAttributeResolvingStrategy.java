@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,18 +38,18 @@ final class EnumAttributeResolvingStrategy extends AbstractAttributeResolvingStr
         if (value == null) {
             return Optional.absent();
         }
-
         Util.checkType(value, Map.class);
         Map<?, ?> valueMap = (Map<?, ?>) value;
-        Preconditions.checkArgument(valueMap.size() == 1, "Unexpected value size " + value + " should be just 1 foe enum");
+        Preconditions.checkArgument(valueMap.size() == 1,
+                "Unexpected value size " + value + " should be just 1 foe enum");
         final Object innerValue = valueMap.values().iterator().next();
         Util.checkType(innerValue, String.class);
 
         final String className = getOpenType().getTypeName();
-        final Object parsedValue = enumResolver.fromYang(className, ((String) innerValue));
+        final Object parsedValue = enumResolver.fromYang(className, (String) innerValue);
 
-        LOG.debug("Attribute {} : {} parsed to enum type {} with value {}", attrName, innerValue, getOpenType(), parsedValue);
+        LOG.debug("Attribute {} : {} parsed to enum type {} with value {}", attrName, innerValue, getOpenType(),
+                parsedValue);
         return Optional.of(parsedValue);
     }
-
 }

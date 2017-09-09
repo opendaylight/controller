@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -36,25 +36,25 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         for (Entry<String, AttributeIfc> attrEntry : configDefinition.entrySet()) {
             strategies.put(attrEntry.getKey(), prepareStrategy(attrEntry.getValue()));
         }
-
         return strategies;
     }
 
     public AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(final AttributeIfc attributeIfc) {
 
-        if(attributeIfc instanceof DependencyAttribute) {
-            namespaceOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
+        if (attributeIfc instanceof DependencyAttribute) {
+            namespaceOfDepAttr = ((DependencyAttribute) attributeIfc).getDependency().getSie().getQName().getNamespace()
+                    .toString();
         } else if (attributeIfc instanceof ListDependenciesAttribute) {
-            namespaceOfDepAttr = ((ListDependenciesAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
+            namespaceOfDepAttr = ((ListDependenciesAttribute) attributeIfc).getDependency().getSie().getQName()
+                    .getNamespace().toString();
         }
-
         return switchAttribute(attributeIfc);
     }
 
     private Map<String, String> createJmxToYangMapping(final TOAttribute attributeIfc) {
         Map<String, String> retVal = Maps.newHashMap();
         for (Entry<String, AttributeIfc> entry : attributeIfc.getJmxPropertiesToTypesMap().entrySet()) {
-            retVal.put(entry.getKey(), (entry.getValue()).getAttributeYangName());
+            retVal.put(entry.getKey(), entry.getValue().getAttributeYangName());
         }
         return retVal;
     }
@@ -66,7 +66,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
 
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaEnumAttribute(final OpenType<?> openType) {
-        return new EnumAttributeMappingStrategy(((CompositeType) openType), enumResolver);
+        return new EnumAttributeMappingStrategy((CompositeType) openType, enumResolver);
     }
 
     @Override
@@ -78,7 +78,8 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaCompositeAttribute(final CompositeType openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaCompositeAttribute(
+            final CompositeType openType) {
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> innerStrategies = Maps.newHashMap();
 
         Map<String, String> attributeMapping = Maps.newHashMap();
@@ -88,7 +89,6 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
             innerStrategies.put(innerAttributeKey, caseJavaAttribute(openType.getType(innerAttributeKey)));
             attributeMapping.put(innerAttributeKey, innerAttributeKey);
         }
-
         return new CompositeAttributeMappingStrategy(openType, innerStrategies, attributeMapping);
     }
 
@@ -104,15 +104,13 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
             innerStrategies.put(innerAttributeKey, caseJavaAttribute(compositeType.getType(innerAttributeKey)));
             attributeMapping.put(innerAttributeKey, innerAttributeKey);
         }
-
         return new UnionCompositeAttributeMappingStrategy(compositeType, innerStrategies, attributeMapping);
     }
 
     private String namespaceOfDepAttr;
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
-            final SimpleType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(final SimpleType<?> openType) {
         return new ObjectNameAttributeMappingStrategy(openType, namespaceOfDepAttr);
     }
 
@@ -123,12 +121,12 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         Preconditions.checkState(getLastAttribute() instanceof TOAttribute);
         TOAttribute lastTO = (TOAttribute) getLastAttribute();
 
-        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute)getLastAttribute()).getJmxPropertiesToTypesMap().entrySet()) {
+        for (Entry<String, AttributeIfc> innerAttrEntry : ((TOAttribute) getLastAttribute())
+                .getJmxPropertiesToTypesMap().entrySet()) {
             innerStrategies.put(innerAttrEntry.getKey(), prepareStrategy(innerAttrEntry.getValue()));
         }
 
-        return new CompositeAttributeMappingStrategy(openType, innerStrategies,
-                createJmxToYangMapping(lastTO));
+        return new CompositeAttributeMappingStrategy(openType, innerStrategies, createJmxToYangMapping(lastTO));
     }
 
     @Override
@@ -139,9 +137,9 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     }
 
     @Override
-    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(final ArrayType<?> openType) {
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(
+            final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         return new ArrayAttributeMappingStrategy(openType, caseDependencyAttribute(SimpleType.OBJECTNAME));
     }
-
 }

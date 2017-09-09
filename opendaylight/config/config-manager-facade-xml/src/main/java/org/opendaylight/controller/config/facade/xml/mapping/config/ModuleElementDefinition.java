@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,28 +19,30 @@ import org.slf4j.LoggerFactory;
 public class ModuleElementDefinition {
 
     public static final NoneEditConfigStrategy NONE_EDIT_CONFIG_STRATEGY = new NoneEditConfigStrategy();
-    public static final MissingInstanceHandlingStrategy MISSING_INSTANCE_HANDLING_STRATEGY = new MissingInstanceHandlingStrategy();
+    public static final MissingInstanceHandlingStrategy MISSING_INSTANCE_HANDLING_STRATEGY =
+            new MissingInstanceHandlingStrategy();
 
     private final String instanceName;
     private final EditStrategyType editStrategy;
     private static final Logger LOG = LoggerFactory.getLogger(ModuleElementDefinition.class);
 
-    public ModuleElementDefinition(final String instanceName, final String currentStrategy, final EditStrategyType defaultStrategy) {
+    public ModuleElementDefinition(final String instanceName, final String currentStrategy,
+            final EditStrategyType defaultStrategy) {
         this.instanceName = instanceName;
         if (currentStrategy == null || currentStrategy.isEmpty()) {
             this.editStrategy = defaultStrategy;
         } else {
-            EditStrategyType _edStrategy = null;
+            EditStrategyType edStrategy = null;
             try {
-                _edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
+                edStrategy = InstanceConfigElementResolved.parseStrategy(currentStrategy, defaultStrategy);
             } catch (final OperationNotPermittedException e) {
-                _edStrategy = defaultStrategy;
-                LOG.warn("Operation not permitted on current strategy {} while default strategy is {}. Element definition strategy set to default.",
-                        currentStrategy,
-                        defaultStrategy,
-                        e);
+                edStrategy = defaultStrategy;
+                LOG.warn(
+                        "Operation not permitted on current strategy {} while default strategy "
+                        + "is {}. Element definition strategy set to default.",
+                        currentStrategy, defaultStrategy, e);
             }
-            this.editStrategy = _edStrategy;
+            this.editStrategy = edStrategy;
         }
 
     }
@@ -51,12 +53,12 @@ public class ModuleElementDefinition {
 
     public EditConfigStrategy getEditStrategy() {
         switch (editStrategy) {
-        case delete :
-        case remove :
-        case none :
-            return NONE_EDIT_CONFIG_STRATEGY;
-        default :
-            return MISSING_INSTANCE_HANDLING_STRATEGY;
+            case delete:
+            case remove:
+            case none:
+                return NONE_EDIT_CONFIG_STRATEGY;
+            default:
+                return MISSING_INSTANCE_HANDLING_STRATEGY;
         }
     }
 }

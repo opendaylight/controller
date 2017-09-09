@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,7 +10,8 @@ package org.opendaylight.controller.config.facade.xml.mapping.attributes.resolvi
 
 import javax.management.openmbean.OpenType;
 
-abstract class AbstractAttributeResolvingStrategy<T, O extends OpenType<?>> implements AttributeResolvingStrategy<T, O> {
+public abstract class AbstractAttributeResolvingStrategy<T, O extends OpenType<?>>
+        implements AttributeResolvingStrategy<T, O> {
     private O openType;
 
     public AbstractAttributeResolvingStrategy(final O openType) {
@@ -23,7 +24,8 @@ abstract class AbstractAttributeResolvingStrategy<T, O extends OpenType<?>> impl
     }
 
     /**
-     * Composite types might change during resolution. Use this setter to update open type
+     * Composite types might change during resolution. Use this setter to update
+     * open type
      */
     public void setOpenType(final O openType) {
         this.openType = openType;

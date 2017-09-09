@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -21,17 +21,15 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
 
     private static final String PREFIX = "prefix";
 
-    /**
-     * @param document
-     * @param key
-     */
     public SimpleIdentityRefAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
+    @Override
     protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
+        Preconditions.checkArgument(((Map<?, ?>) value).size() == 1, "Unexpected number of values in %s, expected 1",
+                value);
         Object stringValue = ((Map<?, ?>) value).values().iterator().next();
         Util.checkType(stringValue, String.class);
 
@@ -39,10 +37,12 @@ public class SimpleIdentityRefAttributeWritingStrategy extends SimpleAttributeWr
     }
 
     @Override
-    protected Element createElement(final Document doc, final String key, final String value, final Optional<String> namespace) {
-        QName qName = QName.create(value);
-        String identityValue = qName.getLocalName();
-        String identityNamespace = qName.getNamespace().toString();
-        return XmlUtil.createTextElementWithNamespacedContent(doc, key, PREFIX, identityNamespace, identityValue, namespace);
+    protected Element createElement(final Document doc, final String key, final String value,
+            final Optional<String> namespace) {
+        QName qualifiedName = QName.create(value);
+        String identityValue = qualifiedName.getLocalName();
+        String identityNamespace = qualifiedName.getNamespace().toString();
+        return XmlUtil.createTextElementWithNamespacedContent(doc, key, PREFIX, identityNamespace, identityValue,
+                namespace);
     }
 }

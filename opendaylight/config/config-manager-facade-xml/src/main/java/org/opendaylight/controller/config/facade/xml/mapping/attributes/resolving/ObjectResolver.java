@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -40,8 +40,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> strategies = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> attrEntry : configDefinition.entrySet()) {
-            strategies.put(attrEntry.getKey(),
-                    prepareStrategy(attrEntry.getValue()));
+            strategies.put(attrEntry.getKey(), prepareStrategy(attrEntry.getValue()));
         }
 
         return strategies;
@@ -54,7 +53,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     private Map<String, String> createYangToJmxMapping(final TOAttribute attributeIfc) {
         Map<String, String> retVal = Maps.newHashMap();
         for (Entry<String, AttributeIfc> entry : attributeIfc.getYangPropertiesToTypesMap().entrySet()) {
-            retVal.put(entry.getKey(), (entry.getValue()).getLowerCaseCammelCase());
+            retVal.put(entry.getKey(), entry.getValue().getLowerCaseCammelCase());
         }
         return retVal;
     }
@@ -65,12 +64,13 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaSimpleAttribute(final SimpleType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaSimpleAttribute(
+            final SimpleType<?> openType) {
         return new SimpleAttributeResolvingStrategy(openType);
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaArrayAttribute(final ArrayType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaArrayAttribute(final ArrayType<?> openType) {
 
         SimpleType<?> innerType = (SimpleType<?>) openType.getElementOpenType();
         AttributeResolvingStrategy<?, ? extends OpenType<?>> strat = new SimpleAttributeResolvingStrategy(innerType);
@@ -78,7 +78,8 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaCompositeAttribute(final CompositeType openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaCompositeAttribute(
+            final CompositeType openType) {
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap = Maps.newHashMap();
         Map<String, String> yangToJmxMapping = Maps.newHashMap();
 
@@ -86,7 +87,9 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         return new CompositeAttributeResolvingStrategy(innerMap, openType, yangToJmxMapping);
     }
 
-    private void fillMappingForComposite(final CompositeType openType, final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap, final Map<String, String> yangToJmxMapping) {
+    private void fillMappingForComposite(final CompositeType openType,
+            final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerMap,
+            final Map<String, String> yangToJmxMapping) {
         for (String innerAttributeKey : openType.keySet()) {
             innerMap.put(innerAttributeKey, caseJavaAttribute(openType.getType(innerAttributeKey)));
             yangToJmxMapping.put(innerAttributeKey, innerAttributeKey);
@@ -122,8 +125,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         for (String innerName : openType.keySet()) {
 
             AttributeIfc innerAttributeIfc = toAttribute.getJmxPropertiesToTypesMap().get(innerName);
-            innerMap.put(innerAttributeIfc.getAttributeYangName(),
-                    prepareStrategy(innerAttributeIfc));
+            innerMap.put(innerAttributeIfc.getAttributeYangName(), prepareStrategy(innerAttributeIfc));
         }
         return new CompositeAttributeResolvingStrategy(innerMap, openType, createYangToJmxMapping(toAttribute));
     }
@@ -136,9 +138,9 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
-    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(final ArrayType<?> openType) {
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseListDependeciesAttribute(
+            final ArrayType<?> openType) {
         Preconditions.checkState(getLastAttribute() instanceof ListDependenciesAttribute);
         return new ArrayAttributeResolvingStrategy(caseDependencyAttribute(SimpleType.OBJECTNAME), openType);
     }
-
 }

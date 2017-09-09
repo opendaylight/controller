@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,7 +17,8 @@ import org.opendaylight.controller.config.facade.xml.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResolvingStrategy<ObjectName, SimpleType<?>> {
+public class ObjectNameAttributeResolvingStrategy
+        extends AbstractAttributeResolvingStrategy<ObjectName, SimpleType<?>> {
 
     private final ServiceRegistryWrapper serviceTracker;
     private static final Logger LOG = LoggerFactory.getLogger(ObjectNameAttributeResolvingStrategy.class);
@@ -35,7 +36,8 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
 
         Util.checkType(value, ObjectNameAttributeMappingStrategy.MappedDependency.class);
 
-        ObjectNameAttributeMappingStrategy.MappedDependency mappedDep = (ObjectNameAttributeMappingStrategy.MappedDependency) value;
+        ObjectNameAttributeMappingStrategy.MappedDependency mappedDep =
+                (ObjectNameAttributeMappingStrategy.MappedDependency) value;
         String serviceName = mappedDep.getServiceName();
         String refName = mappedDep.getRefName();
         String namespace = mappedDep.getNamespace();
@@ -46,5 +48,4 @@ public class ObjectNameAttributeResolvingStrategy extends AbstractAttributeResol
         LOG.debug("Attribute {} : {} parsed to type {}", attrName, value, getOpenType());
         return Optional.of(on);
     }
-
 }

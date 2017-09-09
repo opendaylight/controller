@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,25 +24,26 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
 
     @Override
     public Optional<String> mapAttribute(final Object value) {
-        if (value == null){
+        if (value == null) {
             return Optional.absent();
         }
 
         String expectedClass = getOpenType().getClassName();
         String realClass = value.getClass().getName();
-        Preconditions.checkArgument(realClass.equals(expectedClass), "Type mismatch, expected " + expectedClass
-                + " but was " + realClass);
+        Preconditions.checkArgument(realClass.equals(expectedClass),
+                "Type mismatch, expected " + expectedClass + " but was " + realClass);
 
-        WriterPlugin prefferedPlugin = writerPlugins.get(value.getClass().getCanonicalName());
-        prefferedPlugin = prefferedPlugin == null ? writerPlugins.get(DEFAULT_WRITER_PLUGIN) : prefferedPlugin;
+        WriterPlugin prefferedPlugin = WRITER_PLUGINS.get(value.getClass().getCanonicalName());
+        prefferedPlugin = prefferedPlugin == null ? WRITER_PLUGINS.get(DEFAULT_WRITER_PLUGIN) : prefferedPlugin;
         return Optional.of(prefferedPlugin.writeObject(value));
     }
 
     private static final String DEFAULT_WRITER_PLUGIN = "default";
-    private static final Map<String, WriterPlugin> writerPlugins = Maps.newHashMap();
+    private static final Map<String, WriterPlugin> WRITER_PLUGINS = Maps.newHashMap();
+
     static {
-        writerPlugins.put(DEFAULT_WRITER_PLUGIN, new DefaultWriterPlugin());
-        writerPlugins.put(Date.class.getCanonicalName(), new DatePlugin());
+        WRITER_PLUGINS.put(DEFAULT_WRITER_PLUGIN, new DefaultWriterPlugin());
+        WRITER_PLUGINS.put(Date.class.getCanonicalName(), new DatePlugin());
     }
 
     /**

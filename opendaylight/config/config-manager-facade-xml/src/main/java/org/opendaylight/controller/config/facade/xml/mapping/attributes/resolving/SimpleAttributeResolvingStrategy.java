@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -51,8 +51,8 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
 
         Util.checkType(value, String.class);
 
-        Resolver prefferedPlugin = resolverPlugins.get(cls.getCanonicalName());
-        prefferedPlugin = prefferedPlugin == null ? resolverPlugins.get(DEFAULT_RESOLVERS) : prefferedPlugin;
+        Resolver prefferedPlugin = RESOLVER_PLUGINS.get(cls.getCanonicalName());
+        prefferedPlugin = prefferedPlugin == null ? RESOLVER_PLUGINS.get(DEFAULT_RESOLVERS) : prefferedPlugin;
 
         Object parsedValue = prefferedPlugin.resolveObject(cls, attrName, (String) value);
         LOG.debug("Attribute {} : {} parsed to type {} with value {}", attrName, value, getOpenType(), parsedValue);
@@ -60,15 +60,15 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     }
 
     private static final String DEFAULT_RESOLVERS = "default";
-    private static final Map<String, Resolver> resolverPlugins = Maps.newHashMap();
+    private static final Map<String, Resolver> RESOLVER_PLUGINS = Maps.newHashMap();
 
     static {
-        resolverPlugins.put(DEFAULT_RESOLVERS, new DefaultResolver());
-        resolverPlugins.put(String.class.getCanonicalName(), new StringResolver());
-        resolverPlugins.put(Date.class.getCanonicalName(), new DateResolver());
-        resolverPlugins.put(Character.class.getCanonicalName(), new CharResolver());
-        resolverPlugins.put(BigInteger.class.getCanonicalName(), new BigIntegerResolver());
-        resolverPlugins.put(BigDecimal.class.getCanonicalName(), new BigDecimalResolver());
+        RESOLVER_PLUGINS.put(DEFAULT_RESOLVERS, new DefaultResolver());
+        RESOLVER_PLUGINS.put(String.class.getCanonicalName(), new StringResolver());
+        RESOLVER_PLUGINS.put(Date.class.getCanonicalName(), new DateResolver());
+        RESOLVER_PLUGINS.put(Character.class.getCanonicalName(), new CharResolver());
+        RESOLVER_PLUGINS.put(BigInteger.class.getCanonicalName(), new BigIntegerResolver());
+        RESOLVER_PLUGINS.put(BigDecimal.class.getCanonicalName(), new BigDecimalResolver());
     }
 
     interface Resolver {
@@ -78,13 +78,13 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class DefaultResolver implements Resolver {
 
         @Override
-        public Object resolveObject(final Class<?> type, final String attrName, final String value) throws DocumentedException {
+        public Object resolveObject(final Class<?> type, final String attrName, final String value)
+                throws DocumentedException {
             try {
                 return parseObject(type, value);
-            } catch (final Exception e) {
+            } catch (final DocumentedException e) {
                 throw new DocumentedException("Unable to resolve attribute " + attrName + " from " + value,
-                        DocumentedException.ErrorType.APPLICATION,
-                        DocumentedException.ErrorTag.OPERATION_FAILED,
+                        DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                         DocumentedException.ErrorSeverity.ERROR);
             }
         }
@@ -95,11 +95,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 method = type.getMethod("valueOf", String.class);
                 return method.invoke(null, value);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                LOG.trace("Error parsing object ",e);
-                throw new DocumentedException("Error parsing object.",
-                        DocumentedException.ErrorType.APPLICATION,
-                        DocumentedException.ErrorTag.OPERATION_FAILED,
-                        DocumentedException.ErrorSeverity.ERROR);
+                LOG.trace("Error parsing object ", e);
+                throw new DocumentedException("Error parsing object.", DocumentedException.ErrorType.APPLICATION,
+                        DocumentedException.ErrorTag.OPERATION_FAILED, DocumentedException.ErrorSeverity.ERROR);
             }
         }
     }
@@ -131,7 +129,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
     static class CharResolver extends DefaultResolver {
 
         @Override
-        protected Object parseObject(final Class<?> type, final String value)  {
+        protected Object parseObject(final Class<?> type, final String value) {
             return value.charAt(0);
         }
     }
@@ -142,13 +140,11 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             try {
                 return Util.readDate(value);
             } catch (final ParseException e) {
-                LOG.trace("Unable parse value {} due to ",value, e);
-                throw new DocumentedException("Unable to parse value "+value+" as date.",
-                        DocumentedException.ErrorType.APPLICATION,
-                        DocumentedException.ErrorTag.OPERATION_FAILED,
+                LOG.trace("Unable parse value {} due to ", value, e);
+                throw new DocumentedException("Unable to parse value " + value + " as date.",
+                        DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                         DocumentedException.ErrorSeverity.ERROR);
             }
         }
     }
-
 }

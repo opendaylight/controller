@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,11 +17,13 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 
 final class UnionCompositeAttributeResolvingStrategy extends CompositeAttributeResolvingStrategy {
 
-    UnionCompositeAttributeResolvingStrategy(final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
-                                        final CompositeType openType, final Map<String, String> yangToJavaAttrMapping) {
+    UnionCompositeAttributeResolvingStrategy(
+            final Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> innerTypes,
+            final CompositeType openType, final Map<String, String> yangToJavaAttrMapping) {
         super(innerTypes, openType, yangToJavaAttrMapping);
     }
 
+    @Override
     protected Map<String, Object> preprocessValueMap(final Map<?, ?> valueMap) {
         CompositeType openType = getOpenType();
 
@@ -33,7 +35,7 @@ final class UnionCompositeAttributeResolvingStrategy extends CompositeAttributeR
         Map<String, Object> newMap = Maps.newHashMap();
 
         for (String key : openType.keySet()) {
-            if (openType.getDescription(key).equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION)){
+            if (openType.getDescription(key).equals(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION)) {
                 newMap.put(key, valueMap.get(JavaAttribute.DESCRIPTION_OF_VALUE_ATTRIBUTE_FOR_UNION));
             } else {
                 newMap.put(key, null);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,12 +11,15 @@ package org.opendaylight.controller.config.facade.xml.mapping.config;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
+
 import org.opendaylight.controller.config.facade.xml.mapping.IdentityMapping;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeReadingStrategy;
@@ -58,6 +61,7 @@ public final class InstanceConfig {
         this.configRegistryClient = configRegistryClient;
     }
 
+    @SuppressWarnings("IllegalCatch")
     private Map<String, Object> getMappedConfiguration(final ObjectName on, final EnumResolver enumResolver) {
 
         // TODO make field, mappingStrategies can be instantiated only once
@@ -68,19 +72,19 @@ public final class InstanceConfig {
 
         for (Entry<String, AttributeIfc> configDefEntry : jmxToAttrConfig.entrySet()) {
             // Skip children runtime beans as they are mapped by InstanceRuntime
-            if (configDefEntry.getValue() instanceof RuntimeBeanEntry){
+            if (configDefEntry.getValue() instanceof RuntimeBeanEntry) {
                 continue;
             }
             Object value = configRegistryClient.getAttributeCurrentValue(on, configDefEntry.getKey());
             try {
                 AttributeMappingStrategy<?, ? extends OpenType<?>> attributeMappingStrategy = mappingStrategies
                         .get(configDefEntry.getKey());
-                Optional<?> a = attributeMappingStrategy.mapAttribute(value);
-                if (!a.isPresent()){
+                Optional<?> attribute = attributeMappingStrategy.mapAttribute(value);
+                if (!attribute.isPresent()) {
                     continue;
                 }
-                toXml.put(configDefEntry.getValue().getAttributeYangName(), a.get());
-            } catch (final Exception e) {
+                toXml.put(configDefEntry.getValue().getAttributeYangName(), attribute.get());
+            } catch (final RuntimeException e) {
                 throw new IllegalStateException("Unable to map value " + value + " to attribute "
                         + configDefEntry.getKey(), e);
             }
@@ -88,7 +92,9 @@ public final class InstanceConfig {
         return toXml;
     }
 
-    public Element toXml(final ObjectName on, final String namespace, final Document document, final Element rootElement, final EnumResolver enumResolver) {
+    @SuppressWarnings("IllegalCatch")
+    public Element toXml(final ObjectName on, final String namespace, final Document document,
+                         final Element rootElement, final EnumResolver enumResolver) {
         Map<String, AttributeWritingStrategy> strats = new ObjectXmlWriter().prepareWriting(yangToAttrConfig, document);
         Map<String, Object> mappedConfig = getMappedConfiguration(on, enumResolver);
         Element parentElement;
@@ -102,7 +108,7 @@ public final class InstanceConfig {
         for (Entry<String, ?> mappingEntry : mappedConfig.entrySet()) {
             try {
                 strats.get(mappingEntry.getKey()).writeElement(parentElement, namespace, mappingEntry.getValue());
-            } catch (final Exception e) {
+            } catch (final RuntimeException e) {
                 throw new IllegalStateException("Unable to write value " + mappingEntry.getValue() + " for attribute "
                         + mappingEntry.getValue(), e);
             }
@@ -110,7 +116,8 @@ public final class InstanceConfig {
         return rootElement;
     }
 
-    private void resolveConfiguration(final InstanceConfigElementResolved mappedConfig, final ServiceRegistryWrapper depTracker, final EnumResolver enumResolver) {
+    private void resolveConfiguration(final InstanceConfigElementResolved mappedConfig,
+                                      final ServiceRegistryWrapper depTracker, final EnumResolver enumResolver) {
 
         // TODO make field, resolvingStrategies can be instantiated only once
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> resolvingStrategies = new ObjectResolver(
@@ -122,24 +129,26 @@ public final class InstanceConfig {
             try {
                 AttributeResolvingStrategy<?, ? extends OpenType<?>> attributeResolvingStrategy = resolvingStrategies
                         .get(attributeName);
-                LOG.trace("Trying to set value {} of attribute {} with {}", value, attributeName, attributeResolvingStrategy);
+                LOG.trace("Trying to set value {} of attribute {} with {}", value, attributeName,
+                        attributeResolvingStrategy);
 
                 value.resolveValue(attributeResolvingStrategy, attributeName);
-                value.setJmxName(
-                        yangToAttrConfig.get(attributeName).getUpperCaseCammelCase());
-            } catch (final Exception e) {
-                throw new IllegalStateException("Unable to resolve value " + value
-                        + " to attribute " + attributeName, e);
+                value.setJmxName(yangToAttrConfig.get(attributeName).getUpperCaseCammelCase());
+            } catch (final DocumentedException e) {
+                throw new IllegalStateException("Unable to resolve value " + value + " to attribute " + attributeName,
+                        e);
             }
         }
     }
 
-    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, final ServiceRegistryWrapper services, final String moduleNamespace,
-                                                 final EditStrategyType defaultStrategy,
-                                                 final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) throws DocumentedException {
+    public InstanceConfigElementResolved fromXml(XmlElement moduleElement, final ServiceRegistryWrapper services,
+                                                 final String moduleNamespace, final EditStrategyType defaultStrategy,
+                                                 final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver)
+            throws DocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
-        Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
+        Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig,
+                identityMap);
         List<XmlElement> recognisedChildren = Lists.newArrayList();
 
         XmlElement typeElement = moduleElement.getOnlyChildElementWithSameNamespace(XmlMappingConstants.TYPE_KEY);
@@ -151,18 +160,17 @@ public final class InstanceConfig {
             int size = moduleElement.getChildElements().size();
             int expectedChildNodes = 1 + typeAndNameElements.size();
             if (size > expectedChildNodes) {
-                throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
-                        nameElement.getTextContent() + " - Expected " + expectedChildNodes +" child nodes, " +
-                        "one of them with name " + nullableDummyContainerName +
-                        ", got " + size + " elements.");
+                throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : "
+                        + nameElement.getTextContent() + " - Expected " + expectedChildNodes + " child nodes, "
+                        + "one of them with name " + nullableDummyContainerName + ", got " + size + " elements.");
             }
             if (size == expectedChildNodes) {
                 try {
                     moduleElement = moduleElement.getOnlyChildElement(nullableDummyContainerName, moduleNamespace);
                 } catch (final DocumentedException e) {
-                    throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
-                            nameElement.getTextContent() + " - Expected child node with name " + nullableDummyContainerName +
-                            "." + e.getMessage());
+                    throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : "
+                            + nameElement.getTextContent() + " - Expected child node with name "
+                            + nullableDummyContainerName + "." + e.getMessage());
                 }
             } // else 2 elements, no need to descend
         }
@@ -178,23 +186,26 @@ public final class InstanceConfig {
         try {
             moduleElement.checkUnrecognisedElements(recognisedChildren);
         } catch (final DocumentedException e) {
-            throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : " +
-                    nameElement.getTextContent() + " - " +
-                    e.getMessage(), e.getErrorType(), e.getErrorTag(),e.getErrorSeverity(),e.getErrorInfo());
+            throw new DocumentedException(
+                    "Error reading module " + typeElement.getTextContent() + " : " + nameElement.getTextContent()
+                            + " - " + e.getMessage(),
+                    e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
         }
         // TODO: add check for conflicts between global and local edit strategy
         String perInstanceEditStrategy = moduleElement.getAttribute(XmlMappingConstants.OPERATION_ATTR_KEY,
                 XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
-        InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
-                retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
+        InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("")
+                ? new InstanceConfigElementResolved(retVal, defaultStrategy)
+                : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
 
         resolveConfiguration(instanceConfigElementResolved, services, enumResolver);
         return instanceConfigElementResolved;
     }
 
-    private List<XmlElement> getConfigNodes(final XmlElement moduleElement, final String moduleNamespace, final String name,
-            final List<XmlElement> recognisedChildren, final List<XmlElement> typeAndName) throws DocumentedException {
+    private List<XmlElement> getConfigNodes(final XmlElement moduleElement, final String moduleNamespace,
+                                            final String name, final List<XmlElement> recognisedChildren, final List<XmlElement> typeAndName)
+            throws DocumentedException {
         List<XmlElement> foundConfigNodes = moduleElement.getChildElementsWithinNamespace(name, moduleNamespace);
         if (foundConfigNodes.isEmpty()) {
             LOG.debug("No config nodes {}:{} found in {}", moduleNamespace, name, moduleElement);
@@ -212,15 +223,14 @@ public final class InstanceConfig {
             List<XmlElement> foundWithoutNamespaceNodes = moduleElement.getChildElementsWithinNamespace(name,
                     XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
             foundWithoutNamespaceNodes.removeAll(typeAndName);
-            if (!foundWithoutNamespaceNodes.isEmpty()){
-                throw new DocumentedException(String.format("Element %s present multiple times with different namespaces: %s, %s", name, foundConfigNodes,
-                        foundWithoutNamespaceNodes),
-                        DocumentedException.ErrorType.APPLICATION,
-                        DocumentedException.ErrorTag.INVALID_VALUE,
+            if (!foundWithoutNamespaceNodes.isEmpty()) {
+                throw new DocumentedException(
+                        String.format("Element %s present multiple times with different namespaces: %s, %s", name,
+                                foundConfigNodes, foundWithoutNamespaceNodes),
+                        DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.INVALID_VALUE,
                         DocumentedException.ErrorSeverity.ERROR);
             }
         }
-
         recognisedChildren.addAll(foundConfigNodes);
         return foundConfigNodes;
     }
@@ -231,8 +241,6 @@ public final class InstanceConfig {
         for (Entry<String, AttributeIfc> entry : yangNameToAttr.entrySet()) {
             reversednameToAtr.put(entry.getValue().getUpperCaseCammelCase(), entry.getValue());
         }
-
         return reversednameToAtr;
     }
-
 }

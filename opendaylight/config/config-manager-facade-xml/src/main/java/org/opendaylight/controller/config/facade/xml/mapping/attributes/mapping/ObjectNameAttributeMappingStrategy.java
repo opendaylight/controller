@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,8 +16,8 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.facade.xml.util.Util;
 import org.opendaylight.yangtools.yang.common.QName;
 
-public class ObjectNameAttributeMappingStrategy extends
-        AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
+public class ObjectNameAttributeMappingStrategy
+        extends AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
 
     private final String namespace;
 
@@ -28,27 +28,30 @@ public class ObjectNameAttributeMappingStrategy extends
 
     @Override
     public Optional<MappedDependency> mapAttribute(final Object value) {
-        if (value == null){
+        if (value == null) {
             return Optional.absent();
         }
 
         String expectedClass = getOpenType().getClassName();
         String realClass = value.getClass().getName();
-        Preconditions.checkArgument(realClass.equals(expectedClass), "Type mismatch, expected " + expectedClass
-                + " but was " + realClass);
+        Preconditions.checkArgument(realClass.equals(expectedClass),
+                "Type mismatch, expected " + expectedClass + " but was " + realClass);
         Util.checkType(value, ObjectName.class);
 
         ObjectName on = (ObjectName) value;
 
         String refName = ObjectNameUtil.getReferenceName(on);
 
-        //we want to use the exact service name that was configured in xml so services that are referencing it can be resolved
+        // we want to use the exact service name that was configured in xml so services
+        // that are referencing it can be resolved
         return Optional.of(new MappedDependency(namespace,
                 QName.create(ObjectNameUtil.getServiceQName(on)).getLocalName(), refName));
     }
 
     public static class MappedDependency {
-        private final String namespace, serviceName, refName;
+        private final String namespace;
+        private final String serviceName;
+        private final String refName;
 
         public MappedDependency(final String namespace, final String serviceName, final String refName) {
             this.serviceName = serviceName;
@@ -78,5 +81,4 @@ public class ObjectNameAttributeMappingStrategy extends
             return sb.toString();
         }
     }
-
 }
