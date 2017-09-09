@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,25 +24,25 @@ public class InstanceConfigElementResolved {
     private final EditStrategyType editStrategy;
     private final Map<String, AttributeConfigElement> configuration;
 
-    public InstanceConfigElementResolved(final String currentStrategy, final Map<String, AttributeConfigElement> configuration,
-                                         final EditStrategyType defaultStrategy)
+    public InstanceConfigElementResolved(final String currentStrategy,
+            final Map<String, AttributeConfigElement> configuration, final EditStrategyType defaultStrategy)
             throws DocumentedException {
         this.editStrategy = parseStrategy(currentStrategy, defaultStrategy);
         this.configuration = configuration;
     }
 
-    public InstanceConfigElementResolved(final Map<String, AttributeConfigElement> configuration, final EditStrategyType defaultStrategy) {
+    public InstanceConfigElementResolved(final Map<String, AttributeConfigElement> configuration,
+            final EditStrategyType defaultStrategy) {
         editStrategy = defaultStrategy;
         this.configuration = configuration;
     }
 
-
-    static EditStrategyType parseStrategy(final String currentStrategy, final EditStrategyType defaultStrategy) throws OperationNotPermittedException {
+    static EditStrategyType parseStrategy(final String currentStrategy, final EditStrategyType defaultStrategy)
+            throws OperationNotPermittedException {
         EditStrategyType parsedStrategy = EditStrategyType.valueOf(currentStrategy);
-        EditStrategyType.compareParsedStrategyToDefaultEnforcing(parsedStrategy,defaultStrategy);
+        EditStrategyType.compareParsedStrategyToDefaultEnforcing(parsedStrategy, defaultStrategy);
         return parsedStrategy;
     }
-
 
     public EditConfigStrategy getEditStrategy() {
         return editStrategy.getFittingStrategy();

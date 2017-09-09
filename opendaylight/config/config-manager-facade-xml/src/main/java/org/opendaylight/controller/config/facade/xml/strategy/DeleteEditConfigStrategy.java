@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -23,28 +23,25 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeleteEditConfigStrategy.class);
 
-
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                               String module, String instance, ServiceRegistryWrapper services) throws
-        ConfigHandlingException {
-        throw new ConfigHandlingException(String.format("Unable to delete %s : %s , ServiceInstance not found", module, instance),
-                DocumentedException.ErrorType.APPLICATION,
-                DocumentedException.ErrorTag.OPERATION_FAILED,
+            String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
+        throw new ConfigHandlingException(
+                String.format("Unable to delete %s : %s , ServiceInstance not found", module, instance),
+                DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                 DocumentedException.ErrorSeverity.ERROR);
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws
-        ConfigHandlingException {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on,
+            ServiceRegistryWrapper services) throws ConfigHandlingException {
         try {
             ta.destroyModule(on);
             LOG.debug("ServiceInstance {} deleted successfully", on);
         } catch (InstanceNotFoundException e) {
             throw new ConfigHandlingException(
                     String.format("Unable to delete %s because of exception %s" + on, e.getMessage()),
-                    DocumentedException.ErrorType.APPLICATION,
-                    DocumentedException.ErrorTag.OPERATION_FAILED,
+                    DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                     DocumentedException.ErrorSeverity.ERROR);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,12 +10,15 @@ package org.opendaylight.controller.config.facade.xml.transactions;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
+
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -41,13 +44,14 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public synchronized void close() {
         for (ObjectName tx : allOpenedTransactions) {
             try {
                 if (isStillOpenTransaction(tx)) {
                     configRegistryClient.getConfigTransactionClient(tx).abortConfig();
                 }
-            } catch (final Exception e) {
+            } catch (final RuntimeException e) {
                 LOG.debug("Ignoring exception while closing transaction {}", tx, e);
             }
         }
@@ -56,7 +60,7 @@ public class TransactionProvider implements AutoCloseable {
 
     public synchronized Optional<ObjectName> getTransaction() {
 
-        if (candidateTx == null){
+        if (candidateTx == null) {
             return Optional.absent();
         }
 
@@ -71,7 +75,7 @@ public class TransactionProvider implements AutoCloseable {
 
     public synchronized Optional<ObjectName> getReadTransaction() {
 
-        if (readTx == null){
+        if (readTx == null) {
             return Optional.absent();
         }
 
@@ -111,7 +115,7 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     /**
-     * Used for editConfig test option
+     * Used for editConfig test option.
      */
     public synchronized ObjectName getTestTransaction() {
         ObjectName testTx = configRegistryClient.beginConfig();
@@ -120,21 +124,22 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     /**
-     * Commit and notification send must be atomic
+     * Commit and notification send must be atomic.
      */
     public CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException {
         return commitTransaction(configRegistryClient);
     }
 
     /**
-     * Commit and notification send must be atomic
-     * @param configRegistryClient
+     * Commit and notification send must be atomic.
      */
-    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient configRegistryClient) throws ValidationException, ConflictingVersionException {
-        if (!getTransaction().isPresent()){
-            //making empty commit without prior opened transaction, just return commit status with empty lists
+    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient configRegistryClient)
+            throws ValidationException, ConflictingVersionException {
+        if (!getTransaction().isPresent()) {
+            // making empty commit without prior opened transaction, just return commit
+            // status with empty lists
             LOG.debug("Making commit without open candidate transaction for session {}", sessionIdForReporting);
-            return new CommitStatus(Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+            return new CommitStatus(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
         final Optional<ObjectName> maybeTaON = getTransaction();
         ObjectName taON = maybeTaON.get();
@@ -203,18 +208,19 @@ public class TransactionProvider implements AutoCloseable {
     }
 
     /**
-     * Wiping means removing all module instances keeping the transaction open + service references.
+     * Wiping means removing all module instances keeping the transaction open +
+     * service references.
      */
     synchronized void wipeInternal(final ObjectName taON, final boolean isTest) {
         ConfigTransactionClient transactionClient = configRegistryClient.getConfigTransactionClient(taON);
 
         Set<ObjectName> lookupConfigBeans = transactionClient.lookupConfigBeans();
-        int i = lookupConfigBeans.size();
+        int index = lookupConfigBeans.size();
         for (ObjectName instance : lookupConfigBeans) {
             try {
                 transactionClient.destroyModule(instance);
             } catch (final InstanceNotFoundException e) {
-                if (isTest){
+                if (isTest) {
                     LOG.debug("Unable to clean configuration in transactiom {}", taON, e);
                 } else {
                     LOG.warn("Unable to clean configuration in transactiom {}", taON, e);
@@ -223,7 +229,7 @@ public class TransactionProvider implements AutoCloseable {
                 throw new IllegalStateException("Unable to clean configuration in transactiom " + taON, e);
             }
         }
-        LOG.debug("Transaction {} wiped clean of {} config beans", taON, i);
+        LOG.debug("Transaction {} wiped clean of {} config beans", taON, index);
 
         transactionClient.removeAllServiceReferences();
         LOG.debug("Transaction {} wiped clean of all service references", taON);
@@ -234,5 +240,4 @@ public class TransactionProvider implements AutoCloseable {
         Preconditions.checkState(taON.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + sessionIdForReporting);
         wipeInternal(taON.get(), false);
     }
-
 }

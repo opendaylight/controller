@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -61,9 +61,9 @@ public final class InstanceRuntimeRpc {
                         .get(configDefEntry.getKey());
 
                 configDefEntry.getValue().resolveValue(attributeResolvingStrategy, configDefEntry.getKey());
-                configDefEntry.getValue().setJmxName(
-                        yangToAttrConfig.get(configDefEntry.getKey()).getUpperCaseCammelCase());
-            } catch (final Exception e) {
+                configDefEntry.getValue()
+                        .setJmxName(yangToAttrConfig.get(configDefEntry.getKey()).getUpperCaseCammelCase());
+            } catch (final DocumentedException e) {
                 throw new IllegalStateException("Unable to resolve value " + configDefEntry.getValue()
                         + " to attribute " + configDefEntry.getKey(), e);
             }
@@ -75,7 +75,7 @@ public final class InstanceRuntimeRpc {
 
         // FIXME add identity map to runtime data
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig,
-                Collections.<String, Map<Date, IdentityMapping>> emptyMap());
+                Collections.<String, Map<Date, IdentityMapping>>emptyMap());
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
             List<XmlElement> configNodes = configRootNode.getChildElements(readStratEntry.getKey());
@@ -94,5 +94,4 @@ public final class InstanceRuntimeRpc {
     public AttributeIfc getReturnType() {
         return rpc.getReturnType();
     }
-
 }

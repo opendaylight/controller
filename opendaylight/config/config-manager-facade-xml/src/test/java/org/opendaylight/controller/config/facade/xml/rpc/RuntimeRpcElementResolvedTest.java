@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,33 +31,35 @@ public class RuntimeRpcElementResolvedTest {
     public Map<String, String> additional;
 
     @Parameterized.Parameters(name = "{index}: parsed({0}) contains moduleName:{1} and instanceName:{2}")
+    @SuppressWarnings("linelength")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
+        return Arrays.asList(new Object[][] {
                 // With namespaces
-                {"/a:modules/a:module[a:name='instanceName'][a:type='moduleType']/b:listener-state[b:peer-id='127.0.0.1']",
-                    new HashMap<>(ImmutableMap.of("listener-state", "127.0.0.1"))},
-                {"/a:modules/a:module[a:name='instanceName'][a:type='moduleType']",
-                    null},
+                { "/a:modules/a:module[a:name='instanceName'][a:type='moduleType']/b:listener-state[b:peer-id='127.0.0.1']",
+                    new HashMap<>(ImmutableMap.of("listener-state", "127.0.0.1")) },
+                { "/a:modules/a:module[a:name='instanceName'][a:type='moduleType']", null },
 
                 // Without namespaces
-                {"/modules/module[name=instanceName][type=moduleType]", null},
-                {"/modules/module[type=moduleType][name='instanceName']", null},
-                {"/modules/module[name=\'instanceName\'][type=\"moduleType\"]", null},
-                {"/modules/module[type=moduleType and name=instanceName]", null},
-                {"/modules/module[name=\"instanceName\" and type=moduleType]", null},
-                {"/modules/module[type=\"moduleType\" and name=instanceName]", null},
-                {"/modules/module[name=\'instanceName\' and type=\"moduleType\"]", null},
+                { "/modules/module[name=instanceName][type=moduleType]", null },
+                { "/modules/module[type=moduleType][name='instanceName']", null },
+                { "/modules/module[name=\'instanceName\'][type=\"moduleType\"]", null },
+                { "/modules/module[type=moduleType and name=instanceName]", null },
+                { "/modules/module[name=\"instanceName\" and type=moduleType]", null },
+                { "/modules/module[type=\"moduleType\" and name=instanceName]", null },
+                { "/modules/module[name=\'instanceName\' and type=\"moduleType\"]", null },
 
                 // With inner beans
-                {"/modules/module[name=instanceName and type=\"moduleType\"]/inner[key=b]", Collections.singletonMap("inner", "b")},
-                {"/modules/module[name=instanceName and type=moduleType]/inner[key=b]", Collections.singletonMap("inner", "b")},
-                {"/modules/module[name=instanceName and type=moduleType]/inner[key=\'b\']", Collections.singletonMap("inner", "b")},
-                {"/modules/module[name=instanceName and type=moduleType]/inner[key=\"b\"]", Collections.singletonMap("inner", "b")},
+                { "/modules/module[name=instanceName and type=\"moduleType\"]/inner[key=b]",
+                        Collections.singletonMap("inner", "b") },
+                { "/modules/module[name=instanceName and type=moduleType]/inner[key=b]",
+                        Collections.singletonMap("inner", "b") },
+                { "/modules/module[name=instanceName and type=moduleType]/inner[key=\'b\']",
+                        Collections.singletonMap("inner", "b") },
+                { "/modules/module[name=instanceName and type=moduleType]/inner[key=\"b\"]",
+                        Collections.singletonMap("inner", "b") },
 
-                {"/modules/module[name=instanceName and type=\"moduleType\"]/inner[key2=a]/inner2[key=b]",
-                    new HashMap<>(ImmutableMap.of("inner", "a", "inner2", "b"))
-                },
-        });
+                { "/modules/module[name=instanceName and type=\"moduleType\"]/inner[key2=a]/inner2[key=b]",
+                    new HashMap<>(ImmutableMap.of("inner", "a", "inner2", "b")) }, });
     }
 
     @Test

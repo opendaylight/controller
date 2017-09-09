@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,10 +19,6 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
     private final Document document;
     private final String key;
 
-    /**
-     * @param document
-     * @param key
-     */
     public SimpleAttributeWritingStrategy(final Document document, final String key) {
         this.document = document;
         this.key = key;
@@ -36,15 +32,15 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
         parentElement.appendChild(innerNode);
     }
 
-    protected Element createElement(final Document document, final String key, final String value, final Optional<String> namespace) {
+    protected Element createElement(final Document document, final String key, final String value,
+            final Optional<String> namespace) {
         Element typeElement = XmlUtil.createElement(document, key, namespace);
 
         typeElement.appendChild(document.createTextNode(value));
         return typeElement;
     }
+
     protected Object preprocess(final Object value) {
         return value;
     }
-
-
 }

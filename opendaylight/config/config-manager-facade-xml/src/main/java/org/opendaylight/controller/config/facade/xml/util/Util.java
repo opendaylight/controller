@@ -16,17 +16,19 @@ import java.util.Date;
 
 public final class Util {
 
+    private Util() {
+    }
+
     public static String writeDate(final Date date) {
         return getRevisionFormat().format(date);
     }
 
-    public static Date readDate(final String s) throws ParseException {
-        return getRevisionFormat().parse(s);
+    public static Date readDate(final String string) throws ParseException {
+        return getRevisionFormat().parse(string);
     }
 
     public static void checkType(final Object value, final Class<?> clazz) {
-        Preconditions.checkArgument(clazz.isAssignableFrom(value.getClass()), "Unexpected type " + value.getClass()
-                + " should be " + clazz + " of " + value);
+        Preconditions.checkArgument(clazz.isAssignableFrom(value.getClass()),
+                "Unexpected type " + value.getClass() + " should be " + clazz + " of " + value);
     }
-
 }

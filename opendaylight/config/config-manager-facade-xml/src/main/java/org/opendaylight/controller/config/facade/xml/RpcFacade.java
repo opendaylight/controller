@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,8 +39,8 @@ import org.w3c.dom.Element;
 public class RpcFacade {
 
     public static final String CONTEXT_INSTANCE = "context-instance";
-    private YangStoreService yangStoreService;
-    private ConfigRegistryClient configRegistryClient;
+    private final YangStoreService yangStoreService;
+    private final ConfigRegistryClient configRegistryClient;
 
     public RpcFacade(final YangStoreService yangStoreService, final ConfigRegistryClient configRegistryClient) {
         this.yangStoreService = yangStoreService;
@@ -51,15 +51,17 @@ public class RpcFacade {
 
         final Map<String, Map<String, ModuleRpcs>> map = new HashMap<>();
 
-        for (final Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : yangStoreService.getModuleMXBeanEntryMap().entrySet()) {
+        for (final Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : yangStoreService
+                .getModuleMXBeanEntryMap().entrySet()) {
 
-            Map<String, ModuleRpcs> namespaceToModules =
-                    map.computeIfAbsent(namespaceToModuleEntry.getKey(), k -> new HashMap<>());
+            Map<String, ModuleRpcs> namespaceToModules = map.computeIfAbsent(namespaceToModuleEntry.getKey(),
+                k -> new HashMap<>());
 
-            for (final Map.Entry<String, ModuleMXBeanEntry> moduleEntry : namespaceToModuleEntry.getValue().entrySet()) {
+            for (final Map.Entry<String, ModuleMXBeanEntry> moduleEntry : namespaceToModuleEntry.getValue()
+                    .entrySet()) {
 
                 ModuleRpcs rpcMapping = namespaceToModules.computeIfAbsent(moduleEntry.getKey(),
-                        k -> new ModuleRpcs(yangStoreService.getEnumResolver()));
+                    k -> new ModuleRpcs(yangStoreService.getEnumResolver()));
 
                 final ModuleMXBeanEntry entry = moduleEntry.getValue();
 
@@ -75,7 +77,6 @@ public class RpcFacade {
         return new Rpcs(map);
     }
 
-
     public OperationExecution fromXml(final XmlElement xml) throws DocumentedException {
         final String namespace;
         namespace = xml.getNamespace();
@@ -83,8 +84,8 @@ public class RpcFacade {
         final XmlElement contextInstanceElement = xml.getOnlyChildElement(CONTEXT_INSTANCE);
         final String operationName = xml.getName();
 
-        final RuntimeRpcElementResolved id = RuntimeRpcElementResolved.fromXpath(
-                contextInstanceElement.getTextContent(), operationName, namespace);
+        final RuntimeRpcElementResolved id = RuntimeRpcElementResolved
+                .fromXpath(contextInstanceElement.getTextContent(), operationName, namespace);
 
         final Rpcs rpcs = mapRpcs();
 
@@ -97,12 +98,12 @@ public class RpcFacade {
         Map<String, AttributeConfigElement> attributes = instanceRuntimeRpc.fromXml(xml);
         attributes = sortAttributes(attributes, xml);
 
-        return new OperationExecution(on, instanceRuntimeRpc.getName(), attributes,
-                instanceRuntimeRpc.getReturnType(), namespace);
+        return new OperationExecution(on, instanceRuntimeRpc.getName(), attributes, instanceRuntimeRpc.getReturnType(),
+                namespace);
     }
 
-    private Map<String, AttributeConfigElement> sortAttributes(
-            final Map<String, AttributeConfigElement> attributes, final XmlElement xml) {
+    private Map<String, AttributeConfigElement> sortAttributes(final Map<String, AttributeConfigElement> attributes,
+            final XmlElement xml) {
         final Map<String, AttributeConfigElement> sorted = new LinkedHashMap<>();
 
         for (XmlElement xmlElement : xml.getChildElements()) {
@@ -127,33 +128,39 @@ public class RpcFacade {
         final Object[] params = new Object[execution.attributes.size()];
         final String[] signature = new String[execution.attributes.size()];
 
-        int i = 0;
+        int index = 0;
         for (final AttributeConfigElement attribute : execution.attributes.values()) {
             final Optional<?> resolvedValueOpt = attribute.getResolvedValue();
 
-            params[i] = resolvedValueOpt.isPresent() ? resolvedValueOpt.get() : attribute.getResolvedDefaultValue();
-            signature[i] = resolvedValueOpt.isPresent() ? resolvedValueOpt.get().getClass().getName() : attribute
-                    .getResolvedDefaultValue().getClass().getName();
-            i++;
+            params[index] = resolvedValueOpt.isPresent() ? resolvedValueOpt.get() : attribute.getResolvedDefaultValue();
+            signature[index] = resolvedValueOpt.isPresent() ? resolvedValueOpt.get().getClass().getName()
+                    : attribute.getResolvedDefaultValue().getClass().getName();
+            index++;
         }
 
         return configRegistryClient.invokeMethod(execution.on, execution.operationName, params, signature);
     }
 
-    public Element toXml(final Document doc, final Object result, final OperationExecution execution) throws DocumentedException {
-        AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper().prepareStrategy(execution.getReturnType());
+    public Element toXml(final Document doc, final Object result, final OperationExecution execution)
+            throws DocumentedException {
+        AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper()
+                .prepareStrategy(execution.getReturnType());
         Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
-        Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, execution.getReturnType().getOpenType());
+        Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result,
+                execution.getReturnType().getOpenType());
 
-        // FIXME: multiple return values defined as leaf-list and list in yang should not be wrapped in output xml element,
+        // FIXME: multiple return values defined as leaf-list and list in yang should
+        // not be wrapped in output xml element,
         // they need to be appended directly under rpc-reply element
         //
         // Either allow List of Elements to be returned from NetconfOperation or
         // pass reference to parent output xml element for netconf operations to
         // append result(s) on their own
-        Element tempParent = XmlUtil.createElement(doc, "output", Optional.of(XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
+        Element tempParent = XmlUtil.createElement(doc, "output",
+                Optional.of(XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
         new ObjectXmlWriter().prepareWritingStrategy(execution.getReturnType().getAttributeYangName(),
-                execution.getReturnType(), doc).writeElement(tempParent, execution.getNamespace(), mappedAttributeOpt.get());
+                execution.getReturnType(), doc)
+                .writeElement(tempParent, execution.getNamespace(), mappedAttributeOpt.get());
 
         XmlElement xmlElement = XmlElement.fromDomElement(tempParent);
         return xmlElement.getChildElements().size() > 1 ? tempParent : xmlElement.getOnlyChildElement().getDomElement();
@@ -168,7 +175,8 @@ public class RpcFacade {
         private final String namespace;
 
         public OperationExecution(final ObjectName on, final String name,
-            final Map<String, AttributeConfigElement> attributes, final AttributeIfc returnType, final String namespace) {
+                final Map<String, AttributeConfigElement> attributes, final AttributeIfc returnType,
+                final String namespace) {
             this.on = on;
             this.operationName = name;
             this.attributes = attributes;
@@ -200,5 +208,4 @@ public class RpcFacade {
             return namespace;
         }
     }
-
 }

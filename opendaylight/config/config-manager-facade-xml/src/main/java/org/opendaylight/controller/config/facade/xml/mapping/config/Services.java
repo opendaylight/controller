@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,7 +7,6 @@
  */
 
 package org.opendaylight.controller.config.facade.xml.mapping.config;
-
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -36,12 +35,12 @@ public final class Services {
     public static final String TYPE_KEY = "type";
     public static final String SERVICE_KEY = "service";
 
-    private final Map<String /*Namespace*/, Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>>>
-            namespaceToServiceNameToRefNameToInstance = new HashMap<>();
+    private final Map<String
+        /* Namespace */,
+        Map<String/* ServiceName */,
+        Map<String/* refName */,
+        ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = new HashMap<>();
 
-    /**
-     *
-     */
     public Map<String, Map<String, Map<String, ServiceInstance>>> getNamespaceToServiceNameToRefNameToInstance() {
         return namespaceToServiceNameToRefNameToInstance;
     }
@@ -58,16 +57,17 @@ public final class Services {
                 for (Entry<String, String> refEntry : serviceEntry.getValue().entrySet()) {
 
                     Map<String, Map<String, ServiceInstance>> namespaceToServices =
-                            tracker.namespaceToServiceNameToRefNameToInstance.computeIfAbsent(namespace,
-                                    k -> new HashMap<>());
+                            tracker.namespaceToServiceNameToRefNameToInstance
+                            .computeIfAbsent(namespace, k -> new HashMap<>());
 
-                    Map<String, ServiceInstance> refNameToInstance = namespaceToServices
-                            .computeIfAbsent(serviceName, k -> new HashMap<>());
+                    Map<String, ServiceInstance> refNameToInstance = namespaceToServices.computeIfAbsent(serviceName,
+                        k -> new HashMap<>());
 
                     String refName = refEntry.getKey();
-                    //we want to compare reference not value of the provider
+                    // we want to compare reference not value of the provider
                     refNameToInstance.put(refName, refEntry.getValue() == EMPTY_PROVIDER
-                            //provider name cannot be EMPTY_PROVIDER instance unless we are executing delete
+                            // provider name cannot be EMPTY_PROVIDER instance unless we are executing
+                            // delete
                             ? ServiceInstance.EMPTY_SERVICE_INSTANCE
                             : ServiceInstance.fromString(refEntry.getValue()));
 
@@ -90,13 +90,14 @@ public final class Services {
             XmlElement typeElement = service.getOnlyChildElement(TYPE_KEY);
             Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
 
-            Preconditions.checkState(prefixNamespace.getKey()!=null && !prefixNamespace.getKey().equals(""), "Type attribute was not prefixed");
+            Preconditions.checkState(prefixNamespace.getKey() != null && !prefixNamespace.getKey().equals(""),
+                    "Type attribute was not prefixed");
 
-            Map<String, Map<String, String>> namespaceToServices =
-                    retVal.computeIfAbsent(prefixNamespace.getValue(), k -> new HashMap<>());
+            Map<String, Map<String, String>> namespaceToServices = retVal.computeIfAbsent(prefixNamespace.getValue(),
+                k -> new HashMap<>());
 
-            String serviceName =  ObjectNameAttributeReadingStrategy
-                .checkPrefixAndExtractServiceName(typeElement, prefixNamespace);
+            String serviceName = ObjectNameAttributeReadingStrategy.checkPrefixAndExtractServiceName(typeElement,
+                    prefixNamespace);
 
             Map<String, String> innerMap = namespaceToServices.computeIfAbsent(serviceName, k -> new HashMap<>());
 
@@ -107,11 +108,9 @@ public final class Services {
                 XmlElement nameElement = instance.getOnlyChildElement(NAME_KEY);
                 String refName = nameElement.getTextContent();
 
-                if (!ModifyAction.DELETE.toString().toLowerCase().equals(
-                        instance.getAttribute(
-                                XmlMappingConstants.OPERATION_ATTR_KEY,
-                                XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0)))
-                {
+                if (!ModifyAction.DELETE.toString().toLowerCase()
+                        .equals(instance.getAttribute(XmlMappingConstants.OPERATION_ATTR_KEY,
+                                XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0))) {
                     XmlElement providerElement = instance.getOnlyChildElement(PROVIDER_KEY);
                     String providerName = providerElement.getTextContent();
 
@@ -119,7 +118,8 @@ public final class Services {
 
                     innerMap.put(refName, providerName);
                 } else {
-                    //since this is a delete we dont have a provider name - we want empty service instance
+                    // since this is a delete we dont have a provider name - we want empty service
+                    // instance
                     innerMap.put(refName, EMPTY_PROVIDER);
                 }
             }
@@ -129,7 +129,8 @@ public final class Services {
     }
 
     public static Element toXml(final ServiceRegistryWrapper serviceRegistryWrapper, final Document document) {
-        final Optional<String> configNs = Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        final Optional<String> configNs = Optional
+                .of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
         Element root = XmlUtil.createElement(document, XmlMappingConstants.SERVICES_KEY, configNs);
 
         Map<String, Map<String, Map<String, String>>> mappedServices = serviceRegistryWrapper.getMappedServices();
@@ -142,23 +143,23 @@ public final class Services {
 
                 // type belongs to config.yang namespace
                 String serviceType = serviceEntry.getKey();
-                Element typeElement = XmlUtil.createTextElementWithNamespacedContent(
-                        document, XmlMappingConstants.TYPE_KEY, XmlMappingConstants.PREFIX,
-                        namespaceToRefEntry.getKey(), serviceType, configNs);
+                Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document,
+                        XmlMappingConstants.TYPE_KEY, XmlMappingConstants.PREFIX, namespaceToRefEntry.getKey(),
+                        serviceType, configNs);
 
                 serviceElement.appendChild(typeElement);
 
                 for (Entry<String, String> instanceEntry : serviceEntry.getValue().entrySet()) {
-                    Element instanceElement = XmlUtil.createElement(
-                            document, XmlMappingConstants.INSTANCE_KEY, configNs);
+                    Element instanceElement = XmlUtil.createElement(document, XmlMappingConstants.INSTANCE_KEY,
+                            configNs);
                     serviceElement.appendChild(instanceElement);
 
-                    Element nameElement = XmlUtil.createTextElement(
-                            document, NAME_KEY, instanceEntry.getKey(), configNs);
+                    Element nameElement = XmlUtil.createTextElement(document, NAME_KEY, instanceEntry.getKey(),
+                            configNs);
                     instanceElement.appendChild(nameElement);
 
-                    Element providerElement = XmlUtil.createTextElement(
-                            document, PROVIDER_KEY, instanceEntry.getValue(), configNs);
+                    Element providerElement = XmlUtil.createTextElement(document, PROVIDER_KEY,
+                            instanceEntry.getValue(), configNs);
                     instanceElement.appendChild(providerElement);
                 }
             }
@@ -177,20 +178,23 @@ public final class Services {
 
         public static ServiceInstance fromString(String instanceId) {
             instanceId = instanceId.trim();
-            Matcher matcher = p.matcher(instanceId);
-            if(!matcher.matches()) {
-                matcher = pDeprecated.matcher(instanceId);
+            Matcher matcher = PATTERN.matcher(instanceId);
+            if (!matcher.matches()) {
+                matcher = PATTERN_DEPRECATED.matcher(instanceId);
             }
 
-            Preconditions.checkArgument(matcher.matches(), "Unexpected format for provider, expected " + p.toString()
-                    + " or " + pDeprecated.toString() + " but was " + instanceId);
+            Preconditions.checkArgument(matcher.matches(),
+                    "Unexpected format for provider, expected " + PATTERN.toString()
+                    + " or " + PATTERN_DEPRECATED.toString() + " but was " + instanceId);
 
             String factoryName = matcher.group(1);
             String instanceName = matcher.group(2);
             return new ServiceInstance(factoryName, instanceName);
         }
 
-        private final String moduleName, instanceName;
+        private final String moduleName;
+        private final String instanceName;
+
         private String serviceName;
 
         public String getServiceName() {
@@ -209,65 +213,65 @@ public final class Services {
             return instanceName;
         }
 
-        private static final String blueprint = "/"
-                + XmlMappingConstants.MODULES_KEY + "/" + XmlMappingConstants.MODULE_KEY + "["
-                + XmlMappingConstants.TYPE_KEY + "='%s']["
+        private static final String BLUEPRINT = "/" + XmlMappingConstants.MODULES_KEY + "/"
+                + XmlMappingConstants.MODULE_KEY + "[" + XmlMappingConstants.TYPE_KEY + "='%s']["
                 + XmlMappingConstants.NAME_KEY + "='%s']";
 
         // TODO unify with xpath in RuntimeRpc
 
-        // Previous version of xpath, needs to be supported for backwards compatibility (persisted configs by config-persister)
-        private static final String blueprintRDeprecated = "/" + XmlMappingConstants.CONFIG_KEY + "/"
+        // Previous version of xpath, needs to be supported for backwards compatibility
+        // (persisted configs by config-persister)
+        private static final String BLUEPRINTR_DEPRECATED = "/" + XmlMappingConstants.CONFIG_KEY + "/"
                 + XmlMappingConstants.MODULES_KEY + "/" + XmlMappingConstants.MODULE_KEY + "\\["
                 + XmlMappingConstants.NAME_KEY + "='%s'\\]/" + XmlMappingConstants.INSTANCE_KEY + "\\["
                 + XmlMappingConstants.NAME_KEY + "='%s'\\]";
 
-        private static final String blueprintR = "/"
-                + XmlMappingConstants.MODULES_KEY + "/" + XmlMappingConstants.MODULE_KEY + "\\["
-                + XmlMappingConstants.TYPE_KEY + "='%s'\\]\\["
+        private static final String BLUEPRINTR = "/" + XmlMappingConstants.MODULES_KEY + "/"
+                + XmlMappingConstants.MODULE_KEY + "\\[" + XmlMappingConstants.TYPE_KEY + "='%s'\\]\\["
                 + XmlMappingConstants.NAME_KEY + "='%s'\\]";
 
-        private static final Pattern pDeprecated = Pattern.compile(String.format(blueprintRDeprecated, "(.+)", "(.+)"));
-        private static final Pattern p = Pattern.compile(String.format(blueprintR, "(.+)", "(.+)"));
+        private static final Pattern PATTERN_DEPRECATED =
+                Pattern.compile(String.format(BLUEPRINTR_DEPRECATED, "(.+)", "(.+)"));
+        private static final Pattern PATTERN = Pattern.compile(String.format(BLUEPRINTR, "(.+)", "(.+)"));
 
         @Override
         public String toString() {
-            return String.format(blueprint, moduleName, instanceName);
+            return String.format(BLUEPRINT, moduleName, instanceName);
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((instanceName == null) ? 0 : instanceName.hashCode());
-            result = prime * result + ((moduleName == null) ? 0 : moduleName.hashCode());
+            result = prime * result + (instanceName == null ? 0 : instanceName.hashCode());
+            result = prime * result + (moduleName == null ? 0 : moduleName.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(final Object obj) {
-            if (this == obj){
+            if (this == obj) {
                 return true;
             }
-            if (obj == null){
+            if (obj == null) {
                 return false;
             }
-            if (getClass() != obj.getClass()){
+            if (getClass() != obj.getClass()) {
                 return false;
             }
             ServiceInstance other = (ServiceInstance) obj;
             if (instanceName == null) {
-                if (other.instanceName != null){
+                if (other.instanceName != null) {
                     return false;
                 }
-            } else if (!instanceName.equals(other.instanceName)){
+            } else if (!instanceName.equals(other.instanceName)) {
                 return false;
             }
             if (moduleName == null) {
-                if (other.moduleName != null){
+                if (other.moduleName != null) {
                     return false;
                 }
-            } else if (!moduleName.equals(other.moduleName)){
+            } else if (!moduleName.equals(other.moduleName)) {
                 return false;
             }
             return true;
@@ -281,5 +285,4 @@ public final class Services {
             return new ServiceInstance(ObjectNameUtil.getFactoryName(on), ObjectNameUtil.getInstanceName(on));
         }
     }
-
 }
