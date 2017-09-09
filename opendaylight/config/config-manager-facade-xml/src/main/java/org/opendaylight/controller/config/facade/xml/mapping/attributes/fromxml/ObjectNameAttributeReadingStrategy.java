@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -27,14 +27,15 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
     AttributeConfigElement readElementHook(final List<XmlElement> configNodes) throws DocumentedException {
 
         XmlElement firstChild = configNodes.get(0);
-        Preconditions.checkState(configNodes.size() == 1, "This element should be present only once " + firstChild
-                + " but was " + configNodes.size());
+        Preconditions.checkState(configNodes.size() == 1,
+                "This element should be present only once " + firstChild + " but was " + configNodes.size());
 
         Preconditions.checkNotNull(firstChild, "Element %s should be present", firstChild);
         return AttributeConfigElement.create(getNullableDefault(), resolve(firstChild));
     }
 
-    private ObjectNameAttributeMappingStrategy.MappedDependency resolve(final XmlElement firstChild) throws DocumentedException{
+    private ObjectNameAttributeMappingStrategy.MappedDependency resolve(final XmlElement firstChild)
+            throws DocumentedException {
         XmlElement typeElement = firstChild.getOnlyChildElementWithSameNamespace(XmlMappingConstants.TYPE_KEY);
         Map.Entry<String, String> prefixNamespace = typeElement.findNamespaceOfTextContent();
 
@@ -47,11 +48,12 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
                 dependencyName);
     }
 
-    public static String checkPrefixAndExtractServiceName(final XmlElement typeElement, final Map.Entry<String, String> prefixNamespace) throws DocumentedException {
+    public static String checkPrefixAndExtractServiceName(final XmlElement typeElement,
+            final Map.Entry<String, String> prefixNamespace) throws DocumentedException {
         String serviceName = typeElement.getTextContent();
         Preconditions.checkNotNull(prefixNamespace.getKey(), "Service %s value cannot be linked to namespace",
                 XmlMappingConstants.TYPE_KEY);
-        if(prefixNamespace.getKey().isEmpty()) {
+        if (prefixNamespace.getKey().isEmpty()) {
             return serviceName;
         } else {
             String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;
@@ -62,5 +64,4 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
             return serviceName;
         }
     }
-
 }

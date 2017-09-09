@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,13 +19,13 @@ import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.yangtools.yang.common.QName;
 
-
 public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
 
     private final String key;
     private final Map<String, Map<Date, IdentityMapping>> identityMap;
 
-    public SimpleIdentityRefAttributeReadingStrategy(final String nullableDefault, final String key, final Map<String, Map<Date, IdentityMapping>> identityMap) {
+    public SimpleIdentityRefAttributeReadingStrategy(final String nullableDefault, final String key,
+            final Map<String, Map<Date, IdentityMapping>> identityMap) {
         super(nullableDefault);
         this.key = key;
         this.identityMap = identityMap;
@@ -38,22 +38,25 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
 
         final String namespace;
         final String localName;
-        if(namespaceOfTextContent.getKey().isEmpty()) {
+        if (namespaceOfTextContent.getKey().isEmpty()) {
             localName = content;
             namespace = xmlElement.getNamespace();
         } else {
             String prefix = namespaceOfTextContent.getKey() + ":";
-            Preconditions.checkArgument(content.startsWith(prefix), "Identity ref should be prefixed with \"%s\"", prefix);
+            Preconditions.checkArgument(content.startsWith(prefix), "Identity ref should be prefixed with \"%s\"",
+                    prefix);
             localName = content.substring(prefix.length());
             namespace = namespaceOfTextContent.getValue();
         }
 
         Date revision = null;
         Map<Date, IdentityMapping> revisions = identityMap.get(namespace);
-        if(revisions.keySet().size() > 1) {
+        if (revisions.keySet().size() > 1) {
             for (Map.Entry<Date, IdentityMapping> revisionToIdentityEntry : revisions.entrySet()) {
-                if(revisionToIdentityEntry.getValue().containsIdName(localName)) {
-                    Preconditions.checkState(revision == null, "Duplicate identity %s, in namespace %s, with revisions: %s, %s detected. Cannot map attribute",
+                if (revisionToIdentityEntry.getValue().containsIdName(localName)) {
+                    Preconditions.checkState(revision == null,
+                            "Duplicate identity %s, in namespace %s, "
+                            + "with revisions: %s, %s detected. Cannot map attribute",
                             localName, namespace, revision, revisionToIdentityEntry.getKey());
                     revision = revisionToIdentityEntry.getKey();
                 }
@@ -66,7 +69,7 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
 
     @Override
     protected Object postprocessParsedValue(final String textContent) {
-        HashMap<String,String> map = Maps.newHashMap();
+        HashMap<String, String> map = Maps.newHashMap();
         map.put(key, textContent);
         return map;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -27,7 +27,8 @@ public class AttributeConfigElement {
     private Object resolvedDefaultValue;
     private String jmxName;
 
-    public AttributeConfigElement(final Object defaultValue, final Object value, final EditStrategyType editStrategyType) {
+    public AttributeConfigElement(final Object defaultValue, final Object value,
+            final EditStrategyType editStrategyType) {
         this.defaultValue = defaultValue;
         this.value = value;
         this.editStrategy = Optional.fromNullable(editStrategyType);
@@ -56,12 +57,13 @@ public class AttributeConfigElement {
         return new AttributeConfigElement(nullableDefault, value, null);
     }
 
-    public static AttributeConfigElement createNullValue(final Object nullableDefault) {
-        return new AttributeConfigElement(nullableDefault, null, null);
+    public static AttributeConfigElement create(final String nullableDefault, final Object value,
+            final EditStrategyType editStrategyType) {
+        return new AttributeConfigElement(nullableDefault, value, editStrategyType);
     }
 
-    public static AttributeConfigElement create(final String nullableDefault, final Object value, final EditStrategyType editStrategyType) {
-        return new AttributeConfigElement(nullableDefault, value, editStrategyType);
+    public static AttributeConfigElement createNullValue(final Object nullableDefault) {
+        return new AttributeConfigElement(nullableDefault, null, null);
     }
 
     public Object getValue() {
@@ -84,5 +86,4 @@ public class AttributeConfigElement {
     public String toString() {
         return "AttributeConfigElement [defaultValue=" + defaultValue + ", value=" + value + "]";
     }
-
 }

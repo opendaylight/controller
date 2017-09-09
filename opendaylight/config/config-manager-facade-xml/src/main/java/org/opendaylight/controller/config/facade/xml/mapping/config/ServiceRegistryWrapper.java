@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -30,35 +30,36 @@ public class ServiceRegistryWrapper {
         Map<String, Map<String, String>> serviceNameToRefNameToInstance = mappedServices.get(namespace);
 
         Preconditions.checkArgument(serviceNameToRefNameToInstance != null,
-                "No service mapped to %s:%s:%s. Wrong namespace, available namespaces: %s",
-                namespace, serviceType, refName, mappedServices.keySet());
+                "No service mapped to %s:%s:%s. Wrong namespace, available namespaces: %s", namespace, serviceType,
+                refName, mappedServices.keySet());
 
         Map<String, String> refNameToInstance = serviceNameToRefNameToInstance.get(serviceType);
         Preconditions.checkArgument(refNameToInstance != null,
-                "No service mapped to %s:%s:%s. Wrong service type, available service types: %s"
-                , namespace, serviceType, refName, serviceNameToRefNameToInstance.keySet());
+                "No service mapped to %s:%s:%s. Wrong service type, available service types: %s", namespace,
+                serviceType, refName, serviceNameToRefNameToInstance.keySet());
 
         String instanceId = refNameToInstance.get(refName);
         Preconditions.checkArgument(instanceId != null,
-                "No service mapped to %s:%s:%s. Wrong ref name, available ref names: %s"
-                ,namespace, serviceType, refName, refNameToInstance.keySet());
+                "No service mapped to %s:%s:%s. Wrong ref name, available ref names: %s", namespace, serviceType,
+                refName, refNameToInstance.keySet());
 
         Services.ServiceInstance serviceInstance = Services.ServiceInstance.fromString(instanceId);
         Preconditions.checkArgument(serviceInstance != null,
-                "No service mapped to %s:%s:%s. Wrong ref name, available ref names: %s"
-                ,namespace, serviceType, refName, refNameToInstance.keySet());
+                "No service mapped to %s:%s:%s. Wrong ref name, available ref names: %s", namespace, serviceType,
+                refName, refNameToInstance.keySet());
 
-        String qNameOfService = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceType);
+        String serviceName = configServiceRefRegistry.getServiceInterfaceName(namespace, serviceType);
         try {
             /*
-             Remove transaction name as this is redundant - will be stripped in DynamicWritableWrapper,
-             and makes it hard to compare with service references got from MXBean attributes
-            */
-            return ObjectNameUtil.withoutTransactionName(
-                    configServiceRefRegistry.getServiceReference(qNameOfService, refName));
+             * Remove transaction name as this is redundant - will be stripped in
+             * DynamicWritableWrapper, and makes it hard to compare with service references
+             * got from MXBean attributes
+             */
+            return ObjectNameUtil
+                    .withoutTransactionName(configServiceRefRegistry.getServiceReference(serviceName, refName));
         } catch (final InstanceNotFoundException e) {
-            throw new IllegalArgumentException("No serviceInstance mapped to " + refName
-                    + " under service name " + serviceType + " , " + refNameToInstance.keySet(), e);
+            throw new IllegalArgumentException("No serviceInstance mapped to " + refName + " under service name "
+                    + serviceType + " , " + refNameToInstance.keySet(), e);
 
         }
     }
@@ -67,16 +68,16 @@ public class ServiceRegistryWrapper {
         Map<String, Map<String, Map<String, String>>> retVal = new HashMap<>();
 
         Map<String, Map<String, ObjectName>> serviceMapping = configServiceRefRegistry.getServiceMapping();
-        for (Map.Entry<String, Map<String, ObjectName>> qNameToRefNameEntry : serviceMapping.entrySet()){
-            for (String refName : qNameToRefNameEntry.getValue().keySet()) {
+        for (Map.Entry<String, Map<String, ObjectName>> nameToRefEntry : serviceMapping.entrySet()) {
+            for (String refName : nameToRefEntry.getValue().keySet()) {
 
-                ObjectName on = qNameToRefNameEntry.getValue().get(refName);
+                ObjectName on = nameToRefEntry.getValue().get(refName);
                 Services.ServiceInstance si = Services.ServiceInstance.fromObjectName(on);
 
-                QName qname = QName.create(qNameToRefNameEntry.getKey());
+                QName qname = QName.create(nameToRefEntry.getKey());
                 String namespace = qname.getNamespace().toString();
-                Map<String, Map<String, String>> serviceToRefs =
-                        retVal.computeIfAbsent(namespace, k -> new HashMap<>());
+                Map<String, Map<String, String>> serviceToRefs = retVal.computeIfAbsent(namespace,
+                    k -> new HashMap<>());
 
                 String localName = qname.getLocalName();
                 Map<String, String> refsToSis = serviceToRefs.computeIfAbsent(localName, k -> new HashMap<>());

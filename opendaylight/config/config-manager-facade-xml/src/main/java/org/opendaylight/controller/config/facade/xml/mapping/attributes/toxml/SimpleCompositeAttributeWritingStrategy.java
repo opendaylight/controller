@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,18 +15,15 @@ import org.w3c.dom.Document;
 
 public class SimpleCompositeAttributeWritingStrategy extends SimpleAttributeWritingStrategy {
 
-    /**
-     * @param document
-     * @param key
-     */
     public SimpleCompositeAttributeWritingStrategy(final Document document, final String key) {
         super(document, key);
     }
 
+    @Override
     protected Object preprocess(final Object value) {
         Util.checkType(value, Map.class);
-        Preconditions.checkArgument(((Map<?, ?>)value).size() == 1, "Unexpected number of values in %s, expected 1", value);
-        return ((Map<?, ?>)value).values().iterator().next();
+        Preconditions.checkArgument(((Map<?, ?>) value).size() == 1, "Unexpected number of values in %s, expected 1",
+                value);
+        return ((Map<?, ?>) value).values().iterator().next();
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -52,19 +52,20 @@ public class Runtime {
 
             multimap.put(instanceName, objectName);
         }
-
         return retVal;
     }
 
-    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document, final EnumResolver enumResolver) {
+    public Element toXml(Set<ObjectName> instancesToMap, Set<ObjectName> configBeans, Document document,
+            final EnumResolver enumResolver) {
         Element root = XmlUtil.createElement(document, XmlMappingConstants.DATA_KEY, Optional.<String>absent());
 
-        Element modulesElement = XmlUtil.createElement(document, XmlMappingConstants.MODULES_KEY, Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
+        Element modulesElement = XmlUtil.createElement(document, XmlMappingConstants.MODULES_KEY,
+                Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
         root.appendChild(modulesElement);
 
         Map<String, Multimap<String, ObjectName>> moduleToRuntimeInstance = mapInstancesToModules(instancesToMap);
-        Map<String, Map<String, Collection<ObjectName>>> moduleToConfigInstance = Config
-            .getMappedInstances(configBeans, moduleConfigs);
+        Map<String, Map<String, Collection<ObjectName>>> moduleToConfigInstance = Config.getMappedInstances(configBeans,
+                moduleConfigs);
 
         for (String localNamespace : moduleConfigs.keySet()) {
 
@@ -78,7 +79,7 @@ public class Runtime {
 
                     Element runtimeXml;
                     ModuleConfig moduleConfig = moduleConfigs.get(localNamespace).get(moduleName);
-                    if(instanceToRbe==null || !instanceToRbe.containsKey(instanceName)) {
+                    if (instanceToRbe == null || !instanceToRbe.containsKey(instanceName)) {
                         runtimeXml = moduleConfig.toXml(instanceON, document, localNamespace, enumResolver);
                     } else {
                         ModuleRuntime moduleRuntime = moduleRuntimes.get(localNamespace).get(moduleName);
@@ -90,8 +91,6 @@ public class Runtime {
 
             }
         }
-
         return root;
     }
-
 }

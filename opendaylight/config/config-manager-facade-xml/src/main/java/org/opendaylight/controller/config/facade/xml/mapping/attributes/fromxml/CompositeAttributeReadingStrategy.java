@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -41,14 +41,13 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
 
         List<XmlElement> recognisedChildren = Lists.newArrayList();
         for (Entry<String, AttributeReadingStrategy> innerAttrEntry : innerStrategies.entrySet()) {
-            List<XmlElement> childItem = complexElement.getChildElementsWithSameNamespace(
-                    innerAttrEntry.getKey());
+            List<XmlElement> childItem = complexElement.getChildElementsWithSameNamespace(innerAttrEntry.getKey());
             recognisedChildren.addAll(childItem);
 
             AttributeConfigElement resolvedInner = innerAttrEntry.getValue().readElement(childItem);
 
             Object value = resolvedInner.getValue();
-            if(value == null) {
+            if (value == null) {
                 value = resolvedInner.getDefaultValue();
             }
 
@@ -60,8 +59,9 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
         String perInstanceEditStrategy = complexElement.getAttribute(XmlMappingConstants.OPERATION_ATTR_KEY,
                 XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
-        return Strings.isNullOrEmpty(perInstanceEditStrategy) ? AttributeConfigElement.create(getNullableDefault(), innerMap) :
-                AttributeConfigElement.create(getNullableDefault(), innerMap, EditStrategyType.valueOf(perInstanceEditStrategy));
+        return Strings.isNullOrEmpty(perInstanceEditStrategy)
+                ? AttributeConfigElement.create(getNullableDefault(), innerMap)
+                : AttributeConfigElement.create(getNullableDefault(), innerMap,
+                        EditStrategyType.valueOf(perInstanceEditStrategy));
     }
-
 }

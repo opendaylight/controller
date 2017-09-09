@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -42,11 +42,11 @@ import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
+public final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
     private static final class MXBeans {
         private final Map<String /* Namespace from yang file */,
                 Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
-        private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
+        private final Map<QName, Map<String, ModuleMXBeanEntry>> namesToIdentitiesToModuleMXBeanEntries;
 
         MXBeans(final SchemaContext schemaContext) {
             LOG.trace("Resolved modules:{}", schemaContext.getModules());
@@ -63,7 +63,7 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
                         .create(module, packageName, knownSEITracker);
                 for (final Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries.entrySet()) {
                     // merge value into qNamesToSIEs
-                    if (qNamesToSIEs.containsKey(sieEntry.getKey()) == false) {
+                    if (!qNamesToSIEs.containsKey(sieEntry.getKey())) {
                         qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
                     } else {
                         throw new IllegalStateException("Cannot add two SIE with same qname "
@@ -74,7 +74,8 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
             final Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
 
-            final Map<QName, Map<String /* identity local name */, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
+            final Map<QName, Map<String /* identity local name */,
+                ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
 
 
             for (final Module module : schemaContext.getModules()) {
@@ -92,7 +93,8 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
                 qNamesToIdentitiesToModuleMXBeanEntries.put(qName, namesToMBEs);
             }
             this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntryMap);
-            this.qNamesToIdentitiesToModuleMXBeanEntries = Collections.unmodifiableMap(qNamesToIdentitiesToModuleMXBeanEntries);
+            this.namesToIdentitiesToModuleMXBeanEntries =
+                    Collections.unmodifiableMap(qNamesToIdentitiesToModuleMXBeanEntries);
         }
     }
 
@@ -136,7 +138,7 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public Map<QName, Map<String, ModuleMXBeanEntry>> getQNamesToIdentitiesToModuleMXBeanEntries() {
-        return getMXBeans().qNamesToIdentitiesToModuleMXBeanEntries;
+        return getMXBeans().namesToIdentitiesToModuleMXBeanEntries;
     }
 
     @Override
@@ -150,13 +152,13 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
-        final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = this.sourceProvider.getSource(
-            SourceIdentifier.create(moduleIdentifier.getName(), Optional.fromNullable(
-                QName.formattedRevision(moduleIdentifier.getRevision()))));
+        final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = this.sourceProvider
+                .getSource(SourceIdentifier.create(moduleIdentifier.getName(),
+                        Optional.fromNullable(QName.formattedRevision(moduleIdentifier.getRevision()))));
 
         try {
             final YangTextSchemaSource yangTextSchemaSource = source.checkedGet();
-            try(InputStream inStream = yangTextSchemaSource.openStream()) {
+            try (InputStream inStream = yangTextSchemaSource.openStream()) {
                 return new String(ByteStreams.toByteArray(inStream), StandardCharsets.UTF_8);
             }
         } catch (SchemaSourceException | IOException e) {
@@ -193,7 +195,9 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
         Preconditions.checkState(this.bindingContextProvider != null, "Binding context provider was not set yet");
         final BiMap<String, String> enumMapping = this.bindingContextProvider.getEnumMapping(enumClass);
         final String javaName = enumMapping.get(enumYangValue);
-        return Preconditions.checkNotNull(javaName, "Unable to resolve enum value %s for enum class %s with assumed enum mapping: %s", enumYangValue, enumClass, enumMapping);
+        return Preconditions.checkNotNull(javaName,
+                "Unable to resolve enum value %s for enum class %s with assumed enum mapping: %s", enumYangValue,
+                enumClass, enumMapping);
     }
 
     @Override

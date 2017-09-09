@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -28,7 +28,8 @@ public class ConfigExecution {
     private final Config configResolver;
     private final XmlElement configElement;
 
-    public ConfigExecution(final Config configResolver, final XmlElement configElement, final TestOption testOption, final EditStrategyType defaultStrategy) throws DocumentedException {
+    public ConfigExecution(final Config configResolver, final XmlElement configElement, final TestOption testOption,
+            final EditStrategyType defaultStrategy) throws DocumentedException {
         Config.checkUnrecognisedChildren(configElement);
         this.configResolver = configResolver;
         this.configElement = configElement;
@@ -47,7 +48,8 @@ public class ConfigExecution {
 
     public Map<String, Multimap<String, ModuleElementResolved>> getResolvedXmlElements(
             final ServiceReferenceReadableRegistry serviceRegistry) throws DocumentedException {
-        return configResolver.fromXmlModulesResolved(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
+        return configResolver.fromXmlModulesResolved(configElement, defaultEditStrategyType,
+                getServiceRegistryWrapper(serviceRegistry));
     }
 
     public ServiceRegistryWrapper getServiceRegistryWrapper(final ServiceReferenceReadableRegistry serviceRegistry) {
@@ -55,9 +57,10 @@ public class ConfigExecution {
         return new ServiceRegistryWrapper(serviceRegistry);
     }
 
-    public Map<String, Multimap<String,ModuleElementDefinition>> getModulesDefinition(
+    public Map<String, Multimap<String, ModuleElementDefinition>> getModulesDefinition(
             final ServiceReferenceReadableRegistry serviceRegistry) throws DocumentedException {
-        return configResolver.fromXmlModulesMap(configElement, defaultEditStrategyType, getServiceRegistryWrapper(serviceRegistry));
+        return configResolver.fromXmlModulesMap(configElement, defaultEditStrategyType,
+                getServiceRegistryWrapper(serviceRegistry));
     }
 
     public EditStrategyType getDefaultStrategy() {

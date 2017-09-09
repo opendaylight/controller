@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,38 +26,28 @@ public class ReplaceEditConfigStrategy extends AbstractEditConfigStrategy {
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-                               String module, String instance, ServiceRegistryWrapper services) throws
-        ConfigHandlingException {
-        throw new ConfigHandlingException(
-                String.format("Unable to handle missing instance, no missing instances should appear at this point, missing: %s : %s ",
-                        module,
-                        instance),
-                DocumentedException.ErrorType.APPLICATION,
-                DocumentedException.ErrorTag.OPERATION_FAILED,
-                DocumentedException.ErrorSeverity.ERROR);
+            String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
+        throw new ConfigHandlingException(String.format(
+                "Unable to handle missing instance, no missing instances should appear"
+                + " at this point, missing: %s : %s ",
+                module, instance), DocumentedException.ErrorType.APPLICATION,
+                DocumentedException.ErrorTag.OPERATION_FAILED, DocumentedException.ErrorSeverity.ERROR);
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on, ServiceRegistryWrapper services) throws
-        ConfigHandlingException {
+    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on,
+            ServiceRegistryWrapper services) throws ConfigHandlingException {
         for (Entry<String, AttributeConfigElement> configAttributeEntry : configuration.entrySet()) {
-            try {
-                AttributeConfigElement ace = configAttributeEntry.getValue();
+            AttributeConfigElement ace = configAttributeEntry.getValue();
 
-                if (!ace.getResolvedValue().isPresent()) {
-                    Object value = ace.getResolvedDefaultValue();
-                    ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
-                    LOG.debug("Attribute {} set to default value {} for {}", configAttributeEntry.getKey(), value,
-                            on);
-                } else {
-                    Object value = ace.getResolvedValue().get();
-                    ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
-                    LOG.debug("Attribute {} set to value {} for {}", configAttributeEntry.getKey(), value, on);
-                }
-
-            } catch (Exception e) {
-                throw new IllegalStateException("Unable to set attributes for " + on + ", Error with attribute "
-                        + configAttributeEntry.getKey() + ":" + configAttributeEntry.getValue(), e);
+            if (!ace.getResolvedValue().isPresent()) {
+                Object value = ace.getResolvedDefaultValue();
+                ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
+                LOG.debug("Attribute {} set to default value {} for {}", configAttributeEntry.getKey(), value, on);
+            } else {
+                Object value = ace.getResolvedValue().get();
+                ta.setAttribute(on, ace.getJmxName(), new Attribute(ace.getJmxName(), value));
+                LOG.debug("Attribute {} set to value {} for {}", configAttributeEntry.getKey(), value, on);
             }
         }
     }

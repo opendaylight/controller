@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2017 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,17 +26,18 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
     @Override
     AttributeConfigElement readElementHook(final List<XmlElement> configNodes) throws DocumentedException {
         List<Object> innerList = Lists.newArrayList();
-        EditStrategyType innerEditStrategy= null;
+        EditStrategyType innerEditStrategy = null;
         for (XmlElement configNode : configNodes) {
-            final AttributeConfigElement attributeConfigElement = innerStrategy.readElement(Lists.newArrayList(configNode));
-            if(attributeConfigElement.getEditStrategy().isPresent()) {
+            final AttributeConfigElement attributeConfigElement = innerStrategy
+                    .readElement(Lists.newArrayList(configNode));
+            if (attributeConfigElement.getEditStrategy().isPresent()) {
                 // TODO this sets the last operation for the entire array
                 innerEditStrategy = attributeConfigElement.getEditStrategy().get();
             }
             innerList.add(attributeConfigElement.getValue());
         }
-        return innerEditStrategy == null ? AttributeConfigElement.create(getNullableDefault(), innerList) :
-                AttributeConfigElement.create(getNullableDefault(), innerList, innerEditStrategy);
+        return innerEditStrategy == null ? AttributeConfigElement.create(getNullableDefault(), innerList)
+                : AttributeConfigElement.create(getNullableDefault(), innerList, innerEditStrategy);
     }
 
 }
