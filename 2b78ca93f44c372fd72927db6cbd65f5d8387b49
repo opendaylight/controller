@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_efc2ae51",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-10T15:52:50Z",
+      "side": 0,
+      "message": "None of the methods inside the try declares to throw any exception.",
+      "parentUuid": "ba1f61a0_cfcfea7d",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_afcc368a",
         "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-09-10T14:54:03Z",
       "side": 0,
       "message": "... same here",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_4fa3fab1",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-10T15:52:50Z",
+      "side": 0,
+      "message": "Same.",
+      "parentUuid": "ba1f61a0_afcc368a",
       "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_2fa8468c",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/strategy/MergeEditConfigStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-10T15:52:50Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ba1f61a0_2fc16654",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_8fb21204",
         "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/strategy/ReplaceEditConfigStrategy.java",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_8fa97292",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/strategy/ReplaceEditConfigStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-10T15:52:50Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ba1f61a0_8fb21204",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_6fb7def5",
         "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/transactions/TransactionProvider.java",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2017-09-10T14:54:03Z",
       "side": 0,
       "message": "Here a RuntimeEx may get raised and we should keep the behavior of ignoring it as callers may not expect it.",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_6faebe99",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/transactions/TransactionProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-10T15:52:50Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ba1f61a0_6fb7def5",
       "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
