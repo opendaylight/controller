@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_cfcfea7d",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-10T14:54:03Z",
+      "side": 0,
+      "message": "By not rethrowing the IllegalStateException we lose contextual info...",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_afcc368a",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-10T14:54:03Z",
+      "side": 0,
+      "message": "... same here",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_2fc16654",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/strategy/MergeEditConfigStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-10T14:54:03Z",
+      "side": 0,
+      "message": "While the code block doesn\u0027t throw a checked Exception, it may throw a RuntimeException. I\u0027ve found CSS code tends to throw undocumented ISE\u0027s from anywhere. Unless you\u0027ve determined no method call in the block can throw a RuntimeException, I think it would be safer to catch  RuntimeException and throw the ConfigHandlingException as that\u0027s what\u0027s documented to be thrown from this method and callers may not expect RuntimeException.",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_8fb21204",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/strategy/ReplaceEditConfigStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-10T14:54:03Z",
+      "side": 0,
+      "message": "Here it\u0027s inconsistent as it rethrows an ISE instead of the documented ConfigHandlingException. The new exception adds more context info so I think we should keep it. Ideally it should throw ConfigHandlingException.",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_6fb7def5",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/transactions/TransactionProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-10T14:54:03Z",
+      "side": 0,
+      "message": "Here a RuntimeEx may get raised and we should keep the behavior of ignoring it as callers may not expect it.",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
