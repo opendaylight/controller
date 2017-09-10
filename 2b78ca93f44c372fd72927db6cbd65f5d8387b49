@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_af7a7621",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-10T16:10:07Z",
+      "side": 0,
+      "message": "They don\u0027t declare any but they may still throw ISE or IAE - this code is littered with undeclared exceptions. Looking at some implementations of mapAttribute, they can throw them. I think it\u0027s best to keep the previous behavior. This patch is intended to fix CS errors and really shouldn\u0027t change behavior.",
+      "parentUuid": "ba1f61a0_efc2ae51",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_afcc368a",
         "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
         "patchSetId": 1
