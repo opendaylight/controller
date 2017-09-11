@@ -108,6 +108,9 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
             if (failure != null) {
                 LOG.debug("Resolution of cookie {} shard {} failed, removing state", cookie, shardName, failure);
                 backends.remove(cookie, toInsert);
+
+                // Remove cache state in case someone else forgot to invalidate it
+                flushCache(shardName);
             }
         });
 
