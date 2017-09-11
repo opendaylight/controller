@@ -519,6 +519,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     }
 
                     self().tell((RunnableMessage) () -> {
+                        // At any rate, invalidate primaryShardInfo cache
+                        primaryShardInfoCache.remove(shardName);
+
                         shardActorsStopping.remove(shardName);
                         notifyOnCompleteTasks(failure, result);
                     }, ActorRef.noSender());
