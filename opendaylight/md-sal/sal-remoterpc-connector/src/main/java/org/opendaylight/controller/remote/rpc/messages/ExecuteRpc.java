@@ -79,13 +79,13 @@ public class ExecuteRpc implements Serializable {
 
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(executeRpc.getRpc());
+            out.writeObject(executeRpc.getRpc().toString());
             SerializationUtils.serializeNormalizedNode(executeRpc.getInputNormalizedNode(), out);
         }
 
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            QName qname = (QName) in.readObject();
+            QName qname = QName.create((String) in.readObject());
             executeRpc = new ExecuteRpc(SerializationUtils.deserializeNormalizedNode(in), qname);
         }
 
