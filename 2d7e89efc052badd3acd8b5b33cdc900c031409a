@@ -70,6 +70,30 @@
       "revId": "2d7e89efc052badd3acd8b5b33cdc900c031409a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_2554e5fd",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-09-11T11:23:53Z",
+      "side": 1,
+      "message": "Looking at Date\u0027s serialization format, it is documented as:\n\n    /**\n     * Save the state of this object to a stream (i.e., serialize it).\n     *\n     * @serialData The value returned by \u003ccode\u003egetTime()\u003c/code\u003e\n     *             is emitted (long).  This represents the offset from\n     *             January 1, 1970, 00:00:00 GMT in milliseconds.\n     */\n    private void writeObject(ObjectOutputStream s)\n\n\nI suspect the two nodes are not in the same timezone -- leading to the discrepancy.\n\nRather than changing serialization format here (and incurring serialization/parsing overhead), I think we need to release-note this and it will get fixed with yang-common-2.0.0, where  revision is not going to be represented as a Date.",
+      "parentUuid": "ba1f61a0_051ba173",
+      "range": {
+        "startLine": 82,
+        "startChar": 12,
+        "endLine": 82,
+        "endChar": 60
+      },
+      "revId": "2d7e89efc052badd3acd8b5b33cdc900c031409a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
