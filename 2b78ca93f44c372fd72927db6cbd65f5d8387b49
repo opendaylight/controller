@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "ba1f61a0_2fbde6b7",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-11T05:55:20Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ba1f61a0_af7a7621",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba1f61a0_afcc368a",
         "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
         "patchSetId": 1
@@ -84,6 +102,24 @@
       "side": 0,
       "message": "Same.",
       "parentUuid": "ba1f61a0_afcc368a",
+      "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_4fb81ac8",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/mapping/config/InstanceConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-09-11T05:55:20Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ba1f61a0_4fa3fab1",
       "revId": "2b78ca93f44c372fd72927db6cbd65f5d8387b49",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
