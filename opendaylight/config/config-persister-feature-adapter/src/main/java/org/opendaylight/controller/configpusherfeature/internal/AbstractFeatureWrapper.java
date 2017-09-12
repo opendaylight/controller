@@ -10,14 +10,19 @@ package org.opendaylight.controller.configpusherfeature.internal;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Capability;
 import org.apache.karaf.features.Conditional;
@@ -32,6 +37,7 @@ import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigS
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /*
  * Wrap a Feature for the purposes of extracting the FeatureConfigSnapshotHolders from
@@ -53,9 +59,9 @@ public class AbstractFeatureWrapper implements Feature {
     /*
      * @param f Feature to wrap
      */
-    public AbstractFeatureWrapper(final Feature f) {
-        Preconditions.checkNotNull(f,"FeatureWrapper requires non-null Feature in constructor");
-        this.feature = f;
+    public AbstractFeatureWrapper(final Feature feature) {
+        Preconditions.checkNotNull(feature, "FeatureWrapper requires non-null Feature in constructor");
+        this.feature = feature;
     }
 
     /*
@@ -64,11 +70,12 @@ public class AbstractFeatureWrapper implements Feature {
      */
     public Set<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
         final Set<FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
-        for(final ConfigFileInfo c: getConfigurationFiles()) {
+        for (final ConfigFileInfo c : getConfigurationFiles()) {
             // Skip non config snapshot XML files
-            if(isConfigSnapshot(c.getFinalname())) {
-                final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(c);
-                if(featureConfigSnapshotHolder.isPresent()) {
+            if (isConfigSnapshot(c.getFinalname())) {
+                final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder =
+                        getFeatureConfigSnapshotHolder(c);
+                if (featureConfigSnapshotHolder.isPresent()) {
                     snapShotHolders.add(featureConfigSnapshotHolder.get());
                 }
             }
@@ -76,28 +83,29 @@ public class AbstractFeatureWrapper implements Feature {
         return snapShotHolders;
     }
 
-    protected Optional<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolder(final ConfigFileInfo c) {
+    protected Optional<FeatureConfigSnapshotHolder>
+        getFeatureConfigSnapshotHolder(final ConfigFileInfo configFileInfo) {
         try {
-            return Optional.of(new FeatureConfigSnapshotHolder(c, this));
+            return Optional.of(new FeatureConfigSnapshotHolder(configFileInfo, this));
         } catch (final JAXBException e) {
-            LOG.warn("Unable to parse configuration snapshot. Config from '{}' will be IGNORED. " +
-                    "Note that subsequent config files may fail due to this problem. " +
-                    "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
-                    c.getFinalname(), e);
+            LOG.warn("Unable to parse configuration snapshot. Config from '{}' will be IGNORED. "
+                    + "Note that subsequent config files may fail due to this problem. "
+                    + "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                    configFileInfo.getFinalname(), e);
         } catch (final XMLStreamException e) {
             // Files that cannot be loaded are ignored as non config subsystem files e.g. jetty.xml
             LOG.debug("Unable to read configuration file '{}'. Not a configuration snapshot",
-                    c.getFinalname(), e);
+                    configFileInfo.getFinalname(), e);
         }
         return Optional.absent();
     }
 
     private static boolean isConfigSnapshot(final String fileName) {
-        if(!Files.getFileExtension(fileName).equals(CONFIG_FILE_SUFFIX)) {
+        if (!Files.getFileExtension(fileName).equals(CONFIG_FILE_SUFFIX)) {
             return false;
         }
 
-        if(fileName.endsWith("jetty.xml")) {
+        if (fileName.endsWith("jetty.xml")) {
             // Special case - ignore the jetty.xml file as it contains a DTD and causes a "Connection refused"
             // error when it tries to go out to the network to retrieve it. We don't want it trying to go out
             // to the network nor do we want an error logged trying to parse it.
@@ -105,7 +113,7 @@ public class AbstractFeatureWrapper implements Feature {
         }
 
         File file = new File(System.getProperty("karaf.home"), fileName);
-        try(FileInputStream fis = new FileInputStream(file)) {
+        try (FileInputStream fis = new FileInputStream(file)) {
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             builderFactory.setNamespaceAware(true);
             builderFactory.setCoalescing(true);
@@ -114,7 +122,7 @@ public class AbstractFeatureWrapper implements Feature {
 
             Element root = builderFactory.newDocumentBuilder().parse(fis).getDocumentElement();
             return ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME.equals(root.getLocalName());
-        } catch (final Exception e) {
+        } catch (final ParserConfigurationException | IOException | SAXException e) {
             LOG.error("Could not parse XML file {}", file, e);
             return false;
         }

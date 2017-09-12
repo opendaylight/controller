@@ -20,7 +20,7 @@ public class ConfigPusherCustomizer implements ServiceTrackerCustomizer<ConfigPu
     private static final Logger LOG = LoggerFactory.getLogger(ConfigPusherCustomizer.class);
     private ConfigFeaturesListener configFeaturesListener = null;
     private FeatureServiceCustomizer featureServiceCustomizer = null;
-    private ServiceTracker<FeaturesService,FeaturesService> fsst = null;
+    private ServiceTracker<FeaturesService, FeaturesService> fsst = null;
 
     @Override
     public ConfigPusher addingService(final ServiceReference<ConfigPusher> configPusherServiceReference) {
@@ -34,26 +34,28 @@ public class ConfigPusherCustomizer implements ServiceTrackerCustomizer<ConfigPu
     }
 
     @Override
-    public void modifiedService(final ServiceReference<ConfigPusher> configPusherServiceReference, final ConfigPusher configPusher) {
+    public void modifiedService(final ServiceReference<ConfigPusher> configPusherServiceReference,
+                                final ConfigPusher configPusher) {
         // we don't care if the properties change
     }
 
     @Override
-    public void removedService(final ServiceReference<ConfigPusher> configPusherServiceReference, final ConfigPusher configPusher) {
+    public void removedService(final ServiceReference<ConfigPusher> configPusherServiceReference,
+                               final ConfigPusher configPusher) {
         this.close();
     }
 
     @Override
     public void close() {
-        if(fsst != null) {
+        if (fsst != null) {
             fsst.close();
             fsst = null;
         }
-        if(configFeaturesListener != null) {
+        if (configFeaturesListener != null) {
             configFeaturesListener.close();
             configFeaturesListener = null;
         }
-        if(featureServiceCustomizer != null) {
+        if (featureServiceCustomizer != null) {
             featureServiceCustomizer.close();
             featureServiceCustomizer = null;
         }

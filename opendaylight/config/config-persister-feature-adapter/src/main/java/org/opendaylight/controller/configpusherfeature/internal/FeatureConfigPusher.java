@@ -9,6 +9,7 @@ package org.opendaylight.controller.configpusherfeature.internal;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
@@ -46,15 +48,14 @@ public class FeatureConfigPusher {
      * LinkedHashMultimap to track which configs we pushed for each Feature installation
      * For future use
      */
-    private final LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> feature2configs = LinkedHashMultimap.create();
+    private final LinkedHashMultimap<Feature, FeatureConfigSnapshotHolder> feature2configs = LinkedHashMultimap
+            .create();
 
-    /*
-     * @param p - ConfigPusher to push ConfigSnapshotHolders
-     */
-    public FeatureConfigPusher(final ConfigPusher p, final FeaturesService f) {
-        pusher = p;
-        featuresService = f;
+    public FeatureConfigPusher(final ConfigPusher configPusher, final FeaturesService featuresService) {
+        pusher = configPusher;
+        this.featuresService = featuresService;
     }
+
     /*
      * Push config files from Features to config subsystem
      * @param features - list of Features to extract config files from recursively and push
@@ -64,8 +65,8 @@ public class FeatureConfigPusher {
      * If a Feature is not in the returned LinkedHashMultimap then we couldn't push its configs
      * (Ususally because it was not yet installed)
      */
-    public LinkedHashMultimap<Feature, FeatureConfigSnapshotHolder> pushConfigs(final List<Feature> features)
-            throws Exception {
+    public LinkedHashMultimap<Feature, FeatureConfigSnapshotHolder> pushConfigs(
+            final List<Feature> features) throws Exception {
         LinkedHashMultimap<Feature, FeatureConfigSnapshotHolder> pushedFeatures = LinkedHashMultimap.create();
         for (Feature feature : features) {
             Set<FeatureConfigSnapshotHolder> configSnapShots = pushConfig(feature);
@@ -94,8 +95,8 @@ public class FeatureConfigPusher {
         // FIXME Workaround for BUG-2836, features service returns null for feature:
         // standard-condition-webconsole_0_0_0, 3.0.1
         if (featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
-            LOG.debug("Feature: {}, {} is missing from features service. Skipping", feature.getName(),
-                feature.getVersion());
+            LOG.debug("Feature: {}, {} is missing from features service. Skipping", feature.getName(), feature
+                    .getVersion());
             return Collections.emptySet();
         }
 
@@ -108,6 +109,29 @@ public class FeatureConfigPusher {
         return configs;
     }
 
+    private Set<FeatureConfigSnapshotHolder> pushConfig(final Set<FeatureConfigSnapshotHolder> configs,
+                                                        final Feature feature) throws InterruptedException {
+        Set<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<>(configs);
+        configsToPush.removeAll(pushedConfigs);
+        if (!configsToPush.isEmpty()) {
+
+            // Ignore features that are present in persisted current config
+            final Optional<XmlFileStorageAdapter> currentCfgPusher = XmlFileStorageAdapter.getInstance();
+            if (currentCfgPusher.isPresent() && currentCfgPusher.get().getPersistedFeatures()
+                    .contains(feature.getId())) {
+                LOG.warn("Ignoring default configuration {} for feature {}, the configuration is present in {}",
+                        configsToPush, feature.getId(), currentCfgPusher.get());
+            } else {
+                pusher.pushConfigs(new ArrayList<>(configsToPush));
+            }
+            pushedConfigs.addAll(configsToPush);
+        }
+        Set<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<>(pushedConfigs);
+        configsPushed.retainAll(configs);
+        return configsPushed;
+    }
+
+    @SuppressWarnings("IllegalCatch")
     private boolean isInstalled(final Feature feature) throws InterruptedException {
         for (int retries = 0; retries < MAX_RETRIES; retries++) {
             try {
@@ -116,39 +140,16 @@ public class FeatureConfigPusher {
                     return true;
                 }
 
-                LOG.info("Karaf Feature Service has not yet finished installing feature {}/{} (retry {})",
-                    feature.getName(), feature.getVersion(), retries);
+                LOG.info("Karaf Feature Service has not yet finished installing feature {}/{} (retry {})", feature
+                        .getName(), feature.getVersion(), retries);
             } catch (final Exception e) {
                 LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
             }
 
             TimeUnit.MILLISECONDS.sleep(RETRY_PAUSE_MILLIS);
         }
-        LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet finished installing feature {} {}",
-            MAX_RETRIES, feature.getName(), feature.getVersion());
+        LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet "
+                + "finished installing feature {} {}", MAX_RETRIES, feature.getName(), feature.getVersion());
         return false;
-    }
-
-    private Set<FeatureConfigSnapshotHolder> pushConfig(final Set<FeatureConfigSnapshotHolder> configs,
-            final Feature feature) throws InterruptedException {
-        Set<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<>(configs);
-        configsToPush.removeAll(pushedConfigs);
-        if (!configsToPush.isEmpty()) {
-
-            // Ignore features that are present in persisted current config
-            final Optional<XmlFileStorageAdapter> currentCfgPusher = XmlFileStorageAdapter.getInstance();
-            if (currentCfgPusher.isPresent() &&
-                    currentCfgPusher.get().getPersistedFeatures().contains(feature.getId())) {
-                LOG.warn("Ignoring default configuration {} for feature {}, the configuration is present in {}",
-                        configsToPush, feature.getId(), currentCfgPusher.get());
-            } else {
-                pusher.pushConfigs(new ArrayList<>(configsToPush));
-            }
-
-            pushedConfigs.addAll(configsToPush);
-        }
-        Set<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<>(pushedConfigs);
-        configsPushed.retainAll(configs);
-        return configsPushed;
     }
 }

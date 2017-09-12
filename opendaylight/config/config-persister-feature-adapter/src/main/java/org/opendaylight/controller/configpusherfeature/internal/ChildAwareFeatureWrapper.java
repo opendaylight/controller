@@ -9,9 +9,11 @@ package org.opendaylight.controller.configpusherfeature.internal;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Dependency;
@@ -29,20 +31,21 @@ import org.slf4j.LoggerFactory;
  */
 public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements Feature {
     private static final Logger LOG = LoggerFactory.getLogger(ChildAwareFeatureWrapper.class);
-    private FeaturesService featuresService= null;
+    private FeaturesService featuresService = null;
 
-    protected ChildAwareFeatureWrapper(final Feature f) {
+    protected ChildAwareFeatureWrapper(final Feature feature) {
         // Don't use without a feature service
     }
 
-    /*
-     * @param f Feature to wrap
-     * @param s FeaturesService to look up dependencies
+    /* Constructor.
+
+     * @param feature Feature to wrap
+     * @param featuresService FeaturesService to look up dependencies
      */
-    ChildAwareFeatureWrapper(final Feature f, final FeaturesService s) throws Exception {
-        super(s.getFeature(f.getName(), f.getVersion()));
-        Preconditions.checkNotNull(s, "FeatureWrapper requires non-null FeatureService in constructor");
-        this.featuresService = s;
+    ChildAwareFeatureWrapper(final Feature feature, final FeaturesService featuresService) throws Exception {
+        super(featuresService.getFeature(feature.getName(), feature.getVersion()));
+        Preconditions.checkNotNull(featuresService, "FeatureWrapper requires non-null FeatureService in constructor");
+        this.featuresService = featuresService;
     }
 
     protected FeaturesService getFeaturesService() {
@@ -56,12 +59,13 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
     public Set<? extends ChildAwareFeatureWrapper> getChildFeatures() throws Exception {
         List<Dependency> dependencies = feature.getDependencies();
         Set<ChildAwareFeatureWrapper> childFeatures = new LinkedHashSet<>();
-        if(dependencies != null) {
-            for(Dependency dependency: dependencies) {
+        if (dependencies != null) {
+            for (Dependency dependency : dependencies) {
                 Feature fi = extractFeatureFromDependency(dependency);
                 if (fi != null) {
                     if (featuresService.getFeature(fi.getName(), fi.getVersion()) == null) {
-                        LOG.warn("Feature: {}, {} is missing from features service. Skipping", fi.getName(), fi.getVersion());
+                        LOG.warn("Feature: {}, {} is missing from features service. Skipping", fi.getName(), fi
+                                .getVersion());
                     } else {
                         ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(fi, featuresService);
                         childFeatures.add(wrappedFeature);
@@ -75,10 +79,11 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
     @Override
     public Set<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
         Set<FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
-        for(ChildAwareFeatureWrapper c: getChildFeatures()) {
-            for(FeatureConfigSnapshotHolder h: c.getFeatureConfigSnapshotHolders()) {
-                final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(h.getFileInfo());
-                if(featureConfigSnapshotHolder.isPresent()) {
+        for (ChildAwareFeatureWrapper c : getChildFeatures()) {
+            for (FeatureConfigSnapshotHolder h : c.getFeatureConfigSnapshotHolders()) {
+                final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder =
+                        getFeatureConfigSnapshotHolder(h.getFileInfo());
+                if (featureConfigSnapshotHolder.isPresent()) {
                     snapShotHolders.add(featureConfigSnapshotHolder.get());
                 }
             }
@@ -89,14 +94,14 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
 
     protected Feature extractFeatureFromDependency(final Dependency dependency) throws Exception {
         Feature[] features = featuresService.listFeatures();
-        VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
-                ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+        VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency
+                .getVersion()) ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
         Feature fi = null;
-        for(Feature f: features) {
+        for (Feature f : features) {
             if (f.getName().equals(dependency.getName())) {
-                Version v = VersionTable.getVersion(f.getVersion());
-                if (range.contains(v) &&
-                    (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0)) {
+                Version version = VersionTable.getVersion(f.getVersion());
+                if (range.contains(version) && (fi == null || VersionTable.getVersion(fi.getVersion())
+                        .compareTo(version) < 0)) {
                     fi = f;
                     break;
                 }
@@ -104,5 +109,4 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
         }
         return fi;
     }
-
 }

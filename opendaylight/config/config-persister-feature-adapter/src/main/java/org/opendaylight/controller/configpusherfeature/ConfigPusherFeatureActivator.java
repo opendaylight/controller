@@ -14,10 +14,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class ConfigPusherFeatureActivator implements BundleActivator {
-
-    BundleContext bc = null;
-    ConfigPusherCustomizer cpc = null;
-    ServiceTracker<ConfigPusher,ConfigPusher> cpst = null;
+    private BundleContext bc = null;
+    private ConfigPusherCustomizer cpc = null;
+    private ServiceTracker<ConfigPusher, ConfigPusher> cpst = null;
 
     public void start(final BundleContext context) throws Exception {
         bc = context;
@@ -27,11 +26,11 @@ public class ConfigPusherFeatureActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        if(cpst != null) {
+        if (cpst != null) {
             cpst.close();
             cpst = null;
         }
-        if(cpc != null) {
+        if (cpc != null) {
             cpc.close();
             cpc = null;
         }

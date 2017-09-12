@@ -11,12 +11,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -24,6 +26,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
+
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
@@ -46,8 +49,9 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
      * @param holder - FeatureConfigSnapshotHolder that we
      * @param feature - new
      */
-    public FeatureConfigSnapshotHolder(final FeatureConfigSnapshotHolder holder, final Feature feature) throws JAXBException, XMLStreamException {
-        this(holder.fileInfo,holder.getFeature());
+    public FeatureConfigSnapshotHolder(final FeatureConfigSnapshotHolder holder,
+                                       final Feature feature) throws JAXBException, XMLStreamException {
+        this(holder.fileInfo, holder.getFeature());
         this.featureChain.add(feature);
     }
 
@@ -57,7 +61,8 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
      * @param fileInfo - ConfigFileInfo to read into the ConfigSnapshot
      * @param feature - Feature the ConfigFileInfo was attached to
      */
-    public FeatureConfigSnapshotHolder(final ConfigFileInfo fileInfo, final Feature feature) throws JAXBException, XMLStreamException {
+    public FeatureConfigSnapshotHolder(final ConfigFileInfo fileInfo,
+                                       final Feature feature) throws JAXBException, XMLStreamException {
         Preconditions.checkNotNull(fileInfo);
         Preconditions.checkNotNull(fileInfo.getFinalname());
         Preconditions.checkNotNull(feature);
@@ -73,6 +78,7 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
         XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
         unmarshalled = (ConfigSnapshot) um.unmarshal(xsr);
     }
+
     /*
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -83,9 +89,11 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((unmarshalled != null && unmarshalled.getConfigSnapshot() == null) ? 0 : unmarshalled.getConfigSnapshot().hashCode());
+        result = prime * result + ((unmarshalled != null && unmarshalled.getConfigSnapshot() == null) ? 0 :
+                unmarshalled.getConfigSnapshot().hashCode());
         return result;
     }
+
     /*
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
@@ -103,8 +111,8 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        FeatureConfigSnapshotHolder fcsh = (FeatureConfigSnapshotHolder)obj;
-        if(this.unmarshalled.getConfigSnapshot().equals(fcsh.unmarshalled.getConfigSnapshot())) {
+        FeatureConfigSnapshotHolder fcsh = (FeatureConfigSnapshotHolder) obj;
+        if (this.unmarshalled.getConfigSnapshot().equals(fcsh.unmarshalled.getConfigSnapshot())) {
             return true;
         }
         return false;
@@ -112,15 +120,11 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
 
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
-        Path p = Paths.get(fileInfo.getFinalname());
-        b.append(p.getFileName())
-            .append("(")
-            .append(getCauseFeature())
-            .append(",")
-            .append(getFeature())
-            .append(")");
-        return b.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        Path path = Paths.get(fileInfo.getFinalname());
+        stringBuilder.append(path.getFileName()).append("(").append(getCauseFeature()).append(",").append(getFeature())
+                .append(")");
+        return stringBuilder.toString();
     }
 
     @Override
