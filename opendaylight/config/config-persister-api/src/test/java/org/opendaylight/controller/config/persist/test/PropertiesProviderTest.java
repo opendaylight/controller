@@ -9,14 +9,16 @@ package org.opendaylight.controller.config.persist.test;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 
 public class PropertiesProviderTest implements PropertiesProvider {
-    private final Map<String,String> properties = new HashMap<>();
+    private final Map<String, String> properties = new HashMap<>();
 
-    public void addProperty(final String key, final String value){
-        properties.put(key,value);
+    public void addProperty(final String key, final String value) {
+        properties.put(key, value);
     }
+
     @Override
     public String getProperty(final String key) {
         return properties.get(key);

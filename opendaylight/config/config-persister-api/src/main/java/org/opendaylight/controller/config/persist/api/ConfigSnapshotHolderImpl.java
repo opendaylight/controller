@@ -15,7 +15,9 @@ public class ConfigSnapshotHolderImpl implements ConfigSnapshotHolder {
     private final SortedSet<String> caps;
     private final String fileName;
 
-    public ConfigSnapshotHolderImpl(final String configSnapshot, final SortedSet<String> capabilities, final String fileName) {
+    public ConfigSnapshotHolderImpl(final String configSnapshot,
+                                    final SortedSet<String> capabilities,
+                                    final String fileName) {
         this.snapshot = configSnapshot;
         this.caps = capabilities;
         this.fileName = fileName;
@@ -37,10 +39,9 @@ public class ConfigSnapshotHolderImpl implements ConfigSnapshotHolder {
 
     @Override
     public String toString() {
-        return "ConfigSnapshotHolderImpl{" +
-                "snapshot='" + snapshot + '\'' +
-                ", caps=" + caps +
-                ", fileName='" + fileName + '\'' +
-                '}';
+        return "snapshot='" + "ConfigSnapshotHolderImpl{"
+                + snapshot + '\'' + ", caps="
+                + caps + ", fileName='"
+                + fileName + '\'' + '}';
     }
 }

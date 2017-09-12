@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.persist.api;
 
 import java.util.List;
+
 /*
  * The config pusher service pushes configs into the config subsystem
  */
