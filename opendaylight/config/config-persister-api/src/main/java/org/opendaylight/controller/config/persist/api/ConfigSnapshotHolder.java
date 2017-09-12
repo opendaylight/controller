@@ -12,7 +12,7 @@ import java.util.SortedSet;
 public interface ConfigSnapshotHolder {
 
     /**
-     * Get XML node that should be pushed to netconf's edit-config
+     * Get XML node that should be pushed to netconf's edit-config.
      */
     String getConfigSnapshot();
 
@@ -22,5 +22,4 @@ public interface ConfigSnapshotHolder {
      * If no value is specified, return empty set instead of null
      */
     SortedSet<String> getCapabilities();
-
 }
