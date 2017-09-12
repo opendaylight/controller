@@ -24,16 +24,18 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<FeaturesService, FeaturesService>, AutoCloseable {
+public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<FeaturesService, FeaturesService>,
+        AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(FeatureServiceCustomizer.class);
     private ConfigPusher configPusher = null;
     private ServiceRegistration<?> registration;
 
-    FeatureServiceCustomizer(final ConfigPusher c) {
-        configPusher = c;
+    FeatureServiceCustomizer(final ConfigPusher configPusher) {
+        this.configPusher = configPusher;
     }
 
     @Override
+    @SuppressWarnings("IllegalCatch")
     public FeaturesService addingService(final ServiceReference<FeaturesService> reference) {
         BundleContext bc = reference.getBundle().getBundleContext();
         final FeaturesService featureService = bc.getService(reference);
@@ -57,14 +59,12 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
     }
 
     @Override
-    public void modifiedService(final ServiceReference<FeaturesService> reference,
-                                final FeaturesService service) {
+    public void modifiedService(final ServiceReference<FeaturesService> reference, final FeaturesService service) {
         // we don't care if the properties change
     }
 
     @Override
-    public void removedService(final ServiceReference<FeaturesService> reference,
-                               final FeaturesService service) {
+    public void removedService(final ServiceReference<FeaturesService> reference, final FeaturesService service) {
         close();
     }
 

@@ -9,6 +9,7 @@ package org.opendaylight.controller.configpusherfeature.internal;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
 import org.apache.karaf.features.FeaturesService;
@@ -17,14 +18,15 @@ import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable {
+public class ConfigFeaturesListener implements FeaturesListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigFeaturesListener.class);
     private static final int QUEUE_SIZE = 1000;
     private BlockingQueue<FeatureEvent> queue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     Thread pushingThread = null;
 
-    public ConfigFeaturesListener(final ConfigPusher p, final FeaturesService f) {
-        pushingThread = new Thread(new ConfigPushingRunnable(p, f, queue), "ConfigFeatureListener - ConfigPusher");
+    public ConfigFeaturesListener(final ConfigPusher configPusher, final FeaturesService featuresService) {
+        pushingThread = new Thread(new ConfigPushingRunnable(configPusher, featuresService, queue),
+                "ConfigFeatureListener - ConfigPusher");
         pushingThread.start();
     }
 
@@ -40,7 +42,7 @@ public class ConfigFeaturesListener implements  FeaturesListener,  AutoCloseable
 
     @Override
     public void close() {
-        if(pushingThread != null) {
+        if (pushingThread != null) {
             pushingThread.interrupt();
             pushingThread = null;
         }
