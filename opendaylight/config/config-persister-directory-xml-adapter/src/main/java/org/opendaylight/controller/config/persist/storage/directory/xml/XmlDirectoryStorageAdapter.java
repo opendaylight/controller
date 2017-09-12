@@ -11,8 +11,10 @@ package org.opendaylight.controller.config.persist.storage.directory.xml;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+
 import java.io.File;
 import java.util.Set;
+
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
 import org.opendaylight.controller.config.persist.api.StorageAdapter;
@@ -30,17 +32,17 @@ public class XmlDirectoryStorageAdapter implements StorageAdapter {
     public static final String INCLUDE_EXT_PROP = "includeExtensions";
     private static final char EXTENSIONS_SEPARATOR = ',';
 
-
     @Override
     public Persister instantiate(final PropertiesProvider propertiesProvider) {
         String fileStorageProperty = propertiesProvider.getProperty(DIRECTORY_STORAGE_PROP);
-        Preconditions.checkNotNull(fileStorageProperty, "Unable to find " + propertiesProvider.getFullKeyForReporting(DIRECTORY_STORAGE_PROP));
-        File storage  = new File(fileStorageProperty);
+        Preconditions.checkNotNull(fileStorageProperty,
+                "Unable to find " + propertiesProvider.getFullKeyForReporting(DIRECTORY_STORAGE_PROP));
+        File storage = new File(fileStorageProperty);
         String fileExtensions = propertiesProvider.getProperty(INCLUDE_EXT_PROP);
 
         LOG.debug("Using storage: {}", storage);
 
-        if(fileExtensions != null) {
+        if (fileExtensions != null) {
             LOG.debug("Using extensions: {}", fileExtensions);
             return new XmlDirectoryPersister(storage, splitExtensions(fileExtensions));
         } else {
@@ -52,5 +54,4 @@ public class XmlDirectoryStorageAdapter implements StorageAdapter {
         return Sets.newHashSet(Splitter.on(EXTENSIONS_SEPARATOR).trimResults().omitEmptyStrings()
                 .split(fileExtensions));
     }
-
 }

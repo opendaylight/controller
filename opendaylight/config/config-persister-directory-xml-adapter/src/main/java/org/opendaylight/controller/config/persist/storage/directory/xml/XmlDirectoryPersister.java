@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.Optional;
 import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -27,6 +29,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
+
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
@@ -40,14 +43,14 @@ public class XmlDirectoryPersister implements Persister {
     private final Optional<FilenameFilter> extensionsFilter;
 
     /**
-     * Creates XmlDirectoryPersister that picks up all files in specified folder
+     * Creates XmlDirectoryPersister that picks up all files in specified folder.
      */
     public XmlDirectoryPersister(final File storage) {
         this(storage, Optional.<FilenameFilter>absent());
     }
 
     /**
-     * Creates XmlDirectoryPersister that picks up files only with specified file extension
+     * Creates XmlDirectoryPersister that picks up files only with specified file extension.
      */
     public XmlDirectoryPersister(final File storage, final Set<String> fileExtensions) {
         this(storage, Optional.of(getFilter(fileExtensions)));
@@ -66,7 +69,8 @@ public class XmlDirectoryPersister implements Persister {
 
     @Override
     public List<ConfigSnapshotHolder> loadLastConfigs() throws IOException {
-        File[] filesArray = extensionsFilter.isPresent() ? storage.listFiles(extensionsFilter.get()) : storage.listFiles();
+        File[] filesArray =
+                extensionsFilter.isPresent() ? storage.listFiles(extensionsFilter.get()) : storage.listFiles();
         if (filesArray == null || filesArray.length == 0) {
             return Collections.emptyList();
         }
@@ -78,13 +82,13 @@ public class XmlDirectoryPersister implements Persister {
         List<ConfigSnapshotHolder> result = new ArrayList<>();
         for (File file : sortedFiles) {
             LOG.trace("Adding file '{}' to combined result", file);
-            Optional<ConfigSnapshotHolder> h = fromXmlSnapshot(file);
+            Optional<ConfigSnapshotHolder> configSnapshotHolderOptional = fromXmlSnapshot(file);
             // Ignore non valid snapshot
-            if(h.isPresent() == false) {
+            if (!configSnapshotHolderOptional.isPresent()) {
                 continue;
             }
 
-            result.add(h.get());
+            result.add(configSnapshotHolderOptional.get());
         }
         return result;
     }
@@ -95,7 +99,8 @@ public class XmlDirectoryPersister implements Persister {
         } catch (final JAXBException e) {
             // In case of parse error, issue a warning, ignore and continue
             LOG.warn(
-                    "Unable to parse configuration snapshot from {}. Initial config from {} will be IGNORED in this run. ",
+                    "Unable to parse configuration snapshot from {}. "
+                            + "Initial config from {} will be IGNORED in this run. ",
                     file, file);
             LOG.warn(
                     "Note that subsequent config files may fail due to this problem. ",
@@ -139,8 +144,8 @@ public class XmlDirectoryPersister implements Persister {
         };
     }
 
-    private static FilenameFilter getFilter(final Set<String>fileExtensions) {
-        checkArgument(fileExtensions.isEmpty() == false, "No file extension provided", fileExtensions);
+    private static FilenameFilter getFilter(final Set<String> fileExtensions) {
+        checkArgument(!fileExtensions.isEmpty(), "No file extension provided", fileExtensions);
 
         return (dir, name) -> {
             String ext = Files.getFileExtension(name);
@@ -150,7 +155,6 @@ public class XmlDirectoryPersister implements Persister {
 
     @Override
     public void close() {
-
     }
 
     @Override

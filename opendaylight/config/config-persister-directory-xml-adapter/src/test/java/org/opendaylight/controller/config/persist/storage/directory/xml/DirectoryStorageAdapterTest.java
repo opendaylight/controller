@@ -14,11 +14,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
+
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -31,10 +33,10 @@ public class DirectoryStorageAdapterTest {
     private static final Logger LOG = LoggerFactory.getLogger(DirectoryStorageAdapterTest.class);
     Persister tested;
 
-    private Persister instantiatePersisterFromAdapter(final File file, final Optional<String> extensions){
+    private Persister instantiatePersisterFromAdapter(final File file, final Optional<String> extensions) {
         PropertiesProviderTest pp = new PropertiesProviderTest();
-        pp.addProperty(XmlDirectoryStorageAdapter.DIRECTORY_STORAGE_PROP,file.getPath());
-        if(extensions.isPresent()) {
+        pp.addProperty(XmlDirectoryStorageAdapter.DIRECTORY_STORAGE_PROP, file.getPath());
+        if (extensions.isPresent()) {
             pp.addProperty(XmlDirectoryStorageAdapter.INCLUDE_EXT_PROP, extensions.get());
         }
 
@@ -42,7 +44,7 @@ public class DirectoryStorageAdapterTest {
         return dsa.instantiate(pp);
     }
 
-    private Persister instantiatePersisterFromAdapter(final File file){
+    private Persister instantiatePersisterFromAdapter(final File file) {
         return instantiatePersisterFromAdapter(file, Optional.<String>absent());
     }
 
@@ -68,13 +70,12 @@ public class DirectoryStorageAdapterTest {
             });
             fail();
         } catch (final UnsupportedOperationException e) {
-
+            // TODO: empty catch block
         }
     }
 
     private File getFolder(final String folderName) {
-        File result = new File(("src/test/resources/" +
-                folderName).replace("/", File.separator));
+        File result = new File(("src/test/resources/" + folderName).replace("/", File.separator));
         assertTrue(result + " is not a directory", result.isDirectory());
         return result;
     }
@@ -98,11 +99,13 @@ public class DirectoryStorageAdapterTest {
         LOG.info("Testing : {}", tested);
     }
 
-    private void assertResult(final ConfigSnapshotHolder result, final String s, final String... caps) throws SAXException, IOException {
-        assertXMLEqual(s, result.getConfigSnapshot());
-        int i = 0;
+    private void assertResult(final ConfigSnapshotHolder result,
+                              final String string,
+                              final String... caps) throws SAXException, IOException {
+        assertXMLEqual(string, result.getConfigSnapshot());
+        int index = 0;
         for (String capFromSnapshot : result.getCapabilities()) {
-            assertEquals(capFromSnapshot, caps[i++]);
+            assertEquals(capFromSnapshot, caps[index++]);
         }
     }
 
