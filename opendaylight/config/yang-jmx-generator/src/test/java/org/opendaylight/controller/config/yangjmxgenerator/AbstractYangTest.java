@@ -78,7 +78,7 @@ public abstract class AbstractYangTest {
     }
 
     public static List<InputStream> getConfigApiYangInputStreams() {
-        return getStreams("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang");
+        return getStreams("/META-INF/yang/config@2013-04-05.yang", "/META-INF/yang/rpc-context@2013-06-17.yang");
     }
 
     public Map<QName, IdentitySchemaNode> mapIdentitiesByQNames(final Module module) {
