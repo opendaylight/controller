@@ -134,7 +134,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                 result.put(configSnapshotHolder, pushResult);
             }
         }
-        LOG.debug("All configuration snapshots have been pushed successfully.");
+        LOG.info("All configuration snapshots have been pushed successfully.");
         return result;
     }
 
