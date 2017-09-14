@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +52,6 @@ import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -325,32 +323,23 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-1", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
-        // Get the leader's lastIndex and verify followers are fully synced before shutting down the leader
-
-        AtomicLong leaderLastIndex = new AtomicLong();
-        MemberNode.verifyRaftState(leaderDistributedDataStore, ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> leaderLastIndex.set(raftState.getLastIndex()));
-
-        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
-
-        MemberNode.verifyRaftState(follower2Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
-
-        // Shutdown the leader and verify its removed from the candidate list
-
-        leaderNode.cleanup();
-        follower1Node.waitForMemberDown("member-1");
-
-        // Re-enable elections on follower1 so it becomes the leader
+        // Re-enable elections on all remaining followers so one becomes the new leader
 
         ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
         follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
                 .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
+        ActorRef follower2Shard = IntegrationTestKit.findLocalShard(follower2Node.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+        follower2Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
+                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
+
+        // Shutdown the leader and verify its removed from the candidate list
+
+        leaderNode.cleanup();
+        follower1Node.waitForMemberDown("member-1");
+        follower2Node.waitForMemberDown("member-1");
 
         // Verify the prior leader's entity owners are re-assigned.
 
@@ -441,19 +430,22 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-1", "member-3", "member-4");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
-        // Get the leader's lastIndex and verify followers are fully synced before shutting down the leader
-        AtomicLong leaderLastIndex = new AtomicLong();
-        MemberNode.verifyRaftState(leaderDistributedDataStore, ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> leaderLastIndex.set(raftState.getLastIndex()));
+        // Re-enable elections on all remaining followers so one becomes the new leader
 
-        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
+        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+        follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
+                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        MemberNode.verifyRaftState(follower2Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
+        ActorRef follower2Shard = IntegrationTestKit.findLocalShard(follower2Node.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+        follower2Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
+                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        MemberNode.verifyRaftState(follower4Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Last index", leaderLastIndex.get(), raftState.getLastIndex()));
+        ActorRef follower4Shard = IntegrationTestKit.findLocalShard(follower4Node.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+        follower4Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
+                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
         // Shutdown the leader and follower3
 
@@ -462,16 +454,10 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         follower1Node.waitForMemberDown("member-1");
         follower1Node.waitForMemberDown("member-4");
-
-        // Re-enable elections on follower1 so it becomes the leader
-
-        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
-                ENTITY_OWNERSHIP_SHARD_NAME);
-        follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
-                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
-
-        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-            raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
+        follower2Node.waitForMemberDown("member-1");
+        follower2Node.waitForMemberDown("member-4");
+        follower4Node.waitForMemberDown("member-1");
+        follower4Node.waitForMemberDown("member-4");
 
         // Verify the prior leader's and follower3 entity owners are re-assigned.
 
