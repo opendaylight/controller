@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_207162a8",
+        "filename": "opendaylight/config/config-parent/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-15T20:18:08Z",
+      "side": 1,
+      "message": "This can\u0027t be changed as derived projects use it.",
+      "revId": "fbe1aebe71f758f8af5ea567e26ccdd6d70d5e99",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_806beeb5",
+        "filename": "opendaylight/md-sal/mdsal-it-parent/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-15T20:18:08Z",
+      "side": 1,
+      "message": "Probably same here",
+      "revId": "fbe1aebe71f758f8af5ea567e26ccdd6d70d5e99",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
