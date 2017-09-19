@@ -28,7 +28,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     private static final Logger LOG = LoggerFactory.getLogger(StaticServiceReferenceRecipe.class);
 
     private static final SatisfactionListener NOOP_LISTENER = satisfiable -> {
-
+        // Intentional NOOP
     };
 
     private volatile ServiceReference<?> trackedServiceReference;
@@ -78,6 +78,8 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     }
 
     @Override
+    // Disables "Either log or rethrow this exception" sonar warning
+    @SuppressWarnings("squid:S1166")
     protected void doStop() {
         LOG.debug("{}: In doStop", getName());
 

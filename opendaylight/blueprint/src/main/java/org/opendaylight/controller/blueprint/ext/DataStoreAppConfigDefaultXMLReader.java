@@ -16,8 +16,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -45,7 +45,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
     private final String logName;
     private final String defaultAppConfigFileName;
-    private final SchemaService schemaService;
+    private final DOMSchemaService schemaService;
     private final BindingNormalizedNodeSerializer bindingSerializer;
     private final BindingContext bindingContext;
     private final ConfigURLProvider inputStreamProvider;
@@ -64,7 +64,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     public DataStoreAppConfigDefaultXMLReader(
             final String logName,
             final String defaultAppConfigFileName,
-            final SchemaService schemaService,
+            final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingSerializer,
             final BindingContext bindingContext,
             final ConfigURLProvider inputStreamProvider) {
@@ -80,7 +80,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
     public DataStoreAppConfigDefaultXMLReader(
             final Class<?> testClass,
             final String defaultAppConfigFileName,
-            final SchemaService schemaService,
+            final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingSerializer,
             final Class<T> klass) {
         this(testClass.getName(), defaultAppConfigFileName, schemaService, bindingSerializer,
@@ -108,33 +108,21 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName, yangPath,
                 bindingContext.bindingQName);
 
-        if (schemaService == null) {
-            throw new ConfigXMLReaderException(
-                    String.format("%s: Could not obtain the SchemaService OSGi service", logName));
-        }
+        checkNotNull(schemaService, "%s: Could not obtain the SchemaService OSGi service", logName);
 
         SchemaContext schemaContext = schemaService.getGlobalContext();
 
         Module module = schemaContext.findModuleByNamespaceAndRevision(bindingContext.bindingQName.getNamespace(),
                 bindingContext.bindingQName.getRevision());
-        if (module == null) {
-            throw new ConfigXMLReaderException(
-                    String.format("%s: Could not obtain the module schema for namespace %s, revision %s",
-                    logName, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision()));
-        }
+        checkNotNull(module, "%s: Could not obtain the module schema for namespace %s, revision %s",
+                logName, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision());
 
         DataSchemaNode dataSchema = module.getDataChildByName(bindingContext.bindingQName);
-        if (dataSchema == null) {
-            throw new ConfigXMLReaderException(
-                    String.format("%s: Could not obtain the schema for %s", logName,
-                    bindingContext.bindingQName));
-        }
+        checkNotNull(dataSchema, "%s: Could not obtain the schema for %s", logName, bindingContext.bindingQName);
 
-        if (!bindingContext.schemaType.isAssignableFrom(dataSchema.getClass())) {
-            throw new ConfigXMLReaderException(
-                    String.format("%s: Expected schema type %s for %s but actual type is %s", logName,
-                    bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass()));
-        }
+        checkCondition(bindingContext.schemaType.isAssignableFrom(dataSchema.getClass()),
+                "%s: Expected schema type %s for %s but actual type is %s", logName,
+                bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass());
 
         NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
         if (dataNode == null) {
@@ -142,13 +130,23 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         }
 
         DataObject appConfig = bindingSerializer.fromNormalizedNode(yangPath, dataNode).getValue();
-        if (appConfig == null) {
-            // This shouldn't happen but need to handle it in case...
-            throw new ConfigXMLReaderException(
-                    String.format("%s: Could not create instance for app config binding %s",
-                    logName, bindingContext.appConfigBindingClass));
-        } else {
-            return (T) appConfig;
+
+        // This shouldn't happen but need to handle it in case...
+        checkNotNull(appConfig, "%s: Could not create instance for app config binding %s", logName,
+                bindingContext.appConfigBindingClass);
+
+        return (T) appConfig;
+    }
+
+    private static void checkNotNull(Object reference, String errorMessageFormat, Object... formatArgs)
+            throws ConfigXMLReaderException {
+        checkCondition(reference != null, errorMessageFormat, formatArgs);
+    }
+
+    private static void checkCondition(boolean expression, String errorMessageFormat, Object... formatArgs)
+            throws ConfigXMLReaderException {
+        if (!expression) {
+            throw new ConfigXMLReaderException(String.format(errorMessageFormat, formatArgs));
         }
     }
 
