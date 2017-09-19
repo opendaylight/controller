@@ -27,7 +27,7 @@ import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
@@ -228,8 +228,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
             metadata.setActivation(BeanMetadata.ACTIVATION_EAGER);
             metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
             metadata.setRuntimeClass(ComponentProcessor.class);
-            metadata.setDestroyMethod("destroy");
-            metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+            setDestroyMethod(metadata);
+            addBlueprintBundleRefProperty(context, metadata);
             metadata.addProperty("blueprintContainerRestartService", createServiceRef(context,
                     BlueprintContainerRestartService.class, null));
 
@@ -251,9 +251,9 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
         metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
         metadata.setRuntimeClass(ActionProviderBean.class);
-        metadata.setInitMethod("init");
-        metadata.setDestroyMethod("destroy");
-        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        setInitMethod(metadata);
+        setDestroyMethod(metadata);
+        addBlueprintBundleRefProperty(context, metadata);
         metadata.addProperty("rpcProviderService", createRef(context, RPC_PROVIDER_SERVICE_NAME));
         metadata.addProperty("rpcRegistry", createRef(context, RPC_REGISTRY_NAME));
         metadata.addProperty("schemaService", createRef(context, SCHEMA_SERVICE_NAME));
@@ -275,9 +275,9 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
         metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
         metadata.setRuntimeClass(RpcImplementationBean.class);
-        metadata.setInitMethod("init");
-        metadata.setDestroyMethod("destroy");
-        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        setInitMethod(metadata);
+        setDestroyMethod(metadata);
+        addBlueprintBundleRefProperty(context, metadata);
         metadata.addProperty("rpcRegistry", createRef(context, RPC_REGISTRY_NAME));
         metadata.addProperty("implementation", createRef(context, element.getAttribute(REF_ATTR)));
 
@@ -340,7 +340,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     }
 
     private static void registerSchemaServiceRefBean(final ParserContext context) {
-        registerRefBean(context, SCHEMA_SERVICE_NAME, SchemaService.class);
+        registerRefBean(context, SCHEMA_SERVICE_NAME, DOMSchemaService.class);
     }
 
     private static void registerRefBean(final ParserContext context, final String name, final Class<?> clazz) {
@@ -360,9 +360,9 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
         metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
         metadata.setRuntimeClass(NotificationListenerBean.class);
-        metadata.setInitMethod("init");
-        metadata.setDestroyMethod("destroy");
-        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        setInitMethod(metadata);
+        setDestroyMethod(metadata);
+        addBlueprintBundleRefProperty(context, metadata);
         metadata.addProperty("notificationService", createRef(context, NOTIFICATION_SERVICE_NAME));
         metadata.addProperty("notificationListener", createRef(context, element.getAttribute(REF_ATTR)));
 
@@ -490,5 +490,17 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private static boolean nodeNameEquals(final Node node, final String name) {
         return name.equals(node.getNodeName()) || name.equals(node.getLocalName());
+    }
+
+    private static void setDestroyMethod(final MutableBeanMetadata metadata) {
+        metadata.setDestroyMethod("destroy");
+    }
+
+    private static void setInitMethod(final MutableBeanMetadata metadata) {
+        metadata.setInitMethod("init");
+    }
+
+    private static void addBlueprintBundleRefProperty(final ParserContext context, final MutableBeanMetadata metadata) {
+        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
     }
 }
