@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_d5f11e96",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-19T11:38:48Z",
+      "side": 1,
+      "message": "Heh that works, but it’s not what I had in mind ;-). I was thinking more along the lines of having a method to do all the common setup:\n\n            metadata \u003d context.createMetadata(MutableBeanMetadata.class);\n            metadata.setProcessor(true);\n            metadata.setActivation(BeanMetadata.ACTIVATION_EAGER);\n            metadata.setScope(BeanMetadata.SCOPE_SINGLETON);\n            metadata.setDestroyMethod(\"destroy\");\n            metadata.addProperty(\"bundle\", createRef(context, \"blueprintBundle\"));\n\n(along with the id and the init-method in most cases).",
+      "revId": "dad38142e534f316329c0ef07c87cacf9e91b007",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
