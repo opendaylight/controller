@@ -8,9 +8,10 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -31,9 +32,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -159,9 +159,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private void readInitialAppConfig(final DataBroker dataBroker) {
-        @SuppressWarnings("resource") // it's closed in the callback
         final ReadOnlyTransaction readOnlyTx = dataBroker.newReadOnlyTransaction();
-        CheckedFuture<Optional<DataObject>, ReadFailedException> future = readOnlyTx.read(
+        ListenableFuture<Optional<DataObject>> future = readOnlyTx.read(
                 LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath);
         Futures.addCallback(future, new FutureCallback<Optional<DataObject>>() {
             @Override
@@ -185,7 +184,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                     readInitialAppConfig(dataBroker);
                 }
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private void onAppConfigChanged(final Collection<DataTreeModification<DataObject>> changes) {
@@ -243,7 +242,6 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     private DataObject createDefaultInstance() {
         try {
-            @SuppressWarnings("resource")
             ConfigURLProvider inputStreamProvider = appConfigFileName -> {
                 File appConfigFile = new File(DEFAULT_APP_CONFIG_FILE_PATH, appConfigFileName);
                 LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(),
@@ -258,8 +256,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 return Optional.of(appConfigFile.toURI().toURL());
             };
 
-            DataStoreAppConfigDefaultXMLReader<?> reader = new DataStoreAppConfigDefaultXMLReader(logName(),
-                    defaultAppConfigFileName, getOSGiService(SchemaService.class), bindingSerializer, bindingContext,
+            DataStoreAppConfigDefaultXMLReader<?> reader = new DataStoreAppConfigDefaultXMLReader<>(logName(),
+                    defaultAppConfigFileName, getOSGiService(DOMSchemaService.class), bindingSerializer, bindingContext,
                     inputStreamProvider);
             return reader.createDefaultInstance((schemaContext, dataSchema) -> {
                 // Fallback if file cannot be read, try XML from Config

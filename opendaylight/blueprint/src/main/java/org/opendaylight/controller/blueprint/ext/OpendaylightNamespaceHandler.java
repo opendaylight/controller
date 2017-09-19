@@ -27,7 +27,7 @@ import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
@@ -74,6 +74,9 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static final String ACTION_SERVICE = "action-service";
     private static final String SPECIFIC_SERVICE_REF_LIST = "specific-reference-list";
     private static final String STATIC_REFERENCE = "static-reference";
+    private static final String DESTROY = "destroy";
+    private static final String BUNDLE = "bundle";
+    private static final String BLUEPRINT_BUNDLE = "blueprintBundle";
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -228,8 +231,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
             metadata.setActivation(BeanMetadata.ACTIVATION_EAGER);
             metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
             metadata.setRuntimeClass(ComponentProcessor.class);
-            metadata.setDestroyMethod("destroy");
-            metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+            metadata.setDestroyMethod(DESTROY);
+            metadata.addProperty(BUNDLE, createRef(context, BLUEPRINT_BUNDLE));
             metadata.addProperty("blueprintContainerRestartService", createServiceRef(context,
                     BlueprintContainerRestartService.class, null));
 
@@ -252,8 +255,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
         metadata.setRuntimeClass(ActionProviderBean.class);
         metadata.setInitMethod("init");
-        metadata.setDestroyMethod("destroy");
-        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        metadata.setDestroyMethod(DESTROY);
+        metadata.addProperty(BUNDLE, createRef(context, BLUEPRINT_BUNDLE));
         metadata.addProperty("rpcProviderService", createRef(context, RPC_PROVIDER_SERVICE_NAME));
         metadata.addProperty("rpcRegistry", createRef(context, RPC_REGISTRY_NAME));
         metadata.addProperty("schemaService", createRef(context, SCHEMA_SERVICE_NAME));
@@ -276,8 +279,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
         metadata.setRuntimeClass(RpcImplementationBean.class);
         metadata.setInitMethod("init");
-        metadata.setDestroyMethod("destroy");
-        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        metadata.setDestroyMethod(DESTROY);
+        metadata.addProperty(BUNDLE, createRef(context, BLUEPRINT_BUNDLE));
         metadata.addProperty("rpcRegistry", createRef(context, RPC_REGISTRY_NAME));
         metadata.addProperty("implementation", createRef(context, element.getAttribute(REF_ATTR)));
 
@@ -340,7 +343,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     }
 
     private static void registerSchemaServiceRefBean(final ParserContext context) {
-        registerRefBean(context, SCHEMA_SERVICE_NAME, SchemaService.class);
+        registerRefBean(context, SCHEMA_SERVICE_NAME, DOMSchemaService.class);
     }
 
     private static void registerRefBean(final ParserContext context, final String name, final Class<?> clazz) {
@@ -361,8 +364,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
         metadata.setRuntimeClass(NotificationListenerBean.class);
         metadata.setInitMethod("init");
-        metadata.setDestroyMethod("destroy");
-        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        metadata.setDestroyMethod(DESTROY);
+        metadata.addProperty(BUNDLE, createRef(context, BLUEPRINT_BUNDLE));
         metadata.addProperty("notificationService", createRef(context, NOTIFICATION_SERVICE_NAME));
         metadata.addProperty("notificationListener", createRef(context, element.getAttribute(REF_ATTR)));
 

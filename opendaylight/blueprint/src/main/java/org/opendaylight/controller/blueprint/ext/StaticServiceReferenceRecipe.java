@@ -28,7 +28,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     private static final Logger LOG = LoggerFactory.getLogger(StaticServiceReferenceRecipe.class);
 
     private static final SatisfactionListener NOOP_LISTENER = satisfiable -> {
-
+        // Intentional NOOP
     };
 
     private volatile ServiceReference<?> trackedServiceReference;
@@ -86,6 +86,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
                 getBundleContextForServiceLookup().ungetService(trackedServiceReference);
             } catch (final IllegalStateException e) {
                 // In case the service no longer exists, ignore.
+                LOG.trace("ungetService error", e);
             }
 
             trackedServiceReference = null;
