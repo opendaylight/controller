@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_fa31b15a",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_5a355d44",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_3a38693c",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "\"Collapsible \"if\" statements should be merged\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_9a4235ac",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "\"Methods should not be too complex (Cyclomatic Complexity)\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_7a3dc12a",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigDefaultXMLReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "\"Methods should not be too complex (Cyclomatic Complexity)\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_da482dce",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "CheckedFuture is deprecated",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_ba43b9ad",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 0,
+      "message": "\"String literals should not be duplicated\" - threshold is 4",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

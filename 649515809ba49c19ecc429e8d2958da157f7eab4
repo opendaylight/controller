@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_da1f8db5",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/StaticServiceReferenceRecipe.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 1,
+      "message": "\"Nested blocks of code should not be left empty\" - comment should avoid the warning according to the docs",
+      "revId": "649515809ba49c19ecc429e8d2958da157f7eab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_ba1a99c3",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/StaticServiceReferenceRecipe.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T08:27:59Z",
+      "side": 1,
+      "message": "\"Exception handlers should preserve the original exception\"",
+      "revId": "649515809ba49c19ecc429e8d2958da157f7eab4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
