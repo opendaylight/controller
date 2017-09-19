@@ -16,6 +16,24 @@
       "revId": "dad38142e534f316329c0ef07c87cacf9e91b007",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_a7d1e124",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-19T15:40:42Z",
+      "side": 1,
+      "message": "Not sure there\u0027s that much commonality to warrant that level of effort but I\u0027ll check it out :)",
+      "parentUuid": "ba1f61a0_d5f11e96",
+      "revId": "dad38142e534f316329c0ef07c87cacf9e91b007",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
