@@ -19,7 +19,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -75,14 +75,14 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
         rpcRegistry = (RpcProviderRegistry)service;
 
         // Now acquire SchemaService...
-        retrieveService("SchemaService", SchemaService.class, this::onSchemaService);
+        retrieveService("SchemaService", DOMSchemaService.class, this::onSchemaService);
     }
 
     private void onSchemaService(final Object service) {
         log.debug("{}: Retrieved SchemaService {}", logName(), service);
 
         // Now get the SchemaContext and trigger RPC resolution
-        retrievedSchemaContext(((SchemaService)service).getGlobalContext());
+        retrievedSchemaContext(((DOMSchemaService)service).getGlobalContext());
     }
 
     private void retrievedSchemaContext(final SchemaContext schemaContext) {

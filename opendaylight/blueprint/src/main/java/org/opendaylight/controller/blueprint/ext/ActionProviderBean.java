@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailab
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -45,7 +45,7 @@ public class ActionProviderBean {
 
     private DOMRpcProviderService rpcProviderService;
     private RpcProviderRegistry rpcRegistry;
-    private SchemaService schemaService;
+    private DOMSchemaService schemaService;
     private RpcService implementation;
     private String interfaceName;
     private Registration reg;
@@ -71,7 +71,7 @@ public class ActionProviderBean {
         this.rpcRegistry = rpcRegistry;
     }
 
-    public void setSchemaService(final SchemaService schemaService) {
+    public void setSchemaService(final DOMSchemaService schemaService) {
         this.schemaService = schemaService;
     }
 
