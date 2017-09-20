@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_3b67c827",
+        "filename": "features/config-feature-parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-09-20T13:13:58Z",
+      "side": 1,
+      "message": "Oops, should be controller.",
+      "range": {
+        "startLine": 23,
+        "startChar": 34,
+        "endLine": 23,
+        "endChar": 43
+      },
+      "revId": "e26a0769a042ee6696a3caa75b9766fc8896f6d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
