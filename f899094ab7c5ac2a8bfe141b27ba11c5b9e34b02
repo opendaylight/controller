@@ -1,0 +1,497 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_1132a35e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"String literals should not be duplicated\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_7135df44",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/ClientBackedTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Modifiers should be declared in the correct order\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_51389b3c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/ConcurrentDOMDataBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_b142b7ab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractDataStoreClientBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_913df32d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"String literals should not be duplicated\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_f148afcd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractShardBackendResolver.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_d143ebac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCursor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Local variables should not shadow class fields\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_3116c7a8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/LocalProxyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"String literals should not be duplicated\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_111903d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ProxyHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\" Collapsible \"if\" statements should be merged\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_710cbf94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_510ffb87",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_b12917e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractFrontendHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Lambdas and anonymous classes should not have too many lines\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_9124d30d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractFrontendHistory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\" Collapsible \"if\" statements should be merged\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_f11f0fb5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Unused private fields should be removed\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_317d27e9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextIntrospector.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\" Generic exceptions should never be thrown\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_71831fcc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DefaultShardDataChangeListenerPublisher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Nested blocks of code should not be left empty\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_5186dbdb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DefaultShardDataTreeChangeListenerPublisher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Nested blocks of code should not be left empty\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_31640749",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendReadWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"String literals should not be duplicated\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_1167434e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Collapsible \"if\" statements should be merged\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_715aff83",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Comments should not be located at the end of lines of code\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_515d3b78",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"String literals should not be duplicated\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_91521365",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/PrefixShardConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Local variables should not shadow class fields\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_31cb6720",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/OnDemandShardState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Overriding methods should do more than simply call the same method in the super class\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_71d15fcc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/DatastoreSnapshot.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Local variables should not shadow class fields\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_51d41bbc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/ShardManagerSnapshot.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Local variables should not shadow class fields\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_b1de37db",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Local variables should not shadow class fields\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_91d973f5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardChangePublisher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Unused private fields should be removed\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_d1df6bd4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardProxyProducer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Unused private fields should be removed\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_31f24770",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-20T18:21:44Z",
+      "side": 0,
+      "message": "\"Unused private fields should be removed\"",
+      "revId": "f899094ab7c5ac2a8bfe141b27ba11c5b9e34b02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
