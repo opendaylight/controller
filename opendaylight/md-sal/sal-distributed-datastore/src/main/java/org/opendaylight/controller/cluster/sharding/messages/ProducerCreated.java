@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.sharding.messages;
 
 import com.google.common.annotations.Beta;
 import java.util.Collection;
+import java.util.Set;
 import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
@@ -19,10 +20,16 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
  */
 @Beta
 public class ProducerCreated {
-    private final Collection<DOMDataTreeIdentifier> subtrees;
+    private final DOMDataTreeIdentifier idPrefix;
+    private final Set<DOMDataTreeIdentifier> subtrees;
 
-    public ProducerCreated(final Collection<DOMDataTreeIdentifier> subtrees) {
+    public ProducerCreated(final DOMDataTreeIdentifier idPrefix, final Set<DOMDataTreeIdentifier> subtrees) {
+        this.idPrefix = idPrefix;
         this.subtrees = subtrees;
+    }
+
+    public DOMDataTreeIdentifier getIdPrefix() {
+        return idPrefix;
     }
 
     public Collection<DOMDataTreeIdentifier> getSubtrees() {

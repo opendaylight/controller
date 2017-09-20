@@ -1,0 +1,39 @@
+module producer-status {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:producer-status";
+    prefix "producer-status";
+
+    description
+            "This module contains the base YANG definitions for
+            producer registrations in the DOMDataTreeService";
+
+    revision "2017-07-18" {
+        description "Initial revision.";
+    }
+
+    container producers {
+        list producer {
+            key key-prefix;
+            leaf key-prefix {
+                type instance-identifier;
+                description "One of the prefixes that the producer has access to. All the prefixes should be present
+                            as elements of the list and their life cycle must be managed as one entity.";
+            }
+
+            container prefixes {
+                leaf-list prefix {
+                    type instance-identifier;
+                    description "All the prefixes that the producer has write access to.";
+                }
+            }
+
+            leaf member {
+                type string;
+                description "Which member opened this producer.";
+            }
+        }
+    }
+
+
+
+}
