@@ -49,6 +49,9 @@ public final class EntityOwnersModel {
     static final YangInstanceIdentifier ENTITY_TYPES_PATH =
             YangInstanceIdentifier.of(EntityOwners.QNAME).node(EntityType.QNAME);
 
+    private EntityOwnersModel() {
+    }
+
     static YangInstanceIdentifier entityPath(String entityType, YangInstanceIdentifier entityId) {
         return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME)
                 .nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME)

@@ -45,7 +45,8 @@ abstract class ClientBackedTransaction<T extends AbstractClientHandle<?>> extend
             this.allocationContext = allocationContext;
         }
 
-        static @Nonnull <T extends AbstractClientHandle<?>> T recordTransaction(
+        @Nonnull
+        static <T extends AbstractClientHandle<?>> T recordTransaction(
                 @Nonnull final ClientBackedTransaction<T> referent, @Nonnull final T transaction,
                 @Nullable final Throwable allocationContext) {
             FINALIZERS.add(new Finalizer(referent, transaction, allocationContext));

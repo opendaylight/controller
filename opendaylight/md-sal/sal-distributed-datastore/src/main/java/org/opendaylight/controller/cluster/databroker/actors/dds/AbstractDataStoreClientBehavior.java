@@ -21,6 +21,8 @@ import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
+import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
+import org.opendaylight.controller.cluster.access.client.ReconnectForwarder;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -140,28 +142,34 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
         }
 
         return previousEntries -> {
-            try {
-                // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
-                //         the non-throttling interface to the connection, hence we use a wrapper consumer
-                for (HistoryReconnectCohort c : cohorts) {
-                    c.replayRequests(previousEntries);
-                }
-
-                // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
-                //         requests will be immediately sent to it and requests being sent concurrently will get
-                //         forwarded once they hit the new connection.
-                return BouncingReconnectForwarder.forCohorts(newConn, cohorts);
-            } finally {
-                try {
-                    // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
-                    for (HistoryReconnectCohort c : cohorts) {
-                        c.close();
-                    }
-                } finally {
-                    lock.unlockWrite(stamp);
-                }
-            }
+            return finishReconnect(newConn, stamp, cohorts, previousEntries);
         };
+    }
+
+    private ReconnectForwarder finishReconnect(final ConnectedClientConnection<ShardBackendInfo> newConn,
+            final long stamp, final Collection<HistoryReconnectCohort> cohorts,
+            final Collection<ConnectionEntry> previousEntries) {
+        try {
+            // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
+            //         the non-throttling interface to the connection, hence we use a wrapper consumer
+            for (HistoryReconnectCohort c : cohorts) {
+                c.replayRequests(previousEntries);
+            }
+
+            // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
+            //         requests will be immediately sent to it and requests being sent concurrently will get
+            //         forwarded once they hit the new connection.
+            return BouncingReconnectForwarder.forCohorts(newConn, cohorts);
+        } finally {
+            try {
+                // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
+                for (HistoryReconnectCohort c : cohorts) {
+                    c.close();
+                }
+            } finally {
+                lock.unlockWrite(stamp);
+            }
+        }
     }
 
     private static void startReconnect(final AbstractClientHistory history,

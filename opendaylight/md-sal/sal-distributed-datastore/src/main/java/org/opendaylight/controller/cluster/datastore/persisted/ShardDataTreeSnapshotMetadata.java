@@ -46,7 +46,8 @@ public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnaps
      *
      * @return Externalizable proxy, may not be null
      */
-    protected abstract @Nonnull Externalizable externalizableProxy();
+    @Nonnull
+    protected abstract Externalizable externalizableProxy();
 
     public abstract Class<T> getType();
 }

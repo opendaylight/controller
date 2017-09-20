@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import static org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER;
+import static org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER;
+import static org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractFuture;
@@ -89,8 +93,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
         doCanCommit(clientSubmitFuture, transaction, cohorts);
 
-        return MappingCheckedFuture.create(clientSubmitFuture,
-                TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+        return MappingCheckedFuture.create(clientSubmitFuture, COMMIT_ERROR_MAPPER);
     }
 
     private void doCanCommit(final AsyncNotifyingSettableFuture clientSubmitFuture,
@@ -106,25 +109,19 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             @Override
             public void onSuccess(Boolean result) {
                 if (result == null || !result) {
-                    handleException(clientSubmitFuture, transaction, cohorts,
-                            CAN_COMMIT, TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER,
-                            new TransactionCommitFailedException(
-                                            "Can Commit failed, no detailed cause available."));
+                    handleException(clientSubmitFuture, transaction, cohorts, CAN_COMMIT, CAN_COMMIT_ERROR_MAPPER,
+                            new TransactionCommitFailedException("Can Commit failed, no detailed cause available."));
+                } else if (!cohortIterator.hasNext()) {
+                    // All cohorts completed successfully - we can move on to the preCommit phase
+                    doPreCommit(startTime, clientSubmitFuture, transaction, cohorts);
                 } else {
-                    if (!cohortIterator.hasNext()) {
-                        // All cohorts completed successfully - we can move on to the preCommit phase
-                        doPreCommit(startTime, clientSubmitFuture, transaction, cohorts);
-                    } else {
-                        ListenableFuture<Boolean> canCommitFuture = cohortIterator.next().canCommit();
-                        Futures.addCallback(canCommitFuture, this, MoreExecutors.directExecutor());
-                    }
+                    Futures.addCallback(cohortIterator.next().canCommit(), this, MoreExecutors.directExecutor());
                 }
             }
 
             @Override
             public void onFailure(Throwable failure) {
-                handleException(clientSubmitFuture, transaction, cohorts, CAN_COMMIT,
-                        TransactionCommitFailedExceptionMapper.CAN_COMMIT_ERROR_MAPPER, failure);
+                handleException(clientSubmitFuture, transaction, cohorts, CAN_COMMIT, CAN_COMMIT_ERROR_MAPPER, failure);
             }
         };
 
@@ -153,8 +150,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
             @Override
             public void onFailure(Throwable failure) {
-                handleException(clientSubmitFuture, transaction, cohorts, PRE_COMMIT,
-                        TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER, failure);
+                handleException(clientSubmitFuture, transaction, cohorts, PRE_COMMIT, PRE_COMMIT_MAPPER, failure);
             }
         };
 
@@ -185,8 +181,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
             @Override
             public void onFailure(Throwable throwable) {
-                handleException(clientSubmitFuture, transaction, cohorts, COMMIT,
-                        TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER, throwable);
+                handleException(clientSubmitFuture, transaction, cohorts, COMMIT, COMMIT_ERROR_MAPPER, throwable);
             }
         };
 

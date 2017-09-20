@@ -168,7 +168,7 @@ public final class DataTreeCandidateInputOutput {
                 out.writeByte(UNMODIFIED);
                 break;
             default:
-                throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+                throwUnhandledNodeType(node);
         }
     }
 
@@ -201,8 +201,12 @@ public final class DataTreeCandidateInputOutput {
                     writer.writeNormalizedNode(node.getDataAfter().get());
                     break;
                 default:
-                    throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+                    throwUnhandledNodeType(node);
             }
         }
+    }
+
+    private static void throwUnhandledNodeType(final DataTreeCandidateNode node) {
+        throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
     }
 }

@@ -413,7 +413,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
     }
 
-    final void recordSuccessfulRequest(final @Nonnull TransactionRequest<?> req) {
+    final void recordSuccessfulRequest(@Nonnull final TransactionRequest<?> req) {
         successfulRequests.add(Verify.verifyNotNull(req));
     }
 
@@ -449,7 +449,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             } else if (t instanceof RequestFailure) {
                 ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
             } else {
-                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+                ret.voteNo(unhandledResponseException(t));
             }
 
             // This is a terminal request, hence we do not need to record it
@@ -507,7 +507,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                             ret.setException(cause);
                         }
                     } else {
-                        ret.setException(new IllegalStateException("Unhandled response " + t.getClass()));
+                        ret.setException(unhandledResponseException(t));
                     }
 
                     // This is a terminal request, hence we do not need to record it
@@ -538,7 +538,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     } else if (t instanceof RequestFailure) {
                         ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
                     } else {
-                        ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+                        ret.voteNo(unhandledResponseException(t));
                     }
 
                     recordSuccessfulRequest(req);
@@ -569,7 +569,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             } else if (t instanceof RequestFailure) {
                 ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
             } else {
-                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+                ret.voteNo(unhandledResponseException(t));
             }
 
             onPreCommitComplete(req);
@@ -602,7 +602,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             } else if (t instanceof RequestFailure) {
                 ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
             } else {
-                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+                ret.voteNo(unhandledResponseException(t));
             }
 
             LOG.debug("Transaction {} doCommit completed", this);
@@ -687,13 +687,13 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             for (Object obj : successfulRequests) {
                 if (obj instanceof TransactionRequest) {
                     LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                    successor.doReplayRequest((TransactionRequest<?>) obj, resp -> { }, now);
+                    successor.doReplayRequest((TransactionRequest<?>) obj, resp -> { /*NOOP*/ }, now);
                 } else {
                     Verify.verify(obj instanceof IncrementSequence);
                     final IncrementSequence increment = (IncrementSequence) obj;
                     successor.doReplayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
-                        increment.getSequence(), localActor(), isSnapshotOnly(), increment.getDelta()), resp -> { },
-                        now);
+                        increment.getSequence(), localActor(), isSnapshotOnly(),
+                        increment.getDelta()), resp -> { /*NOOP*/ }, now);
                     LOG.debug("Incrementing sequence {} to successor {}", obj, successor);
                 }
             }
@@ -845,6 +845,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      */
     abstract void handleReplayedRemoteRequest(TransactionRequest<?> request,
             @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
+
+    private static IllegalStateException unhandledResponseException(Response<?, ?> resp) {
+        return new IllegalStateException("Unhandled response " + resp.getClass());
+    }
 
     @Override
     public final String toString() {

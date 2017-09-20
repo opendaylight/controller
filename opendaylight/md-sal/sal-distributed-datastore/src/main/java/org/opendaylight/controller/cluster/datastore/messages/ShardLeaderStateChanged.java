@@ -37,7 +37,8 @@ public class ShardLeaderStateChanged extends LeaderStateChanged {
         this.localShardDataTree = null;
     }
 
-    public @Nonnull Optional<DataTree> getLocalShardDataTree() {
+    @Nonnull
+    public Optional<DataTree> getLocalShardDataTree() {
         return Optional.ofNullable(localShardDataTree);
     }
 }

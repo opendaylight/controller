@@ -44,9 +44,9 @@ final class ClientTransactionCursor implements DOMDataTreeWriteCursor {
 
     @Override
     public void exit() {
-        final YangInstanceIdentifier parent = current.getParent();
-        Preconditions.checkState(parent != null);
-        current = parent;
+        final YangInstanceIdentifier currentParent = current.getParent();
+        Preconditions.checkState(currentParent != null);
+        current = currentParent;
     }
 
     @Override

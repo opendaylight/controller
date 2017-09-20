@@ -39,7 +39,7 @@ public final class ShardManagerSnapshot implements Serializable {
      *             org.opendaylight.controller.cluster.datastore.ShardManagerSnapshot is removed.
      */
     @Deprecated
-    public static ShardManagerSnapshot forShardList(final @Nonnull List<String> shardList) {
+    public static ShardManagerSnapshot forShardList(@Nonnull final List<String> shardList) {
         return new ShardManagerSnapshot(shardList);
     }
 

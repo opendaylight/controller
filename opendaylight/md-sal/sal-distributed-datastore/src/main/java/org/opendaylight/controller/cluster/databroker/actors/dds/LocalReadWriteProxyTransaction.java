@@ -228,18 +228,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     void applyForwardedModifyTransactionRequest(final ModifyTransactionRequest request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
+            @Nullable final Consumer<Response<?, ?>> callback) {
         commonModifyTransactionRequest(request, callback, this::sendRequest);
     }
 
     @Override
     void replayModifyTransactionRequest(final ModifyTransactionRequest request,
-            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         commonModifyTransactionRequest(request, callback, (req, cb) -> enqueueRequest(req, cb, enqueuedTicks));
     }
 
     private void commonModifyTransactionRequest(final ModifyTransactionRequest request,
-            final @Nullable Consumer<Response<?, ?>> callback,
+            @Nullable final Consumer<Response<?, ?>> callback,
             final BiConsumer<TransactionRequest<?>, Consumer<Response<?, ?>>> sendMethod) {
         for (final TransactionModification mod : request.getModifications()) {
             if (mod instanceof TransactionWrite) {
@@ -291,7 +291,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     void handleReplayedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         LOG.debug("Applying replayed request {}", request);
 
         if (request instanceof TransactionPreCommitRequest) {
@@ -347,7 +347,8 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         closedException = this::abortedException;
     }
 
-    private @Nonnull CursorAwareDataTreeModification getModification() {
+    @Nonnull
+    private CursorAwareDataTreeModification getModification() {
         if (closedException != null) {
             throw closedException.get();
         }

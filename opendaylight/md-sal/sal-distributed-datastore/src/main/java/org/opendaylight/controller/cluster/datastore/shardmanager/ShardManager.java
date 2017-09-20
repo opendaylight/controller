@@ -336,7 +336,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onInitConfigListener() {
         LOG.debug("{}: Initializing config listener on {}", persistenceId(), cluster.getCurrentMemberName());
 
-        final org.opendaylight.mdsal.common.api.LogicalDatastoreType type =
+        final org.opendaylight.mdsal.common.api.LogicalDatastoreType datastoreType =
                 org.opendaylight.mdsal.common.api.LogicalDatastoreType
                         .valueOf(datastoreContextFactory.getBaseDatastoreContext().getLogicalStoreType().name());
 
@@ -345,7 +345,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         configUpdateHandler = new PrefixedShardConfigUpdateHandler(self(), cluster.getCurrentMemberName());
-        configUpdateHandler.initListener(dataStore, type);
+        configUpdateHandler.initListener(dataStore, datastoreType);
     }
 
     private void onShutDown() {
@@ -849,7 +849,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final ActorRef sender = getSender();
 
         if (sender == null) {
-            return; //why is a non-actor sending this message? Just ignore.
+            // why is a non-actor sending this message? Just ignore.
+            return;
         }
 
         String actorName = sender.path().name();
@@ -1252,7 +1253,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
 
-        restoreFromSnapshot = null; // null out to GC
+        // null out to GC
+        restoreFromSnapshot = null;
 
         for (String shardName : memberShardNames) {
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
