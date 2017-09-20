@@ -43,7 +43,8 @@ public class DataChanged implements Externalizable {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        in.readShort(); // Read the version
+        // Read the version
+        in.readShort();
 
         NormalizedNodeDataInput streamReader = NormalizedNodeInputOutput.newDataInputWithoutValidation(in);
 

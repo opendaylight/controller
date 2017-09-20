@@ -60,8 +60,8 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
 
     void init(ShardDataTree shardDataTree) {
         shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH)
-                .node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME)
-                    .node(Candidate.QNAME).node(Candidate.QNAME).build(), this, Optional.absent(), noop -> { });
+            .node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME)
+                .node(Candidate.QNAME).node(Candidate.QNAME).build(), this, Optional.absent(), noop -> { /* NOOP */ });
     }
 
     @Override

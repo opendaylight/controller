@@ -27,11 +27,13 @@ public class LocalPrimaryShardFound {
         this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
     }
 
-    public @Nonnull String getPrimaryPath() {
+    @Nonnull
+    public String getPrimaryPath() {
         return primaryPath;
     }
 
-    public @Nonnull DataTree getLocalShardDataTree() {
+    @Nonnull
+    public DataTree getLocalShardDataTree() {
         return localShardDataTree;
     }
 

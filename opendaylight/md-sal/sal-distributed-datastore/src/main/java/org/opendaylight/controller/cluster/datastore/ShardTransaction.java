@@ -40,7 +40,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     protected ShardTransaction(final ActorRef shardActor, final ShardStats shardStats,
             final TransactionIdentifier transactionId) {
-        super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
+        // actor name override used for metering. This does not change the "real" actor name
+        super("shard-tx");
         this.shardActor = shardActor;
         this.shardStats = shardStats;
         this.transactionId = Preconditions.checkNotNull(transactionId);

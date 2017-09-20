@@ -39,7 +39,8 @@ public class PrimaryShardInfo {
     /**
      * Returns an ActorSelection representing the primary shard actor.
      */
-    public @Nonnull ActorSelection getPrimaryShardActor() {
+    @Nonnull
+    public ActorSelection getPrimaryShardActor() {
         return primaryShardActor;
     }
 
@@ -54,7 +55,8 @@ public class PrimaryShardInfo {
      * Returns an Optional whose value contains the primary shard's DataTree if the primary shard is local
      * to the caller. Otherwise the Optional value is absent.
      */
-    public @Nonnull Optional<DataTree> getLocalShardDataTree() {
+    @Nonnull
+    public Optional<DataTree> getLocalShardDataTree() {
         return Optional.ofNullable(localShardDataTree);
     }
 }

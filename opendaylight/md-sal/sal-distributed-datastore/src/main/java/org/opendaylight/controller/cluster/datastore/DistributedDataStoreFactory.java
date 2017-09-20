@@ -24,6 +24,9 @@ public class DistributedDataStoreFactory {
     private static final String DEFAULT_MODULE_SHARDS_PATH = "./configuration/initial/module-shards.conf";
     private static final String DEFAULT_MODULES_PATH = "./configuration/initial/modules.conf";
 
+    private DistributedDataStoreFactory() {
+    }
+
     /**
      * Create a data store instance.
      *

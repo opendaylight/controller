@@ -13,8 +13,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Optional;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for snapshots of the ShardDataTree.
@@ -23,8 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 public abstract class ShardDataTreeSnapshot {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeSnapshot.class);
-
     ShardDataTreeSnapshot() {
         // Hidden to prevent subclassing from outside of this package
     }

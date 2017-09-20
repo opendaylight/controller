@@ -86,7 +86,7 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
             final AsyncDataChangeListener<YangInstanceIdentifier,NormalizedNode<?, ?>> listener,
             final DataChangeScope scope, final DataTreeCandidate initialState, String logContext) {
         DefaultShardDataChangeListenerPublisher publisher = new DefaultShardDataChangeListenerPublisher(logContext);
-        publisher.registerDataChangeListener(path, listener, scope, Optional.absent(), noop -> { });
+        publisher.registerDataChangeListener(path, listener, scope, Optional.absent(), noop -> { /* NOOP */ });
         publisher.publishChanges(initialState);
     }
 }

@@ -124,7 +124,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     public ListenableFuture<Void> submit() {
         LOG.debug("Submitting transaction for shard {}", shardRoot);
 
-        Preconditions.checkState(!cohorts.isEmpty(), "Transaction not readied yet");
+        checkTransactionReadied();
 
         final AsyncFunction<Boolean, Void> validateFunction = input -> prepare();
         final AsyncFunction<Void, Void> prepareFunction = input -> commit();
@@ -136,11 +136,15 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
         return Futures.transformAsync(prepareFuture, prepareFunction, MoreExecutors.directExecutor());
     }
 
+    private void checkTransactionReadied() {
+        Preconditions.checkState(!cohorts.isEmpty(), "Transaction not readied yet");
+    }
+
     @Override
     public ListenableFuture<Boolean> validate() {
         LOG.debug("Validating transaction for shard {}", shardRoot);
 
-        Preconditions.checkState(!cohorts.isEmpty(), "Transaction not readied yet");
+        checkTransactionReadied();
         final List<ListenableFuture<Boolean>> futures =
                 cohorts.stream().map(DOMStoreThreePhaseCommitCohort::canCommit).collect(Collectors.toList());
         final SettableFuture<Boolean> ret = SettableFuture.create();
@@ -164,7 +168,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     public ListenableFuture<Void> prepare() {
         LOG.debug("Preparing transaction for shard {}", shardRoot);
 
-        Preconditions.checkState(!cohorts.isEmpty(), "Transaction not readied yet");
+        checkTransactionReadied();
         final List<ListenableFuture<Void>> futures =
                 cohorts.stream().map(DOMStoreThreePhaseCommitCohort::preCommit).collect(Collectors.toList());
         final SettableFuture<Void> ret = SettableFuture.create();
@@ -188,7 +192,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
     public ListenableFuture<Void> commit() {
         LOG.debug("Committing transaction for shard {}", shardRoot);
 
-        Preconditions.checkState(!cohorts.isEmpty(), "Transaction not readied yet");
+        checkTransactionReadied();
         final List<ListenableFuture<Void>> futures =
                 cohorts.stream().map(DOMStoreThreePhaseCommitCohort::commit).collect(Collectors.toList());
         final SettableFuture<Void> ret = SettableFuture.create();

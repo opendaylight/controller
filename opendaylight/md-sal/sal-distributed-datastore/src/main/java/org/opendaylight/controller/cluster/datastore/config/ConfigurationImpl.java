@@ -142,7 +142,7 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public Collection<MemberName> getMembersFromShardName(final String shardName) {
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        checkNotNullShardName(shardName);
 
         for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
@@ -158,6 +158,10 @@ public class ConfigurationImpl implements Configuration {
         }
 
         return Collections.emptyList();
+    }
+
+    private static void checkNotNullShardName(final String shardName) {
+        Preconditions.checkNotNull(shardName, "shardName should not be null");
     }
 
     @Override
@@ -234,13 +238,13 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public boolean isShardConfigured(String shardName) {
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        checkNotNullShardName(shardName);
         return allShardNames.contains(shardName);
     }
 
     @Override
     public void addMemberReplicaForShard(String shardName, MemberName newMemberName) {
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        checkNotNullShardName(shardName);
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
         for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
@@ -256,7 +260,7 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public void removeMemberReplicaForShard(String shardName, MemberName newMemberName) {
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        checkNotNullShardName(shardName);
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
         for (ModuleConfig moduleConfig: moduleConfigMap.values()) {

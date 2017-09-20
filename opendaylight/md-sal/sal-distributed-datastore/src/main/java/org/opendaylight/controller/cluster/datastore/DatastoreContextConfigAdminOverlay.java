@@ -60,7 +60,8 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
         this.listener = listener;
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressWarnings({"checkstyle:IllegalCatch",
+        "squid:S1166" /*  Exception handlers should preserve the original exception */})
     private void overlaySettings(ServiceReference<ConfigurationAdmin> configAdminServiceReference) {
         try {
             ConfigurationAdmin configAdmin = bundleContext.getService(configAdminServiceReference);
@@ -71,10 +72,8 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
                 LOG.debug("Overlaying settings: {}", properties);
 
-                if (introspector.update(properties)) {
-                    if (listener != null) {
-                        listener.onDatastoreContextUpdated(introspector.newContextFactory());
-                    }
+                if (introspector.update(properties) && listener != null) {
+                    listener.onDatastoreContextUpdated(introspector.newContextFactory());
                 }
             } else {
                 LOG.debug("No Configuration found for {}", CONFIG_ID);

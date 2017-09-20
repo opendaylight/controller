@@ -64,7 +64,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
 
             LOG.debug("Could not read strategy configuration file, will use default configuration");
         } catch (IOException e1) {
-            LOG.warn("Failed to get configuration for {}, starting up empty", CONFIG_ID);
+            LOG.warn("Failed to get configuration for {}, starting up empty", CONFIG_ID, e1);
             return builder.build();
         } finally {
             try {
@@ -127,7 +127,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
         try {
             clazz = EntityOwnerSelectionStrategyConfigReader.class.getClassLoader().loadClass(strategyClassAndDelay);
         } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Failed to load strategy " + strategyClassAndDelay);
+            throw new IllegalArgumentException("Failed to load strategy " + strategyClassAndDelay, e);
         }
 
         Preconditions.checkArgument(EntityOwnerSelectionStrategy.class.isAssignableFrom(clazz),

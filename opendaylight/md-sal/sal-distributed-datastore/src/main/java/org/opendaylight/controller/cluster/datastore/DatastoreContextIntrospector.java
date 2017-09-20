@@ -18,6 +18,7 @@ import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,16 +67,18 @@ public class DatastoreContextIntrospector {
      * constructor that takes a single String argument. For primitive wrappers, this constructor
      * converts from a String representation.
      */
-    @SuppressWarnings("checkstyle:IllegalCatch")
+    // Disables "Either log or rethrow this exception" sonar warning
+    @SuppressWarnings("squid:S1166")
     private static void introspectPrimitiveTypes() {
-
         Set<Class<?>> primitives = ImmutableSet.<Class<?>>builder().addAll(
                 Primitives.allWrapperTypes()).add(String.class).build();
         for (Class<?> primitive: primitives) {
             try {
                 processPropertyType(primitive);
-            } catch (Exception e) {
+            } catch (NoSuchMethodException e) {
                 // Ignore primitives that can't be constructed from a String, eg Character and Void.
+            } catch (SecurityException | IntrospectionException e) {
+                LOG.error("Error introspect primitive type {}", primitive, e);
             }
         }
     }
@@ -139,7 +142,8 @@ public class DatastoreContextIntrospector {
      * Finds the appropriate constructor for the specified type that we will use to construct
      * instances.
      */
-    private static void processPropertyType(Class<?> propertyType) throws Exception {
+    private static void processPropertyType(Class<?> propertyType) throws NoSuchMethodException, SecurityException,
+            IntrospectionException {
         Class<?> wrappedType = Primitives.wrap(propertyType);
         if (CONSTRUCTORS.containsKey(wrappedType)) {
             return;
@@ -169,8 +173,7 @@ public class DatastoreContextIntrospector {
     /**
      * Finds the getter method on a yang-generated type for the specified property name.
      */
-    private static void findYangTypeGetter(Class<?> type, String propertyName)
-            throws Exception {
+    private static void findYangTypeGetter(Class<?> type, String propertyName) throws IntrospectionException {
         for (PropertyDescriptor desc: Introspector.getBeanInfo(type).getPropertyDescriptors()) {
             if (desc.getName().equals(propertyName)) {
                 YANG_TYPE_GETTERS.put(type, desc.getReadMethod());
@@ -178,7 +181,7 @@ public class DatastoreContextIntrospector {
             }
         }
 
-        throw new IllegalArgumentException(String.format(
+        throw new IntrospectionException(String.format(
                 "Getter method for constructor property %s not found for YANG type %s",
                 propertyName, type));
     }
@@ -303,7 +306,8 @@ public class DatastoreContextIntrospector {
                     Primitives.wrap(setter.getParameterTypes()[0]), value.toString()));
 
             return true;
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | InstantiationException e) {
             LOG.error("Error converting value ({}) for property {}", inValue, key, e);
         }
 
@@ -321,7 +325,8 @@ public class DatastoreContextIntrospector {
         return StringUtils.uncapitalize(str);
     }
 
-    private Object convertValue(String name, Object from) throws Exception {
+    private Object convertValue(String name, Object from)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Class<?> propertyType = DATA_STORE_PROP_TYPES.get(name);
         if (propertyType == null) {
             LOG.debug("Property not found for {}", name);
@@ -345,7 +350,8 @@ public class DatastoreContextIntrospector {
         return converted;
     }
 
-    private Object constructorValueRecursively(Class<?> toType, Object fromValue) throws Exception {
+    private Object constructorValueRecursively(Class<?> toType, Object fromValue)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         LOG.trace("convertValueRecursively - toType: {}, fromValue {} ({})",
                 toType.getSimpleName(), fromValue, fromValue.getClass().getSimpleName());
 

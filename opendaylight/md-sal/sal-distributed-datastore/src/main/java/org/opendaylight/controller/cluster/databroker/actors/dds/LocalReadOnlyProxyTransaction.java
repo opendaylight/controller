@@ -55,22 +55,22 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
 
     @Override
     void doDelete(final YangInstanceIdentifier path) {
-        throw new UnsupportedOperationException("Read-only snapshot");
+        throw new UnsupportedOperationException("doDelete");
     }
 
     @Override
     void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        throw new UnsupportedOperationException("Read-only snapshot");
+        throw new UnsupportedOperationException("doMerge");
     }
 
     @Override
     void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        throw new UnsupportedOperationException("Read-only snapshot");
+        throw new UnsupportedOperationException("doWrite");
     }
 
     @Override
     CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
-        throw new UnsupportedOperationException("Read-only snapshot");
+        throw new UnsupportedOperationException("commitRequest");
     }
 
     @Override
