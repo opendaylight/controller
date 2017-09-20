@@ -60,10 +60,5 @@ public class OnDemandShardState extends OnDemandRaftState {
             state.commitCohortActors = actors;
             return self();
         }
-
-        @Override
-        public OnDemandShardState build() {
-            return super.build();
-        }
     }
 }

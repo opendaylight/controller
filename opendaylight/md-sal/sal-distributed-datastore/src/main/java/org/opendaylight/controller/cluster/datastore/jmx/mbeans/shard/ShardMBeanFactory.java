@@ -17,6 +17,9 @@ import org.opendaylight.controller.cluster.datastore.Shard;
  */
 public class ShardMBeanFactory {
 
+    private ShardMBeanFactory() {
+    }
+
     public static ShardStats getShardStatsMBean(final String shardName, final String mxBeanType,
             @Nonnull final Shard shard) {
         String finalMXBeanType = mxBeanType != null ? mxBeanType : "DistDataStore";

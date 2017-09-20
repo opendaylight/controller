@@ -502,7 +502,8 @@ public class Shard extends RaftActor {
         throw new OutOfSequenceEnvelopeException(0);
     }
 
-    private static @Nonnull ABIVersion selectVersion(final ConnectClientRequest message) {
+    @Nonnull
+    private static ABIVersion selectVersion(final ConnectClientRequest message) {
         final Range<ABIVersion> clientRange = Range.closed(message.getMinVersion(), message.getMaxVersion());
         for (ABIVersion v : SUPPORTED_ABIVERSIONS) {
             if (clientRange.contains(v)) {
@@ -550,7 +551,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope, final long now)
+    @Nullable
+    private RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope, final long now)
             throws RequestException {
         // We are not the leader, hence we want to fail-fast.
         if (!isLeader() || paused || !isLeaderActive()) {
@@ -683,7 +685,7 @@ public class Shard extends RaftActor {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(batched, getSender(),
-                        "Could not commit transaction " + batched.getTransactionId());
+                        "Could not process BatchedModifications " + batched.getTransactionId());
             } else {
                 // If this is not the first batch and leadership changed in between batched messages,
                 // we need to reconstruct previous BatchedModifications from the transaction
@@ -736,7 +738,7 @@ public class Shard extends RaftActor {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(message, getSender(),
-                        "Could not commit transaction " + message.getTransactionId());
+                        "Could not process ready local transaction " + message.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding ReadyLocalTransaction to leader {}", persistenceId(), leader);
                 message.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
@@ -755,7 +757,7 @@ public class Shard extends RaftActor {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(forwardedReady, getSender(),
-                        "Could not commit transaction " + forwardedReady.getTransactionId());
+                        "Could not process forwarded ready transaction " + forwardedReady.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding ForwardedReadyTransaction to leader {}", persistenceId(), leader);
 

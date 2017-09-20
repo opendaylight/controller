@@ -42,7 +42,8 @@ public abstract class AbstractVersionException extends Exception {
      *
      * @return Closest supported {@link PayloadVersion}
      */
-    public final @Nonnull PayloadVersion getClosestVersion() {
+    @Nonnull
+    public final PayloadVersion getClosestVersion() {
         return closestVersion;
     }
 

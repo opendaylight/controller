@@ -71,10 +71,8 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
                 LOG.debug("Overlaying settings: {}", properties);
 
-                if (introspector.update(properties)) {
-                    if (listener != null) {
-                        listener.onDatastoreContextUpdated(introspector.newContextFactory());
-                    }
+                if (introspector.update(properties) && listener != null) {
+                    listener.onDatastoreContextUpdated(introspector.newContextFactory());
                 }
             } else {
                 LOG.debug("No Configuration found for {}", CONFIG_ID);
@@ -83,6 +81,7 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
             LOG.error("Error obtaining Configuration for pid {}", CONFIG_ID, e);
         } catch (IllegalStateException e) {
             // Ignore - indicates the bundleContext has been closed.
+            LOG.debug("Got IllegalStateException", e);
         } finally {
             try {
                 bundleContext.ungetService(configAdminServiceReference);

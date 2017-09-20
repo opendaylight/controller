@@ -166,30 +166,29 @@ final class RemoteTransactionContextSupport {
         // the cached remote leader actor is no longer available.
         boolean retryCreateTransaction = primaryShardInfo != null
                 && (failure instanceof NoShardLeaderException || failure instanceof AskTimeoutException);
-        if (retryCreateTransaction) {
-            // Schedule a retry unless we're out of retries. Note: totalCreateTxTimeout is volatile as it may
-            // be written by different threads however not concurrently, therefore decrementing it
-            // non-atomically here is ok.
-            if (totalCreateTxTimeout > 0) {
-                long scheduleInterval = CREATE_TX_TRY_INTERVAL_IN_MS;
-                if (failure instanceof AskTimeoutException) {
-                    // Since we use the createTxMessageTimeout for the CreateTransaction request and it timed
-                    // out, subtract it from the total timeout. Also since the createTxMessageTimeout period
-                    // has already elapsed, we can immediately schedule the retry (10 ms is virtually immediate).
-                    totalCreateTxTimeout -= createTxMessageTimeout.duration().toMillis();
-                    scheduleInterval = 10;
-                }
 
-                totalCreateTxTimeout -= scheduleInterval;
-
-                LOG.debug("Tx {}: create tx on shard {} failed with exception \"{}\" - scheduling retry in {} ms",
-                        getIdentifier(), shardName, failure, scheduleInterval);
-
-                getActorContext().getActorSystem().scheduler().scheduleOnce(
-                    FiniteDuration.create(scheduleInterval, TimeUnit.MILLISECONDS),
-                        this::tryFindPrimaryShard, getActorContext().getClientDispatcher());
-                return;
+        // Schedule a retry unless we're out of retries. Note: totalCreateTxTimeout is volatile as it may
+        // be written by different threads however not concurrently, therefore decrementing it
+        // non-atomically here is ok.
+        if (retryCreateTransaction && totalCreateTxTimeout > 0) {
+            long scheduleInterval = CREATE_TX_TRY_INTERVAL_IN_MS;
+            if (failure instanceof AskTimeoutException) {
+                // Since we use the createTxMessageTimeout for the CreateTransaction request and it timed
+                // out, subtract it from the total timeout. Also since the createTxMessageTimeout period
+                // has already elapsed, we can immediately schedule the retry (10 ms is virtually immediate).
+                totalCreateTxTimeout -= createTxMessageTimeout.duration().toMillis();
+                scheduleInterval = 10;
             }
+
+            totalCreateTxTimeout -= scheduleInterval;
+
+            LOG.debug("Tx {}: create tx on shard {} failed with exception \"{}\" - scheduling retry in {} ms",
+                    getIdentifier(), shardName, failure, scheduleInterval);
+
+            getActorContext().getActorSystem().scheduler().scheduleOnce(
+                    FiniteDuration.create(scheduleInterval, TimeUnit.MILLISECONDS),
+                    this::tryFindPrimaryShard, getActorContext().getClientDispatcher());
+            return;
         }
 
         createTransactionContext(failure, response);

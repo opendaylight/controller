@@ -29,7 +29,7 @@ public abstract class CompositeOnComplete<T> extends OnComplete<T> {
         onCompleteTasks.add(task);
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressWarnings({ "checkstyle:IllegalCatch", "squid:S1181" /*  Throwable and Error should not be caught */ })
     protected void notifyOnCompleteTasks(Throwable failure, T result) {
         for (OnComplete<T> task: onCompleteTasks) {
             try {

@@ -57,16 +57,16 @@ public class DatastoreSnapshot implements Serializable {
 
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            String type = (String)in.readObject();
-            ShardManagerSnapshot shardManagerSnapshot = (ShardManagerSnapshot) in.readObject();
+            String localType = (String)in.readObject();
+            ShardManagerSnapshot localShardManagerSnapshot = (ShardManagerSnapshot) in.readObject();
 
             int size = in.readInt();
-            List<ShardSnapshot> shardSnapshots = new ArrayList<>(size);
+            List<ShardSnapshot> localShardSnapshots = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                shardSnapshots.add((ShardSnapshot) in.readObject());
+                localShardSnapshots.add((ShardSnapshot) in.readObject());
             }
 
-            datastoreSnapshot = new DatastoreSnapshot(type, shardManagerSnapshot, shardSnapshots);
+            datastoreSnapshot = new DatastoreSnapshot(localType, localShardManagerSnapshot, localShardSnapshots);
         }
 
         private Object readResolve() {
