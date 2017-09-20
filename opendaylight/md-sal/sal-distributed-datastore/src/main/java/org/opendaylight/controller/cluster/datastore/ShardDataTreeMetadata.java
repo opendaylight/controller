@@ -44,14 +44,16 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
      *
      * @return Metadata type
      */
-    abstract @Nonnull Class<T> getSupportedType();
+    @Nonnull
+    abstract Class<T> getSupportedType();
 
     /**
      * Take a snapshot of current metadata state.
      *
      * @return Metadata snapshot, or null if the metadata is empty.
      */
-    abstract @Nullable T toSnapshot();
+    @Nullable
+    abstract T toSnapshot();
 
     // Lifecycle events
 

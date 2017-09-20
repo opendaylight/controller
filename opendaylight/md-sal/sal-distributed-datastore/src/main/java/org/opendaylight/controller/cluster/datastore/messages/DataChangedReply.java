@@ -10,4 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 public class DataChangedReply {
     public static final DataChangedReply INSTANCE = new DataChangedReply();
+
+    private DataChangedReply() {
+    }
 }

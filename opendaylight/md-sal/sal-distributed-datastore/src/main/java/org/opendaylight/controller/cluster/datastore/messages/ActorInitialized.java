@@ -11,4 +11,7 @@ import java.io.Serializable;
 
 public class ActorInitialized implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    public ActorInitialized() {
+    }
 }

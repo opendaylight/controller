@@ -18,11 +18,11 @@ import javax.annotation.Nonnull;
 public class DOMDataTreeShardCreationFailedException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public DOMDataTreeShardCreationFailedException(final @Nonnull String message) {
+    public DOMDataTreeShardCreationFailedException(@Nonnull final String message) {
         super(message);
     }
 
-    public DOMDataTreeShardCreationFailedException(final @Nonnull String message, final @Nonnull Throwable cause) {
+    public DOMDataTreeShardCreationFailedException(@Nonnull final String message, @Nonnull final Throwable cause) {
         super(message, cause);
     }
 }

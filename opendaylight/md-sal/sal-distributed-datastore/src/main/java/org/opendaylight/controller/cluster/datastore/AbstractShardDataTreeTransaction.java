@@ -14,8 +14,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base for transactions running on SharrdDataTree.
@@ -25,8 +23,6 @@ import org.slf4j.LoggerFactory;
 @NotThreadSafe
 abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         implements Identifiable<TransactionIdentifier> {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractShardDataTreeTransaction.class);
-
     private final ShardDataTreeTransactionParent parent;
     private final TransactionIdentifier id;
     private final T snapshot;

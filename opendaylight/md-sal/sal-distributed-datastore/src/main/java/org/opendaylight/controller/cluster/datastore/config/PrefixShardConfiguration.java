@@ -52,16 +52,17 @@ public class PrefixShardConfiguration implements Serializable {
 
         @Override
         public void readExternal(final ObjectInput objectInput) throws IOException, ClassNotFoundException {
-            final DOMDataTreeIdentifier prefix =  (DOMDataTreeIdentifier) objectInput.readObject();
-            final String strategyName = (String) objectInput.readObject();
+            final DOMDataTreeIdentifier localPrefix = (DOMDataTreeIdentifier) objectInput.readObject();
+            final String localStrategyName = (String) objectInput.readObject();
 
             final int size = objectInput.readInt();
-            final Collection<MemberName> shardMemberNames = new ArrayList<>(size);
+            final Collection<MemberName> localShardMemberNames = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                shardMemberNames.add(MemberName.readFrom(objectInput));
+                localShardMemberNames.add(MemberName.readFrom(objectInput));
             }
 
-            prefixShardConfiguration = new PrefixShardConfiguration(prefix, strategyName, shardMemberNames);
+            prefixShardConfiguration = new PrefixShardConfiguration(localPrefix, localStrategyName,
+                    localShardMemberNames);
         }
 
         private Object readResolve() {
