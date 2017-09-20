@@ -25,6 +25,7 @@ public class ClusterUtils {
 
     // id for the shard used to store prefix configuration
     public static final String PREFIX_CONFIG_SHARD_ID = "prefix-configuration-shard";
+    public static final String PRODUCER_STATUS_SHARD_ID = "producer-status-shard";
 
     public static final QName PREFIX_SHARDS_QNAME =
             QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:prefix-shard-configuration",
@@ -42,6 +43,25 @@ public class ClusterUtils {
             YangInstanceIdentifier.of(PREFIX_SHARDS_QNAME).toOptimized();
     public static final YangInstanceIdentifier SHARD_LIST_PATH =
             PREFIX_SHARDS_PATH.node(SHARD_LIST_QNAME).toOptimized();
+
+    public static final QName PRODUCERS_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:producer-status",
+                    "2017-07-18", "producers").intern();
+    public static final QName PRODUCER_QNAME =
+            QName.create(PRODUCERS_QNAME, "producer").intern();
+    public static final QName PRODUCER_KEY_PREFIX_QNAME =
+            QName.create(PRODUCERS_QNAME, "key-prefix").intern();
+    public static final QName PRODUCER_PREFIX_QNAME =
+            QName.create(PRODUCERS_QNAME, "prefix").intern();
+    public static final QName PRODUCER_PREFIXES_QNAME =
+            QName.create(PRODUCERS_QNAME, "prefixes").intern();
+    public static final QName PRODUCER_MEMBER_QNAME =
+            QName.create(PRODUCERS_QNAME, "member").intern();
+
+    public static final YangInstanceIdentifier PRODUCERS_PATH =
+            YangInstanceIdentifier.of(PRODUCERS_QNAME).toOptimized();
+    public static final YangInstanceIdentifier PRODUCER_LIST_PATH =
+            PRODUCERS_PATH.node(PRODUCER_QNAME).toOptimized();
 
     public static ShardIdentifier getShardIdentifier(final MemberName memberName, final DOMDataTreeIdentifier prefix) {
         final String type;

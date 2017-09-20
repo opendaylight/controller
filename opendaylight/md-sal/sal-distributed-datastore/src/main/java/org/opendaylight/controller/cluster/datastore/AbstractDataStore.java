@@ -340,4 +340,19 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         return (ListenerRegistration<L>) proxy;
     }
 
+    @SuppressWarnings("unchecked")
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProducerStatusListener(
+            final YangInstanceIdentifier internalPath,
+            final DOMDataTreeChangeListener delegate) {
+        Preconditions.checkNotNull(delegate, "delegate should not be null");
+
+        LOG.debug("Registering a listener for the producer status shard: {}", internalPath);
+
+        final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy =
+                new DataTreeChangeListenerProxy<>(actorContext, delegate, internalPath);
+        proxy.init(ClusterUtils.PRODUCER_STATUS_SHARD_ID);
+
+        return (ListenerRegistration<L>) proxy;
+    }
+
 }

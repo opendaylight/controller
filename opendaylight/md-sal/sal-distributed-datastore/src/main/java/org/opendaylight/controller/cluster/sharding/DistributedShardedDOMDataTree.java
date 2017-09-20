@@ -50,6 +50,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -82,6 +83,7 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree;
 import org.opendaylight.mdsal.dom.spi.DOMDataTreePrefixTable;
 import org.opendaylight.mdsal.dom.spi.DOMDataTreePrefixTableEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.prefix.shard.configuration.rev170110.PrefixShards;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.producer.status.rev170718.Producers;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -156,6 +158,9 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         LOG.debug("{} - Starting prefix configuration shards", memberName);
         createPrefixConfigShard(distributedConfigDatastore);
         createPrefixConfigShard(distributedOperDatastore);
+
+        createProducerShard(distributedConfigDatastore);
+        createProducerShard(distributedOperDatastore);
     }
 
     private static void createPrefixConfigShard(final AbstractDataStore dataStore) {
@@ -166,6 +171,23 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                         "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID, ModuleShardStrategy.NAME,
                         memberNames),
                         Shard.builder(), dataStore.getActorContext().getDatastoreContext());
+
+        dataStore.getActorContext().getShardManager().tell(createShardMessage, noSender());
+    }
+
+    private static void createProducerShard(final AbstractDataStore dataStore) {
+        Configuration configuration = dataStore.getActorContext().getConfiguration();
+        Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
+
+        final DatastoreContext context =
+                DatastoreContext.newBuilderFrom(
+                        dataStore.getActorContext().getDatastoreContext()).persistent(false).build();
+
+        final CreateShard createShardMessage =
+                new CreateShard(new ModuleShardConfiguration(Producers.QNAME.getNamespace(),
+                        "producer-status", ClusterUtils.PRODUCER_STATUS_SHARD_ID, ModuleShardStrategy.NAME,
+                        memberNames),
+                        Shard.builder().datastoreContext(context), context);
 
         dataStore.getActorContext().getShardManager().tell(createShardMessage, noSender());
     }
@@ -291,20 +313,20 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         LOG.debug("{} - Creating producer for {}", memberName, subtrees);
         final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(subtrees);
 
-        final Object response = distributedConfigDatastore.getActorContext()
-                .executeOperation(shardedDataTreeActor, new ProducerCreated(subtrees));
-        if (response == null) {
-            LOG.debug("{} - Received success from remote nodes, creating producer:{}", memberName, subtrees);
-            return new ProxyProducer(producer, subtrees, shardedDataTreeActor,
-                    distributedConfigDatastore.getActorContext(), shards);
-        }
-
-        closeProducer(producer);
-
-        if (response instanceof Throwable) {
-            Throwables.throwIfUnchecked((Throwable) response);
-            throw new RuntimeException((Throwable) response);
-        }
+//        final Object response = distributedConfigDatastore.getActorContext()
+//                .executeOperation(shardedDataTreeActor, new ProducerCreated(subtrees));
+//        if (response == null) {
+//            LOG.debug("{} - Received success from remote nodes, creating producer:{}", memberName, subtrees);
+//            return new ProxyProducer(producer, subtrees, shardedDataTreeActor,
+//                    distributedConfigDatastore.getActorContext(), shards);
+//        }
+//
+//        closeProducer(producer);
+//
+//        if (response instanceof Throwable) {
+//            Throwables.throwIfUnchecked((Throwable) response);
+//            throw new RuntimeException((Throwable) response);
+//        }
         throw new RuntimeException("Unexpected response to create producer received." + response);
     }
 
