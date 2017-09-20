@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_96116954",
+        "filename": "features/mdsal/odl-mdsal-remoterpc-connector/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-20T13:43:55Z",
+      "side": 1,
+      "message": "The artifactId and groupId are wrong here too.",
+      "revId": "5e8d875d46666d72f1667bf6a257625d5c5ba299",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
