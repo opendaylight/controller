@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_bb573857",
+        "filename": "features/mdsal/odl-mdsal-broker-local/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-09-20T12:48:14Z",
+      "side": 1,
+      "message": "I expect validate-autorelease to fail on this, until it is taught there is a new parent to add paths for.",
+      "range": {
+        "startLine": 18,
+        "startChar": 21,
+        "endLine": 18,
+        "endChar": 23
+      },
+      "revId": "b9ae6559f7702335d67c5971be9db75b2287e0c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
