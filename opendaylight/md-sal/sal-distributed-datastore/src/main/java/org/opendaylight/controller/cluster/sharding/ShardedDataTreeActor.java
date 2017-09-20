@@ -17,7 +17,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.actor.Status.Success;
-import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.MemberExited;
 import akka.cluster.ClusterEvent.MemberRemoved;
@@ -98,11 +97,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private final int lookupTaskMaxRetries;
 
     private final Map<DOMDataTreeIdentifier, ActorProducerRegistration> idToProducer = new HashMap<>();
-    private final Map<DOMDataTreeIdentifier, ShardFrontendRegistration> idToShardRegistration = new HashMap<>();
-
-    private final Cluster cluster;
-
-    private final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
 
     ShardedDataTreeActor(final ShardedDataTreeActorCreator builder) {
         LOG.debug("Creating ShardedDataTreeActor on {}", builder.getClusterWrapper().getCurrentMemberName());
@@ -118,7 +112,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 DistributedShardedDOMDataTree.ACTOR_ID, clusterWrapper.getCurrentMemberName());
 
         clusterWrapper.subscribeToMemberEvents(self());
-        cluster = Cluster.get(actorSystem);
     }
 
     @Override

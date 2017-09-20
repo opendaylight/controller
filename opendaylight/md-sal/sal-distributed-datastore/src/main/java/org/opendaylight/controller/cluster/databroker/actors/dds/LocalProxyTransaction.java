@@ -69,7 +69,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         return identifier;
     }
 
-    abstract @Nonnull DataTreeSnapshot readOnlyView();
+    @Nonnull
+    abstract DataTreeSnapshot readOnlyView();
 
     abstract void applyForwardedModifyTransactionRequest(ModifyTransactionRequest request,
             @Nullable Consumer<Response<?, ?>> callback);
@@ -103,7 +104,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     private boolean handleReadRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback) {
+            @Nullable final Consumer<Response<?, ?>> callback) {
         // Note we delay completion of read requests to limit the scope at which the client can run, as they have
         // listeners, which we do not want to execute while we are reconnecting.
         if (request instanceof ReadTransactionRequest) {
@@ -133,7 +134,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void handleReplayedRemoteRequest(final TransactionRequest<?> request,
-            final @Nullable Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+            @Nullable final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         if (request instanceof ModifyTransactionRequest) {
             replayModifyTransactionRequest((ModifyTransactionRequest) request, callback, enqueuedTicks);
         } else if (handleReadRequest(request, callback)) {
@@ -206,7 +207,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof ModifyTransactionRequest) {
             successor.handleForwardedRequest(request, callback);
         } else {
-            throw new IllegalArgumentException("Unhandled request" + request);
+            throwUnhandledRequest(request);
         }
     }
 
@@ -218,10 +219,14 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof TransactionPurgeRequest) {
             successor.enqueuePurge(callback);
         } else {
-            throw new IllegalArgumentException("Unhandled request" + request);
+            throwUnhandledRequest(request);
         }
 
         LOG.debug("Forwarded request {} to successor {}", request, successor);
+    }
+
+    private static void throwUnhandledRequest(final TransactionRequest<?> request) {
+        throw new IllegalArgumentException("Unhandled request" + request);
     }
 
     void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {

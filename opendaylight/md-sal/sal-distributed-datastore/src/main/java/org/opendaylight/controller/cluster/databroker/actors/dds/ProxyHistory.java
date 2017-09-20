@@ -127,10 +127,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void onTransactionCompleted(final AbstractProxyTransaction tx) {
             Verify.verify(tx instanceof LocalProxyTransaction);
-            if (tx instanceof LocalReadWriteProxyTransaction) {
-                if (LAST_SEALED_UPDATER.compareAndSet(this, (LocalReadWriteProxyTransaction) tx, null)) {
-                    LOG.debug("Completed last sealed transaction {}", tx);
-                }
+            if (tx instanceof LocalReadWriteProxyTransaction
+                    && LAST_SEALED_UPDATER.compareAndSet(this, (LocalReadWriteProxyTransaction) tx, null)) {
+                LOG.debug("Completed last sealed transaction {}", tx);
             }
         }
 

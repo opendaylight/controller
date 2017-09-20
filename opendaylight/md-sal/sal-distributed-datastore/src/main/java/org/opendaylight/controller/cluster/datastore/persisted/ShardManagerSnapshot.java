@@ -63,19 +63,19 @@ public class ShardManagerSnapshot implements Serializable {
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             int size = in.readInt();
-            List<String> shardList = new ArrayList<>(size);
+            List<String> localShardList = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                shardList.add((String) in.readObject());
+                localShardList.add((String) in.readObject());
             }
 
             size = in.readInt();
-            Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration = new HashMap<>(size);
+            Map<DOMDataTreeIdentifier, PrefixShardConfiguration> localPrefixShardConfiguration = new HashMap<>(size);
             for (int i = 0; i < size; i++) {
-                prefixShardConfiguration.put((DOMDataTreeIdentifier) in.readObject(),
+                localPrefixShardConfiguration.put((DOMDataTreeIdentifier) in.readObject(),
                         (PrefixShardConfiguration) in.readObject());
             }
 
-            snapshot = new ShardManagerSnapshot(shardList, prefixShardConfiguration);
+            snapshot = new ShardManagerSnapshot(localShardList, localPrefixShardConfiguration);
         }
 
         private Object readResolve() {

@@ -88,7 +88,7 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
         DefaultShardDataTreeChangeListenerPublisher publisher =
                 new DefaultShardDataTreeChangeListenerPublisher(logContext);
         publisher.logContext = logContext;
-        publisher.registerTreeChangeListener(treeId, listener, Optional.absent(), noop -> { });
+        publisher.registerTreeChangeListener(treeId, listener, Optional.absent(), noop -> { /* NOOP */ });
         publisher.publishChanges(state);
     }
 

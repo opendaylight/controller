@@ -23,7 +23,8 @@ import scala.concurrent.Future;
 public class PrimaryShardInfoFutureCache {
     private final Cache<String, Future<PrimaryShardInfo>> primaryShardInfoCache = CacheBuilder.newBuilder().build();
 
-    public @Nullable Future<PrimaryShardInfo> getIfPresent(@Nonnull String shardName) {
+    @Nullable
+    public Future<PrimaryShardInfo> getIfPresent(@Nonnull String shardName) {
         return primaryShardInfoCache.getIfPresent(shardName);
     }
 

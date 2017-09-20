@@ -247,7 +247,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY:
                 throw new IllegalStateException("Attempted to preCommit in stage " + ready.stage);
             default:
-                throw new IllegalStateException("Unhandled commit stage " + ready.stage);
+                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -306,7 +306,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY:
                 throw new IllegalStateException("Attempted to doCommit in stage " + ready.stage);
             default:
-                throw new IllegalStateException("Unhandled commit stage " + ready.stage);
+                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -395,7 +395,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case PRE_COMMIT_PENDING:
                 throw new IllegalStateException("Attempted to canCommit in stage " + ready.stage);
             default:
-                throw new IllegalStateException("Unhandled commit stage " + ready.stage);
+                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -442,7 +442,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 });
                 break;
             default:
-                throw new IllegalStateException("Unhandled commit stage " + ready.stage);
+                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -558,7 +558,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
-    private @Nullable TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
+    @Nullable
+    private TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         // We need to examine the persistence protocol first to see if this is an idempotent request. If there is no
         // protocol, there is nothing for us to do.
@@ -635,5 +636,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         Preconditions.checkState(state instanceof Sealed, "%s expect to be sealed, is in state %s", getIdentifier(),
             state);
         return ((Sealed) state).sealedModification;
+    }
+
+    private static void throwUnhandledCommitStage(final Ready ready) {
+        throw new IllegalStateException("Unhandled commit stage " + ready.stage);
     }
 }

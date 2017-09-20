@@ -43,6 +43,9 @@ public class ClusterUtils {
     public static final YangInstanceIdentifier SHARD_LIST_PATH =
             PREFIX_SHARDS_PATH.node(SHARD_LIST_QNAME).toOptimized();
 
+    private ClusterUtils() {
+    }
+
     public static ShardIdentifier getShardIdentifier(final MemberName memberName, final DOMDataTreeIdentifier prefix) {
         final String type;
         switch (prefix.getDatastoreType()) {
