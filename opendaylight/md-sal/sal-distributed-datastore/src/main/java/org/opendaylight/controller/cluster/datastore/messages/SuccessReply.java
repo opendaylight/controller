@@ -18,4 +18,7 @@ public class SuccessReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final SuccessReply INSTANCE = new SuccessReply();
+
+    private SuccessReply() {
+    }
 }

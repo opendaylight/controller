@@ -57,9 +57,6 @@ public class DistributedShardChangePublisher
     private final AbstractDataStore distributedDataStore;
     private final YangInstanceIdentifier shardPath;
 
-    // This will be useful for signaling back pressure
-    private final DataStoreClient client;
-
     private final Map<DOMDataTreeIdentifier, ChildShardContext> childShards;
 
     @GuardedBy("this")
@@ -69,7 +66,6 @@ public class DistributedShardChangePublisher
                                            final AbstractDataStore distributedDataStore,
                                            final DOMDataTreeIdentifier prefix,
                                            final Map<DOMDataTreeIdentifier, ChildShardContext> childShards) {
-        this.client = client;
         this.distributedDataStore = distributedDataStore;
         // TODO keeping the whole dataTree thats contained in subshards doesn't seem like a good idea
         // maybe the whole listener logic would be better in the backend shards where we have direct access to the
@@ -306,7 +302,7 @@ public class DistributedShardChangePublisher
                 // data tree yet. Postpone processing of these changes till we
                 // receive changes from current shard.
                 LOG.debug("Validation for modification built from subshard {} changes {} failed, current data tree {}.",
-                        pathFromRoot, changes, dataTree);
+                        pathFromRoot, changes, dataTree, e);
                 stashedDataTreeCandidates.addAll(newCandidates);
             }
         }

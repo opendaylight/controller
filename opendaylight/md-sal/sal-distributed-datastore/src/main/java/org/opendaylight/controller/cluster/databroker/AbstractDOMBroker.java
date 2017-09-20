@@ -54,9 +54,7 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
                 @Override
                 public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
                         final DOMDataTreeIdentifier treeId, final L listener) {
-                    DOMStore store = getTxFactories().get(treeId.getDatastoreType());
-                    checkState(store != null, "Requested logical data store is not available.");
-
+                    DOMStore store = getDOMStore(treeId.getDatastoreType());
                     return ((DOMStoreTreeChangePublisher) store).registerTreeChangeListener(
                             treeId.getRootIdentifier(), listener);
                 }
@@ -68,9 +66,7 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
                 @Override
                 public <T extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<T> registerCommitCohort(
                         org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier path, T cohort) {
-                    DOMStore store = getTxFactories().get(toLegacy(path.getDatastoreType()));
-                    checkState(store != null, "Requested logical data store is not available.");
-
+                    DOMStore store = getDOMStore(toLegacy(path.getDatastoreType()));
                     return ((org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry) store)
                             .registerCommitCohort(path, cohort);
                 }
@@ -129,8 +125,7 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
     public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
             final YangInstanceIdentifier path, final DOMDataChangeListener listener,
             final DataChangeScope triggeringScope) {
-        DOMStore potentialStore = getTxFactories().get(store);
-        checkState(potentialStore != null, "Requested logical data store is not available.");
+        DOMStore potentialStore = getDOMStore(store);
         return potentialStore.registerChangeListener(path, listener, triggeringScope);
     }
 
@@ -153,5 +148,11 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
         LOG.debug("Transaction chain {} created with listener {}, backing store chains {}", chainId, listener,
                 backingChains);
         return new DOMBrokerTransactionChain(chainId, backingChains, this, listener);
+    }
+
+    private DOMStore getDOMStore(final LogicalDatastoreType type) {
+        DOMStore store = getTxFactories().get(type);
+        checkState(store != null, "Requested logical data store is not available.");
+        return store;
     }
 }
