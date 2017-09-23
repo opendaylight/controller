@@ -164,7 +164,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *
      *          public void onFailure( Throwable t ) {
      *              if( t instanceof OptimisticLockFailedException ) {
-     *                  if( ( tries - 1 ) &lt; 0 ) {
+     *                  if( ( tries - 1 ) &gt; 0 ) {
      *                      // do retry
      *                      doWrite( tries - 1 );
      *                  } else {
