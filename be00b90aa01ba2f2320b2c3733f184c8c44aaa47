@@ -50,6 +50,24 @@
       "revId": "be00b90aa01ba2f2320b2c3733f184c8c44aaa47",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_70aca48c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextConfigAdminOverlay.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-09-27T11:19:26Z",
+      "side": 1,
+      "message": "Robert likes to log to trace/debug agreeing with squid on this. I see both points. Disabling at least leaves the code as it  was.",
+      "parentUuid": "ba1f61a0_02d9a2f2",
+      "revId": "be00b90aa01ba2f2320b2c3733f184c8c44aaa47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
