@@ -1,0 +1,7 @@
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Wed, 27 Sep 2017 08:21:39 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/62670
+Project: controller
+Branch: refs/heads/stable/nitrogen
