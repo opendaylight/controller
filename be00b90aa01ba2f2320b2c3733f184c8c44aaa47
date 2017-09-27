@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1f61a0_42df1ad6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-27T06:26:03Z",
+      "side": 1,
+      "message": "I guess this one is the reason for moving @Nullable etc. around, which seems a shame since it makes the code less readable IMO — perhaps we should change the Sonar setting instead (if exceptions can be made for @Nullable, @NonNull \u0026 co. specifically).\n\n(No need to change anything in this PR, just a note for discussion.)",
+      "revId": "be00b90aa01ba2f2320b2c3733f184c8c44aaa47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_62e4deab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractDataStoreClientBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-27T06:26:03Z",
+      "side": 1,
+      "message": "This can be reduced further to\n\n    return previousEntries -\u003e finishReconnect(newConn, stamp, cohorts, previousEntries);",
+      "revId": "be00b90aa01ba2f2320b2c3733f184c8c44aaa47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba1f61a0_02d9a2f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContextConfigAdminOverlay.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-09-27T06:26:03Z",
+      "side": 1,
+      "message": "Disable S1166 for this one instead? I’m loath to log stuff that should be ignored (even just at debug level — it means more support questions...).",
+      "revId": "be00b90aa01ba2f2320b2c3733f184c8c44aaa47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
