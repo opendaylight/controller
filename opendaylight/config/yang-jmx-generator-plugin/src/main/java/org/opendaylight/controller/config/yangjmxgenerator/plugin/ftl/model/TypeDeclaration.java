@@ -17,7 +17,6 @@ public class TypeDeclaration {
 
     public TypeDeclaration(String type, String name, List<String> extended,
             List<String> implemented, boolean isAbstract, boolean isFinal) {
-        super();
         this.type = type;
         this.name = name;
         this.extended = extended;

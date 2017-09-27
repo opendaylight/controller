@@ -56,7 +56,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     protected DataNormalizationOperation(final T identifier, final SchemaNode schema) {
-        super();
         this.identifier = identifier;
         if(schema instanceof DataSchemaNode) {
             this.dataSchemaNode = Optional.of((DataSchemaNode) schema);
@@ -328,7 +327,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     private static final class AugmentationNormalization extends DataContainerNormalizationOperation<AugmentationIdentifier> {
 
         public AugmentationNormalization(final AugmentationSchema augmentation, final DataNodeContainer schema) {
-            //super();
             super(augmentationIdentifierFrom(augmentation), augmentationProxy(augmentation,schema),null);
         }
 

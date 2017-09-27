@@ -55,7 +55,6 @@ public class RpcErrors {
          */
         protected RpcErrorTO(String applicationTag, String tag, String info,
                 ErrorSeverity severity, String message, ErrorType errorType, Throwable cause) {
-            super();
             this.applicationTag = applicationTag;
             this.tag = tag;
             this.info = info;

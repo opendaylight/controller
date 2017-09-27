@@ -2389,7 +2389,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         private final int snapshotChunkSize;
 
         MockConfigParamsImpl(final long electionTimeOutIntervalMillis, final int snapshotChunkSize) {
-            super();
             this.electionTimeOutIntervalMillis = electionTimeOutIntervalMillis;
             this.snapshotChunkSize = snapshotChunkSize;
         }

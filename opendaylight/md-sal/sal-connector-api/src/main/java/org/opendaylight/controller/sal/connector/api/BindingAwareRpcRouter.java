@@ -23,7 +23,6 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
         private final byte[] payload;
 
         public BindingAwareRequest(BindingAwareRouteIdentifier routingInformation, byte[] payload) {
-            super();
             this.routingInformation = routingInformation;
             this.payload = payload;
         }
@@ -45,7 +44,6 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
         private final String content;
 
         public BindingAwareRouteIdentifier(String type, String route, String content) {
-            super();
             this.type = type;
             this.route = route;
             this.content = content;

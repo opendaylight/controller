@@ -17,7 +17,6 @@ public final  class RpcContextIdentifier implements Immutable{
     public final Class<? extends BaseIdentity> routingContext;
 
     private RpcContextIdentifier(Class<? extends RpcService> rpcService, Class<? extends BaseIdentity> routingContext) {
-        super();
         this.rpcService = rpcService;
         this.routingContext = routingContext;
     }

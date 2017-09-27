@@ -40,7 +40,6 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
     private final BindingToNormalizedNodeCodec codec;
 
     public BindingDOMRpcServiceAdapter(final DOMRpcService domService, final BindingToNormalizedNodeCodec codec) {
-        super();
         this.domService = domService;
         this.codec = codec;
     }

@@ -34,7 +34,6 @@ public class LLDP extends Packet {
      * Default constructor that creates the tlvList LinkedHashMap
      */
     public LLDP() {
-        super();
         init();
     }
 

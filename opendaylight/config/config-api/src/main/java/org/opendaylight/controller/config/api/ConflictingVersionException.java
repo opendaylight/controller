@@ -18,7 +18,6 @@ public class ConflictingVersionException extends Exception {
     private static final long serialVersionUID = 1L;
 
     public ConflictingVersionException() {
-        super();
     }
 
     public ConflictingVersionException(final String message, final Throwable cause) {

@@ -16,7 +16,6 @@ public class NioEventLoopGroupCloseable extends NioEventLoopGroup implements Aut
     }
 
     private NioEventLoopGroupCloseable() {
-        super();
     }
 
     @Override

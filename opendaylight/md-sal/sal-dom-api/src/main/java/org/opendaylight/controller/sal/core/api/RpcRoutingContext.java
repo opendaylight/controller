@@ -24,7 +24,6 @@ public class RpcRoutingContext implements Immutable, Serializable {
 
 
     private RpcRoutingContext(QName context, QName rpc) {
-        super();
         this.context = context;
         this.rpc = rpc;
     }

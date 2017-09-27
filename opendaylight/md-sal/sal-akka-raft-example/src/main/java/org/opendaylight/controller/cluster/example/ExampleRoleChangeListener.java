@@ -45,7 +45,6 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     private static final String[] shardsToMonitor = new String[] {"example"};
 
     public ExampleRoleChangeListener(String memberName) {
-        super();
         scheduleRegistrationListener(schedulerDuration);
         this.memberName = memberName;
         populateRegistry(memberName);

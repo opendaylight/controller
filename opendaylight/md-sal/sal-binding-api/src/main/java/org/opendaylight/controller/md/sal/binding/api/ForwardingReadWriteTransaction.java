@@ -29,7 +29,6 @@ public class ForwardingReadWriteTransaction extends ForwardingObject implements 
     private final ReadWriteTransaction delegate;
 
     protected ForwardingReadWriteTransaction(ReadWriteTransaction delegate) {
-        super();
         this.delegate = delegate;
     }
 

@@ -30,7 +30,6 @@ public final class LazySerializedDOMNotification implements DOMNotification {
     private ContainerNode domBody;
 
     private LazySerializedDOMNotification(final BindingNormalizedNodeSerializer codec, final Notification data, final SchemaPath type) {
-        super();
         this.codec = codec;
         this.data = data;
         this.type = type;

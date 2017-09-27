@@ -31,9 +31,8 @@ public class QueuedNotificationManagerStats {
     private final List<ListenerNotificationQueueStats> currentListenerQueueStats;
 
     @ConstructorProperties({"maxListenerQueueSize","currentListenerQueueStats"})
-    public QueuedNotificationManagerStats( int maxListenerQueueSize,
-            List<ListenerNotificationQueueStats> currentListenerQueueStats ) {
-        super();
+    public QueuedNotificationManagerStats(int maxListenerQueueSize,
+            List<ListenerNotificationQueueStats> currentListenerQueueStats) {
         this.maxListenerQueueSize = maxListenerQueueSize;
         this.currentListenerQueueStats = currentListenerQueueStats;
     }

@@ -16,7 +16,6 @@ public class AbstractEntry {
     private String yangModuleLocalname;
 
     public AbstractEntry() {
-        super();
     }
 
     protected void setYangModuleName(String name) {

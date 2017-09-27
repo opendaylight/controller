@@ -30,7 +30,6 @@ public class SchemaContextProviders {
         private final SchemaService service;
 
         public SchemaServiceAdapter(final SchemaService service) {
-            super();
             this.service = service;
         }
 

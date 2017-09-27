@@ -28,7 +28,6 @@ public class ForwardingWriteTransaction extends ForwardingObject implements Writ
     private final WriteTransaction delegate;
 
     protected ForwardingWriteTransaction(WriteTransaction delegate) {
-        super();
         this.delegate = delegate;
     }
 

@@ -24,7 +24,6 @@ public class CloseTrackedRegistryReportEntry<T extends CloseTracked<T>> {
 
     public CloseTrackedRegistryReportEntry(CloseTracked<T> exampleCloseTracked, long numberAddedNotRemoved,
             List<StackTraceElement> stackTraceElements) {
-        super();
         this.exampleCloseTracked = requireNonNull(exampleCloseTracked, "closeTracked");
         this.numberAddedNotRemoved = requireNonNull(numberAddedNotRemoved, "numberAddedNotRemoved");
         this.stackTraceElements = requireNonNull(stackTraceElements, "stackTraceElements");

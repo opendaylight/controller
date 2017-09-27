@@ -15,7 +15,6 @@ public class Rpcs {
     private final Map<String, Map<String, ModuleRpcs>> mappedRpcs;
 
     public Rpcs(Map<String, Map<String, ModuleRpcs>> mappedRpcs) {
-        super();
         this.mappedRpcs = mappedRpcs;
     }
 

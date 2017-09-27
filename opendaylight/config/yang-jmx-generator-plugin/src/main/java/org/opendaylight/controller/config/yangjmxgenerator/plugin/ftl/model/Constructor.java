@@ -13,7 +13,6 @@ public class Constructor {
     private final boolean isPublic;
 
     public Constructor(String typeName, String body, boolean isPublic) {
-        super();
         this.typeName = typeName;
         this.body = body;
         this.isPublic = isPublic;

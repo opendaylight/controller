@@ -11,7 +11,6 @@ public class Header {
     private final String yangModuleName, yangModuleLocalName;
 
     public Header(String yangModuleName, String yangModuleLocalName) {
-        super();
         this.yangModuleName = yangModuleName;
         this.yangModuleLocalName = yangModuleLocalName;
     }

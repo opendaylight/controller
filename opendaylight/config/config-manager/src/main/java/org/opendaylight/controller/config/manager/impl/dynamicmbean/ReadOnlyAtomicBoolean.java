@@ -17,7 +17,6 @@ public interface ReadOnlyAtomicBoolean {
         private final AtomicBoolean atomicBoolean;
 
         public ReadOnlyAtomicBooleanImpl(final AtomicBoolean atomicBoolean) {
-            super();
             this.atomicBoolean = atomicBoolean;
         }
 

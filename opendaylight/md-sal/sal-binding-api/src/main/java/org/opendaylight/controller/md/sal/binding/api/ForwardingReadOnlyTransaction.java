@@ -25,7 +25,6 @@ public class ForwardingReadOnlyTransaction extends ForwardingObject implements R
     private final ReadOnlyTransaction delegate;
 
     protected ForwardingReadOnlyTransaction(ReadOnlyTransaction delegate) {
-        super();
         this.delegate = delegate;
     }
 

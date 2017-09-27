@@ -44,7 +44,6 @@ public class Ethernet extends Packet {
      * Default constructor that creates and sets the HashMap
      */
     public Ethernet() {
-        super();
         fieldValues = new HashMap<>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
