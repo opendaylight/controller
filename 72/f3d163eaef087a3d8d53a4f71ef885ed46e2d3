@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Tom Pantelis <tompantelis@gmail.com>
+Submitted-at: Wed, 27 Sep 2017 03:50:33 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/63231
+Project: controller
+Branch: refs/heads/stable/nitrogen
