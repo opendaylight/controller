@@ -13,18 +13,9 @@ module producer-status {
 
     container producers {
         list producer {
-            key key-prefix;
-            leaf key-prefix {
+            key prefix;
+            leaf prefix {
                 type instance-identifier;
-                description "One of the prefixes that the producer has access to. All the prefixes should be present
-                            as elements of the list and their life cycle must be managed as one entity.";
-            }
-
-            container prefixes {
-                leaf-list prefix {
-                    type instance-identifier;
-                    description "All the prefixes that the producer has write access to.";
-                }
             }
 
             leaf member {

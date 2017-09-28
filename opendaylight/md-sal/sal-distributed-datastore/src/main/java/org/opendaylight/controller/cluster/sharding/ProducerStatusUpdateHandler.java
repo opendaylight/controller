@@ -10,16 +10,12 @@ package org.opendaylight.controller.cluster.sharding;
 
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.PRODUCER_KEY_PREFIX_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.PRODUCER_MEMBER_QNAME;
-import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.PRODUCER_PREFIXES_QNAME;
 import static org.opendaylight.controller.cluster.datastore.utils.ClusterUtils.PRODUCER_PREFIX_QNAME;
 
 import akka.actor.ActorRef;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -33,10 +29,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
@@ -63,8 +56,7 @@ public class ProducerStatusUpdateHandler {
 
     public void initListener(final AbstractDataStore dataStore, final LogicalDatastoreType type) {
         registrations.put(type, dataStore.registerShardConfigListener(
-                ClusterUtils.PRODUCER_LIST_PATH,
-                new PrefixedShardConfigUpdateHandler.ShardConfigHandler(memberName, type, handlingActor)));
+                ClusterUtils.PRODUCER_LIST_PATH, new ProducerStatusHandler(memberName, type, handlingActor)));
     }
 
     public void close() {
@@ -147,22 +139,13 @@ public class ProducerStatusUpdateHandler {
                 return;
             }
 
-            final LeafNode<YangInstanceIdentifier> idPrefix =
+            final LeafNode<YangInstanceIdentifier> prefix =
                     (LeafNode<YangInstanceIdentifier>) entryNode.getChild(
-                            new NodeIdentifier(PRODUCER_KEY_PREFIX_QNAME)).get();
-
-            final ContainerNode prefixes =
-                    (ContainerNode) entryNode.getChild(new NodeIdentifier(PRODUCER_PREFIXES_QNAME)).get();
-            final LeafSetNode<YangInstanceIdentifier> prefixList =
-                    (LeafSetNode<YangInstanceIdentifier>) prefixes.getChild(
                             new NodeIdentifier(PRODUCER_PREFIX_QNAME)).get();
 
-            final Set<DOMDataTreeIdentifier> producerPrefixes =
-                    prefixList.getValue().stream().map(leaf -> new DOMDataTreeIdentifier(type, leaf.getValue()))
-                            .collect(Collectors.toSet());
 
             final ProducerCreated producerCreated =
-                    new ProducerCreated(new DOMDataTreeIdentifier(type, idPrefix.getValue()), producerPrefixes);
+                    new ProducerCreated(Collections.singleton(new DOMDataTreeIdentifier(type, prefix.getValue())));
 
             // assemble and send to the actor
 
@@ -182,23 +165,16 @@ public class ProducerStatusUpdateHandler {
                 return;
             }
 
-            final LeafNode<YangInstanceIdentifier> idPrefix =
+            final LeafNode<YangInstanceIdentifier> prefix =
                     (LeafNode<YangInstanceIdentifier>) entryNode.getChild(
                             new NodeIdentifier(PRODUCER_KEY_PREFIX_QNAME)).get();
 
-            final ContainerNode prefixes =
-                    (ContainerNode) entryNode.getChild(new NodeIdentifier(PRODUCER_PREFIXES_QNAME)).get();
-            final LeafSetNode<YangInstanceIdentifier> prefixList =
-                    (LeafSetNode<YangInstanceIdentifier>) prefixes.getChild(
-                            new NodeIdentifier(PRODUCER_PREFIX_QNAME)).get();
 
-            final Set<DOMDataTreeIdentifier> producerPrefixes =
-                    prefixList.getValue().stream().map(leaf -> new DOMDataTreeIdentifier(type, leaf.getValue()))
-                            .collect(Collectors.toSet());
+            final ProducerRemoved producerRemoved =
+                    new ProducerRemoved(Collections.singleton(new DOMDataTreeIdentifier(type, prefix.getValue())));
 
-            new ProducerRemoved(producerPrefixes);
+            handlingActor.tell(producerRemoved, ActorRef.noSender());
 
-            // assemble and send to the actor
         }
 
         private void resolveDelete(final DataTreeCandidateNode rootNode) {

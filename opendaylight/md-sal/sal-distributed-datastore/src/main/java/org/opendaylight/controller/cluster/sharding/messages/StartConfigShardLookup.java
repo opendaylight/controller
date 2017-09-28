@@ -11,23 +11,32 @@ package org.opendaylight.controller.cluster.sharding.messages;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 
 /**
- * Message that should be sent to ShardedDataTreeActor when the lookup of the prefix config shard should begin.
+ * Message that should be sent to ShardedDataTreeActor when the lookup one of one of the internal shards used
+ * for tracking the state of shards and producers.
  * Replied to with Succes once the shard has a leader.
  */
 public class StartConfigShardLookup {
 
-    private LogicalDatastoreType type;
+    private final LogicalDatastoreType type;
+    private final String shardName;
 
-    public StartConfigShardLookup(final LogicalDatastoreType type) {
+    public StartConfigShardLookup(final LogicalDatastoreType type, final String shardName) {
         this.type = type;
+        this.shardName = shardName;
     }
 
     public LogicalDatastoreType getType() {
         return type;
     }
 
+    public String getShardName() {
+        return shardName;
+    }
+
     @Override
     public String toString() {
-        return "StartConfigShardLookup{type=" + type + '}';
+        return "StartConfigShardLookup{"
+                + "type=" + type
+                + ", shardName='" + shardName + '\'' + '}';
     }
 }

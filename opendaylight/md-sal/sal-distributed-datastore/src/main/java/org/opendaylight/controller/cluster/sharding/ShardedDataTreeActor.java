@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.sharding;
 import static akka.actor.ActorRef.noSender;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -31,13 +30,10 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
@@ -69,7 +65,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -224,34 +219,13 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private void onProducerCreated(final ProducerCreated message) {
         LOG.debug("Received ProducerCreated: {}", message);
 
-        // fastpath if we have no peers
-        if (resolver.getShardingServicePeerActorAddresses().isEmpty()) {
-            getSender().tell(new Status.Success(null), noSender());
-        }
+        // this is purely for the replicated producers which should only be distibuted via single subtree.
+        Preconditions.checkArgument(message.getSubtrees().size() == 1,
+                "1 Subtree is enforced in the distributed producers.");
+        final DOMDataTreeProducer producer = shardingService.localCreateProducer(message.getSubtrees());
 
-        final ActorRef sender = getSender();
-        final Collection<DOMDataTreeIdentifier> subtrees = message.getSubtrees();
-
-        final List<CompletableFuture<Object>> futures = new ArrayList<>();
-
-        for (final String address : resolver.getShardingServicePeerActorAddresses()) {
-            final ActorSelection actorSelection = actorSystem.actorSelection(address);
-            futures.add(
-                    FutureConverters.toJava(
-                            actorContext.executeOperationAsync(
-                                    actorSelection, new NotifyProducerCreated(subtrees), DEFAULT_ASK_TIMEOUT))
-                    .toCompletableFuture());
-        }
-
-        final CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
-                futures.toArray(new CompletableFuture[futures.size()]));
-
-        combinedFuture
-                .thenRun(() -> sender.tell(new Success(null), noSender()))
-                .exceptionally(throwable -> {
-                    sender.tell(new Status.Failure(throwable), self());
-                    return null;
-                });
+        final ActorProducerRegistration reg = new ActorProducerRegistration(producer, message.getSubtrees());
+        idToProducer.put(message.getSubtrees().iterator().next(), reg);
     }
 
     private void onNotifyProducerCreated(final NotifyProducerCreated message) {
@@ -272,28 +246,13 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private void onProducerRemoved(final ProducerRemoved message) {
         LOG.debug("Received ProducerRemoved: {}", message);
 
-        final List<CompletableFuture<Object>> futures = new ArrayList<>();
-
-        for (final String address : resolver.getShardingServicePeerActorAddresses()) {
-            final ActorSelection selection = actorSystem.actorSelection(address);
-
-            futures.add(FutureConverters.toJava(
-                    actorContext.executeOperationAsync(selection, new NotifyProducerRemoved(message.getSubtrees())))
-                    .toCompletableFuture());
-        }
-
-        final CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
-                futures.toArray(new CompletableFuture[futures.size()]));
-
-        final ActorRef respondTo = getSender();
-
-        combinedFuture
-                .thenRun(() -> respondTo.tell(new Status.Success(null), self()))
-                .exceptionally(e -> {
-                    respondTo.tell(new Status.Failure(null), self());
-                    return null;
-                });
-
+        message.getSubtrees().forEach(subtree -> {
+            try {
+                idToProducer.get(subtree).close();
+            } catch (DOMDataTreeProducerException e) {
+                LOG.error("Unable to close producer.", e);
+            }
+        });
     }
 
     private void onNotifyProducerRemoved(final NotifyProducerRemoved message) {
@@ -657,13 +616,15 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * Task for handling the lookup of the backend for the configuration shard.
+     * Task for handling the lookup of the backend for a shard that exists only on the backend which are only used
+     * internaly for state tracking.
      */
     private static class ConfigShardLookupTask extends LookupTask {
 
         private final ActorSystem system;
         private final ActorRef replyTo;
         private final ActorContext context;
+        private final StartConfigShardLookup message;
 
         ConfigShardLookupTask(final ActorSystem system,
                               final ActorRef replyTo,
@@ -674,6 +635,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             this.system = system;
             this.replyTo = replyTo;
             this.context = context;
+            this.message = message;
         }
 
         @Override
@@ -686,7 +648,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         @Override
         public void run() {
             final Optional<ActorRef> localShard =
-                    context.findLocalShard(ClusterUtils.PREFIX_CONFIG_SHARD_ID);
+                    context.findLocalShard(message.getShardName());
 
             if (!localShard.isPresent()) {
                 tryReschedule(null);

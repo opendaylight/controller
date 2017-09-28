@@ -54,6 +54,7 @@ public class SchemaContextHelper {
             // for DistributedShardedDOMDataTree tests
             streams.add(getInputStream(ODL_DATASTORE_TEST_YANG));
             streams.add(new FileInputStream("src/main/yang/prefix-shard-configuration.yang"));
+            streams.add(new FileInputStream("src/main/yang/producer-status.yang"));
             return YangParserTestUtils.parseYangStreams(streams);
         } catch (FileNotFoundException | ReactorException e) {
             throw new RuntimeException(e);

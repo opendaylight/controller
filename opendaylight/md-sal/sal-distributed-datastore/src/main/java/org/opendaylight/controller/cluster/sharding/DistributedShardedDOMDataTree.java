@@ -20,7 +20,6 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -64,8 +63,6 @@ import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor.Sharded
 import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
 import org.opendaylight.controller.cluster.sharding.messages.LookupPrefixShard;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemovalLookup;
-import org.opendaylight.controller.cluster.sharding.messages.ProducerCreated;
-import org.opendaylight.controller.cluster.sharding.messages.ProducerRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.StartConfigShardLookup;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
@@ -106,6 +103,9 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private static final int ACTOR_RETRY_DELAY = 100;
     private static final TimeUnit ACTOR_RETRY_TIME_UNIT = TimeUnit.MILLISECONDS;
     private static final int LOOKUP_TASK_MAX_RETRIES = 100;
+
+    private static final Timeout PRODUCER_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
+
     static final FiniteDuration SHARD_FUTURE_TIMEOUT_DURATION =
             new FiniteDuration(LOOKUP_TASK_MAX_RETRIES * LOOKUP_TASK_MAX_RETRIES * 3, TimeUnit.SECONDS);
     static final Timeout SHARD_FUTURE_TIMEOUT = new Timeout(SHARD_FUTURE_TIMEOUT_DURATION);
@@ -124,13 +124,20 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shards =
             DOMDataTreePrefixTable.create();
 
-    private final EnumMap<LogicalDatastoreType, Entry<DataStoreClient, ActorRef>> configurationShardMap =
+    private final EnumMap<LogicalDatastoreType, Entry<DataStoreClient, ActorRef>> prefixConfigShardMap =
             new EnumMap<>(LogicalDatastoreType.class);
 
-    private final EnumMap<LogicalDatastoreType, PrefixedShardConfigWriter> writerMap =
+    private final EnumMap<LogicalDatastoreType, PrefixedShardConfigWriter> prefixConfigWriterMap =
             new EnumMap<>(LogicalDatastoreType.class);
 
-    private final PrefixedShardConfigUpdateHandler updateHandler;
+    private final EnumMap<LogicalDatastoreType, Entry<DataStoreClient, ActorRef>> producerShardMap =
+            new EnumMap<>(LogicalDatastoreType.class);
+
+    private final EnumMap<LogicalDatastoreType, ProducerStatusWriter> producerConfigWriterMap =
+            new EnumMap<>(LogicalDatastoreType.class);
+
+    private final PrefixedShardConfigUpdateHandler shardConfigUpdateHandler;
+    private final ProducerStatusUpdateHandler producerUpdateHandler;
 
     public DistributedShardedDOMDataTree(final ActorSystemProvider actorSystemProvider,
                                          final AbstractDataStore distributedOperDatastore,
@@ -152,7 +159,10 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         this.memberName = distributedConfigDatastore.getActorContext().getCurrentMemberName();
 
-        updateHandler = new PrefixedShardConfigUpdateHandler(shardedDataTreeActor,
+        shardConfigUpdateHandler = new PrefixedShardConfigUpdateHandler(shardedDataTreeActor,
+                distributedConfigDatastore.getActorContext().getCurrentMemberName());
+
+        producerUpdateHandler = new ProducerStatusUpdateHandler(shardedDataTreeActor,
                 distributedConfigDatastore.getActorContext().getCurrentMemberName());
 
         LOG.debug("{} - Starting prefix configuration shards", memberName);
@@ -168,8 +178,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         Collection<MemberName> memberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShardMessage =
                 new CreateShard(new ModuleShardConfiguration(PrefixShards.QNAME.getNamespace(),
-                        "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID, ModuleShardStrategy.NAME,
-                        memberNames),
+                        "prefix-shard-configuration", ClusterUtils.PREFIX_CONFIG_SHARD_ID,
+                        ModuleShardStrategy.NAME, memberNames),
                         Shard.builder(), dataStore.getActorContext().getDatastoreContext());
 
         dataStore.getActorContext().getShardManager().tell(createShardMessage, noSender());
@@ -212,49 +222,18 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
      * This is intended to be invoked by blueprint as initialization method.
      */
     public void init() {
-        // create our writers to the configuration
-        try {
-            LOG.debug("{} - starting config shard lookup.", memberName);
 
-            // We have to wait for prefix config shards to be up and running
-            // so we can create datastore clients for them
-            handleConfigShardLookup().get(SHARD_FUTURE_TIMEOUT_DURATION.length(), SHARD_FUTURE_TIMEOUT_DURATION.unit());
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new IllegalStateException("Prefix config shards not found", e);
-        }
+//        initPrefixConfigShards();
 
-        try {
-            LOG.debug("{}: Prefix configuration shards ready - creating clients", memberName);
-            configurationShardMap.put(LogicalDatastoreType.CONFIGURATION,
-                    createDatastoreClient(ClusterUtils.PREFIX_CONFIG_SHARD_ID,
-                            distributedConfigDatastore.getActorContext()));
-        } catch (final DOMDataTreeShardCreationFailedException e) {
-            throw new IllegalStateException(
-                    "Unable to create datastoreClient for config DS prefix configuration shard.", e);
-        }
+        initConfigShard(ClusterUtils.PREFIX_CONFIG_SHARD_ID, prefixConfigShardMap);
+        initConfigShard(ClusterUtils.PRODUCER_STATUS_SHARD_ID, producerShardMap);
 
-        try {
-            configurationShardMap.put(LogicalDatastoreType.OPERATIONAL,
-                    createDatastoreClient(ClusterUtils.PREFIX_CONFIG_SHARD_ID,
-                            distributedOperDatastore.getActorContext()));
+        //init writer/updateHandlers for prefix config shard
+        prefixConfigWriterMap.put(LogicalDatastoreType.CONFIGURATION, new PrefixedShardConfigWriter(
+                prefixConfigShardMap.get(LogicalDatastoreType.CONFIGURATION).getKey()));
 
-        } catch (final DOMDataTreeShardCreationFailedException e) {
-            throw new IllegalStateException(
-                        "Unable to create datastoreClient for oper DS prefix configuration shard.", e);
-        }
-
-        writerMap.put(LogicalDatastoreType.CONFIGURATION, new PrefixedShardConfigWriter(
-                configurationShardMap.get(LogicalDatastoreType.CONFIGURATION).getKey()));
-
-        writerMap.put(LogicalDatastoreType.OPERATIONAL, new PrefixedShardConfigWriter(
-                configurationShardMap.get(LogicalDatastoreType.OPERATIONAL).getKey()));
-
-        updateHandler.initListener(distributedConfigDatastore, LogicalDatastoreType.CONFIGURATION);
-        updateHandler.initListener(distributedOperDatastore, LogicalDatastoreType.OPERATIONAL);
-
-        distributedConfigDatastore.getActorContext().getShardManager().tell(InitConfigListener.INSTANCE, noSender());
-        distributedOperDatastore.getActorContext().getShardManager().tell(InitConfigListener.INSTANCE, noSender());
-
+        prefixConfigWriterMap.put(LogicalDatastoreType.OPERATIONAL, new PrefixedShardConfigWriter(
+                prefixConfigShardMap.get(LogicalDatastoreType.OPERATIONAL).getKey()));
 
         //create shard registration for DEFAULT_SHARD
         try {
@@ -268,21 +247,70 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         } catch (final InterruptedException | ExecutionException e) {
             throw new IllegalStateException("Unable to create default shard frontend for operational shard", e);
         }
+
+        shardConfigUpdateHandler.initListener(distributedConfigDatastore, LogicalDatastoreType.CONFIGURATION);
+        shardConfigUpdateHandler.initListener(distributedOperDatastore, LogicalDatastoreType.OPERATIONAL);
+
+        distributedConfigDatastore.getActorContext().getShardManager().tell(InitConfigListener.INSTANCE, noSender());
+        distributedOperDatastore.getActorContext().getShardManager().tell(InitConfigListener.INSTANCE, noSender());
+
+        //init writer/updateHandlers for the producer shard
+        producerConfigWriterMap.put(LogicalDatastoreType.CONFIGURATION, new ProducerStatusWriter(
+                producerShardMap.get(LogicalDatastoreType.CONFIGURATION).getKey()));
+
+        producerConfigWriterMap.put(LogicalDatastoreType.OPERATIONAL, new ProducerStatusWriter(
+                producerShardMap.get(LogicalDatastoreType.OPERATIONAL).getKey()));
+
+        producerUpdateHandler.initListener(distributedConfigDatastore, LogicalDatastoreType.CONFIGURATION);
+        producerUpdateHandler.initListener(distributedOperDatastore, LogicalDatastoreType.OPERATIONAL);
     }
 
-    private ListenableFuture<List<Void>> handleConfigShardLookup() {
+    private void initConfigShard(final String shardName,
+                                 final EnumMap<LogicalDatastoreType, Entry<DataStoreClient, ActorRef>> shardMap) {
 
-        final ListenableFuture<Void> configFuture = lookupConfigShard(LogicalDatastoreType.CONFIGURATION);
-        final ListenableFuture<Void> operFuture = lookupConfigShard(LogicalDatastoreType.OPERATIONAL);
+        // create our writers to the configuration
+        try {
+            LOG.debug("{} - starting config shard({}) lookup.", memberName, shardName);
+            handleConfigShardLookup(shardName)
+                    .get(SHARD_FUTURE_TIMEOUT_DURATION.length(), SHARD_FUTURE_TIMEOUT_DURATION.unit());
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new IllegalStateException("Backend config shards not found", e);
+        }
+
+        try {
+            LOG.debug("{}: Prefix configuration shards ready - creating clients", memberName);
+            shardMap.put(LogicalDatastoreType.CONFIGURATION,
+                    createDatastoreClient(shardName, distributedConfigDatastore.getActorContext()));
+        } catch (final DOMDataTreeShardCreationFailedException e) {
+            throw new IllegalStateException(
+                    "Unable to create datastoreClient for config ds configuration shard(" + shardName + ").", e);
+        }
+
+        try {
+            shardMap.put(LogicalDatastoreType.OPERATIONAL,
+                    createDatastoreClient(shardName, distributedOperDatastore.getActorContext()));
+        } catch (final DOMDataTreeShardCreationFailedException e) {
+            throw new IllegalStateException(
+                    "Unable to create datastoreClient for oper ds configuration shard(" + shardName + ").", e);
+        }
+    }
+
+    private ListenableFuture<List<Void>> handleConfigShardLookup(final String shardName) {
+
+        final ListenableFuture<Void> configFuture =
+                lookupConfigShard(LogicalDatastoreType.CONFIGURATION, shardName);
+        final ListenableFuture<Void> operFuture =
+                lookupConfigShard(LogicalDatastoreType.OPERATIONAL, shardName);
 
         return Futures.allAsList(configFuture, operFuture);
     }
 
-    private ListenableFuture<Void> lookupConfigShard(final LogicalDatastoreType type) {
+    private ListenableFuture<Void> lookupConfigShard(final LogicalDatastoreType type, final String shardName) {
         final SettableFuture<Void> future = SettableFuture.create();
 
         final Future<Object> ask =
-                Patterns.ask(shardedDataTreeActor, new StartConfigShardLookup(type), SHARD_FUTURE_TIMEOUT);
+                Patterns.ask(shardedDataTreeActor,
+                        new StartConfigShardLookup(type, shardName), SHARD_FUTURE_TIMEOUT);
 
         ask.onComplete(new OnComplete<Object>() {
             @Override
@@ -311,23 +339,53 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     @Override
     public DOMDataTreeProducer createProducer(@Nonnull final Collection<DOMDataTreeIdentifier> subtrees) {
         LOG.debug("{} - Creating producer for {}", memberName, subtrees);
-        final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(subtrees);
 
-//        final Object response = distributedConfigDatastore.getActorContext()
-//                .executeOperation(shardedDataTreeActor, new ProducerCreated(subtrees));
-//        if (response == null) {
-//            LOG.debug("{} - Received success from remote nodes, creating producer:{}", memberName, subtrees);
-//            return new ProxyProducer(producer, subtrees, shardedDataTreeActor,
-//                    distributedConfigDatastore.getActorContext(), shards);
-//        }
-//
-//        closeProducer(producer);
-//
-//        if (response instanceof Throwable) {
-//            Throwables.throwIfUnchecked((Throwable) response);
-//            throw new RuntimeException((Throwable) response);
-//        }
-        throw new RuntimeException("Unexpected response to create producer received." + response);
+        // TODO this needs to be an atomic exists check, with a write right after since another node could come
+        // right after the exists says everything is ok and create a different producer at the same time.
+        LOG.trace("Exists check for producer: {}", subtrees);
+        List<ListenableFuture<Boolean>> existsFutures = new ArrayList<>();
+        subtrees.forEach(subtree ->
+                existsFutures.add(producerConfigWriterMap.get(subtree.getDatastoreType())
+                        .checkProducerExists(subtree.getRootIdentifier())));
+        final ListenableFuture<List<Boolean>> allFutures = Futures.allAsList(existsFutures);
+        try {
+            final List<Boolean> booleans = allFutures.get(PRODUCER_TIMEOUT.duration().length(),
+                    PRODUCER_TIMEOUT.duration().unit());
+
+            for (Boolean exists : booleans) {
+                Preconditions.checkArgument(!exists, "Subtree %s is attached to another producer.", subtrees);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOG.error("Unable to verify producer status.", e);
+            throw new IllegalStateException("Unable to verify producer status.", e);
+        }
+
+        List<ListenableFuture<Void>> writeFutures = new ArrayList<>();
+        subtrees.forEach(subtree -> {
+            LOG.trace("Writing new producer().", subtree);
+            writeFutures.add(producerConfigWriterMap.get(subtree.getDatastoreType())
+                    .writeProducer(subtree.getRootIdentifier()));
+        });
+
+        final ListenableFuture<List<Void>> writeFuture = Futures.allAsList(writeFutures);
+
+        try {
+            writeFuture.get(PRODUCER_TIMEOUT.duration().length(),
+                    PRODUCER_TIMEOUT.duration().unit());
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOG.error("Unable to write new producer status.", e);
+            throw new IllegalStateException("Unable to write new producer status.", e);
+        }
+
+        // TODO we really need to be able to verify with the shardedDOMDataTree on ALL nodes whether
+        // we can actually create this producer. We could potentially keep DOMDataTreePrefixTable in the
+        // ProducerStatusWriter since right now were only checking for the specified prefix, but we need
+        // to check whether theres a conflicting producer anywhere in the tree.
+        final DOMDataTreeProducer delegate = shardedDOMDataTree.createProducer(subtrees);
+
+
+        return new ProxyProducer(delegate, subtrees,
+                distributedConfigDatastore.getActorContext(), shards, producerConfigWriterMap);
     }
 
     @Override
@@ -344,7 +402,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             }
         }
 
-        final PrefixedShardConfigWriter writer = writerMap.get(prefix.getDatastoreType());
+        final PrefixedShardConfigWriter writer = prefixConfigWriterMap.get(prefix.getDatastoreType());
 
         final ListenableFuture<Void> writeFuture =
                 writer.writeConfig(prefix.getRootIdentifier(), replicaMembers);
@@ -458,7 +516,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             shards.remove(prefix);
         }
 
-        final PrefixedShardConfigWriter writer = writerMap.get(prefix.getDatastoreType());
+        final PrefixedShardConfigWriter writer = prefixConfigWriterMap.get(prefix.getDatastoreType());
         final ListenableFuture<Void> future = writer.removeConfig(prefix.getRootIdentifier());
 
         Futures.addCallback(future, new FutureCallback<Void>() {
@@ -527,7 +585,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private void initDefaultShard(final LogicalDatastoreType logicalDatastoreType)
             throws ExecutionException, InterruptedException {
 
-        final PrefixedShardConfigWriter writer = writerMap.get(logicalDatastoreType);
+        final PrefixedShardConfigWriter writer = prefixConfigWriterMap.get(logicalDatastoreType);
 
         if (writer.checkDefaultIsPresent()) {
             LOG.debug("{}: Default shard for {} is already present in the config. Possibly saved in snapshot.",
@@ -569,14 +627,6 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                 LOG.error("{}: Default shard initialization for {} failed", memberName, logicalDatastoreType, e);
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    private static void closeProducer(final DOMDataTreeProducer producer) {
-        try {
-            producer.close();
-        } catch (final DOMDataTreeProducerException e) {
-            LOG.error("Unable to close producer", e);
         }
     }
 
@@ -647,7 +697,6 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         private final DOMDataTreeProducer delegate;
         private final Collection<DOMDataTreeIdentifier> subtrees;
-        private final ActorRef shardDataTreeActor;
         private final ActorContext actorContext;
         @GuardedBy("shardAccessMap")
         private final Map<DOMDataTreeIdentifier, CDSShardAccessImpl> shardAccessMap = new HashMap<>();
@@ -656,17 +705,18 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         // ShardTable's entries relevant to this ProxyProducer shouldn't
         // change during producer's lifetime.
         private final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shardTable;
+        private final EnumMap<LogicalDatastoreType, ProducerStatusWriter> producerConfigWriterMap;
 
         ProxyProducer(final DOMDataTreeProducer delegate,
                       final Collection<DOMDataTreeIdentifier> subtrees,
-                      final ActorRef shardDataTreeActor,
                       final ActorContext actorContext,
-                      final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shardLayout) {
+                      final DOMDataTreePrefixTable<DOMDataTreeShardRegistration<DOMDataTreeShard>> shardLayout,
+                      final EnumMap<LogicalDatastoreType, ProducerStatusWriter> producerConfigWriterMap) {
             this.delegate = Preconditions.checkNotNull(delegate);
             this.subtrees = Preconditions.checkNotNull(subtrees);
-            this.shardDataTreeActor = Preconditions.checkNotNull(shardDataTreeActor);
             this.actorContext = Preconditions.checkNotNull(actorContext);
             this.shardTable = Preconditions.checkNotNull(shardLayout);
+            this.producerConfigWriterMap = Preconditions.checkNotNull(producerConfigWriterMap);
         }
 
         @Nonnull
@@ -686,17 +736,23 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
         public void close() throws DOMDataTreeProducerException {
+            LOG.debug("Closing producer().", subtrees);
+            List<ListenableFuture<Void>> futures = new ArrayList<>();
+            subtrees.forEach(subtree ->
+                    futures.add(producerConfigWriterMap.get(subtree.getDatastoreType())
+                            .removeProducer(subtree.getRootIdentifier())));
+
+            try {
+                Futures.allAsList(futures).get(PRODUCER_TIMEOUT.duration().length(),
+                        PRODUCER_TIMEOUT.duration().unit());
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                LOG.error("Error while closing producer.", e);
+            }
+
             delegate.close();
 
             synchronized (shardAccessMap) {
                 shardAccessMap.values().forEach(CDSShardAccessImpl::close);
-            }
-
-            final Object o = actorContext.executeOperation(shardDataTreeActor, new ProducerRemoved(subtrees));
-            if (o instanceof DOMDataTreeProducerException) {
-                throw (DOMDataTreeProducerException) o;
-            } else if (o instanceof Throwable) {
-                throw new DOMDataTreeProducerException("Unable to close producer", (Throwable) o);
             }
         }
 

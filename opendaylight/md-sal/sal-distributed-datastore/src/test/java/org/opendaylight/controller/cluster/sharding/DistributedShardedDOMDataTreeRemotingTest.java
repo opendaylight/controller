@@ -215,10 +215,14 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             followerShardFactory.createProducer(Collections.singleton(TEST_ID));
             fail("Producer should be already registered on the other node");
         } catch (final IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("is attached to producer"));
+            assertTrue(e.getMessage().contains("is attached to another producer"));
         }
 
         producer.close();
+
+        Thread.sleep(1000);
+
+        LOG.debug("producer closed.");
 
         final DOMDataTreeProducer followerProducer =
                 followerShardFactory.createProducer(Collections.singleton(TEST_ID));
@@ -226,7 +230,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
             fail("Producer should be already registered on the other node");
         } catch (final IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("is attached to producer"));
+            assertTrue(e.getMessage().contains("is attached to another producer"));
         }
 
         followerProducer.close();
