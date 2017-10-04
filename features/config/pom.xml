@@ -28,6 +28,7 @@
         <module>odl-config-core</module>
         <module>odl-config-manager</module>
         <module>odl-config-netty-config-api</module>
+        <module>odl-config-parent-dependencies</module>
     </modules>
 
     <scm>
