@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a245df4_44653f44",
+        "filename": "features/config/odl-config-parent-dependencies/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-10-04T12:30:57Z",
+      "side": 1,
+      "message": "Hold on.",
+      "range": {
+        "startLine": 47,
+        "startChar": 25,
+        "endLine": 47,
+        "endChar": 39
+      },
+      "revId": "6862c87a2a5c98a4755c1a1d932160dd6bf3da07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
