@@ -362,6 +362,13 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>odl-mdsal-model-inventory</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>odl-toaster</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>

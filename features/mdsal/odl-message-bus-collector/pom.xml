@@ -42,14 +42,14 @@
     <dependencies>
         <!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-binding-base -->
         <dependency>
-            <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-inventory</artifactId>
-            <version>1.7.0-SNAPSHOT</version>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-mdsal-model-inventory</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-broker</artifactId>
-            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
