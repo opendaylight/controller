@@ -14,9 +14,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -27,12 +27,12 @@ public final class NormalizedNodeAggregator {
 
     private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
             final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
-            LogicalDatastoreType logicalDatastoreType) {
+            final LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
-        this.dataTree = InMemoryDataTreeFactory.getInstance().create(
-                logicalDatastoreType == LogicalDatastoreType.CONFIGURATION ? TreeType.CONFIGURATION :
-                    TreeType.OPERATIONAL);
+        this.dataTree = new InMemoryDataTreeFactory().create(
+            logicalDatastoreType == LogicalDatastoreType.CONFIGURATION ? DataTreeConfiguration.DEFAULT_CONFIGURATION
+                    : DataTreeConfiguration.DEFAULT_OPERATIONAL);
         this.dataTree.setSchemaContext(schemaContext);
     }
 
@@ -41,7 +41,7 @@ public final class NormalizedNodeAggregator {
      */
     public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
             final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
-            LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
+            final LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
         return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
     }
 
@@ -66,6 +66,6 @@ public final class NormalizedNodeAggregator {
     }
 
     private Optional<NormalizedNode<?, ?>> getRootNode() {
-        return dataTree.takeSnapshot().readNode(rootIdentifier);
+        return Optional.fromJavaUtil(dataTree.takeSnapshot().readNode(rootIdentifier));
     }
 }

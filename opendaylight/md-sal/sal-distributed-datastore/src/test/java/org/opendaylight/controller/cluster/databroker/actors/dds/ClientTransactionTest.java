@@ -49,7 +49,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     public void setUp() throws Exception {
         super.setUp();
         when(getDataTreeSnapshot().newModification()).thenReturn(modification);
-        when(modification.readNode(PATH)).thenReturn(Optional.of(DATA));
+        when(modification.readNode(PATH)).thenReturn(java.util.Optional.of(DATA));
     }
 
     @Override
