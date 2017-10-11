@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.facade.xml.mapping.config;
 
 import com.google.common.base.Optional;
-import java.util.Date;
 import java.util.Map;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
@@ -20,6 +19,7 @@ import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
 import org.opendaylight.controller.config.util.xml.XmlUtil;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,7 +59,7 @@ public class ModuleConfig {
 
     public ModuleElementResolved fromXml(final XmlElement moduleElement, final ServiceRegistryWrapper depTracker,
             final String instanceName, final String moduleNamespace, final EditStrategyType defaultStrategy,
-            final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver)
+            final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap, final EnumResolver enumResolver)
             throws DocumentedException {
 
         InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace,

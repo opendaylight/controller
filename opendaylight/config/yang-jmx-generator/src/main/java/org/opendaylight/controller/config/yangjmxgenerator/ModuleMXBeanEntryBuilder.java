@@ -37,8 +37,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.ServiceRef;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.CaseSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -131,12 +131,12 @@ final class ModuleMXBeanEntryBuilder {
 
         Map<String, ModuleMXBeanEntry> result = new HashMap<>();
 
-        for (AugmentationSchema augmentation : currentModule.getAugmentations()) {
+        for (AugmentationSchemaNode augmentation : currentModule.getAugmentations()) {
             Collection<DataSchemaNode> childNodes = augmentation.getChildNodes();
-            if (areAllChildrenChoiceCaseNodes(childNodes)) {
-                for (ChoiceCaseNode childCase : castChildNodesToChoiceCases(childNodes)) {
+            if (areAllChildrenCaseSchemaNodes(childNodes)) {
+                for (CaseSchemaNode childCase : castChildNodesToChoiceCases(childNodes)) {
                     // TODO refactor, extract to standalone builder class
-                    processChoiceCaseNode(result, uniqueGeneratedClassesNames, configModulePrefix, moduleIdentities,
+                    processCaseSchemaNode(result, uniqueGeneratedClassesNames, configModulePrefix, moduleIdentities,
                             unaugmentedModuleIdentities, augmentation, childCase);
                 }
             } // skip if child nodes are not all cases
@@ -172,7 +172,8 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private static void checkAttributeNamesUniqueness(final Map<String, QName> uniqueGeneratedClassesNames, final Map<String, ModuleMXBeanEntry> result) {
+    private static void checkAttributeNamesUniqueness(final Map<String, QName> uniqueGeneratedClassesNames,
+            final Map<String, ModuleMXBeanEntry> result) {
         for (Map.Entry<String, ModuleMXBeanEntry> entry : result.entrySet()) {
             checkUniqueRuntimeBeanAttributesName(entry.getValue(),
                     uniqueGeneratedClassesNames);
@@ -183,8 +184,8 @@ final class ModuleMXBeanEntryBuilder {
         Map<String, IdentitySchemaNode> moduleIdentities = Maps.newHashMap();
 
         for (IdentitySchemaNode id : currentModule.getIdentities()) {
-            if (id.getBaseIdentity() != null
-                    && ConfigConstants.MODULE_TYPE_Q_NAME.equals(id.getBaseIdentity().getQName())) {
+            if (!id.getBaseIdentities().isEmpty()
+                    && ConfigConstants.MODULE_TYPE_Q_NAME.equals(id.getBaseIdentities().iterator().next().getQName())) {
                 String identityLocalName = id.getQName().getLocalName();
                 if (moduleIdentities.containsKey(identityLocalName)) {
                     throw new IllegalStateException("Module name already defined in this currentModule: "
@@ -217,37 +218,39 @@ final class ModuleMXBeanEntryBuilder {
         return moduleIdentities;
     }
 
-    private static Collection<ChoiceCaseNode> castChildNodesToChoiceCases(final Collection<DataSchemaNode> childNodes) {
-        return Collections2.transform(childNodes, new Function<DataSchemaNode, ChoiceCaseNode>() {
+    private static Collection<CaseSchemaNode> castChildNodesToChoiceCases(final Collection<DataSchemaNode> childNodes) {
+        return Collections2.transform(childNodes, new Function<DataSchemaNode, CaseSchemaNode>() {
             @Nullable
             @Override
-            public ChoiceCaseNode apply(@Nullable final DataSchemaNode input) {
-                return (ChoiceCaseNode) input;
+            public CaseSchemaNode apply(@Nullable final DataSchemaNode input) {
+                return (CaseSchemaNode) input;
             }
         });
     }
 
-    private static boolean areAllChildrenChoiceCaseNodes(final Iterable<DataSchemaNode> childNodes) {
+    private static boolean areAllChildrenCaseSchemaNodes(final Iterable<DataSchemaNode> childNodes) {
         for (DataSchemaNode childNode : childNodes) {
-            if (childNode instanceof ChoiceCaseNode == false) {
+            if (childNode instanceof CaseSchemaNode == false) {
                 return false;
             }
         }
         return true;
     }
 
-    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processChoiceCaseNode(final Map<String, ModuleMXBeanEntry> result,
+    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processCaseSchemaNode(
+            final Map<String, ModuleMXBeanEntry> result,
             final Map<String, QName> uniqueGeneratedClassesNames, final String configModulePrefix,
             final Map<String, IdentitySchemaNode> moduleIdentities,
-            final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities, final AugmentationSchema augmentation,
-            final DataSchemaNode when) {
+            final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities,
+            final AugmentationSchemaNode augmentation, final DataSchemaNode when) {
 
-        ChoiceCaseNode choiceCaseNode = (ChoiceCaseNode) when;
-        if (choiceCaseNode.getConstraints() == null || choiceCaseNode.getConstraints().getWhenCondition() == null) {
+        CaseSchemaNode choiceCaseNode = (CaseSchemaNode) when;
+        if (!choiceCaseNode.getWhenCondition().isPresent()) {
             return;
         }
-        RevisionAwareXPath xPath = choiceCaseNode.getConstraints().getWhenCondition();
-        Matcher matcher = getWhenConditionMatcher(configModulePrefix, xPath);
+        java.util.Optional<RevisionAwareXPath> xPath = choiceCaseNode.getWhenCondition();
+        checkState(xPath.isPresent(), "Choice node %s does not have a when condition", choiceCaseNode);
+        Matcher matcher = getWhenConditionMatcher(configModulePrefix, xPath.get());
         if (matcher.matches() == false) {
             return;
         }
@@ -384,7 +387,7 @@ final class ModuleMXBeanEntryBuilder {
      * @param choiceCaseNode state or configuration case statement
      * @return either choiceCaseNode or its only child container
      */
-    private static <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(final ChoiceCaseNode choiceCaseNode) {
+    private static <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(final CaseSchemaNode choiceCaseNode) {
         Collection<DataSchemaNode> childNodes = choiceCaseNode.getChildNodes();
         if (childNodes.size() == 1) {
             DataSchemaNode onlyChild = childNodes.iterator().next();
@@ -479,14 +482,14 @@ final class ModuleMXBeanEntryBuilder {
                             qNamesToSIEs, schemaContext);
                     LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines().values().iterator().next();
 
-                    boolean mandatory = refine.getConstraints().isMandatory();
+                    boolean mandatory = refine.isMandatory();
                     AbstractDependencyAttribute reference;
                     if (dataNodeContainer instanceof ContainerSchemaNode) {
                         reference = new DependencyAttribute(attrNode, serviceInterfaceEntry, mandatory,
-                                attrNode.getDescription());
+                                attrNode.getDescription().orElse(null));
                     } else {
                         reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry, mandatory,
-                                attrNode.getDescription());
+                                attrNode.getDescription().orElse(null));
                     }
                     return Optional.of(reference);
                 }
@@ -528,7 +531,7 @@ final class ModuleMXBeanEntryBuilder {
             // Module from SchemaContext
             String prefix = m.group(1);
             ModuleImport moduleImport = findModuleImport(currentModule, prefix);
-            foundModule = schemaContext.findModuleByName(moduleImport.getModuleName(), moduleImport.getRevision());
+            foundModule = schemaContext.findModule(moduleImport.getModuleName(), moduleImport.getRevision()).orElse(null);
             checkNotNull(foundModule, format("Module not found in SchemaContext by %s", moduleImport));
             localSIName = m.group(2);
         } else {

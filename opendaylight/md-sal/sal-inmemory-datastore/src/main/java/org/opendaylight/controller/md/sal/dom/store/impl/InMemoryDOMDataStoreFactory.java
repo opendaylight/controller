@@ -140,7 +140,7 @@ public final class InMemoryDOMDataStoreFactory {
         int dclExecutorMaxPoolSize = actualProperties.getMaxDataChangeExecutorPoolSize();
 
         ExecutorService dataChangeListenerExecutor = SpecialExecutors.newBlockingBoundedFastThreadPool(
-                dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL" );
+                dclExecutorMaxPoolSize, dclExecutorMaxQueueSize, name + "-DCL", InMemoryDOMDataStore.class);
 
         final InMemoryDOMDataStore dataStore = new InMemoryDOMDataStore(name, type, dataChangeListenerExecutor,
                 actualProperties.getMaxDataChangeListenerQueueSize(), debugTransactions);

@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>odl-yangtools-yang-data</artifactId>
+            <artifactId>odl-yangtools-data</artifactId>
             <version>2.0.0-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
