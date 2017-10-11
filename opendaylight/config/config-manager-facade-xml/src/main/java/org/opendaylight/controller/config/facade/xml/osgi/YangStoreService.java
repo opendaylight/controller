@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,6 +26,7 @@ import org.opendaylight.controller.config.util.capability.YangModuleCapability;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
@@ -146,6 +148,16 @@ public class YangStoreService implements YangStoreContext {
 
     private static Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
         return ImmutableSet.copyOf(Collections2.transform(modules,
-            input -> new YangModuleCapability(input, current.getModuleSource(input))));
+            input -> new YangModuleCapability(input, current.getModuleSource(new ModuleIdentifier() {
+                @Override
+                public Optional<Revision> getRevision() {
+                    return input.getRevision();
+                }
+
+                @Override
+                public String getName() {
+                    return input.getName();
+                }
+            }))));
     }
 }

@@ -13,6 +13,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -29,8 +30,8 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
     protected LocalReadOnlyProxyTransaction createTransaction(final ProxyHistory parent,
                                                               final TransactionIdentifier id,
                                                               final DataTreeSnapshot snapshot) {
-        when(snapshot.readNode(PATH_1)).thenReturn(com.google.common.base.Optional.of(DATA_1));
-        when(snapshot.readNode(PATH_3)).thenReturn(com.google.common.base.Optional.absent());
+        when(snapshot.readNode(PATH_1)).thenReturn(Optional.of(DATA_1));
+        when(snapshot.readNode(PATH_3)).thenReturn(Optional.empty());
         this.snapshot = snapshot;
         return new LocalReadOnlyProxyTransaction(parent, id, this.snapshot);
     }

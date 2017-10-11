@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
@@ -35,8 +35,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
@@ -152,16 +151,14 @@ public final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
-        final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = this.sourceProvider
-                .getSource(SourceIdentifier.create(moduleIdentifier.getName(),
-                        Optional.fromNullable(QName.formattedRevision(moduleIdentifier.getRevision()))));
-
+        final ListenableFuture<? extends YangTextSchemaSource> source = this.sourceProvider.getSource(
+            RevisionSourceIdentifier.create(moduleIdentifier.getName(), moduleIdentifier.getRevision()));
         try {
-            final YangTextSchemaSource yangTextSchemaSource = source.checkedGet();
+            final YangTextSchemaSource yangTextSchemaSource = source.get();
             try (InputStream inStream = yangTextSchemaSource.openStream()) {
                 return new String(ByteStreams.toByteArray(inStream), StandardCharsets.UTF_8);
             }
-        } catch (SchemaSourceException | IOException e) {
+        } catch (ExecutionException | InterruptedException | IOException e) {
             LOG.warn("Unable to provide source for {}", moduleIdentifier, e);
             throw new IllegalArgumentException("Unable to provide source for " + moduleIdentifier, e);
         }
