@@ -52,15 +52,15 @@ public final class EntityOwnersModel {
     private EntityOwnersModel() {
     }
 
-    static YangInstanceIdentifier entityPath(String entityType, YangInstanceIdentifier entityId) {
+    static YangInstanceIdentifier entityPath(final String entityType, final YangInstanceIdentifier entityId) {
         return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME)
                 .nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME)
                         .nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).build();
 
     }
 
-    static YangInstanceIdentifier candidatePath(String entityType, YangInstanceIdentifier entityId,
-            String candidateName) {
+    static YangInstanceIdentifier candidatePath(final String entityType, final YangInstanceIdentifier entityId,
+            final String candidateName) {
         return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME)
                 .nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME)
                         .nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).node(Candidate.QNAME)
@@ -68,53 +68,55 @@ public final class EntityOwnersModel {
 
     }
 
-    static YangInstanceIdentifier candidatePath(YangInstanceIdentifier entityPath, String candidateName) {
+    static YangInstanceIdentifier candidatePath(final YangInstanceIdentifier entityPath, final String candidateName) {
         return YangInstanceIdentifier.builder(entityPath).node(Candidate.QNAME).nodeWithKey(
                 Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
     }
 
-    static NodeIdentifierWithPredicates candidateNodeKey(String candidateName) {
+    static NodeIdentifierWithPredicates candidateNodeKey(final String candidateName) {
         return new NodeIdentifierWithPredicates(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
     }
 
-    static NormalizedNode<?, ?> entityOwnersWithCandidate(String entityType, YangInstanceIdentifier entityId,
-            String candidateName) {
+    static NormalizedNode<?, ?> entityOwnersWithCandidate(final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         return entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entityType,
                 entityEntryWithCandidateEntry(entityId, candidateName)));
     }
 
-    static ContainerNode entityOwnersWithEntityTypeEntry(MapEntryNode entityTypeNode) {
+    static ContainerNode entityOwnersWithEntityTypeEntry(final MapEntryNode entityTypeNode) {
         return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 ENTITY_OWNERS_NODE_ID).addChild(ImmutableNodes.mapNodeBuilder(EntityType.QNAME)
                         .addChild(entityTypeNode).build()).build();
     }
 
-    static MapEntryNode entityTypeEntryWithEntityEntry(String entityType, MapEntryNode entityNode) {
+    static MapEntryNode entityTypeEntryWithEntityEntry(final String entityType, final MapEntryNode entityNode) {
         return ImmutableNodes.mapEntryBuilder(EntityType.QNAME,
                 ENTITY_TYPE_QNAME, entityType).addChild(ImmutableNodes.mapNodeBuilder(
                         ENTITY_QNAME).addChild(entityNode).build()).build();
     }
 
-    static MapEntryNode entityEntryWithCandidateEntry(YangInstanceIdentifier entityId, String candidateName) {
+    static MapEntryNode entityEntryWithCandidateEntry(final YangInstanceIdentifier entityId,
+            final String candidateName) {
         return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).addChild(
                 candidateEntry(candidateName)).build();
     }
 
-    static MapNode candidateEntry(String candidateName) {
+    static MapNode candidateEntry(final String candidateName) {
         return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME))
                 .addChild(candidateMapEntry(candidateName)).build();
     }
 
-    static MapEntryNode candidateMapEntry(String candidateName) {
+    static MapEntryNode candidateMapEntry(final String candidateName) {
         return ImmutableNodes.mapEntry(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
     }
 
-    static MapEntryNode entityEntryWithOwner(YangInstanceIdentifier entityId, String owner) {
-        return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).addChild(
-                ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner)).build();
+    static MapEntryNode entityEntryWithOwner(final YangInstanceIdentifier entityId, final String owner) {
+        return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId)
+                .addChild(ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner != null ? owner : ""))
+                .build();
     }
 
-    public static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath) {
+    public static String entityTypeFromEntityPath(final YangInstanceIdentifier entityPath) {
         YangInstanceIdentifier parent = entityPath;
         while (!parent.isEmpty()) {
             if (EntityType.QNAME.equals(parent.getLastPathArgument().getNodeType())) {
@@ -127,7 +129,7 @@ public final class EntityOwnersModel {
         return null;
     }
 
-    static DOMEntity createEntity(YangInstanceIdentifier entityPath) {
+    static DOMEntity createEntity(final YangInstanceIdentifier entityPath) {
         String entityType = null;
         YangInstanceIdentifier entityId = null;
         for (PathArgument pathArg: entityPath.getPathArguments()) {

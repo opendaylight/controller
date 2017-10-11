@@ -54,7 +54,7 @@ public class AbstractRpcTest {
     static final QName TEST_RPC_INPUT = QName.create(TEST_NS, TEST_REV, "input");
     static final QName TEST_RPC_INPUT_DATA = QName.create(TEST_NS, TEST_REV, "input-data");
     static final QName TEST_RPC_OUTPUT = QName.create(TEST_NS, TEST_REV, "output");
-    static final QName TEST_RPC_OUTPUT_DATA = new QName(TEST_URI, "output-data");
+    static final QName TEST_RPC_OUTPUT_DATA = QName.create(TEST_URI, "output-data");
 
 
     static final SchemaPath TEST_RPC_TYPE = SchemaPath.create(true, TEST_RPC);
