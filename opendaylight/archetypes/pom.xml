@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>2.0.5</version>
+    <version>3.0.1</version>
     <relativePath/>
   </parent>
 
@@ -18,7 +18,7 @@
     <!-- TODO Bump maven-archetype-plugin version in odlparent instead of here: -->
     <maven.archetype.version>3.0.1</maven.archetype.version>
     <!-- TODO Figure out why SFT fails on archetype self test with:
-         ArtifactResolutionException: Error resolving artifact org.opendaylight.odlparent:opendaylight-karaf-empty:zip:2.0.5 -->
+         ArtifactResolutionException: Error resolving artifact org.opendaylight.odlparent:opendaylight-karaf-empty:zip:3.0.1 -->
     <archetype.test.skip>true</archetype.test.skip>
   </properties>
 
