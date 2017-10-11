@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -39,10 +39,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.slf4j.Logger;
@@ -70,11 +70,27 @@ public class DistributedShardChangePublisher
         // TODO keeping the whole dataTree thats contained in subshards doesn't seem like a good idea
         // maybe the whole listener logic would be better in the backend shards where we have direct access to the
         // dataTree and wont have to cache it redundantly.
-        this.dataTree = InMemoryDataTreeFactory.getInstance().create(
-                TreeType.valueOf(prefix.getDatastoreType().name()), prefix.getRootIdentifier());
 
-        dataTree.setSchemaContext(distributedDataStore.getActorContext().getSchemaContext());
+        final DataTreeConfiguration baseConfig;
+        switch (prefix.getDatastoreType()) {
+            case CONFIGURATION:
+                baseConfig = DataTreeConfiguration.DEFAULT_CONFIGURATION;
+                break;
+            case OPERATIONAL:
+                baseConfig = DataTreeConfiguration.DEFAULT_OPERATIONAL;
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown prefix type " + prefix.getDatastoreType());
+        }
 
+        this.dataTree = new InMemoryDataTreeFactory().create(new DataTreeConfiguration.Builder(baseConfig.getTreeType())
+                .setMandatoryNodesValidation(baseConfig.isMandatoryNodesValidationEnabled())
+                .setUniqueIndexes(baseConfig.isUniqueIndexEnabled())
+                .setRootPath(prefix.getRootIdentifier())
+                .build());
+
+        // XXX: can we guarantee that the root is present in the schemacontext?
+        this.dataTree.setSchemaContext(distributedDataStore.getActorContext().getSchemaContext());
         this.shardPath = prefix.getRootIdentifier();
         this.childShards = childShards;
     }
@@ -363,13 +379,13 @@ public class DistributedShardChangePublisher
         @Nonnull
         @Override
         public Optional<NormalizedNode<?, ?>> getDataAfter() {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         @Nonnull
         @Override
         public Optional<NormalizedNode<?, ?>> getDataBefore() {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

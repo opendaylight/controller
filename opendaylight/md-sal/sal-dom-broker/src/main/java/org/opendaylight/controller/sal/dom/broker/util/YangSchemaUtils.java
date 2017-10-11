@@ -11,22 +11,27 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ActionDefinition;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.CaseSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.MustDefinition;
+import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
+import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.Status;
@@ -53,8 +58,7 @@ public final class YangSchemaUtils {
         }
 
         QName firstNode = path.iterator().next();
-        DataNodeContainer previous = schema.findModuleByNamespaceAndRevision(firstNode.getNamespace(),
-                firstNode.getRevision());
+        DataNodeContainer previous = schema.findModule(firstNode.getModule()).orElse(null);
         Iterator<QName> iterator = path.iterator();
 
         while (iterator.hasNext()) {
@@ -91,8 +95,7 @@ public final class YangSchemaUtils {
     }
 
     private static DataSchemaNode searchInCases(final ChoiceSchemaNode choiceNode, final QName arg) {
-        Set<ChoiceCaseNode> cases = choiceNode.getCases();
-        for (ChoiceCaseNode caseNode : cases) {
+        for (CaseSchemaNode caseNode : choiceNode.getCases().values()) {
             DataSchemaNode node = caseNode.getDataChildByName(arg);
             if (node != null) {
                 return node;
@@ -130,7 +133,7 @@ public final class YangSchemaUtils {
         }
 
         @Override
-        public DataSchemaNode getDataChildByName(final QName name) {
+        public Optional<DataSchemaNode> findDataChildByName(final QName name) {
             // TODO Auto-generated method stub
             return null;
         }
@@ -142,7 +145,7 @@ public final class YangSchemaUtils {
         }
 
         @Override
-        public Set<AugmentationSchema> getAvailableAugmentations() {
+        public Set<AugmentationSchemaNode> getAvailableAugmentations() {
             // TODO Auto-generated method stub
             return null;
         }
@@ -166,12 +169,6 @@ public final class YangSchemaUtils {
         }
 
         @Override
-        public ConstraintDefinition getConstraints() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
         public QName getQName() {
             // TODO Auto-generated method stub
             return null;
@@ -184,15 +181,13 @@ public final class YangSchemaUtils {
         }
 
         @Override
-        public String getDescription() {
-            // TODO Auto-generated method stub
-            return null;
+        public Optional<String> getDescription() {
+            return Optional.empty();
         }
 
         @Override
-        public String getReference() {
-            // TODO Auto-generated method stub
-            return null;
+        public Optional<String> getReference() {
+            return Optional.empty();
         }
 
         @Override
@@ -213,6 +208,29 @@ public final class YangSchemaUtils {
             return false;
         }
 
+        @Override
+        public Set<NotificationDefinition> getNotifications() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Set<ActionDefinition> getActions() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Optional<RevisionAwareXPath> getWhenCondition() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Collection<MustDefinition> getMustConstraints() {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
 }

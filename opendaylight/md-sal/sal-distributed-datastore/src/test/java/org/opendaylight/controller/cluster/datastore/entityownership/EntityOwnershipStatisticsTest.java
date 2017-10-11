@@ -120,7 +120,7 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
         assertStatistics(statistics, REMOTE_MEMBER_NAME2, 0L);
 
         // Clear the owner for entity 2
-        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, null));
+        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, ""));
         statistics = ownershipStatistics.all();
         assertStatistics(statistics, LOCAL_MEMBER_NAME, 1L);
         assertStatistics(statistics, REMOTE_MEMBER_NAME1, 0L);
@@ -128,7 +128,7 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
 
         // Clear the owner for entity 2 again - expect no change
 
-        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, null));
+        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, ""));
         statistics = ownershipStatistics.all();
         assertStatistics(statistics, LOCAL_MEMBER_NAME, 1L);
         assertStatistics(statistics, REMOTE_MEMBER_NAME1, 0L);

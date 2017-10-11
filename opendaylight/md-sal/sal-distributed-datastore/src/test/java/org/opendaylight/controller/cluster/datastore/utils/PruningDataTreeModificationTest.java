@@ -23,9 +23,9 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.i
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 
-import com.google.common.base.Optional;
 import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -43,12 +43,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
@@ -66,7 +66,7 @@ public class PruningDataTreeModificationTest {
     @Mock
     private DataTreeModification mockModification;
 
-    private TipProducingDataTree dataTree;
+    private DataTree dataTree;
     private DataTreeModification realModification;
     private DataTreeModification proxyModification;
     private PruningDataTreeModification pruningDataTreeModification;
@@ -76,8 +76,8 @@ public class PruningDataTreeModificationTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
-        dataTree.setSchemaContext(SCHEMA_CONTEXT);
+        dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_CONFIGURATION,
+            SCHEMA_CONTEXT);
 
         realModification = dataTree.takeSnapshot().newModification();
         proxyModification = Reflection.newProxy(DataTreeModification.class, (proxy, method, args) -> {
@@ -128,7 +128,7 @@ public class PruningDataTreeModificationTest {
 
         verify(mockModification, times(1)).merge(path, normalizedNode);
 
-        DataTreeCandidateTip candidate = getCandidate();
+        DataTreeCandidate candidate = getCandidate();
         assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().getModificationType());
     }
 
@@ -153,7 +153,7 @@ public class PruningDataTreeModificationTest {
                 new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode).build();
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(path);
-        assertEquals("After pruning present", true, actual.isPresent());
+        assertTrue("After pruning present", actual.isPresent());
         assertEquals("After pruning", prunedNode, actual.get());
     }
 
@@ -166,7 +166,7 @@ public class PruningDataTreeModificationTest {
 
         verify(mockModification, times(1)).merge(path, normalizedNode);
 
-        DataTreeCandidateTip candidate = getCandidate();
+        DataTreeCandidate candidate = getCandidate();
         assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().getModificationType());
     }
 
@@ -181,8 +181,8 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testWriteRootNode() throws Exception {
-        final DataTree localDataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
-        localDataTree.setSchemaContext(SCHEMA_CONTEXT);
+        final DataTree localDataTree = new InMemoryDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_CONFIGURATION, SCHEMA_CONTEXT);
 
         DataTreeModification mod = localDataTree.takeSnapshot().newModification();
         mod.write(CarsModel.BASE_PATH, CarsModel.create());
@@ -195,7 +195,7 @@ public class PruningDataTreeModificationTest {
         dataTree.commit(getCandidate());
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
-        assertEquals("Root present", true, actual.isPresent());
+        assertTrue("Root present", actual.isPresent());
         assertEquals("Root node", normalizedNode, actual.get());
     }
 
@@ -227,7 +227,7 @@ public class PruningDataTreeModificationTest {
 
         verify(mockModification, times(1)).write(path, normalizedNode);
 
-        DataTreeCandidateTip candidate = getCandidate();
+        DataTreeCandidate candidate = getCandidate();
         assertEquals("getModificationType", ModificationType.UNMODIFIED, candidate.getRootNode().getModificationType());
     }
 
@@ -254,7 +254,7 @@ public class PruningDataTreeModificationTest {
                 .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(path);
-        assertEquals("After pruning present", true, actual.isPresent());
+        assertTrue("After pruning present", actual.isPresent());
         assertEquals("After pruning", prunedNode, actual.get());
     }
 
@@ -289,12 +289,11 @@ public class PruningDataTreeModificationTest {
                 dataTreeModification instanceof PruningDataTreeModification);
     }
 
-    private DataTreeCandidateTip getCandidate() throws DataValidationFailedException {
+    private DataTreeCandidate getCandidate() throws DataValidationFailedException {
         pruningDataTreeModification.ready();
         DataTreeModification mod = pruningDataTreeModification.delegate();
         mod = mod == proxyModification ? realModification : mod;
         dataTree.validate(mod);
-        DataTreeCandidateTip candidate = dataTree.prepare(mod);
-        return candidate;
+        return dataTree.prepare(mod);
     }
 }
