@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.model.YangTextSourceProvider;
@@ -15,7 +15,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.osgi.framework.BundleContext;
@@ -105,8 +104,8 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
             }
 
             @Override
-            public CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> getSource(
-                    SourceIdentifier sourceIdentifier) {
+            public ListenableFuture<? extends YangTextSchemaSource> getSource(
+                    final SourceIdentifier sourceIdentifier) {
                 return sourceProvider.getSource(sourceIdentifier);
             }
         }

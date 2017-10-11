@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -44,7 +45,7 @@ final class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataO
     protected void writeQName(final QName qname) throws IOException {
         writeString(qname.getLocalName());
         writeString(qname.getNamespace().toString());
-        writeString(qname.getFormattedRevision());
+        writeString(qname.getRevision().map(Revision::toString).orElse(null));
     }
 
     @Override

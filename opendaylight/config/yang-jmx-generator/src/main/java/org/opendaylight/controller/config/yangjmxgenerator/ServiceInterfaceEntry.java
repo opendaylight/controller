@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.SERVICE_TYPE_Q_NAME;
+
 import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,12 +57,12 @@ public class ServiceInterfaceEntry extends AbstractEntry {
     private final QName yangModuleQName;
     private final boolean registerToOsgi;
 
-    private ServiceInterfaceEntry(IdentitySchemaNode id, String packageName, QName yangModuleQName) {
+    private ServiceInterfaceEntry(final IdentitySchemaNode id, final String packageName, final QName yangModuleQName) {
         this(Optional.<ServiceInterfaceEntry> absent(), id, packageName, yangModuleQName);
     }
 
-    private ServiceInterfaceEntry(Optional<ServiceInterfaceEntry> base,
-            IdentitySchemaNode id, String packageName, QName yangModuleQName) {
+    private ServiceInterfaceEntry(final Optional<ServiceInterfaceEntry> base,
+            final IdentitySchemaNode id, final String packageName, final QName yangModuleQName) {
         checkNotNull(base);
         this.maybeBaseCache = base;
         List<UnknownSchemaNode> unknownSchemaNodes = id.getUnknownSchemaNodes();
@@ -93,13 +94,13 @@ public class ServiceInterfaceEntry extends AbstractEntry {
         this.registerToOsgi = !disableOsgiServiceRegistration;
         this.exportedOsgiClassName = exportedOsgiClassNames.get(0);
         qName = id.getQName();
-        nullableDescription = id.getDescription();
+        nullableDescription = id.getDescription().orElse(null);
         typeName = getSimpleName(exportedOsgiClassName) + CLASS_NAME_SUFFIX;
         this.packageName = packageName;
         this.yangModuleQName = yangModuleQName;
     }
 
-    private static final String getSimpleName(String fullyQualifiedName) {
+    private static final String getSimpleName(final String fullyQualifiedName) {
         int lastDotPosition = fullyQualifiedName.lastIndexOf(".");
         return fullyQualifiedName.substring(lastDotPosition + 1);
     }
@@ -128,8 +129,8 @@ public class ServiceInterfaceEntry extends AbstractEntry {
      * @return Map of QNames as keys and ServiceInterfaceEntry instances as
      *         values
      */
-    public static Map<QName, ServiceInterfaceEntry> create(Module currentModule,
-            String packageName,Map<IdentitySchemaNode, ServiceInterfaceEntry> definedSEItracker) {
+    public static Map<QName, ServiceInterfaceEntry> create(final Module currentModule,
+            final String packageName,final Map<IdentitySchemaNode, ServiceInterfaceEntry> definedSEItracker) {
         LOG.debug("Generating ServiceInterfaces from {} to package {}",
                 currentModule.getNamespace(), packageName);
 
@@ -149,17 +150,17 @@ public class ServiceInterfaceEntry extends AbstractEntry {
                     .hasNext();) {
                 IdentitySchemaNode identity = iterator.next();
                 ServiceInterfaceEntry created = null;
-                if (identity.getBaseIdentity() == null) {
+                if (identity.getBaseIdentities().isEmpty()) {
                     // this can happen while loading config module, just skip
                     // the identity
                     continue;
-                } else if (identity.getBaseIdentity().getQName()
+                } else if (identity.getBaseIdentities().iterator().next().getQName()
                         .equals(SERVICE_TYPE_Q_NAME)) {
                     // this is a base type
                     created = new ServiceInterfaceEntry(identity, packageName, ModuleUtil.getQName(currentModule));
                 } else {
                     ServiceInterfaceEntry foundBase = definedSEItracker
-                            .get(identity.getBaseIdentity());
+                            .get(identity.getBaseIdentities().iterator().next());
                     // derived type, did we convert the parent?
                     if (foundBase != null) {
                         created = new ServiceInterfaceEntry(
@@ -206,7 +207,7 @@ public class ServiceInterfaceEntry extends AbstractEntry {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
