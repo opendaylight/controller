@@ -32,7 +32,6 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePayloadReplication;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePreCommit;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Ticker;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.UnsignedLong;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import org.junit.Before;
@@ -175,7 +175,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         DOMDataTreeChangeListener listener = mock(DOMDataTreeChangeListener.class);
         shardDataTree.registerTreeChangeListener(CarsModel.CAR_LIST_PATH.node(CarsModel.CAR_QNAME), listener,
-                Optional.absent(), noop -> { });
+            com.google.common.base.Optional.absent(), noop -> { });
 
         addCar(shardDataTree, "optima");
 

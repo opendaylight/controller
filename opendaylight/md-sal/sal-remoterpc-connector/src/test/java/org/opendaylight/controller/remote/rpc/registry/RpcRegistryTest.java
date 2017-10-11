@@ -26,7 +26,6 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -368,14 +367,14 @@ public class RpcRegistryTest {
     }
 
     @Test
-    public void testAddRoutesConcurrency() throws Exception {
+    public void testAddRoutesConcurrency() {
         final JavaTestKit testKit = new JavaTestKit(node1);
 
         final int nRoutes = 500;
         final Collection<DOMRpcIdentifier> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
             final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(SchemaPath.create(true,
-                    new QName(new URI("/mockrpc"), "type" + i)));
+                    QName.create(URI.create("/mockrpc"), "type" + i)));
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -408,8 +407,8 @@ public class RpcRegistryTest {
         }
     }
 
-    private List<DOMRpcIdentifier> createRouteIds() throws URISyntaxException {
-        QName type = new QName(new URI("/mockrpc"), "mockrpc" + routeIdCounter++);
+    private List<DOMRpcIdentifier> createRouteIds() {
+        QName type = QName.create(URI.create("/mockrpc"), "mockrpc" + routeIdCounter++);
         List<DOMRpcIdentifier> routeIds = new ArrayList<>(1);
         routeIds.add(DOMRpcIdentifier.create(SchemaPath.create(true, type)));
         return routeIds;
