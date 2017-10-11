@@ -8,20 +8,19 @@
 
 package org.opendaylight.controller.sal.dom.broker.util;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.common.Revision;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ExtensionDefinition;
 import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -31,9 +30,6 @@ import org.opendaylight.yangtools.yang.model.api.Status;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 /**
  * ProxySchema Context for SchemaContextProviders
@@ -77,31 +73,6 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public Module findModuleByName(final String s, final Date date) {
-        return getCurrentSchema().findModuleByName(s, date);
-    }
-
-    @Override
-    public Set<Module> findModuleByNamespace(final URI uri) {
-        return getCurrentSchema().findModuleByNamespace(uri);
-    }
-
-    @Override
-    public Module findModuleByNamespaceAndRevision(final URI uri, final Date date) {
-        return getCurrentSchema().findModuleByNamespaceAndRevision(uri, date);
-    }
-
-    @Override
-    public Optional<String> getModuleSource(final ModuleIdentifier moduleIdentifier) {
-        return getCurrentSchema().getModuleSource(moduleIdentifier);
-    }
-
-    @Override
-    public Set<ModuleIdentifier> getAllModuleIdentifiers() {
-        return getCurrentSchema().getAllModuleIdentifiers();
-    }
-
-    @Override
     public boolean isPresenceContainer() {
         return getCurrentSchema().isPresenceContainer();
     }
@@ -132,7 +103,7 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public Set<AugmentationSchema> getAvailableAugmentations() {
+    public Set<AugmentationSchemaNode> getAvailableAugmentations() {
         return getCurrentSchema().getAvailableAugmentations();
     }
 
@@ -184,5 +155,10 @@ public class ProxySchemaContext implements SchemaContext {
     @Override
     public Status getStatus() {
         return getCurrentSchema().getStatus();
+    }
+
+    @Override
+    public Optional<Module> findModule(final String name, final Optional<Revision> revision) {
+        return getCurrentSchema().findModule(name, revision);
     }
 }
