@@ -133,7 +133,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
                     mod.write(path, result.get());
                 }
                 applyModificationHistoryToSnapshot(mod, currentHistory);
-                readResult.set(mod.readNode(path));
+                readResult.set(Optional.fromJavaUtil(mod.readNode(path)));
             }
 
             @Override

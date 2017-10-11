@@ -17,7 +17,7 @@ import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
@@ -53,8 +53,7 @@ public final class YangSchemaUtils {
         }
 
         QName firstNode = path.iterator().next();
-        DataNodeContainer previous = schema.findModuleByNamespaceAndRevision(firstNode.getNamespace(),
-                firstNode.getRevision());
+        DataNodeContainer previous = schema.findModule(firstNode.getModule()).orElse(null);
         Iterator<QName> iterator = path.iterator();
 
         while (iterator.hasNext()) {
@@ -142,7 +141,7 @@ public final class YangSchemaUtils {
         }
 
         @Override
-        public Set<AugmentationSchema> getAvailableAugmentations() {
+        public Set<AugmentationSchemaNode> getAvailableAugmentations() {
             // TODO Auto-generated method stub
             return null;
         }

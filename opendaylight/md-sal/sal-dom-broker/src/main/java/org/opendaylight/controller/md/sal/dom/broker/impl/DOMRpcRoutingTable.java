@@ -137,7 +137,7 @@ final class DOMRpcRoutingTable {
     private static RpcDefinition findRpcDefinition(final SchemaContext context, final SchemaPath schemaPath) {
         if (context != null) {
             final QName qname = schemaPath.getPathFromRoot().iterator().next();
-            final Module module = context.findModuleByNamespaceAndRevision(qname.getNamespace(), qname.getRevision());
+            final Module module = context.findModule(qname.getModule()).orElse(null);
             if (module != null && module.getRpcs() != null) {
                 for (RpcDefinition rpc : module.getRpcs()) {
                     if (qname.equals(rpc.getQName())) {

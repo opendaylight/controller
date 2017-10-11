@@ -14,10 +14,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +24,7 @@ import java.util.Set;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 
 public class ServiceInterfaceEntryTest extends AbstractYangTest {
@@ -37,20 +35,13 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
             + ".java, ThreadFactoryServiceInterface.java, ThreadPoolServiceInterface.java]");
 
     private static final URI THREADS_NAMESPACE;
-    private static final Date THREADS_REVISION_DATE;
+    private static final Revision THREADS_REVISION_DATE = Revision.valueOf("2013-04-09");
 
     static {
         try {
-            THREADS_NAMESPACE = new URI(ConfigConstants.CONFIG_NAMESPACE
-                    + ":threads");
+            THREADS_NAMESPACE = new URI(ConfigConstants.CONFIG_NAMESPACE + ":threads");
         } catch (URISyntaxException e) {
-            throw new Error(e);
-        }
-        SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            THREADS_REVISION_DATE = revisionFormat.parse("2013-04-09");
-        } catch (ParseException e) {
-            throw new Error(e);
+            throw new ExceptionInInitializerError(e);
         }
     }
 

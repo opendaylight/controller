@@ -15,10 +15,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableBiMap;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -309,11 +307,9 @@ public class BindingToNormalizedNodeCodec
 
     private Module getModuleBlocking(final Class<?> modeledClass) {
         final QNameModule moduleName = BindingReflections.getQNameModule(modeledClass);
-        final URI namespace = moduleName.getNamespace();
-        final Date revision = moduleName.getRevision();
-        Module module = runtimeContext().getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
-        if ((module == null) && this.futureSchema.waitForSchema(namespace, revision)) {
-            module = runtimeContext().getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
+        Module module = runtimeContext().getSchemaContext().findModule(moduleName).orElse(null);
+        if (module == null && this.futureSchema.waitForSchema(moduleName)) {
+            module = runtimeContext().getSchemaContext().findModule(moduleName).orElse(null);
         }
         Preconditions.checkState(module != null, "Schema for %s is not available.", modeledClass);
         return module;
@@ -332,7 +328,7 @@ public class BindingToNormalizedNodeCodec
     private Method findRpcMethod(final Class<? extends RpcService> key, final RpcDefinition rpcDef)
             throws NoSuchMethodException {
         final String methodName = BindingMapping.getMethodName(rpcDef.getQName());
-        if ((rpcDef.getInput() != null) && isExplicitStatement(rpcDef.getInput())) {
+        if (rpcDef.getInput() != null && isExplicitStatement(rpcDef.getInput())) {
             final Class<?> inputClz = runtimeContext().getClassForSchema(rpcDef.getInput());
             return key.getMethod(methodName, inputClz);
         }
@@ -340,8 +336,8 @@ public class BindingToNormalizedNodeCodec
     }
 
     private static boolean isExplicitStatement(final ContainerSchemaNode node) {
-        return (node instanceof EffectiveStatement)
-                && (((EffectiveStatement) node).getDeclared().getStatementSource() == StatementSource.DECLARATION);
+        return node instanceof EffectiveStatement
+                && ((EffectiveStatement) node).getDeclared().getStatementSource() == StatementSource.DECLARATION;
     }
 
     private BindingRuntimeContext runtimeContext() {

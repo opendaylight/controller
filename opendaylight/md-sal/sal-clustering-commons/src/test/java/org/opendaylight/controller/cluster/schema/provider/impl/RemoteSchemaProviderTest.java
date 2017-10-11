@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -23,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 public class RemoteSchemaProviderTest {
 
-    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Optional.of("2015-10-30"));
+    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Revision.valueOf("2015-10-30"));
 
     private RemoteSchemaProvider remoteSchemaProvider;
     private RemoteYangTextSourceProvider mockedRemoteSchemaRepository;
