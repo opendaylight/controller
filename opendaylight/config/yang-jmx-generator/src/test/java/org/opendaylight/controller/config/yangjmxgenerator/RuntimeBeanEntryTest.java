@@ -25,7 +25,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.CaseSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
@@ -45,7 +45,7 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
 
     @Test
     public void createRuntimeBean() {
-        final ChoiceCaseNode caseNode = Mockito.mock(ChoiceCaseNode.class);
+        final CaseSchemaNode caseNode = Mockito.mock(CaseSchemaNode.class);
         doReturn(new HashSet<LeafSchemaNode>()).when(caseNode).getChildNodes();
         doReturn(new ArrayList<UnknownSchemaNode>()).when(caseNode)
                 .getUnknownSchemaNodes();

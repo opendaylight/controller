@@ -85,7 +85,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path) {
-        return Futures.immediateCheckedFuture(readOnlyView().readNode(path));
+        return Futures.immediateCheckedFuture(Optional.fromJavaUtil(readOnlyView().readNode(path)));
     }
 
     @Override
@@ -109,7 +109,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
         // listeners, which we do not want to execute while we are reconnecting.
         if (request instanceof ReadTransactionRequest) {
             final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
-            final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);
+            final Optional<NormalizedNode<?, ?>> result = Optional.fromJavaUtil(readOnlyView().readNode(path));
             if (callback != null) {
                 // XXX: FB does not see that callback is final, on stack and has be check for non-null.
                 final Consumer<Response<?, ?>> fbIsStupid = Preconditions.checkNotNull(callback);

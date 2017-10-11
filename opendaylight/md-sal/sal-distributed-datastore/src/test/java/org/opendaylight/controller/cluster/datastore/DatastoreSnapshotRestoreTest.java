@@ -35,10 +35,9 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
-
 
 /**
  * Unit tests for DatastoreSnapshotRestore.
@@ -93,7 +92,8 @@ public class DatastoreSnapshotRestoreTest {
         assertNull("Expected null DatastoreSnapshot", instance.getAndRemove("oper"));
     }
 
-    private static void assertDatastoreSnapshotEquals(DatastoreSnapshot expected, DatastoreSnapshot actual) {
+    private static void assertDatastoreSnapshotEquals(final DatastoreSnapshot expected,
+            final DatastoreSnapshot actual) {
         assertNotNull("DatastoreSnapshot is null", actual);
         assertEquals("getType", expected.getType(), actual.getType());
 
@@ -113,7 +113,7 @@ public class DatastoreSnapshotRestoreTest {
         }
     }
 
-    private static void assertSnapshotEquals(String prefix, Snapshot expected, Snapshot actual) {
+    private static void assertSnapshotEquals(final String prefix, final Snapshot expected, final Snapshot actual) {
         assertEquals(prefix + " lastIndex", expected.getLastIndex(), actual.getLastIndex());
         assertEquals(prefix + " lastTerm", expected.getLastTerm(), actual.getLastTerm());
         assertEquals(prefix + " lastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
@@ -125,14 +125,14 @@ public class DatastoreSnapshotRestoreTest {
                 ((ShardSnapshotState)actual.getState()).getSnapshot().getRootNode());
     }
 
-    private static ShardManagerSnapshot newShardManagerSnapshot(String... shards) {
+    private static ShardManagerSnapshot newShardManagerSnapshot(final String... shards) {
         return new ShardManagerSnapshot(Arrays.asList(shards), Collections.emptyMap());
     }
 
-    private static Snapshot newSnapshot(YangInstanceIdentifier path, NormalizedNode<?, ?> node)
+    private static Snapshot newSnapshot(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
             throws Exception {
-        DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        dataTree.setSchemaContext(SchemaContextHelper.full());
+        DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
+            SchemaContextHelper.full());
         AbstractShardTest.writeToStore(dataTree, path, node);
         NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
