@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,14 +25,15 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
+import org.opendaylight.yangtools.yang.common.Revision;
 
 public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadingStrategy> {
 
     private String key;
-    private Map<String, Map<Date, IdentityMapping>> identityMap;
+    private Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap;
 
     public Map<String, AttributeReadingStrategy> prepareReading(final Map<String, AttributeIfc> yangToAttrConfig,
-            final Map<String, Map<Date, IdentityMapping>> identityMap) {
+            final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap) {
         Map<String, AttributeReadingStrategy> strategies = Maps.newHashMap();
         this.identityMap = identityMap;
 

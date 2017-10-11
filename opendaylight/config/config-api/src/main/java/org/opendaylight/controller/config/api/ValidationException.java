@@ -102,8 +102,8 @@ public class ValidationException extends Exception {
             this.message = message;
         }
 
-        public void setStackTrace(final String stackTrace) {
-            this.stackTrace = stackTrace;
+        public void setTrace(final String trace) {
+            this.stackTrace = trace;
         }
 
         @Override

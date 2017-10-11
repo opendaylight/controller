@@ -18,6 +18,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -52,8 +53,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
                                                                final TransactionIdentifier id,
                                                                final DataTreeSnapshot snapshot) {
         when(snapshot.newModification()).thenReturn(modification);
-        when(modification.readNode(PATH_1)).thenReturn(com.google.common.base.Optional.of(DATA_1));
-        when(modification.readNode(PATH_3)).thenReturn(com.google.common.base.Optional.absent());
+        when(modification.readNode(PATH_1)).thenReturn(Optional.of(DATA_1));
+        when(modification.readNode(PATH_3)).thenReturn(Optional.empty());
         return new LocalReadWriteProxyTransaction(parent, TestUtils.TRANSACTION_ID, snapshot);
     }
 
