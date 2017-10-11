@@ -10,8 +10,8 @@ package org.opendaylight.controller.md.sal.common.impl.util.compat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -28,13 +28,13 @@ class DataSchemaContainerProxy implements DataNodeContainer {
         realChildSchemas = realChildSchema;
         mappedChildSchemas = new HashMap<>();
         for(DataSchemaNode schema : realChildSchemas) {
-            mappedChildSchemas.put(schema.getQName(),schema);
+            mappedChildSchemas.put(schema.getQName(), schema);
         }
     }
 
     @Override
-    public DataSchemaNode getDataChildByName(final QName name) {
-        return mappedChildSchemas.get(name);
+    public Optional<DataSchemaNode> findDataChildByName(final QName name) {
+        return Optional.ofNullable(mappedChildSchemas.get(name));
     }
 
     @Override
@@ -56,5 +56,4 @@ class DataSchemaContainerProxy implements DataNodeContainer {
     public Set<UsesNode> getUses() {
         return Collections.emptySet();
     }
-
 }

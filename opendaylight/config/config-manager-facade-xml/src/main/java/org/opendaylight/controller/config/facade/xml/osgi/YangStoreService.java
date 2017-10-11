@@ -26,8 +26,9 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 
@@ -94,7 +95,7 @@ public class YangStoreService implements YangStoreContext {
     }
 
     @Override
-    public String getModuleSource(final ModuleIdentifier moduleIdentifier) {
+    public String getModuleSource(final SourceIdentifier moduleIdentifier) {
         return this.snap.getModuleSource(moduleIdentifier);
     }
 
@@ -146,6 +147,7 @@ public class YangStoreService implements YangStoreContext {
 
     private static Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
         return ImmutableSet.copyOf(Collections2.transform(modules,
-            input -> new YangModuleCapability(input, current.getModuleSource(input))));
+            input -> new YangModuleCapability(input, current.getModuleSource(
+                RevisionSourceIdentifier.create(input.getName(), input.getRevision())))));
     }
 }

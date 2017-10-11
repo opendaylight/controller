@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
@@ -22,8 +23,8 @@ class DistributedEntityOwnershipListenerRegistration extends AbstractObjectRegis
     private final DistributedEntityOwnershipService service;
     private final String entityType;
 
-    DistributedEntityOwnershipListenerRegistration(DOMEntityOwnershipListener listener, String entityType,
-            DistributedEntityOwnershipService service) {
+    DistributedEntityOwnershipListenerRegistration(final DOMEntityOwnershipListener listener, final String entityType,
+            final DistributedEntityOwnershipService service) {
         super(listener);
         this.entityType = Preconditions.checkNotNull(entityType, "entityType cannot be null");
         this.service = Preconditions.checkNotNull(service, "DOMEntityOwnershipListener cannot be null");
@@ -40,8 +41,7 @@ class DistributedEntityOwnershipListenerRegistration extends AbstractObjectRegis
     }
 
     @Override
-    public String toString() {
-        return "DistributedEntityOwnershipListenerRegistration [entityType=" + getEntityType()
-                + ", listener=" + getInstance() + "]";
+    protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return toStringHelper.add("entityType", entityType);
     }
 }

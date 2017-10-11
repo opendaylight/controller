@@ -8,24 +8,25 @@
 
 package org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.net.URI;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.config.facade.xml.mapping.IdentityMapping;
 import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 
 public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeReadingStrategy {
 
     private final String key;
-    private final Map<String, Map<Date, IdentityMapping>> identityMap;
+    private final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap;
 
     public SimpleIdentityRefAttributeReadingStrategy(final String nullableDefault, final String key,
-            final Map<String, Map<Date, IdentityMapping>> identityMap) {
+            final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap) {
         super(nullableDefault);
         this.key = key;
         this.identityMap = identityMap;
@@ -49,10 +50,10 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
             namespace = namespaceOfTextContent.getValue();
         }
 
-        Date revision = null;
-        Map<Date, IdentityMapping> revisions = identityMap.get(namespace);
+        Optional<Revision> revision = null;
+        Map<Optional<Revision>, IdentityMapping> revisions = identityMap.get(namespace);
         if (revisions.keySet().size() > 1) {
-            for (Map.Entry<Date, IdentityMapping> revisionToIdentityEntry : revisions.entrySet()) {
+            for (Map.Entry<Optional<Revision>, IdentityMapping> revisionToIdentityEntry : revisions.entrySet()) {
                 if (revisionToIdentityEntry.getValue().containsIdName(localName)) {
                     Preconditions.checkState(revision == null,
                             "Duplicate identity %s, in namespace %s, "
@@ -64,7 +65,7 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
         } else {
             revision = revisions.keySet().iterator().next();
         }
-        return QName.create(URI.create(namespace), revision, localName).toString();
+        return QName.create(URI.create(namespace), revision.toJavaUtil(), localName).toString();
     }
 
     @Override

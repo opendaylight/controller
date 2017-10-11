@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.core.spi.data;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Optional;
@@ -119,11 +120,12 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
      * @return null if the the transaction has been closed;
      */
     final Optional<NormalizedNode<?, ?>> readSnapshotNode(final YangInstanceIdentifier path) {
-        return readyImpl == null ? null : mutableTree.readNode(path);
+        return readyImpl == null ? null : Optional.fromJavaUtil(mutableTree.readNode(path));
     }
 
     private final void checkNotReady() {
-        checkState(readyImpl != null, "Transaction %s is no longer open. No further modifications allowed.", getIdentifier());
+        checkState(readyImpl != null, "Transaction %s is no longer open. No further modifications allowed.",
+                getIdentifier());
     }
 
     @Override

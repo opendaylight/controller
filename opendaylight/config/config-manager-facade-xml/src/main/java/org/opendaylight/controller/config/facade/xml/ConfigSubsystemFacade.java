@@ -10,17 +10,13 @@ package org.opendaylight.controller.config.facade.xml;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
-
 import java.io.Closeable;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -53,6 +49,7 @@ import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
 import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
@@ -205,7 +202,7 @@ public class ConfigSubsystemFacade implements Closeable {
         setOnTransaction(ta, configExecution);
     }
 
-    private void setServicesOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
+    private static void setServicesOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
             throws DocumentedException {
         Services services = execution.getServices();
 
@@ -244,11 +241,12 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    private String getQname(final ConfigTransactionClient ta, final String namespace, final String serviceName) {
+    private static String getQname(final ConfigTransactionClient ta, final String namespace,
+            final String serviceName) {
         return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
-    private void setOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
+    private static void setOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
             throws DocumentedException {
 
         for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta)
@@ -268,8 +266,8 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    private void handleMisssingInstancesOnTransaction(final ConfigTransactionClient ta, final ConfigExecution execution)
-            throws DocumentedException {
+    private static void handleMisssingInstancesOnTransaction(final ConfigTransactionClient ta,
+            final ConfigExecution execution) throws DocumentedException {
 
         for (Multimap<String, ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta)
                 .values()) {
@@ -289,18 +287,20 @@ public class ConfigSubsystemFacade implements Closeable {
         final YangStoreContext snapshot = yangStoreService.getCurrentSnapshot();
         Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(
                 snapshot.getModuleMXBeanEntryMap());
-        Map<String, Map<Date, IdentityMapping>> identitiesMap = transformIdentities(snapshot.getModules());
+        Map<String, Map<Optional<Revision>, IdentityMapping>> identitiesMap =
+            transformIdentities(snapshot.getModules());
         return new Config(factories, identitiesMap, snapshot.getEnumResolver());
     }
 
-    private static Map<String, Map<Date, IdentityMapping>> transformIdentities(final Set<Module> modules) {
-        Map<String, Map<Date, IdentityMapping>> mappedIds = new HashMap<>();
+    private static Map<String, Map<Optional<Revision>, IdentityMapping>> transformIdentities(
+            final Set<Module> modules) {
+        Map<String, Map<Optional<Revision>, IdentityMapping>> mappedIds = new HashMap<>();
         for (Module module : modules) {
             String namespace = module.getNamespace().toString();
-            Map<Date, IdentityMapping> revisionsByNamespace = mappedIds.computeIfAbsent(namespace,
+            Map<Optional<Revision>, IdentityMapping> revisionsByNamespace = mappedIds.computeIfAbsent(namespace,
                 k -> new HashMap<>());
 
-            Date revision = module.getRevision();
+            Optional<Revision> revision = Optional.fromJavaUtil(module.getRevision());
 
             IdentityMapping identityMapping = revisionsByNamespace.computeIfAbsent(revision,
                 k -> new IdentityMapping());
