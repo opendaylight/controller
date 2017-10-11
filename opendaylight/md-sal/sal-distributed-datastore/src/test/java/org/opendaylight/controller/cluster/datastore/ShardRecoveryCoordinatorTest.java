@@ -25,10 +25,11 @@ import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
@@ -85,9 +86,9 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         }
     }
 
-    private DataTreeCandidateTip createCar() {
-        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        dataTree.setSchemaContext(carsSchemaContext);
+    private DataTreeCandidate createCar() {
+        final DataTree dataTree = new InMemoryDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, carsSchemaContext);
 
         final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
 
@@ -99,7 +100,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree) {
-        final TipProducingDataTree dataTree = shardDataTree.getDataTree();
+        final DataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setSchemaContext(peopleSchemaContext);
 
@@ -107,7 +108,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree) {
-        final TipProducingDataTree dataTree = shardDataTree.getDataTree();
+        final DataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setSchemaContext(peopleSchemaContext);
 
@@ -115,8 +116,8 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     private static ShardSnapshotState createSnapshot() {
-        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
+        final DataTree dataTree = new InMemoryDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
                 SchemaContextHelper.PEOPLE_YANG));
 
         DataTreeSnapshot snapshot = dataTree.takeSnapshot();

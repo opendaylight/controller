@@ -58,7 +58,8 @@ public abstract class AbstractDataChangeListenerTest {
         this.schemaContext = context.tryToCreateSchemaContext().get();
 
         this.dclExecutorService = new TestDCLExecutorService(
-                SpecialExecutors.newBlockingBoundedFastThreadPool(1, 10, "DCL" ));
+                SpecialExecutors.newBlockingBoundedFastThreadPool(1, 10, "DCL",
+                    AbstractDataChangeListenerTest.class));
 
         this.datastore = new InMemoryDOMDataStore("TEST", this.dclExecutorService);
         this.datastore.onGlobalContextUpdated(this.schemaContext);

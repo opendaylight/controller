@@ -100,7 +100,8 @@ public class DOMDataTreeListenerTest {
                 .build();
 
         commitExecutor = new CommitExecutorService(Executors.newSingleThreadExecutor());
-        futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB");
+        futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB",
+                DOMDataTreeListenerTest.class);
         executor = new DeadlockDetectingListeningExecutorService(commitExecutor,
                                                                  TransactionCommitDeadlockException
                                                                          .DEADLOCK_EXCEPTION_SUPPLIER,

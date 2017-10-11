@@ -10,8 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator.unknownextension;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.collect.Lists;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
@@ -23,25 +22,20 @@ public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
 
     @Test
     public void testStopOnUnknownLanguageExtension() throws Exception {
-        List<InputStream> yangISs = Lists.newArrayList(getClass()
-                .getResourceAsStream("test-ifcWithUnknownExtension.yang"));
-        yangISs.addAll(getConfigApiYangInputStreams());
+        List<String> yangs = new ArrayList<>();
+        yangs.addAll(getConfigApiYangs());
+        yangs.add("test-ifcWithUnknownExtension.yang");
+
+        context = YangParserTestUtils.parseYangResources(UnknownExtensionTest.class, yangs);
+        namesToModules = YangModelSearchUtils.mapModulesByNames(context.getModules());
+        configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
+        threadsModule = namesToModules.get(ConfigConstants.CONFIG_THREADS_MODULE);
         try {
-            context = YangParserTestUtils.parseYangStreams(yangISs);
-            namesToModules = YangModelSearchUtils.mapModulesByNames(context.getModules());
-            configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
-            threadsModule = namesToModules.get(ConfigConstants.CONFIG_THREADS_MODULE);
-            try {
-                super.testCreateFromIdentities();
-                fail();
-            } catch (IllegalStateException e) {
-                assertTrue(e.getMessage(),
-                        e.getMessage().startsWith("Unexpected unknown schema node."));
-            }
-        } finally {
-            for (InputStream is : yangISs) {
-                is.close();
-            }
+            super.testCreateFromIdentities();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage(),
+                e.getMessage().startsWith("Unexpected unknown schema node."));
         }
     }
 

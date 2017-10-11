@@ -12,7 +12,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Futures;
 import java.util.Collections;
@@ -20,6 +19,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
@@ -31,7 +31,7 @@ import scala.concurrent.duration.Duration;
 
 public class RemoteYangTextSourceProviderImplTest {
 
-    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Optional.of("2015-10-30"));
+    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Revision.of("2015-10-30"));
 
     private RemoteYangTextSourceProviderImpl remoteRepository;
     private SchemaRepository mockedLocalRepository;

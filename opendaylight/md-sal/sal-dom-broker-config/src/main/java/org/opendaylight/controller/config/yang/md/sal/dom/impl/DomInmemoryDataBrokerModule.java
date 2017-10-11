@@ -79,7 +79,7 @@ public final class DomInmemoryDataBrokerModule extends
          */
         ExecutorService listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
                 getMaxDataBrokerFutureCallbackPoolSize(), getMaxDataBrokerFutureCallbackQueueSize(),
-                "CommitFutures");
+                "CommitFutures", SerializedDOMDataBroker.class);
 
         final List<AbstractMXBean> mBeans = Lists.newArrayList();
         final DurationStatisticsTracker commitStatsTracker;
@@ -93,7 +93,7 @@ public final class DomInmemoryDataBrokerModule extends
          * system it's running on.
          */
         ExecutorService commitExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
-            getMaxDataBrokerCommitQueueSize(), "WriteTxCommit");
+            getMaxDataBrokerCommitQueueSize(), "WriteTxCommit", SerializedDOMDataBroker.class);
 
         SerializedDOMDataBroker sdb = new SerializedDOMDataBroker(datastores,
             new DeadlockDetectingListeningExecutorService(commitExecutor,
