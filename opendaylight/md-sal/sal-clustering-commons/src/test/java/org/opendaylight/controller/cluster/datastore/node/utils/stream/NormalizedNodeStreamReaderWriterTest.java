@@ -10,12 +10,12 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Optional;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -79,7 +79,7 @@ public class NormalizedNodeStreamReaderWriterTest {
     }
 
     private static NormalizedNode<?, ?> createTestContainer() {
-        byte[] bytes1 = {1,2,3};
+        byte[] bytes1 = {1, 2, 3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).withValue(bytes1).build();
 
@@ -87,14 +87,11 @@ public class NormalizedNodeStreamReaderWriterTest {
         LeafSetEntryNode<Object> entry2 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).withValue(bytes2).build();
 
-        LeafSetEntryNode<Object> entry3 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
-                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, null)).withValue(null).build();
-
         return TestModel.createBaseTestContainerBuilder()
                 .withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
                         new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
-                        .withChild(entry1).withChild(entry2).withChild(entry3).build())
-                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1,2,3,4}))
+                        .withChild(entry1).withChild(entry2).build())
+                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1, 2, 3, 4}))
                 .withChild(Builders.orderedMapBuilder()
                       .withNodeIdentifier(new NodeIdentifier(TestModel.ORDERED_LIST_QNAME))
                       .withChild(ImmutableNodes.mapEntry(TestModel.ORDERED_LIST_ENTRY_QNAME,

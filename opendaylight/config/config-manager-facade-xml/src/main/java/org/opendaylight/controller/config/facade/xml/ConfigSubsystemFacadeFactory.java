@@ -16,6 +16,7 @@ import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.config.util.capability.YangModuleCapability;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 
 public class ConfigSubsystemFacadeFactory {
 
@@ -47,7 +48,8 @@ public class ConfigSubsystemFacadeFactory {
         Set<Module> modules = yangStoreService.getModules();
         final Set<Capability> capabilities = Sets.newHashSet();
         for (Module module : modules) {
-            capabilities.add(new YangModuleCapability(module, yangStoreService.getModuleSource(module)));
+            capabilities.add(new YangModuleCapability(module, yangStoreService.getModuleSource(
+                RevisionSourceIdentifier.create(module.getName(), module.getRevision()))));
         }
         return capabilities;
     }
