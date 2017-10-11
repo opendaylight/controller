@@ -27,7 +27,7 @@ public class ClientSnapshotTest extends AbstractClientHandleTest<ClientSnapshot>
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        when(getDataTreeSnapshot().readNode(PATH)).thenReturn(Optional.absent());
+        when(getDataTreeSnapshot().readNode(PATH)).thenReturn(java.util.Optional.empty());
     }
 
     @Override
