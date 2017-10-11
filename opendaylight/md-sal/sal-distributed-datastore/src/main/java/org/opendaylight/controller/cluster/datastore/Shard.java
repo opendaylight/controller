@@ -103,8 +103,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
@@ -1025,7 +1025,7 @@ public class Shard extends RaftActor {
         private DatastoreContext datastoreContext;
         private SchemaContextProvider schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
-        private TipProducingDataTree dataTree;
+        private DataTree dataTree;
         private volatile boolean sealed;
 
         protected AbstractBuilder(final Class<S> shardClass) {
@@ -1071,7 +1071,7 @@ public class Shard extends RaftActor {
             return self();
         }
 
-        public T dataTree(final TipProducingDataTree newDataTree) {
+        public T dataTree(final DataTree newDataTree) {
             checkSealed();
             this.dataTree = newDataTree;
             return self();
@@ -1097,7 +1097,7 @@ public class Shard extends RaftActor {
             return restoreFromSnapshot;
         }
 
-        public TipProducingDataTree getDataTree() {
+        public DataTree getDataTree() {
             return dataTree;
         }
 

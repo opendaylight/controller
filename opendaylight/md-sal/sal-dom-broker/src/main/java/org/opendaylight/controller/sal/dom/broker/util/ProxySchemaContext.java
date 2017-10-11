@@ -8,21 +8,19 @@
 
 package org.opendaylight.controller.sal.dom.broker.util;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.net.URI;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
-import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
+import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.common.Revision;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ExtensionDefinition;
 import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -76,31 +74,6 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public Module findModuleByName(final String string, final Date date) {
-        return getCurrentSchema().findModuleByName(string, date);
-    }
-
-    @Override
-    public Set<Module> findModuleByNamespace(final URI uri) {
-        return getCurrentSchema().findModuleByNamespace(uri);
-    }
-
-    @Override
-    public Module findModuleByNamespaceAndRevision(final URI uri, final Date date) {
-        return getCurrentSchema().findModuleByNamespaceAndRevision(uri, date);
-    }
-
-    @Override
-    public Optional<String> getModuleSource(final ModuleIdentifier moduleIdentifier) {
-        return getCurrentSchema().getModuleSource(moduleIdentifier);
-    }
-
-    @Override
-    public Set<ModuleIdentifier> getAllModuleIdentifiers() {
-        return getCurrentSchema().getAllModuleIdentifiers();
-    }
-
-    @Override
     public boolean isPresenceContainer() {
         return getCurrentSchema().isPresenceContainer();
     }
@@ -121,8 +94,8 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public DataSchemaNode getDataChildByName(final QName name) {
-        return getCurrentSchema().getDataChildByName(name);
+    public Optional<DataSchemaNode> findDataChildByName(final QName name) {
+        return getCurrentSchema().findDataChildByName(name);
     }
 
     @Override
@@ -131,7 +104,7 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public Set<AugmentationSchema> getAvailableAugmentations() {
+    public Set<AugmentationSchemaNode> getAvailableAugmentations() {
         return getCurrentSchema().getAvailableAugmentations();
     }
 
@@ -151,11 +124,6 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public ConstraintDefinition getConstraints() {
-        return getCurrentSchema().getConstraints();
-    }
-
-    @Override
     public QName getQName() {
         return getCurrentSchema().getQName();
     }
@@ -171,17 +139,27 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public String getDescription() {
+    public Optional<String> getDescription() {
         return getCurrentSchema().getDescription();
     }
 
     @Override
-    public String getReference() {
+    public Optional<String> getReference() {
         return getCurrentSchema().getReference();
     }
 
     @Override
     public Status getStatus() {
         return getCurrentSchema().getStatus();
+    }
+
+    @Override
+    public Optional<Module> findModule(final String name, final Optional<Revision> revision) {
+        return getCurrentSchema().findModule(name, revision);
+    }
+
+    @Override
+    public Optional<Module> findModule(final QNameModule qnameModule) {
+        return getCurrentSchema().findModule(qnameModule);
     }
 }
