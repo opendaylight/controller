@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
@@ -83,8 +83,11 @@ enum BindingStructuralType {
     UNKNOWN;
 
     static BindingStructuralType from(final DataTreeCandidateNode domChildNode) {
-        final Optional<NormalizedNode<?, ?>> dataBased = domChildNode.getDataAfter().or(domChildNode.getDataBefore());
-        if(dataBased.isPresent()) {
+        Optional<NormalizedNode<?, ?>> dataBased = domChildNode.getDataAfter();
+        if (!dataBased.isPresent()) {
+            dataBased = domChildNode.getDataBefore();
+        }
+        if (dataBased.isPresent()) {
             return from(dataBased.get());
         }
         return from(domChildNode.getIdentifier());
