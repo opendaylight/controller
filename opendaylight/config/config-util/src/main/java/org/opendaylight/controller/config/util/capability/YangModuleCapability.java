@@ -9,7 +9,7 @@
 package org.opendaylight.controller.config.util.capability;
 
 import com.google.common.base.Optional;
-import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
@@ -27,7 +27,7 @@ public final class YangModuleCapability extends BasicCapability {
         this.content = moduleContent;
         this.moduleName = module.getName();
         this.moduleNamespace = module.getNamespace().toString();
-        this.revision = SimpleDateFormatUtil.getRevisionFormat().format(module.getRevision());
+        this.revision = module.getRevision().map(Revision::toString).orElse(null);
     }
 
     @Override
@@ -36,8 +36,14 @@ public final class YangModuleCapability extends BasicCapability {
     }
 
     private static String toCapabilityURI(final Module module) {
-        return String.valueOf(module.getNamespace()) + "?module="
-                + module.getName() + "&revision=" + SimpleDateFormatUtil.getRevisionFormat().format(module.getRevision());
+        final StringBuilder sb = new StringBuilder();
+        sb.append(module.getNamespace()).append("?module=").append(module.getName());
+
+        final java.util.Optional<Revision> rev = module.getRevision();
+        if (rev.isPresent()) {
+            sb.append("&revision=").append(rev.get());
+        }
+        return sb.toString();
     }
 
     @Override

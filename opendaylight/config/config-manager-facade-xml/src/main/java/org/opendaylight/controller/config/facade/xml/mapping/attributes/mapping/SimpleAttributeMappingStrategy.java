@@ -11,10 +11,9 @@ package org.opendaylight.controller.config.facade.xml.mapping.attributes.mapping
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import java.util.Date;
 import java.util.Map;
 import javax.management.openmbean.SimpleType;
-import org.opendaylight.controller.config.facade.xml.util.Util;
+import org.opendaylight.yangtools.yang.common.Revision;
 
 public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStrategy<String, SimpleType<?>> {
 
@@ -43,7 +42,7 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
 
     static {
         WRITER_PLUGINS.put(DEFAULT_WRITER_PLUGIN, new DefaultWriterPlugin());
-        WRITER_PLUGINS.put(Date.class.getCanonicalName(), new DatePlugin());
+        WRITER_PLUGINS.put(Revision.class.getCanonicalName(), new RevisionPlugin());
     }
 
     /**
@@ -61,12 +60,12 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
         }
     }
 
-    static class DatePlugin implements WriterPlugin {
+    static class RevisionPlugin implements WriterPlugin {
 
         @Override
         public String writeObject(final Object value) {
-            Preconditions.checkArgument(value instanceof Date, "Attribute must be Date");
-            return Util.writeDate((Date) value);
+            Preconditions.checkArgument(value instanceof Revision, "Attribute must be Date");
+            return ((Revision) value).toString();
         }
     }
 

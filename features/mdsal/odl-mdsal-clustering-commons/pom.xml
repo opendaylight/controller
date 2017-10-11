@@ -45,19 +45,19 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-akka-system-2.4</artifactId>
+            <artifactId>odl-akka-system-2.5</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-akka-persistence-2.4</artifactId>
+            <artifactId>odl-akka-persistence-2.5</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-akka-clustering-2.4</artifactId>
+            <artifactId>odl-akka-clustering-2.5</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
