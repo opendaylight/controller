@@ -73,8 +73,8 @@ public class ModuleMXBeanEntry extends AbstractEntry {
     private Collection<RuntimeBeanEntry> runtimeBeans;
     private String nullableDummyContainerName;
 
-    ModuleMXBeanEntry(ModuleMXBeanEntryInitial initials, Map<String, AttributeIfc> yangToAttributes,
-            Map<String, QName> providedServices2, Collection<RuntimeBeanEntry> runtimeBeans) {
+    ModuleMXBeanEntry(final ModuleMXBeanEntryInitial initials, final Map<String, AttributeIfc> yangToAttributes,
+            final Map<String, QName> providedServices2, final Collection<RuntimeBeanEntry> runtimeBeans) {
         this.yangToAttributes = yangToAttributes;
         this.providedServices = Collections.unmodifiableMap(providedServices2);
         this.runtimeBeans = runtimeBeans;
@@ -101,7 +101,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         return ABSTRACT_PREFIX + getStubModuleName();
     }
 
-    public String getFullyQualifiedName(String typeName) {
+    public String getFullyQualifiedName(final String typeName) {
         return FullyQualifiedNameHelper.getFullyQualifiedName(initial.packageName,
                 typeName);
     }
@@ -123,7 +123,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         return providedServices;
     }
 
-    public void setRuntimeBeans(Collection<RuntimeBeanEntry> newRuntimeBeans) {
+    public void setRuntimeBeans(final Collection<RuntimeBeanEntry> newRuntimeBeans) {
         runtimeBeans = newRuntimeBeans;
     }
 
@@ -147,10 +147,10 @@ public class ModuleMXBeanEntry extends AbstractEntry {
      *         instances as values
      */
     public static Map<String/* identity local name */, ModuleMXBeanEntry> create(
-            Module currentModule,
-            Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
-            SchemaContext schemaContext,
-            TypeProviderWrapper typeProviderWrapper, String packageName) {
+            final Module currentModule,
+            final Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
+            final SchemaContext schemaContext,
+            final TypeProviderWrapper typeProviderWrapper, final String packageName) {
 
         ModuleMXBeanEntryBuilder builder = new ModuleMXBeanEntryBuilder().setModule(currentModule).setqNamesToSIEs(qNamesToSIEs)
                 .setSchemaContext(schemaContext).setTypeProviderWrapper(typeProviderWrapper)
@@ -163,7 +163,7 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         return yangToAttributes;
     }
 
-    void setYangToAttributes(Map<String, AttributeIfc> newAttributes) {
+    void setYangToAttributes(final Map<String, AttributeIfc> newAttributes) {
         this.yangToAttributes = newAttributes;
     }
 
@@ -186,21 +186,21 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         return nullableDummyContainerName;
     }
 
-    public void setNullableDummyContainerName(String nullableDummyContainerName) {
+    public void setNullableDummyContainerName(final String nullableDummyContainerName) {
         this.nullableDummyContainerName = nullableDummyContainerName;
     }
 
 
     static final class ModuleMXBeanEntryInitial {
 
-        private String localName;
-        private String description;
-        private String packageName;
-        private String javaNamePrefix;
-        private String namespace;
-        private QName qName;
+        private final String localName;
+        private final String description;
+        private final String packageName;
+        private final String javaNamePrefix;
+        private final String namespace;
+        private final QName qName;
 
-        ModuleMXBeanEntryInitial(String localName, String description, String packageName, String javaNamePrefix, String namespace, QName qName) {
+        ModuleMXBeanEntryInitial(final String localName, final String description, final String packageName, final String javaNamePrefix, final String namespace, final QName qName) {
             this.localName = localName;
             this.description = description;
             this.packageName = packageName;
@@ -218,22 +218,22 @@ public class ModuleMXBeanEntry extends AbstractEntry {
         private String namespace;
         private QName qName;
 
-        public ModuleMXBeanEntryInitialBuilder setPackageName(String packageName) {
+        public ModuleMXBeanEntryInitialBuilder setPackageName(final String packageName) {
             this.packageName = packageName;
             return this;
         }
 
-        public ModuleMXBeanEntryInitialBuilder setJavaNamePrefix(String javaNamePrefix) {
+        public ModuleMXBeanEntryInitialBuilder setJavaNamePrefix(final String javaNamePrefix) {
             this.javaNamePrefix = javaNamePrefix;
             return this;
         }
 
-        public ModuleMXBeanEntryInitialBuilder setNamespace(String namespace) {
+        public ModuleMXBeanEntryInitialBuilder setNamespace(final String namespace) {
             this.namespace = namespace;
             return this;
         }
 
-        public ModuleMXBeanEntryInitialBuilder setqName(QName qName) {
+        public ModuleMXBeanEntryInitialBuilder setqName(final QName qName) {
             this.qName = qName;
             return this;
         }
@@ -242,9 +242,9 @@ public class ModuleMXBeanEntry extends AbstractEntry {
             return new ModuleMXBeanEntry.ModuleMXBeanEntryInitial(localName, description, packageName, javaNamePrefix, namespace, qName);
         }
 
-        public ModuleMXBeanEntryInitialBuilder setIdSchemaNode(IdentitySchemaNode idSchemaNode) {
+        public ModuleMXBeanEntryInitialBuilder setIdSchemaNode(final IdentitySchemaNode idSchemaNode) {
             this.localName = idSchemaNode.getQName().getLocalName();
-            this.description = idSchemaNode.getDescription();
+            this.description = idSchemaNode.getDescription().orElse(null);
             return this;
         }
 
