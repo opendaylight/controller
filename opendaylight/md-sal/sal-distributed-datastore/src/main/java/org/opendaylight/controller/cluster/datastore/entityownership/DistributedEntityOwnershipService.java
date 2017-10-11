@@ -187,7 +187,7 @@ public final class DistributedEntityOwnershipService implements DOMEntityOwnersh
             return Optional.absent();
         }
 
-        Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
+        java.util.Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
                 entityPath(forEntity.getType(), forEntity.getIdentifier()));
         if (!entityNode.isPresent()) {
             return Optional.absent();
@@ -195,7 +195,7 @@ public final class DistributedEntityOwnershipService implements DOMEntityOwnersh
 
         // Check if there are any candidates, if there are none we do not really have ownership state
         final MapEntryNode entity = (MapEntryNode) entityNode.get();
-        final Optional<DataContainerChild<? extends PathArgument, ?>> optionalCandidates =
+        final java.util.Optional<DataContainerChild<? extends PathArgument, ?>> optionalCandidates =
                 entity.getChild(CANDIDATE_NODE_ID);
         final boolean hasCandidates = optionalCandidates.isPresent()
                 && ((MapNode) optionalCandidates.get()).getValue().size() > 0;
@@ -204,7 +204,8 @@ public final class DistributedEntityOwnershipService implements DOMEntityOwnersh
         }
 
         MemberName localMemberName = context.getCurrentMemberName();
-        Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = entity.getChild(ENTITY_OWNER_NODE_ID);
+        java.util.Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = entity.getChild(
+            ENTITY_OWNER_NODE_ID);
         String owner = ownerLeaf.isPresent() ? ownerLeaf.get().getValue().toString() : null;
         boolean hasOwner = !Strings.isNullOrEmpty(owner);
         boolean isOwner = hasOwner && localMemberName.getName().equals(owner);

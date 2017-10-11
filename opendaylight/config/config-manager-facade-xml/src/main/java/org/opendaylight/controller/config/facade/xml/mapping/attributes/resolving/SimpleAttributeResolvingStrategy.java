@@ -14,12 +14,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Map;
 import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.config.facade.xml.util.Util;
 import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,8 +139,8 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         @Override
         protected Object parseObject(final Class<?> type, final String value) throws DocumentedException {
             try {
-                return Util.readDate(value);
-            } catch (final ParseException e) {
+                return Revision.ofNullable(value).orElse(null);
+            } catch (final DateTimeParseException e) {
                 LOG.trace("Unable parse value {} due to ", value, e);
                 throw new DocumentedException("Unable to parse value " + value + " as date.",
                         DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
