@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 import static org.junit.Assert.assertNotNull;
+
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.URI;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
  * can be used.
  */
 public abstract class AbstractDOMDataTreeServiceTestSuite {
-    protected static final QNameModule TEST_MODULE = QNameModule.create(URI.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:store"), null);
+    protected static final QNameModule TEST_MODULE = QNameModule.create(URI.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:store"));
 
     protected static final YangInstanceIdentifier UNORDERED_CONTAINER_IID = YangInstanceIdentifier.create(
         new NodeIdentifier(QName.create(TEST_MODULE, "lists")),

@@ -149,17 +149,17 @@ public class ServiceInterfaceEntry extends AbstractEntry {
                     .hasNext();) {
                 IdentitySchemaNode identity = iterator.next();
                 ServiceInterfaceEntry created = null;
-                if (identity.getBaseIdentity() == null) {
+                if (identity.getBaseIdentities().isEmpty()) {
                     // this can happen while loading config module, just skip
                     // the identity
                     continue;
-                } else if (identity.getBaseIdentity().getQName()
+                } else if (identity.getBaseIdentities().iterator().next().getQName()
                         .equals(SERVICE_TYPE_Q_NAME)) {
                     // this is a base type
                     created = new ServiceInterfaceEntry(identity, packageName, ModuleUtil.getQName(currentModule));
                 } else {
                     ServiceInterfaceEntry foundBase = definedSEItracker
-                            .get(identity.getBaseIdentity());
+                            .get(identity.getBaseIdentities().iterator().next());
                     // derived type, did we convert the parent?
                     if (foundBase != null) {
                         created = new ServiceInterfaceEntry(

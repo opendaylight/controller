@@ -37,7 +37,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.rev130405.ServiceRef;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -131,7 +131,7 @@ final class ModuleMXBeanEntryBuilder {
 
         Map<String, ModuleMXBeanEntry> result = new HashMap<>();
 
-        for (AugmentationSchema augmentation : currentModule.getAugmentations()) {
+        for (AugmentationSchemaNode augmentation : currentModule.getAugmentations()) {
             Collection<DataSchemaNode> childNodes = augmentation.getChildNodes();
             if (areAllChildrenChoiceCaseNodes(childNodes)) {
                 for (ChoiceCaseNode childCase : castChildNodesToChoiceCases(childNodes)) {
@@ -172,7 +172,8 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private static void checkAttributeNamesUniqueness(final Map<String, QName> uniqueGeneratedClassesNames, final Map<String, ModuleMXBeanEntry> result) {
+    private static void checkAttributeNamesUniqueness(final Map<String, QName> uniqueGeneratedClassesNames,
+            final Map<String, ModuleMXBeanEntry> result) {
         for (Map.Entry<String, ModuleMXBeanEntry> entry : result.entrySet()) {
             checkUniqueRuntimeBeanAttributesName(entry.getValue(),
                     uniqueGeneratedClassesNames);
@@ -183,8 +184,8 @@ final class ModuleMXBeanEntryBuilder {
         Map<String, IdentitySchemaNode> moduleIdentities = Maps.newHashMap();
 
         for (IdentitySchemaNode id : currentModule.getIdentities()) {
-            if (id.getBaseIdentity() != null
-                    && ConfigConstants.MODULE_TYPE_Q_NAME.equals(id.getBaseIdentity().getQName())) {
+            if (!id.getBaseIdentities().isEmpty()
+                    && ConfigConstants.MODULE_TYPE_Q_NAME.equals(id.getBaseIdentities().iterator().next().getQName())) {
                 String identityLocalName = id.getQName().getLocalName();
                 if (moduleIdentities.containsKey(identityLocalName)) {
                     throw new IllegalStateException("Module name already defined in this currentModule: "
@@ -236,11 +237,12 @@ final class ModuleMXBeanEntryBuilder {
         return true;
     }
 
-    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processChoiceCaseNode(final Map<String, ModuleMXBeanEntry> result,
+    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> void processChoiceCaseNode(
+            final Map<String, ModuleMXBeanEntry> result,
             final Map<String, QName> uniqueGeneratedClassesNames, final String configModulePrefix,
             final Map<String, IdentitySchemaNode> moduleIdentities,
-            final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities, final AugmentationSchema augmentation,
-            final DataSchemaNode when) {
+            final Map<String, IdentitySchemaNode> unaugmentedModuleIdentities,
+            final AugmentationSchemaNode augmentation, final DataSchemaNode when) {
 
         ChoiceCaseNode choiceCaseNode = (ChoiceCaseNode) when;
         if (choiceCaseNode.getConstraints() == null || choiceCaseNode.getConstraints().getWhenCondition() == null) {
@@ -528,7 +530,7 @@ final class ModuleMXBeanEntryBuilder {
             // Module from SchemaContext
             String prefix = m.group(1);
             ModuleImport moduleImport = findModuleImport(currentModule, prefix);
-            foundModule = schemaContext.findModuleByName(moduleImport.getModuleName(), moduleImport.getRevision());
+            foundModule = schemaContext.findModule(moduleImport.getModuleName(), moduleImport.getRevision()).orElse(null);
             checkNotNull(foundModule, format("Module not found in SchemaContext by %s", moduleImport));
             localSIName = m.group(2);
         } else {

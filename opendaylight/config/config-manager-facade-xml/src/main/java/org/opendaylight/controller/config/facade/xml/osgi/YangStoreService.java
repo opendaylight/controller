@@ -30,6 +30,7 @@ import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
+import org.opendaylight.yangtools.yang.model.util.ModuleIdentifierImpl;
 
 public class YangStoreService implements YangStoreContext {
 
@@ -146,6 +147,7 @@ public class YangStoreService implements YangStoreContext {
 
     private static Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
         return ImmutableSet.copyOf(Collections2.transform(modules,
-            input -> new YangModuleCapability(input, current.getModuleSource(input))));
+            input -> new YangModuleCapability(input, current.getModuleSource(
+                ModuleIdentifierImpl.create(input.getName(), input.getRevision())))));
     }
 }
