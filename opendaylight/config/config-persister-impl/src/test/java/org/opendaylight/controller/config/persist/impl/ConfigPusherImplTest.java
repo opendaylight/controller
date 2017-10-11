@@ -19,6 +19,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -46,7 +47,7 @@ import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.capability.Capability;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.w3c.dom.Element;
 
 public class ConfigPusherImplTest {
@@ -71,7 +72,7 @@ public class ConfigPusherImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doReturn("content").when(yangStoreService).getModuleSource(any(ModuleIdentifier.class));
+        doReturn("content").when(yangStoreService).getModuleSource(any(SourceIdentifier.class));
         doReturn("mocked snapshot").when(mockedConfigSnapshot).toString();
         doReturn("<mocked-snapshot/>").when(mockedConfigSnapshot).getConfigSnapshot();
         doReturn(Collections.<Module>emptySet()).when(yangStoreService).getModules();

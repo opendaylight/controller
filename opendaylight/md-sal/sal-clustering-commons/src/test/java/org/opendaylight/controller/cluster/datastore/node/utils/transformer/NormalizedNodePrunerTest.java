@@ -52,15 +52,15 @@ public class NormalizedNodePrunerTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    private static NormalizedNodePruner prunerFullSchema(YangInstanceIdentifier path) {
+    private static NormalizedNodePruner prunerFullSchema(final YangInstanceIdentifier path) {
         return new NormalizedNodePruner(path, FULL_SCHEMA);
     }
 
-    private static NormalizedNodePruner prunerNoAugSchema(YangInstanceIdentifier path) {
+    private static NormalizedNodePruner prunerNoAugSchema(final YangInstanceIdentifier path) {
         return new NormalizedNodePruner(path, NO_AUG_SCHEMA);
     }
 
-    private static NormalizedNodePruner prunerNoTestSchema(YangInstanceIdentifier path) {
+    private static NormalizedNodePruner prunerNoTestSchema(final YangInstanceIdentifier path) {
         return new NormalizedNodePruner(path, NO_TEST_SCHEMA);
     }
 
@@ -140,7 +140,7 @@ public class NormalizedNodePrunerTest {
 
     }
 
-    private static int countNodes(NormalizedNode<?,?> normalizedNode, final String namespaceFilter) {
+    private static int countNodes(final NormalizedNode<?,?> normalizedNode, final String namespaceFilter) {
         if (normalizedNode == null) {
             return 0;
         }
@@ -381,7 +381,7 @@ public class NormalizedNodePrunerTest {
     }
 
     private static NormalizedNode<?, ?> createTestContainer() {
-        byte[] bytes1 = {1,2,3};
+        byte[] bytes1 = {1, 2, 3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).withValue(bytes1).build();
 
@@ -389,14 +389,10 @@ public class NormalizedNodePrunerTest {
         LeafSetEntryNode<Object> entry2 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).withValue(bytes2).build();
 
-        LeafSetEntryNode<Object> entry3 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
-                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, null)).withValue(null).build();
-
-
         return TestModel.createBaseTestContainerBuilder()
                 .withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
                         new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
-                        .withChild(entry1).withChild(entry2).withChild(entry3).build())
+                        .withChild(entry1).withChild(entry2).build())
                 .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1, 2, 3, 4}))
                 .build();
     }

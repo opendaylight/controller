@@ -8,23 +8,11 @@
 
 package org.opendaylight.controller.config.facade.xml.util;
 
-import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
-
 import com.google.common.base.Preconditions;
-import java.text.ParseException;
-import java.util.Date;
 
 public final class Util {
 
     private Util() {
-    }
-
-    public static String writeDate(final Date date) {
-        return getRevisionFormat().format(date);
-    }
-
-    public static Date readDate(final String string) throws ParseException {
-        return getRevisionFormat().parse(string);
     }
 
     public static void checkType(final Object value, final Class<?> clazz) {
