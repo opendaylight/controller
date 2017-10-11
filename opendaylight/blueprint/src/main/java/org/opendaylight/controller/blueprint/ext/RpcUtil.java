@@ -36,8 +36,7 @@ final class RpcUtil {
     static Collection<SchemaPath> decomposeRpcService(final Class<RpcService> service,
             final SchemaContext schemaContext, final Predicate<RpcRoutingStrategy> filter) {
         final QNameModule moduleName = BindingReflections.getQNameModule(service);
-        final Module module = schemaContext.findModuleByNamespaceAndRevision(moduleName.getNamespace(),
-                moduleName.getRevision());
+        final Module module = schemaContext.findModule(moduleName).get();
         LOG.debug("Resolved service {} to module {}", service, module);
 
         final Collection<RpcDefinition> rpcs = module.getRpcs();
