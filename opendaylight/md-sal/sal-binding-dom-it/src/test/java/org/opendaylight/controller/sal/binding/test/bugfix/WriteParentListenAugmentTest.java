@@ -36,14 +36,14 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
     private static final String TLL_NAME = "foo";
 
     private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
-    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
-            .child(TopLevelList.class, TLL_KEY).toInstance();
+    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class)
+            .child(TopLevelList.class, TLL_KEY).build();
 
     private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_WILDCARDED_PATH = InstanceIdentifier
-            .builder(Top.class).child(TopLevelList.class).augmentation(TreeComplexUsesAugment.class).toInstance();
+            .builder(Top.class).child(TopLevelList.class).augmentation(TreeComplexUsesAugment.class).build();
 
     private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_TLL_PATH = InstanceIdentifier
-            .builder(Top.class).child(TopLevelList.class, TLL_KEY).augmentation(TreeComplexUsesAugment.class).toInstance();
+            .builder(Top.class).child(TopLevelList.class, TLL_KEY).augmentation(TreeComplexUsesAugment.class).build();
 
     @Test
     public void writeNodeListenAugment() throws Exception {
@@ -56,8 +56,8 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
-        TopLevelList tll = new TopLevelListBuilder() //
-                .setKey(TLL_KEY) //
+        TopLevelList tll = new TopLevelListBuilder()
+                .setKey(TLL_KEY)
                 .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment("one")).build();
         transaction.put(LogicalDatastoreType.OPERATIONAL, TLL_INSTANCE_ID_BA, tll, true);
         transaction.submit().get(5, TimeUnit.SECONDS);
@@ -72,13 +72,13 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
         transaction2.submit().get(5, TimeUnit.SECONDS);
 
         TreeComplexUsesAugment readedAug = dataBroker.newReadOnlyTransaction().read(
-                LogicalDatastoreType.OPERATIONAL, AUGMENT_TLL_PATH).checkedGet(5, TimeUnit.SECONDS).get();
+                LogicalDatastoreType.OPERATIONAL, AUGMENT_TLL_PATH).get(5, TimeUnit.SECONDS).get();
         assertEquals("two", readedAug.getContainerWithUses().getLeafFromGrouping());
     }
 
-    private TreeComplexUsesAugment treeComplexUsesAugment(final String value) {
-        return new TreeComplexUsesAugmentBuilder() //
-                .setContainerWithUses(new ContainerWithUsesBuilder().setLeafFromGrouping(value).build()) //
+    private static TreeComplexUsesAugment treeComplexUsesAugment(final String value) {
+        return new TreeComplexUsesAugmentBuilder()
+                .setContainerWithUses(new ContainerWithUsesBuilder().setLeafFromGrouping(value).build())
                 .build();
     }
 }

@@ -79,7 +79,7 @@ public class DOMBrokerTest {
                 .build();
 
         commitExecutor = new CommitExecutorService(Executors.newSingleThreadExecutor());
-        futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB");
+        futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB", DOMBrokerTest.class);
         executor = new DeadlockDetectingListeningExecutorService(commitExecutor,
                                                                  TransactionCommitDeadlockException
                                                                          .DEADLOCK_EXCEPTION_SUPPLIER,

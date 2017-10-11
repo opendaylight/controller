@@ -124,6 +124,10 @@
     <argument value="${max-data-broker-future-callback-pool-size}"/>
     <argument value="${max-data-broker-future-callback-queue-size}"/>
     <argument value="CommitFutures"/>
+    <argument>
+    <!-- We should use a more specific class -->
+      <bean factory-ref="operDatastore" factory-method="getClass"/>
+    </argument>
   </bean>
 
   <bean id="commitStatsTracker" class="org.opendaylight.yangtools.util.DurationStatisticsTracker"

@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeFromEntityPath;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.triemap.TrieMap;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
