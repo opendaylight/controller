@@ -12,7 +12,7 @@ import java.util.Set;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 
 public interface YangStoreContext {
 
@@ -38,7 +38,7 @@ public interface YangStoreContext {
      */
     Set<Module> getModules();
 
-    String getModuleSource(ModuleIdentifier moduleIdentifier);
+    String getModuleSource(SourceIdentifier moduleIdentifier);
 
     EnumResolver getEnumResolver();
 }

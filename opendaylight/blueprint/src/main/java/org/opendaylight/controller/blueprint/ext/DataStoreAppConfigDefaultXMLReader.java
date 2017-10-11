@@ -112,8 +112,7 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
 
         SchemaContext schemaContext = schemaService.getGlobalContext();
 
-        Module module = schemaContext.findModuleByNamespaceAndRevision(bindingContext.bindingQName.getNamespace(),
-                bindingContext.bindingQName.getRevision());
+        Module module = schemaContext.findModule(bindingContext.bindingQName.getModule()).orElse(null);
         checkNotNull(module, "%s: Could not obtain the module schema for namespace %s, revision %s",
                 logName, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision());
 
@@ -138,13 +137,13 @@ public class DataStoreAppConfigDefaultXMLReader<T extends DataObject> {
         return (T) appConfig;
     }
 
-    private static void checkNotNull(Object reference, String errorMessageFormat, Object... formatArgs)
-            throws ConfigXMLReaderException {
+    private static void checkNotNull(final Object reference, final String errorMessageFormat,
+            final Object... formatArgs) throws ConfigXMLReaderException {
         checkCondition(reference != null, errorMessageFormat, formatArgs);
     }
 
-    private static void checkCondition(boolean expression, String errorMessageFormat, Object... formatArgs)
-            throws ConfigXMLReaderException {
+    private static void checkCondition(final boolean expression, final String errorMessageFormat,
+            final Object... formatArgs) throws ConfigXMLReaderException {
         if (!expression) {
             throw new ConfigXMLReaderException(String.format(errorMessageFormat, formatArgs));
         }

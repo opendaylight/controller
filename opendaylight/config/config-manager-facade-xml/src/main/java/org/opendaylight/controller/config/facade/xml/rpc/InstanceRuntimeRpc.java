@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.config.facade.xml.rpc;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +27,7 @@ import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
+import org.opendaylight.yangtools.yang.common.Revision;
 
 public final class InstanceRuntimeRpc {
 
@@ -75,7 +76,7 @@ public final class InstanceRuntimeRpc {
 
         // FIXME add identity map to runtime data
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig,
-                Collections.<String, Map<Date, IdentityMapping>>emptyMap());
+                Collections.<String, Map<Optional<Revision>, IdentityMapping>>emptyMap());
 
         for (Entry<String, AttributeReadingStrategy> readStratEntry : strats.entrySet()) {
             List<XmlElement> configNodes = configRootNode.getChildElements(readStratEntry.getKey());
