@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.core.spi.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -64,7 +65,7 @@ public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTran
         }
 
         try {
-            return Futures.immediateCheckedFuture(snapshot.readNode(path));
+            return Futures.immediateCheckedFuture(Optional.fromJavaUtil(snapshot.readNode(path)));
         } catch (Exception e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));

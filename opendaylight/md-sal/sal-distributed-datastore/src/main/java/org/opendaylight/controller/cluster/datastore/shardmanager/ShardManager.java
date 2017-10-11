@@ -1125,7 +1125,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void updateSchemaContext(final Object message) {
         schemaContext = ((UpdateSchemaContext) message).getSchemaContext();
 
-        LOG.debug("Got updated SchemaContext: # of modules {}", schemaContext.getAllModuleIdentifiers().size());
+        LOG.debug("Got updated SchemaContext: # of modules {}", schemaContext.getModules().size());
 
         for (ShardInformation info : localShards.values()) {
             info.setSchemaContext(schemaContext);

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2017 Red Hat, Inc. and others.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+<features name="odl-controller-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+    <feature name="odl-mdsal-clustering-commons" version="${project.version}">
+        <feature version="[3.0.0,4)">odl-akka-system-2.5</feature>
+        <feature version="[3.0.0,4)">odl-akka-persistence-2.5</feature>
+        <feature version="[3.0.0,4)">odl-akka-clustering-2.5</feature>
+    </feature>
+</features>
