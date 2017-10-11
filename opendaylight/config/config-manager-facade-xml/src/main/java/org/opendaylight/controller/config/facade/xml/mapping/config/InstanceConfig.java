@@ -11,15 +11,11 @@ package org.opendaylight.controller.config.facade.xml.mapping.config;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
-
 import org.opendaylight.controller.config.facade.xml.mapping.IdentityMapping;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeReadingStrategy;
@@ -39,6 +35,7 @@ import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
 import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -142,9 +139,9 @@ public final class InstanceConfig {
     }
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, final ServiceRegistryWrapper services,
-                                                 final String moduleNamespace, final EditStrategyType defaultStrategy,
-                                                 final Map<String, Map<Date, IdentityMapping>> identityMap,
-                                                 final EnumResolver enumResolver)
+            final String moduleNamespace, final EditStrategyType defaultStrategy,
+            final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap,
+            final EnumResolver enumResolver)
             throws DocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 

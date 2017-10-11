@@ -11,6 +11,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
@@ -18,11 +19,11 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import javassist.ClassPool;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.test.AbstractSchemaAwareTest;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.DataObjectSerializerGenerator;
@@ -42,11 +43,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.util.AbstractSchemaContext;
-import javassist.ClassPool;
 
 public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
 
@@ -165,11 +164,6 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         @Override
         public Set<Module> getModules() {
             return Collections.emptySet();
-        }
-
-        @Override
-        protected Map<ModuleIdentifier, String> getIdentifiersToSources() {
-            return Collections.emptyMap();
         }
 
         @Override

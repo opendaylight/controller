@@ -52,19 +52,16 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
         // Transfer Object: get the leaves
         final Map<String, AttributeIfc> map = new HashMap<>();
         final Map<String, String> attributeNameMap = new HashMap<>();
-        for (final DataSchemaNode dataSchemaNode : containerSchemaNode
-                .getChildNodes()) {
+        for (final DataSchemaNode dataSchemaNode : containerSchemaNode.getChildNodes()) {
             try {
                 final String yangName = dataSchemaNode.getQName().getLocalName();
-                map.put(yangName,
-                        createInnerAttribute(dataSchemaNode,
-                                typeProviderWrapper, packageName));
+                map.put(yangName, createInnerAttribute(dataSchemaNode, typeProviderWrapper, packageName));
             } catch (final IllegalArgumentException e) {
                 throw new IllegalStateException("Unable to create TO", e);
             }
         }
         return new TOAttribute(containerSchemaNode, map, attributeNameMap,
-                containerSchemaNode.getDescription(), packageName);
+                containerSchemaNode.getDescription().orElse(null), packageName);
     }
 
     private static AttributeIfc createInnerAttribute(
@@ -73,17 +70,13 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
         final Class<? extends DataSchemaNode> type = isAllowedType(dataSchemaNode);
 
         if (type.equals(LeafSchemaNode.class)) {
-            return new JavaAttribute((LeafSchemaNode) dataSchemaNode,
-                    typeProviderWrapper);
+            return new JavaAttribute((LeafSchemaNode) dataSchemaNode, typeProviderWrapper);
         } else if (type.equals(ListSchemaNode.class)) {
-            return ListAttribute.create((ListSchemaNode) dataSchemaNode,
-                    typeProviderWrapper, packageName);
+            return ListAttribute.create((ListSchemaNode) dataSchemaNode, typeProviderWrapper, packageName);
         } else if (type.equals(LeafListSchemaNode.class)) {
-            return ListAttribute.create((LeafListSchemaNode) dataSchemaNode,
-                    typeProviderWrapper);
+            return ListAttribute.create((LeafListSchemaNode) dataSchemaNode, typeProviderWrapper);
         } else if (type.equals(ContainerSchemaNode.class)) {
-            return TOAttribute.create((ContainerSchemaNode) dataSchemaNode,
-                    typeProviderWrapper, packageName);
+            return TOAttribute.create((ContainerSchemaNode) dataSchemaNode, typeProviderWrapper, packageName);
         }
 
         throw new IllegalStateException("This should never happen");
@@ -92,7 +85,7 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     private static Class<? extends DataSchemaNode> isAllowedType(
             final DataSchemaNode dataSchemaNode) {
         for (final Class<? extends DataSchemaNode> allowedType : ALLOWED_CHILDREN) {
-            if (allowedType.isAssignableFrom(dataSchemaNode.getClass()) == true) {
+            if (allowedType.isAssignableFrom(dataSchemaNode.getClass())) {
                 return allowedType;
             }
         }
@@ -160,7 +153,7 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
         if (this == o) {
             return true;
         }
-        if ((o == null) || (getClass() != o.getClass())) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
@@ -190,14 +183,14 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = (31
-                * result)
+        result = 31
+                * result
                 + (this.nullableDescription != null ? this.nullableDescription.hashCode()
                         : 0);
-        result = (31 * result)
+        result = 31 * result
                 + (this.nullableDefault != null ? this.nullableDefault.hashCode() : 0);
-        result = (31
-                * result)
+        result = 31
+                * result
                 + (this.yangNameToAttributeMap != null ? this.yangNameToAttributeMap
                         .hashCode() : 0);
         return result;
