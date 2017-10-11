@@ -9,19 +9,20 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.maven.project.MavenProject;
@@ -80,15 +81,15 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     }
 
     @Override
-    public Collection<File> generateSources(final SchemaContext context,
-                                            final File outputBaseDir, final Set<Module> yangModulesInCurrentMavenModule) {
+    public Collection<File> generateSources(final SchemaContext context, final File outputBaseDir,
+            final Set<Module> currentModules, final Function<Module, Optional<String>> moduleResourcePathResolver) {
 
         Preconditions.checkArgument(context != null, "Null context received");
         Preconditions.checkArgument(outputBaseDir != null,
                 "Null outputBaseDir received");
 
         Preconditions
-                .checkArgument((this.namespaceToPackageMapping != null) && !this.namespaceToPackageMapping.isEmpty(),
+                .checkArgument(this.namespaceToPackageMapping != null && !this.namespaceToPackageMapping.isEmpty(),
                         "No namespace to package mapping provided in additionalConfiguration");
 
         final PackageTranslator packageTranslator = new PackageTranslator(this.namespaceToPackageMapping);
@@ -117,7 +118,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
                                 + sieEntry.getValue());
                 }
             }
-            if (yangModulesInCurrentMavenModule.contains(module)) {
+            if (currentModules.contains(module)) {
                 // write this sie to disk
                 for (final ServiceInterfaceEntry sie : namesToSIEntries.values()) {
                     try {
@@ -138,7 +139,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
 
         final StringBuilder fullyQualifiedNamesOfFactories = new StringBuilder();
         // create MBEs
-        for (final Module module : yangModulesInCurrentMavenModule) {
+        for (final Module module : currentModules) {
             final String packageName = packageTranslator.getPackageName(module);
             final Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                     .create(module, qNamesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl(context)),
@@ -162,7 +163,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             }
         }
         // create ModuleFactory file if needed
-        if ((fullyQualifiedNamesOfFactories.length() > 0)
+        if (fullyQualifiedNamesOfFactories.length() > 0
                 && this.generateModuleFactoryFile) {
             final File serviceLoaderFile = JMXGenerator.concatFolders(
                     this.resourceBaseDir, "META-INF", "services",
@@ -171,7 +172,8 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             serviceLoaderFile.getParentFile().mkdirs();
             try {
                 serviceLoaderFile.createNewFile();
-                Files.write(fullyQualifiedNamesOfFactories.toString(), serviceLoaderFile, StandardCharsets.UTF_8);
+                Files.asCharSink(serviceLoaderFile, StandardCharsets.UTF_8).write(
+                    fullyQualifiedNamesOfFactories.toString());
             } catch (final IOException e) {
                 final String message = "Cannot write to " + serviceLoaderFile;
                 LOG.error(message, e);
@@ -204,7 +206,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
 
     private static Map<String, String> extractNamespaceMapping(
             final Map<String, String> additionalCfg) {
-        final Map<String, String> namespaceToPackage = Maps.newHashMap();
+        final Map<String, String> namespaceToPackage = new HashMap<>();
         for (final String key : additionalCfg.keySet()) {
             if (key.startsWith(NAMESPACE_TO_PACKAGE_PREFIX)) {
                 final String mapping = additionalCfg.get(key);
@@ -237,24 +239,21 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
 
     @VisibleForTesting
     static class GeneratedFilesTracker {
-        private final Set<File> files = Sets.newHashSet();
+        private final Set<File> files = new HashSet<>();
 
         void addFile(final File file) {
             if (this.files.contains(file)) {
-                final List<File> undeletedFiles = Lists.newArrayList();
+                final List<File> undeletedFiles = new ArrayList<>();
                 for (final File presentFile : this.files) {
                     if (!presentFile.delete()) {
                         undeletedFiles.add(presentFile);
                     }
                 }
                 if (!undeletedFiles.isEmpty()) {
-                    LOG.error(
-                            "Illegal state occurred: Unable to delete already generated files, undeleted files: {}",
+                    LOG.error("Illegal state occurred: Unable to delete already generated files, undeleted files: {}",
                             undeletedFiles);
                 }
-                throw new IllegalStateException(
-                        "Name conflict in generated files, file" + file
-                                + " present twice");
+                throw new IllegalStateException("Name conflict in generated files, file" + file + " present twice");
             }
             this.files.add(file);
         }

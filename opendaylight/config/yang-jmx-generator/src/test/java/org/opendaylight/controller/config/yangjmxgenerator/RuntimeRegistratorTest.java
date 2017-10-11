@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Optional;
 import java.net.URI;
 import java.util.Collections;
@@ -48,8 +49,7 @@ public class RuntimeRegistratorTest {
     @Test
     public void testHierarchy() {
         final LeafSchemaNode leaf = mock(LeafSchemaNode.class);
-        doReturn(new QName(URI.create("urn:x"), "leaf-local-name")).when(leaf)
-                .getQName();
+        doReturn(QName.create(URI.create("urn:x"), "leaf-local-name")).when(leaf).getQName();
         doReturn(Collections.emptyList()).when(leaf).getUnknownSchemaNodes();
         doReturn(null).when(leaf).getDefault();
         doReturn(null).when(leaf).getDescription();

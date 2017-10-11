@@ -17,10 +17,8 @@ import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -49,7 +47,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLe
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class TestModel {
@@ -173,36 +170,17 @@ public class TestModel {
     }
 
     public static SchemaContext createTestContext() {
-        List<InputStream> inputStreams = new ArrayList<>();
-        inputStreams.add(getDatastoreTestInputStream());
-        inputStreams.add(getDatastoreAugInputStream());
-        inputStreams.add(getDatastoreTestNotificationInputStream());
-
-        return resolveSchemaContext(inputStreams);
+        return YangParserTestUtils.parseYangResources(TestModel.class, DATASTORE_TEST_YANG, DATASTORE_AUG_YANG,
+            DATASTORE_TEST_NOTIFICATION_YANG);
     }
 
     public static SchemaContext createTestContextWithoutTestSchema() {
-        List<InputStream> inputStreams = new ArrayList<>();
-        inputStreams.add(getDatastoreTestNotificationInputStream());
-
-        return resolveSchemaContext(inputStreams);
+        return YangParserTestUtils.parseYangResource(DATASTORE_TEST_NOTIFICATION_YANG);
     }
-
 
     public static SchemaContext createTestContextWithoutAugmentationSchema() {
-        List<InputStream> inputStreams = new ArrayList<>();
-        inputStreams.add(getDatastoreTestInputStream());
-        inputStreams.add(getDatastoreTestNotificationInputStream());
-
-        return resolveSchemaContext(inputStreams);
-    }
-
-    private static SchemaContext resolveSchemaContext(final List<InputStream> streams) {
-        try {
-            return YangParserTestUtils.parseYangStreams(streams);
-        } catch (ReactorException e) {
-            throw new RuntimeException("Unable to build schema context from " + streams, e);
-        }
+        return YangParserTestUtils.parseYangResources(TestModel.class, DATASTORE_TEST_YANG,
+            DATASTORE_TEST_NOTIFICATION_YANG);
     }
 
     /**
