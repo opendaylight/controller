@@ -12,10 +12,7 @@ import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.ma
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -35,7 +32,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class CompositeModel {
@@ -109,33 +105,9 @@ public class CompositeModel {
                     .build()) //
             .build();
 
-    public static final InputStream getDatastoreTestInputStream() {
-        return getInputStream(DATASTORE_TEST_YANG);
-    }
-
-    public static final InputStream getDatastoreAugInputStream() {
-        return getInputStream(DATASTORE_AUG_YANG);
-    }
-
-    public static final InputStream getDatastoreTestNotificationInputStream() {
-        return getInputStream(DATASTORE_TEST_NOTIFICATION_YANG);
-    }
-
-    private static InputStream getInputStream(final String resourceName) {
-        return CompositeModel.class.getResourceAsStream(resourceName);
-    }
-
     public static SchemaContext createTestContext() {
-        List<InputStream> inputStreams = new ArrayList<>();
-        inputStreams.add(getDatastoreTestInputStream());
-        inputStreams.add(getDatastoreAugInputStream());
-        inputStreams.add(getDatastoreTestNotificationInputStream());
-
-        try {
-            return YangParserTestUtils.parseYangStreams(inputStreams);
-        } catch (ReactorException e) {
-            throw new RuntimeException("Unable to build schema context from " + inputStreams, e);
-        }
+        return YangParserTestUtils.parseYangResources(CompositeModel.class, DATASTORE_TEST_YANG, DATASTORE_AUG_YANG,
+            DATASTORE_TEST_NOTIFICATION_YANG);
     }
 
     /**

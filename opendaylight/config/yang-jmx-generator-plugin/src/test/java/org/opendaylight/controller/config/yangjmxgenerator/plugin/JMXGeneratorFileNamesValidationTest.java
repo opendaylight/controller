@@ -13,7 +13,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import java.util.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslatorTest;
@@ -35,8 +36,8 @@ public class JMXGeneratorFileNamesValidationTest extends JMXGeneratorTest {
         map.put(JMXGenerator.MODULE_FACTORY_FILE_BOOLEAN, "randomValue");
         jmxGenerator.setAdditionalConfig(map);
         try {
-            jmxGenerator.generateSources(context, outputBaseDir,
-                    Sets.newHashSet(testFilesModule, testFiles1Module));
+            jmxGenerator.generateSources(context, outputBaseDir, ImmutableSet.of(testFilesModule, testFiles1Module),
+                m -> Optional.empty());
             fail();
         } catch (RuntimeException e) {
             final Throwable cause = e.getCause();
