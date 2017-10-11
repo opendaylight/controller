@@ -44,7 +44,7 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
     private static final List1Key LIST1_KEY = new List1Key(LIST1_NAME);
 
     private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
-            .child(TopLevelList.class, TLL_KEY).toInstance();
+            .child(TopLevelList.class, TLL_KEY).build();
 
     private static final InstanceIdentifier<List1> LIST1_INSTANCE_ID_BA = //
             TLL_INSTANCE_ID_BA.builder() //
@@ -75,11 +75,11 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
         transaction.submit().get(5, TimeUnit.SECONDS);
 
         Optional<List1> readList1 = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                LIST1_INSTANCE_ID_BA).checkedGet(1000, TimeUnit.MILLISECONDS);
+                LIST1_INSTANCE_ID_BA).get(1000, TimeUnit.MILLISECONDS);
         assertTrue(readList1.isPresent());
 
         Optional<? extends DataObject> readList11 = dataBroker.newReadOnlyTransaction().read(
-                LogicalDatastoreType.OPERATIONAL, LIST11_INSTANCE_ID_BA).checkedGet(5, TimeUnit.SECONDS);
+                LogicalDatastoreType.OPERATIONAL, LIST11_INSTANCE_ID_BA).get(5, TimeUnit.SECONDS);
         assertNotNull("Readed flow should not be null.",readList11);
         assertTrue(readList11.isPresent());
         assertEquals(list11, readList11.get());

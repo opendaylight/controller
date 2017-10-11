@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.NotSerializableException;
 import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -21,9 +22,9 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 
@@ -35,9 +36,9 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFac
 public class ReadyLocalTransactionSerializerTest extends AbstractTest {
 
     @Test
-    public void testToAndFromBinary() {
-        TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        dataTree.setSchemaContext(TestModel.createTestContext());
+    public void testToAndFromBinary() throws NotSerializableException {
+        DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, TestModel.createTestContext());
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
 
         ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);

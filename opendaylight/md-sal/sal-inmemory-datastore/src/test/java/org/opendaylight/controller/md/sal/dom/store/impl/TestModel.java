@@ -7,13 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class TestModel {
@@ -33,17 +29,7 @@ public class TestModel {
             YangInstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 
-    private static InputStream getInputStream() {
-        return TestModel.class.getResourceAsStream(DATASTORE_TEST_YANG);
-    }
-
     public static SchemaContext createTestContext() {
-        final List<InputStream> streams = Collections.singletonList(getInputStream());
-
-        try {
-            return YangParserTestUtils.parseYangStreams(streams);
-        } catch (ReactorException e) {
-            throw new RuntimeException("Unable to build schema context from " + streams, e);
-        }
+        return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);
     }
 }
