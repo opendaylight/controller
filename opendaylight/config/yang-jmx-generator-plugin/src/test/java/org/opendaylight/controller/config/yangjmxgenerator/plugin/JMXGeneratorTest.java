@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.config.yangjmxgenerator.PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -106,8 +108,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     @Test
     public void generateSIsMBsTest() {
-        Collection<File> files = jmxGenerator.generateSources(context,
-                outputBaseDir, context.getModules());
+        Collection<File> files = jmxGenerator.generateSources(context, outputBaseDir, context.getModules(),
+            m -> Optional.empty());
         List<String> expectedFileNames = new ArrayList<>();
         expectedFileNames
                 .addAll(ServiceInterfaceEntryTest.expectedSIEFileNames);
@@ -147,8 +149,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     @Test
     public void generateSIEsTest() throws IOException, ParseException {
-        Collection<File> files = jmxGenerator.generateSources(context,
-                outputBaseDir, Collections.singleton(threadsModule));
+        Collection<File> files = jmxGenerator.generateSources(context, outputBaseDir,
+            Collections.singleton(threadsModule), m -> Optional.empty());
         assertEquals(ServiceInterfaceEntryTest.expectedSIEFileNames, toFileNames(files));
 
         for (File file : files) {
@@ -205,7 +207,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         jmxGenerator.setAdditionalConfig(map);
 
         Collection<File> files = jmxGenerator.generateSources(context, outputBaseDir,
-            Collections.singleton(bgpListenerJavaModule));
+            Collections.singleton(bgpListenerJavaModule), m -> Optional.empty());
 
         assertEquals(expectedGenerateMBEsListNames, toFileNames(files));
     }
@@ -217,7 +219,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         jmxGenerator.setAdditionalConfig(map);
 
         Collection<File> files = jmxGenerator.generateSources(context, outputBaseDir,
-            Collections.singleton(threadsJavaModule));
+            Collections.singleton(threadsJavaModule), m -> Optional.empty());
 
         assertEquals(expectedModuleFileNames, toFileNames(files));
 

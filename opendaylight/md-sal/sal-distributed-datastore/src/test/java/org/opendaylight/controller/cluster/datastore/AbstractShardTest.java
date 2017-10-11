@@ -28,7 +28,6 @@ import akka.japi.Creator;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -73,11 +73,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -202,7 +202,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected TipProducingDataTree createDelegatingMockDataTree() throws Exception {
-        TipProducingDataTree actual = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
+        TipProducingDataTree actual = InMemoryDataTreeFactory.getInstance().create(
+            DataTreeConfiguration.DEFAULT_CONFIGURATION);
         final TipProducingDataTree mock = mock(TipProducingDataTree.class);
 
         doAnswer(invocation -> {
@@ -294,7 +295,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
-        return store.takeSnapshot().readNode(id).orNull();
+        return store.takeSnapshot().readNode(id).orElse(null);
     }
 
     public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
@@ -341,8 +342,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
-        final DataTree testStore = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        testStore.setSchemaContext(SCHEMA_CONTEXT);
+        final DataTree testStore = InMemoryDataTreeFactory.getInstance().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, SCHEMA_CONTEXT);
 
         writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
