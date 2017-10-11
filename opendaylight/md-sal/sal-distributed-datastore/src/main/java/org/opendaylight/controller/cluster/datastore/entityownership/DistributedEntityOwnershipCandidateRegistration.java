@@ -20,7 +20,8 @@ class DistributedEntityOwnershipCandidateRegistration extends AbstractObjectRegi
         implements DOMEntityOwnershipCandidateRegistration {
     private final DistributedEntityOwnershipService service;
 
-    DistributedEntityOwnershipCandidateRegistration(DOMEntity entity, DistributedEntityOwnershipService service) {
+    DistributedEntityOwnershipCandidateRegistration(final DOMEntity entity,
+            final DistributedEntityOwnershipService service) {
         super(entity);
         this.service = service;
     }
@@ -29,11 +30,4 @@ class DistributedEntityOwnershipCandidateRegistration extends AbstractObjectRegi
     protected void removeRegistration() {
         service.unregisterCandidate(getInstance());
     }
-
-    @Override
-    public String toString() {
-        return "DistributedEntityOwnershipCandidateRegistration [entity=" + getInstance() + "]";
-    }
-
-
 }
