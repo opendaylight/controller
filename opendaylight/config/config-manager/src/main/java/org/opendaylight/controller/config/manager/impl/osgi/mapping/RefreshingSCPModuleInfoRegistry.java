@@ -89,7 +89,7 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             this.inner.close();
             // send modify event when a bundle disappears
             updateService();
