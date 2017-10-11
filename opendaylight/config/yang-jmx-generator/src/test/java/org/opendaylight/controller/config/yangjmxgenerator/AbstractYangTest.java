@@ -10,7 +10,9 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -46,20 +48,20 @@ public abstract class AbstractYangTest {
 
     @Before
     public void loadYangFiles() throws Exception {
-        final List<InputStream> yangISs = new ArrayList<>();
-        yangISs.addAll(getStreams("/test-config-threads.yang",
-                "/test-config-threads-java.yang",
-                "/config-bgp-listener-impl.yang", "/ietf-inet-types.yang",
-                "/config-jmx-it.yang", "/config-jmx-it-impl.yang",
-                "/test-config-files.yang", "/test-config-files1.yang"));
+        final List<String> yangResources = new ArrayList<>();
+        yangResources.add("/test-config-threads.yang");
+        yangResources.add("/test-config-threads-java.yang");
+        yangResources.add("/config-bgp-listener-impl.yang");
+        yangResources.add("/ietf-inet-types.yang");
+        yangResources.add("/config-jmx-it.yang");
+        yangResources.add("/config-jmx-it-impl.yang");
+        yangResources.add("/test-config-files.yang");
+        yangResources.add("/test-config-files1.yang");
 
-        yangISs.addAll(getConfigApiYangInputStreams());
+        yangResources.addAll(getConfigApiYangs());
 
-        this.context = YangParserTestUtils.parseYangStreams(yangISs);
-        // close ISs
-        for (final InputStream is : yangISs) {
-            is.close();
-        }
+        this.context = YangParserTestUtils.parseYangResources(AbstractYangTest.class, yangResources);
+
         this.namesToModules = YangModelSearchUtils.mapModulesByNames(this.context
                 .getModules());
         this.configModule = this.namesToModules.get(ConfigConstants.CONFIG_MODULE);
@@ -74,11 +76,10 @@ public abstract class AbstractYangTest {
         this.jmxImplModule = this.namesToModules.get("config-jmx-it-impl");
         this.testFilesModule = this.namesToModules.get("test-config-files");
         this.testFiles1Module = this.namesToModules.get("test-config-files1");
-
     }
 
-    public static List<InputStream> getConfigApiYangInputStreams() {
-        return getStreams("/META-INF/yang/config@2013-04-05.yang", "/META-INF/yang/rpc-context@2013-06-17.yang");
+    public static List<String> getConfigApiYangs() {
+        return ImmutableList.of("/META-INF/yang/config@2013-04-05.yang", "/META-INF/yang/rpc-context@2013-06-17.yang");
     }
 
     public Map<QName, IdentitySchemaNode> mapIdentitiesByQNames(final Module module) {

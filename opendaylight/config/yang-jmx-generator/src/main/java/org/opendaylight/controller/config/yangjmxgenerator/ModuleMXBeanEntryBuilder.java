@@ -183,8 +183,8 @@ final class ModuleMXBeanEntryBuilder {
         Map<String, IdentitySchemaNode> moduleIdentities = Maps.newHashMap();
 
         for (IdentitySchemaNode id : currentModule.getIdentities()) {
-            if (id.getBaseIdentity() != null
-                    && ConfigConstants.MODULE_TYPE_Q_NAME.equals(id.getBaseIdentity().getQName())) {
+            if (!id.getBaseIdentities().isEmpty()
+                    && ConfigConstants.MODULE_TYPE_Q_NAME.equals(id.getBaseIdentities().iterator().next().getQName())) {
                 String identityLocalName = id.getQName().getLocalName();
                 if (moduleIdentities.containsKey(identityLocalName)) {
                     throw new IllegalStateException("Module name already defined in this currentModule: "

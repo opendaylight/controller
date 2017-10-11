@@ -28,7 +28,6 @@ import akka.japi.Creator;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -294,7 +294,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
-        return store.takeSnapshot().readNode(id).orNull();
+        return store.takeSnapshot().readNode(id).orElse(null);
     }
 
     public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
