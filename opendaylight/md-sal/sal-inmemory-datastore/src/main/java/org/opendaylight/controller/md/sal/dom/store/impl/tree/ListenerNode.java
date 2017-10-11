@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
+import java.util.Optional;
 import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -43,7 +43,7 @@ public class ListenerNode implements StoreTreeNode<ListenerNode>, Identifiable<P
     public Optional<ListenerNode> getChild(final PathArgument child) {
         final RegistrationTreeNode<DataChangeListenerRegistration<?>> c = delegate.getExactChild(child);
         if (c == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(new ListenerNode(c));

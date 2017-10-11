@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -42,9 +43,17 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
         this.typeDefinition = CompatUtils.compatLeafType(leaf);
         this.typeProviderWrapper = typeProviderWrapper;
-        this.nullableDefault = leaf.getDefault();
-        this.nullableDefaultWrappedForCode = leaf.getDefault() == null ? null : typeProviderWrapper.getDefault(leaf);
-        this.nullableDescription = leaf.getDescription();
+
+        final Optional<? extends Object> typeDefault = leaf.getType().getDefaultValue();
+        if (typeDefault.isPresent()) {
+            nullableDefault = (String) typeDefault.get();
+            nullableDefaultWrappedForCode = typeProviderWrapper.getDefault(leaf);
+        } else {
+            nullableDefault = null;
+            nullableDefaultWrappedForCode = null;
+        }
+
+        this.nullableDescription = leaf.getDescription().orElse(null);
     }
 
     public JavaAttribute(final LeafListSchemaNode leaf,
@@ -54,7 +63,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         this.typeDefinition = leaf.getType();
         this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = this.nullableDefaultWrappedForCode = null;
-        this.nullableDescription = leaf.getDescription();
+        this.nullableDescription = leaf.getDescription().orElse(null);
     }
 
     public boolean isUnion() {
@@ -105,7 +114,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         if (this == o) {
             return true;
         }
-        if ((o == null) || (getClass() != o.getClass())) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
@@ -133,12 +142,12 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = (31 * result) + (this.type != null ? this.type.hashCode() : 0);
-        result = (31
-                * result)
+        result = 31 * result + (this.type != null ? this.type.hashCode() : 0);
+        result = 31
+                * result
                 + (this.nullableDescription != null ? this.nullableDescription.hashCode()
                         : 0);
-        result = (31 * result)
+        result = 31 * result
                 + (this.nullableDefault != null ? this.nullableDefault.hashCode() : 0);
         return result;
     }

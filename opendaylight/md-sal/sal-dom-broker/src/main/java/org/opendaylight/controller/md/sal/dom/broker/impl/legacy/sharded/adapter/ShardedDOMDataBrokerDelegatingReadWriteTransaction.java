@@ -38,9 +38,9 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -82,7 +82,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
         final ImmutableMap.Builder<LogicalDatastoreType, Queue<Modification>> modificationHistoryMapBuilder =
                 ImmutableMap.builder();
         for (final LogicalDatastoreType store : LogicalDatastoreType.values()) {
-            final DataTree tree = treeFactory.create(treeTypeForStore(store));
+            final DataTree tree = treeFactory.create(treeConfigForStore(store));
             tree.setSchemaContext(ctx);
             snapshotMapBuilder.put(store, tree.takeSnapshot());
 
@@ -133,7 +133,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
                     mod.write(path, result.get());
                 }
                 applyModificationHistoryToSnapshot(mod, currentHistory);
-                readResult.set(mod.readNode(path));
+                readResult.set(Optional.fromJavaUtil(mod.readNode(path)));
             }
 
             @Override
@@ -190,11 +190,12 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
         }
     }
 
-    private TreeType treeTypeForStore(final LogicalDatastoreType store) {
-        return store == LogicalDatastoreType.CONFIGURATION ? TreeType.CONFIGURATION : TreeType.OPERATIONAL;
+    private static DataTreeConfiguration treeConfigForStore(final LogicalDatastoreType store) {
+        return store == LogicalDatastoreType.CONFIGURATION ? DataTreeConfiguration.DEFAULT_CONFIGURATION
+                : DataTreeConfiguration.DEFAULT_OPERATIONAL;
     }
 
-    private void applyModificationHistoryToSnapshot(final DataTreeModification dataTreeModification,
+    private static void applyModificationHistoryToSnapshot(final DataTreeModification dataTreeModification,
                                                     final Queue<Modification> modificationHistory) {
         while (!modificationHistory.isEmpty()) {
             final Modification modification = modificationHistory.poll();
