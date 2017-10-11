@@ -10,6 +10,7 @@
     <!-- This needs to be added manually until we resolve the odl-mdsal-common situation -->
     <repository>mvn:org.opendaylight.controller/odl-mdsal-common/${project.version}/xml/features</repository>
     <feature name="odl-mdsal-broker-local" version="${project.version}">
+        <feature version="[3.0.0,4)">odl-lmax-3</feature>
         <bundle start-level="70">mvn:org.opendaylight.controller/sal-schema-service/${project.version}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${blueprint.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}" override="true">

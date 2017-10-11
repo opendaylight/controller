@@ -28,7 +28,7 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
         final TOAttribute innerAttribute = TOAttribute.create(node, typeProvider, packageName);
 
-        return new ListAttribute(node, innerAttribute, node.getDescription());
+        return new ListAttribute(node, innerAttribute, node.getDescription().orElse(null));
     }
 
     public static ListAttribute create(final LeafListSchemaNode node,
@@ -36,7 +36,7 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
 
         final JavaAttribute innerAttribute = new JavaAttribute(node, typeProvider);
 
-        return new ListAttribute(node, innerAttribute, node.getDescription());
+        return new ListAttribute(node, innerAttribute, node.getDescription().orElse(null));
     }
 
     ListAttribute(final DataSchemaNode attrNode, final TypedAttribute innerAttribute,
@@ -70,11 +70,11 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = (31
-                * result)
+        result = 31
+                * result
                 + (this.nullableDescription != null ? this.nullableDescription.hashCode()
                         : 0);
-        result = (31 * result)
+        result = 31 * result
                 + (this.nullableDefault != null ? this.nullableDefault.hashCode() : 0);
         return result;
     }
@@ -84,7 +84,7 @@ public class ListAttribute extends AbstractAttribute implements TypedAttribute {
         if (this == o) {
             return true;
         }
-        if ((o == null) || (getClass() != o.getClass())) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
