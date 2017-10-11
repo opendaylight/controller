@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import com.google.common.io.Resources;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -23,7 +18,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class TestModel {
@@ -60,20 +54,7 @@ public class TestModel {
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 
     public static SchemaContext createTestContext() {
-        final List<InputStream> sources;
-
-        try {
-            sources = Collections.singletonList(
-                Resources.asByteSource(TestModel.class.getResource(DATASTORE_TEST_YANG)).openStream());
-        } catch (IOException e1) {
-            throw new ExceptionInInitializerError(e1);
-        }
-
-        try {
-            return YangParserTestUtils.parseYangStreams(sources);
-        }  catch (ReactorException e) {
-            throw new RuntimeException("Unable to build schema context from " + sources, e);
-        }
+        return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);
     }
 
     public static DataContainerChild<?, ?> outerNode(final int... ids) {

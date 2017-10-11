@@ -124,7 +124,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             unregisterMountPoint(mountPoint.getIdentifier());
         }
     }

@@ -18,7 +18,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,6 +31,7 @@ import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
 import org.opendaylight.controller.config.util.xml.XmlUtil;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -41,16 +41,16 @@ public class Config {
         Map<String /* Name of module entry from yang file */,
         ModuleConfig>> moduleConfigs;
 
-    private final Map<String, Map<Date, IdentityMapping>> identityMap;
+    private final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap;
 
     private final EnumResolver enumResolver;
 
     public Config(final Map<String, Map<String, ModuleConfig>> moduleConfigs, final EnumResolver enumResolver) {
-        this(moduleConfigs, Collections.<String, Map<Date, IdentityMapping>>emptyMap(), enumResolver);
+        this(moduleConfigs, Collections.<String, Map<Optional<Revision>, IdentityMapping>>emptyMap(), enumResolver);
     }
 
     public Config(final Map<String, Map<String, ModuleConfig>> moduleConfigs,
-            final Map<String, Map<Date, IdentityMapping>> identityMap, final EnumResolver enumResolver) {
+            final Map<String, Map<Optional<Revision>, IdentityMapping>> identityMap, final EnumResolver enumResolver) {
         this.moduleConfigs = moduleConfigs;
         this.identityMap = identityMap;
         this.enumResolver = enumResolver;
