@@ -90,7 +90,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
@@ -1282,8 +1282,8 @@ public class DistributedDataStoreIntegrationTest {
                         CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
                                 CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
 
-                DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-                dataTree.setSchemaContext(SchemaContextHelper.full());
+                DataTree dataTree = new InMemoryDataTreeFactory().create(
+                    DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
                 AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
                 NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
@@ -1291,8 +1291,8 @@ public class DistributedDataStoreIntegrationTest {
                         new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
                         Collections.emptyList(), 2, 1, 2, 1, 1, "member-1", null);
 
-                dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-                dataTree.setSchemaContext(SchemaContextHelper.full());
+                dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
+                    SchemaContextHelper.full());
 
                 final NormalizedNode<?, ?> peopleNode = PeopleModel.create();
                 AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);

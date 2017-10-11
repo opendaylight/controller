@@ -11,13 +11,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -31,16 +31,16 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
-    private final List<DataTreeCandidate> changeList = Lists.newArrayList();
+    private final List<DataTreeCandidate> changeList = new ArrayList<>();
 
     private volatile CountDownLatch changeLatch;
     private int expChangeEventCount;
 
-    public MockDataTreeChangeListener(int expChangeEventCount) {
+    public MockDataTreeChangeListener(final int expChangeEventCount) {
         reset(expChangeEventCount);
     }
 
-    public void reset(int newExpChangeEventCount) {
+    public void reset(final int newExpChangeEventCount) {
         changeLatch = new CountDownLatch(newExpChangeEventCount);
         this.expChangeEventCount = newExpChangeEventCount;
         synchronized (changeList) {
@@ -59,7 +59,7 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void waitForChangeEvents(YangInstanceIdentifier... expPaths) {
+    public void waitForChangeEvents(final YangInstanceIdentifier... expPaths) {
         boolean done = Uninterruptibles.awaitUninterruptibly(changeLatch, 5, TimeUnit.SECONDS);
         if (!done) {
             fail(String.format("Missing change notifications. Expected: %d. Actual: %d",
@@ -100,7 +100,7 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
-    public void verifyNotifiedData(YangInstanceIdentifier... paths) {
+    public void verifyNotifiedData(final YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
         synchronized (changeList) {
             for (DataTreeCandidate c : changeList) {
@@ -113,14 +113,14 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
-    public void expectNoMoreChanges(String assertMsg) {
+    public void expectNoMoreChanges(final String assertMsg) {
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         synchronized (changeList) {
             assertEquals(assertMsg, expChangeEventCount, changeList.size());
         }
     }
 
-    public void verifyNoNotifiedData(YangInstanceIdentifier... paths) {
+    public void verifyNoNotifiedData(final YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
         synchronized (changeList) {
             for (DataTreeCandidate c : changeList) {

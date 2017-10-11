@@ -21,11 +21,8 @@ import static org.mockito.Mockito.mock;
 import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,6 +44,7 @@ import org.opendaylight.mdsal.binding.model.api.Type;
 import org.opendaylight.mdsal.binding.model.util.Types;
 import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.RevisionAwareXPath;
@@ -56,20 +54,13 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
     public static final String PACKAGE_NAME = "pack2";
 
     protected static final URI THREADS_NAMESPACE;
-    protected static final Date THREADS_REVISION_DATE;
+    protected static final Revision THREADS_REVISION_DATE = Revision.of("2013-04-09");
 
     static {
         try {
-            THREADS_NAMESPACE = new URI(ConfigConstants.CONFIG_NAMESPACE
-                    + ":threads");
+            THREADS_NAMESPACE = new URI(ConfigConstants.CONFIG_NAMESPACE + ":threads");
         } catch (final URISyntaxException e) {
-            throw new Error(e);
-        }
-        final SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            THREADS_REVISION_DATE = revisionFormat.parse("2013-04-09");
-        } catch (final ParseException e) {
-            throw new Error(e);
+            throw new ExceptionInInitializerError(e);
         }
     }
 
