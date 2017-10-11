@@ -23,9 +23,9 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.i
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 
-import com.google.common.base.Optional;
 import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -152,7 +152,7 @@ public class PruningDataTreeModificationTest {
                 new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode).build();
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(path);
-        assertEquals("After pruning present", true, actual.isPresent());
+        assertTrue("After pruning present", actual.isPresent());
         assertEquals("After pruning", prunedNode, actual.get());
     }
 
@@ -253,7 +253,7 @@ public class PruningDataTreeModificationTest {
                 .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(path);
-        assertEquals("After pruning present", true, actual.isPresent());
+        assertTrue("After pruning present", actual.isPresent());
         assertEquals("After pruning", prunedNode, actual.get());
     }
 

@@ -29,7 +29,7 @@ import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 public class SchemaContextTest extends AbstractYangTest {
 
-    IdentitySchemaNode findIdentityByQName(Module module, QName qName) {
+    IdentitySchemaNode findIdentityByQName(final Module module, final QName qName) {
         Map<QName, IdentitySchemaNode> mapIdentitiesByQNames = mapIdentitiesByQNames(module);
         IdentitySchemaNode found = mapIdentitiesByQNames.get(qName);
         assertNotNull(found);
@@ -60,7 +60,7 @@ public class SchemaContextTest extends AbstractYangTest {
             // all except scheduled-threadpool should have base set to
             // serviceType
             if (localName.equals("scheduled-threadpool") == false) {
-                assertEquals(serviceType, id.getBaseIdentity());
+                assertEquals(serviceType, id.getBaseIdentities().iterator().next());
             }
         }
         assertNotNull(eventBusSchemaNode);
@@ -75,9 +75,8 @@ public class SchemaContextTest extends AbstractYangTest {
                 usn.getNodeType());
     }
 
-    private void assertAllIdentitiesAreExpected(
-            Module module,
-            Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases) {
+    private static void assertAllIdentitiesAreExpected(final Module module,
+            final Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases) {
         Map<String /* identity name */, Optional<QName>> copyOfExpectedNames = new HashMap<>(
                 expectedIdentitiesToBases);
         for (IdentitySchemaNode id : module.getIdentities()) {
@@ -88,8 +87,7 @@ public class SchemaContextTest extends AbstractYangTest {
                     .remove(localName);
             if (maybeExpectedBaseQName.isPresent()) {
                 assertEquals("Unexpected base identity of " + localName,
-                        maybeExpectedBaseQName.get(), id.getBaseIdentity()
-                                .getQName());
+                        maybeExpectedBaseQName.get(), id.getBaseIdentities().iterator().next().getQName());
             }
         }
         assertEquals("Expected identities not found " + copyOfExpectedNames,
@@ -98,21 +96,14 @@ public class SchemaContextTest extends AbstractYangTest {
 
     @Test
     public void testReadingIdentities_threadsJavaModule() {
-        Map<String /* identity name */, Optional<QName>> expectedIdentitiesToBases = new HashMap<String, Optional<QName>>(){
-            private static final long serialVersionUID = 1L;
+        Map<String /* identity name */, Optional<QName>> expected = new HashMap<>();
+        expected.put(ModuleMXBeanEntryTest.EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+        expected.put(ModuleMXBeanEntryTest.ASYNC_EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+        expected.put(ModuleMXBeanEntryTest.THREADFACTORY_NAMING_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+        expected.put(ModuleMXBeanEntryTest.THREADPOOL_DYNAMIC_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
+        expected.put("thread-rpc-context", Optional.<QName>absent());
+        expected.put(ModuleMXBeanEntryTest.THREADPOOL_REGISTRY_IMPL_NAME, Optional.of(MODULE_TYPE_Q_NAME));
 
-            {
-                put(ModuleMXBeanEntryTest.EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-                put(ModuleMXBeanEntryTest.ASYNC_EVENTBUS_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-                put(ModuleMXBeanEntryTest.THREADFACTORY_NAMING_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-                put(ModuleMXBeanEntryTest.THREADPOOL_DYNAMIC_MXB_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-                put("thread-rpc-context", Optional.<QName>absent());
-                put(ModuleMXBeanEntryTest.THREADPOOL_REGISTRY_IMPL_NAME, Optional.of(MODULE_TYPE_Q_NAME));
-            }
-        };
-
-        assertAllIdentitiesAreExpected(threadsJavaModule,
-                expectedIdentitiesToBases);
+        assertAllIdentitiesAreExpected(threadsJavaModule, expected);
     }
-
 }

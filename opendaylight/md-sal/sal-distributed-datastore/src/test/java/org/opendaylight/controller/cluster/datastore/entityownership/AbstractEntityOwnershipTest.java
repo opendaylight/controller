@@ -24,9 +24,9 @@ import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -78,8 +78,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
-    protected void verifyEntityCandidate(NormalizedNode<?, ?> node, String entityType,
-            YangInstanceIdentifier entityId, String candidateName, boolean expectPresent) {
+    protected void verifyEntityCandidate(final NormalizedNode<?, ?> node, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName, final boolean expectPresent) {
         try {
             assertNotNull("Missing " + EntityOwners.QNAME.toString(), node);
             assertTrue(node instanceof ContainerNode);
@@ -98,8 +98,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         }
     }
 
-    protected void verifyEntityCandidate(String entityType, YangInstanceIdentifier entityId, String candidateName,
-            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader, boolean expectPresent) {
+    protected void verifyEntityCandidate(final String entityType, final YangInstanceIdentifier entityId, final String candidateName,
+            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader, final boolean expectPresent) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
@@ -116,13 +116,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         throw lastError;
     }
 
-    protected void verifyEntityCandidate(String entityType, YangInstanceIdentifier entityId, String candidateName,
-            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+    protected void verifyEntityCandidate(final String entityType, final YangInstanceIdentifier entityId, final String candidateName,
+            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
         verifyEntityCandidate(entityType, entityId, candidateName, reader, true);
     }
 
-    protected MapEntryNode getMapEntryNodeChild(DataContainerNode<? extends PathArgument> parent, QName childMap,
-            QName child, Object key, boolean expectPresent) {
+    protected MapEntryNode getMapEntryNodeChild(final DataContainerNode<? extends PathArgument> parent, final QName childMap,
+            final QName child, final Object key, final boolean expectPresent) {
         Optional<DataContainerChild<? extends PathArgument, ?>> childNode =
                 parent.getChild(new NodeIdentifier(childMap));
         assertEquals("Missing " + childMap.toString(), true, childNode.isPresent());
@@ -139,8 +139,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         return entityTypeEntry.isPresent() ? entityTypeEntry.get() : null;
     }
 
-    static void verifyOwner(String expected, String entityType, YangInstanceIdentifier entityId,
-            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+    static void verifyOwner(final String expected, final String entityType, final YangInstanceIdentifier entityId,
+            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
         AssertionError lastError = null;
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         Stopwatch sw = Stopwatch.createStarted();
@@ -160,8 +160,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static void verifyOwner(final TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String localMemberName) {
+    static void verifyOwner(final TestActorRef<? extends EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String localMemberName) {
         verifyOwner(localMemberName, entityType, entityId, path -> {
             try {
                 return AbstractShardTest.readStore(shard, path);
@@ -171,8 +171,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         });
     }
 
-    protected void verifyNodeRemoved(YangInstanceIdentifier path,
-            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+    protected void verifyNodeRemoved(final YangInstanceIdentifier path,
+            final Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
@@ -189,21 +189,21 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         throw lastError;
     }
 
-    static void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node, ShardDataTree shardDataTree)
+    static void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node, final ShardDataTree shardDataTree)
             throws DataValidationFailedException {
         DataTreeModification modification = shardDataTree.newModification();
         modification.merge(path, node);
         commit(shardDataTree, modification);
     }
 
-    static void deleteNode(YangInstanceIdentifier path, ShardDataTree shardDataTree)
+    static void deleteNode(final YangInstanceIdentifier path, final ShardDataTree shardDataTree)
             throws DataValidationFailedException {
         DataTreeModification modification = shardDataTree.newModification();
         modification.delete(path);
         commit(shardDataTree, modification);
     }
 
-    static void commit(ShardDataTree shardDataTree, DataTreeModification modification)
+    static void commit(final ShardDataTree shardDataTree, final DataTreeModification modification)
             throws DataValidationFailedException {
         modification.ready();
         shardDataTree.getDataTree().validate(modification);
@@ -221,7 +221,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             final boolean expIsOwner, final boolean expHasOwner, final boolean expInJeopardy) {
         return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
                 return expEntity.equals(change.getEntity()) && expWasOwner == change.getState().wasOwner()
                         && expIsOwner == change.getState().isOwner() && expHasOwner == change.getState().hasOwner()
@@ -229,7 +229,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
                         expWasOwner, expIsOwner, expHasOwner), expInJeopardy));
             }
@@ -239,13 +239,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity) {
         return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
                 return expEntity.equals(change.getEntity());
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
                         false, false, false)));
             }
@@ -253,8 +253,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static void verifyNoOwnerSet(TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId) {
+    static void verifyNoOwnerSet(final TestActorRef<? extends EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId) {
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         try {
             NormalizedNode<?, ?> node = AbstractShardTest.readStore(shard, entityPath);
@@ -268,7 +268,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     static void verifyRaftState(final TestActorRef<? extends EntityOwnershipShard> shard,
-            Consumer<OnDemandRaftState> verifier)
+            final Consumer<OnDemandRaftState> verifier)
             throws Exception {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
@@ -288,14 +288,14 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         throw lastError;
     }
 
-    static ShardIdentifier newShardId(String memberName) {
+    static ShardIdentifier newShardId(final String memberName) {
         return ShardIdentifier.create("entity-ownership", MemberName.forName(memberName),
             "operational" + NEXT_SHARD_NUM.getAndIncrement());
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void verifyEntityCandidateRemoved(final TestActorRef<EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    void verifyEntityCandidateRemoved(final TestActorRef<EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyNodeRemoved(candidatePath(entityType, entityId, candidateName), path -> {
             try {
                 return AbstractShardTest.readStore(shard, path);
@@ -306,8 +306,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void verifyCommittedEntityCandidate(final TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    void verifyCommittedEntityCandidate(final TestActorRef<? extends EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyEntityCandidate(entityType, entityId, candidateName, path -> {
             try {
                 return AbstractShardTest.readStore(shard, path);
@@ -318,8 +318,8 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void verifyNoEntityCandidate(final TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    void verifyNoEntityCandidate(final TestActorRef<? extends EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyEntityCandidate(entityType, entityId, candidateName, path -> {
             try {
                 return AbstractShardTest.readStore(shard, path);

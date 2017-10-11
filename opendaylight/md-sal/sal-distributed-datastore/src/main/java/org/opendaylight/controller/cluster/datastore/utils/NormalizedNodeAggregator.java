@@ -27,7 +27,7 @@ public class NormalizedNodeAggregator {
 
     private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
             final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
-            LogicalDatastoreType logicalDatastoreType) {
+            final LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
         this.dataTree = InMemoryDataTreeFactory.getInstance().create(
@@ -41,7 +41,7 @@ public class NormalizedNodeAggregator {
      */
     public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
             final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
-            LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
+            final LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
         return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
     }
 
@@ -66,6 +66,6 @@ public class NormalizedNodeAggregator {
     }
 
     private Optional<NormalizedNode<?, ?>> getRootNode() {
-        return dataTree.takeSnapshot().readNode(rootIdentifier);
+        return Optional.fromJavaUtil(dataTree.takeSnapshot().readNode(rootIdentifier));
     }
 }

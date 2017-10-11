@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;

@@ -9,10 +9,10 @@
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Optional;
 import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
@@ -35,6 +35,6 @@ public class YangTextSchemaSourceSerializationProxy implements Serializable {
 
     public YangTextSchemaSource getRepresentation() {
         return YangTextSchemaSource.delegateForByteSource(
-                RevisionSourceIdentifier.create(name, Optional.fromNullable(revision)), ByteSource.wrap(schemaSource));
+                RevisionSourceIdentifier.create(name, Optional.ofNullable(revision)), ByteSource.wrap(schemaSource));
     }
 }
