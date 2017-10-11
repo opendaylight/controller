@@ -97,9 +97,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
@@ -642,8 +641,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .findLocalShard("cars");
         assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
 
-        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        dataTree.setSchemaContext(SchemaContextHelper.full());
+        final DataTree dataTree = new InMemoryDataTreeFactory().create(
+            DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
 
         // Send a tx with immediate commit.
 
@@ -1122,8 +1121,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Setup a saved snapshot on the leader. The follower will startup with no data and the leader should
         // install a snapshot to sync the follower.
 
-        TipProducingDataTree tree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
-        tree.setSchemaContext(SchemaContextHelper.full());
+        DataTree tree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_CONFIGURATION,
+            SchemaContextHelper.full());
 
         final ContainerNode carsNode = CarsModel.newCarsNode(
                 CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000))));

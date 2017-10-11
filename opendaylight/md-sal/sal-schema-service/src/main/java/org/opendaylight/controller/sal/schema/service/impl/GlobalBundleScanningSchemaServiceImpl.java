@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.schema.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.concurrent.GuardedBy;
@@ -115,6 +116,7 @@ public final class GlobalBundleScanningSchemaServiceImpl implements SchemaContex
                 "Source provider is not available", sourceIdentifier));
         }
 
-        return (CheckedFuture<YangTextSchemaSource, SchemaSourceException>) yangProvider.getSource(sourceIdentifier);
+        return Futures.makeChecked((ListenableFuture<YangTextSchemaSource>) yangProvider.getSource(sourceIdentifier),
+                e -> new SchemaSourceException("Error retrieving source", e));
     }
 }

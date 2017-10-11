@@ -19,6 +19,7 @@ import akka.actor.Status;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
 import java.util.Collections;
+import java.util.Optional;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -135,7 +136,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     public void testGetConnection() throws Exception {
         //set up data tree mock
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
-        when(modification.readNode(YangInstanceIdentifier.EMPTY)).thenReturn(com.google.common.base.Optional.absent());
+        when(modification.readNode(YangInstanceIdentifier.EMPTY)).thenReturn(Optional.empty());
         final DataTreeSnapshot snapshot = mock(DataTreeSnapshot.class);
         when(snapshot.newModification()).thenReturn(modification);
         final DataTree dataTree = mock(DataTree.class);
