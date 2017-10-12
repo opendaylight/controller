@@ -34,8 +34,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
-import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,12 +61,12 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     private final Executor clientFutureCallbackExecutor;
 
     public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores,
-            Executor listenableFutureExecutor) {
+            final Executor listenableFutureExecutor) {
         this(datastores, listenableFutureExecutor, DurationStatisticsTracker.createConcurrent());
     }
 
     public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores,
-            Executor listenableFutureExecutor, DurationStatisticsTracker commitStatsTracker) {
+            final Executor listenableFutureExecutor, final DurationStatisticsTracker commitStatsTracker) {
         super(datastores);
         this.clientFutureCallbackExecutor = Preconditions.checkNotNull(listenableFutureExecutor);
         this.commitStatsTracker = Preconditions.checkNotNull(commitStatsTracker);
@@ -77,8 +77,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     @Override
-    protected CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
-            Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+    protected CheckedFuture<Void, TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
@@ -107,7 +107,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         // Not using Futures.allAsList here to avoid its internal overhead.
         FutureCallback<Boolean> futureCallback = new FutureCallback<Boolean>() {
             @Override
-            public void onSuccess(Boolean result) {
+            public void onSuccess(final Boolean result) {
                 if (result == null || !result) {
                     handleException(clientSubmitFuture, transaction, cohorts, CAN_COMMIT, CAN_COMMIT_ERROR_MAPPER,
                             new TransactionCommitFailedException("Can Commit failed, no detailed cause available."));
@@ -120,7 +120,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 handleException(clientSubmitFuture, transaction, cohorts, CAN_COMMIT, CAN_COMMIT_ERROR_MAPPER, failure);
             }
         };
@@ -138,7 +138,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         // Not using Futures.allAsList here to avoid its internal overhead.
         FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
             @Override
-            public void onSuccess(Void notUsed) {
+            public void onSuccess(final Void notUsed) {
                 if (!cohortIterator.hasNext()) {
                     // All cohorts completed successfully - we can move on to the commit phase
                     doCommit(startTime, clientSubmitFuture, transaction, cohorts);
@@ -149,7 +149,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 handleException(clientSubmitFuture, transaction, cohorts, PRE_COMMIT, PRE_COMMIT_MAPPER, failure);
             }
         };
@@ -167,7 +167,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         // Not using Futures.allAsList here to avoid its internal overhead.
         FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
             @Override
-            public void onSuccess(Void notUsed) {
+            public void onSuccess(final Void notUsed) {
                 if (!cohortIterator.hasNext()) {
                     // All cohorts completed successfully - we're done.
                     commitStatsTracker.addDuration(System.nanoTime() - startTime);
@@ -180,7 +180,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             }
 
             @Override
-            public void onFailure(Throwable throwable) {
+            public void onFailure(final Throwable throwable) {
                 handleException(clientSubmitFuture, transaction, cohorts, COMMIT, COMMIT_ERROR_MAPPER, throwable);
             }
         };
@@ -228,13 +228,13 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         ListenableFuture<List<Void>> combinedFuture = Futures.allAsList(canCommitFutures);
         Futures.addCallback(combinedFuture, new FutureCallback<List<Void>>() {
             @Override
-            public void onSuccess(List<Void> notUsed) {
+            public void onSuccess(final List<Void> notUsed) {
                 // Propagate the original exception to the client.
                 LOG.debug("Tx: {} aborted successfully", transaction.getIdentifier());
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 LOG.error("Tx: {} Error during Abort.", transaction.getIdentifier(), failure);
             }
         }, MoreExecutors.directExecutor());
@@ -259,7 +259,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
         private final Executor listenerExecutor;
 
-        AsyncNotifyingSettableFuture(Executor listenerExecutor) {
+        AsyncNotifyingSettableFuture(final Executor listenerExecutor) {
             this.listenerExecutor = Preconditions.checkNotNull(listenerExecutor);
         }
 
@@ -287,7 +287,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         }
 
         @Override
-        protected boolean setException(Throwable throwable) {
+        protected boolean setException(final Throwable throwable) {
             ON_TASK_COMPLETION_THREAD_TL.set(Boolean.TRUE);
             try {
                 return super.setException(throwable);
