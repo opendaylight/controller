@@ -261,7 +261,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
             return codedStringMap.get(input.readInt());
         } else if (valueType == TokenTypes.IS_STRING_VALUE) {
             String value = input.readUTF().intern();
-            codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
+            codedStringMap.put(codedStringMap.size(), value);
             return value;
         }
 
@@ -296,22 +296,22 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 return readObjSet();
 
             case ValueTypes.BOOL_TYPE :
-                return Boolean.valueOf(input.readBoolean());
+                return input.readBoolean();
 
             case ValueTypes.BYTE_TYPE :
-                return Byte.valueOf(input.readByte());
+                return input.readByte();
 
             case ValueTypes.INT_TYPE :
-                return Integer.valueOf(input.readInt());
+                return input.readInt();
 
             case ValueTypes.LONG_TYPE :
-                return Long.valueOf(input.readLong());
+                return input.readLong();
 
             case ValueTypes.QNAME_TYPE :
                 return readQName();
 
             case ValueTypes.SHORT_TYPE :
-                return Short.valueOf(input.readShort());
+                return input.readShort();
 
             case ValueTypes.STRING_TYPE :
                 return input.readUTF();

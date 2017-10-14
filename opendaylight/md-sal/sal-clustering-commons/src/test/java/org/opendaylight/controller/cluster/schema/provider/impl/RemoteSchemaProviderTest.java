@@ -62,7 +62,7 @@ public class RemoteSchemaProviderTest {
         Futures.failed(new Exception("halo"));
 
         Mockito.when(mockedRemoteSchemaRepository.getYangTextSchemaSource(ID)).thenReturn(
-                Futures.<YangTextSchemaSourceSerializationProxy>failed(
+                Futures.failed(
                         new SchemaSourceException("Source not provided")));
 
         CheckedFuture<?, ?> sourceFuture = remoteSchemaProvider.getSource(ID);

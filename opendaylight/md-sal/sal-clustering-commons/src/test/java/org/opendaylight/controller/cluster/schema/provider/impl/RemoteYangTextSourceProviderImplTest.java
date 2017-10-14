@@ -50,7 +50,7 @@ public class RemoteYangTextSourceProviderImplTest {
         YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(
                 ID, ByteSource.wrap(source.getBytes()));
         Mockito.when(mockedLocalRepository.getSchemaSource(ID, YangTextSchemaSource.class)).thenReturn(
-                Futures.<YangTextSchemaSource, SchemaSourceException>immediateCheckedFuture(schemaSource));
+                Futures.immediateCheckedFuture(schemaSource));
 
         Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =
                 remoteRepository.getYangTextSchemaSource(ID);
@@ -64,7 +64,7 @@ public class RemoteYangTextSourceProviderImplTest {
     @Test(expected = SchemaSourceException.class)
     public void testGetNonExistentYangTextSchemaSource() throws Exception {
         Mockito.when(mockedLocalRepository.getSchemaSource(ID, YangTextSchemaSource.class)).thenReturn(
-                Futures.<YangTextSchemaSource, SchemaSourceException>immediateFailedCheckedFuture(
+                Futures.immediateFailedCheckedFuture(
                         new SchemaSourceException("Source is not provided")));
 
         Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =

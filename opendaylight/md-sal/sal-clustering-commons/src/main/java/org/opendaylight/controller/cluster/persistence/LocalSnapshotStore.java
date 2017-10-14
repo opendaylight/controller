@@ -22,7 +22,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -236,7 +235,7 @@ public class LocalSnapshotStore extends SnapshotStore {
     private Collection<File> getSnapshotFiles(final String persistenceId) {
         String encodedPersistenceId = encode(persistenceId);
 
-        File[] files = snapshotDir.listFiles((FilenameFilter) (dir, name) -> {
+        File[] files = snapshotDir.listFiles((dir, name) -> {
             int persistenceIdEndIndex = name.lastIndexOf('-', name.lastIndexOf('-') - 1);
             return PERSISTENCE_ID_START_INDEX + encodedPersistenceId.length() == persistenceIdEndIndex
                     && name.startsWith(encodedPersistenceId, PERSISTENCE_ID_START_INDEX) && !name.endsWith(".tmp");

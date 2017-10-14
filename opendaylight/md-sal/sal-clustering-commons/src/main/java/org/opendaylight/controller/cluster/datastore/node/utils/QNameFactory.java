@@ -13,22 +13,20 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.opendaylight.yangtools.yang.common.QName;
 
-public class QNameFactory {
+public final class QNameFactory {
 
     private static final int MAX_QNAME_CACHE_SIZE = 10000;
 
-    private static final LoadingCache<String, QName> CACHE = CacheBuilder.newBuilder()
-        .maximumSize(MAX_QNAME_CACHE_SIZE)
-        .softValues()
-        .build(
-            new CacheLoader<String, QName>() {
+    private QNameFactory() {
+    }
+
+    private static final LoadingCache<String, QName> CACHE = CacheBuilder.newBuilder().maximumSize(MAX_QNAME_CACHE_SIZE)
+            .softValues().build(new CacheLoader<String, QName>() {
                 @Override
                 public QName load(String key) {
                     return QName.create(key);
                 }
-            }
-        );
-
+            });
 
     public static QName create(String name) {
         return CACHE.getUnchecked(name);

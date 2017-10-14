@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -55,13 +54,12 @@ public class MessageSlicer implements AutoCloseable {
         id = SLICER_ID_COUNTER.getAndIncrement();
         this.logContext = builder.logContext + "_slicer-id-" + id;
 
-        CacheBuilder<Identifier, SlicedMessageState<ActorRef>> cacheBuilder = CacheBuilder.newBuilder().removalListener(
-                (RemovalListener<Identifier, SlicedMessageState<ActorRef>>) notification -> stateRemoved(notification));
+        CacheBuilder<Identifier, SlicedMessageState<ActorRef>> cacheBuilder =
+                CacheBuilder.newBuilder().removalListener(notification -> stateRemoved(notification));
         if (builder.expireStateAfterInactivityDuration > 0) {
             cacheBuilder = cacheBuilder.expireAfterAccess(builder.expireStateAfterInactivityDuration,
                     builder.expireStateAfterInactivityUnit);
         }
-
         stateCache = cacheBuilder.build();
     }
 
