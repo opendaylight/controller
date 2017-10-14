@@ -693,7 +693,8 @@ public class ClusterAdminRpcServiceTest {
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                "pets", null, Arrays.asList(MEMBER_1));
+                                                                                 "pets", null,
+                                                                                 Collections.singletonList(MEMBER_1));
         leaderNode1.configDataStore().getActorContext().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
@@ -711,7 +712,9 @@ public class ClusterAdminRpcServiceTest {
 
         newReplicaNode2.operDataStore().getActorContext().getShardManager().tell(
                 new CreateShard(new ModuleShardConfiguration(URI.create("no-leader-ns"), "no-leader-module",
-                        "no-leader", null, Arrays.asList(MEMBER_1)), Shard.builder(), null),
+                                                             "no-leader", null,
+                                                             Collections.singletonList(MEMBER_1)),
+                                Shard.builder(), null),
                                 newReplicaNode2.kit().getRef());
         newReplicaNode2.kit().expectMsgClass(Success.class);
 

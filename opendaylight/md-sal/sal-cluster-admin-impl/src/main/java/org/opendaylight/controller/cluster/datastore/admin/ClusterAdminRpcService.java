@@ -12,12 +12,14 @@ import akka.actor.Status.Success;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -139,7 +141,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 onMessageFailure(String.format("Failed to add replica for shard %s", shardName),
                         returnFuture, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -178,7 +180,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 onMessageFailure(String.format("Failed to remove replica for shard %s", shardName),
                         returnFuture, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -270,7 +272,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 onMessageFailure(String.format("Failed to add replica for shard %s", prefix),
                         returnFuture, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -312,7 +314,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 onMessageFailure(String.format("Failed to remove replica for shard %s", prefix),
                         returnFuture, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -391,7 +393,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 onMessageFailure(String.format("Failed to change member voting states for shard %s", shardName),
                         returnFuture, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -471,7 +473,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 returnFuture.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
                         "Failed to get shard role.", failure).build());
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -517,7 +519,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 returnFuture.set(ClusterAdminRpcService.<GetPrefixShardRoleOutput>newFailedRpcResultBuilder(
                         "Failed to get shard role.", failure).build());
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -542,7 +544,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             public void onFailure(Throwable failure) {
                 onDatastoreBackupFailure(input.getFilePath(), returnFuture, failure);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return returnFuture;
     }
@@ -553,10 +555,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         for (MemberVotingState memberStatus: memberVotingStatus) {
             serverVotingStatusMap.put(memberStatus.getMemberName(), memberStatus.isVoting());
         }
-
-        ChangeShardMembersVotingStatus changeVotingStatus = new ChangeShardMembersVotingStatus(shardName,
-                serverVotingStatusMap);
-        return changeVotingStatus;
+        return new ChangeShardMembersVotingStatus(shardName, serverVotingStatusMap);
     }
 
     private static <T> SettableFuture<RpcResult<T>> waitForShardResults(
@@ -596,7 +595,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                         returnFuture.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
                     }
                 }
-            });
+            }, MoreExecutors.directExecutor());
         }
         return returnFuture;
     }
@@ -611,8 +610,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorContext.getDataStoreName());
 
         for (String shardName: allShardNames) {
-            ListenableFuture<T> future = this.<T>ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
-                    SHARD_MGR_TIMEOUT);
+            ListenableFuture<T> future = this.ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
+                                                  SHARD_MGR_TIMEOUT);
             shardResultData.add(new SimpleEntry<>(future,
                     new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
         }
@@ -691,10 +690,10 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     private static RpcResult<Void> newSuccessfulResult() {
-        return newSuccessfulResult((Void)null);
+        return newSuccessfulResult(null);
     }
 
     private static <T> RpcResult<T> newSuccessfulResult(T data) {
-        return RpcResultBuilder.<T>success(data).build();
+        return RpcResultBuilder.success(data).build();
     }
 }
