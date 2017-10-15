@@ -74,10 +74,10 @@ public class LegacyEntityOwnershipServiceAdapterTest {
         verify(mockDOMReg).close();
     }
 
-    @Test(expected=CandidateAlreadyRegisteredException.class)
+    @Test(expected = CandidateAlreadyRegisteredException.class)
     public void testAlreadyRegisteredCandidate() throws Exception {
-        doThrow(new org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException(DOM_ENTITY)).
-                when(mockDOMService).registerCandidate(DOM_ENTITY);
+        doThrow(new org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException(DOM_ENTITY))
+                .when(mockDOMService).registerCandidate(DOM_ENTITY);
 
         adapter.registerCandidate(LEGACY_ENTITY);
     }
@@ -86,8 +86,8 @@ public class LegacyEntityOwnershipServiceAdapterTest {
     public void testRegisterListener() {
         DOMEntityOwnershipListenerRegistration mockDOMReg = mock(DOMEntityOwnershipListenerRegistration.class);
         doNothing().when(mockDOMReg).close();
-        doReturn(mockDOMReg).when(mockDOMService).registerListener(eq(DOM_ENTITY.getType()),
-                any(DOMEntityOwnershipListener.class));
+        doReturn(mockDOMReg).when(mockDOMService)
+                .registerListener(eq(DOM_ENTITY.getType()), any(DOMEntityOwnershipListener.class));
         EntityOwnershipListener mockListener = mock(EntityOwnershipListener.class);
         doNothing().when(mockListener).ownershipChanged(any(EntityOwnershipChange.class));
 
@@ -97,14 +97,17 @@ public class LegacyEntityOwnershipServiceAdapterTest {
         assertEquals("getInstance", mockListener, reg.getInstance());
         assertEquals("getEntityType", LEGACY_ENTITY.getType(), reg.getEntityType());
 
-        ArgumentCaptor<DOMEntityOwnershipListener> domListenerCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipListener.class);
-        verify(mockDOMService).registerListener(eq(DOM_ENTITY.getType()),  domListenerCaptor.capture());
+        ArgumentCaptor<DOMEntityOwnershipListener> domListenerCaptor = ArgumentCaptor
+                .forClass(DOMEntityOwnershipListener.class);
+        verify(mockDOMService).registerListener(eq(DOM_ENTITY.getType()), domListenerCaptor.capture());
 
         DOMEntityOwnershipChange domOwnershipChange = new DOMEntityOwnershipChange(DOM_ENTITY,
-                EntityOwnershipChangeState.LOCAL_OWNERSHIP_GRANTED);
-        domListenerCaptor.getValue().ownershipChanged(domOwnershipChange );
+                                                                                   EntityOwnershipChangeState
+                                                                                           .LOCAL_OWNERSHIP_GRANTED);
+        domListenerCaptor.getValue().ownershipChanged(domOwnershipChange);
 
-        ArgumentCaptor<EntityOwnershipChange> ownershipChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
+        ArgumentCaptor<EntityOwnershipChange> ownershipChangeCaptor = ArgumentCaptor
+                .forClass(EntityOwnershipChange.class);
         verify(mockListener).ownershipChanged(ownershipChangeCaptor.capture());
 
         EntityOwnershipChange change = ownershipChangeCaptor.getValue();
@@ -127,17 +130,11 @@ public class LegacyEntityOwnershipServiceAdapterTest {
         assertEquals("isPresent", false, adapter.getOwnershipState(LEGACY_ENTITY).isPresent());
     }
 
-    @Test
-    public void testIsCandidateRegistered() {
-        doReturn(true).when(mockDOMService).isCandidateRegistered(DOM_ENTITY);
-        assertEquals("isCandidateRegistered", true, adapter.isCandidateRegistered(LEGACY_ENTITY));
-    }
-
     private void testGetOwnershipState(EntityOwnershipState state, boolean expIsOwner, boolean expHasOwner) {
         doReturn(Optional.of(state)).when(mockDOMService).getOwnershipState(DOM_ENTITY);
 
-        Optional<org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState> actualState =
-                adapter.getOwnershipState(LEGACY_ENTITY);
+        Optional<org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState> actualState = adapter
+                .getOwnershipState(LEGACY_ENTITY);
 
         assertEquals("isPresent", true, actualState.isPresent());
         assertEquals("isOwner", expIsOwner, actualState.get().isOwner());
@@ -145,4 +142,9 @@ public class LegacyEntityOwnershipServiceAdapterTest {
 
     }
 
+    @Test
+    public void testIsCandidateRegistered() {
+        doReturn(true).when(mockDOMService).isCandidateRegistered(DOM_ENTITY);
+        assertEquals("isCandidateRegistered", true, adapter.isCandidateRegistered(LEGACY_ENTITY));
+    }
 }

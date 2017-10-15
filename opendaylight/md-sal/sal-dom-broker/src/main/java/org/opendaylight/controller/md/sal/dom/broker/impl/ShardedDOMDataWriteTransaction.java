@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * ShardedDOMDataWriteTransaction.
+ *
  * @deprecated To be removed with {@link ShardedDOMDataTree}.
  */
 @Deprecated
@@ -46,9 +48,10 @@ final class ShardedDOMDataWriteTransaction implements DOMDataWriteTransaction {
     private final ShardedDOMDataTreeProducer producer;
     private final String identifier;
     @GuardedBy("this")
-    private boolean closed =  false;
+    private boolean closed = false;
 
-    ShardedDOMDataWriteTransaction(final ShardedDOMDataTreeProducer producer, final Map<DOMDataTreeIdentifier, DOMStoreWriteTransaction> idToTransaction) {
+    ShardedDOMDataWriteTransaction(final ShardedDOMDataTreeProducer producer,
+                                   final Map<DOMDataTreeIdentifier, DOMStoreWriteTransaction> idToTransaction) {
         this.producer = Preconditions.checkNotNull(producer);
         this.idToTransaction = Preconditions.checkNotNull(idToTransaction);
         this.identifier = "SHARDED-DOM-" + COUNTER.getAndIncrement();
@@ -118,12 +121,14 @@ final class ShardedDOMDataWriteTransaction implements DOMDataWriteTransaction {
     }
 
     @Override
-    public synchronized void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public synchronized void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                                 final NormalizedNode<?, ?> data) {
         lookup(store, path).write(path, data);
     }
 
     @Override
-    public synchronized void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public synchronized void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                                   final NormalizedNode<?, ?> data) {
         lookup(store, path).merge(path, data);
     }
 }

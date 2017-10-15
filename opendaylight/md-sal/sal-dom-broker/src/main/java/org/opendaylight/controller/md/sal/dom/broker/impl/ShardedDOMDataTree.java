@@ -28,12 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Shared DOM data tree.
+ *
  * @deprecated Use {@link org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree} instead.
  */
 @Deprecated
 public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTreeShardingService {
     private static final Logger LOG = LoggerFactory.getLogger(ShardedDOMDataTree.class);
-    private final Map<LogicalDatastoreType, ShardingTableEntry> shardingTables = new EnumMap<>(LogicalDatastoreType.class);
+    private final Map<LogicalDatastoreType, ShardingTableEntry> shardingTables = new EnumMap<>(
+            LogicalDatastoreType.class);
     @GuardedBy("this")
     private final Map<DOMDataTreeIdentifier, DOMDataTreeProducer> idToProducer = new TreeMap<>();
 
@@ -49,9 +52,10 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
 
     @GuardedBy("this")
     private void storeShard(final DOMDataTreeIdentifier prefix, final ShardRegistration<?> reg) {
-        ShardingTableEntry t = shardingTables.computeIfAbsent(prefix.getDatastoreType(), k -> new ShardingTableEntry());
+        ShardingTableEntry shardingTableEntry = shardingTables
+                .computeIfAbsent(prefix.getDatastoreType(), k -> new ShardingTableEntry());
 
-        t.store(prefix.getRootIdentifier(), reg);
+        shardingTableEntry.store(prefix.getRootIdentifier(), reg);
     }
 
     void removeShard(final ShardRegistration<?> reg) {
@@ -82,7 +86,8 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     }
 
     @Override
-    public <T extends DOMDataTreeShard> ListenerRegistration<T> registerDataTreeShard(final DOMDataTreeIdentifier prefix, final T shard) throws DOMDataTreeShardingConflictException {
+    public <T extends DOMDataTreeShard> ListenerRegistration<T> registerDataTreeShard(
+            final DOMDataTreeIdentifier prefix, final T shard) throws DOMDataTreeShardingConflictException {
         final ShardRegistration<T> reg;
         final ShardRegistration<?> parentReg;
 
@@ -95,7 +100,8 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
             final ShardingTableEntry parent = lookupShard(prefix);
             parentReg = parent.getRegistration();
             if (parentReg != null && prefix.equals(parentReg.getPrefix())) {
-                throw new DOMDataTreeShardingConflictException(String.format("Prefix %s is already occupied by shard %s", prefix, parentReg.getInstance()));
+                throw new DOMDataTreeShardingConflictException(
+                        String.format("Prefix %s is already occupied by shard %s", prefix, parentReg.getInstance()));
             }
 
             // FIXME: wrap the shard in a proper adaptor based on implemented interface
@@ -162,7 +168,8 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
         return createProducer(shardMap);
     }
 
-    synchronized DOMDataTreeProducer createProducer(final ShardedDOMDataTreeProducer parent, final Collection<DOMDataTreeIdentifier> subtrees) {
+    synchronized DOMDataTreeProducer createProducer(final ShardedDOMDataTreeProducer parent,
+                                                    final Collection<DOMDataTreeIdentifier> subtrees) {
         Preconditions.checkNotNull(parent);
 
         final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap = new HashMap<>();
@@ -174,7 +181,11 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     }
 
     @Override
-    public synchronized <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(final T listener, final Collection<DOMDataTreeIdentifier> subtrees, final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers) {
+    public synchronized <T extends DOMDataTreeListener> ListenerRegistration<T>
+        registerListener(final T listener,
+                         final Collection<DOMDataTreeIdentifier> subtrees,
+                         final boolean allowRxMerges,
+                         final Collection<DOMDataTreeProducer> producers) {
         // FIXME Implement this.
         throw new UnsupportedOperationException("Not implemented yet.");
     }

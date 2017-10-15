@@ -22,14 +22,16 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntry {
     private final DOMRpcIdentifier rpcId;
 
-    private GlobalDOMRpcRoutingTableEntry(final DOMRpcIdentifier rpcId, final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    private GlobalDOMRpcRoutingTableEntry(final DOMRpcIdentifier rpcId,
+                                          final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(rpcId.getType(), impls);
         this.rpcId = Preconditions.checkNotNull(rpcId);
     }
 
     // We do not need the RpcDefinition, but this makes sure we do not
     // forward something we don't know to be an RPC.
-    GlobalDOMRpcRoutingTableEntry(final RpcDefinition def, final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    GlobalDOMRpcRoutingTableEntry(final RpcDefinition def,
+                                  final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(def.getPath(), impls);
         this.rpcId = DOMRpcIdentifier.create(def.getPath());
     }
@@ -40,7 +42,8 @@ final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
     }
 
     @Override
-    protected GlobalDOMRpcRoutingTableEntry newInstance(final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    protected GlobalDOMRpcRoutingTableEntry newInstance(
+            final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         return new GlobalDOMRpcRoutingTableEntry(rpcId, impls);
     }
 }

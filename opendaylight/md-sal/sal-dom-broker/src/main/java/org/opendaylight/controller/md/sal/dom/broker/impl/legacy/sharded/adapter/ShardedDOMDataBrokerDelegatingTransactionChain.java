@@ -26,8 +26,8 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 
-class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionChain,
-        org.opendaylight.mdsal.common.api.TransactionChainListener {
+class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionChain, org.opendaylight.mdsal.common
+        .api.TransactionChainListener {
     private final org.opendaylight.mdsal.dom.api.DOMTransactionChain txChainDelegate;
     private final SchemaContext schemaContext;
     private final TransactionChainListener txChainListener;
@@ -36,8 +36,10 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
 
     private final Map<Object, AsyncTransaction<?, ?>> transactionMap;
 
-    public ShardedDOMDataBrokerDelegatingTransactionChain(final Object txChainIdentifier, final SchemaContext schemaContext,
-                                                          final org.opendaylight.mdsal.dom.api.DOMDataBroker brokerDelegate,
+    ShardedDOMDataBrokerDelegatingTransactionChain(final Object txChainIdentifier,
+                                                          final SchemaContext schemaContext,
+                                                          final org.opendaylight.mdsal.dom.api.DOMDataBroker
+                                                                  brokerDelegate,
                                                           final TransactionChainListener txChainListener) {
         checkNotNull(brokerDelegate);
         this.schemaContext = checkNotNull(schemaContext);
@@ -50,8 +52,8 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         final DOMDataTreeReadTransaction readTxDelegate = txChainDelegate.newReadOnlyTransaction();
-        final DOMDataReadOnlyTransaction readTx =
-                new ShardedDOMDataBrokerDelegatingReadTransaction(newTransactionIdentifier(), readTxDelegate);
+        final DOMDataReadOnlyTransaction readTx = new ShardedDOMDataBrokerDelegatingReadTransaction(
+                newTransactionIdentifier(), readTxDelegate);
         transactionMap.put(readTxDelegate.getIdentifier(), readTx);
 
         return readTx;
@@ -61,16 +63,15 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
     public DOMDataReadWriteTransaction newReadWriteTransaction() {
         final Object readWriteTxId = newTransactionIdentifier();
         final DOMDataTreeReadTransaction readTxDelegate = txChainDelegate.newReadOnlyTransaction();
-        final DOMDataReadOnlyTransaction readTx =
-                new ShardedDOMDataBrokerDelegatingReadTransaction(readWriteTxId, readTxDelegate);
+        final DOMDataReadOnlyTransaction readTx = new ShardedDOMDataBrokerDelegatingReadTransaction(readWriteTxId,
+                                                                                                    readTxDelegate);
 
         final DOMDataTreeWriteTransaction writeTxDelegate = txChainDelegate.newWriteOnlyTransaction();
-        final DOMDataWriteTransaction writeTx =
-                new ShardedDOMDataBrokerDelegatingWriteTransaction(readWriteTxId, writeTxDelegate);
+        final DOMDataWriteTransaction writeTx = new ShardedDOMDataBrokerDelegatingWriteTransaction(readWriteTxId,
+                                                                                                   writeTxDelegate);
 
-        final DOMDataReadWriteTransaction readWriteTx =
-                new ShardedDOMDataBrokerDelegatingReadWriteTransaction(readWriteTxId, schemaContext,
-                        readTx, writeTx);
+        final DOMDataReadWriteTransaction readWriteTx = new ShardedDOMDataBrokerDelegatingReadWriteTransaction(
+                readWriteTxId, schemaContext, readTx, writeTx);
         transactionMap.put(readTxDelegate.getIdentifier(), readWriteTx);
         transactionMap.put(writeTxDelegate.getIdentifier(), readWriteTx);
 
@@ -80,8 +81,8 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         final DOMDataTreeWriteTransaction writeTxDelegate = txChainDelegate.newWriteOnlyTransaction();
-        final DOMDataWriteTransaction writeTx =
-                new ShardedDOMDataBrokerDelegatingWriteTransaction(newTransactionIdentifier(), writeTxDelegate);
+        final DOMDataWriteTransaction writeTx = new ShardedDOMDataBrokerDelegatingWriteTransaction(
+                newTransactionIdentifier(), writeTxDelegate);
         transactionMap.put(writeTxDelegate.getIdentifier(), writeTx);
 
         return writeTx;
@@ -94,10 +95,11 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
 
     @Override
     public void onTransactionChainFailed(final TransactionChain<?, ?> transactionChain,
-                                         final org.opendaylight.mdsal.common.api.AsyncTransaction<?, ?> asyncTransaction,
+                                         final org.opendaylight.mdsal.common.api.AsyncTransaction<?, ?>
+                                                 asyncTransaction,
                                          final Throwable throwable) {
-        txChainListener.onTransactionChainFailed(
-                this, transactionFromDelegate(asyncTransaction.getIdentifier()), throwable);
+        txChainListener
+                .onTransactionChainFailed(this, transactionFromDelegate(asyncTransaction.getIdentifier()), throwable);
     }
 
     @Override
@@ -107,7 +109,7 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
 
     private AsyncTransaction<?, ?> transactionFromDelegate(final Object delegateId) {
         Preconditions.checkState(transactionMap.containsKey(delegateId),
-                "Delegate transaction {} is not present in transaction chain history", delegateId);
+                                 "Delegate transaction {} is not present in transaction chain history", delegateId);
         return transactionMap.get(delegateId);
     }
 

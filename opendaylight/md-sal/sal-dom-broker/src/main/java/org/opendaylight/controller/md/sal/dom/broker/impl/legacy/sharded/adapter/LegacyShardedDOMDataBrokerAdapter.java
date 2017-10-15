@@ -28,13 +28,16 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-
 /**
- * DOMDataBroker implementation that forwards calls to {@link org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter},
- * which in turn translates calls to shard aware implementation of {@link org.opendaylight.mdsal.dom.api.DOMDataTreeService}
+ * DOMDataBroker implementation that forwards calls to
+ * {@link org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter},
+ * which in turn translates calls to shard aware implementation of
+ * {@link org.opendaylight.mdsal.dom.api.DOMDataTreeService}
+ *
  * <p>
  * The incompatibility between first and latter APIs, puts restriction on {@link DOMDataReadWriteTransaction}
- * and {@link DOMDataReadOnlyTransaction} provided by this data broker. See {@link ShardedDOMDataBrokerDelegatingReadWriteTransaction}
+ * and {@link DOMDataReadOnlyTransaction} provided by this data broker. See
+ * {@link ShardedDOMDataBrokerDelegatingReadWriteTransaction}
  * and {@link ShardedDOMDataBrokerDelegatingReadTransaction} respectively.
  */
 // FIXME try to refactor some of the implementation to abstract class for better reusability
@@ -54,35 +57,39 @@ public class LegacyShardedDOMDataBrokerAdapter implements DOMDataBroker {
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         return new ShardedDOMDataBrokerDelegatingReadTransaction(newTransactionIdentifier(),
-                delegateDataBroker.newReadOnlyTransaction());
+                                                                 delegateDataBroker.newReadOnlyTransaction());
     }
 
     @Override
     public DOMDataReadWriteTransaction newReadWriteTransaction() {
-        return new ShardedDOMDataBrokerDelegatingReadWriteTransaction(newTransactionIdentifier(), schemaService.getGlobalContext(),
-                newReadOnlyTransaction(), newWriteOnlyTransaction());
+        return new ShardedDOMDataBrokerDelegatingReadWriteTransaction(newTransactionIdentifier(),
+                                                                      schemaService.getGlobalContext(),
+                                                                      newReadOnlyTransaction(),
+                                                                      newWriteOnlyTransaction());
     }
 
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         return new ShardedDOMDataBrokerDelegatingWriteTransaction(newTransactionIdentifier(),
-                delegateDataBroker.newWriteOnlyTransaction());
+                                                                  delegateDataBroker.newWriteOnlyTransaction());
     }
 
     @Override
     public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
                                                                                   final YangInstanceIdentifier path,
                                                                                   final DOMDataChangeListener listener,
-                                                                                  final DataChangeScope triggeringScope) {
-        throw new UnsupportedOperationException("Registering data change listeners is not supported in " +
-                "md-sal forwarding data broker");
+                                                                                  final DataChangeScope
+                                                                                              triggeringScope) {
+        throw new UnsupportedOperationException(
+                "Registering data change listeners is not supported in " + "md-sal forwarding data broker");
 
     }
 
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
-        return new ShardedDOMDataBrokerDelegatingTransactionChain(chainNum.getAndIncrement(), schemaService.getGlobalContext(),
-                delegateDataBroker, listener);
+        return new ShardedDOMDataBrokerDelegatingTransactionChain(chainNum.getAndIncrement(),
+                                                                  schemaService.getGlobalContext(), delegateDataBroker,
+                                                                  listener);
     }
 
     @Nonnull

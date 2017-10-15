@@ -38,7 +38,7 @@ final class CommitCoordinationTask implements Callable<Void> {
     private final DurationStatisticsTracker commitStatTracker;
     private final DOMDataWriteTransaction tx;
 
-    public CommitCoordinationTask(final DOMDataWriteTransaction transaction,
+    CommitCoordinationTask(final DOMDataWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
             final DurationStatisticsTracker commitStatTracker) {
         this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
@@ -78,10 +78,10 @@ final class CommitCoordinationTask implements Callable<Void> {
     }
 
     /**
-     *
      * Invokes canCommit on underlying cohorts and blocks till
      * all results are returned.
      *
+     * <p>
      * Valid state transition is from SUBMITTED to CAN_COMMIT,
      * if currentPhase is not SUBMITTED throws IllegalStateException.
      *
@@ -103,11 +103,11 @@ final class CommitCoordinationTask implements Callable<Void> {
     }
 
     /**
-     *
      * Invokes canCommit on underlying cohorts and returns composite future
      * which will contains {@link Boolean#TRUE} only and only if
      * all cohorts returned true.
      *
+     * <p>
      * Valid state transition is from SUBMITTED to CAN_COMMIT,
      * if currentPhase is not SUBMITTED throws IllegalStateException.
      *
@@ -116,18 +116,18 @@ final class CommitCoordinationTask implements Callable<Void> {
      */
     private ListenableFuture<?>[] canCommitAll() {
         final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
-        int i = 0;
+        int index = 0;
         for (final DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-            ops[i++] = cohort.canCommit();
+            ops[index++] = cohort.canCommit();
         }
         return ops;
     }
 
     /**
-     *
      * Invokes preCommit on underlying cohorts and blocks till
      * all results are returned.
      *
+     * <p>
      * Valid state transition is from CAN_COMMIT to PRE_COMMIT, if current
      * state is not CAN_COMMIT
      * throws IllegalStateException.
@@ -139,7 +139,7 @@ final class CommitCoordinationTask implements Callable<Void> {
     private void preCommitBlocking() throws TransactionCommitFailedException {
         final ListenableFuture<?>[] preCommitFutures = preCommitAll();
         try {
-            for(final ListenableFuture<?> future : preCommitFutures) {
+            for (final ListenableFuture<?> future : preCommitFutures) {
                 future.get();
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -148,12 +148,11 @@ final class CommitCoordinationTask implements Callable<Void> {
     }
 
     /**
-     *
      * Invokes preCommit on underlying cohorts and returns future
      * which will complete once all preCommit on cohorts completed or
      * failed.
      *
-     *
+     * <p>
      * Valid state transition is from CAN_COMMIT to PRE_COMMIT, if current
      * state is not CAN_COMMIT
      * throws IllegalStateException.
@@ -163,18 +162,18 @@ final class CommitCoordinationTask implements Callable<Void> {
      */
     private ListenableFuture<?>[] preCommitAll() {
         final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
-        int i = 0;
+        int index = 0;
         for (final DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-            ops[i++] = cohort.preCommit();
+            ops[index++] = cohort.preCommit();
         }
         return ops;
     }
 
     /**
-     *
      * Invokes commit on underlying cohorts and blocks till
      * all results are returned.
      *
+     * <p>
      * Valid state transition is from PRE_COMMIT to COMMIT, if not throws
      * IllegalStateException.
      *
@@ -185,7 +184,7 @@ final class CommitCoordinationTask implements Callable<Void> {
     private void commitBlocking() throws TransactionCommitFailedException {
         final ListenableFuture<?>[] commitFutures = commitAll();
         try {
-            for(final ListenableFuture<?> future : commitFutures) {
+            for (final ListenableFuture<?> future : commitFutures) {
                 future.get();
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -194,11 +193,11 @@ final class CommitCoordinationTask implements Callable<Void> {
     }
 
     /**
-     *
      * Invokes commit on underlying cohorts and returns future which
      * completes
      * once all commits on cohorts are completed.
      *
+     * <p>
      * Valid state transition is from PRE_COMMIT to COMMIT, if not throws
      * IllegalStateException
      *
@@ -206,9 +205,9 @@ final class CommitCoordinationTask implements Callable<Void> {
      */
     private ListenableFuture<?>[] commitAll() {
         final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
-        int i = 0;
+        int index = 0;
         for (final DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-            ops[i++] = cohort.commit();
+            ops[index++] = cohort.commit();
         }
         return ops;
     }
@@ -216,12 +215,14 @@ final class CommitCoordinationTask implements Callable<Void> {
     /**
      * Aborts transaction.
      *
+     * <p>
      * Invokes {@link DOMStoreThreePhaseCommitCohort#abort()} on all
      * cohorts, blocks
      * for all results. If any of the abort failed throws
      * IllegalStateException,
      * which will contains originalCause as suppressed Exception.
      *
+     * <p>
      * If aborts we're successful throws supplied exception
      *
      * @param originalCause
@@ -235,7 +236,8 @@ final class CommitCoordinationTask implements Callable<Void> {
      * @throws IllegalStateException
      *             if abort failed.
      */
-    private void abortBlocking(final TransactionCommitFailedException originalCause) throws TransactionCommitFailedException {
+    private void abortBlocking(
+            final TransactionCommitFailedException originalCause) throws TransactionCommitFailedException {
         Exception cause = originalCause;
         try {
             abortAsyncAll().get();
@@ -258,9 +260,9 @@ final class CommitCoordinationTask implements Callable<Void> {
     private ListenableFuture<Void> abortAsyncAll() {
 
         final ListenableFuture<?>[] ops = new ListenableFuture<?>[cohorts.size()];
-        int i = 0;
+        int index = 0;
         for (final DOMStoreThreePhaseCommitCohort cohort : cohorts) {
-            ops[i++] = cohort.abort();
+            ops[index++] = cohort.abort();
         }
 
         /*

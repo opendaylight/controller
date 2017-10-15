@@ -13,6 +13,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeShard;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 
 /**
+ * ShardRegistration.
+ *
  * @deprecated To be removed with {@link ShardedDOMDataTree}.
  */
 @Deprecated

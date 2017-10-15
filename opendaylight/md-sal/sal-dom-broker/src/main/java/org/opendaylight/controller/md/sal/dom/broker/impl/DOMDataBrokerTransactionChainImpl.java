@@ -28,24 +28,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * NormalizedNode implementation of {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChain} which is backed
+ * NormalizedNode implementation of {@link org.opendaylight.controller.md.sal.common.api.data.TransactionChain} which
+ * is backed
  * by several {@link DOMStoreTransactionChain} differentiated by provided
  * {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} type.
- *
  */
-final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransactionFactory<DOMStoreTransactionChain>
-        implements DOMTransactionChain {
+final class DOMDataBrokerTransactionChainImpl extends
+        AbstractDOMForwardedTransactionFactory<DOMStoreTransactionChain> implements DOMTransactionChain {
     private enum State {
-        RUNNING,
-        CLOSING,
-        CLOSED,
-        FAILED,
+        RUNNING, CLOSING, CLOSED, FAILED,
     }
 
-    private static final AtomicIntegerFieldUpdater<DOMDataBrokerTransactionChainImpl> COUNTER_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(DOMDataBrokerTransactionChainImpl.class, "counter");
-    private static final AtomicReferenceFieldUpdater<DOMDataBrokerTransactionChainImpl, State> STATE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(DOMDataBrokerTransactionChainImpl.class, State.class, "state");
+    private static final AtomicIntegerFieldUpdater<DOMDataBrokerTransactionChainImpl> COUNTER_UPDATER
+            = AtomicIntegerFieldUpdater.newUpdater(DOMDataBrokerTransactionChainImpl.class, "counter");
+    private static final AtomicReferenceFieldUpdater<DOMDataBrokerTransactionChainImpl, State> STATE_UPDATER
+            = AtomicReferenceFieldUpdater.newUpdater(DOMDataBrokerTransactionChainImpl.class, State.class, "state");
     private static final Logger LOG = LoggerFactory.getLogger(DOMDataBrokerTransactionChainImpl.class);
     private final AtomicLong txNum = new AtomicLong();
     private final AbstractDOMDataBroker broker;
@@ -56,23 +53,20 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
     private volatile int counter = 0;
 
     /**
+     * DOMDataBrokerTransactionChainImpl constructor.
      *
-     * @param chainId
-     *            ID of transaction chain
-     * @param chains
-     *            Backing {@link DOMStoreTransactionChain}s.
-     * @param broker
-     *            Commit Coordinator which should be used to coordinate commits
-     *            of transaction
-     *            produced by this chain.
-     * @param listener
-     *            Listener, which listens on transaction chain events.
-     * @throws NullPointerException
-     *             If any of arguments is null.
+     * @param chainId  ID of transaction chain
+     * @param chains   Backing {@link DOMStoreTransactionChain}s.
+     * @param broker   Commit Coordinator which should be used to coordinate commits
+     *                 of transaction
+     *                 produced by this chain.
+     * @param listener Listener, which listens on transaction chain events.
+     * @throws NullPointerException If any of arguments is null.
      */
-    public DOMDataBrokerTransactionChainImpl(final long chainId,
-            final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-            final AbstractDOMDataBroker broker, final TransactionChainListener listener) {
+    DOMDataBrokerTransactionChainImpl(final long chainId,
+                                             final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
+                                             final AbstractDOMDataBroker broker,
+                                             final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
         this.broker = Preconditions.checkNotNull(broker);
@@ -89,8 +83,10 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
     }
 
     @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit(
-            final DOMDataWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+    public CheckedFuture<Void, TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
+                                                                        final
+                                                                        Collection<DOMStoreThreePhaseCommitCohort>
+                                                                                cohorts) {
         checkNotFailed();
         checkNotClosed();
 
@@ -104,8 +100,8 @@ final class DOMDataBrokerTransactionChainImpl extends AbstractDOMForwardedTransa
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                transactionFailed(transaction, t);
+            public void onFailure(final Throwable throwable) {
+                transactionFailed(transaction, throwable);
             }
         });
 

@@ -40,20 +40,20 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
     }
 
     @Override
-    public EntityOwnershipCandidateRegistration registerCandidate(Entity entity)
-            throws CandidateAlreadyRegisteredException {
+    public EntityOwnershipCandidateRegistration registerCandidate(
+            Entity entity) throws CandidateAlreadyRegisteredException {
         try {
-            return new EntityOwnershipCandidateRegistrationAdapter(domService.registerCandidate(
-                    toDOMEntity(entity)), entity);
-        } catch(org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException e) {
+            return new EntityOwnershipCandidateRegistrationAdapter(domService.registerCandidate(toDOMEntity(entity)),
+                                                                   entity);
+        } catch (org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException e) {
             throw new CandidateAlreadyRegisteredException(entity);
         }
     }
 
     @Override
     public EntityOwnershipListenerRegistration registerListener(String entityType, EntityOwnershipListener listener) {
-        return new EntityOwnershipListenerRegistrationAdapter(entityType, listener,
-                domService.registerListener(entityType, new DOMEntityOwnershipListenerAdapter(listener)));
+        return new EntityOwnershipListenerRegistrationAdapter(entityType, listener, domService
+                .registerListener(entityType, new DOMEntityOwnershipListenerAdapter(listener)));
     }
 
     @Override
@@ -76,7 +76,7 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
 
     private Optional<EntityOwnershipState> toEntityOwnershipState(
             Optional<org.opendaylight.mdsal.eos.common.api.EntityOwnershipState> from) {
-        if(!from.isPresent()) {
+        if (!from.isPresent()) {
             return Optional.absent();
         }
 
@@ -91,7 +91,7 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
         private final DOMEntityOwnershipCandidateRegistration domRegistration;
 
         EntityOwnershipCandidateRegistrationAdapter(DOMEntityOwnershipCandidateRegistration domRegistration,
-                Entity entity) {
+                                                    Entity entity) {
             super(entity);
             this.domRegistration = Preconditions.checkNotNull(domRegistration);
         }
@@ -102,13 +102,13 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
         }
     }
 
-    private static class EntityOwnershipListenerRegistrationAdapter extends AbstractObjectRegistration<EntityOwnershipListener>
-            implements EntityOwnershipListenerRegistration {
+    private static class EntityOwnershipListenerRegistrationAdapter extends
+            AbstractObjectRegistration<EntityOwnershipListener> implements EntityOwnershipListenerRegistration {
         private final String entityType;
         private final DOMEntityOwnershipListenerRegistration domRegistration;
 
         EntityOwnershipListenerRegistrationAdapter(String entityType, EntityOwnershipListener listener,
-                DOMEntityOwnershipListenerRegistration domRegistration) {
+                                                   DOMEntityOwnershipListenerRegistration domRegistration) {
             super(listener);
             this.entityType = Preconditions.checkNotNull(entityType);
             this.domRegistration = Preconditions.checkNotNull(domRegistration);
@@ -134,11 +134,12 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
 
         @Override
         public void ownershipChanged(DOMEntityOwnershipChange ownershipChange) {
-            Entity entity = new Entity(ownershipChange.getEntity().getType(), ownershipChange.getEntity().
-                    getIdentifier());
-            delegateListener.ownershipChanged(new EntityOwnershipChange(entity,
-                    ownershipChange.getState().wasOwner(), ownershipChange.getState().isOwner(),
-                    ownershipChange.getState().hasOwner(), ownershipChange.inJeopardy()));
+            Entity entity = new Entity(ownershipChange.getEntity().getType(),
+                                       ownershipChange.getEntity().getIdentifier());
+            delegateListener.ownershipChanged(new EntityOwnershipChange(entity, ownershipChange.getState().wasOwner(),
+                                                                        ownershipChange.getState().isOwner(),
+                                                                        ownershipChange.getState().hasOwner(),
+                                                                        ownershipChange.inJeopardy()));
         }
     }
 }

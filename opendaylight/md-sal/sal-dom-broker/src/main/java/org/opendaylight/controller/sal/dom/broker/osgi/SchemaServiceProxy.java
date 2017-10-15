@@ -42,7 +42,8 @@ public class SchemaServiceProxy extends AbstractBrokerServiceProxy<SchemaService
 
     @Override
     public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(SchemaContextListener listener) {
-        ListenerRegistration<SchemaContextListener> registration = getDelegate().registerSchemaContextListener(listener);
+        ListenerRegistration<SchemaContextListener> registration = getDelegate()
+                .registerSchemaContextListener(listener);
         addRegistration(registration);
         return registration;
     }

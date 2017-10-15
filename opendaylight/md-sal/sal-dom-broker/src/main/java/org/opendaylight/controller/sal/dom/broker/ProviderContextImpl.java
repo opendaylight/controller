@@ -13,7 +13,7 @@ import org.opendaylight.controller.sal.core.api.Provider;
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
     private final Provider provider;
 
-    public ProviderContextImpl(final Provider provider, final BrokerImpl broker) {
+    ProviderContextImpl(final Provider provider, final BrokerImpl broker) {
         super(null, broker);
         this.provider = provider;
     }
@@ -22,15 +22,7 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
     public void close() {
     }
 
-    /**
-     * @return the provider
-     */
     public Provider getProvider() {
         return provider;
     }
-
-    /**
-     * @param provider
-     *            the provider to set
-     */
 }

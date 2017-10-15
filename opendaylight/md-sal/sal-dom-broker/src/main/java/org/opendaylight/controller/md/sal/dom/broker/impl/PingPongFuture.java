@@ -16,17 +16,17 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
  * {@link java.util.concurrent.Future}.
  */
 final class PingPongFuture extends AbstractCheckedFuture<Void, TransactionCommitFailedException> {
-  protected PingPongFuture(final ListenableFuture<Void> delegate) {
-    super(delegate);
-  }
-
-  @Override
-  protected TransactionCommitFailedException mapException(final Exception e) {
-    if (e.getCause() instanceof TransactionCommitFailedException){
-      return (TransactionCommitFailedException) e.getCause();
-    } else {
-            return new TransactionCommitFailedException(e.getMessage(), e.getCause());
+    protected PingPongFuture(final ListenableFuture<Void> delegate) {
+        super(delegate);
     }
-  }
+
+    @Override
+    protected TransactionCommitFailedException mapException(final Exception exception) {
+        if (exception.getCause() instanceof TransactionCommitFailedException) {
+            return (TransactionCommitFailedException) exception.getCause();
+        } else {
+            return new TransactionCommitFailedException(exception.getMessage(), exception.getCause());
+        }
+    }
 }
 

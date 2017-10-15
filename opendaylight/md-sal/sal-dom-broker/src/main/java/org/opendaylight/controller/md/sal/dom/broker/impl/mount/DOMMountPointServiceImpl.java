@@ -64,7 +64,8 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
     public ObjectRegistration<DOMMountPoint> registerMountPoint(final DOMMountPoint mountPoint) {
         synchronized (mountPoints) {
-            Preconditions.checkState(!mountPoints.containsKey(mountPoint.getIdentifier()), "Mount point already exists");
+            Preconditions
+                    .checkState(!mountPoints.containsKey(mountPoint.getIdentifier()), "Mount point already exists");
             mountPoints.put(mountPoint.getIdentifier(), mountPoint);
         }
         notifyMountCreated(mountPoint.getIdentifier());
@@ -114,7 +115,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
     private final class MountRegistration implements ObjectRegistration<DOMMountPoint> {
         private final DOMMountPoint mountPoint;
 
-        public MountRegistration(final DOMMountPoint mountPoint) {
+        MountRegistration(final DOMMountPoint mountPoint) {
             this.mountPoint = mountPoint;
         }
 

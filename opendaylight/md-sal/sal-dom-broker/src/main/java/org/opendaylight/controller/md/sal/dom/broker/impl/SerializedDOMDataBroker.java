@@ -30,11 +30,14 @@ import org.slf4j.LoggerFactory;
  * Implementation of blocking three phase commit coordinator, which which
  * supports coordination on multiple {@link DOMStoreThreePhaseCommitCohort}.
  *
+ * <p>
  * This implementation does not support cancellation of commit,
  *
+ * <p>
  * In order to advance to next phase of three phase commit all subtasks of
  * previous step must be finish.
  *
+ * <p>
  * This executor does not have an upper bound on subtask timeout.
  */
 public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
@@ -43,13 +46,13 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
     private final ListeningExecutorService executor;
 
     /**
-     *
      * Construct DOMDataCommitCoordinator which uses supplied executor to
      * process commit coordinations.
      *
-     * @param executor
+     * @param executor executor
      */
-    public SerializedDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores, final ListeningExecutorService executor) {
+    public SerializedDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores,
+                                   final ListeningExecutorService executor) {
         super(datastores);
         this.executor = Preconditions.checkNotNull(executor, "executor must not be null.");
     }
@@ -59,25 +62,23 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
     }
 
     @Override
-    protected CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+    protected CheckedFuture<Void, TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
+                                                                           final
+                                                                           Collection<DOMStoreThreePhaseCommitCohort>
+                                                                                   cohorts) {
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
         ListenableFuture<Void> commitFuture = null;
         try {
-            commitFuture = executor.submit(new CommitCoordinationTask(transaction, cohorts,
-                    commitStatsTracker));
-        } catch(RejectedExecutionException e) {
-            LOG.error("The commit executor's queue is full - submit task was rejected. \n" +
-                      executor, e);
-            return Futures.immediateFailedCheckedFuture(
-                    new TransactionCommitFailedException(
-                        "Could not submit the commit task - the commit queue capacity has been exceeded.", e));
+            commitFuture = executor.submit(new CommitCoordinationTask(transaction, cohorts, commitStatsTracker));
+        } catch (RejectedExecutionException e) {
+            LOG.error("The commit executor's queue is full - submit task was rejected. \n" + executor, e);
+            return Futures.immediateFailedCheckedFuture(new TransactionCommitFailedException(
+                    "Could not submit the commit task - the commit queue capacity has been exceeded.", e));
         }
 
-        return MappingCheckedFuture.create(commitFuture,
-                TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+        return MappingCheckedFuture.create(commitFuture, TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
     }
 }

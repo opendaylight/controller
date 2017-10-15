@@ -16,9 +16,10 @@ final class LegacyShardedDOMDataBrokerAdapterUtils {
         throw new AssertionError("Util class should not be instantiated");
     }
 
-    public static org.opendaylight.mdsal.common.api.LogicalDatastoreType translateDataStoreType(final LogicalDatastoreType store) {
-        return store.equals(LogicalDatastoreType.CONFIGURATION) ?
-                org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION :
-                org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
+    public static org.opendaylight.mdsal.common.api.LogicalDatastoreType translateDataStoreType(
+            final LogicalDatastoreType store) {
+        return store
+                .equals(LogicalDatastoreType.CONFIGURATION) ? org.opendaylight.mdsal.common.api.LogicalDatastoreType
+                .CONFIGURATION : org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
     }
 }

@@ -34,7 +34,9 @@ final class DOMNotificationRouterEvent {
         // Hidden on purpose, initialized in initialize()
     }
 
-    ListenableFuture<Void> initialize(final DOMNotification notification, final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers) {
+    ListenableFuture<Void> initialize(final DOMNotification notification,
+                                      final Collection<ListenerRegistration<? extends DOMNotificationListener>>
+                                              subscribers) {
         this.notification = Preconditions.checkNotNull(notification);
         this.subscribers = Preconditions.checkNotNull(subscribers);
         this.future = SettableFuture.create();
@@ -46,13 +48,9 @@ final class DOMNotificationRouterEvent {
         for (ListenerRegistration<? extends DOMNotificationListener> r : subscribers) {
             final DOMNotificationListener listener = r.getInstance();
             if (listener != null) {
-                try {
-                    LOG.trace("Notifying listener {}", listener);
-                    listener.onNotification(notification);
-                    LOG.trace("Listener notification completed");
-                } catch (Exception e) {
-                    LOG.error("Delivery of notification {} caused an error in listener {}", notification, listener, e);
-                }
+                LOG.trace("Notifying listener {}", listener);
+                listener.onNotification(notification);
+                LOG.trace("Listener notification completed");
             }
         }
         LOG.trace("Delivery completed");
