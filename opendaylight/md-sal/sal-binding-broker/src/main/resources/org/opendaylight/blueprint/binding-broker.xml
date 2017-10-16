@@ -26,13 +26,13 @@
     </interfaces>
   </service>
 
-  <!-- We also register the BindingToNormalizedNodeCodec with its actual class name for
-       backwards compatibility for CSS users that inject the binding-dom-mapping-service -->
-  <bean id="mappingCodecServiceReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
-         factory-method="registerOSGiService" destroy-method="unregister">
-    <argument ref="mappingCodec"/>
-    <argument ref="blueprintBundleContext"/>
-  </bean>
+  <service id="codec" ref="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec">
+    <service-properties>
+      <entry key="config-module-namespace" value="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl"/>
+      <entry key="config-module-name" value="runtime-generated-mapping"/>
+      <entry key="config-instance-name" value="runtime-mapping-singleton"/>
+    </service-properties>
+  </service>
 
   <!-- Binding RPC Registry Service -->
 
