@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a245df4_b81d17c0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-10-16T17:28:17Z",
+      "side": 1,
+      "message": "hold on a sec - are you intentionally using isTraceEnabled() for debug() ?  So that if the level is debug you don\u0027t get the log but not the stack trace, and with trace you get both?  But with debug there is an un-used null log argument - will slf4j dig that, without barfing?  Somehow I would be able to sleep better ;) if this was either the same level and using isDebugEnabled instead of isTraceEnabled:\n\n   final Throwable stackTrace \u003d log.isDebugEnabled() ? new Throwable() : null;\n   log.debug(\"{}: Moving last applied index from {} to {}\", id, this.lastApplied, lastApplied, stackTrace);\n\n-OR- both at trace level:\n\n   final Throwable stackTrace \u003d log.isTraceEnabled() ? new Throwable() : null;\n   log.trace(\"{}: Moving last applied index from {} to {}\", id, this.lastApplied, lastApplied, stackTrace);\n\n-OR- if, this is truly intentional, then instead something like this which will be clearer to read:\n\n    if (log.isDebugEnabled()) {\n      log.debug(\"{}: Moving last applied index from {} to {}\", id, this.lastApplied, lastApplied);\n    } else if (log.isTraceEnabled()) {\n      log.debug(\"{}: Moving last applied index from {} to {}\", id, this.lastApplied, lastApplied, new Throwable());\n    }",
+      "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
