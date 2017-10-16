@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
@@ -16,8 +14,6 @@ import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * Factory class for creating and initializing the BindingToNormalizedNodeCodec instances.
@@ -47,28 +43,5 @@ public class BindingToNormalizedNodeCodecFactory {
     public static ListenerRegistration<SchemaContextListener> registerInstance(final BindingToNormalizedNodeCodec instance,
             final DOMSchemaService schemaService) {
         return schemaService.registerSchemaContextListener(instance);
-    }
-
-    /**
-     * This method is called via blueprint to register a BindingToNormalizedNodeCodec instance with the OSGI
-     * service registry. This is done in code instead of directly via blueprint because the BindingToNormalizedNodeCodec
-     * instance must be advertised with the actual class for backwards compatibility with CSS modules and blueprint
-     * will try to create a proxy wrapper which is problematic with BindingToNormalizedNodeCodec because it's final
-     * and has final methods which can't be proxied.
-     *
-     * @param instance the BindingToNormalizedNodeCodec instance
-     * @param bundleContext the BundleContext
-     * @return ServiceRegistration instance
-     */
-    public static ServiceRegistration<BindingToNormalizedNodeCodec> registerOSGiService(final BindingToNormalizedNodeCodec instance,
-            final BundleContext bundleContext) {
-        final Dictionary<String, String> props = new Hashtable<>();
-
-        // Set the appropriate service properties so the corresponding CSS module is restarted if this
-        // blueprint container is restarted
-        props.put("config-module-namespace", "urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl");
-        props.put("config-module-name", "runtime-generated-mapping");
-        props.put("config-instance-name", "runtime-mapping-singleton");
-        return bundleContext.registerService(BindingToNormalizedNodeCodec.class, instance, props );
     }
 }
