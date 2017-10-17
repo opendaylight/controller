@@ -34,16 +34,18 @@ import org.slf4j.LoggerFactory;
  * {@link DOMStoreWriteTransaction} transactions. A sub-transaction is selected by
  * {@link LogicalDatastoreType} type parameter in:
  *
+ * <p>
  * <ul>
  * <li>{@link #put(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
  * <li>{@link #delete(LogicalDatastoreType, YangInstanceIdentifier)}
  * <li>{@link #merge(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
  * </ul>
+ *
  * <p>
  * {@link #commit()} will result in invocation of
- * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
- * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
- * transactions.
+ * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction,
+ * Iterable)} invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort}
+ * for underlying transactions.
  *
  * @param <T> Subtype of {@link DOMStoreWriteTransaction} which is used as
  *            subtransaction.
@@ -51,11 +53,13 @@ import org.slf4j.LoggerFactory;
 class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         AbstractDOMForwardedCompositeTransaction<LogicalDatastoreType, T> implements DOMDataWriteTransaction {
     @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, AbstractDOMForwardedTransactionFactory> IMPL_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, AbstractDOMForwardedTransactionFactory.class, "commitImpl");
+    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction,
+            AbstractDOMForwardedTransactionFactory>
+            IMPL_UPDATER = AtomicReferenceFieldUpdater
+            .newUpdater(DOMForwardedWriteTransaction.class, AbstractDOMForwardedTransactionFactory.class, "commitImpl");
     @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, Future> FUTURE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, Future.class, "commitFuture");
+    private static final AtomicReferenceFieldUpdater<DOMForwardedWriteTransaction, Future> FUTURE_UPDATER
+            = AtomicReferenceFieldUpdater.newUpdater(DOMForwardedWriteTransaction.class, Future.class, "commitFuture");
     private static final Logger LOG = LoggerFactory.getLogger(DOMForwardedWriteTransaction.class);
     private static final Future<?> CANCELLED_FUTURE = Futures.immediateCancelledFuture();
 
@@ -71,6 +75,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
      * set appropriately on {@link #submit()} and {@link #cancel()} via
      * {@link AtomicReferenceFieldUpdater#lazySet(Object, Object)}.
      *
+     * <p>
      * Lazy set is safe for use because it is only referenced to in the
      * {@link #cancel()} slow path, where we will busy-wait for it. The
      * fast path gets the benefit of a store-store barrier instead of the
@@ -78,14 +83,15 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
      */
     private volatile Future<?> commitFuture;
 
-    protected DOMForwardedWriteTransaction(final Object identifier,
-            final Map<LogicalDatastoreType, T> backingTxs, final AbstractDOMForwardedTransactionFactory<?> commitImpl) {
+    protected DOMForwardedWriteTransaction(final Object identifier, final Map<LogicalDatastoreType, T> backingTxs,
+                                           final AbstractDOMForwardedTransactionFactory<?> commitImpl) {
         super(identifier, backingTxs);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                    final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
         getSubtransaction(store).write(path, data);
     }
@@ -97,7 +103,8 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                      final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
         getSubtransaction(store).merge(path, data);
     }

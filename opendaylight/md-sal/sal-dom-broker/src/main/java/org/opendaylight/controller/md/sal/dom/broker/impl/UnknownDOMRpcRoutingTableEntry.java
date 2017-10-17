@@ -22,10 +22,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 final class UnknownDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntry {
     private final CheckedFuture<DOMRpcResult, DOMRpcException> unknownRpc;
 
-    UnknownDOMRpcRoutingTableEntry(final SchemaPath schemaPath, final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    UnknownDOMRpcRoutingTableEntry(final SchemaPath schemaPath,
+                                   final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(schemaPath, impls);
         unknownRpc = Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(
-            new DOMRpcImplementationNotAvailableException("SchemaPath %s is not resolved to an RPC", schemaPath));
+                new DOMRpcImplementationNotAvailableException("SchemaPath %s is not resolved to an RPC", schemaPath));
     }
 
     @Override
@@ -34,7 +35,8 @@ final class UnknownDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEnt
     }
 
     @Override
-    protected UnknownDOMRpcRoutingTableEntry newInstance(final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    protected UnknownDOMRpcRoutingTableEntry newInstance(
+            final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         return new UnknownDOMRpcRoutingTableEntry(getSchemaPath(), impls);
     }
 }

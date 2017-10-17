@@ -25,11 +25,11 @@ public class CommitStatsMXBeanImpl extends AbstractMXBean implements CommitStats
      * Constructor.
      *
      * @param commitStatsTracker the DurationStatsTracker used to obtain the stats.
-     * @param mBeanType mBeanType Used as the <code>type</code> property in the bean's ObjectName.
+     * @param mbeantype mBeanType Used as the <code>type</code> property in the bean's ObjectName.
      */
     public CommitStatsMXBeanImpl(@Nonnull DurationStatisticsTracker commitStatsTracker,
-            @Nonnull String mBeanType) {
-        super("CommitStats", mBeanType, null);
+            @Nonnull String mbeantype) {
+        super("CommitStats", mbeantype, null);
         this.commitStatsTracker = commitStatsTracker;
     }
 

@@ -49,9 +49,11 @@ import org.slf4j.LoggerFactory;
  * the committing transaction completes successfully, the scratch transaction
  * is enqueued as soon as it is ready.
  *
+ * <p>
  * This mode of operation means that there is no inherent isolation between
  * the front-end transactions and transactions cannot be reasonably cancelled.
  *
+ * <p>
  * It furthermore means that the transactions returned by {@link #newReadOnlyTransaction()}
  * counts as an outstanding transaction and the user may not allocate multiple
  * read-only transactions at the same time.
@@ -72,8 +74,9 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      * This updater is used to manipulate the "ready" transaction. We perform only atomic
      * get-and-set on it.
      */
-    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> READY_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "readyTx");
+    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> READY_UPDATER
+            = AtomicReferenceFieldUpdater
+            .newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "readyTx");
     private volatile PingPongTransaction readyTx;
 
     /**
@@ -82,16 +85,18 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      * us. We perform on compare-and-swap to ensure we properly detect when a user is
      * attempting to allocated multiple transactions concurrently.
      */
-    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> LOCKED_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "lockedTx");
+    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> LOCKED_UPDATER
+            = AtomicReferenceFieldUpdater
+            .newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "lockedTx");
     private volatile PingPongTransaction lockedTx;
 
     /**
      * This updater is used to manipulate the "inflight" transaction. There can be at most
      * one of these at any given time. We perform only compare-and-swap on these.
      */
-    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> INFLIGHT_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "inflightTx");
+    private static final AtomicReferenceFieldUpdater<PingPongTransactionChain, PingPongTransaction> INFLIGHT_UPDATER
+            = AtomicReferenceFieldUpdater
+            .newUpdater(PingPongTransactionChain.class, PingPongTransaction.class, "inflightTx");
     private volatile PingPongTransaction inflightTx;
 
     PingPongTransactionChain(final DOMDataBroker broker, final TransactionChainListener listener) {
@@ -99,7 +104,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         this.delegate = broker.createTransactionChain(new TransactionChainListener() {
             @Override
             public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-                    final AsyncTransaction<?, ?> transaction, final Throwable cause) {
+                                                 final AsyncTransaction<?, ?> transaction, final Throwable cause) {
                 LOG.debug("Transaction chain {} reported failure in {}", chain, transaction, cause);
                 delegateFailed(chain, cause);
             }
@@ -164,9 +169,9 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         Preconditions.checkState(shutdownTx == null, "Transaction chain %s has been shut down", this);
 
         if (deadTx != null) {
-            throw new IllegalStateException(String.format(
-                "Transaction chain %s has failed due to transaction %s being canceled", this, deadTx.getKey()),
-                deadTx.getValue());
+            throw new IllegalStateException(
+                    String.format("Transaction chain %s has failed due to transaction %s being canceled", this,
+                                  deadTx.getKey()), deadTx.getValue());
         }
 
         final DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
@@ -174,7 +179,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
         if (!LOCKED_UPDATER.compareAndSet(this, null, newTx)) {
             delegateTx.cancel();
-            throw new IllegalStateException(String.format("New transaction %s raced with transaction %s", newTx, lockedTx));
+            throw new IllegalStateException(
+                    String.format("New transaction %s raced with transaction %s", newTx, lockedTx));
         }
 
         return newTx;
@@ -193,7 +199,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         if (!LOCKED_UPDATER.compareAndSet(this, null, oldTx)) {
             // Ouch. Delegate chain has not detected a duplicate transaction allocation. This is the best we can do.
             oldTx.getTransaction().cancel();
-            throw new IllegalStateException(String.format("Reusable transaction %s raced with transaction %s", oldTx, lockedTx));
+            throw new IllegalStateException(
+                    String.format("Reusable transaction %s raced with transaction %s", oldTx, lockedTx));
         }
 
         return oldTx;
@@ -240,8 +247,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                transactionFailed(tx, t);
+            public void onFailure(final Throwable throwable) {
+                transactionFailed(tx, throwable);
             }
         }, MoreExecutors.directExecutor());
     }
@@ -288,10 +295,10 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         processNextTransaction(tx);
     }
 
-    void transactionFailed(final PingPongTransaction tx, final Throwable t) {
-        LOG.debug("Transaction {} failed", tx, t);
+    void transactionFailed(final PingPongTransaction tx, final Throwable throwable) {
+        LOG.debug("Transaction {} failed", tx, throwable);
 
-        tx.onFailure(t);
+        tx.onFailure(throwable);
         processNextTransaction(tx);
     }
 
@@ -327,9 +334,9 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      * and return false for everything else. Cancelling such a transaction will result in all transactions in the
      * batch to be cancelled.
      *
-     * @param tx Backend shared transaction
-     * @param frontendTx
-     * @param isOpen indicator whether the transaction was already closed
+     * @param tx         Backend shared transaction
+     * @param frontendTx transaction
+     * @param isOpen     indicator whether the transaction was already closed
      */
     synchronized void cancelTransaction(final PingPongTransaction tx, final DOMDataReadWriteTransaction frontendTx) {
         // Attempt to unlock the operation.
@@ -362,16 +369,16 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         // transaction chain, too. Since we just came off of a locked transaction, we do not have a ready transaction
         // at the moment, but there may be some transaction in-flight. So we proceed to shutdown the backend chain
         // and mark the fact that we should be turning its completion into a failure.
-        deadTx = new SimpleImmutableEntry<>(tx,
-                new CancellationException("Transaction " + frontendTx + " canceled").fillInStackTrace());
+        deadTx = new SimpleImmutableEntry<>(tx, new CancellationException("Transaction " + frontendTx + " canceled")
+                .fillInStackTrace());
         delegate.close();
     }
 
     @Override
     public synchronized void close() {
         final PingPongTransaction notLocked = lockedTx;
-        Preconditions.checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s",
-                notLocked);
+        Preconditions
+                .checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s", notLocked);
 
         // This is not reliable, but if we observe it to be null and the process has already completed,
         // the backend transaction chain will throw the appropriate error.
@@ -417,7 +424,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
             @Override
             public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
-                    final YangInstanceIdentifier path) {
+                                                                      final YangInstanceIdentifier path) {
                 return tx.getTransaction().exists(store, path);
             }
 

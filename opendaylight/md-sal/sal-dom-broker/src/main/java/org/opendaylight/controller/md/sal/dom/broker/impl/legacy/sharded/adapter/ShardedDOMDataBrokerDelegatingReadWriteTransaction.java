@@ -45,9 +45,12 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFac
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
- * Read/write transaction that delegates write and initial read to {@link org.opendaylight.mdsal.dom.broker.ShardedDOMWriteTransactionAdapter}
+ * Read/write transaction that delegates write and initial read to
+ * {@link org.opendaylight.mdsal.dom.broker.ShardedDOMWriteTransactionAdapter}
  * and {@link org.opendaylight.mdsal.dom.broker.ShardedDOMReadTransactionAdapter}
- * respectively. These two in turn rely on shard aware implementation of {@link org.opendaylight.mdsal.dom.api.DOMDataTreeService}.
+ * respectively. These two in turn rely on shard aware implementation of
+ * {@link org.opendaylight.mdsal.dom.api.DOMDataTreeService}.
+ *
  * <p>
  * Since reading data distributed on different subshards is not guaranteed to
  * return all relevant data, best effort is to try to operate only on single
@@ -58,8 +61,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 // FIXME explicitly enforce just one subtree requirement
 @NotThreadSafe
 class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadWriteTransaction {
-    private static final ListenableFuture<RpcResult<TransactionStatus>> SUCCESS_FUTURE =
-            Futures.immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
+    private static final ListenableFuture<RpcResult<TransactionStatus>> SUCCESS_FUTURE = Futures
+            .immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
 
     private final DOMDataReadOnlyTransaction readTxDelegate;
     private final DOMDataWriteTransaction writeTxDelegate;
@@ -69,7 +72,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
     private final Map<LogicalDatastoreType, ListenableFuture<Optional<NormalizedNode<?, ?>>>> initialReadMap;
     private YangInstanceIdentifier root = null;
 
-    public ShardedDOMDataBrokerDelegatingReadWriteTransaction(final Object readWriteTxId, final SchemaContext ctx,
+    ShardedDOMDataBrokerDelegatingReadWriteTransaction(final Object readWriteTxId, final SchemaContext ctx,
                                                               final DOMDataReadOnlyTransaction readTxDelegate,
                                                               final DOMDataWriteTransaction writeTxDelegate) {
         this.readTxDelegate = checkNotNull(readTxDelegate);
@@ -79,8 +82,8 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
 
         final InMemoryDataTreeFactory treeFactory = InMemoryDataTreeFactory.getInstance();
         final ImmutableMap.Builder<LogicalDatastoreType, DataTreeSnapshot> snapshotMapBuilder = ImmutableMap.builder();
-        final ImmutableMap.Builder<LogicalDatastoreType, Queue<Modification>> modificationHistoryMapBuilder =
-                ImmutableMap.builder();
+        final ImmutableMap.Builder<LogicalDatastoreType, Queue<Modification>> modificationHistoryMapBuilder
+                = ImmutableMap.builder();
         for (final LogicalDatastoreType store : LogicalDatastoreType.values()) {
             final DataTree tree = treeFactory.create(treeTypeForStore(store));
             tree.setSchemaContext(ctx);
@@ -122,7 +125,8 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
                                                                                    final YangInstanceIdentifier path) {
-        checkState(root != null, "A modify operation (put, merge or delete) must be performed prior to a read operation");
+        checkState(root != null,
+                   "A modify operation (put, merge or delete) must be performed prior to a read operation");
         final SettableFuture<Optional<NormalizedNode<?, ?>>> readResult = SettableFuture.create();
         final Queue<Modification> currentHistory = Lists.newLinkedList(modificationHistoryMap.get(store));
         Futures.addCallback(initialReadMap.get(store), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
@@ -137,8 +141,8 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                readResult.setException(t);
+            public void onFailure(final Throwable throwable) {
+                readResult.setException(throwable);
             }
         }, MoreExecutors.directExecutor());
 
@@ -148,10 +152,12 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
     @Override
     public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
                                                               final YangInstanceIdentifier path) {
-        checkState(root != null, "A modify operation (put, merge or delete) must be performed prior to an exists operation");
+        checkState(root != null,
+                   "A modify operation (put, merge or delete) must be performed prior to an exists operation");
         return Futures.makeChecked(Futures.transform(read(store, path),
-                (Function<Optional<NormalizedNode<?, ?>>, Boolean>) Optional::isPresent),
-                ReadFailedException.MAPPER);
+                                                     (Function<Optional<NormalizedNode<?, ?>>, Boolean>)
+                                                             Optional::isPresent),
+                                   ReadFailedException.MAPPER);
     }
 
     @Override

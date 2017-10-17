@@ -70,15 +70,6 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         return registerRpcImplementation(implementation, ImmutableSet.copyOf(rpcs));
     }
 
-    private synchronized void removeRpcImplementation(final DOMRpcImplementation implementation,
-            final Set<DOMRpcIdentifier> rpcs) {
-        final DOMRpcRoutingTable oldTable = routingTable;
-        final DOMRpcRoutingTable newTable = oldTable.remove(implementation, rpcs);
-        routingTable = newTable;
-
-        listenerNotifier.execute(() -> notifyRemoved(newTable, implementation));
-    }
-
     @Override
     public synchronized <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
             final T implementation, final Set<DOMRpcIdentifier> rpcs) {
@@ -96,9 +87,18 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         };
     }
 
+    private synchronized void removeRpcImplementation(final DOMRpcImplementation implementation,
+                                                      final Set<DOMRpcIdentifier> rpcs) {
+        final DOMRpcRoutingTable oldTable = routingTable;
+        final DOMRpcRoutingTable newTable = oldTable.remove(implementation, rpcs);
+        routingTable = newTable;
+
+        listenerNotifier.execute(() -> notifyRemoved(newTable, implementation));
+    }
+
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type,
-            final NormalizedNode<?, ?> input) {
+                                                                  final NormalizedNode<?, ?> input) {
         return routingTable.invokeRpc(type, input);
     }
 
@@ -143,15 +143,15 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         listenerNotifier.shutdown();
     }
 
-    private static final class Registration<T extends DOMRpcAvailabilityListener>
-        extends AbstractListenerRegistration<T> {
+    private static final class Registration<T extends DOMRpcAvailabilityListener> extends
+            AbstractListenerRegistration<T> {
 
         private final DOMRpcRouter router;
 
         private Map<SchemaPath, Set<YangInstanceIdentifier>> prevRpcs;
 
         Registration(final DOMRpcRouter router, final T listener,
-                final Map<SchemaPath, Set<YangInstanceIdentifier>> rpcs) {
+                     final Map<SchemaPath, Set<YangInstanceIdentifier>> rpcs) {
             super(Preconditions.checkNotNull(listener));
             this.router = Preconditions.checkNotNull(router);
             this.prevRpcs = Preconditions.checkNotNull(rpcs);
@@ -187,7 +187,8 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
             for (Entry<SchemaPath, Set<YangInstanceIdentifier>> e : diff.entriesOnlyOnRight().entrySet()) {
                 added.addAll(Collections2.transform(e.getValue(), i -> DOMRpcIdentifier.create(e.getKey(), i)));
             }
-            for (Entry<SchemaPath, ValueDifference<Set<YangInstanceIdentifier>>> e : diff.entriesDiffering().entrySet()) {
+            for (Entry<SchemaPath, ValueDifference<Set<YangInstanceIdentifier>>> e : diff.entriesDiffering()
+                    .entrySet()) {
                 for (YangInstanceIdentifier i : Sets.difference(e.getValue().rightValue(), e.getValue().leftValue())) {
                     added.add(DOMRpcIdentifier.create(e.getKey(), i));
                 }
@@ -212,7 +213,8 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
             for (Entry<SchemaPath, Set<YangInstanceIdentifier>> e : diff.entriesOnlyOnLeft().entrySet()) {
                 removed.addAll(Collections2.transform(e.getValue(), i -> DOMRpcIdentifier.create(e.getKey(), i)));
             }
-            for (Entry<SchemaPath, ValueDifference<Set<YangInstanceIdentifier>>> e : diff.entriesDiffering().entrySet()) {
+            for (Entry<SchemaPath, ValueDifference<Set<YangInstanceIdentifier>>> e : diff.entriesDiffering()
+                    .entrySet()) {
                 for (YangInstanceIdentifier i : Sets.difference(e.getValue().leftValue(), e.getValue().rightValue())) {
                     removed.add(DOMRpcIdentifier.create(e.getKey(), i));
                 }

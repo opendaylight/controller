@@ -30,13 +30,15 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
     private final DOMRpcIdentifier globalRpcId;
     private final YangInstanceIdentifier keyId;
 
-    private RoutedDOMRpcRoutingTableEntry(final DOMRpcIdentifier globalRpcId, final YangInstanceIdentifier keyId, final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    private RoutedDOMRpcRoutingTableEntry(final DOMRpcIdentifier globalRpcId, final YangInstanceIdentifier keyId,
+                                          final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(globalRpcId.getType(), impls);
         this.keyId = Preconditions.checkNotNull(keyId);
         this.globalRpcId = Preconditions.checkNotNull(globalRpcId);
     }
 
-    RoutedDOMRpcRoutingTableEntry(final RpcDefinition def, final YangInstanceIdentifier keyId, final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    RoutedDOMRpcRoutingTableEntry(final RpcDefinition def, final YangInstanceIdentifier keyId,
+                                  final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         super(def.getPath(), impls);
         this.keyId = Preconditions.checkNotNull(keyId);
         this.globalRpcId = DOMRpcIdentifier.create(def.getPath());
@@ -65,7 +67,7 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
                 // implementation this way
                 final List<DOMRpcImplementation> mayBeRemoteImpls = getImplementations(YangInstanceIdentifier.EMPTY);
 
-                if(mayBeRemoteImpls != null){
+                if (mayBeRemoteImpls != null) {
                     return mayBeRemoteImpls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
                 }
 
@@ -78,12 +80,15 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
         if (impls != null) {
             return impls.get(0).invokeRpc(globalRpcId, input);
         } else {
-            return Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException("No implementation of RPC %s available", getSchemaPath()));
+            return Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(
+                    new DOMRpcImplementationNotAvailableException("No implementation of RPC %s available",
+                                                                  getSchemaPath()));
         }
     }
 
     @Override
-    protected RoutedDOMRpcRoutingTableEntry newInstance(final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+    protected RoutedDOMRpcRoutingTableEntry newInstance(
+            final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
         return new RoutedDOMRpcRoutingTableEntry(globalRpcId, keyId, impls);
     }
 }

@@ -71,9 +71,28 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
     }
 
     @Override
+    public ConsumerSession registerConsumer(final Consumer consumer) {
+        checkPredicates(consumer);
+        LOG.trace("Registering consumer {}", consumer);
+        final ConsumerContextImpl session = newSessionFor(consumer);
+        consumer.onSessionInitiated(session);
+        sessions.add(session);
+        return session;
+    }
+
+    @Override
     public ProviderSession registerProvider(final Provider provider,
             final BundleContext ctx) {
         return registerProvider(provider);
+    }
+
+    @Override
+    public ProviderSession registerProvider(final Provider provider) {
+        checkPredicates(provider);
+        final ProviderContextImpl session = newSessionFor(provider);
+        provider.onSessionInitiated(session);
+        providerSessions.add(session);
+        return session;
     }
 
     // Validation
@@ -126,6 +145,8 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
     }
 
     /**
+     * Gets deactivator.
+     *
      * @return the deactivator
      */
     public AutoCloseable getDeactivator() {
@@ -133,6 +154,8 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
     }
 
     /**
+     * Sets deactivator.
+     *
      * @param deactivator
      *            the deactivator to set
      */
@@ -144,49 +167,31 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
         return Optional.fromNullable(services.getInstance(service));
     }
 
-
-    @Override
-    public ConsumerSession registerConsumer(final Consumer consumer) {
-        checkPredicates(consumer);
-        LOG.trace("Registering consumer {}", consumer);
-        final ConsumerContextImpl session = newSessionFor(consumer);
-        consumer.onSessionInitiated(session);
-        sessions.add(session);
-        return session;
-    }
-
-
-    @Override
-    public ProviderSession registerProvider(final Provider provider) {
-        checkPredicates(provider);
-        final ProviderContextImpl session = newSessionFor(provider);
-        provider.onSessionInitiated(session);
-        providerSessions.add(session);
-        return session;
-    }
-
-
     @Nonnull
     @Override
-    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(@Nonnull final T implementation, @Nonnull final DOMRpcIdentifier... rpcs) {
+    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            @Nonnull final T implementation, @Nonnull final DOMRpcIdentifier... rpcs) {
         return rpcProvider.registerRpcImplementation(implementation, rpcs);
     }
 
     @Nonnull
     @Override
-    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(@Nonnull final T implementation, @Nonnull final Set<DOMRpcIdentifier> rpcs) {
+    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            @Nonnull final T implementation, @Nonnull final Set<DOMRpcIdentifier> rpcs) {
         return rpcProvider.registerRpcImplementation(implementation, rpcs);
     }
 
     @Nonnull
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final SchemaPath type, @Nullable final NormalizedNode<?, ?> input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final SchemaPath type,
+                                                                  @Nullable final NormalizedNode<?, ?> input) {
         return rpcService.invokeRpc(type, input);
     }
 
     @Nonnull
     @Override
-    public <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(@Nonnull final T listener) {
+    public <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(
+            @Nonnull final T listener) {
         return rpcService.registerRpcListener(listener);
     }
 }

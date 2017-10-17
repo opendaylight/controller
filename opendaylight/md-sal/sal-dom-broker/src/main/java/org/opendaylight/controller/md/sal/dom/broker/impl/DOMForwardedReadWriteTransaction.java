@@ -19,7 +19,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
- *
  * Read-Write Transaction, which is composed of several
  * {@link DOMStoreReadWriteTransaction} transactions. Subtransaction is selected by
  * {@link LogicalDatastoreType} type parameter in:
@@ -31,12 +30,14 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * <li>{@link #merge(LogicalDatastoreType, YangInstanceIdentifier, NormalizedNode)}
  * </ul>
  * {@link #commit()} will result in invocation of
- * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction, Iterable)}
- * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort} for underlying
- * transactions.
+ * {@link DOMDataCommitImplementation#submit(org.opendaylight.controller.md.sal.dom
+ * .api.DOMDataWriteTransaction, Iterable)}
+ * invocation with all {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort}
+ * for underlying transactions.
  *
  */
-final class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
+final class DOMForwardedReadWriteTransaction extends DOMForwardedWriteTransaction<DOMStoreReadWriteTransaction>
+        implements DOMDataReadWriteTransaction {
     protected DOMForwardedReadWriteTransaction(final Object identifier,
             final Map<LogicalDatastoreType, DOMStoreReadWriteTransaction> backingTxs,
             final AbstractDOMForwardedTransactionFactory<?> commitImpl) {

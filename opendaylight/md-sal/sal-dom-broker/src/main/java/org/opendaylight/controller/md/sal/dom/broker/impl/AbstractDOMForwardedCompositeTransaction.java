@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Composite DOM Transaction backed by {@link DOMStoreTransaction}.
  *
+ * <p>
  * Abstract base for composite transaction, which provides access only to common
  * functionality as retrieval of subtransaction, close method and retrieval of
  * identifier.
@@ -35,7 +36,6 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
     private final Object identifier;
 
     /**
-     *
      * Creates new composite Transactions.
      *
      * @param identifier
@@ -51,8 +51,8 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
     /**
      * Returns subtransaction associated with supplied key.
      *
-     * @param key
-     * @return
+     * @param key key
+     * @return subtransaction
      * @throws NullPointerException
      *             if key is null
      * @throws IllegalArgumentException
@@ -79,6 +79,7 @@ abstract class AbstractDOMForwardedCompositeTransaction<K, T extends DOMStoreTra
         return identifier;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     protected void closeSubtransactions() {
         /*
          * We share one exception for all failures, which are added
