@@ -17,24 +17,33 @@ public interface CommitStatsMXBean {
 
     /**
      * Returns the total number of commits that have occurred.
+     *
+     * @return Returns the total number of commits that have occurred
+     *
      */
     long getTotalCommits();
 
     /**
      * Returns a string representing the time duration of the longest commit, in the appropriate
      * scaled units, along with the date/time that it occurred.
+     *
+     * @return string
      */
     String getLongestCommitTime();
 
     /**
      * Returns a string representing the time duration of the shortest commit, in the appropriate
      * scaled units, along with the date/time that it occurred.
+     *
+     * @return string
      */
     String getShortestCommitTime();
 
     /**
      * Returns a string representing average commit time duration, in the appropriate
      * scaled units.
+     *
+     * @return string
      */
     String getAverageCommitTime();
 

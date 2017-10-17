@@ -25,24 +25,27 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTransaction {
-    private static final ListenableFuture<RpcResult<TransactionStatus>> SUCCESS_FUTURE =
-            Futures.immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
+    private static final ListenableFuture<RpcResult<TransactionStatus>> SUCCESS_FUTURE = Futures
+            .immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
 
     private final DOMDataTreeWriteTransaction delegateTx;
     private final Object txIdentifier;
 
-    public ShardedDOMDataBrokerDelegatingWriteTransaction(final Object txIdentifier, final DOMDataTreeWriteTransaction delegateTx) {
+    ShardedDOMDataBrokerDelegatingWriteTransaction(final Object txIdentifier,
+                                                          final DOMDataTreeWriteTransaction delegateTx) {
         this.delegateTx = checkNotNull(delegateTx);
         this.txIdentifier = checkNotNull(txIdentifier);
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                    final NormalizedNode<?, ?> data) {
         delegateTx.put(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path, data);
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                      final NormalizedNode<?, ?> data) {
         delegateTx.merge(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path, data);
     }
 

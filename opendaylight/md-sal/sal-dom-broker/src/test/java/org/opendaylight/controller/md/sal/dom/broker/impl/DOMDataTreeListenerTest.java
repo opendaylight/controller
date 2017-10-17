@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ForwardingExecutorService;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -63,21 +64,18 @@ public class DOMDataTreeListenerTest {
     private CommitExecutorService commitExecutor;
 
     private static final DataContainerChild<?, ?> OUTER_LIST = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
-            .build();
+            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)).build();
 
-    private static final DataContainerChild<?, ?> OUTER_LIST_2 = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2))
-            .build();
+    private static final DataContainerChild<?, ?> OUTER_LIST_2 = ImmutableNodes
+            .mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2)).build();
 
     private static final NormalizedNode<?, ?> TEST_CONTAINER = Builders.containerBuilder()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-            .withChild(OUTER_LIST)
+            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(OUTER_LIST)
             .build();
 
     private static final NormalizedNode<?, ?> TEST_CONTAINER_2 = Builders.containerBuilder()
-            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
-            .withChild(OUTER_LIST_2)
+            .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(OUTER_LIST_2)
             .build();
 
     private static DOMDataTreeIdentifier ROOT_DATA_TREE_ID = new DOMDataTreeIdentifier(
@@ -88,16 +86,15 @@ public class DOMDataTreeListenerTest {
 
     @Before
     public void setupStore() {
-        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
-                MoreExecutors.newDirectExecutorService());
-        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
-                MoreExecutors.newDirectExecutorService());
+        InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
+        InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", MoreExecutors.newDirectExecutorService());
         schemaContext = TestModel.createTestContext();
 
         operStore.onGlobalContextUpdated(schemaContext);
         configStore.onGlobalContextUpdated(schemaContext);
 
-        ImmutableMap<LogicalDatastoreType, DOMStore> stores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder() //
+        final ImmutableMap<LogicalDatastoreType, DOMStore> stores = ImmutableMap.<LogicalDatastoreType,
+                DOMStore>builder() //
                 .put(CONFIGURATION, configStore) //
                 .put(OPERATIONAL, operStore) //
                 .build();
@@ -105,7 +102,9 @@ public class DOMDataTreeListenerTest {
         commitExecutor = new CommitExecutorService(Executors.newSingleThreadExecutor());
         futureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(1, 5, "FCB");
         executor = new DeadlockDetectingListeningExecutorService(commitExecutor,
-                TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER, futureExecutor);
+                                                                 TransactionCommitDeadlockException
+                                                                         .DEADLOCK_EXCEPTION_SUPPLIER,
+                                                                 futureExecutor);
         domBroker = new SerializedDOMDataBroker(stores, executor);
     }
 
@@ -125,12 +124,11 @@ public class DOMDataTreeListenerTest {
         CountDownLatch latch = new CountDownLatch(1);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
-        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!",
-                dataTreeChangeService);
+        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!", dataTreeChangeService);
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
-        final ListenerRegistration<TestDataTreeListener> listenerReg =
-                dataTreeChangeService.registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
+        final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
+                .registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
 
         final DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
@@ -151,19 +149,18 @@ public class DOMDataTreeListenerTest {
 
     @Test
     public void replaceContainerContainerInTreeTest() throws InterruptedException, TransactionCommitFailedException {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
-        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!",
-                dataTreeChangeService);
+        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!", dataTreeChangeService);
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
         writeTx.submit().checkedGet();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
-        final ListenerRegistration<TestDataTreeListener> listenerReg =
-                dataTreeChangeService.registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
+        final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
+                .registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER_2);
         writeTx.submit();
@@ -191,19 +188,18 @@ public class DOMDataTreeListenerTest {
 
     @Test
     public void deleteContainerContainerInTreeTest() throws InterruptedException, TransactionCommitFailedException {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
-        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!",
-                dataTreeChangeService);
+        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!", dataTreeChangeService);
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
         writeTx.submit().checkedGet();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
-        final ListenerRegistration<TestDataTreeListener> listenerReg =
-                dataTreeChangeService.registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
+        final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
+                .registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.delete(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
@@ -232,19 +228,18 @@ public class DOMDataTreeListenerTest {
 
     @Test
     public void replaceChildListContainerInTreeTest() throws InterruptedException, TransactionCommitFailedException {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
-        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!",
-                dataTreeChangeService);
+        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!", dataTreeChangeService);
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
         writeTx.submit().checkedGet();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
-        final ListenerRegistration<TestDataTreeListener> listenerReg =
-                dataTreeChangeService.registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
+        final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
+                .registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH, OUTER_LIST_2);
@@ -268,8 +263,8 @@ public class DOMDataTreeListenerTest {
         assertNotNull(candidate);
         candidateRoot = candidate.getRootNode();
         checkChange(TEST_CONTAINER, TEST_CONTAINER_2, ModificationType.SUBTREE_MODIFIED, candidateRoot);
-        final DataTreeCandidateNode modifiedChild = candidateRoot.getModifiedChild(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME));
+        final DataTreeCandidateNode modifiedChild = candidateRoot
+                .getModifiedChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME));
         assertNotNull(modifiedChild);
         checkChange(OUTER_LIST, OUTER_LIST_2, ModificationType.WRITE, modifiedChild);
         listenerReg.close();
@@ -277,19 +272,18 @@ public class DOMDataTreeListenerTest {
 
     @Test
     public void rootModificationChildListenerTest() throws InterruptedException, TransactionCommitFailedException {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
-        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!",
-                dataTreeChangeService);
+        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!", dataTreeChangeService);
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
         writeTx.submit().checkedGet();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
-        final ListenerRegistration<TestDataTreeListener> listenerReg =
-                dataTreeChangeService.registerDataTreeChangeListener(OUTER_LIST_DATA_TREE_ID, listener);
+        final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
+                .registerDataTreeChangeListener(OUTER_LIST_DATA_TREE_ID, listener);
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER_2);
@@ -318,42 +312,42 @@ public class DOMDataTreeListenerTest {
 
     @Test
     public void listEntryChangeNonRootRegistrationTest() throws InterruptedException, TransactionCommitFailedException {
-        CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
-        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!",
-                dataTreeChangeService);
+        assertNotNull("DOMDataTreeChangeService not found, cannot continue with test!", dataTreeChangeService);
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
         writeTx.submit().checkedGet();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
-        final ListenerRegistration<TestDataTreeListener> listenerReg =
-                dataTreeChangeService.registerDataTreeChangeListener(OUTER_LIST_DATA_TREE_ID, listener);
+        final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
+                .registerDataTreeChangeListener(OUTER_LIST_DATA_TREE_ID, listener);
 
-        final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId1 =
-                new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1);
-        final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId2 =
-                new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2);
-        final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId3 =
-                new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 3);
+        final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId1
+                = new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                                                                          TestModel.ID_QNAME, 1);
+        final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId2
+                = new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                                                                          TestModel.ID_QNAME, 2);
+        final YangInstanceIdentifier.NodeIdentifierWithPredicates outerListEntryId3
+                = new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                                                                          TestModel.ID_QNAME, 3);
 
         final MapEntryNode outerListEntry1 = ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1);
         final MapEntryNode outerListEntry2 = ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2);
         final MapEntryNode outerListEntry3 = ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 3);
 
-        final MapNode listAfter = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .withChild(outerListEntry2)
-                .withChild(outerListEntry3)
-                .build();
+        final MapNode listAfter = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).withChild(outerListEntry2)
+                .withChild(outerListEntry3).build();
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.delete(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH.node(outerListEntryId1));
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH.node(outerListEntryId2),
-                outerListEntry2);
+                    outerListEntry2);
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH.node(outerListEntryId3),
-                outerListEntry3);
+                    outerListEntry3);
         writeTx.submit();
 
         latch.await(5, TimeUnit.SECONDS);
@@ -383,10 +377,8 @@ public class DOMDataTreeListenerTest {
         listenerReg.close();
     }
 
-    private static void checkChange(final NormalizedNode<?, ?> expectedBefore,
-                                    final NormalizedNode<?, ?> expectedAfter,
-                                    final ModificationType expectedMod,
-                                    final DataTreeCandidateNode candidateNode) {
+    private static void checkChange(final NormalizedNode<?, ?> expectedBefore, final NormalizedNode<?, ?> expectedAfter,
+                                    final ModificationType expectedMod, final DataTreeCandidateNode candidateNode) {
         if (expectedBefore != null) {
             assertTrue(candidateNode.getDataBefore().isPresent());
             assertEquals(expectedBefore, candidateNode.getDataBefore().get());
@@ -405,8 +397,7 @@ public class DOMDataTreeListenerTest {
     }
 
     private DOMDataTreeChangeService getDOMDataTreeChangeService() {
-        final DOMDataBrokerExtension extension = domBroker.getSupportedExtensions()
-                .get(DOMDataTreeChangeService.class);
+        final DOMDataBrokerExtension extension = domBroker.getSupportedExtensions().get(DOMDataTreeChangeService.class);
         if (extension == null) {
             return null;
         }
@@ -422,7 +413,7 @@ public class DOMDataTreeListenerTest {
 
         ExecutorService delegate;
 
-        public CommitExecutorService(final ExecutorService delegate) {
+        CommitExecutorService(final ExecutorService delegate) {
             this.delegate = delegate;
         }
 
@@ -437,7 +428,7 @@ public class DOMDataTreeListenerTest {
         private final List<Collection<DataTreeCandidate>> receivedChanges = new ArrayList<>();
         private final CountDownLatch latch;
 
-        public TestDataTreeListener(final CountDownLatch latch) {
+        TestDataTreeListener(final CountDownLatch latch) {
             this.latch = latch;
         }
 

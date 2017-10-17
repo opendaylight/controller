@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -48,7 +49,7 @@ public class DOMTransactionChainTest {
         operStore.onGlobalContextUpdated(schemaContext);
         configStore.onGlobalContextUpdated(schemaContext);
 
-        ImmutableMap<LogicalDatastoreType, DOMStore> stores = ImmutableMap.<LogicalDatastoreType, DOMStore> builder() //
+        ImmutableMap<LogicalDatastoreType, DOMStore> stores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder() //
                 .put(CONFIGURATION, configStore) //
                 .put(OPERATIONAL, operStore) //
                 .build();
@@ -64,15 +65,13 @@ public class DOMTransactionChainTest {
         assertNotNull(txChain);
 
         /**
-         * We alocate new read-write transaction and write /test
-         *
-         *
+         * We alocate new read-write transaction and write /test.
          */
         DOMDataReadWriteTransaction firstTx = allocateAndWrite(txChain);
 
         /**
          * First transaction is marked as ready, we are able to allocate chained
-         * transactions
+         * transactions.
          */
         ListenableFuture<Void> firstWriteTxFuture = firstTx.submit();
 
@@ -85,13 +84,10 @@ public class DOMTransactionChainTest {
          *
          * We test if we are able to read data from tx, read should not fail
          * since we are using chained transaction.
-         *
-         *
          */
         assertTestContainerExists(secondReadTx);
 
         /**
-         *
          * We alocate next transaction, which is still based on first one, but
          * is read-write.
          *
@@ -99,15 +95,13 @@ public class DOMTransactionChainTest {
         DOMDataReadWriteTransaction thirdDeleteTx = allocateAndDelete(txChain);
 
         /**
-         * We commit first transaction
+         * We commit first transaction.
          *
          */
         assertCommitSuccessful(firstWriteTxFuture);
 
         /**
-         *
          * Allocates transaction from data store.
-         *
          */
         DOMDataReadTransaction storeReadTx = domBroker.newReadOnlyTransaction();
 
@@ -118,7 +112,7 @@ public class DOMTransactionChainTest {
         assertTestContainerExists(storeReadTx);
 
         /**
-         * third transaction is sealed and commited
+         * third transaction is sealed and commited.
          */
         ListenableFuture<Void> thirdDeleteTxFuture = thirdDeleteTx.submit();
         assertCommitSuccessful(thirdDeleteTxFuture);
@@ -132,6 +126,7 @@ public class DOMTransactionChainTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionChainNotSealed() throws InterruptedException, ExecutionException, TimeoutException {
         BlockingTransactionChainListener listener = new BlockingTransactionChainListener();
         DOMTransactionChain txChain = domBroker.createTransactionChain(listener);
@@ -139,8 +134,6 @@ public class DOMTransactionChainTest {
 
         /**
          * We alocate new read-write transaction and write /test
-         *
-         *
          */
         allocateAndWrite(txChain);
 
@@ -157,8 +150,8 @@ public class DOMTransactionChainTest {
         }
     }
 
-    private static DOMDataReadWriteTransaction allocateAndDelete(final DOMTransactionChain txChain)
-            throws InterruptedException, ExecutionException {
+    private static DOMDataReadWriteTransaction allocateAndDelete(
+            final DOMTransactionChain txChain) throws InterruptedException, ExecutionException {
         DOMDataReadWriteTransaction tx = txChain.newReadWriteTransaction();
 
         /**
@@ -175,27 +168,27 @@ public class DOMTransactionChainTest {
         return tx;
     }
 
-    private static DOMDataReadWriteTransaction allocateAndWrite(final DOMTransactionChain txChain)
-            throws InterruptedException, ExecutionException {
+    private static DOMDataReadWriteTransaction allocateAndWrite(
+            final DOMTransactionChain txChain) throws InterruptedException, ExecutionException {
         DOMDataReadWriteTransaction tx = txChain.newReadWriteTransaction();
         assertTestContainerWrite(tx);
         return tx;
     }
 
-    private static void assertCommitSuccessful(final ListenableFuture<Void> future)
-            throws InterruptedException, ExecutionException {
+    private static void assertCommitSuccessful(
+            final ListenableFuture<Void> future) throws InterruptedException, ExecutionException {
         future.get();
     }
 
-    private static void assertTestContainerExists(final DOMDataReadTransaction readTx) throws InterruptedException,
-            ExecutionException {
+    private static void assertTestContainerExists(
+            final DOMDataReadTransaction readTx) throws InterruptedException, ExecutionException {
         ListenableFuture<Optional<NormalizedNode<?, ?>>> readFuture = readTx.read(OPERATIONAL, TestModel.TEST_PATH);
         Optional<NormalizedNode<?, ?>> readedData = readFuture.get();
         assertTrue(readedData.isPresent());
     }
 
-    private static void assertTestContainerWrite(final DOMDataReadWriteTransaction tx) throws InterruptedException,
-            ExecutionException {
+    private static void assertTestContainerWrite(
+            final DOMDataReadWriteTransaction tx) throws InterruptedException, ExecutionException {
         tx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
         assertTestContainerExists(tx);
     }

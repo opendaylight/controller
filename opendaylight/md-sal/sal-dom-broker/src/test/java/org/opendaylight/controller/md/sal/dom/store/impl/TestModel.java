@@ -16,7 +16,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
-public class TestModel {
+public final class TestModel {
+
+    private TestModel() {
+    }
 
     public static final QName TEST_QNAME =
             QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");

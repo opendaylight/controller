@@ -20,11 +20,13 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 /**
  * An implementation of a {@link DOMDataBroker}, which forwards most requests to a delegate.
  *
+ * <p>
  * Its interpretation of the API contract is somewhat looser, specifically it does not
  * guarantee transaction ordering between transactions allocated directly from the broker
  * and its transaction chains.
  */
-public final class PingPongDataBroker extends ForwardingDOMDataBroker implements AutoCloseable, DOMDataTreeChangeService {
+public final class PingPongDataBroker extends ForwardingDOMDataBroker implements AutoCloseable,
+        DOMDataTreeChangeService {
     private final DOMDataBroker delegate;
 
     /**
@@ -53,9 +55,10 @@ public final class PingPongDataBroker extends ForwardingDOMDataBroker implements
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(final DOMDataTreeIdentifier treeId, final L listener) {
-        final DOMDataTreeChangeService treeService =
-                (DOMDataTreeChangeService) delegate.getSupportedExtensions().get(DOMDataTreeChangeService.class);
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
+            final DOMDataTreeIdentifier treeId, final L listener) {
+        final DOMDataTreeChangeService treeService = (DOMDataTreeChangeService) delegate.getSupportedExtensions()
+                .get(DOMDataTreeChangeService.class);
         if (treeService != null) {
             return treeService.registerDataTreeChangeListener(treeId, listener);
         }

@@ -48,7 +48,8 @@ public class ShardedDOMDataBrokerDelegatingTransactionChainTest {
         MockitoAnnotations.initMocks(this);
 
         doReturn(delegateTxChain).when(dataBroker).createTransactionChain(any());
-        txChain = new ShardedDOMDataBrokerDelegatingTransactionChain("1", TestModel.createTestContext(), dataBroker, txChainlistener);
+        txChain = new ShardedDOMDataBrokerDelegatingTransactionChain("1", TestModel.createTestContext(), dataBroker,
+                                                                     txChainlistener);
     }
 
     @Test
@@ -105,8 +106,7 @@ public class ShardedDOMDataBrokerDelegatingTransactionChainTest {
 
         final ArgumentCaptor<AsyncTransaction> txCaptor = ArgumentCaptor.forClass(AsyncTransaction.class);
         final ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
-        verify(txChainlistener)
-                .onTransactionChainFailed(eq(txChain), txCaptor.capture(), throwableCaptor.capture());
+        verify(txChainlistener).onTransactionChainFailed(eq(txChain), txCaptor.capture(), throwableCaptor.capture());
         assertEquals("DOM-CHAIN-1-0", txCaptor.getValue().getIdentifier());
         assertEquals("Fail", throwableCaptor.getValue().getMessage());
 

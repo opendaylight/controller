@@ -8,12 +8,13 @@
 
 package org.opendaylight.controller.sal.dom.broker.util;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
@@ -32,11 +33,8 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
 /**
- * ProxySchema Context for SchemaContextProviders
+ * ProxySchema Context for SchemaContextProviders.
  */
 public class ProxySchemaContext implements SchemaContext {
 
@@ -47,7 +45,8 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     private SchemaContext getCurrentSchema() {
-        Preconditions.checkState(schemaProvider.getSchemaContext() != null, "Schema context unavailable from %s", schemaProvider);
+        Preconditions.checkState(schemaProvider.getSchemaContext() != null, "Schema context unavailable from %s",
+                                 schemaProvider);
         return schemaProvider.getSchemaContext();
     }
 
@@ -77,8 +76,8 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public Module findModuleByName(final String s, final Date date) {
-        return getCurrentSchema().findModuleByName(s, date);
+    public Module findModuleByName(final String string, final Date date) {
+        return getCurrentSchema().findModuleByName(string, date);
     }
 
     @Override
@@ -122,8 +121,8 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public DataSchemaNode getDataChildByName(final QName qName) {
-        return getCurrentSchema().getDataChildByName(qName);
+    public DataSchemaNode getDataChildByName(final QName name) {
+        return getCurrentSchema().getDataChildByName(name);
     }
 
     @Override
