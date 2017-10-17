@@ -51,7 +51,8 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
         doNothing().when(writeTx).put(any(), any(), any());
         doNothing().when(writeTx).merge(any(), any(), any());
         doNothing().when(writeTx).delete(any(), any());
-        rwTx = new ShardedDOMDataBrokerDelegatingReadWriteTransaction("TEST-TX", TestModel.createTestContext(), readTx, writeTx);
+        rwTx = new ShardedDOMDataBrokerDelegatingReadWriteTransaction("TEST-TX", TestModel.createTestContext(), readTx,
+                                                                      writeTx);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -66,33 +67,29 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
 
     @Test
     public void testReadWriteOperations() throws Exception {
-        doReturn(Futures.immediateCheckedFuture(Optional.absent())).when(readTx)
-                .read(any(), any());
-        rwTx.put(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH,
-                testNodeWithOuter(1, 2, 3));
+        doReturn(Futures.immediateCheckedFuture(Optional.absent())).when(readTx).read(any(), any());
+        rwTx.put(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH, testNodeWithOuter(1, 2, 3));
 
         verify(writeTx).put(eq(LogicalDatastoreType.OPERATIONAL), Matchers.eq(TestModel.TEST_PATH),
-                Matchers.eq(testNodeWithOuter(1, 2, 3)));
+                            Matchers.eq(testNodeWithOuter(1, 2, 3)));
         verify(readTx).read(eq(LogicalDatastoreType.OPERATIONAL), Matchers.eq(TestModel.TEST_PATH));
 
         assertEquals(testNodeWithOuter(1, 2, 3),
-                rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet().get());
+                     rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet().get());
 
-        rwTx.merge(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH,
-                testNodeWithOuter(4, 5, 6));
+        rwTx.merge(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH, testNodeWithOuter(4, 5, 6));
         assertEquals(testNodeWithOuter(1, 2, 3, 4, 5, 6),
-                rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet().get());
+                     rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet().get());
 
         rwTx.delete(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH);
 
         verify(writeTx).delete(eq(LogicalDatastoreType.OPERATIONAL), Matchers.eq(TestModel.TEST_PATH));
-        assertEquals(Optional.absent(),
-                rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet());
+        assertEquals(Optional.absent(), rwTx.read(LogicalDatastoreType.OPERATIONAL, TestModel.TEST_PATH).checkedGet());
     }
 
     private DataContainerChild<?, ?> outerNode(int... ids) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME);
-        for(int id: ids) {
+        for (int id : ids) {
             outer.addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, id));
         }
 
@@ -104,7 +101,8 @@ public class ShardedDOMDataBrokerDelegatingReadWriteTransactionTest {
     }
 
     private NormalizedNode<?, ?> testNodeWithOuter(DataContainerChild<?, ?> outer) {
-        return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(outer).build();
+        return ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(outer)
+                .build();
     }
 }

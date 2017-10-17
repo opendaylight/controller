@@ -35,9 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Sharded DOM Data Tree Producer.
+ *
  * @deprecated To be removed with {@link ShardedDOMDataTree}.
  */
 @Deprecated
+@SuppressWarnings("checkstyle:IllegalCatch")
 final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
     private static final Logger LOG = LoggerFactory.getLogger(ShardedDOMDataTreeProducer.class);
     private final BiMap<DOMDataTreeShard, DOMStoreTransactionChain> shardToChain;
@@ -51,7 +54,9 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
     @GuardedBy("this")
     private boolean closed;
 
-    ShardedDOMDataTreeProducer(final ShardedDOMDataTree dataTree, final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap, final Set<DOMDataTreeShard> shards) {
+    ShardedDOMDataTreeProducer(final ShardedDOMDataTree dataTree,
+                               final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap,
+                               final Set<DOMDataTreeShard> shards) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
 
         // Create shard -> chain map
@@ -61,7 +66,7 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
         for (final DOMDataTreeShard s : shards) {
             if (s instanceof DOMStore) {
                 try {
-                    final DOMStoreTransactionChain c = ((DOMStore)s).createTransactionChain();
+                    final DOMStoreTransactionChain c = ((DOMStore) s).createTransactionChain();
                     LOG.trace("Using DOMStore chain {} to access shard {}", c, s);
                     cb.put(s, c);
                 } catch (final Exception e) {
@@ -84,7 +89,8 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
                 }
             }
 
-            final IllegalStateException e = new IllegalStateException("Failed to completely allocate contexts", es.poll());
+            final IllegalStateException e = new IllegalStateException("Failed to completely allocate contexts",
+                                                                      es.poll());
             while (!es.isEmpty()) {
                 e.addSuppressed(es.poll());
             }
@@ -129,9 +135,9 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
     }
 
     @GuardedBy("this")
-    private DOMDataTreeProducer lookupChild(final DOMDataTreeIdentifier s) {
+    private DOMDataTreeProducer lookupChild(final DOMDataTreeIdentifier identifier) {
         for (final Entry<DOMDataTreeIdentifier, DOMDataTreeProducer> e : children.entrySet()) {
-            if (e.getKey().contains(s)) {
+            if (e.getKey().contains(identifier)) {
                 return e.getValue();
             }
         }
@@ -147,7 +153,8 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
         for (final DOMDataTreeIdentifier s : subtrees) {
             // Check if the subtree was visible at any time
             if (!haveSubtree(s)) {
-                throw new IllegalArgumentException(String.format("Subtree %s was never available in producer %s", s, this));
+                throw new IllegalArgumentException(
+                        String.format("Subtree %s was never available in producer %s", s, this));
             }
 
             // Check if the subtree has not been delegated to a child
@@ -157,7 +164,9 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
             // Check if part of the requested subtree is not delegated to a child.
             for (final DOMDataTreeIdentifier c : children.keySet()) {
                 if (s.contains(c)) {
-                    throw new IllegalArgumentException(String.format("Subtree %s cannot be delegated as it is superset of already-delegated %s", s, c));
+                    throw new IllegalArgumentException(
+                            String.format("Subtree %s cannot be delegated as it is superset of already-delegated %s", s,
+                                          c));
                 }
             }
         }
@@ -185,7 +194,8 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
         }
     }
 
-    static DOMDataTreeProducer create(final ShardedDOMDataTree dataTree, final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap) {
+    static DOMDataTreeProducer create(final ShardedDOMDataTree dataTree,
+                                      final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap) {
         /*
          * FIXME: we do not allow multiple multiple shards in a producer because we do not implement the
          *        synchronization primitives yet

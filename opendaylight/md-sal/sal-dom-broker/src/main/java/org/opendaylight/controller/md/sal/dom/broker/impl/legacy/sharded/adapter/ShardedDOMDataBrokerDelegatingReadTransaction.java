@@ -22,7 +22,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * Read transaction that delegates calls to {@link org.opendaylight.mdsal.dom.broker.ShardedDOMReadTransactionAdapter},
- * which in turn translates calls to shard aware implementation of {@link org.opendaylight.mdsal.dom.api.DOMDataTreeService}.
+ * which in turn translates calls to shard aware implementation of
+ * {@link org.opendaylight.mdsal.dom.api.DOMDataTreeService}.
+ *
  * <p>
  * Since reading data distributed on different subshards is not guaranteed to
  * return all relevant data, we cannot guarantee it neither. Best effort is to
@@ -32,7 +34,8 @@ class ShardedDOMDataBrokerDelegatingReadTransaction implements DOMDataReadOnlyTr
     private final DOMDataTreeReadTransaction delegateTx;
     private final Object txIdentifier;
 
-    public ShardedDOMDataBrokerDelegatingReadTransaction(final Object txIdentifier, final DOMDataTreeReadTransaction delegateTx) {
+    ShardedDOMDataBrokerDelegatingReadTransaction(final Object txIdentifier,
+                                                         final DOMDataTreeReadTransaction delegateTx) {
         this.delegateTx = checkNotNull(delegateTx);
         this.txIdentifier = checkNotNull(txIdentifier);
     }
@@ -40,12 +43,17 @@ class ShardedDOMDataBrokerDelegatingReadTransaction implements DOMDataReadOnlyTr
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
                                                                                    final YangInstanceIdentifier path) {
-        return Futures.makeChecked(delegateTx.read(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path), ReadFailedException.MAPPER);
+        return Futures.makeChecked(
+                delegateTx.read(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path),
+                ReadFailedException.MAPPER);
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        return Futures.makeChecked(delegateTx.exists(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path), ReadFailedException.MAPPER);
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                                                              final YangInstanceIdentifier path) {
+        return Futures.makeChecked(
+                delegateTx.exists(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path),
+                ReadFailedException.MAPPER);
     }
 
     @Override

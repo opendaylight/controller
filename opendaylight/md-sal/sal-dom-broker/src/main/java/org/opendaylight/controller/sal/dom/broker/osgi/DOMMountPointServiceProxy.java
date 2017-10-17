@@ -16,10 +16,11 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.ServiceReference;
 
-public class DOMMountPointServiceProxy extends AbstractBrokerServiceProxy<DOMMountPointService> implements DOMMountPointService{
+public class DOMMountPointServiceProxy extends AbstractBrokerServiceProxy<DOMMountPointService> implements
+        DOMMountPointService {
 
-
-    public DOMMountPointServiceProxy(final ServiceReference<DOMMountPointService> ref, final DOMMountPointService delegate) {
+    public DOMMountPointServiceProxy(final ServiceReference<DOMMountPointService> ref,
+                                     final DOMMountPointService delegate) {
         super(ref, delegate);
     }
 
@@ -33,7 +34,8 @@ public class DOMMountPointServiceProxy extends AbstractBrokerServiceProxy<DOMMou
         return getDelegate().createMountPoint(path);
     }
 
-    public ListenerRegistration<MountProvisionListener> registerProvisionListener(final MountProvisionListener listener) {
+    public ListenerRegistration<MountProvisionListener> registerProvisionListener(
+            final MountProvisionListener listener) {
         return getDelegate().registerProvisionListener(listener);
     }
 }

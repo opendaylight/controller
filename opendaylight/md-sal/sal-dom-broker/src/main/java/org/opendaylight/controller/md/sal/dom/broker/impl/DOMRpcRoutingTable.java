@@ -44,7 +44,8 @@ final class DOMRpcRoutingTable {
     private final Map<SchemaPath, AbstractDOMRpcRoutingTableEntry> rpcs;
     private final SchemaContext schemaContext;
 
-    private DOMRpcRoutingTable(final Map<SchemaPath, AbstractDOMRpcRoutingTableEntry> rpcs, final SchemaContext schemaContext) {
+    private DOMRpcRoutingTable(final Map<SchemaPath, AbstractDOMRpcRoutingTableEntry> rpcs,
+                               final SchemaContext schemaContext) {
         this.rpcs = Preconditions.checkNotNull(rpcs);
         this.schemaContext = schemaContext;
     }
@@ -122,10 +123,10 @@ final class DOMRpcRoutingTable {
         return contexts != null && contexts.containsContext(input.getContextReference());
     }
 
-    Map<SchemaPath, Set<YangInstanceIdentifier>> getRpcs(final DOMRpcAvailabilityListener l) {
+    Map<SchemaPath, Set<YangInstanceIdentifier>> getRpcs(final DOMRpcAvailabilityListener listener) {
         final Map<SchemaPath, Set<YangInstanceIdentifier>> ret = new HashMap<>(rpcs.size());
         for (Entry<SchemaPath, AbstractDOMRpcRoutingTableEntry> e : rpcs.entrySet()) {
-            final Set<YangInstanceIdentifier> ids = e.getValue().registeredIdentifiers(l);
+            final Set<YangInstanceIdentifier> ids = e.getValue().registeredIdentifiers(listener);
             if (!ids.isEmpty()) {
                 ret.put(e.getKey(), ids);
             }

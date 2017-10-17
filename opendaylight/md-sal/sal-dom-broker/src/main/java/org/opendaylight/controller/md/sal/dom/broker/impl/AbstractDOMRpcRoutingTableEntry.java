@@ -52,15 +52,15 @@ abstract class AbstractDOMRpcRoutingTableEntry {
         return impls.containsKey(contextReference);
     }
 
-    final Set<YangInstanceIdentifier> registeredIdentifiers(final DOMRpcAvailabilityListener l) {
-        return Maps.filterValues(impls, list -> list.stream().anyMatch(l::acceptsImplementation)).keySet();
+    final Set<YangInstanceIdentifier> registeredIdentifiers(final DOMRpcAvailabilityListener listener) {
+        return Maps.filterValues(impls, list -> list.stream().anyMatch(listener::acceptsImplementation)).keySet();
     }
 
     /**
+     * Adds an entry to the DOM RPC routing table.
      *
-     * @param implementation
+     * @param implementation RPC implementation
      * @param newRpcs List of new RPCs, must be mutable
-     * @return
      */
     final AbstractDOMRpcRoutingTableEntry add(final DOMRpcImplementation implementation,
             final List<YangInstanceIdentifier> newRpcs) {
@@ -79,7 +79,7 @@ abstract class AbstractDOMRpcRoutingTableEntry {
                 vb.put(ve);
             }
         }
-        for(final YangInstanceIdentifier ii : newRpcs) {
+        for (final YangInstanceIdentifier ii : newRpcs) {
             final List<DOMRpcImplementation> impl = new ArrayList<>(1);
             impl.add(implementation);
             vb.put(ii, impl);
@@ -109,6 +109,8 @@ abstract class AbstractDOMRpcRoutingTableEntry {
         return v.isEmpty() ? null : newInstance(v);
     }
 
-    protected abstract CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final NormalizedNode<?, ?> input);
-    protected abstract AbstractDOMRpcRoutingTableEntry newInstance(final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls);
+    protected abstract CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(NormalizedNode<?, ?> input);
+
+    protected abstract AbstractDOMRpcRoutingTableEntry newInstance(
+            Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls);
 }

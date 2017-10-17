@@ -57,6 +57,7 @@ public abstract class AbstractBrokerServiceProxy<T extends BrokerService> implem
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() {
         if (delegate != null) {
             delegate = null;

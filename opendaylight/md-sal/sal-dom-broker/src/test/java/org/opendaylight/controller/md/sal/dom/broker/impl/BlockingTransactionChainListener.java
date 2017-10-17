@@ -7,19 +7,18 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 
-import com.google.common.util.concurrent.SettableFuture;
-
 /**
  * Simple implementation of {@link TransactionChainListener} for testing.
  *
+ * <p>
  * This transaction chain listener does not contain any logic, only update
  * futures ({@link #getFailFuture()} and {@link #getSuccessFuture()} when
  * transaction chain event is retrieved.
- *
  */
 class BlockingTransactionChainListener implements TransactionChainListener {
 
@@ -28,7 +27,7 @@ class BlockingTransactionChainListener implements TransactionChainListener {
 
     @Override
     public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction,
-            final Throwable cause) {
+                                         final Throwable cause) {
         failFuture.set(cause);
     }
 

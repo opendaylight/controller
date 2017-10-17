@@ -61,8 +61,8 @@ final class PingPongTransaction implements FutureCallback<Void> {
     }
 
     @Override
-    public void onFailure(final Throwable t) {
-        future.setException(t);
+    public void onFailure(final Throwable throwable) {
+        future.setException(throwable);
     }
 
     void recordFrontendTransaction(final DOMDataReadWriteTransaction tx) {

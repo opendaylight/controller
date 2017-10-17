@@ -11,26 +11,24 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
+import java.util.Collection;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.dom.broker.osgi.AbstractBrokerServiceProxy;
 import org.opendaylight.controller.sal.dom.broker.osgi.ProxyFactory;
 
-import javax.annotation.concurrent.GuardedBy;
-import java.util.Collection;
-
 class ConsumerContextImpl implements ConsumerSession {
 
-    private final ClassToInstanceMap<BrokerService> instantiatedServices = MutableClassToInstanceMap
-            .create();
+    private final ClassToInstanceMap<BrokerService> instantiatedServices = MutableClassToInstanceMap.create();
     private final Consumer consumer;
 
     private BrokerImpl broker = null;
     @GuardedBy("this")
     private boolean closed = false;
 
-    public ConsumerContextImpl(final Consumer provider, final BrokerImpl brokerImpl) {
+    ConsumerContextImpl(final Consumer provider, final BrokerImpl brokerImpl) {
         broker = brokerImpl;
         consumer = provider;
     }
@@ -43,8 +41,8 @@ class ConsumerContextImpl implements ConsumerSession {
             return localProxy;
         }
         final Optional<T> serviceImpl = broker.getGlobalService(service);
-        if(serviceImpl.isPresent()) {
-            final T ret = ProxyFactory.createProxy(null,serviceImpl.get());
+        if (serviceImpl.isPresent()) {
+            final T ret = ProxyFactory.createProxy(null, serviceImpl.get());
             instantiatedServices.putInstance(service, ret);
             return ret;
         } else {
@@ -78,21 +76,25 @@ class ConsumerContextImpl implements ConsumerSession {
     }
 
     /**
+     * Gets broker.
+     *
      * @return the broker
      */
-    protected final  BrokerImpl getBrokerChecked() {
+    protected final BrokerImpl getBrokerChecked() {
         checkNotClosed();
         return broker;
     }
 
     /**
+     * Gets consumer.
+     *
      * @return the _consumer
      */
     public Consumer getConsumer() {
         return consumer;
     }
 
-    protected final void checkNotClosed()  {
+    protected final void checkNotClosed() {
         Preconditions.checkState(!closed, "Session is closed.");
     }
 }

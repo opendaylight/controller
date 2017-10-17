@@ -107,7 +107,7 @@ public final class YangSchemaUtils {
 
     private static final class NetconfDataRootNode implements ContainerSchemaNode {
 
-        public NetconfDataRootNode(final SchemaContext schema) {
+        NetconfDataRootNode(final SchemaContext schema) {
             // TODO Auto-generated constructor stub
         }
 

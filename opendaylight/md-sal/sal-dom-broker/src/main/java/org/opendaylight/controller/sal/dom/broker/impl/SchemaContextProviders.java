@@ -12,13 +12,13 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
-public class SchemaContextProviders {
+public final class SchemaContextProviders {
 
     private SchemaContextProviders() {
         throw new UnsupportedOperationException("Utility class.");
     }
 
-    public static final SchemaContextProvider fromSchemaService(final SchemaService schemaService) {
+    public static SchemaContextProvider fromSchemaService(final SchemaService schemaService) {
         if (schemaService instanceof SchemaContextProvider) {
             return (SchemaContextProvider) schemaService;
         }
@@ -29,7 +29,7 @@ public class SchemaContextProviders {
 
         private final SchemaService service;
 
-        public SchemaServiceAdapter(final SchemaService service) {
+        SchemaServiceAdapter(final SchemaService service) {
             this.service = service;
         }
 
