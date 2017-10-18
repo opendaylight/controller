@@ -34,6 +34,24 @@
       "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_125eb7e6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2017-10-18T13:01:25Z",
+      "side": 1,
+      "message": "That’s pretty neat, but it deserves a comment (if only to avoid someone coming along later and “aligning” the log levels one way or the other), don’t you think?",
+      "parentUuid": "9a245df4_928d877e",
+      "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
