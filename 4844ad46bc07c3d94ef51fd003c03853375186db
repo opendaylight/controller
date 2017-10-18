@@ -16,6 +16,24 @@
       "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_928d877e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-10-18T12:34:09Z",
+      "side": 1,
+      "message": "Yes I do, and no, slf4j does not have a problem with it -- last argument is checked for being a throwable, which it is not.\n\nThis is a fast path, so we really want to keep those checks at bay -- and copy\u0026pasting logs is rather bad.",
+      "parentUuid": "9a245df4_b81d17c0",
+      "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
