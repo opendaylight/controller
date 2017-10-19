@@ -225,6 +225,13 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-test-util</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.infrautils</groupId>
+      <artifactId>diagstatus-api</artifactId>
+      <version>${infrautils.version}</version>
+    </dependency>
+
   </dependencies>
 
   <build>

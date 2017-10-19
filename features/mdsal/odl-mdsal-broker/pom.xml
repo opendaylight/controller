@@ -53,6 +53,13 @@
             <classifier>config</classifier>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.infrautils</groupId>
+            <artifactId>odl-infrautils-diagstatus</artifactId>
+            <version>1.3.0-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <!-- finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}" -->
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-clustering-config</artifactId>
