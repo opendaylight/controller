@@ -93,6 +93,11 @@
     </interfaces>
   </service>
 
+
+  <!-- Infrautils DiagStatus -->
+  <bean id="datastoreStatusMonitor" class="org.opendaylight.controller.cluster.datastore.statusanddiag.DatastoreStatusMonitor"/>
+  <service ref="datastoreStatusMonitor" interface="org.opendaylight.infrautils.diagstatus.ServiceStatusProvider"/>
+
   <!-- Concurrent DOMDataBroker -->
 
   <bean id="listenableFutureExecutor" class="org.opendaylight.yangtools.util.concurrent.SpecialExecutors"
