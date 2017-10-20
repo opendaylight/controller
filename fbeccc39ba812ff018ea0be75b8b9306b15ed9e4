@@ -76,6 +76,29 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_294a69ac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:30:39Z",
+      "side": 1,
+      "message": "This class really doesn\u0027t monitor anything. How about  \"DatastoreServiceStatusProvider\"?",
+      "range": {
+        "startLine": 15,
+        "startChar": 13,
+        "endLine": 15,
+        "endChar": 35
+      },
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_29738916",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
         "patchSetId": 2
