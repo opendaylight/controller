@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a245df4_891395b7",
+        "filename": "opendaylight/config/config-parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "config-parent is essentially deprecated so this really shouldn\u0027t go here.",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_691621a9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "I think just hard-code the version.",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_a95e5974",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "Can we name this \"diagstatus\" so it matches the infrautils naming? Also I generally don\u0027t prefer \"and\" in a package.",
+      "range": {
+        "startLine": 8,
+        "startChar": 54,
+        "endLine": 8,
+        "endChar": 67
+      },
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_c90d8d92",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "Can you add class javadocs?",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_29738916",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "I think it\u0027s generally better not to initialize in case some code path doesn\u0027t set it appropriately when it should, ie force each code path to set it by making it final, ie\n\n   final ServiceState dataStoreServiceState;",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_8961d53b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_c9846dd6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "It seems reporting ServiceState.OPERATIONAL is all we really need to return here - does the framework use/expect a statusDesc when it\u0027s operational?",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_49219dfa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "How about \"The datastore is partially or fully non-operational. Config store SyncStatus is %s, Operational store SyncStatus is %s\"?\n\nAlso this would be reported as ServiceState.ERROR which doesn\u0027t really seem applicable. It\u0027s non-operational so I think a ServiceState.NON_OPERATIONAL enum would be more appropriate. To me, ERROR connotes an issue in obtaining the status, ie it\u0027s unknown whether it\u0027s operational or non-operational. Just a thought for an enhancement...",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_291c29c1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/statusanddiag/DatastoreStatusMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-10-20T14:28:27Z",
+      "side": 1,
+      "message": "How about \"Unable to obtain the datastore status\"?",
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
