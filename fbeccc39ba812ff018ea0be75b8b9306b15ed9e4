@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a245df4_2e726a49",
+        "filename": "features/mdsal/odl-mdsal-broker/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-10-23T08:19:33Z",
+      "side": 1,
+      "message": "dependency of a mature project on an incubation project.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 21
+      },
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_891395b7",
         "filename": "opendaylight/config/config-parent/pom.xml",
         "patchSetId": 2
