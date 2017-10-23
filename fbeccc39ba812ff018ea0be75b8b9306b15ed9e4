@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a245df4_ce362e52",
+        "filename": "features/mdsal/odl-mdsal-broker/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 817
+      },
+      "writtenOn": "2017-10-23T09:18:31Z",
+      "side": 1,
+      "message": "Is this completely not possible? :( Or is there a way in which this can be still be done? Could you please educate us on that? This utility will help several projects including genius, and netvirt and many others to deterministically handle their southbound and northbound interfaces and configurations..",
+      "parentUuid": "9a245df4_2e726a49",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 21
+      },
+      "revId": "fbeccc39ba812ff018ea0be75b8b9306b15ed9e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a245df4_891395b7",
         "filename": "opendaylight/config/config-parent/pom.xml",
         "patchSetId": 2
