@@ -52,6 +52,24 @@
       "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_2c4c3242",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-10-23T14:12:40Z",
+      "side": 1,
+      "message": "Yeah, a comment would be nice.. but seems to minor to -1 and hold, life isn\u0027t perfect; so I\u0027ll merge this, given Tom\u0027s +1.",
+      "parentUuid": "9a245df4_125eb7e6",
+      "revId": "4844ad46bc07c3d94ef51fd003c03853375186db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
