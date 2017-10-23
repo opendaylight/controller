@@ -138,17 +138,14 @@
 
   <!-- Distributed EntityOwnershipService -->
 
-  <bean id="selectionStrategyConfig" class="org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader"
-          factory-method="loadStrategyWithConfig">
-    <argument ref="blueprintBundleContext"/>
-  </bean>
+  <cm:property-placeholder id="strategyConfig" persistent-id="org.opendaylight.controller.cluster.entity.owner.selection.strategies" placeholder-prefix="$(" placeholder-suffix=")" />
 
   <bean id="distributedEntityOwnershipService" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService"
           factory-method="start" destroy-method="close">
     <argument>
       <bean factory-ref="operDatastore" factory-method="getActorContext"/>
     </argument>
-    <argument ref="selectionStrategyConfig"/>
+    <argument ref="strategyConfig"/>
   </bean>
 
   <service ref="distributedEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"
