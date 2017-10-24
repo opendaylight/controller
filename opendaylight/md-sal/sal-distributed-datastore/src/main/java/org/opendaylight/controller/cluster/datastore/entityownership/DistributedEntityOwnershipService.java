@@ -19,7 +19,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -27,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -41,6 +39,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.PropertiesResolver;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -123,7 +122,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
      * @return distributed entity ownership service
      */
     public static DistributedEntityOwnershipService start(final ActorContext context, final Object propsResolver) {
-        return start(context, prepareProps(propsResolver));
+        return start(context, PropertiesResolver.resolveProps(propsResolver));
     }
 
     /**
@@ -138,22 +137,6 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     public static DistributedEntityOwnershipService start(final ActorContext context,
             final Dictionary<String, Object> props) {
         return start(context, prepareStrategy(props));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    private static Dictionary<String, Object> prepareProps(final Object propsResolver) {
-        Field field;
-        Dictionary<String, Object> props = null;
-        try {
-            field = propsResolver.getClass().getDeclaredField("properties");
-            field.setAccessible(true);
-            props = (Dictionary<String, Object>) field.get(propsResolver);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            throw new IllegalArgumentException("Input object has to contain properties field.", e);
-        }
-
-        return props;
     }
 
     private static EntityOwnerSelectionStrategyConfig prepareStrategy(final Dictionary<String, Object> properties) {
