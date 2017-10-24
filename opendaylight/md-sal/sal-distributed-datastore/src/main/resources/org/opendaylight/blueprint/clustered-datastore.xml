@@ -39,8 +39,10 @@
 
   <service ref="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider"/>
 
-  <!-- Distributed Config Datastore -->
+  <!-- Datastore properties -->
+  <cm:cm-properties id="datastoreProps" persistent-id="org.opendaylight.controller.cluster.datastore"/>
 
+  <!-- Distributed Config Datastore -->
   <bean id="datastoreSnapshotRestore" class="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"
           factory-method="instance">
     <argument value="./clustered-datastore-restore"/>
@@ -49,13 +51,24 @@
   <bean id="configDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedConfigDataStoreProviderModule"
           factory-method="newDatastoreContext" />
 
+  <bean id="introspectorConfig" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospector">
+    <argument ref="configDatastoreContext"/>
+  </bean>
+
+  <bean id="updaterConfig" class="org.opendaylight.controller.cluster.datastore.DatastoreContextPropertiesUpdater">
+    <cm:managed-properties persistent-id="org.opendaylight.controller.cluster.datastore" update-strategy="component-managed" update-method="update"/>
+    <argument ref="introspectorConfig"/>
+    <argument ref="datastoreProps"/>
+  </bean>
+
   <bean id="configDatastore" class="org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory"
           factory-method="createInstance" destroy-method="close">
     <argument ref="schemaService"/>
     <argument ref="configDatastoreContext"/>
     <argument ref="datastoreSnapshotRestore"/>
     <argument ref="actorSystemProvider"/>
-    <argument ref="blueprintBundleContext"/>
+    <argument ref="introspectorConfig"/>
+    <argument ref="updaterConfig"/>
   </bean>
 
   <service ref="configDatastore" odl:type="distributed-config">
@@ -77,13 +90,24 @@
   <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
           factory-method="newDatastoreContext" />
 
+  <bean id="introspectorOper" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospector">
+    <argument ref="operDatastoreContext"/>
+  </bean>
+
+  <bean id="updaterOper" class="org.opendaylight.controller.cluster.datastore.DatastoreContextPropertiesUpdater">
+    <cm:managed-properties persistent-id="org.opendaylight.controller.cluster.datastore" update-strategy="component-managed" update-method="update"/>
+    <argument ref="introspectorOper"/>
+    <argument ref="datastoreProps"/>
+  </bean>
+
   <bean id="operDatastore" class="org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory"
           factory-method="createInstance" destroy-method="close">
     <argument ref="schemaService"/>
     <argument ref="operDatastoreContext"/>
     <argument ref="datastoreSnapshotRestore"/>
     <argument ref="actorSystemProvider"/>
-    <argument ref="blueprintBundleContext"/>
+    <argument ref="introspectorOper"/>
+    <argument ref="updaterOper"/>
     <argument ref="configurationImpl" />
   </bean>
 
