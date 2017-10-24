@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * Base implementation of a distributed DOMStore.
  */
 public abstract class AbstractDataStore implements DistributedDataStoreInterface, SchemaContextListener,
-        DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher,
+        DatastoreContextPropertiesUpdater.Listener, DOMStoreTreeChangePublisher,
         DOMDataTreeCommitCohortRegistry, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStore.class);
