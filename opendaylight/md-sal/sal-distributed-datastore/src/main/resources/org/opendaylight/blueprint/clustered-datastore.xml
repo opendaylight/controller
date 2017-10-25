@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.2.0">
 
   <cm:property-placeholder persistent-id="org.opendaylight.controller.cluster.datastore.broker" update-strategy="none">
     <cm:default-properties>
@@ -137,10 +137,11 @@
   </bean>
 
   <!-- Distributed EntityOwnershipService -->
+  <cm:cm-properties id="strategiesProps" persistent-id="org.opendaylight.controller.cluster.entity.owner.selection.strategies" />
 
   <bean id="selectionStrategyConfig" class="org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader"
           factory-method="loadStrategyWithConfig">
-    <argument ref="blueprintBundleContext"/>
+    <argument ref="strategiesProps"/>
   </bean>
 
   <bean id="distributedEntityOwnershipService" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService"
