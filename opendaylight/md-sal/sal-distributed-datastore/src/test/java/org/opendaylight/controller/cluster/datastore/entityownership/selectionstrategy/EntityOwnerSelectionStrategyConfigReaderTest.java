@@ -11,61 +11,36 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 public class EntityOwnerSelectionStrategyConfigReaderTest {
-    @Mock
-    private BundleContext mockBundleContext;
-
-    @Mock
-    private ServiceReference<ConfigurationAdmin> mockConfigAdminServiceRef;
-
-    @Mock
-    private ConfigurationAdmin mockConfigAdmin;
-
-    @Mock
-    private Configuration mockConfig;
 
     @Before
     public void setup() throws IOException {
         MockitoAnnotations.initMocks(this);
-
-        doReturn(mockConfigAdminServiceRef).when(mockBundleContext).getServiceReference(ConfigurationAdmin.class);
-        doReturn(mockConfigAdmin).when(mockBundleContext).getService(mockConfigAdminServiceRef);
-
-        doReturn(mockConfig).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
-    }
-
-    private EntityOwnerSelectionStrategyConfig loadStrategyConfig() {
-        return EntityOwnerSelectionStrategyConfigReader.loadStrategyWithConfig(mockBundleContext);
     }
 
     @Test
     public void testReadStrategies() {
-        Hashtable<String, Object> props = new Hashtable<>();
+        final Map<Object, Object> props = new java.util.HashMap<>();
         props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership."
                 + "selectionstrategy.LastCandidateSelectionStrategy,100");
 
-        doReturn(props).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
+        final EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfigReader
+                .loadStrategyWithConfig(props);
 
         assertTrue(config.isStrategyConfigured("test"));
 
-        EntityOwnerSelectionStrategy strategy = config.createStrategy("test", Collections.<String, Long>emptyMap());
+        final EntityOwnerSelectionStrategy strategy = config.createStrategy("test",
+                Collections.<String, Long>emptyMap());
         assertTrue(strategy.toString(), strategy instanceof LastCandidateSelectionStrategy);
         assertEquals(100L, strategy.getSelectionDelayInMillis());
 
@@ -79,65 +54,48 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     }
 
     @Test
-    public void testReadStrategiesWithIOException() throws IOException {
-        doThrow(IOException.class).when(mockConfigAdmin).getConfiguration(
-                EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
+    public void testReadStrategiesWithEmptyConfiguration() {
 
-        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
-
-        assertFalse(config.isStrategyConfigured("test"));
-    }
-
-    @Test
-    public void testReadStrategiesWithNullConfiguration() throws IOException {
-        doReturn(null).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
-
-        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
+        final Map<Object, Object> props = new HashMap<>();
+        final EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfigReader
+                .loadStrategyWithConfig(props);
 
         assertFalse(config.isStrategyConfigured("test"));
     }
 
     @Test
-    public void testReadStrategiesWithNullConfigurationProperties() throws IOException {
-        doReturn(null).when(mockConfig).getProperties();
-
-        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
-
+    public void testReadStrategiesWithNullConfiguration() {
+        final EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfigReader
+                .loadStrategyWithConfig(null);
         assertFalse(config.isStrategyConfigured("test"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadStrategiesInvalidDelay() {
-        Hashtable<String, Object> props = new Hashtable<>();
+        final Map<Object, Object> props = new HashMap<>();
         props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership."
                 + "selectionstrategy.LastCandidateSelectionStrategy,foo");
-
-        doReturn(props).when(mockConfig).getProperties();
-
-        loadStrategyConfig();
+        EntityOwnerSelectionStrategyConfigReader.loadStrategyWithConfig(props);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testReadStrategiesInvalidClassType() {
-        Hashtable<String, Object> props = new Hashtable<>();
+        final Map<Object, Object> props = new HashMap<>();
         props.put("entity.type.test", "String,100");
-
-        doReturn(props).when(mockConfig).getProperties();
-
-        loadStrategyConfig();
+        EntityOwnerSelectionStrategyConfigReader.loadStrategyWithConfig(props);
     }
 
     @Test
     public void testReadStrategiesMissingDelay() {
-        Hashtable<String, Object> props = new Hashtable<>();
+        final Map<Object, Object> props = new HashMap<>();
         props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership."
                 + "selectionstrategy.LastCandidateSelectionStrategy,100");
         props.put("entity.type.test1", "org.opendaylight.controller.cluster.datastore.entityownership."
                 + "selectionstrategy.LastCandidateSelectionStrategy");
 
-        doReturn(props).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
+        final EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfigReader
+                .loadStrategyWithConfig(props);
 
         assertEquals(100, config.createStrategy("test", Collections.emptyMap()).getSelectionDelayInMillis());
         assertEquals(0, config.createStrategy("test2", Collections.emptyMap()).getSelectionDelayInMillis());
