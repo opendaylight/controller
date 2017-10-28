@@ -28,10 +28,10 @@ import org.opendaylight.yangtools.yang.common.QName;
  * Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-final class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput {
+public final class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput {
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
 
-    NormalizedNodeOutputStreamWriter(final DataOutput output) {
+    public NormalizedNodeOutputStreamWriter(final DataOutput output) {
         super(output);
     }
 

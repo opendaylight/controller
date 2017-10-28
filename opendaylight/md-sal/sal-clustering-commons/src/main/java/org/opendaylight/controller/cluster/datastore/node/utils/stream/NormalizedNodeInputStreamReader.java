@@ -74,7 +74,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private boolean readSignatureMarker = true;
 
-    NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
+    public NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
         this.input = Preconditions.checkNotNull(input);
         readSignatureMarker = !versionChecked;
     }
