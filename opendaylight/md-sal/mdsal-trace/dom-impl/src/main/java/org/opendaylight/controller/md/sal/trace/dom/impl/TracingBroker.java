@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
@@ -353,7 +354,8 @@ public class TracingBroker implements TracingDOMDataBroker {
                     @Nonnull DOMDataTreeIdentifier domDataTreeIdentifier, @Nonnull L listener) {
                 if (isRegistrationWatched(domDataTreeIdentifier.getRootIdentifier(),
                         domDataTreeIdentifier.getDatastoreType(), DataChangeScope.SUBTREE)) {
-                    LOG.warn("Registration (registerDataTreeChangeListener) for {} from {}",
+                    LOG.warn("{} registration (registerDataTreeChangeListener) for {} from {}.",
+                            listener instanceof ClusteredDOMDataTreeChangeListener ? "Clustered" : "Non-clustered",
                             toPathString(domDataTreeIdentifier.getRootIdentifier()), getStackSummary());
                 }
                 return treeChangeSvc.registerDataTreeChangeListener(domDataTreeIdentifier, listener);
