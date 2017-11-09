@@ -70,16 +70,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Codahale -->
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-graphite</artifactId>
-    </dependency>
-
     <!-- Google -->
     <dependency>
       <groupId>com.google.guava</groupId>
