@@ -79,9 +79,11 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
     // Validation
     private void checkPredicates(final Provider prov) {
         Preconditions.checkNotNull(prov, "Provider should not be null.");
-        for (final ProviderContextImpl session : providerSessions) {
-            if (prov.equals(session.getProvider())) {
-                throw new IllegalStateException("Provider already registered");
+        synchronized (providerSessions) {
+            for (final ProviderContextImpl session : providerSessions) {
+                if (prov.equals(session.getProvider())) {
+                    throw new IllegalStateException("Provider already registered");
+                }
             }
         }
 
@@ -89,9 +91,11 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
 
     private void checkPredicates(final Consumer cons) {
         Preconditions.checkNotNull(cons, "Consumer should not be null.");
-        for (final ConsumerContextImpl session : sessions) {
-            if (cons.equals(session.getConsumer())) {
-                throw new IllegalStateException("Consumer already registered");
+        synchronized (sessions) {
+            for (final ConsumerContextImpl session : sessions) {
+                if (cons.equals(session.getConsumer())) {
+                    throw new IllegalStateException("Consumer already registered");
+                }
             }
         }
     }
