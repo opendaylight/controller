@@ -22,6 +22,30 @@
       "revId": "51b39ba945727296df50375c3246a4789acd7b8c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_eb71000d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 5861
+      },
+      "writtenOn": "2017-11-14T14:44:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a245df4_8f7cf0b6",
+      "range": {
+        "startLine": 102,
+        "startChar": 82,
+        "endLine": 105,
+        "endChar": 112
+      },
+      "revId": "51b39ba945727296df50375c3246a4789acd7b8c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
