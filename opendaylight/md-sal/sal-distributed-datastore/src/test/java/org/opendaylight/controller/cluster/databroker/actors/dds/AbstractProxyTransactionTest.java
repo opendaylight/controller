@@ -15,8 +15,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Ticker;
 import com.google.common.primitives.UnsignedLong;
 import java.util.ArrayList;
@@ -118,7 +118,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test

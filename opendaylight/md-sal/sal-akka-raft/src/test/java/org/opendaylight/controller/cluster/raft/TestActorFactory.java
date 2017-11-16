@@ -8,14 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-/*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- */
-
 import akka.actor.Actor;
 import akka.actor.ActorIdentity;
 import akka.actor.ActorRef;
@@ -26,8 +18,8 @@ import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -181,15 +173,15 @@ public class TestActorFactory implements AutoCloseable {
         return prefix + actorCount++;
     }
 
-    public void killActor(ActorRef actor, JavaTestKit kit) {
+    public void killActor(ActorRef actor, TestKit kit) {
         killActor(actor, kit, true);
     }
 
-    private void killActor(ActorRef actor, JavaTestKit kit, boolean remove) {
+    private void killActor(ActorRef actor, TestKit kit, boolean remove) {
         LOG.info("Killing actor {}", actor);
         kit.watch(actor);
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectTerminated(JavaTestKit.duration("5 seconds"), actor);
+        kit.expectTerminated(kit.duration("5 seconds"), actor);
 
         if (remove) {
             createdActors.remove(actor);
@@ -202,7 +194,7 @@ public class TestActorFactory implements AutoCloseable {
 
     @Override
     public void close() {
-        JavaTestKit kit = new JavaTestKit(system);
+        TestKit kit = new TestKit(system);
         for (ActorRef actor : createdActors) {
             killActor(actor, kit, false);
         }

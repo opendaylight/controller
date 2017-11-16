@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocation;
@@ -30,7 +30,7 @@ public class RoleChangeListenerActorTest extends AbstractActorTest {
 
     @Test
     public void testRegisterRoleChangeListenerOnStart() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final LeaderLocationListener listener = mock(LeaderLocationListener.class);
                 final Props props = RoleChangeListenerActor.props(getRef(), listener);

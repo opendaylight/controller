@@ -10,8 +10,8 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
@@ -53,9 +53,9 @@ public class RemoteRpcRegistryMXBeanImplTest {
         buckets = Lists.newArrayList(emptyRpcIdentifier, localRpcIdentifier);
 
         final RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("system").build();
-        final JavaTestKit invoker = new JavaTestKit(system);
-        final JavaTestKit registrar = new JavaTestKit(system);
-        final JavaTestKit supervisor = new JavaTestKit(system);
+        final TestKit invoker = new TestKit(system);
+        final TestKit registrar = new TestKit(system);
+        final TestKit supervisor = new TestKit(system);
         final Props props = RpcRegistry.props(config, invoker.getRef(), registrar.getRef());
         testActor = new TestActorRef<>(system, props, supervisor.getRef(), "testActor");
         final RpcRegistry rpcRegistry = testActor.underlyingActor();
@@ -66,7 +66,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, null, Boolean.TRUE);
     }
 
     @Test

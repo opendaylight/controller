@@ -23,8 +23,8 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
@@ -1916,7 +1916,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertTrue("Behavior not instance of Leader when all followers are active", newBehavior instanceof Leader);
 
         // kill 1 follower and verify if that got killed
-        final JavaTestKit probe = new JavaTestKit(getSystem());
+        final TestKit probe = new TestKit(getSystem());
         probe.watch(followerActor1);
         followerActor1.tell(PoisonPill.getInstance(), ActorRef.noSender());
         final Terminated termMsg1 = probe.expectMsgClass(Terminated.class);

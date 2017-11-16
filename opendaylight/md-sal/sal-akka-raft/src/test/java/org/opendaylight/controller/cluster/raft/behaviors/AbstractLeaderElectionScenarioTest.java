@@ -19,8 +19,8 @@ import akka.dispatch.ControlMessage;
 import akka.dispatch.Dispatchers;
 import akka.dispatch.Mailboxes;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Map;
@@ -227,7 +227,7 @@ public class AbstractLeaderElectionScenarioTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     DefaultConfigParamsImpl newConfigParams() {

@@ -19,8 +19,8 @@ import static org.opendaylight.controller.cluster.messaging.MessageSlicerTest.sl
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -79,7 +79,7 @@ public class MessageSlicingIntegrationTest {
 
     @AfterClass
     public static void staticTearDown() {
-        JavaTestKit.shutdownActorSystem(ACTOR_SYSTEM, Boolean.TRUE);
+        TestKit.shutdownActorSystem(ACTOR_SYSTEM, true);
     }
 
     @Test

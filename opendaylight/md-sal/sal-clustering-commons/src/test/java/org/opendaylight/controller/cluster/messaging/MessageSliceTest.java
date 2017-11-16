@@ -13,8 +13,8 @@ import static org.junit.Assert.assertEquals;
 import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -35,7 +35,7 @@ public class MessageSliceTest {
 
     @After
     public void tearDown() {
-        JavaTestKit.shutdownActorSystem(actorSystem, Boolean.TRUE);
+        TestKit.shutdownActorSystem(actorSystem, Boolean.TRUE);
     }
 
     @Test

@@ -16,8 +16,8 @@ import static org.opendaylight.controller.cluster.access.client.ConnectionEntryM
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.Iterables;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -143,7 +143,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     protected Request<?, ?> createRequest(final ActorRef replyTo) {

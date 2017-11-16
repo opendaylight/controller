@@ -20,7 +20,7 @@ import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.cluster.UniqueAddress;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -63,12 +63,12 @@ public class RpcRegistryTest {
     private static ActorSystem node2;
     private static ActorSystem node3;
 
-    private JavaTestKit invoker1;
-    private JavaTestKit invoker2;
-    private JavaTestKit invoker3;
-    private JavaTestKit registrar1;
-    private JavaTestKit registrar2;
-    private JavaTestKit registrar3;
+    private TestKit invoker1;
+    private TestKit invoker2;
+    private TestKit invoker3;
+    private TestKit registrar1;
+    private TestKit registrar2;
+    private TestKit registrar3;
     private ActorRef registry1;
     private ActorRef registry2;
     private ActorRef registry3;
@@ -113,21 +113,21 @@ public class RpcRegistryTest {
 
     @AfterClass
     public static void staticTeardown() {
-        JavaTestKit.shutdownActorSystem(node1);
-        JavaTestKit.shutdownActorSystem(node2);
-        JavaTestKit.shutdownActorSystem(node3);
+        TestKit.shutdownActorSystem(node1);
+        TestKit.shutdownActorSystem(node2);
+        TestKit.shutdownActorSystem(node3);
     }
 
     @Before
     public void setup() {
-        invoker1 = new JavaTestKit(node1);
-        registrar1 = new JavaTestKit(node1);
+        invoker1 = new TestKit(node1);
+        registrar1 = new TestKit(node1);
         registry1 = node1.actorOf(RpcRegistry.props(config(node1), invoker1.getRef(), registrar1.getRef()));
-        invoker2 = new JavaTestKit(node2);
-        registrar2 = new JavaTestKit(node2);
+        invoker2 = new TestKit(node2);
+        registrar2 = new TestKit(node2);
         registry2 = node2.actorOf(RpcRegistry.props(config(node2), invoker2.getRef(), registrar2.getRef()));
-        invoker3 = new JavaTestKit(node3);
-        registrar3 = new JavaTestKit(node3);
+        invoker3 = new TestKit(node3);
+        registrar3 = new TestKit(node3);
         registry3 = node3.actorOf(RpcRegistry.props(config(node3), invoker3.getRef(), registrar3.getRef()));
     }
 
@@ -185,7 +185,7 @@ public class RpcRegistryTest {
         registry1.tell(new AddOrUpdateRoutes(addedRouteIds), ActorRef.noSender());
 
         // Bucket store should get an update bucket message. Updated bucket contains added rpc.
-        final JavaTestKit testKit = new JavaTestKit(node1);
+        final TestKit testKit = new TestKit(node1);
 
         Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry1, testKit, nodeAddress);
         verifyBucket(buckets.get(nodeAddress), addedRouteIds);
@@ -222,7 +222,7 @@ public class RpcRegistryTest {
         registry1.tell(new AddOrUpdateRoutes(addedRouteIds), ActorRef.noSender());
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets
-        final JavaTestKit testKit = new JavaTestKit(node2);
+        final TestKit testKit = new TestKit(node2);
 
         Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry2, testKit, node1Address);
         verifyBucket(buckets.get(node1Address), addedRouteIds);
@@ -238,7 +238,7 @@ public class RpcRegistryTest {
         LOG.info("testRpcAddRemoveInCluster ending");
     }
 
-    private void verifyEmptyBucket(final JavaTestKit testKit, final ActorRef registry, final Address address)
+    private void verifyEmptyBucket(final TestKit testKit, final ActorRef registry, final Address address)
             throws AssertionError {
         Map<Address, Bucket<RoutingTable>> buckets;
         int numTries = 0;
@@ -263,7 +263,7 @@ public class RpcRegistryTest {
      */
     @Test
     public void testRpcAddedOnMultiNodes() throws Exception {
-        final JavaTestKit testKit = new JavaTestKit(node3);
+        final TestKit testKit = new TestKit(node3);
 
         // Add rpc on node 1
         List<DOMRpcIdentifier> addedRouteIds1 = createRouteIds();
@@ -298,8 +298,7 @@ public class RpcRegistryTest {
 
     }
 
-    private static void assertEndpoints(final UpdateRemoteEndpoints msg, final Address address,
-            final JavaTestKit invoker) {
+    private static void assertEndpoints(final UpdateRemoteEndpoints msg, final Address address, final TestKit invoker) {
         final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getEndpoints();
         Assert.assertEquals(1, endpoints.size());
 
@@ -316,7 +315,7 @@ public class RpcRegistryTest {
         Assert.assertEquals("hello", s);
     }
 
-    private static Map<Address, Long> retrieveVersions(final ActorRef bucketStore, final JavaTestKit testKit) {
+    private static Map<Address, Long> retrieveVersions(final ActorRef bucketStore, final TestKit testKit) {
         bucketStore.tell(GET_BUCKET_VERSIONS, testKit.getRef());
         @SuppressWarnings("unchecked")
         final Map<Address, Long> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS), Map.class);
@@ -336,7 +335,7 @@ public class RpcRegistryTest {
     }
 
     private static Map<Address, Bucket<RoutingTable>> retrieveBuckets(final ActorRef bucketStore,
-            final JavaTestKit testKit, final Address... addresses) {
+            final TestKit testKit, final Address... addresses) {
         int numTries = 0;
         while (true) {
             bucketStore.tell(GET_ALL_BUCKETS, testKit.getRef());
@@ -368,7 +367,7 @@ public class RpcRegistryTest {
 
     @Test
     public void testAddRoutesConcurrency() {
-        final JavaTestKit testKit = new JavaTestKit(node1);
+        final TestKit testKit = new TestKit(node1);
 
         final int nRoutes = 500;
         final Collection<DOMRpcIdentifier> added = new ArrayList<>(nRoutes);

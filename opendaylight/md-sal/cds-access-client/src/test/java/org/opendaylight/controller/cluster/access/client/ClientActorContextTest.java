@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.access.client;
 import static org.junit.Assert.assertSame;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -76,6 +76,6 @@ public class ClientActorContextTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 }

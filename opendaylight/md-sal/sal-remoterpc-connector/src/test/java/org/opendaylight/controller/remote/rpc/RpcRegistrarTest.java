@@ -11,8 +11,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class RpcRegistrarTest {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.create("test");
 
-        final JavaTestKit testKit = new JavaTestKit(system);
+        final TestKit testKit = new TestKit(system);
         final RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("system").build();
         final Props props = RpcRegistrar.props(config, service);
         testActorRef = new TestActorRef<>(system, props, testKit.getRef(), "actorRef");
@@ -63,7 +63,7 @@ public class RpcRegistrarTest {
         final DOMRpcIdentifier secondEndpointId = DOMRpcIdentifier.create(
                 SchemaPath.create(true, QName.create("second:identifier", "bar")));
 
-        final JavaTestKit senderKit = new JavaTestKit(system);
+        final TestKit senderKit = new TestKit(system);
         firstEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), Collections.singletonList(firstEndpointId));
         secondEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), Collections.singletonList(secondEndpointId));
 
@@ -78,7 +78,7 @@ public class RpcRegistrarTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, null, true);
     }
 
     @Test

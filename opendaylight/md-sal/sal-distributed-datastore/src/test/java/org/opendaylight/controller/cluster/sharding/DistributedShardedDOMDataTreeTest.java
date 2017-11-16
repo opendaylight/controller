@@ -28,7 +28,7 @@ import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.actor.Props;
 import akka.cluster.Cluster;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -158,7 +158,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
             operDistributedDatastore.close();
         }
 
-        JavaTestKit.shutdownActorSystem(leaderSystem);
+        TestKit.shutdownActorSystem(leaderSystem);
 
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();

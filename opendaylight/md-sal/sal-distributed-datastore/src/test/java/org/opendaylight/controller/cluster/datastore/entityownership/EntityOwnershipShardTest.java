@@ -26,7 +26,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -524,7 +523,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.watch(peer2);
         peer2.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
         kit.unwatch(peer2);
 
         leader.tell(new PeerDown(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
@@ -591,7 +590,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.watch(peer1);
         peer1.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
         kit.unwatch(peer1);
         leader.tell(new PeerDown(peerId1.getMemberName(), peerId1.toString()), ActorRef.noSender());
 
@@ -650,7 +649,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.watch(leader);
         leader.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
         kit.unwatch(leader);
         peer2.tell(new PeerDown(leaderId.getMemberName(), leaderId.toString()), ActorRef.noSender());
         peer2.tell(TimeoutNow.INSTANCE, peer2);

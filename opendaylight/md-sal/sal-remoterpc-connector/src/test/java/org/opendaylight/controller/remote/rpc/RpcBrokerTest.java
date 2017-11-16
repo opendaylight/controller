@@ -13,7 +13,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import akka.actor.Status.Failure;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.util.concurrent.Futures;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
     @Test
     public void testExecuteRpc() {
-        new JavaTestKit(node1) {
+        new TestKit(node1) {
             {
 
                 final ContainerNode invokeRpcResult = makeRPCOutput("bar");
@@ -52,7 +52,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
     @Test
     public void testExecuteRpcFailureWithException() {
-        new JavaTestKit(node1) {
+        new TestKit(node1) {
             {
                 when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), Mockito.<NormalizedNode<?, ?>>any()))
                         .thenReturn(Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(

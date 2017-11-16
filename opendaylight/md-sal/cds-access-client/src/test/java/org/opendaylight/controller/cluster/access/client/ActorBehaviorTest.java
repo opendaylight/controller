@@ -19,8 +19,8 @@ import akka.actor.Props;
 import akka.persistence.Persistence;
 import akka.persistence.SelectedSnapshot;
 import akka.persistence.SnapshotMetadata;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +63,7 @@ public class ActorBehaviorTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test

@@ -21,8 +21,8 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Dispatchers;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
@@ -1212,7 +1212,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         // Reinstate the actor from persistence
 
-        actorFactory.killActor(followerActorRef, new JavaTestKit(getSystem()));
+        actorFactory.killActor(followerActorRef, new TestKit(getSystem()));
 
         followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);

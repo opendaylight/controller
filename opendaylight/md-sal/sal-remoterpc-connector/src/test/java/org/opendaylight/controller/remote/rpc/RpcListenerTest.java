@@ -10,7 +10,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -40,16 +40,16 @@ public class RpcListenerTest {
 
     @AfterClass
     public static void teardown() {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
         system = null;
     }
 
     @Test
     public void testRouteAdd() throws URISyntaxException, InterruptedException {
-        new JavaTestKit(system) {
+        new TestKit(system) {
             {
                 // Test announcements
-                final JavaTestKit probeReg = new JavaTestKit(system);
+                final TestKit probeReg = new TestKit(system);
                 final ActorRef rpcRegistry = probeReg.getRef();
 
                 final RpcListener rpcListener = new RpcListener(rpcRegistry);
@@ -61,10 +61,10 @@ public class RpcListenerTest {
 
     @Test
     public void testRouteRemove() throws URISyntaxException, InterruptedException {
-        new JavaTestKit(system) {
+        new TestKit(system) {
             {
                 // Test announcements
-                final JavaTestKit probeReg = new JavaTestKit(system);
+                final TestKit probeReg = new TestKit(system);
                 final ActorRef rpcRegistry = probeReg.getRef();
 
                 final RpcListener rpcListener = new RpcListener(rpcRegistry);
