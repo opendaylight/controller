@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.NotSerializableException;
 import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -35,7 +36,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFac
 public class ReadyLocalTransactionSerializerTest extends AbstractTest {
 
     @Test
-    public void testToAndFromBinary() {
+    public void testToAndFromBinary() throws NotSerializableException {
         DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, TestModel.createTestContext());
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
