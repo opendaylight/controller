@@ -43,5 +43,6 @@ abstract class AbstractResponseEnvelopeProxy<T extends Response<?, ?>> extends A
         return createEnvelope(message, sessionId, txSequence, executionTimeNanos);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     abstract ResponseEnvelope<T> createEnvelope(T message, long sessionId, long txSequence, long executionTimeNanos);
 }

@@ -17,7 +17,11 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-class TestUtils {
+final class TestUtils {
+    @FunctionalInterface
+    public interface RunnableWithException {
+        void run() throws Exception;
+    }
 
     static final MemberName MEMBER_NAME = MemberName.forName("member-1");
     static final FrontendType FRONTEND_TYPE = FrontendType.forName("type-1");
@@ -26,12 +30,11 @@ class TestUtils {
     static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0L);
     static final TransactionIdentifier TRANSACTION_ID = new TransactionIdentifier(HISTORY_ID, 0L);
 
-    @FunctionalInterface
-    public interface RunnableWithException {
-        void run() throws Exception;
-    }
-
     private static final long TIMEOUT = 3;
+
+    private TestUtils() {
+
+    }
 
     /**
      * Asserts, that future result when it completes is equal to given object.

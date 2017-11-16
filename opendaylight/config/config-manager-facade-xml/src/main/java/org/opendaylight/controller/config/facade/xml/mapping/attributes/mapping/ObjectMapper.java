@@ -28,6 +28,7 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
 
     private EnumResolver enumResolver;
 
+    @SuppressWarnings("checkstyle:hiddenField")
     public Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> prepareMapping(
             final Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
         this.enumResolver = Preconditions.checkNotNull(enumResolver);

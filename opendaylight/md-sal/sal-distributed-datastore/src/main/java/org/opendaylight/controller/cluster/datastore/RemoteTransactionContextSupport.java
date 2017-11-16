@@ -97,12 +97,12 @@ final class RemoteTransactionContextSupport {
     /**
      * Sets the target primary shard and initiates a CreateTransaction try.
      */
-    void setPrimaryShard(PrimaryShardInfo primaryShardInfo) {
-        this.primaryShardInfo = primaryShardInfo;
+    void setPrimaryShard(final PrimaryShardInfo newPrimaryShardInfo) {
+        this.primaryShardInfo = newPrimaryShardInfo;
 
         if (getTransactionType() == TransactionType.WRITE_ONLY
                 && getActorContext().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
-            ActorSelection primaryShard = primaryShardInfo.getPrimaryShardActor();
+            ActorSelection primaryShard = newPrimaryShardInfo.getPrimaryShardActor();
 
             LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
                 getIdentifier(), primaryShard);
@@ -110,7 +110,7 @@ final class RemoteTransactionContextSupport {
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
             transactionContextWrapper.executePriorTransactionOperations(createValidTransactionContext(
-                    primaryShard, String.valueOf(primaryShard.path()), primaryShardInfo.getPrimaryShardVersion()));
+                    primaryShard, String.valueOf(primaryShard.path()), newPrimaryShardInfo.getPrimaryShardVersion()));
         } else {
             tryCreateTransaction();
         }
@@ -131,7 +131,7 @@ final class RemoteTransactionContextSupport {
 
         createTxFuture.onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object response) {
+            public void onComplete(final Throwable failure, final Object response) {
                 onCreateTransactionComplete(failure, response);
             }
         }, getActorContext().getClientDispatcher());
@@ -161,7 +161,7 @@ final class RemoteTransactionContextSupport {
         }
     }
 
-    private void onCreateTransactionComplete(Throwable failure, Object response) {
+    private void onCreateTransactionComplete(final Throwable failure, final Object response) {
         // An AskTimeoutException will occur if the local shard forwards to an unavailable remote leader or
         // the cached remote leader actor is no longer available.
         boolean retryCreateTransaction = primaryShardInfo != null
@@ -194,7 +194,7 @@ final class RemoteTransactionContextSupport {
         createTransactionContext(failure, response);
     }
 
-    private void createTransactionContext(Throwable failure, Object response) {
+    private void createTransactionContext(final Throwable failure, final Object response) {
         // Create the TransactionContext from the response or failure. Store the new
         // TransactionContext locally until we've completed invoking the
         // TransactionOperations. This avoids thread timing issues which could cause
@@ -231,15 +231,15 @@ final class RemoteTransactionContextSupport {
         transactionContextWrapper.executePriorTransactionOperations(localTransactionContext);
     }
 
-    private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
+    private TransactionContext createValidTransactionContext(final CreateTransactionReply reply) {
         LOG.debug("Tx {} Received {}", getIdentifier(), reply);
 
         return createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
                 reply.getTransactionPath(), primaryShardInfo.getPrimaryShardVersion());
     }
 
-    private TransactionContext createValidTransactionContext(ActorSelection transactionActor, String transactionPath,
-            short remoteTransactionVersion) {
+    private TransactionContext createValidTransactionContext(final ActorSelection transactionActor,
+            final String transactionPath, final short remoteTransactionVersion) {
         final TransactionContext ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(),
                 transactionActor, getActorContext(), remoteTransactionVersion, transactionContextWrapper.getLimiter());
 

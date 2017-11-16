@@ -11,9 +11,13 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 
-public class AkkaConfigFactory {
+public final class AkkaConfigFactory {
 
     private static final String CONFIGURATION_NAME = "odl-cluster-data";
+
+    private AkkaConfigFactory() {
+
+    }
 
     public static Config createAkkaConfig(final AkkaConfigurationReader reader) {
         return ConfigFactory.load(reader.read()).getConfig(CONFIGURATION_NAME);

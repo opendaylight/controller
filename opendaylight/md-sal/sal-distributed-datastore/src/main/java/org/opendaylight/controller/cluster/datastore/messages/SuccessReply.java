@@ -14,7 +14,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class SuccessReply implements Serializable {
+public final class SuccessReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final SuccessReply INSTANCE = new SuccessReply();

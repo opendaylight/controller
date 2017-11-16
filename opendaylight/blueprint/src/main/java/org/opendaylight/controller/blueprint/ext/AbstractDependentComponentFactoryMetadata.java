@@ -80,6 +80,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         setFailure(failureMessage, null);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected void setFailure(final String failureMessage, final Throwable failureCause) {
         this.failureMessage = failureMessage;
         this.failureCause = failureCause;

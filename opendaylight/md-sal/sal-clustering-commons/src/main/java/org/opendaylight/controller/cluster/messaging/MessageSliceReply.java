@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  *
  * @author Thomas Pantelis
  */
-public class MessageSliceReply implements Serializable {
+public final class MessageSliceReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Identifier identifier;
@@ -86,12 +86,12 @@ public class MessageSliceReply implements Serializable {
         public Proxy() {
         }
 
-        Proxy(MessageSliceReply messageSliceReply) {
+        Proxy(final MessageSliceReply messageSliceReply) {
             this.messageSliceReply = messageSliceReply;
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeObject(messageSliceReply.identifier);
             out.writeInt(messageSliceReply.sliceIndex);
             out.writeObject(messageSliceReply.failure);
@@ -99,7 +99,7 @@ public class MessageSliceReply implements Serializable {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             final Identifier identifier = (Identifier) in.readObject();
             final int sliceIndex = in.readInt();
             final MessageSliceException failure = (MessageSliceException) in.readObject();
