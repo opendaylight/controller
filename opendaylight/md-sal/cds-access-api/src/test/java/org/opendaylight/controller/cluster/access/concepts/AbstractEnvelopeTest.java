@@ -47,5 +47,6 @@ public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
 
     protected abstract E createEnvelope();
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract void doAdditionalAssertions(E envelope, E resolvedObject);
 }

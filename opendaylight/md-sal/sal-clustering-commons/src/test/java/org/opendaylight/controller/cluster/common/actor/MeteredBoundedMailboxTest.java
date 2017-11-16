@@ -77,7 +77,7 @@ public class MeteredBoundedMailboxTest {
 
         ReentrantLock lock;
 
-        private PingPongActor(final ReentrantLock lock) {
+        PingPongActor(final ReentrantLock lock) {
             this.lock = lock;
         }
 

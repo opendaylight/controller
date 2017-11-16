@@ -11,15 +11,15 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
-public class ForwardingActor extends UntypedActor {
+public final class ForwardingActor extends UntypedActor {
     private final ActorRef target;
 
-    private ForwardingActor(ActorRef target) {
+    private ForwardingActor(final ActorRef target) {
         this.target = target;
     }
 
     @Override
-    public void onReceive(Object obj) throws Exception {
+    public void onReceive(final Object obj) throws Exception {
         target.forward(obj, context());
     }
 

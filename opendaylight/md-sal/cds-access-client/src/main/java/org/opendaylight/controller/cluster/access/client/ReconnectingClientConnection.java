@@ -36,6 +36,7 @@ public final class ReconnectingClientConnection<T extends BackendInfo> extends A
     }
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     ClientActorBehavior<T> lockedReconnect(final ClientActorBehavior<T> current, final RequestException cause) {
         this.cause = Preconditions.checkNotNull(cause);
         LOG.warn("Skipping reconnect of already-reconnecting connection {}", this);

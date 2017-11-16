@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class NormalizedNodeAggregator {
+public final class NormalizedNodeAggregator {
     private final YangInstanceIdentifier rootIdentifier;
     private final List<Optional<NormalizedNode<?, ?>>> nodes;
     private final DataTree dataTree;

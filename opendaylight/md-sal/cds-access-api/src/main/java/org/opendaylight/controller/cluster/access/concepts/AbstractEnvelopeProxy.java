@@ -45,6 +45,7 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
         message = (T) in.readObject();
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     abstract Envelope<T> createEnvelope(T wrappedNessage, long sessionId, long txSequence);
 
     final Object readResolve() {

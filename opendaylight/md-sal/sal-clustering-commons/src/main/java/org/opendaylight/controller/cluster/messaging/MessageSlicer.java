@@ -46,7 +46,7 @@ public class MessageSlicer implements AutoCloseable {
     private final String logContext;
     private final long id;
 
-    private MessageSlicer(final Builder builder) {
+    MessageSlicer(final Builder builder) {
         this.fileBackedStreamFactory = builder.fileBackedStreamFactory;
         this.messageSliceSize = builder.messageSliceSize;
         this.maxSlicingTries = builder.maxSlicingTries;

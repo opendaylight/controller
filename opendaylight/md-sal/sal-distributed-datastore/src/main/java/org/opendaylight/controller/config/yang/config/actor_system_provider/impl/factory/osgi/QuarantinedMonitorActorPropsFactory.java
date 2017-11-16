@@ -13,8 +13,12 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QuarantinedMonitorActorPropsFactory {
+public final class QuarantinedMonitorActorPropsFactory {
     private static final Logger LOG = LoggerFactory.getLogger(QuarantinedMonitorActorPropsFactory.class);
+
+    private QuarantinedMonitorActorPropsFactory() {
+
+    }
 
     public static Props createProps(final BundleContext bundleContext) {
         return QuarantinedMonitorActor.props(() -> {

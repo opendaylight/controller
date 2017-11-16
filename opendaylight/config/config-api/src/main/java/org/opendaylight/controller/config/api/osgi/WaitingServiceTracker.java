@@ -54,7 +54,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
             return service;
         } catch (final InterruptedException e) {
             throw new ServiceNotFoundException(
-                    String.format("Wait for OSGi service %s was interrrupted", serviceInterface));
+                    String.format("Wait for OSGi service %s was interrrupted", serviceInterface), e);
         }
     }
 

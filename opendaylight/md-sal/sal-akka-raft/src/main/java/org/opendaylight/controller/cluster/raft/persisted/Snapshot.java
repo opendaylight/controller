@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
  *
  * @author Thomas Pantelis
  */
+// Not final for mocking
 public class Snapshot implements Serializable {
 
     /**
@@ -108,9 +109,9 @@ public class Snapshot implements Serializable {
     private final String electionVotedFor;
     private final ServerConfigurationPayload serverConfig;
 
-    private Snapshot(State state, List<ReplicatedLogEntry> unAppliedEntries, long lastIndex, long lastTerm,
-            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor,
-            ServerConfigurationPayload serverConfig) {
+    Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
+            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
+            final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
         this.state = state;
         this.unAppliedEntries = unAppliedEntries;
         this.lastIndex = lastIndex;
@@ -122,9 +123,9 @@ public class Snapshot implements Serializable {
         this.serverConfig = serverConfig;
     }
 
-    public static Snapshot create(State state, List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
-            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor,
-            ServerConfigurationPayload serverConfig) {
+    public static Snapshot create(final State state, final List<ReplicatedLogEntry> entries, final long lastIndex,
+            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
+            final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
                 electionTerm, electionVotedFor, serverConfig);
     }

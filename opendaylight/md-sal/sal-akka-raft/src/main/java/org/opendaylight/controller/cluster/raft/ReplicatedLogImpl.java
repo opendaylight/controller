@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 /**
  * Implementation of ReplicatedLog used by the RaftActor.
  */
-class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
+final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     private static final int DATA_SIZE_DIVIDER = 5;
 
     private final RaftActorContext context;
@@ -54,7 +54,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public boolean shouldCaptureSnapshot(long logIndex) {
+    public boolean shouldCaptureSnapshot(final long logIndex) {
         final ConfigParams config = context.getConfigParams();
         final long journalSize = logIndex + 1;
         final long dataThreshold = context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
@@ -94,7 +94,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public boolean appendAndPersist(@Nonnull final ReplicatedLogEntry replicatedLogEntry,
-            @Nullable final Procedure<ReplicatedLogEntry> callback, boolean doAsync)  {
+            @Nullable final Procedure<ReplicatedLogEntry> callback, final boolean doAsync)  {
 
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
