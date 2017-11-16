@@ -35,13 +35,14 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipService, AutoCloseable {
     private final DOMEntityOwnershipService domService;
 
-    public LegacyEntityOwnershipServiceAdapter(@Nonnull DOMEntityOwnershipService domService) {
+    public LegacyEntityOwnershipServiceAdapter(@Nonnull final DOMEntityOwnershipService domService) {
         this.domService = Preconditions.checkNotNull(domService);
     }
 
     @Override
+    @SuppressWarnings("checkstyle:avoidHidingCauseException")
     public EntityOwnershipCandidateRegistration registerCandidate(
-            Entity entity) throws CandidateAlreadyRegisteredException {
+            final Entity entity) throws CandidateAlreadyRegisteredException {
         try {
             return new EntityOwnershipCandidateRegistrationAdapter(domService.registerCandidate(toDOMEntity(entity)),
                                                                    entity);
@@ -51,18 +52,19 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
     }
 
     @Override
-    public EntityOwnershipListenerRegistration registerListener(String entityType, EntityOwnershipListener listener) {
+    public EntityOwnershipListenerRegistration registerListener(final String entityType,
+            final EntityOwnershipListener listener) {
         return new EntityOwnershipListenerRegistrationAdapter(entityType, listener, domService
                 .registerListener(entityType, new DOMEntityOwnershipListenerAdapter(listener)));
     }
 
     @Override
-    public Optional<EntityOwnershipState> getOwnershipState(Entity forEntity) {
+    public Optional<EntityOwnershipState> getOwnershipState(final Entity forEntity) {
         return toEntityOwnershipState(domService.getOwnershipState(toDOMEntity(forEntity)));
     }
 
     @Override
-    public boolean isCandidateRegistered(Entity entity) {
+    public boolean isCandidateRegistered(final Entity entity) {
         return domService.isCandidateRegistered(toDOMEntity(entity));
     }
 
@@ -70,12 +72,12 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
     public void close() {
     }
 
-    private DOMEntity toDOMEntity(Entity from) {
+    private static DOMEntity toDOMEntity(final Entity from) {
         return new DOMEntity(from.getType(), from.getId());
     }
 
-    private Optional<EntityOwnershipState> toEntityOwnershipState(
-            Optional<org.opendaylight.mdsal.eos.common.api.EntityOwnershipState> from) {
+    private static Optional<EntityOwnershipState> toEntityOwnershipState(
+            final Optional<org.opendaylight.mdsal.eos.common.api.EntityOwnershipState> from) {
         if (!from.isPresent()) {
             return Optional.absent();
         }
@@ -90,8 +92,8 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
             implements EntityOwnershipCandidateRegistration {
         private final DOMEntityOwnershipCandidateRegistration domRegistration;
 
-        EntityOwnershipCandidateRegistrationAdapter(DOMEntityOwnershipCandidateRegistration domRegistration,
-                                                    Entity entity) {
+        EntityOwnershipCandidateRegistrationAdapter(final DOMEntityOwnershipCandidateRegistration domRegistration,
+                                                    final Entity entity) {
             super(entity);
             this.domRegistration = Preconditions.checkNotNull(domRegistration);
         }
@@ -107,8 +109,8 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
         private final String entityType;
         private final DOMEntityOwnershipListenerRegistration domRegistration;
 
-        EntityOwnershipListenerRegistrationAdapter(String entityType, EntityOwnershipListener listener,
-                                                   DOMEntityOwnershipListenerRegistration domRegistration) {
+        EntityOwnershipListenerRegistrationAdapter(final String entityType, final EntityOwnershipListener listener,
+                                                   final DOMEntityOwnershipListenerRegistration domRegistration) {
             super(listener);
             this.entityType = Preconditions.checkNotNull(entityType);
             this.domRegistration = Preconditions.checkNotNull(domRegistration);
@@ -128,12 +130,12 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
     private static class DOMEntityOwnershipListenerAdapter implements DOMEntityOwnershipListener {
         private final EntityOwnershipListener delegateListener;
 
-        DOMEntityOwnershipListenerAdapter(EntityOwnershipListener delegateListener) {
+        DOMEntityOwnershipListenerAdapter(final EntityOwnershipListener delegateListener) {
             this.delegateListener = Preconditions.checkNotNull(delegateListener);
         }
 
         @Override
-        public void ownershipChanged(DOMEntityOwnershipChange ownershipChange) {
+        public void ownershipChanged(final DOMEntityOwnershipChange ownershipChange) {
             Entity entity = new Entity(ownershipChange.getEntity().getType(),
                                        ownershipChange.getEntity().getIdentifier());
             delegateListener.ownershipChanged(new EntityOwnershipChange(entity, ownershipChange.getState().wasOwner(),

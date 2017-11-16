@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.access.concepts.Request;
 /**
  * Matcher checks, whether matched {@link ConnectionEntry} tracks provided {@link Request}.
  */
-class ConnectionEntryMatcher extends BaseMatcher<ConnectionEntry> {
+final class ConnectionEntryMatcher extends BaseMatcher<ConnectionEntry> {
 
     private final Request<?, ?> request;
 

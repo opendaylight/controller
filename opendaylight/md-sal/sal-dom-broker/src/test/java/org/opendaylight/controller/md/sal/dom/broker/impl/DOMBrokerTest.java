@@ -203,7 +203,7 @@ public class DOMBrokerTest {
             throw caughtEx.get();
         }
 
-        NormalizedNode<?, ?> actualNode = dcListener.change.getCreatedData().get(TestModel.TEST_PATH);
+        NormalizedNode<?, ?> actualNode = dcListener.capturedChange.getCreatedData().get(TestModel.TEST_PATH);
         assertEquals("Created node", testNode, actualNode);
     }
 
@@ -326,12 +326,12 @@ public class DOMBrokerTest {
 
     static class TestDOMDataChangeListener implements DOMDataChangeListener {
 
-        volatile AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change;
+        volatile AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> capturedChange;
         private final CountDownLatch latch = new CountDownLatch(1);
 
         @Override
         public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-            this.change = change;
+            this.capturedChange = change;
             latch.countDown();
         }
 

@@ -93,11 +93,11 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
-    public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
-            @Nonnull ElectionTerm termInformation, long commitIndex, long lastApplied,
-            @Nonnull Map<String, String> peerAddresses,
-            @Nonnull ConfigParams configParams, @Nonnull DataPersistenceProvider persistenceProvider,
-            @Nonnull Consumer<ApplyState> applyStateConsumer, @Nonnull Logger logger) {
+    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
+            @Nonnull final ElectionTerm termInformation, final long commitIndex, final long lastApplied,
+            @Nonnull final Map<String, String> peerAddresses,
+            @Nonnull final ConfigParams configParams, @Nonnull final DataPersistenceProvider persistenceProvider,
+            @Nonnull final Consumer<ApplyState> applyStateConsumer, @Nonnull final Logger logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -118,7 +118,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @VisibleForTesting
-    public void setPayloadVersion(short payloadVersion) {
+    public void setPayloadVersion(final short payloadVersion) {
         this.payloadVersion = payloadVersion;
     }
 
@@ -127,17 +127,17 @@ public class RaftActorContextImpl implements RaftActorContext {
         return payloadVersion;
     }
 
-    public void setConfigParams(ConfigParams configParams) {
+    public void setConfigParams(final ConfigParams configParams) {
         this.configParams = configParams;
     }
 
     @Override
-    public ActorRef actorOf(Props props) {
+    public ActorRef actorOf(final Props props) {
         return context.actorOf(props);
     }
 
     @Override
-    public ActorSelection actorSelection(String path) {
+    public ActorSelection actorSelection(final String path) {
         return context.actorSelection(path);
     }
 
@@ -177,7 +177,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         return commitIndex;
     }
 
-    @Override public void setCommitIndex(long commitIndex) {
+    @Override public void setCommitIndex(final long commitIndex) {
         this.commitIndex = commitIndex;
     }
 
@@ -187,14 +187,14 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void setLastApplied(long lastApplied) {
+    public void setLastApplied(final long lastApplied) {
         final Throwable stackTrace = log.isTraceEnabled() ? new Throwable() : null;
         log.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied, stackTrace);
         this.lastApplied = lastApplied;
     }
 
     @Override
-    public void setReplicatedLog(ReplicatedLog replicatedLog) {
+    public void setReplicatedLog(final ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }
 
@@ -224,12 +224,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public PeerInfo getPeerInfo(String peerId) {
+    public PeerInfo getPeerInfo(final String peerId) {
         return peerInfoMap.get(peerId);
     }
 
     @Override
-    public String getPeerAddress(String peerId) {
+    public String getPeerAddress(final String peerId) {
         String peerAddress;
         PeerInfo peerInfo = peerInfoMap.get(peerId);
         if (peerInfo != null) {
@@ -246,7 +246,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void updatePeerIds(ServerConfigurationPayload serverConfig) {
+    public void updatePeerIds(final ServerConfigurationPayload serverConfig) {
         votingMember = true;
         boolean foundSelf = false;
         Set<String> currentPeers = new HashSet<>(this.getPeerIds());
@@ -285,13 +285,13 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void addToPeers(String peerId, String address, VotingState votingState) {
+    public void addToPeers(final String peerId, final String address, final VotingState votingState) {
         peerInfoMap.put(peerId, new PeerInfo(peerId, address, votingState));
         numVotingPeers = -1;
     }
 
     @Override
-    public void removePeer(String name) {
+    public void removePeer(final String name) {
         if (getId().equals(name)) {
             votingMember = false;
         } else {
@@ -300,7 +300,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
     }
 
-    @Override public ActorSelection getPeerActorSelection(String peerId) {
+    @Override public ActorSelection getPeerActorSelection(final String peerId) {
         String peerAddress = getPeerAddress(peerId);
         if (peerAddress != null) {
             return actorSelection(peerAddress);
@@ -309,7 +309,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void setPeerAddress(String peerId, String peerAddress) {
+    public void setPeerAddress(final String peerId, final String peerAddress) {
         PeerInfo peerInfo = peerInfoMap.get(peerId);
         if (peerInfo != null) {
             log.info("Peer address for peer {} set to {}", peerId, peerAddress);
@@ -331,7 +331,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void setTotalMemoryRetriever(LongSupplier retriever) {
+    public void setTotalMemoryRetriever(final LongSupplier retriever) {
         totalMemoryRetriever = retriever == null ? JVM_MEMORY_RETRIEVER : retriever;
     }
 
@@ -362,7 +362,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ServerConfigurationPayload getPeerServerInfo(boolean includeSelf) {
+    public ServerConfigurationPayload getPeerServerInfo(final boolean includeSelf) {
         if (!isDynamicServerConfigurationInUse()) {
             return null;
         }
@@ -435,8 +435,9 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     public void setRaftActorLeadershipTransferCohort(
-            @Nullable RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+            @Nullable final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         this.leadershipTransferCohort = leadershipTransferCohort;
     }
 }
