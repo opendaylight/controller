@@ -27,7 +27,6 @@ import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
-import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
@@ -607,8 +606,8 @@ public class DistributedEntityOwnershipIntegrationTest {
         AddShardReplica addReplica = new AddShardReplica(ENTITY_OWNERSHIP_SHARD_NAME);
         follower1DistributedDataStore.getActorContext().getShardManager().tell(addReplica,
                 follower1Node.kit().getRef());
-        Object reply = follower1Node.kit().expectMsgAnyClassOf(JavaTestKit.duration("5 sec"),
-                Success.class, Failure.class);
+        Object reply = follower1Node.kit().expectMsgAnyClassOf(follower1Node.kit().duration("5 sec"),
+                Success.class, Failure.class); 
         if (reply instanceof Failure) {
             throw new AssertionError("AddShardReplica failed", ((Failure)reply).cause());
         }

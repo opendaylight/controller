@@ -19,7 +19,7 @@ import akka.japi.Effect;
 import akka.remote.AssociationErrorEvent;
 import akka.remote.InvalidAssociation;
 import akka.remote.ThisActorSystemQuarantinedEvent;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class QuarantinedMonitorActorTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test

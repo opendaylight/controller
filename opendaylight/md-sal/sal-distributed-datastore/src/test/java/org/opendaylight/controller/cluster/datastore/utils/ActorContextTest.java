@@ -26,8 +26,8 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.dispatch.Futures;
 import akka.japi.Creator;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
@@ -141,27 +141,24 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testFindLocalShardWithShardFound() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
-                new Within(duration("1 seconds")) {
-                    @Override
-                    protected void run() {
+                within(duration("1 seconds"), () -> {
+                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
-                        ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
+                    ActorRef shardManagerActorRef = getSystem()
+                            .actorOf(MockShardManager.props(true, shardActorRef));
 
-                        ActorRef shardManagerActorRef = getSystem()
-                                .actorOf(MockShardManager.props(true, shardActorRef));
+                    ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
+                        mock(ClusterWrapper.class), mock(Configuration.class));
 
-                        ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
-                                mock(ClusterWrapper.class), mock(Configuration.class));
+                    Optional<ActorRef> out = actorContext.findLocalShard("default");
 
-                        Optional<ActorRef> out = actorContext.findLocalShard("default");
+                    assertEquals(shardActorRef, out.get());
 
-                        assertEquals(shardActorRef, out.get());
-
-                        expectNoMsg();
-                    }
-                };
+                    expectNoMsg();
+                    return null;
+                });
             }
         };
 
@@ -169,7 +166,7 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testFindLocalShardWithShardNotFound() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(false, null));
 
@@ -185,7 +182,7 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testExecuteRemoteOperation() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
@@ -206,7 +203,7 @@ public class ActorContextTest extends AbstractActorTest {
     @Test
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testExecuteRemoteOperationAsync() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
@@ -316,7 +313,7 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testSetDatastoreContext() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorContext actorContext = new ActorContext(getSystem(), getRef(),
                         mock(ClusterWrapper.class), mock(Configuration.class), DatastoreContext.newBuilder()
@@ -474,7 +471,7 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testBroadcast() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardActorRef1 = getSystem().actorOf(MessageCollectorActor.props());
                 ActorRef shardActorRef2 = getSystem().actorOf(MessageCollectorActor.props());

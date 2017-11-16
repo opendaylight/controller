@@ -13,7 +13,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
@@ -58,7 +58,7 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
 
     @Test
     public void testOnDataTreeChanged() throws Exception {
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         new CandidateListChangeListener(kit.getRef(), "test").init(shardDataTree);
 
