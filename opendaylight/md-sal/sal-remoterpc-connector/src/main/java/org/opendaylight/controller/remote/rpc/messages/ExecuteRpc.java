@@ -22,7 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class ExecuteRpc implements Serializable {
+public final class ExecuteRpc implements Serializable {
     private static final long serialVersionUID = 1128904894827335676L;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "

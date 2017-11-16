@@ -39,7 +39,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServiceReferenceRegistryImpl
+public final class ServiceReferenceRegistryImpl
         implements CloseableServiceReferenceReadableRegistry, SearchableServiceReferenceWritableRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceReferenceRegistryImpl.class);
 

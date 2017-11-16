@@ -69,7 +69,7 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                                 + "Error with attribute %s : %s ",
                         on,
                         configAttributeEntry.getKey(),
-                        configAttributeEntry.getValue()),
+                        configAttributeEntry.getValue()), e,
                         DocumentedException.ErrorType.APPLICATION,
                         DocumentedException.ErrorTag.OPERATION_FAILED,
                         DocumentedException.ErrorSeverity.ERROR);

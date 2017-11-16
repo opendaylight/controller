@@ -79,7 +79,7 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {
         private final ObjectRegistration<YangModuleInfo> inner;
 
-        private ObjectRegistrationWrapper(final ObjectRegistration<YangModuleInfo> inner) {
+        ObjectRegistrationWrapper(final ObjectRegistration<YangModuleInfo> inner) {
             this.inner = inner;
         }
 

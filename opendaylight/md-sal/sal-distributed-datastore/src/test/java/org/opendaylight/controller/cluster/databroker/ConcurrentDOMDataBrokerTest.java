@@ -490,6 +490,7 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor) {
             @Override
+            @SuppressWarnings("checkstyle:hiddenField")
             public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
                     Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);

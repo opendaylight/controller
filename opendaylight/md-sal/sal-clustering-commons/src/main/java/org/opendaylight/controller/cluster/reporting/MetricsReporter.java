@@ -36,7 +36,7 @@ public class MetricsReporter implements AutoCloseable {
     private final JmxReporter jmxReporter;
     private final MetricRegistry metricRegistry = new MetricRegistry();
 
-    private MetricsReporter(final String domainName) {
+    MetricsReporter(final String domainName) {
         this.domainName = domainName;
         jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(domainName).build();
         jmxReporter.start();

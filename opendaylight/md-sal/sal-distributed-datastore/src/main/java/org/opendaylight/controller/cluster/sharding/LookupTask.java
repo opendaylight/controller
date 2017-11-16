@@ -23,7 +23,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 abstract class LookupTask implements Runnable {
     private final int maxRetries;
     private final ActorRef replyTo;
-    private int retries = 0;
+    private int retried = 0;
 
     LookupTask(final ActorRef replyTo, final int maxRetries) {
         this.replyTo = replyTo;
@@ -33,9 +33,9 @@ abstract class LookupTask implements Runnable {
     abstract void reschedule(int retries);
 
     void tryReschedule(@Nullable final Throwable throwable) {
-        if (retries <= maxRetries) {
-            retries++;
-            reschedule(retries);
+        if (retried <= maxRetries) {
+            retried++;
+            reschedule(retried);
         } else {
             fail(throwable);
         }

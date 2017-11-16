@@ -73,7 +73,7 @@ public class ActorContextTest extends AbstractActorTest {
     private static class TestMessage {
     }
 
-    private static class MockShardManager extends UntypedActor {
+    private static final class MockShardManager extends UntypedActor {
 
         private final boolean found;
         private final ActorRef actorRef;

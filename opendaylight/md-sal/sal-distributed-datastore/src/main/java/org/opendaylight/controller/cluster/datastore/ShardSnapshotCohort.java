@@ -33,7 +33,7 @@ import org.slf4j.Logger;
  *
  * @author Thomas Pantelis
  */
-class ShardSnapshotCohort implements RaftActorSnapshotCohort {
+final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
     private final ActorRef snapshotActor;

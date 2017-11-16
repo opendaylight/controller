@@ -24,8 +24,9 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(DeleteEditConfigStrategy.class);
 
     @Override
-    void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
+    void handleMissingInstance(final Map<String, AttributeConfigElement> configuration, final ConfigTransactionClient ta,
+            final String module, final String instance, final ServiceRegistryWrapper services)
+                    throws ConfigHandlingException {
         throw new ConfigHandlingException(
                 String.format("Unable to delete %s : %s , ServiceInstance not found", module, instance),
                 DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
@@ -33,14 +34,14 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
     }
 
     @Override
-    void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta, ObjectName on,
-            ServiceRegistryWrapper services) throws ConfigHandlingException {
+    void executeStrategy(final Map<String, AttributeConfigElement> configuration, final ConfigTransactionClient ta,
+            final ObjectName on, final ServiceRegistryWrapper services) throws ConfigHandlingException {
         try {
             ta.destroyModule(on);
             LOG.debug("ServiceInstance {} deleted successfully", on);
         } catch (InstanceNotFoundException e) {
             throw new ConfigHandlingException(
-                    String.format("Unable to delete %s because of exception %s" + on, e.getMessage()),
+                    String.format("Unable to delete %s because of exception %s" + on, e.getMessage()), e,
                     DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                     DocumentedException.ErrorSeverity.ERROR);
         }

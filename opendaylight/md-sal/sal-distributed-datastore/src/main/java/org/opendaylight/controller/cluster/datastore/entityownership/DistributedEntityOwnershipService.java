@@ -74,7 +74,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     private volatile ActorRef localEntityOwnershipShard;
     private volatile DataTree localEntityOwnershipShardDataTree;
 
-    private DistributedEntityOwnershipService(final ActorContext context) {
+    DistributedEntityOwnershipService(final ActorContext context) {
         this.context = Preconditions.checkNotNull(context);
     }
 

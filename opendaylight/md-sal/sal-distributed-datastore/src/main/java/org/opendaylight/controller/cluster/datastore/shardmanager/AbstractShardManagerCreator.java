@@ -74,9 +74,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return distributedDataStore;
     }
 
-    public T distributedDataStore(final AbstractDataStore distributedDataStore) {
+    public T distributedDataStore(final AbstractDataStore newDistributedDataStore) {
         checkSealed();
-        this.distributedDataStore = distributedDataStore;
+        this.distributedDataStore = newDistributedDataStore;
         return self();
     }
 

@@ -15,6 +15,10 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public final class MockIdentifiers {
+    private MockIdentifiers() {
+
+    }
+
     public static ClientIdentifier clientIdentifier(final Class<?> clazz, final String memberName) {
         return ClientIdentifier.create(FrontendIdentifier.create(MemberName.forName(memberName),
             FrontendType.forName(clazz.getSimpleName())), 0);

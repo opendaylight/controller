@@ -32,6 +32,7 @@ public class SimpleAttributeWritingStrategy implements AttributeWritingStrategy 
         parentElement.appendChild(innerNode);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected Element createElement(final Document document, final String key, final String value,
             final Optional<String> namespace) {
         Element typeElement = XmlUtil.createElement(document, key, namespace);

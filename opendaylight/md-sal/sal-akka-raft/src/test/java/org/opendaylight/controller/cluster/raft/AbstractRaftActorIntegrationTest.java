@@ -67,7 +67,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
         private static final long serialVersionUID = 1L;
 
-        protected MockIdentifier(String string) {
+        protected MockIdentifier(final String string) {
             super(string);
         }
     }
@@ -76,7 +76,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         private final String peerId;
         private final String peerAddress;
 
-        public SetPeerAddress(String peerId, String peerAddress) {
+        public SetPeerAddress(final String peerId, final String peerAddress) {
             this.peerId = peerId;
             this.peerAddress = peerAddress;
         }
@@ -95,20 +95,20 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         private final ActorRef collectorActor;
         private final Map<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
 
-        private TestRaftActor(Builder builder) {
+        TestRaftActor(final Builder builder) {
             super(builder);
             this.collectorActor = builder.collectorActor;
         }
 
-        public void startDropMessages(Class<?> msgClass) {
+        public void startDropMessages(final Class<?> msgClass) {
             dropMessages.put(msgClass, msg -> true);
         }
 
-        <T> void startDropMessages(Class<T> msgClass, Predicate<T> filter) {
+        <T> void startDropMessages(final Class<T> msgClass, final Predicate<T> filter) {
             dropMessages.put(msgClass, filter);
         }
 
-        public void stopDropMessages(Class<?> msgClass) {
+        public void stopDropMessages(final Class<?> msgClass) {
             dropMessages.remove(msgClass);
         }
 
@@ -118,7 +118,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
         @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:IllegalCatch" })
         @Override
-        public void handleCommand(Object message) {
+        public void handleCommand(final Object message) {
             if (message instanceof MockPayload) {
                 MockPayload payload = (MockPayload) message;
                 super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload, false);
@@ -154,7 +154,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public void createSnapshot(ActorRef actorRef, Optional<OutputStream> installSnapshotStream) {
+        public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
             MockSnapshotState snapshotState = new MockSnapshotState(new ArrayList<>(getState()));
             if (installSnapshotStream.isPresent()) {
                 SerializationUtils.serialize(snapshotState, installSnapshotStream.get());
@@ -174,13 +174,13 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public static class Builder extends AbstractBuilder<Builder, TestRaftActor> {
             private ActorRef collectorActor;
 
-            public Builder collectorActor(ActorRef newCollectorActor) {
-                this.collectorActor = newCollectorActor;
-                return this;
+            Builder() {
+                super(TestRaftActor.class);
             }
 
-            private Builder() {
-                super(TestRaftActor.class);
+            public Builder collectorActor(final ActorRef newCollectorActor) {
+                this.collectorActor = newCollectorActor;
+                return this;
             }
         }
     }
@@ -245,17 +245,17 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         return configParams;
     }
 
-    protected void waitUntilLeader(ActorRef actorRef) {
+    protected void waitUntilLeader(final ActorRef actorRef) {
         RaftActorTestKit.waitUntilLeader(actorRef);
     }
 
-    protected TestActorRef<TestRaftActor> newTestRaftActor(String id, Map<String, String> newPeerAddresses,
-            ConfigParams configParams) {
+    protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final Map<String, String> newPeerAddresses,
+            final ConfigParams configParams) {
         return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(newPeerAddresses != null
                 ? newPeerAddresses : Collections.<String, String>emptyMap()).config(configParams));
     }
 
-    protected TestActorRef<TestRaftActor> newTestRaftActor(String id, TestRaftActor.Builder builder) {
+    protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final TestRaftActor.Builder builder) {
         builder.collectorActor(factory.createActor(
                 MessageCollectorActor.props(), factory.generateActorId(id + "-collector"))).id(id);
 
@@ -274,7 +274,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         throw lastEx;
     }
 
-    protected void killActor(TestActorRef<TestRaftActor> actor) {
+    protected void killActor(final TestActorRef<TestRaftActor> actor) {
         JavaTestKit testkit = new JavaTestKit(getSystem());
         testkit.watch(actor);
 
@@ -284,13 +284,13 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         testkit.unwatch(actor);
     }
 
-    protected void verifyApplyJournalEntries(ActorRef actor, final long expIndex) {
+    protected void verifyApplyJournalEntries(final ActorRef actor, final long expIndex) {
         MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class,
             msg -> msg.getToIndex() == expIndex);
     }
 
-    protected void verifySnapshot(String prefix, Snapshot snapshot, long lastAppliedTerm,
-            long lastAppliedIndex, long lastTerm, long lastIndex)
+    protected void verifySnapshot(final String prefix, final Snapshot snapshot, final long lastAppliedTerm,
+            final long lastAppliedIndex, final long lastTerm, final long lastIndex)
                     throws Exception {
         assertEquals(prefix + " Snapshot getLastAppliedTerm", lastAppliedTerm, snapshot.getLastAppliedTerm());
         assertEquals(prefix + " Snapshot getLastAppliedIndex", lastAppliedIndex, snapshot.getLastAppliedIndex());
@@ -305,7 +305,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    protected void verifyPersistedJournal(String persistenceId, List<? extends ReplicatedLogEntry> expJournal) {
+    protected void verifyPersistedJournal(final String persistenceId,
+            final List<? extends ReplicatedLogEntry> expJournal) {
         List<ReplicatedLogEntry> journal = InMemoryJournal.get(persistenceId, ReplicatedLogEntry.class);
         assertEquals("Journal ReplicatedLogEntry count", expJournal.size(), journal.size());
         for (int i = 0; i < expJournal.size(); i++) {
@@ -315,11 +316,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    protected MockPayload sendPayloadData(ActorRef actor, String data) {
+    protected MockPayload sendPayloadData(final ActorRef actor, final String data) {
         return sendPayloadData(actor, data, 0);
     }
 
-    protected MockPayload sendPayloadData(ActorRef actor, String data, int size) {
+    protected MockPayload sendPayloadData(final ActorRef actor, final String data, final int size) {
         MockPayload payload;
         if (size > 0) {
             payload = new MockPayload(data, size);
@@ -331,8 +332,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         return payload;
     }
 
-    protected void verifyApplyState(ApplyState applyState, ActorRef expClientActor,
-            String expId, long expTerm, long expIndex, Payload payload) {
+    protected void verifyApplyState(final ApplyState applyState, final ActorRef expClientActor,
+            final String expId, final long expTerm, final long expIndex, final Payload payload) {
         assertEquals("ApplyState getClientActor", expClientActor, applyState.getClientActor());
 
         final Identifier id = expId == null ? null : new MockIdentifier(expId);
@@ -341,31 +342,32 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         verifyReplicatedLogEntry(replicatedLogEntry, expTerm, expIndex, payload);
     }
 
-    protected void verifyReplicatedLogEntry(ReplicatedLogEntry replicatedLogEntry, long expTerm, long expIndex,
-            Payload payload) {
+    protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,
+            final long expIndex, final Payload payload) {
         assertEquals("ReplicatedLogEntry getTerm", expTerm, replicatedLogEntry.getTerm());
         assertEquals("ReplicatedLogEntry getIndex", expIndex, replicatedLogEntry.getIndex());
         assertEquals("ReplicatedLogEntry getData", payload, replicatedLogEntry.getData());
     }
 
-    protected String testActorPath(String id) {
+    protected String testActorPath(final String id) {
         return factory.createTestActorPath(id);
     }
 
-    protected void verifyLeadersTrimmedLog(long lastIndex) {
+    protected void verifyLeadersTrimmedLog(final long lastIndex) {
         verifyTrimmedLog("Leader", leaderActor, lastIndex, lastIndex - 1);
     }
 
-    protected void verifyLeadersTrimmedLog(long lastIndex, long replicatedToAllIndex) {
+    protected void verifyLeadersTrimmedLog(final long lastIndex, final long replicatedToAllIndex) {
         verifyTrimmedLog("Leader", leaderActor, lastIndex, replicatedToAllIndex);
     }
 
-    protected void verifyFollowersTrimmedLog(int num, TestActorRef<TestRaftActor> actorRef, long lastIndex) {
+    protected void verifyFollowersTrimmedLog(final int num, final TestActorRef<TestRaftActor> actorRef,
+            final long lastIndex) {
         verifyTrimmedLog("Follower " + num, actorRef, lastIndex, lastIndex - 1);
     }
 
-    protected void verifyTrimmedLog(String name, TestActorRef<TestRaftActor> actorRef, long lastIndex,
-            long replicatedToAllIndex) {
+    protected void verifyTrimmedLog(final String name, final TestActorRef<TestRaftActor> actorRef, final long lastIndex,
+            final long replicatedToAllIndex) {
         TestRaftActor actor = actorRef.underlyingActor();
         RaftActorContext context = actor.getRaftActorContext();
         long snapshotIndex = lastIndex - 1;
@@ -381,7 +383,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static void verifyRaftState(ActorRef raftActor, Consumer<OnDemandRaftState> verifier) {
+    static void verifyRaftState(final ActorRef raftActor, final Consumer<OnDemandRaftState> verifier) {
         Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS);
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();

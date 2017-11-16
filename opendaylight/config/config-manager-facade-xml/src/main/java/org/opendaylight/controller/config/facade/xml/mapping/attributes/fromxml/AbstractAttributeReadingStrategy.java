@@ -34,6 +34,7 @@ public abstract class AbstractAttributeReadingStrategy implements AttributeReadi
 
     abstract AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws DocumentedException;
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected Object postprocessNullableDefault(final String nullableDefault) {
         return nullableDefault;
     }

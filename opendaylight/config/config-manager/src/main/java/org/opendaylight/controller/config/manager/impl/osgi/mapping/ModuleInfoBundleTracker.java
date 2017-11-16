@@ -40,7 +40,7 @@ public final class ModuleInfoBundleTracker
 
     private final RefreshingSCPModuleInfoRegistry moduleInfoRegistry;
 
-    private BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
+    private BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> tracker;
     private boolean starting;
 
     public ModuleInfoBundleTracker(final RefreshingSCPModuleInfoRegistry moduleInfoRegistry) {
@@ -51,7 +51,7 @@ public final class ModuleInfoBundleTracker
         LOG.debug("ModuleInfoBundleTracker open starting with bundleTracker {}", bundleTracker);
 
         if (bundleTracker != null) {
-            this.bundleTracker = bundleTracker;
+            this.tracker = bundleTracker;
             starting = true;
             bundleTracker.open();
 
@@ -66,9 +66,9 @@ public final class ModuleInfoBundleTracker
 
     @Override
     public void close() {
-        if (bundleTracker != null) {
-            bundleTracker.close();
-            bundleTracker = null;
+        if (tracker != null) {
+            tracker.close();
+            tracker = null;
         }
     }
 

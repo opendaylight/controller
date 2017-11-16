@@ -776,8 +776,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             return this;
         }
 
-        public ShardedDataTreeActorCreator setClusterWrapper(final ClusterWrapper cluster) {
-            this.cluster = cluster;
+        public ShardedDataTreeActorCreator setClusterWrapper(final ClusterWrapper clusterWrapper) {
+            this.cluster = clusterWrapper;
             return this;
         }
 
@@ -805,8 +805,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             return this;
         }
 
-        public ShardedDataTreeActorCreator setLookupTaskMaxRetries(final int maxRetries) {
-            this.maxRetries = maxRetries;
+        public ShardedDataTreeActorCreator setLookupTaskMaxRetries(final int newMaxRetries) {
+            this.maxRetries = newMaxRetries;
             return this;
         }
 

@@ -94,6 +94,7 @@ public class DatastoreContextContextPropertiesUpdaterTest {
         private DatastoreContextFactory contextFactory;
 
         @Override
+        @SuppressWarnings("checkstyle:hiddenField")
         public void onDatastoreContextUpdated(final DatastoreContextFactory contextFactory) {
             this.contextFactory = contextFactory;
         }

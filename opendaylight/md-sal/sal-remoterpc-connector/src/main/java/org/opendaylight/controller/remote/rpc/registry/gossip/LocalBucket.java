@@ -48,8 +48,8 @@ final class LocalBucket<T extends BucketData<T>> {
         return new BucketImpl<>(version, data);
     }
 
-    boolean setData(final T data) {
-        this.data = Preconditions.checkNotNull(data);
+    boolean setData(final T newData) {
+        this.data = Preconditions.checkNotNull(newData);
         if (!bumpVersion) {
             return false;
         }

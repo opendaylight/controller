@@ -24,6 +24,7 @@ public abstract class AttributeIfcSwitchStatement<T> {
 
     private AttributeIfc lastAttribute;
 
+    @SuppressWarnings("checkstyle:avoidHidingCauseException")
     public T switchAttribute(final AttributeIfc attributeIfc) {
 
         this.lastAttribute = attributeIfc;

@@ -12,7 +12,11 @@ import akka.actor.ActorSystem;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 
-public class RemoteRpcProviderFactory {
+public final class RemoteRpcProviderFactory {
+    private RemoteRpcProviderFactory() {
+
+    }
+
     public static RemoteRpcProvider createInstance(final DOMRpcProviderService rpcProviderService,
             final DOMRpcService rpcService, final ActorSystem actorSystem, final RemoteRpcProviderConfig config) {
 

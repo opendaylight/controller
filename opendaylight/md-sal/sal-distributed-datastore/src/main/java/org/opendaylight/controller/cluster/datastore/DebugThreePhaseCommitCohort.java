@@ -84,7 +84,7 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
     }
 
     @VisibleForTesting
-    void setLogger(final Logger log) {
-        this.log = log;
+    void setLogger(final Logger logger) {
+        this.log = logger;
     }
 }

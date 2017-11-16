@@ -72,6 +72,7 @@ public class PruningDataTreeModificationTest {
     private PruningDataTreeModification pruningDataTreeModification;
 
     @Before
+    @SuppressWarnings("checkstyle:avoidHidingCauseException")
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 

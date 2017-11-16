@@ -83,7 +83,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             try {
                 return parseObject(type, value);
             } catch (final DocumentedException e) {
-                throw new DocumentedException("Unable to resolve attribute " + attrName + " from " + value,
+                throw new DocumentedException("Unable to resolve attribute " + attrName + " from " + value, e,
                         DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                         DocumentedException.ErrorSeverity.ERROR);
             }
@@ -96,7 +96,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 return method.invoke(null, value);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 LOG.trace("Error parsing object ", e);
-                throw new DocumentedException("Error parsing object.", DocumentedException.ErrorType.APPLICATION,
+                throw new DocumentedException("Error parsing object.", e, DocumentedException.ErrorType.APPLICATION,
                         DocumentedException.ErrorTag.OPERATION_FAILED, DocumentedException.ErrorSeverity.ERROR);
             }
         }
@@ -141,7 +141,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 return Util.readDate(value);
             } catch (final ParseException e) {
                 LOG.trace("Unable parse value {} due to ", value, e);
-                throw new DocumentedException("Unable to parse value " + value + " as date.",
+                throw new DocumentedException("Unable to parse value " + value + " as date.", e,
                         DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                         DocumentedException.ErrorSeverity.ERROR);
             }

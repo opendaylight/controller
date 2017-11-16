@@ -34,6 +34,7 @@ final class DOMNotificationRouterEvent {
         // Hidden on purpose, initialized in initialize()
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     ListenableFuture<Void> initialize(final DOMNotification notification,
                                       final Collection<ListenerRegistration<? extends DOMNotificationListener>>
                                               subscribers) {
