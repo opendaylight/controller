@@ -16,8 +16,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Status;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.After;
@@ -66,7 +66,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test

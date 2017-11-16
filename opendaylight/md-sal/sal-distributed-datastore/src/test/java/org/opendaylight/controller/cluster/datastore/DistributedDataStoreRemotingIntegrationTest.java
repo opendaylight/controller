@@ -24,7 +24,7 @@ import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
@@ -182,9 +182,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             leaderDistributedDataStore.close();
         }
 
-        JavaTestKit.shutdownActorSystem(leaderSystem);
-        JavaTestKit.shutdownActorSystem(followerSystem);
-        JavaTestKit.shutdownActorSystem(follower2System);
+        TestKit.shutdownActorSystem(leaderSystem);
+        TestKit.shutdownActorSystem(followerSystem);
+        TestKit.shutdownActorSystem(follower2System);
 
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
@@ -316,8 +316,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        JavaTestKit.shutdownActorSystem(leaderSystem, null, Boolean.TRUE);
-        JavaTestKit.shutdownActorSystem(followerSystem, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(leaderSystem, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(followerSystem, null, Boolean.TRUE);
 
         final ActorSystem newSystem = newActorSystem("reinstated-member2", "Member2");
 
@@ -599,7 +599,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder
                 .shardElectionTimeoutFactor(1).customRaftPolicyImplementation(null));
 
-        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+        TestKit.shutdownActorSystem(leaderSystem, null, true);
         Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
         followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorContext(), CARS);
@@ -1011,7 +1011,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Shutdown the leader and try to create a new tx.
 
-        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+        TestKit.shutdownActorSystem(leaderSystem, null, true);
 
         followerDatastoreContextBuilder.operationTimeoutInMillis(50).shardElectionTimeoutFactor(1);
         sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder);
@@ -1046,7 +1046,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Shutdown the leader and try to create a new tx.
 
-        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+        TestKit.shutdownActorSystem(leaderSystem, null, true);
 
         Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
@@ -1097,7 +1097,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             // Shutdown the leader and try to create a new tx.
 
-            JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+            TestKit.shutdownActorSystem(leaderSystem, null, true);
 
             Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 

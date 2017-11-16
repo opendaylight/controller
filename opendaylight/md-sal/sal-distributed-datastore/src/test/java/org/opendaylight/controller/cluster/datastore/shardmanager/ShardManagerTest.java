@@ -34,8 +34,8 @@ import akka.japi.Creator;
 import akka.pattern.Patterns;
 import akka.persistence.RecoveryCompleted;
 import akka.serialization.Serialization;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
@@ -191,7 +191,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     }
 
     private static void waitForShardInitialized(final ActorRef shardManager, final String shardName,
-            final JavaTestKit kit) {
+            final TestKit kit) {
         AssertionError last = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
@@ -210,8 +210,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T expectMsgClassOrFailure(final Class<T> msgClass, final JavaTestKit kit, final String msg) {
-        Object reply = kit.expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), msgClass, Failure.class);
+    private static <T> T expectMsgClassOrFailure(final Class<T> msgClass, final TestKit kit, final String msg) {
+        Object reply = kit.expectMsgAnyClassOf(kit.duration("5 sec"), msgClass, Failure.class);
         if (reply instanceof Failure) {
             throw new AssertionError(msg + " failed", ((Failure)reply).cause());
         }
@@ -286,7 +286,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
             }
         };
 
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         final ActorRef shardManager = actorFactory.createActor(Props.create(
                 new DelegatingShardManagerCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()));
@@ -323,7 +323,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveFindPrimaryForNonExistentShard() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -339,7 +339,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryForLocalLeaderShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryForLocalLeaderShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
@@ -373,7 +373,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryForNonLocalLeaderShardBeforeMemberUp() throws Exception {
         LOG.info("testOnReceiveFindPrimaryForNonLocalLeaderShardBeforeMemberUp starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -400,7 +400,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryForNonLocalLeaderShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryForNonLocalLeaderShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -432,7 +432,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveFindPrimaryForUninitializedShard() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -445,7 +445,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveFindPrimaryForInitializedShardWithNoRole() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -462,7 +462,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryForFollowerShardWithNoInitialLeaderId() throws Exception {
         LOG.info("testOnReceiveFindPrimaryForFollowerShardWithNoInitialLeaderId starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -499,7 +499,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testOnReceiveFindPrimaryWaitForShardLeader() throws Exception {
         LOG.info("testOnReceiveFindPrimaryWaitForShardLeader starting");
         datastoreContextBuilder.shardInitializationTimeout(10, TimeUnit.SECONDS);
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -544,7 +544,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryWaitForReadyWithUninitializedShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryWaitForReadyWithUninitializedShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -566,7 +566,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryWaitForReadyWithCandidateShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryWaitForReadyWithCandidateShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -587,7 +587,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryWaitForReadyWithIsolatedLeaderShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryWaitForReadyWithIsolatedLeaderShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -608,7 +608,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindPrimaryWaitForReadyWithNoRoleShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryWaitForReadyWithNoRoleShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -656,7 +656,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         new ClusterWrapperImpl(system2)).props().withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
-        new JavaTestKit(system1) {
+        new TestKit(system1) {
             {
                 shardManager1.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 shardManager2.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
@@ -728,7 +728,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         new ClusterWrapperImpl(system2)).props().withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
-        new JavaTestKit(system1) {
+        new TestKit(system1) {
             {
                 shardManager1.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 shardManager2.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
@@ -852,7 +852,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         new ClusterWrapperImpl(system2)).props().withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
-        new JavaTestKit(system1) {
+        new TestKit(system1) {
             {
                 shardManager1.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 shardManager2.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
@@ -915,7 +915,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveFindLocalShardForNonExistentShard() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -932,7 +932,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveFindLocalShardForExistentShard() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -951,7 +951,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveFindLocalShardForNotInitializedShard() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -965,7 +965,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnReceiveFindLocalShardWaitForShardInitialized() throws Exception {
         LOG.info("testOnReceiveFindLocalShardWaitForShardInitialized starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -1005,7 +1005,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 TestShardManager shardManager = newTestShardManager();
 
@@ -1028,7 +1028,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testReadyCountDownForMemberUpAfterLeaderStateChanged() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 TestShardManager shardManager = newTestShardManager();
 
@@ -1163,7 +1163,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testOnReceiveSwitchShardBehavior() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
@@ -1188,7 +1188,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnCreateShard() {
         LOG.info("testOnCreateShard starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
@@ -1240,7 +1240,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnCreateShardWithLocalMemberNotInShardConfig() {
         LOG.info("testOnCreateShardWithLocalMemberNotInShardConfig starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
@@ -1272,7 +1272,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testOnCreateShardWithNoInitialSchemaContext() {
         LOG.info("testOnCreateShardWithNoInitialSchemaContext starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardManager = actorFactory
                         .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
@@ -1304,7 +1304,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testGetSnapshot() throws Exception {
         LOG.info("testGetSnapshot starting");
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                 .put("shard1", Arrays.asList("member-1")).put("shard2", Arrays.asList("member-1"))
@@ -1336,7 +1336,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Add a new replica
 
-        JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
+        TestKit mockShardLeaderKit = new TestKit(getSystem());
 
         TestShardManager shardManagerInstance = shardManager.underlyingActor();
         shardManagerInstance.setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
@@ -1369,7 +1369,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         datastoreContextBuilder.shardInitializationTimeout(3, TimeUnit.SECONDS);
 
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                 .put("shard1", Collections.<String>emptyList()).put("shard2", Collections.<String>emptyList())
@@ -1405,7 +1405,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testAddShardReplicaForNonExistentShardConfig() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardManager = actorFactory
                         .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
@@ -1456,7 +1456,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
-        new JavaTestKit(system1) {
+        new TestKit(system1) {
             {
                 newReplicaShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 leaderShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
@@ -1509,7 +1509,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testAddShardReplicaWithPreExistingReplicaInRemoteShardLeader() throws Exception {
         LOG.info("testAddShardReplicaWithPreExistingReplicaInRemoteShardLeader starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 TestActorRef<TestShardManager> shardManager = actorFactory
                         .createTestActor(newPropsShardMgrWithMockShardActor(), shardMgrID);
@@ -1571,7 +1571,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testAddShardReplicaWithPreExistingLocalReplicaLeader() throws Exception {
         LOG.info("testAddShardReplicaWithPreExistingLocalReplicaLeader starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
@@ -1599,9 +1599,9 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testAddShardReplicaWithAddServerReplyFailure() throws Exception {
         LOG.info("testAddShardReplicaWithAddServerReplyFailure starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
-                JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
+                TestKit mockShardLeaderKit = new TestKit(getSystem());
 
                 MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                         .put("astronauts", Arrays.asList("member-2")).build());
@@ -1615,7 +1615,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-                JavaTestKit terminateWatcher = new JavaTestKit(getSystem());
+                TestKit terminateWatcher = new TestKit(getSystem());
                 terminateWatcher.watch(mockNewReplicaShardActor);
 
                 shardManager.tell(new AddShardReplica("astronauts"), getRef());
@@ -1654,7 +1654,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testAddShardReplicaWithFindPrimaryTimeout() throws Exception {
         LOG.info("testAddShardReplicaWithFindPrimaryTimeout starting");
         datastoreContextBuilder.shardInitializationTimeout(100, TimeUnit.MILLISECONDS);
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                         .put("astronauts", Arrays.asList("member-2")).build());
@@ -1678,7 +1678,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testRemoveShardReplicaForNonExistentShard() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorRef shardManager = actorFactory
                         .createActor(newShardMgrProps(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
@@ -1696,7 +1696,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
      * Primary is Local
      */
     public void testRemoveShardReplicaLocal() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
@@ -1776,7 +1776,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         LOG.error("Forwarding actor : {}", actorRef);
 
-        new JavaTestKit(system1) {
+        new TestKit(system1) {
             {
                 newReplicaShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 leaderShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
@@ -1830,10 +1830,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testServerChangeWhenAlreadyInProgress(final String shardName, final Object firstServerChange,
                                                       final Class<?> firstForwardedServerChangeClass,
                                                       final Object secondServerChange) throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
-                JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
-                final JavaTestKit secondRequestKit = new JavaTestKit(getSystem());
+                TestKit mockShardLeaderKit = new TestKit(getSystem());
+                final TestKit secondRequestKit = new TestKit(getSystem());
 
                 MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                         .put(shardName, Arrays.asList("member-2")).build());
@@ -1863,7 +1863,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testServerRemovedShardActorNotRunning() throws Exception {
         LOG.info("testServerRemovedShardActorNotRunning starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                         .put("default", Arrays.asList("member-1", "member-2"))
@@ -1896,7 +1896,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testServerRemovedShardActorRunning() throws Exception {
         LOG.info("testServerRemovedShardActorRunning starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                         .put("default", Arrays.asList("member-1", "member-2"))
@@ -1933,7 +1933,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testShardPersistenceWithRestoredData() throws Exception {
         LOG.info("testShardPersistenceWithRestoredData starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 MockConfiguration mockConfig =
                     new MockConfiguration(ImmutableMap.<String, List<String>>builder()
@@ -1973,7 +1973,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     @Test
     public void testShutDown() throws Exception {
         LOG.info("testShutDown starting");
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                         .put("shard1", Arrays.asList("member-1")).put("shard2", Arrays.asList("member-1")).build());
@@ -2017,7 +2017,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testChangeServersVotingStatus() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
@@ -2053,7 +2053,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
     @Test
     public void testChangeServersVotingStatusWithNoLeader() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 

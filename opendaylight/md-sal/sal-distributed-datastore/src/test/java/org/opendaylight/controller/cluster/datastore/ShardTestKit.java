@@ -29,11 +29,11 @@ import scala.concurrent.duration.FiniteDuration;
 public class ShardTestKit extends JavaTestKit {
     private static final Logger LOG = LoggerFactory.getLogger(ShardTestKit.class);
 
-    public ShardTestKit(ActorSystem actorSystem) {
+    public ShardTestKit(final ActorSystem actorSystem) {
         super(actorSystem);
     }
 
-    public void waitForLogMessage(final Class<?> logLevel, ActorRef subject, String logMessage) {
+    public void waitForLogMessage(final Class<?> logLevel, final ActorRef subject, final String logMessage) {
         // Wait for a specific log message to show up
         final boolean result =
             new JavaTestKit.EventFilter<Boolean>(logLevel
@@ -51,7 +51,7 @@ public class ShardTestKit extends JavaTestKit {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static String waitUntilLeader(ActorRef shard) {
+    public static String waitUntilLeader(final ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
@@ -75,7 +75,7 @@ public class ShardTestKit extends JavaTestKit {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void waitUntilNoLeader(ActorRef shard) {
+    public void waitUntilNoLeader(final ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         Object lastResponse = null;
         for (int i = 0; i < 20 * 5; i++) {

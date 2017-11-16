@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import org.junit.AfterClass;
@@ -26,7 +26,7 @@ public class AbstractClusterRefEntityOwnershipTest extends AbstractEntityOwnersh
 
     @AfterClass
     public static void tearDownClass() throws IOException {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
         system = null;
     }
 
