@@ -29,7 +29,7 @@ public class IdentityAttributeRefTest {
 
     @Test(expected = NullPointerException.class)
     public void testConstructor2() throws Exception {
-        IdentityAttributeRef attr = new IdentityAttributeRef(null);
+        new IdentityAttributeRef(null);
     }
 
     @Test

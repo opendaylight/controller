@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Utils for encoding prefix shard name.
  */
-public class ClusterUtils {
+public final class ClusterUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterUtils.class);
 
     // id for the shard used to store prefix configuration

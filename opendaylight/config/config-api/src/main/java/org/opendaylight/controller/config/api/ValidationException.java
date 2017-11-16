@@ -102,7 +102,7 @@ public class ValidationException extends Exception {
             this.message = message;
         }
 
-        public void setTrace(final String stackTrace) {
+        public void setStackTrace(final String stackTrace) {
             this.stackTrace = stackTrace;
         }
 

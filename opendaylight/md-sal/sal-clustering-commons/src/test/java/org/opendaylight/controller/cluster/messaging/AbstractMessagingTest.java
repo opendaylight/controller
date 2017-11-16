@@ -74,13 +74,13 @@ public class AbstractMessagingTest {
         JavaTestKit.shutdownActorSystem(ACTOR_SYSTEM, Boolean.TRUE);
     }
 
-    void setupMockFiledBackedStream(final FileBackedOutputStream mockFiledBackedStream) throws IOException {
-        doNothing().when(mockFiledBackedStream).write(any(byte[].class), anyInt(), anyInt());
-        doNothing().when(mockFiledBackedStream).write(any(byte[].class));
-        doNothing().when(mockFiledBackedStream).write(anyInt());
-        doNothing().when(mockFiledBackedStream).close();
-        doNothing().when(mockFiledBackedStream).cleanup();
-        doNothing().when(mockFiledBackedStream).flush();
-        doReturn(mockByteSource).when(mockFiledBackedStream).asByteSource();
+    void setupMockFiledBackedStream(final FileBackedOutputStream mockOutputStream) throws IOException {
+        doNothing().when(mockOutputStream).write(any(byte[].class), anyInt(), anyInt());
+        doNothing().when(mockOutputStream).write(any(byte[].class));
+        doNothing().when(mockOutputStream).write(anyInt());
+        doNothing().when(mockOutputStream).close();
+        doNothing().when(mockOutputStream).cleanup();
+        doNothing().when(mockOutputStream).flush();
+        doReturn(mockByteSource).when(mockOutputStream).asByteSource();
     }
 }

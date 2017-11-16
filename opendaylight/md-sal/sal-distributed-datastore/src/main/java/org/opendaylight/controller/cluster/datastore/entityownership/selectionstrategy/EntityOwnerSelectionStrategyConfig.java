@@ -30,7 +30,7 @@ public final class EntityOwnerSelectionStrategyConfig {
         return entityTypeToStrategyInfo.get(entityType) != null;
     }
 
-    public EntityOwnerSelectionStrategy createStrategy(String entityType, Map<String, Long> initialStatistics) {
+    public EntityOwnerSelectionStrategy createStrategy(final String entityType, final Map<String, Long> initialStatistics) {
         final EntityOwnerSelectionStrategy strategy;
         final EntityOwnerSelectionStrategy existingStrategy = entityTypeToOwnerSelectionStrategy.get(entityType);
         if (existingStrategy != null) {
@@ -70,7 +70,7 @@ public final class EntityOwnerSelectionStrategyConfig {
             this.delay = delay;
         }
 
-        public EntityOwnerSelectionStrategy createStrategy(Map<String, Long> initialStatistics) {
+        public EntityOwnerSelectionStrategy createStrategy(final Map<String, Long> initialStatistics) {
             try {
                 return strategyClass.getDeclaredConstructor(long.class, Map.class)
                         .newInstance(delay, initialStatistics);
@@ -86,10 +86,10 @@ public final class EntityOwnerSelectionStrategyConfig {
         return new Builder(new EntityOwnerSelectionStrategyConfig());
     }
 
-    public static class Builder {
+    public static final class Builder {
         private final EntityOwnerSelectionStrategyConfig config;
 
-        private Builder(final EntityOwnerSelectionStrategyConfig config) {
+        Builder(final EntityOwnerSelectionStrategyConfig config) {
             this.config = config;
         }
 
