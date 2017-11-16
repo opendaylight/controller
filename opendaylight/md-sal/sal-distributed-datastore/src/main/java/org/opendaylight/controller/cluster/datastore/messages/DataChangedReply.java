@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class DataChangedReply {
+public final class DataChangedReply {
     public static final DataChangedReply INSTANCE = new DataChangedReply();
 
     private DataChangedReply() {

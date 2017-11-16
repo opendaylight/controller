@@ -2092,7 +2092,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         private CountDownLatch memberReachableReceived = new CountDownLatch(1);
         private volatile MessageInterceptor messageInterceptor;
 
-        private TestShardManager(final Builder builder) {
+        TestShardManager(final Builder builder) {
             super(builder);
             shardActor = builder.shardActor;
             shardActors = builder.shardActors;

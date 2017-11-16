@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.datastore.Shard;
  *
  * @author Basheeruddin syedbahm@cisco.com
  */
-public class ShardMBeanFactory {
+public final class ShardMBeanFactory {
 
     private ShardMBeanFactory() {
     }

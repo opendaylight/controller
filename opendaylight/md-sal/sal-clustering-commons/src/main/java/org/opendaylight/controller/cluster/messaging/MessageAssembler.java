@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  * @see MessageSlicer
  */
-public class MessageAssembler implements AutoCloseable {
+public final  class MessageAssembler implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(MessageAssembler.class);
 
     private final Cache<Identifier, AssembledMessageState> stateCache;
@@ -40,7 +40,7 @@ public class MessageAssembler implements AutoCloseable {
     private final BiConsumer<Object, ActorRef> assembledMessageCallback;
     private final String logContext;
 
-    private MessageAssembler(final Builder builder) {
+    MessageAssembler(final Builder builder) {
         this.fileBackedStreamFactory = Preconditions.checkNotNull(builder.fileBackedStreamFactory,
                 "FiledBackedStreamFactory cannot be null");
         this.assembledMessageCallback = Preconditions.checkNotNull(builder.assembledMessageCallback,

@@ -12,7 +12,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
  *
  * @author Thomas Pantelis
  */
-public class GetShardDataTree {
+public final class GetShardDataTree {
     public static final GetShardDataTree INSTANCE = new GetShardDataTree();
 
     private GetShardDataTree() {

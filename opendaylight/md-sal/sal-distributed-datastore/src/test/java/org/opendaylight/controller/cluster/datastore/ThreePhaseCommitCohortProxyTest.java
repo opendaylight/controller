@@ -260,8 +260,8 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         verifyCohortActors();
     }
 
+    @SuppressWarnings("checkstyle:avoidHidingCauseException")
     private void propagateExecutionExceptionCause(final ListenableFuture<?> future) throws Exception {
-
         try {
             future.get(5, TimeUnit.SECONDS);
             fail("Expected ExecutionException");
@@ -315,7 +315,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         private final AtomicInteger abortCount = new AtomicInteger();
         private volatile AssertionError assertionError;
 
-        private CohortActor(final Builder builder) {
+        CohortActor(final Builder builder) {
             this.builder = builder;
         }
 

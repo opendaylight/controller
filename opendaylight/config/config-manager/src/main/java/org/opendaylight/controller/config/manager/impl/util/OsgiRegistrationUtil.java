@@ -20,7 +20,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OsgiRegistrationUtil {
+public final class OsgiRegistrationUtil {
     private static final Logger LOG = LoggerFactory.getLogger(OsgiRegistrationUtil.class);
 
     private OsgiRegistrationUtil() {

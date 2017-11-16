@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.api.jmx.constants;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-public class ConfigRegistryConstants {
+public final class ConfigRegistryConstants {
 
     private ConfigRegistryConstants() {
     }

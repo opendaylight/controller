@@ -126,23 +126,23 @@ public abstract class AbstractModule<M extends AbstractModule<M>>
     protected abstract AutoCloseable createInstance();
 
     @Override
-    public final boolean canReuse(final Module oldModule) {
+    public final boolean canReuse(final Module prevModule) {
         // Just cast into a specific instance
         // TODO unify this method with canReuseInstance (required Module interface to be
         // generic which requires quite a lot of changes)
-        return canReuseInstance && getClass().isInstance(oldModule) ? canReuseInstance((M) oldModule) : false;
+        return canReuseInstance && getClass().isInstance(prevModule) ? canReuseInstance((M) prevModule) : false;
     }
 
     /**
      * Users are welcome to override this method to provide custom logic for
      * advanced reusability detection.
      *
-     * @param oldModule
+     * @param prevModule
      *            old instance of a Module
      * @return true if the old instance is reusable false if a new one should be
      *         spawned
      */
-    protected abstract boolean canReuseInstance(M oldModule);
+    protected abstract boolean canReuseInstance(M prevModule);
 
     /**
      * By default the oldInstance is returned since this method is by default called
@@ -150,14 +150,14 @@ public abstract class AbstractModule<M extends AbstractModule<M>>
      * Users are welcome to override this method to provide custom logic for
      * advanced reusability.
      *
-     * @param oldInstance
+     * @param prevInstance
      *            old instance of a class wrapped by the module
      * @return reused instance
      */
-    protected AutoCloseable reuseInstance(final AutoCloseable oldInstance) {
+    protected AutoCloseable reuseInstance(final AutoCloseable prevInstance) {
         // implement if instance reuse should be supported. Override canReuseInstance to
         // change the criteria.
-        return oldInstance;
+        return prevInstance;
     }
 
     /**

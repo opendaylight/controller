@@ -12,12 +12,8 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.ExecutionError;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -36,7 +32,7 @@ class OnDemandShardStateCache {
     private final String shardName;
     private volatile String stateRetrievalTime;
 
-    OnDemandShardStateCache(String shardName, ActorRef shardActor) {
+    OnDemandShardStateCache(final String shardName, final ActorRef shardActor) {
         this.shardName = Preconditions.checkNotNull(shardName);
         this.shardActor = shardActor;
     }
@@ -46,16 +42,7 @@ class OnDemandShardStateCache {
             return OnDemandShardState.newBuilder().build();
         }
 
-        try {
-            return ONDEMAND_SHARD_STATE_CACHE.get(shardName, this::retrieveState);
-        } catch (ExecutionException | UncheckedExecutionException | ExecutionError e) {
-            if (e.getCause() != null) {
-                Throwables.propagateIfPossible(e.getCause(), Exception.class);
-                throw new RuntimeException("unexpected", e.getCause());
-            }
-
-            throw e;
-        }
+        return ONDEMAND_SHARD_STATE_CACHE.get(shardName, this::retrieveState);
     }
 
     String getStatRetrievaelTime() {

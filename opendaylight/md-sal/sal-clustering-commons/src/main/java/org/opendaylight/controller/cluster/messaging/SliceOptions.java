@@ -21,10 +21,10 @@ import org.opendaylight.yangtools.concepts.Identifier;
  *
  * @author Thomas Pantelis
  */
-public class SliceOptions {
+public final class SliceOptions {
     private final Builder builder;
 
-    private SliceOptions(Builder builder) {
+    private SliceOptions(final Builder builder) {
         this.builder = builder;
     }
 

@@ -17,7 +17,7 @@ import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DistributedDataStoreFactory {
+public final class DistributedDataStoreFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
     private static final String DEFAULT_MODULE_SHARDS_PATH = "./configuration/initial/module-shards.conf";

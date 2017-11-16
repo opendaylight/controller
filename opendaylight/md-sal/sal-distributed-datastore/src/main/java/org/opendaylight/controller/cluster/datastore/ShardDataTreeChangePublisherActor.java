@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  *
  * @author Thomas Pantelis
  */
-public class ShardDataTreeChangePublisherActor
+public final class ShardDataTreeChangePublisherActor
         extends ShardDataTreeNotificationPublisherActor<ShardDataTreeChangeListenerPublisher> {
 
     private ShardDataTreeChangePublisherActor(final String name, final String logContext) {
@@ -29,7 +29,7 @@ public class ShardDataTreeChangePublisherActor
     }
 
     @Override
-    protected void handleReceive(Object message) {
+    protected void handleReceive(final Object message) {
         if (message instanceof RegisterListener) {
             RegisterListener reg = (RegisterListener)message;
             LOG.debug("{}: Received {}", logContext(), reg);

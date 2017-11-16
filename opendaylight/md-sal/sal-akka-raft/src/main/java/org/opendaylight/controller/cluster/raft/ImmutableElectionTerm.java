@@ -12,11 +12,11 @@ package org.opendaylight.controller.cluster.raft;
  *
  * @author Thomas Pantelis
  */
-public class ImmutableElectionTerm implements ElectionTerm {
+public final class ImmutableElectionTerm implements ElectionTerm {
     private final long currentTerm;
     private final String votedFor;
 
-    private ImmutableElectionTerm(long currentTerm, String votedFor) {
+    private ImmutableElectionTerm(final long currentTerm, final String votedFor) {
         this.currentTerm = currentTerm;
         this.votedFor = votedFor;
     }
@@ -32,12 +32,12 @@ public class ImmutableElectionTerm implements ElectionTerm {
     }
 
     @Override
-    public void update(long newTerm, String newVotedFor) {
+    public void update(final long newTerm, final String newVotedFor) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateAndPersist(long newTerm, String newVotedFor) {
+    public void updateAndPersist(final long newTerm, final String newVotedFor) {
         throw new UnsupportedOperationException();
     }
 
@@ -46,7 +46,7 @@ public class ImmutableElectionTerm implements ElectionTerm {
         return "ImmutableElectionTerm [currentTerm=" + currentTerm + ", votedFor=" + votedFor + "]";
     }
 
-    public static ElectionTerm copyOf(ElectionTerm from) {
+    public static ElectionTerm copyOf(final ElectionTerm from) {
         return new ImmutableElectionTerm(from.getCurrentTerm(), from.getVotedFor());
     }
 }

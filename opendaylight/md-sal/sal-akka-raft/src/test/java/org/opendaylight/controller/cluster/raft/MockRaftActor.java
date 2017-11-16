@@ -353,7 +353,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     public static class Builder extends AbstractBuilder<Builder, MockRaftActor> {
-        private Builder() {
+        Builder() {
             super(MockRaftActor.class);
         }
     }

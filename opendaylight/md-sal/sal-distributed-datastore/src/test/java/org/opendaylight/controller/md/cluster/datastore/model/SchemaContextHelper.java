@@ -19,11 +19,15 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
-public class SchemaContextHelper {
+public final class SchemaContextHelper {
 
     public static final String ODL_DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
     public static final String PEOPLE_YANG = "/people.yang";
     public static final String CARS_YANG = "/cars.yang";
+
+    private SchemaContextHelper() {
+
+    }
 
     public static InputStream getInputStream(final String yangFileName) {
         return SchemaContextHelper.class.getResourceAsStream(yangFileName);

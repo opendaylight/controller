@@ -65,9 +65,9 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
             return result;
         }
 
-        private synchronized void onStageResolved(final ShardBackendInfo result, final Throwable failure) {
+        private synchronized void onStageResolved(final ShardBackendInfo info, final Throwable failure) {
             if (failure == null) {
-                this.result = Preconditions.checkNotNull(result);
+                this.result = Preconditions.checkNotNull(info);
             } else {
                 LOG.warn("Failed to resolve shard", failure);
             }

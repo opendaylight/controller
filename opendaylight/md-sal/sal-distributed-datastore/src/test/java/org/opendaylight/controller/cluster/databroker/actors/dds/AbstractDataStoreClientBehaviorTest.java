@@ -59,6 +59,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         behavior = createBehavior(clientContext, context);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract AbstractDataStoreClientBehavior createBehavior(ClientActorContext clientContext,
                                                                       ActorContext context);
 

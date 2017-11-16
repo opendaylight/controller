@@ -57,7 +57,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
- * The behavior of a RaftActor when it is in the Leader state
+ * The behavior of a RaftActor when it is in the Leader state.
  *
  * <p>
  * Leaders:
@@ -185,7 +185,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    void setSnapshot(@Nullable final SnapshotHolder snapshotHolder) {
+    void setSnapshotHolder(@Nullable final SnapshotHolder snapshotHolder) {
         this.snapshotHolder = Optional.fromNullable(snapshotHolder);
     }
 
@@ -493,7 +493,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
         } else if (message instanceof SendInstallSnapshot) {
             SendInstallSnapshot sendInstallSnapshot = (SendInstallSnapshot) message;
-            setSnapshot(new SnapshotHolder(sendInstallSnapshot.getSnapshot(), sendInstallSnapshot.getSnapshotBytes()));
+            setSnapshotHolder(new SnapshotHolder(sendInstallSnapshot.getSnapshot(),
+                sendInstallSnapshot.getSnapshotBytes()));
             sendInstallSnapshot();
         } else if (message instanceof Replicate) {
             replicate((Replicate) message);
@@ -547,7 +548,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     if (!anyFollowersInstallingSnapshot()) {
                         // once there are no pending followers receiving snapshots
                         // we can remove snapshot from the memory
-                        setSnapshot(null);
+                        setSnapshotHolder(null);
                     }
 
                     wasLastChunk = true;
@@ -724,8 +725,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    private List<ReplicatedLogEntry> getEntriesToSend(FollowerLogInformation followerLogInfo,
-            ActorSelection followerActor) {
+    private List<ReplicatedLogEntry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
+            final ActorSelection followerActor) {
         // Try to get all the entries in the journal but not exceeding the max data size for a single AppendEntries
         // message.
         int maxEntries = (int) context.getReplicatedLog().size();
@@ -794,8 +795,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return Collections.emptyList();
     }
 
-    private void sendAppendEntriesToFollower(ActorSelection followerActor, List<ReplicatedLogEntry> entries,
-            FollowerLogInformation followerLogInformation) {
+    private void sendAppendEntriesToFollower(final ActorSelection followerActor, final List<ReplicatedLogEntry> entries,
+            final FollowerLogInformation followerLogInformation) {
         // In certain cases outlined below we don't want to send the actual commit index to prevent the follower from
         // possibly committing and applying conflicting entries (those with same index, different term) from a prior
         // term that weren't replicated to a majority, which would be a violation of raft.
