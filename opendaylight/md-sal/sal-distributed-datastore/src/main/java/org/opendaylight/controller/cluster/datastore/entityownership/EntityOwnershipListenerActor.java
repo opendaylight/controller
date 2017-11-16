@@ -20,15 +20,15 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
  *
  * @author Thomas Pantelis
  */
-class EntityOwnershipListenerActor extends AbstractUntypedActor {
+final class EntityOwnershipListenerActor extends AbstractUntypedActor {
     private final DOMEntityOwnershipListener listener;
 
-    private EntityOwnershipListenerActor(DOMEntityOwnershipListener listener) {
+    private EntityOwnershipListenerActor(final DOMEntityOwnershipListener listener) {
         this.listener = listener;
     }
 
     @Override
-    protected void handleReceive(Object message) {
+    protected void handleReceive(final Object message) {
         if (message instanceof DOMEntityOwnershipChange) {
             onEntityOwnershipChanged((DOMEntityOwnershipChange)message);
         } else {
@@ -37,7 +37,7 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void onEntityOwnershipChanged(DOMEntityOwnershipChange change) {
+    private void onEntityOwnershipChanged(final DOMEntityOwnershipChange change) {
         LOG.debug("Notifying EntityOwnershipListener {}: {}", listener, change);
 
         try {
@@ -47,7 +47,7 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
         }
     }
 
-    static Props props(DOMEntityOwnershipListener listener) {
+    static Props props(final DOMEntityOwnershipListener listener) {
         return Props.create(new EntityOwnershipListenerCreator(listener));
     }
 
@@ -58,7 +58,7 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
                 + "create remote instances of this actor and thus don't need it to be Serializable.")
         private final DOMEntityOwnershipListener listener;
 
-        EntityOwnershipListenerCreator(DOMEntityOwnershipListener listener) {
+        EntityOwnershipListenerCreator(final DOMEntityOwnershipListener listener) {
             this.listener = Preconditions.checkNotNull(listener);
         }
 

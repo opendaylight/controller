@@ -55,7 +55,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
      * @param matchIndex the initial match index.
      * @param context the RaftActorContext.
      */
-    public FollowerLogInformationImpl(PeerInfo peerInfo, long matchIndex, RaftActorContext context) {
+    public FollowerLogInformationImpl(final PeerInfo peerInfo, final long matchIndex, final RaftActorContext context) {
         this.nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
         this.context = context;
@@ -78,7 +78,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public boolean setNextIndex(long nextIndex) {
+    @SuppressWarnings("checkstyle:hiddenField")
+    public boolean setNextIndex(final long nextIndex) {
         if (this.nextIndex != nextIndex) {
             this.nextIndex = nextIndex;
             return true;
@@ -93,7 +94,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public boolean setMatchIndex(long matchIndex) {
+    @SuppressWarnings("checkstyle:hiddenField")
+    public boolean setMatchIndex(final long matchIndex) {
         // If the new match index is the index of the entry currently being sliced, then we know slicing is complete
         // and the follower received the entry and responded so clear the slicedLogEntryIndex
         if (isLogEntrySlicingInProgress() && slicedLogEntryIndex == matchIndex) {
@@ -184,7 +186,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public void setPayloadVersion(short payloadVersion) {
+    public void setPayloadVersion(final short payloadVersion) {
         this.payloadVersion = payloadVersion;
     }
 
@@ -194,7 +196,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public void setRaftVersion(short raftVersion) {
+    public void setRaftVersion(final short raftVersion) {
         this.raftVersion = raftVersion;
     }
 
@@ -205,7 +207,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public void setLeaderInstallSnapshotState(@Nonnull LeaderInstallSnapshotState state) {
+    public void setLeaderInstallSnapshotState(@Nonnull final LeaderInstallSnapshotState state) {
         if (this.installSnapshotState == null) {
             this.installSnapshotState = Preconditions.checkNotNull(state);
         }
@@ -219,7 +221,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public void setSlicedLogEntryIndex(long index) {
+    public void setSlicedLogEntryIndex(final long index) {
         slicedLogEntryIndex  = index;
     }
 

@@ -30,35 +30,35 @@ public class Dispatchers {
 
         private final String path;
 
-        DispatcherType(String path) {
+        DispatcherType(final String path) {
             this.path = path;
         }
 
-        private String path(akka.dispatch.Dispatchers dispatchers) {
-            if (dispatchers.hasDispatcher(path)) {
+        String path(final akka.dispatch.Dispatchers knownDispatchers) {
+            if (knownDispatchers.hasDispatcher(path)) {
                 return path;
             }
             return DEFAULT_DISPATCHER_PATH;
         }
 
-        private ExecutionContext dispatcher(akka.dispatch.Dispatchers dispatchers) {
-            if (dispatchers.hasDispatcher(path)) {
-                return dispatchers.lookup(path);
+        ExecutionContext dispatcher(final akka.dispatch.Dispatchers knownDispatchers) {
+            if (knownDispatchers.hasDispatcher(path)) {
+                return knownDispatchers.lookup(path);
             }
-            return dispatchers.defaultGlobalDispatcher();
+            return knownDispatchers.defaultGlobalDispatcher();
         }
     }
 
-    public Dispatchers(akka.dispatch.Dispatchers dispatchers) {
+    public Dispatchers(final akka.dispatch.Dispatchers dispatchers) {
         Preconditions.checkNotNull(dispatchers, "dispatchers should not be null");
         this.dispatchers = dispatchers;
     }
 
-    public ExecutionContext getDispatcher(DispatcherType dispatcherType) {
+    public ExecutionContext getDispatcher(final DispatcherType dispatcherType) {
         return dispatcherType.dispatcher(this.dispatchers);
     }
 
-    public String getDispatcherPath(DispatcherType dispatcherType) {
+    public String getDispatcherPath(final DispatcherType dispatcherType) {
         return dispatcherType.path(this.dispatchers);
     }
 }

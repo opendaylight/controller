@@ -34,9 +34,8 @@ public class RpcManager extends AbstractUntypedActor {
     private ActorRef rpcRegistry;
     private ActorRef rpcRegistrar;
 
-    private RpcManager(final DOMRpcProviderService rpcProvisionRegistry,
-                       final DOMRpcService rpcServices,
-                       final RemoteRpcProviderConfig config) {
+    RpcManager(final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
+            final RemoteRpcProviderConfig config) {
         this.rpcProvisionRegistry = Preconditions.checkNotNull(rpcProvisionRegistry);
         this.rpcServices = Preconditions.checkNotNull(rpcServices);
         this.config = Preconditions.checkNotNull(config);

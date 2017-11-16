@@ -52,7 +52,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
-public class TestModel {
+public final class TestModel {
 
     public static final QName TEST_QNAME = QName.create(
             "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test",
@@ -101,7 +101,6 @@ public class TestModel {
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
     private static final String DATASTORE_AUG_YANG = "/odl-datastore-augmentation.yang";
     private static final String DATASTORE_TEST_NOTIFICATION_YANG = "/odl-datastore-test-notification.yang";
-
 
     public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
     public static final YangInstanceIdentifier DESC_PATH = YangInstanceIdentifier
@@ -156,15 +155,19 @@ public class TestModel {
                     .build()) //
             .build();
 
-    public static final InputStream getDatastoreTestInputStream() {
+    private TestModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static InputStream getDatastoreTestInputStream() {
         return getInputStream(DATASTORE_TEST_YANG);
     }
 
-    public static final InputStream getDatastoreAugInputStream() {
+    public static InputStream getDatastoreAugInputStream() {
         return getInputStream(DATASTORE_AUG_YANG);
     }
 
-    public static final InputStream getDatastoreTestNotificationInputStream() {
+    public static InputStream getDatastoreTestNotificationInputStream() {
         return getInputStream(DATASTORE_TEST_NOTIFICATION_YANG);
     }
 

@@ -23,7 +23,7 @@ public class ShardIdentifier {
     private final String type;
     private final String fullName;
 
-    private ShardIdentifier(String shardName, MemberName memberName, String type) {
+    ShardIdentifier(final String shardName, final MemberName memberName, final String type) {
         this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
         this.type = Preconditions.checkNotNull(type, "type should not be null");
@@ -43,7 +43,7 @@ public class ShardIdentifier {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -101,22 +101,22 @@ public class ShardIdentifier {
             return new ShardIdentifier(shardName, memberName, type);
         }
 
-        public Builder shardName(String newShardName) {
+        public Builder shardName(final String newShardName) {
             this.shardName = newShardName;
             return this;
         }
 
-        public Builder memberName(MemberName newMemberName) {
+        public Builder memberName(final MemberName newMemberName) {
             this.memberName = newMemberName;
             return this;
         }
 
-        public Builder type(String newType) {
+        public Builder type(final String newType) {
             this.type = newType;
             return this;
         }
 
-        public Builder fromShardIdString(String shardId) {
+        public Builder fromShardIdString(final String shardId) {
             Matcher matcher = PATTERN.matcher(shardId);
 
             if (matcher.matches()) {

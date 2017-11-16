@@ -386,6 +386,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                 shardName);
     }
 
+    @SuppressWarnings("checkstyle:avoidHidingCauseException")
     protected void propagateReadFailedExceptionCause(final CheckedFuture<?, ReadFailedException> future)
             throws Exception {
         try {

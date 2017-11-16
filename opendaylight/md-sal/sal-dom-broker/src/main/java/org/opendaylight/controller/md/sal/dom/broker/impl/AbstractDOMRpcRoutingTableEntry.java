@@ -27,13 +27,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 abstract class AbstractDOMRpcRoutingTableEntry {
-    private final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls;
+    private final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> implementations;
     private final SchemaPath schemaPath;
 
     AbstractDOMRpcRoutingTableEntry(final SchemaPath schemaPath,
-        final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
+        final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> implementations) {
         this.schemaPath = Preconditions.checkNotNull(schemaPath);
-        this.impls = Preconditions.checkNotNull(impls);
+        this.implementations = Preconditions.checkNotNull(implementations);
     }
 
     final SchemaPath getSchemaPath() {
@@ -41,19 +41,20 @@ abstract class AbstractDOMRpcRoutingTableEntry {
     }
 
     final List<DOMRpcImplementation> getImplementations(final YangInstanceIdentifier context) {
-        return impls.get(context);
+        return implementations.get(context);
     }
 
     final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> getImplementations() {
-        return impls;
+        return implementations;
     }
 
     final boolean containsContext(final YangInstanceIdentifier contextReference) {
-        return impls.containsKey(contextReference);
+        return implementations.containsKey(contextReference);
     }
 
     final Set<YangInstanceIdentifier> registeredIdentifiers(final DOMRpcAvailabilityListener listener) {
-        return Maps.filterValues(impls, list -> list.stream().anyMatch(listener::acceptsImplementation)).keySet();
+        return Maps.filterValues(implementations, list -> list.stream().anyMatch(listener::acceptsImplementation))
+                .keySet();
     }
 
     /**
@@ -65,7 +66,7 @@ abstract class AbstractDOMRpcRoutingTableEntry {
     final AbstractDOMRpcRoutingTableEntry add(final DOMRpcImplementation implementation,
             final List<YangInstanceIdentifier> newRpcs) {
         final Builder<YangInstanceIdentifier, List<DOMRpcImplementation>> vb = ImmutableMap.builder();
-        for (final Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : impls.entrySet()) {
+        for (final Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : implementations.entrySet()) {
             if (newRpcs.remove(ve.getKey())) {
                 final List<DOMRpcImplementation> i = new ArrayList<>(ve.getValue().size() + 1);
                 i.addAll(ve.getValue());
@@ -91,7 +92,7 @@ abstract class AbstractDOMRpcRoutingTableEntry {
     final AbstractDOMRpcRoutingTableEntry remove(final DOMRpcImplementation implementation,
             final List<YangInstanceIdentifier> removed) {
         final Builder<YangInstanceIdentifier, List<DOMRpcImplementation>> vb = ImmutableMap.builder();
-        for (final Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : impls.entrySet()) {
+        for (final Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : implementations.entrySet()) {
             if (removed.remove(ve.getKey())) {
                 final List<DOMRpcImplementation> i = new ArrayList<>(ve.getValue());
                 i.remove(implementation);

@@ -105,15 +105,15 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     @Override
     @Test
     public void testOnTransactionComplete() throws Exception {
-        final ClientTransaction transaction = object().createTransaction();
+        final ClientTransaction tx = object().createTransaction();
 
         // make transaction ready
-        object().onTransactionReady(transaction, cohort);
+        object().onTransactionReady(tx, cohort);
         // state should be set to IDLE
         Assert.assertEquals(AbstractClientHistory.State.IDLE, object.state());
 
         // complete transaction
-        object().onTransactionComplete(transaction.getIdentifier());
+        object().onTransactionComplete(tx.getIdentifier());
         // state is still IDLE
         Assert.assertEquals(AbstractClientHistory.State.IDLE, object.state());
     }
@@ -129,9 +129,9 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     @Override
     @Test(expected = IllegalStateException.class)
     public void testOnTransactionReadyDuplicate() throws Exception {
-        final ClientTransaction transaction = object().createTransaction();
-        object().onTransactionReady(transaction, cohort);
-        object().onTransactionReady(transaction, cohort);
+        final ClientTransaction tx = object().createTransaction();
+        object().onTransactionReady(tx, cohort);
+        object().onTransactionReady(tx, cohort);
     }
 
     @Test

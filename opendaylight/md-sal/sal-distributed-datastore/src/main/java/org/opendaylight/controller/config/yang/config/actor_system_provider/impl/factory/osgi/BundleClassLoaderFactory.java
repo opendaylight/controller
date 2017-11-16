@@ -12,7 +12,11 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import org.osgi.framework.BundleContext;
 
-public class BundleClassLoaderFactory {
+public final class BundleClassLoaderFactory {
+
+    private BundleClassLoaderFactory() {
+
+    }
 
     public static ClassLoader createClassLoader(final BundleContext bundleContext) {
         return AccessController

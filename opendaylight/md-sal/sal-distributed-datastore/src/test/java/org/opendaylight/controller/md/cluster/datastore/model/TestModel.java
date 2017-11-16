@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
-public class TestModel {
+public final class TestModel {
 
     public static final QName TEST_QNAME =
             QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
@@ -36,7 +36,6 @@ public class TestModel {
 
     public static final QName JUNK_QNAME =
             QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:junk", "2014-03-13", "junk");
-
 
     public static final QName OUTER_LIST_QNAME = QName.create(TEST_QNAME, "outer-list");
     public static final QName OUTER_CONTAINER_QNAME = QName.create(TEST_QNAME, "outer-container");
@@ -58,6 +57,10 @@ public class TestModel {
     public static final YangInstanceIdentifier OUTER_CONTAINER_PATH = TEST_PATH.node(OUTER_CONTAINER_QNAME);
     public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
+
+    private TestModel() {
+
+    }
 
     public static SchemaContext createTestContext() {
         final List<InputStream> sources;

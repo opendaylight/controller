@@ -94,6 +94,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         handle = createHandle(parent);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract T createHandle(AbstractClientHistory parent);
 
     /**
@@ -102,6 +103,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
      *
      * @param handle handle
      */
+    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract void doHandleOperation(T handle);
 
     @After

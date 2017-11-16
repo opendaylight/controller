@@ -12,7 +12,7 @@ package org.opendaylight.controller.cluster.sharding.messages;
  * Message sent to the local ShardManager, once the shard configuration shard is ready and the ShardManager should
  * start its listener.
  */
-public class InitConfigListener {
+public final class InitConfigListener {
 
     public static final InitConfigListener INSTANCE = new InitConfigListener();
 
