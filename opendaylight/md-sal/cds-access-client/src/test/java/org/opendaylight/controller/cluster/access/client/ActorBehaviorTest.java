@@ -180,7 +180,7 @@ public class ActorBehaviorTest {
             return Props.create(MockedActor.class, () -> new MockedActor(frontendId, initialBehavior));
         }
 
-        private MockedActor(final FrontendIdentifier frontendId, final ClientActorBehavior<?> initialBehavior) {
+        MockedActor(final FrontendIdentifier frontendId, final ClientActorBehavior<?> initialBehavior) {
             super(frontendId);
             this.initialBehavior = initialBehavior;
         }

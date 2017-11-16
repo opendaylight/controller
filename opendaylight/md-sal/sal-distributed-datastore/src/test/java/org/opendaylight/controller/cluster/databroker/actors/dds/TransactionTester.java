@@ -84,7 +84,7 @@ class TransactionTester<T extends AbstractProxyTransaction> {
     private static class MockFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
         private static final long serialVersionUID = 1L;
 
-        private MockFailure(@Nonnull final TransactionIdentifier target, final long sequence,
+        MockFailure(@Nonnull final TransactionIdentifier target, final long sequence,
                             @Nonnull final RequestException cause) {
             super(target, sequence, cause);
         }

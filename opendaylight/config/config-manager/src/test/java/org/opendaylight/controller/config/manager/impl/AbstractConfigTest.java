@@ -271,7 +271,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
      *            jmx proxy which will be wrapped and returned
      */
     protected <T> T rethrowCause(final T innerObject) {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "checkstyle:avoidHidingCauseException" })
         final T proxy = (T) Proxy.newProxyInstance(innerObject.getClass().getClassLoader(),
                 innerObject.getClass().getInterfaces(), (proxy1, method, args) -> {
                 try {

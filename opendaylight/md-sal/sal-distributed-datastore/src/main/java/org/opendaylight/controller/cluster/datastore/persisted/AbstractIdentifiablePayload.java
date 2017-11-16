@@ -63,6 +63,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier>
         protected abstract T readIdentifier(@Nonnull DataInput in) throws IOException;
 
         @Nonnull
+        @SuppressWarnings("checkstyle:hiddenField")
         protected abstract Identifiable<T> createObject(@Nonnull T identifier, @Nonnull byte[] serialized);
     }
 
@@ -90,5 +91,6 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier>
     }
 
     @Nonnull
+    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract AbstractProxy<T> externalizableProxy(@Nonnull byte[] serialized);
 }

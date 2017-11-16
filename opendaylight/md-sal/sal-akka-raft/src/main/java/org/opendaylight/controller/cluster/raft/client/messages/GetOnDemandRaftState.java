@@ -15,7 +15,7 @@ import akka.dispatch.ControlMessage;
  *
  * @author Thomas Pantelis
  */
-public class GetOnDemandRaftState implements ControlMessage {
+public final class GetOnDemandRaftState implements ControlMessage {
     public static final GetOnDemandRaftState INSTANCE = new GetOnDemandRaftState();
 
     private GetOnDemandRaftState() {

@@ -356,7 +356,7 @@ public class ConfigSubsystemFacade implements Closeable {
     }
 
     private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(
-            final ConfigRegistryClient configRegistryClient,
+            final ConfigRegistryClient client,
             final Map<String, Map<String, ModuleMXBeanEntry>> mbeanentries) {
         Map<String, Map<String, ModuleRuntime>> retVal = new HashMap<>();
 
@@ -371,7 +371,7 @@ public class ConfigSubsystemFacade implements Closeable {
                 Map<RuntimeBeanEntry, InstanceConfig> cache = new HashMap<>();
                 RuntimeBeanEntry root = null;
                 for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
-                    cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap(),
+                    cache.put(rbe, new InstanceConfig(client, rbe.getYangPropertiesToTypesMap(),
                             mbe.getNullableDummyContainerName()));
                     if (rbe.isRoot()) {
                         root = rbe;

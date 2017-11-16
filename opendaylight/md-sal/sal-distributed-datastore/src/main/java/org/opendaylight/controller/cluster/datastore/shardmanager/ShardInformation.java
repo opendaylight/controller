@@ -63,7 +63,7 @@ final class ShardInformation {
 
     private DatastoreContext datastoreContext;
     private Shard.AbstractBuilder<?, ?> builder;
-    private boolean isActiveMember = true;
+    private boolean activeMember = true;
 
     ShardInformation(final String shardName, final ShardIdentifier shardId,
             final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
@@ -101,8 +101,8 @@ final class ShardInformation {
         return shardId;
     }
 
-    void setLocalDataTree(final Optional<DataTree> localShardDataTree) {
-        this.localShardDataTree = localShardDataTree;
+    void setLocalDataTree(final Optional<DataTree> dataTree) {
+        this.localShardDataTree = dataTree;
     }
 
     Optional<DataTree> getLocalShardDataTree() {
@@ -113,8 +113,8 @@ final class ShardInformation {
         return datastoreContext;
     }
 
-    void setDatastoreContext(final DatastoreContext datastoreContext, final ActorRef sender) {
-        this.datastoreContext = datastoreContext;
+    void setDatastoreContext(final DatastoreContext newDatastoreContext, final ActorRef sender) {
+        this.datastoreContext = newDatastoreContext;
         if (actor != null) {
             LOG.debug("Sending new DatastoreContext to {}", shardId);
             actor.tell(this.datastoreContext, sender);
@@ -233,10 +233,10 @@ final class ShardInformation {
         return false;
     }
 
-    boolean setLeaderId(final String leaderId) {
-        final boolean changed = !Objects.equals(this.leaderId, leaderId);
-        this.leaderId = leaderId;
-        if (leaderId != null) {
+    boolean setLeaderId(final String newLeaderId) {
+        final boolean changed = !Objects.equals(this.leaderId, newLeaderId);
+        this.leaderId = newLeaderId;
+        if (newLeaderId != null) {
             this.leaderAvailable = true;
         }
         notifyOnShardInitializedCallbacks();
@@ -265,11 +265,11 @@ final class ShardInformation {
     }
 
     boolean isActiveMember() {
-        return isActiveMember;
+        return activeMember;
     }
 
     void setActiveMember(final boolean isActiveMember) {
-        this.isActiveMember = isActiveMember;
+        this.activeMember = isActiveMember;
     }
 
     SchemaContext getSchemaContext() {

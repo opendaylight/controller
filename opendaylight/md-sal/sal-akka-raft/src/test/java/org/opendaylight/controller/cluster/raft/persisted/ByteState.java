@@ -16,16 +16,16 @@ import javax.annotation.Nonnull;
  *
  * @author Thomas Pantelis
  */
-public class ByteState implements Snapshot.State {
+public final class ByteState implements Snapshot.State {
     private static final long serialVersionUID = 1L;
 
     private final byte[] bytes;
 
-    private ByteState(@Nonnull byte[] bytes) {
+    private ByteState(@Nonnull final byte[] bytes) {
         this.bytes = Preconditions.checkNotNull(bytes);
     }
 
-    public static ByteState of(@Nonnull byte[] bytes) {
+    public static ByteState of(@Nonnull final byte[] bytes) {
         return new ByteState(bytes);
     }
 
@@ -46,7 +46,7 @@ public class ByteState implements Snapshot.State {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

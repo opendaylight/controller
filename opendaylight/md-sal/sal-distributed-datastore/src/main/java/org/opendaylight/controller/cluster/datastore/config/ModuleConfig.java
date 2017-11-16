@@ -22,14 +22,14 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
  *
  * @author Thomas Pantelis
  */
-public class ModuleConfig {
+public final class ModuleConfig {
     private final String name;
     private final String namespace;
     private final ShardStrategy shardStrategy;
     private final Map<String, ShardConfig> shardConfigs;
 
-    private ModuleConfig(String name, String namespace, ShardStrategy shardStrategy,
-            Map<String, ShardConfig> shardConfigs) {
+    ModuleConfig(final String name, final String namespace, final ShardStrategy shardStrategy,
+            final Map<String, ShardConfig> shardConfigs) {
         this.name = name;
         this.namespace = namespace;
         this.shardStrategy = shardStrategy;
@@ -52,7 +52,7 @@ public class ModuleConfig {
     }
 
     @Nullable
-    public ShardConfig getShardConfig(String forName) {
+    public ShardConfig getShardConfig(final String forName) {
         return shardConfigs.get(forName);
     }
 
@@ -66,25 +66,25 @@ public class ModuleConfig {
         return shardConfigs.keySet();
     }
 
-    public static Builder builder(String name) {
+    public static Builder builder(final String name) {
         return new Builder(name);
     }
 
-    public static Builder builder(ModuleConfig moduleConfig) {
+    public static Builder builder(final ModuleConfig moduleConfig) {
         return new Builder(moduleConfig);
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String name;
         private String nameSpace;
         private ShardStrategy shardStrategy;
         private final Map<String, ShardConfig> shardConfigs = new HashMap<>();
 
-        private Builder(String name) {
+        Builder(final String name) {
             this.name = name;
         }
 
-        private Builder(ModuleConfig moduleConfig) {
+        private Builder(final ModuleConfig moduleConfig) {
             this.name = moduleConfig.getName();
             this.nameSpace = moduleConfig.getNamespace();
             this.shardStrategy = moduleConfig.getShardStrategy();
@@ -93,22 +93,22 @@ public class ModuleConfig {
             }
         }
 
-        public Builder name(String newName) {
+        public Builder name(final String newName) {
             this.name = newName;
             return this;
         }
 
-        public Builder nameSpace(String newNameSpace) {
+        public Builder nameSpace(final String newNameSpace) {
             this.nameSpace = newNameSpace;
             return this;
         }
 
-        public Builder shardStrategy(ShardStrategy newShardStrategy) {
+        public Builder shardStrategy(final ShardStrategy newShardStrategy) {
             this.shardStrategy = newShardStrategy;
             return this;
         }
 
-        public Builder shardConfig(String shardName, Collection<MemberName> replicas) {
+        public Builder shardConfig(final String shardName, final Collection<MemberName> replicas) {
             shardConfigs.put(shardName, new ShardConfig(shardName, replicas));
             return this;
         }

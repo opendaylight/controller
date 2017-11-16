@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.cluster.datastore.model;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
@@ -38,7 +37,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
-public class CompositeModel {
+public final class CompositeModel {
 
     public static final QName TEST_QNAME = QName
             .create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
@@ -102,22 +101,26 @@ public class CompositeModel {
     private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
     private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
-    private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
-            .withChild(mapNodeBuilder(INNER_LIST_QNAME) //
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME)) //
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME)) //
-                    .build()) //
+    private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID)
+            .withChild(mapNodeBuilder(INNER_LIST_QNAME)
+                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME))
+                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME))
+                    .build())
             .build();
 
-    public static final InputStream getDatastoreTestInputStream() {
+    private CompositeModel() {
+
+    }
+
+    public static InputStream getDatastoreTestInputStream() {
         return getInputStream(DATASTORE_TEST_YANG);
     }
 
-    public static final InputStream getDatastoreAugInputStream() {
+    public static InputStream getDatastoreAugInputStream() {
         return getInputStream(DATASTORE_AUG_YANG);
     }
 
-    public static final InputStream getDatastoreTestNotificationInputStream() {
+    public static InputStream getDatastoreTestNotificationInputStream() {
         return getInputStream(DATASTORE_TEST_NOTIFICATION_YANG);
     }
 

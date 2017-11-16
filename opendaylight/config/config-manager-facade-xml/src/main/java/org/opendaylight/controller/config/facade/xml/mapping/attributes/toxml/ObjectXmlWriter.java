@@ -28,6 +28,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     private Document document;
     private String key;
 
+    @SuppressWarnings("checkstyle:hiddenField")
     public Map<String, AttributeWritingStrategy> prepareWriting(final Map<String, AttributeIfc> yangToAttrConfig,
             final Document document) {
 
@@ -43,6 +44,7 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
         return preparedWriting;
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     public AttributeWritingStrategy prepareWritingStrategy(final String key, final AttributeIfc expectedAttr,
             final Document document) {
         Preconditions.checkNotNull(expectedAttr, "Mbean attributes mismatch, unable to find expected attribute for %s",

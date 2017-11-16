@@ -188,6 +188,14 @@ public class DocumentedException extends Exception {
         );
     }
 
+    public DocumentedException(final String message, final Exception cause) {
+        this(message, cause,
+                DocumentedException.ErrorType.APPLICATION,
+                DocumentedException.ErrorTag.INVALID_VALUE,
+                DocumentedException.ErrorSeverity.ERROR
+        );
+    }
+
     public DocumentedException(final String message, final ErrorType errorType, final ErrorTag errorTag,
                                final ErrorSeverity errorSeverity) {
         this(message, errorType, errorTag, errorSeverity, Collections.<String, String> emptyMap());

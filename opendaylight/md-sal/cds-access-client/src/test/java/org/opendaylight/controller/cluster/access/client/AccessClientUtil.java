@@ -22,7 +22,10 @@ import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 /**
  * Util class to access package private members in cds-access-client for test purposes.
  */
-public class AccessClientUtil {
+public final class AccessClientUtil {
+    private AccessClientUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static ClientActorContext createClientActorContext(final ActorSystem system, final ActorRef actor,
                                                               final ClientIdentifier id, final String persistenceId) {
