@@ -21,7 +21,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
@@ -128,8 +128,8 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             followerOperDatastore.close();
         }
 
-        JavaTestKit.shutdownActorSystem(leaderSystem, null, Boolean.TRUE);
-        JavaTestKit.shutdownActorSystem(followerSystem, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(leaderSystem, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(followerSystem, null, Boolean.TRUE);
 
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
@@ -139,7 +139,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         initEmptyDatastores(MODULE_SHARDS_CONFIG);
     }
 
-    private void initEmptyDatastores(String moduleShardsConfig) throws Exception {
+    private void initEmptyDatastores(final String moduleShardsConfig) throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
         leaderConfigDatastore = leaderTestKit.setupDistributedDataStore(

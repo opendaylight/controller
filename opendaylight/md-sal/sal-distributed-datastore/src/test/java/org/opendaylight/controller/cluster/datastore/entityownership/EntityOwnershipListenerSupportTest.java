@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,9 +127,9 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
 
         // Unregister all listeners and verify their listener actors are destroyed.
 
-        List<JavaTestKit> watchers = new ArrayList<>();
+        List<TestKit> watchers = new ArrayList<>();
         for (Iterator<ActorRef> iter = listenerActors.iterator(); iter.hasNext();) {
-            JavaTestKit kit = new JavaTestKit(getSystem());
+            TestKit kit = new TestKit(getSystem());
             kit.watch(iter.next());
             watchers.add(kit);
         }
@@ -139,8 +139,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         support.removeEntityOwnershipListener(entityType2, mockListener2);
 
         Iterator<ActorRef> iter = listenerActors.iterator();
-        for (JavaTestKit kit: watchers) {
-            kit.expectTerminated(JavaTestKit.duration("3 seconds"), iter.next());
+        for (TestKit kit: watchers) {
+            kit.expectTerminated(kit.duration("3 seconds"), iter.next());
         }
 
         assertEquals("# of listener actors", 0, actorContext.children().size());

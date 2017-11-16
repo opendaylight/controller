@@ -13,7 +13,7 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.T
 import akka.actor.ActorRef;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -28,7 +28,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWhenNotificationsAreEnabled() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final AsyncDataChangeEvent mockChangeEvent = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
@@ -51,7 +51,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWhenNotificationsAreDisabled() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final AsyncDataChangeEvent mockChangeEvent = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
@@ -60,15 +60,12 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
                 subject.tell(new DataChanged(mockChangeEvent), getRef());
 
-                new Within(duration("1 seconds")) {
-                    @Override
-                    protected void run() {
-                        expectNoMsg();
-
-                        Mockito.verify(mockListener, Mockito.never())
-                                .onDataChanged(Mockito.any(AsyncDataChangeEvent.class));
-                    }
-                };
+                within(duration("1 seconds"), () -> {
+                    expectNoMsg();
+                    Mockito.verify(mockListener, Mockito.never())
+                    .onDataChanged(Mockito.any(AsyncDataChangeEvent.class));
+                    return null;
+                });
             }
         };
     }
@@ -76,7 +73,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWithNoSender() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final AsyncDataChangeEvent mockChangeEvent = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
@@ -108,7 +105,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWithListenerRuntimeEx() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final AsyncDataChangeEvent mockChangeEvent1 = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeEvent mockChangeEvent2 = Mockito.mock(AsyncDataChangeEvent.class);

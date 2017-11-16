@@ -12,7 +12,7 @@ import akka.actor.ActorSystem;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.testkit.JavaTestKit;
+import akka.testkit.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,8 +43,8 @@ public class MeteredBoundedMailboxTest {
 
     @Test
     public void shouldSendMsgToDeadLetterWhenQueueIsFull() throws InterruptedException {
-        final JavaTestKit mockReceiver = new JavaTestKit(actorSystem);
-        actorSystem.eventStream().subscribe(mockReceiver.getRef(), DeadLetter.class);
+        final TestKit mockReceiver = new TestKit(actorSystem);
+        actorSystem.eventStream().subscribe(mockReceiver.testActor(), DeadLetter.class);
 
         final FiniteDuration twentySeconds = new FiniteDuration(20, TimeUnit.SECONDS);
 
@@ -59,7 +59,7 @@ public class MeteredBoundedMailboxTest {
             //2nd to 11th messages are put on the queue
             //12th message is sent to dead letter.
             for (int i = 0; i < 12; i++) {
-                pingPongActor.tell("ping", mockReceiver.getRef());
+                pingPongActor.tell("ping", mockReceiver.testActor());
             }
 
             mockReceiver.expectMsgClass(twentySeconds, DeadLetter.class);
