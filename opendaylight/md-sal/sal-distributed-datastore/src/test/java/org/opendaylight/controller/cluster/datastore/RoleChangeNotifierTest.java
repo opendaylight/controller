@@ -13,8 +13,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import akka.actor.ActorRef;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -29,7 +29,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
 
     @Test
     public void testHandleRegisterRoleChangeListener() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "testHandleRegisterRoleChangeListener";
                 ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
@@ -52,7 +52,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
 
     @Test
     public void testHandleRaftRoleChanged() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String memberId = "testHandleRegisterRoleChangeListenerWithNotificationSet";
                 ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
@@ -89,7 +89,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
 
     @Test
     public void testHandleLeaderStateChanged() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 String actorId = "testHandleLeaderStateChanged";
                 TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),

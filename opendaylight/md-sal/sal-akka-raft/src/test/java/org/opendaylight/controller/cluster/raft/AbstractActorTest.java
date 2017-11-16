@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
@@ -38,7 +38,7 @@ public abstract class AbstractActorTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
         deleteJournal();
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
         system = null;
     }
 

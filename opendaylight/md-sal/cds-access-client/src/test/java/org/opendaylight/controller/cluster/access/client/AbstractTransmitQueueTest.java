@@ -14,8 +14,8 @@ import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.access.client.ConnectionEntryMatcher.entryWithRequest;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Ticker;
 import java.util.Collection;
 import java.util.Optional;
@@ -63,7 +63,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test

@@ -35,8 +35,8 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -128,7 +128,7 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRaftActorRecoveryWithPersistenceEnabled() throws Exception {
         TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled starting");
 
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
         String persistenceId = factory.generateActorId("follower-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -183,7 +183,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // kill the actor
         followerActor.tell(PoisonPill.getInstance(), null);
-        kit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
 
         kit.unwatch(followerActor);
 
@@ -234,7 +234,7 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testUpdateElectionTermPersistedWithPersistenceDisabled() throws Exception {
-        final JavaTestKit kit = new JavaTestKit(getSystem());
+        final TestKit kit = new TestKit(getSystem());
         String persistenceId = factory.generateActorId("follower-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
@@ -1009,7 +1009,7 @@ public class RaftActorTest extends AbstractActorTest {
     public void testGetSnapshot() throws Exception {
         TEST_LOG.info("testGetSnapshot starting");
 
-        final JavaTestKit kit = new JavaTestKit(getSystem());
+        final TestKit kit = new TestKit(getSystem());
 
         String persistenceId = factory.generateActorId("test-actor-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();

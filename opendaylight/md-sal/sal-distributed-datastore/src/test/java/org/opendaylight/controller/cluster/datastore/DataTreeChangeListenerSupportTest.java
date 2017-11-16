@@ -23,8 +23,8 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.t
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
@@ -91,9 +91,9 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         listener.verifyNotifiedData(TEST_PATH);
 
         listener.reset(1);
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
         entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
-        kit.expectMsgClass(JavaTestKit.duration("5 seconds"), CloseDataTreeNotificationListenerRegistrationReply.class);
+        kit.expectMsgClass(kit.duration("5 seconds"), CloseDataTreeNotificationListenerRegistrationReply.class);
 
         writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
         listener.verifyNoNotifiedData(TEST_PATH);

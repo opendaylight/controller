@@ -12,7 +12,7 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.T
 import akka.actor.ActorRef;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
     @Test
     public void testDataChangedWhenNotificationsAreEnabled() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final DataTreeCandidate mockTreeCandidate = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates = ImmutableList.of(mockTreeCandidate);
@@ -51,7 +51,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
     @Test
     public void testDataChangedWhenNotificationsAreDisabled() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final DataTreeCandidate mockTreeCandidate = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates = ImmutableList.of(mockTreeCandidate);
@@ -61,22 +61,19 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
                 subject.tell(new DataTreeChanged(mockCandidates), getRef());
 
-                new Within(duration("1 seconds")) {
-                    @Override
-                    protected void run() {
-                        expectNoMsg();
-
-                        Mockito.verify(mockListener, Mockito.never())
-                                .onDataTreeChanged(Matchers.anyCollectionOf(DataTreeCandidate.class));
-                    }
-                };
+                within(duration("1 seconds"), () -> {
+                    expectNoMsg();
+                    Mockito.verify(mockListener, Mockito.never())
+                        .onDataTreeChanged(Matchers.anyCollectionOf(DataTreeCandidate.class));
+                    return null;
+                });
             }
         };
     }
 
     @Test
     public void testDataChangedWithNoSender() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final DataTreeCandidate mockTreeCandidate = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates = ImmutableList.of(mockTreeCandidate);
@@ -109,7 +106,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
     @Test
     public void testDataChangedWithListenerRuntimeEx() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final DataTreeCandidate mockTreeCandidate1 = Mockito.mock(DataTreeCandidate.class);
                 final ImmutableList<DataTreeCandidate> mockCandidates1 = ImmutableList.of(mockTreeCandidate1);
