@@ -118,8 +118,8 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         return parent().onTransactionReady(this, cohort);
     }
 
-    void closeCursor(@Nonnull final DOMDataTreeCursor cursor) {
-        if (cursor.equals(this.cursor)) {
+    void closeCursor(@Nonnull final DOMDataTreeCursor cursorToClose) {
+        if (cursorToClose.equals(this.cursor)) {
             this.cursor = null;
         }
     }

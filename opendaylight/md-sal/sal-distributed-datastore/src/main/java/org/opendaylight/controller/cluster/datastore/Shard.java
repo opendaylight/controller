@@ -1059,9 +1059,9 @@ public class Shard extends RaftActor {
             return self();
         }
 
-        public T schemaContextProvider(final SchemaContextProvider schemaContextProvider) {
+        public T schemaContextProvider(final SchemaContextProvider newSchemaContextProvider) {
             checkSealed();
-            this.schemaContextProvider = Preconditions.checkNotNull(schemaContextProvider);
+            this.schemaContextProvider = Preconditions.checkNotNull(newSchemaContextProvider);
             return self();
         }
 
@@ -1128,7 +1128,7 @@ public class Shard extends RaftActor {
     }
 
     public static class Builder extends AbstractBuilder<Builder, Shard> {
-        private Builder() {
+        Builder() {
             super(Shard.class);
         }
     }

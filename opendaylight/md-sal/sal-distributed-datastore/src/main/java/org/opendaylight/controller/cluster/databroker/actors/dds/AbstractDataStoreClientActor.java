@@ -43,6 +43,7 @@ public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
         return Verify.verifyNotNull(initialBehavior(context, actorContext));
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     abstract AbstractDataStoreClientBehavior initialBehavior(ClientActorContext context, ActorContext actorContext);
 
     @SuppressWarnings("checkstyle:IllegalCatch")

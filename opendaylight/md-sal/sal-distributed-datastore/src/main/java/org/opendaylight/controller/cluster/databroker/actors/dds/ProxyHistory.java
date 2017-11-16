@@ -449,6 +449,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     @GuardedBy("lock")
+    @SuppressWarnings("checkstyle:hiddenField")
     abstract AbstractProxyTransaction doCreateTransactionProxy(AbstractClientConnection<ShardBackendInfo> connection,
             TransactionIdentifier txId, boolean snapshotOnly, boolean isDone);
 

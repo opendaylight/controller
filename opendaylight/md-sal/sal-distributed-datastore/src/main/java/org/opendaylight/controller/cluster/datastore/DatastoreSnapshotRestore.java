@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class DatastoreSnapshotRestore {
+public final class DatastoreSnapshotRestore {
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreSnapshotRestore.class);
 
     private static AtomicReference<DatastoreSnapshotRestore> instance = new AtomicReference<>();
@@ -35,12 +35,12 @@ public class DatastoreSnapshotRestore {
     private final String restoreDirectoryPath;
     private final Map<String, DatastoreSnapshot> datastoreSnapshots = new ConcurrentHashMap<>();
 
-    public static DatastoreSnapshotRestore instance(String restoreDirectoryPath) {
+    public static DatastoreSnapshotRestore instance(final String restoreDirectoryPath) {
         instance.compareAndSet(null, new DatastoreSnapshotRestore(restoreDirectoryPath));
         return instance.get();
     }
 
-    private DatastoreSnapshotRestore(String restoreDirectoryPath) {
+    private DatastoreSnapshotRestore(final String restoreDirectoryPath) {
         this.restoreDirectoryPath = Preconditions.checkNotNull(restoreDirectoryPath);
     }
 
@@ -84,14 +84,14 @@ public class DatastoreSnapshotRestore {
         }
     }
 
-    private static DatastoreSnapshotList deserialize(InputStream inputStream)
+    private static DatastoreSnapshotList deserialize(final InputStream inputStream)
             throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(inputStream)) {
             return (DatastoreSnapshotList) ois.readObject();
         }
     }
 
-    public DatastoreSnapshot getAndRemove(String datastoreType) {
+    public DatastoreSnapshot getAndRemove(final String datastoreType) {
         initialize();
         return datastoreSnapshots.remove(datastoreType);
     }

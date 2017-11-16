@@ -14,7 +14,7 @@ import akka.dispatch.ControlMessage;
  *
  * @author Thomas Pantelis
  */
-public class SnapshotComplete implements ControlMessage {
+public final class SnapshotComplete implements ControlMessage {
     public static final SnapshotComplete INSTANCE = new SnapshotComplete();
 
     private SnapshotComplete() {

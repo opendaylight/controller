@@ -61,7 +61,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public class DistributedEntityOwnershipService implements DOMEntityOwnershipService, AutoCloseable {
+public final class DistributedEntityOwnershipService implements DOMEntityOwnershipService, AutoCloseable {
     @VisibleForTesting
     static final String ENTITY_OWNERSHIP_SHARD_NAME = "entity-ownership";
 

@@ -35,6 +35,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
+// Noo-final for mocking
 public class DatastoreContext implements ClientActorConfig {
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
@@ -97,7 +98,7 @@ public class DatastoreContext implements ClientActorConfig {
         return GLOBAL_DATASTORE_NAMES;
     }
 
-    private DatastoreContext() {
+    DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
         setSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT);
         setHeartbeatInterval(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS);
