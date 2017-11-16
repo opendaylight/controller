@@ -133,7 +133,7 @@ public class TransactionProvider implements AutoCloseable {
     /**
      * Commit and notification send must be atomic.
      */
-    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient configRegistryClient)
+    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient client)
             throws ValidationException, ConflictingVersionException {
         if (!getTransaction().isPresent()) {
             // making empty commit without prior opened transaction, just return commit
@@ -144,7 +144,7 @@ public class TransactionProvider implements AutoCloseable {
         final Optional<ObjectName> maybeTaON = getTransaction();
         ObjectName taON = maybeTaON.get();
         try {
-            CommitStatus status = configRegistryClient.commitConfig(taON);
+            CommitStatus status = client.commitConfig(taON);
             // clean up
             allOpenedTransactions.remove(candidateTx);
             candidateTx = null;

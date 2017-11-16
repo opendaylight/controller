@@ -132,6 +132,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
         }
 
         @Override
+        @SuppressWarnings("checkstyle:avoidHidingCauseException")
         protected Object handleInvocation(final Object proxy, final Method method, final Object[] args)
                 throws Throwable {
             boolean isGetInstance = "getInstance".equals(method.getName());

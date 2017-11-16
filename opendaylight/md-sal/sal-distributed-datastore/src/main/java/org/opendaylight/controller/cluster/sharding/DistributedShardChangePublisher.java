@@ -178,7 +178,7 @@ public class DistributedShardChangePublisher
         return listenerPathArgs;
     }
 
-    private static class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
+    private static final class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
 
         private final ListenerRegistration<org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy;
         private final DOMDataTreeChangeListener listener;
@@ -349,6 +349,7 @@ public class DistributedShardChangePublisher
 
         @Nullable
         @Override
+        @SuppressWarnings("checkstyle:hiddenField")
         public DataTreeCandidateNode getModifiedChild(final PathArgument identifier) {
             return null;
         }

@@ -26,6 +26,7 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
     private DataTreeSnapshot snapshot;
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     protected LocalReadOnlyProxyTransaction createTransaction(final ProxyHistory parent,
                                                               final TransactionIdentifier id,
                                                               final DataTreeSnapshot snapshot) {

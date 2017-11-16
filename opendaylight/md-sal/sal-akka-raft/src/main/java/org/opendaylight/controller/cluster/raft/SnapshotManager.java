@@ -67,7 +67,7 @@ public class SnapshotManager implements SnapshotState {
      * @param context the RaftActorContext
      * @param logger the Logger
      */
-    public SnapshotManager(RaftActorContext context, Logger logger) {
+    public SnapshotManager(final RaftActorContext context, final Logger logger) {
         this.context = context;
         this.log = logger;
     }
@@ -82,17 +82,18 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+    public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+            final String targetFollower) {
         return currentState.captureToInstall(lastLogEntry, replicatedToAllIndex, targetFollower);
     }
 
     @Override
-    public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+    public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
         return currentState.capture(lastLogEntry, replicatedToAllIndex);
     }
 
     @Override
-    public void apply(ApplySnapshot snapshot) {
+    public void apply(final ApplySnapshot snapshot) {
         currentState.apply(snapshot);
     }
 
@@ -103,7 +104,7 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void commit(final long sequenceNumber, long timeStamp) {
+    public void commit(final long sequenceNumber, final long timeStamp) {
         currentState.commit(sequenceNumber, timeStamp);
     }
 
@@ -117,7 +118,8 @@ public class SnapshotManager implements SnapshotState {
         return currentState.trimLog(desiredTrimIndex);
     }
 
-    void setCreateSnapshotConsumer(Consumer<Optional<OutputStream>> createSnapshotProcedure) {
+    @SuppressWarnings("checkstyle:hiddenField")
+    void setCreateSnapshotConsumer(final Consumer<Optional<OutputStream>> createSnapshotProcedure) {
         this.createSnapshotProcedure = createSnapshotProcedure;
     }
 
@@ -126,7 +128,7 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Nonnull
-    public Snapshot.State convertSnapshot(ByteSource snapshotBytes) throws IOException {
+    public Snapshot.State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
         return snapshotCohort.deserializeSnapshot(snapshotBytes);
     }
 
@@ -154,7 +156,7 @@ public class SnapshotManager implements SnapshotState {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    public CaptureSnapshot newCaptureSnapshot(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+    public CaptureSnapshot newCaptureSnapshot(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
         TermInformationReader lastAppliedTermInfoReader =
                 lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
                         lastLogEntry, hasFollowers());
@@ -192,20 +194,20 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
             log.debug("capture should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
-                String targetFollower) {
+        public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+                final String targetFollower) {
             log.debug("captureToInstall should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public void apply(ApplySnapshot snapshot) {
+        public void apply(final ApplySnapshot snapshot) {
             log.debug("apply should not be called in state {}", this);
         }
 
@@ -216,7 +218,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void commit(final long sequenceNumber, long timeStamp) {
+        public void commit(final long sequenceNumber, final long timeStamp) {
             log.debug("commit should not be called in state {}", this);
         }
 
@@ -273,7 +275,8 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @SuppressWarnings("checkstyle:IllegalCatch")
-        private boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+        private boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+                final String targetFollower) {
             captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex);
 
             OutputStream installSnapshotStream = null;
@@ -303,18 +306,18 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
             return capture(lastLogEntry, replicatedToAllIndex, null);
         }
 
         @Override
-        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
-                String targetFollower) {
+        public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+                final String targetFollower) {
             return capture(lastLogEntry, replicatedToAllIndex, targetFollower);
         }
 
         @Override
-        public void apply(ApplySnapshot toApply) {
+        public void apply(final ApplySnapshot toApply) {
             SnapshotManager.this.applySnapshot = toApply;
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
@@ -439,7 +442,7 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public void commit(final long sequenceNumber, long timeStamp) {
+        public void commit(final long sequenceNumber, final long timeStamp) {
             log.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
 
             if (applySnapshot != null) {
@@ -519,8 +522,8 @@ public class SnapshotManager implements SnapshotState {
         private long index;
         private long term;
 
-        LastAppliedTermInformationReader init(ReplicatedLog log, long originalIndex, ReplicatedLogEntry lastLogEntry,
-                boolean hasFollowers) {
+        LastAppliedTermInformationReader init(final ReplicatedLog log, final long originalIndex,
+                final ReplicatedLogEntry lastLogEntry, final boolean hasFollowers) {
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;
@@ -556,7 +559,7 @@ public class SnapshotManager implements SnapshotState {
         private long index;
         private long term;
 
-        ReplicatedToAllTermInformationReader init(ReplicatedLog log, long originalIndex) {
+        ReplicatedToAllTermInformationReader init(final ReplicatedLog log, final long originalIndex) {
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;

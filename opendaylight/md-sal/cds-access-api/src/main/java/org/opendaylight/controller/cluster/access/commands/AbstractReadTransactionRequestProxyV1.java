@@ -52,5 +52,6 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
         return createReadRequest(target, sequence, replyTo, snapshotOnly);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     abstract T createReadRequest(TransactionIdentifier target, long sequence, ActorRef replyTo, boolean snapshotOnly);
 }

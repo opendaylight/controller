@@ -58,13 +58,13 @@ final class DOMRpcRoutingTable {
         return ret;
     }
 
-    DOMRpcRoutingTable add(final DOMRpcImplementation implementation, final Set<DOMRpcIdentifier> rpcs) {
-        if (rpcs.isEmpty()) {
+    DOMRpcRoutingTable add(final DOMRpcImplementation implementation, final Set<DOMRpcIdentifier> rpcsToAdd) {
+        if (rpcsToAdd.isEmpty()) {
             return this;
         }
 
         // First decompose the identifiers to a multimap
-        final ListMultimap<SchemaPath, YangInstanceIdentifier> toAdd = decomposeIdentifiers(rpcs);
+        final ListMultimap<SchemaPath, YangInstanceIdentifier> toAdd = decomposeIdentifiers(rpcsToAdd);
 
         // Now iterate over existing entries, modifying them as appropriate...
         final Builder<SchemaPath, AbstractDOMRpcRoutingTableEntry> mb = ImmutableMap.builder();
@@ -92,13 +92,13 @@ final class DOMRpcRoutingTable {
         return new DOMRpcRoutingTable(mb.build(), schemaContext);
     }
 
-    DOMRpcRoutingTable remove(final DOMRpcImplementation implementation, final Set<DOMRpcIdentifier> rpcs) {
-        if (rpcs.isEmpty()) {
+    DOMRpcRoutingTable remove(final DOMRpcImplementation implementation, final Set<DOMRpcIdentifier> rpcIds) {
+        if (rpcIds.isEmpty()) {
             return this;
         }
 
         // First decompose the identifiers to a multimap
-        final ListMultimap<SchemaPath, YangInstanceIdentifier> toRemove = decomposeIdentifiers(rpcs);
+        final ListMultimap<SchemaPath, YangInstanceIdentifier> toRemove = decomposeIdentifiers(rpcIds);
 
         // Now iterate over existing entries, modifying them as appropriate...
         final Builder<SchemaPath, AbstractDOMRpcRoutingTableEntry> b = ImmutableMap.builder();

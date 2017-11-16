@@ -113,6 +113,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         tester = new TransactionTester<>(transaction, connection, backendProbe);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected abstract T createTransaction(ProxyHistory parent, TransactionIdentifier id, DataTreeSnapshot snapshot);
 
     @After
@@ -226,6 +227,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         Assert.assertThat(modifications, hasItem(both(isA(TransactionDelete.class)).and(hasPath(PATH_3))));
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected <R extends TransactionRequest<R>> void testRequestResponse(final Consumer<VotingFuture<Void>> consumer,
             final Class<R> expectedRequest,
             final BiFunction<TransactionIdentifier, Long, TransactionSuccess<?>> replySupplier) throws Exception {
@@ -291,6 +293,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         return new TestProbe(system);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected TransactionTester<LocalReadWriteProxyTransaction> createLocalProxy() {
         final TestProbe backendProbe = new TestProbe(system, "backend2");
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext2");
@@ -309,6 +312,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         return new TransactionTester<>(tx, connection, backendProbe);
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     protected TransactionTester<RemoteProxyTransaction> createRemoteProxyTransactionTester() {
         final TestProbe clientContextProbe = new TestProbe(system, "remoteClientContext");
         final TestProbe backendProbe = new TestProbe(system, "remoteBackend");

@@ -33,14 +33,14 @@ class GetSnapshotReplyActor extends UntypedActor {
 
     private final Params params;
 
-    private GetSnapshotReplyActor(Params params) {
+    GetSnapshotReplyActor(final Params params) {
         this.params = params;
 
         getContext().setReceiveTimeout(params.receiveTimeout);
     }
 
     @Override
-    public void onReceive(Object message) {
+    public void onReceive(final Object message) {
         if (message instanceof CaptureSnapshotReply) {
             Snapshot snapshot = Snapshot.create(
                     ((CaptureSnapshotReply)message).getSnapshotState(),
@@ -65,8 +65,9 @@ class GetSnapshotReplyActor extends UntypedActor {
         }
     }
 
-    public static Props props(CaptureSnapshot captureSnapshot, ElectionTerm electionTerm, ActorRef replyToActor,
-            Duration receiveTimeout, String id, ServerConfigurationPayload updatedPeerInfo) {
+    public static Props props(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm,
+            final ActorRef replyToActor, final Duration receiveTimeout, final String id,
+            final ServerConfigurationPayload updatedPeerInfo) {
         return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, electionTerm, replyToActor,
                 receiveTimeout, id, updatedPeerInfo));
     }
@@ -79,8 +80,8 @@ class GetSnapshotReplyActor extends UntypedActor {
         final String id;
         final ServerConfigurationPayload peerInformation;
 
-        Params(CaptureSnapshot captureSnapshot, ElectionTerm electionTerm, ActorRef replyToActor,
-                Duration receiveTimeout, String id, ServerConfigurationPayload peerInfo) {
+        Params(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm, final ActorRef replyToActor,
+                final Duration receiveTimeout, final String id, final ServerConfigurationPayload peerInfo) {
             this.captureSnapshot = Preconditions.checkNotNull(captureSnapshot);
             this.electionTerm = Preconditions.checkNotNull(electionTerm);
             this.replyToActor = Preconditions.checkNotNull(replyToActor);

@@ -34,14 +34,14 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-class ShardManagerGetSnapshotReplyActor extends UntypedActor {
+final class ShardManagerGetSnapshotReplyActor extends UntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerGetSnapshotReplyActor.class);
 
     private final Set<String> remainingShardNames;
     private final Params params;
     private final List<ShardSnapshot> shardSnapshots = new ArrayList<>();
 
-    private ShardManagerGetSnapshotReplyActor(Params params) {
+    private ShardManagerGetSnapshotReplyActor(final Params params) {
         this.params = params;
         remainingShardNames = new HashSet<>(params.shardNames);
 
@@ -51,7 +51,7 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message) {
+    public void onReceive(final Object message) {
         if (message instanceof GetSnapshotReply) {
             onGetSnapshotReply((GetSnapshotReply)message);
         } else if (message instanceof Failure) {
@@ -70,7 +70,7 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
         }
     }
 
-    private void onGetSnapshotReply(GetSnapshotReply getSnapshotReply) {
+    private void onGetSnapshotReply(final GetSnapshotReply getSnapshotReply) {
         LOG.debug("{}: Received {}", params.id, getSnapshotReply);
 
         ShardIdentifier shardId = ShardIdentifier.fromShardIdString(getSnapshotReply.getId());
@@ -87,8 +87,9 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
         }
     }
 
-    public static Props props(Collection<String> shardNames, String datastoreType,
-            ShardManagerSnapshot shardManagerSnapshot, ActorRef replyToActor, String id, Duration receiveTimeout) {
+    public static Props props(final Collection<String> shardNames, final String datastoreType,
+            final ShardManagerSnapshot shardManagerSnapshot, final ActorRef replyToActor, final String id,
+            final Duration receiveTimeout) {
         return Props.create(ShardManagerGetSnapshotReplyActor.class, new Params(shardNames, datastoreType,
                 shardManagerSnapshot, replyToActor, id, receiveTimeout));
     }
@@ -101,8 +102,9 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
         final String id;
         final Duration receiveTimeout;
 
-        Params(Collection<String> shardNames, String datastoreType, ShardManagerSnapshot shardManagerSnapshot,
-                ActorRef replyToActor, String id, Duration receiveTimeout) {
+        Params(final Collection<String> shardNames, final String datastoreType,
+                final ShardManagerSnapshot shardManagerSnapshot, final ActorRef replyToActor, final String id,
+                final Duration receiveTimeout) {
             this.shardNames = shardNames;
             this.datastoreType = datastoreType;
             this.shardManagerSnapshot = shardManagerSnapshot;

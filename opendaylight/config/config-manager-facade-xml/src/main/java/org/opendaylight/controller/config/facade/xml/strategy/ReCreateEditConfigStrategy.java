@@ -40,7 +40,7 @@ public class ReCreateEditConfigStrategy extends AbstractEditConfigStrategy {
             ta.reCreateModule(objectName);
         } catch (InstanceNotFoundException e) {
             throw new ConfigHandlingException(String.format("Unable to recreate instance for %s", objectName),
-                    DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
+                    e, DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                     DocumentedException.ErrorSeverity.ERROR);
         }
     }

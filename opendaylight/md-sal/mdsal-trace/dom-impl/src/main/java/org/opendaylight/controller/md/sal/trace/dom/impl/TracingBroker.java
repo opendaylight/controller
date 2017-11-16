@@ -147,6 +147,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             return child.startsWith(parent.substring(parentOffset), childOffset);
         }
 
+        @SuppressWarnings("checkstyle:hiddenField")
         public boolean subtreesOverlap(YangInstanceIdentifier iid, LogicalDatastoreType store,
                                                                 AsyncDataBroker.DataChangeScope scope) {
             if (this.store != null && !this.store.equals(store)) {
@@ -165,6 +166,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             }
         }
 
+        @SuppressWarnings("checkstyle:hiddenField")
         public boolean eventIsOfInterest(YangInstanceIdentifier iid, LogicalDatastoreType store) {
             if (this.store != null && !this.store.equals(store)) {
                 return false;

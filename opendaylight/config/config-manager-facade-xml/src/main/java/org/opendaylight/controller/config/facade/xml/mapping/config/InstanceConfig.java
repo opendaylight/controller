@@ -171,7 +171,7 @@ public final class InstanceConfig {
                 } catch (final DocumentedException e) {
                     throw new DocumentedException("Error reading module " + typeElement.getTextContent() + " : "
                             + nameElement.getTextContent() + " - Expected child node with name "
-                            + nullableDummyContainerName + "." + e.getMessage());
+                            + nullableDummyContainerName + "." + e.getMessage(), e);
                 }
             } // else 2 elements, no need to descend
         }
@@ -189,7 +189,7 @@ public final class InstanceConfig {
         } catch (final DocumentedException e) {
             throw new DocumentedException(
                     "Error reading module " + typeElement.getTextContent() + " : " + nameElement.getTextContent()
-                            + " - " + e.getMessage(),
+                            + " - " + e.getMessage(), e,
                     e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
         }
         // TODO: add check for conflicts between global and local edit strategy

@@ -43,6 +43,7 @@ public class YangStoreActivator implements BundleActivator {
     private ServiceRegistration<ConfigSubsystemFacadeFactory> osgiRegistrayion;
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     public void start(final BundleContext context) throws Exception {
         LOG.debug("ConfigPersister starting");
         this.context = context;
@@ -125,6 +126,7 @@ public class YangStoreActivator implements BundleActivator {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     public void stop(final BundleContext context) throws Exception {
         if (this.configRegistryLookup != null) {
             this.configRegistryLookup.interrupt();
@@ -147,7 +149,7 @@ public class YangStoreActivator implements BundleActivator {
 
         private final YangStoreService yangStoreService;
 
-        private ConfigRegistryLookupThread(final YangStoreService yangStoreService) {
+        ConfigRegistryLookupThread(final YangStoreService yangStoreService) {
             super("config-registry-lookup");
             this.yangStoreService = yangStoreService;
         }

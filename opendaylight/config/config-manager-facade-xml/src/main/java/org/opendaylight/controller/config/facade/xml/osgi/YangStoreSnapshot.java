@@ -72,7 +72,7 @@ public final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
                 }
             }
 
-            final Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
+            final Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntries = Maps.newHashMap();
 
             final Map<QName, Map<String /* identity local name */,
                 ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
@@ -88,11 +88,11 @@ public final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
                 final Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
                         Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, schemaContext,
                                 typeProviderWrapper, packageName));
-                moduleMXBeanEntryMap.put(module.getNamespace().toString(), namesToMBEs);
+                moduleMXBeanEntries.put(module.getNamespace().toString(), namesToMBEs);
 
                 qNamesToIdentitiesToModuleMXBeanEntries.put(qName, namesToMBEs);
             }
-            this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntryMap);
+            this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntries);
             this.namesToIdentitiesToModuleMXBeanEntries =
                     Collections.unmodifiableMap(qNamesToIdentitiesToModuleMXBeanEntries);
         }

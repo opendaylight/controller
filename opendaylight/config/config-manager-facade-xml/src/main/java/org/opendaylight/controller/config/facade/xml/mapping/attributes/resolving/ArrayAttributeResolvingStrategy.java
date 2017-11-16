@@ -107,7 +107,7 @@ public final class ArrayAttributeResolvingStrategy extends AbstractAttributeReso
         try {
             return (Class<?>) innerTypeClass.getField("TYPE").get(null);
         } catch (final IllegalAccessException | IllegalArgumentException | NoSuchFieldException e) {
-            throw new IllegalStateException("Unable to determine primitive type to " + innerTypeClass);
+            throw new IllegalStateException("Unable to determine primitive type to " + innerTypeClass, e);
         }
     }
 
