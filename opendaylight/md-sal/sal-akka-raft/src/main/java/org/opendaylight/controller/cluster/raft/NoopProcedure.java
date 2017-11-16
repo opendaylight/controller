@@ -16,7 +16,7 @@ import akka.japi.Procedure;
  *
  * @param <T> the Procedure type
  */
-public class NoopProcedure<T> implements Procedure<T> {
+public final class NoopProcedure<T> implements Procedure<T> {
 
     private static final NoopProcedure<Object> INSTANCE = new NoopProcedure<>();
 
@@ -29,7 +29,7 @@ public class NoopProcedure<T> implements Procedure<T> {
     }
 
     @Override
-    public void apply(Object notUsed) {
+    public void apply(final Object notUsed) {
         // nothing to do
     }
 }

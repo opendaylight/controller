@@ -177,15 +177,15 @@ public class AbstractLeaderElectionScenarioTest {
         }
     }
 
-    static class SendImmediateHeartBeat implements ControlMessage {
-        public static final SendImmediateHeartBeat INSTANCE = new SendImmediateHeartBeat();
+    static final class SendImmediateHeartBeat implements ControlMessage {
+        static final SendImmediateHeartBeat INSTANCE = new SendImmediateHeartBeat();
 
         private SendImmediateHeartBeat() {
         }
     }
 
-    static class GetBehaviorState implements ControlMessage {
-        public static final GetBehaviorState INSTANCE = new GetBehaviorState();
+    static final class GetBehaviorState implements ControlMessage {
+        static final GetBehaviorState INSTANCE = new GetBehaviorState();
 
         private GetBehaviorState() {
         }
