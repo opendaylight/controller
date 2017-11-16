@@ -165,7 +165,7 @@ public class JMXNotifierConfigRegistry implements ConfigRegistryImplMXBean, Auto
             beanServer.unregisterMBean(ConfigJMXNotification.OBJECT_NAME);
         } catch (InstanceNotFoundException | MBeanRegistrationException e) {
             throw new IllegalStateException(
-                    "Notifier: " + ConfigJMXNotification.OBJECT_NAME + " not found in JMX when closing");
+                    "Notifier: " + ConfigJMXNotification.OBJECT_NAME + " not found in JMX when closing", e);
         }
     }
 

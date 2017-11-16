@@ -154,7 +154,7 @@ public class ModuleFactoryBundleTrackerTest {
     static class NotExtendingTestingFactory {
     }
 
-    static class NoAccessConstructorTestingFactory extends TestingFactory {
+    static final class NoAccessConstructorTestingFactory extends TestingFactory {
         private NoAccessConstructorTestingFactory() {
         }
     }

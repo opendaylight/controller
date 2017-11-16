@@ -655,6 +655,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         @Nonnull
         @Override
+        @SuppressWarnings("checkstyle:hiddenField")
         public DOMDataTreeProducer createProducer(@Nonnull final Collection<DOMDataTreeIdentifier> subtrees) {
             // TODO we probably don't need to distribute this on the remote nodes since once we have this producer
             // open we surely have the rights to all the subtrees.

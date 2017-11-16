@@ -110,17 +110,17 @@ public abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrappe
      * platform mbean server. Wait until this wrapper gets unregistered, in that
      * case unregister the module and remove listener.
      */
-    private NotificationListener registerActualModule(final ObjectName objectNameInternal,
+    private NotificationListener registerActualModule(final ObjectName internalObjectName,
             final MBeanServer configMBeanServer) {
         try {
-            internalServer.registerMBean(module, objectNameInternal);
+            internalServer.registerMBean(module, internalObjectName);
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException
                 | IllegalStateException e) {
-            throw new IllegalStateException("Error occured during mbean registration with name " + objectNameInternal,
+            throw new IllegalStateException("Error occured during mbean registration with name " + internalObjectName,
                     e);
         }
 
-        NotificationListener listener = new ModuleNotificationListener(objectNameInternal, internalServer,
+        NotificationListener listener = new ModuleNotificationListener(internalObjectName, internalServer,
                 configMBeanServer);
         try {
             configMBeanServer.addNotificationListener(MBeanServerDelegate.DELEGATE_NAME, listener, null, null);
@@ -156,7 +156,7 @@ public abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrappe
 
     // inspect all exported interfaces ending with MXBean, extract getters &
     // setters into attribute holder
-    private Map<String, AttributeHolder> buildMBeanInfo(final boolean writable, final ModuleIdentifier moduleIdentifier,
+    private Map<String, AttributeHolder> buildMBeanInfo(final boolean writable, final ModuleIdentifier modId,
             final Set<Class<?>> jmxInterfaces, final ObjectName internalObjectName) {
 
         // internal variables for describing MBean elements
@@ -187,7 +187,7 @@ public abstract class AbstractDynamicWrapper implements DynamicMBeanModuleWrappe
                 try {
                     setter = module.getClass().getMethod(method.getName(), method.getParameterTypes());
                 } catch (final NoSuchMethodException e) {
-                    throw new RuntimeException("No such method on " + moduleIdentifier, e);
+                    throw new RuntimeException("No such method on " + modId, e);
                 }
                 RequireInterface ifc = AttributeHolder.findRequireInterfaceAnnotation(setter, jmxInterfaces);
                 String description = null;

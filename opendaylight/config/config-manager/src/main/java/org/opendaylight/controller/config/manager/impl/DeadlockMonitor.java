@@ -67,9 +67,9 @@ public class DeadlockMonitor implements AutoCloseable {
         return "DeadlockMonitor{" + transactionIdentifier + '}';
     }
 
-    private class DeadlockMonitorRunnable extends Thread {
+    private final class DeadlockMonitorRunnable extends Thread {
 
-        private DeadlockMonitorRunnable() {
+        DeadlockMonitorRunnable() {
             super(DeadlockMonitor.this.toString());
         }
 
@@ -108,23 +108,23 @@ public class DeadlockMonitor implements AutoCloseable {
         }
     }
 
-    private static class ModuleIdentifierWithNanos {
+    private static final class ModuleIdentifierWithNanos {
         private static ModuleIdentifierWithNanos empty = new ModuleIdentifierWithNanos();
         @Nullable
         private final ModuleIdentifier moduleIdentifier;
 
         private final long nanoTime;
 
-        private ModuleIdentifierWithNanos() {
+        ModuleIdentifierWithNanos() {
             this((ModuleIdentifier) null);
         }
 
-        private ModuleIdentifierWithNanos(final ModuleIdentifier moduleIdentifier) {
+        ModuleIdentifierWithNanos(final ModuleIdentifier moduleIdentifier) {
             this.moduleIdentifier = moduleIdentifier;
             nanoTime = System.nanoTime();
         }
 
-        private ModuleIdentifierWithNanos(final ModuleIdentifierWithNanos copy) {
+        ModuleIdentifierWithNanos(final ModuleIdentifierWithNanos copy) {
             moduleIdentifier = copy.moduleIdentifier;
             nanoTime = copy.nanoTime;
         }

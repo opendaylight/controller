@@ -49,11 +49,12 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
 
     private volatile boolean inJeopardy = false;
 
-    EntityOwnershipListenerSupport(ActorContext actorContext, String logId) {
+    EntityOwnershipListenerSupport(final ActorContext actorContext, final String logId) {
         this.actorContext = actorContext;
         this.logId = logId;
     }
 
+    @Override
     String getLogId() {
         return logId;
     }
@@ -64,13 +65,14 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
      * @param inJeopardy new value of the in-jeopardy flag
      * @return Previous value of the flag.
      */
+    @SuppressWarnings("checkstyle:hiddenField")
     boolean setInJeopardy(final boolean inJeopardy) {
         final boolean wasInJeopardy = this.inJeopardy;
         this.inJeopardy = inJeopardy;
         return wasInJeopardy;
     }
 
-    void addEntityOwnershipListener(String entityType, DOMEntityOwnershipListener listener) {
+    void addEntityOwnershipListener(final String entityType, final DOMEntityOwnershipListener listener) {
         LOG.debug("{}: Adding EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         listenerLock.writeLock().lock();
@@ -88,7 +90,7 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
         }
     }
 
-    void removeEntityOwnershipListener(String entityType, DOMEntityOwnershipListener listener) {
+    void removeEntityOwnershipListener(final String entityType, final DOMEntityOwnershipListener listener) {
         LOG.debug("{}: Removing EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         listenerLock.writeLock().lock();
@@ -114,7 +116,8 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
     }
 
     @Override
-    void notifyEntityOwnershipListeners(DOMEntity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+    void notifyEntityOwnershipListeners(final DOMEntity entity, final boolean wasOwner, final boolean isOwner,
+            final boolean hasOwner) {
         listenerLock.readLock().lock();
         try {
             Collection<DOMEntityOwnershipListener> listeners = entityTypeListenerMap.get(entity.getType());
@@ -127,8 +130,8 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
         }
     }
 
-    void notifyEntityOwnershipListener(DOMEntity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            DOMEntityOwnershipListener listener) {
+    void notifyEntityOwnershipListener(final DOMEntity entity, final boolean wasOwner, final boolean isOwner,
+            final boolean hasOwner, final DOMEntityOwnershipListener listener) {
         listenerLock.readLock().lock();
         try {
             notifyListeners(entity, wasOwner, isOwner, hasOwner, ImmutableList.of(listenerActorMap.get(listener)));
@@ -138,8 +141,8 @@ class EntityOwnershipListenerSupport extends EntityOwnershipChangePublisher {
     }
 
     @GuardedBy("listenerLock")
-    private void notifyListeners(DOMEntity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            Collection<ListenerActorRefEntry> listenerEntries) {
+    private void notifyListeners(final DOMEntity entity, final boolean wasOwner, final boolean isOwner,
+            final boolean hasOwner, final Collection<ListenerActorRefEntry> listenerEntries) {
         DOMEntityOwnershipChange changed = new DOMEntityOwnershipChange(entity,
                 EntityOwnershipChangeState.from(wasOwner, isOwner, hasOwner), inJeopardy);
         for (ListenerActorRefEntry entry: listenerEntries) {

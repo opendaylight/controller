@@ -12,7 +12,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
  *
  * @author Thomas Pantelis
  */
-public class EmptyState implements Snapshot.State {
+public final class EmptyState implements Snapshot.State {
     private static final long serialVersionUID = 1L;
 
     public static final EmptyState INSTANCE = new EmptyState();

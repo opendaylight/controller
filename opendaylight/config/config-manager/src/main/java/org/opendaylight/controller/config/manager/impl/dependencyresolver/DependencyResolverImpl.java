@@ -272,6 +272,7 @@ public final class DependencyResolverImpl implements DependencyResolver, Compara
     }
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     public Object getAttribute(final ObjectName name, final String attribute)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         ObjectName newName = translateServiceRefIfPossible(name);
@@ -281,6 +282,7 @@ public final class DependencyResolverImpl implements DependencyResolver, Compara
     }
 
     @Override
+    @SuppressWarnings("checkstyle:hiddenField")
     public <T> T newMXBeanProxy(final ObjectName name, final Class<T> interfaceClass) {
         ObjectName newName = translateServiceRefIfPossible(name);
         // add transaction name

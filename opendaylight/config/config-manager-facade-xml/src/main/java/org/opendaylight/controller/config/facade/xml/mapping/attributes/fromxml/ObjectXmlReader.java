@@ -31,6 +31,7 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
     private String key;
     private Map<String, Map<Date, IdentityMapping>> identityMap;
 
+    @SuppressWarnings("checkstyle:hiddenField")
     public Map<String, AttributeReadingStrategy> prepareReading(final Map<String, AttributeIfc> yangToAttrConfig,
             final Map<String, Map<Date, IdentityMapping>> identityMap) {
         Map<String, AttributeReadingStrategy> strategies = Maps.newHashMap();
@@ -43,8 +44,8 @@ public class ObjectXmlReader extends AttributeIfcSwitchStatement<AttributeReadin
         return strategies;
     }
 
-    private AttributeReadingStrategy prepareReadingStrategy(final String key, final AttributeIfc attributeIfc) {
-        this.key = key;
+    private AttributeReadingStrategy prepareReadingStrategy(final String attrkey, final AttributeIfc attributeIfc) {
+        this.key = attrKey;
         return switchAttribute(attributeIfc);
     }
 

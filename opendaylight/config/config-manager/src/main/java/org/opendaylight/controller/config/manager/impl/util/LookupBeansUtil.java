@@ -12,7 +12,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.LookupRegistry;
 
-public class LookupBeansUtil {
+public final class LookupBeansUtil {
 
     private LookupBeansUtil() {
     }

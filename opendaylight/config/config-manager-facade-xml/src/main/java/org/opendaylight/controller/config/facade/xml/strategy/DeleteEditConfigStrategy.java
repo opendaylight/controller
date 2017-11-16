@@ -27,7 +27,7 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
             String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
         throw new ConfigHandlingException(
-                String.format("Unable to delete %s : %s , ServiceInstance not found", module, instance),
+                String.format("Unable to delete %s : %s , ServiceInstance not found", module, instance), e,
                 DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                 DocumentedException.ErrorSeverity.ERROR);
     }
@@ -40,7 +40,7 @@ public class DeleteEditConfigStrategy extends AbstractEditConfigStrategy {
             LOG.debug("ServiceInstance {} deleted successfully", on);
         } catch (InstanceNotFoundException e) {
             throw new ConfigHandlingException(
-                    String.format("Unable to delete %s because of exception %s" + on, e.getMessage()),
+                    String.format("Unable to delete %s because of exception %s" + on, e.getMessage()), e,
                     DocumentedException.ErrorType.APPLICATION, DocumentedException.ErrorTag.OPERATION_FAILED,
                     DocumentedException.ErrorSeverity.ERROR);
         }

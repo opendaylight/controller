@@ -33,6 +33,7 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
         this.serviceTracker = serviceTracker;
     }
 
+    @SuppressWarnings("checkstyle:hiddenField")
     public Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> prepareResolving(
             final Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
         this.enumResolver = enumResolver;
