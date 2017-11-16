@@ -18,8 +18,8 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
@@ -108,7 +108,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test

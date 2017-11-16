@@ -26,8 +26,8 @@ import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -60,7 +60,7 @@ public class TestActorFactory implements AutoCloseable {
     List<ActorRef> createdActors = new LinkedList<>();
     private static int actorCount = 1;
 
-    public TestActorFactory(ActorSystem system) {
+    public TestActorFactory(final ActorSystem system) {
         this.system = system;
     }
 
@@ -70,7 +70,7 @@ public class TestActorFactory implements AutoCloseable {
      * @param props the actor Props
      * @return the ActorRef
      */
-    public ActorRef createActor(Props props) {
+    public ActorRef createActor(final Props props) {
         ActorRef actorRef = system.actorOf(props);
         return addActor(actorRef, true);
     }
@@ -82,7 +82,7 @@ public class TestActorFactory implements AutoCloseable {
      * @param actorId name of actor
      * @return the ActorRef
      */
-    public ActorRef createActor(Props props, String actorId) {
+    public ActorRef createActor(final Props props, final String actorId) {
         ActorRef actorRef = system.actorOf(props, actorId);
         return addActor(actorRef, true);
     }
@@ -94,7 +94,7 @@ public class TestActorFactory implements AutoCloseable {
      * @param actorId name of actor
      * @return the ActorRef
      */
-    public ActorRef createActorNoVerify(Props props, String actorId) {
+    public ActorRef createActorNoVerify(final Props props, final String actorId) {
         ActorRef actorRef = system.actorOf(props, actorId);
         return addActor(actorRef, false);
     }
@@ -108,7 +108,7 @@ public class TestActorFactory implements AutoCloseable {
      * @return the ActorRef
      */
     @SuppressWarnings("unchecked")
-    public <T extends Actor> TestActorRef<T> createTestActor(Props props, String actorId) {
+    public <T extends Actor> TestActorRef<T> createTestActor(final Props props, final String actorId) {
         InvalidActorNameException lastError = null;
         for (int i = 0; i < 10; i++) {
             try {
@@ -131,12 +131,12 @@ public class TestActorFactory implements AutoCloseable {
      * @return the TestActorRef
      */
     @SuppressWarnings("unchecked")
-    public <T extends Actor> TestActorRef<T> createTestActor(Props props) {
+    public <T extends Actor> TestActorRef<T> createTestActor(final Props props) {
         TestActorRef<T> actorRef = TestActorRef.create(system, props);
         return (TestActorRef<T>) addActor(actorRef, true);
     }
 
-    private <T extends ActorRef> ActorRef addActor(T actorRef, boolean verify) {
+    private <T extends ActorRef> ActorRef addActor(final T actorRef, final boolean verify) {
         createdActors.add(actorRef);
         if (verify) {
             verifyActorReady(actorRef);
@@ -146,7 +146,7 @@ public class TestActorFactory implements AutoCloseable {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void verifyActorReady(ActorRef actorRef) {
+    private void verifyActorReady(final ActorRef actorRef) {
         // Sometimes we see messages go to dead letters soon after creation - it seems the actor isn't quite
         // in a state yet to receive messages or isn't actually created yet. This seems to happen with
         // actorSelection so, to alleviate it, we use an actorSelection and send an Identify message with
@@ -177,32 +177,32 @@ public class TestActorFactory implements AutoCloseable {
      * @param prefix the name prefix
      * @return the actor name
      */
-    public String generateActorId(String prefix) {
+    public String generateActorId(final String prefix) {
         return prefix + actorCount++;
     }
 
-    public void killActor(ActorRef actor, JavaTestKit kit) {
+    public void killActor(final ActorRef actor, final TestKit kit) {
         killActor(actor, kit, true);
     }
 
-    private void killActor(ActorRef actor, JavaTestKit kit, boolean remove) {
+    private void killActor(final ActorRef actor, final TestKit kit, final boolean remove) {
         LOG.info("Killing actor {}", actor);
         kit.watch(actor);
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectTerminated(JavaTestKit.duration("5 seconds"), actor);
+        kit.expectTerminated(kit.duration("5 seconds"), actor);
 
         if (remove) {
             createdActors.remove(actor);
         }
     }
 
-    public String createTestActorPath(String actorId) {
+    public String createTestActorPath(final String actorId) {
         return "akka://test/user/" + actorId;
     }
 
     @Override
     public void close() {
-        JavaTestKit kit = new JavaTestKit(system);
+        TestKit kit = new TestKit(system);
         for (ActorRef actor : createdActors) {
             killActor(actor, kit, false);
         }

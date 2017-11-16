@@ -21,7 +21,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -124,7 +124,7 @@ public class DistributedDataStoreIntegrationTest {
 
     @After
     public void tearDown() throws IOException {
-        JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, null, Boolean.TRUE);
         system = null;
     }
 
