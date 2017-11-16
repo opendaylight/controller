@@ -17,8 +17,8 @@ import akka.actor.PoisonPill;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.dispatch.Mailboxes;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
@@ -275,11 +275,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected void killActor(final TestActorRef<TestRaftActor> actor) {
-        JavaTestKit testkit = new JavaTestKit(getSystem());
+        TestKit testkit = new TestKit(getSystem());
         testkit.watch(actor);
 
         actor.tell(PoisonPill.getInstance(), null);
-        testkit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
+        testkit.expectMsgClass(testkit.duration("5 seconds"), Terminated.class);
 
         testkit.unwatch(actor);
     }

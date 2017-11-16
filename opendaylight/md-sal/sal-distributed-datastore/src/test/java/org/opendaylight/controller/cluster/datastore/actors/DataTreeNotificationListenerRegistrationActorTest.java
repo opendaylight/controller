@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.actors;
 import static org.mockito.Mockito.timeout;
 
 import akka.actor.ActorRef;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -36,7 +36,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
 
     @Test
     public void testOnReceiveCloseListenerRegistrationAfterSetRegistration() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
                         "testOnReceiveCloseListenerRegistrationAfterSetRegistration");
@@ -58,7 +58,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
 
     @Test
     public void testOnReceiveCloseListenerRegistrationBeforeSetRegistration() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
                         "testOnReceiveSetRegistrationAfterPriorClose");
@@ -80,7 +80,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
 
     @Test
     public void testOnReceiveSetRegistrationAfterPriorClose() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 DataTreeNotificationListenerRegistrationActor.killDelay = 1000;
                 final ListenerRegistration<?> mockListenerReg2 = Mockito.mock(ListenerRegistration.class);

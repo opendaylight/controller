@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -25,7 +25,7 @@ public abstract class AbstractActorTest extends AbstractTest {
 
     @AfterClass
     public static void tearDownClass() throws IOException {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
         system = null;
     }
 

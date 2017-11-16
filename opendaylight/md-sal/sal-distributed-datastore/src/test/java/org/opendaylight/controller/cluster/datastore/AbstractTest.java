@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,11 +61,11 @@ public abstract class AbstractTest {
     @After
     public void actorSystemCleanup() {
         for (final ActorSystem system : actorSystems) {
-            JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
+            TestKit.shutdownActorSystem(system, null, Boolean.TRUE);
         }
     }
 
-    protected ActorSystem newActorSystem(String name, String config) {
+    protected ActorSystem newActorSystem(final String name, final String config) {
         ActorSystem system = ActorSystem.create(name, ConfigFactory.load().getConfig(config));
         actorSystems.add(system);
         return system;

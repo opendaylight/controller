@@ -23,7 +23,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -84,7 +84,7 @@ public class DataTreeCohortIntegrationTest {
 
     @AfterClass
     public static void tearDownClass() throws IOException {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
         system = null;
     }
 
@@ -259,8 +259,8 @@ public class DataTreeCohortIntegrationTest {
     }
 
     @SuppressWarnings("rawtypes")
-    private static DOMDataTreeCandidate findCandidate(ArgumentCaptor<Collection> candidateCapture,
-            YangInstanceIdentifier rootPath) {
+    private static DOMDataTreeCandidate findCandidate(final ArgumentCaptor<Collection> candidateCapture,
+            final YangInstanceIdentifier rootPath) {
         for (Object obj: candidateCapture.getValue()) {
             DOMDataTreeCandidate candidate = (DOMDataTreeCandidate)obj;
             if (rootPath.equals(candidate.getRootPath().getRootIdentifier())) {
@@ -307,9 +307,9 @@ public class DataTreeCohortIntegrationTest {
         }
     }
 
-    private static void assertDataTreeCandidate(DOMDataTreeCandidate candidate, DOMDataTreeIdentifier expTreeId,
-            ModificationType expType, Optional<NormalizedNode<?, ?>> expDataAfter,
-            Optional<NormalizedNode<?, ?>> expDataBefore) {
+    private static void assertDataTreeCandidate(final DOMDataTreeCandidate candidate, final DOMDataTreeIdentifier expTreeId,
+            final ModificationType expType, final Optional<NormalizedNode<?, ?>> expDataAfter,
+            final Optional<NormalizedNode<?, ?>> expDataBefore) {
         assertNotNull("Expected candidate for path " + expTreeId.getRootIdentifier(), candidate);
         assertEquals("rootPath", expTreeId, candidate.getRootPath());
         assertEquals("modificationType", expType, candidate.getRootNode().getModificationType());
