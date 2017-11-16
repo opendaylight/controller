@@ -31,11 +31,11 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
 /**
- * ListenerRegistrationProxy acts as a proxy for a ListenerRegistration that was done on a remote shard
+ * ListenerRegistrationProxy acts as a proxy for a ListenerRegistration that was done on a remote shard.
+ *
  * <p>
  * Registering a DataChangeListener on the Data Store creates a new instance of the ListenerRegistrationProxy
  * The ListenerRegistrationProxy talks to a remote ListenerRegistration actor.
- * </p>
  */
 @SuppressWarnings("rawtypes")
 public class DataChangeListenerRegistrationProxy implements ListenerRegistration {
@@ -50,7 +50,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     private boolean closed = false;
 
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-            DataChangeListenerRegistrationProxy(String shardName, ActorContext actorContext, L listener) {
+            DataChangeListenerRegistrationProxy(final String shardName, final ActorContext actorContext,
+                    final L listener) {
         this.shardName = Preconditions.checkNotNull(shardName);
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.listener = Preconditions.checkNotNull(listener);
@@ -71,7 +72,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         return listener;
     }
 
-    private void setListenerRegistrationActor(ActorSelection listenerRegistrationActor) {
+    private void setListenerRegistrationActor(final ActorSelection listenerRegistrationActor) {
         if (listenerRegistrationActor == null) {
             return;
         }
@@ -99,7 +100,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName);
         findFuture.onComplete(new OnComplete<ActorRef>() {
             @Override
-            public void onComplete(Throwable failure, ActorRef shard) {
+            public void onComplete(final Throwable failure, final ActorRef shard) {
                 if (failure instanceof LocalShardNotFoundException) {
                     LOG.debug("No local shard found for {} - DataChangeListener {} at path {} "
                             + "cannot be registered", shardName, listener, path);
@@ -113,8 +114,8 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }, actorContext.getClientDispatcher());
     }
 
-    private void doRegistration(ActorRef shard, final YangInstanceIdentifier path,
-            DataChangeScope scope) {
+    private void doRegistration(final ActorRef shard, final YangInstanceIdentifier path,
+            final DataChangeScope scope) {
 
         Future<Object> future = actorContext.executeOperationAsync(shard,
                 new RegisterChangeListener(path, dataChangeListenerActor, scope,
@@ -123,7 +124,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
 
         future.onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object result) {
+            public void onComplete(final Throwable failure, final Object result) {
                 if (failure != null) {
                     LOG.error("Failed to register DataChangeListener {} at path {}",
                             listener, path.toString(), failure);

@@ -36,7 +36,7 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
             String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
         throw new ConfigHandlingException(String.format(
                 "Unable to handle missing instance, no missing instances should "
-                + "appear at this point, missing: %s : %s ",
+                + "appear at this point, missing: %s : %s ", e,
                 module, instance), DocumentedException.ErrorType.APPLICATION,
                 DocumentedException.ErrorTag.OPERATION_FAILED, DocumentedException.ErrorSeverity.ERROR);
     }
@@ -69,7 +69,7 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                                 + "Error with attribute %s : %s ",
                         on,
                         configAttributeEntry.getKey(),
-                        configAttributeEntry.getValue()),
+                        configAttributeEntry.getValue()), e,
                         DocumentedException.ErrorType.APPLICATION,
                         DocumentedException.ErrorTag.OPERATION_FAILED,
                         DocumentedException.ErrorSeverity.ERROR);

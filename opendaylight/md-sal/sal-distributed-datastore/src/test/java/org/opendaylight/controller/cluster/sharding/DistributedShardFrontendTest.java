@@ -149,10 +149,10 @@ public class DistributedShardFrontendTest {
 
         final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(ROOT));
         final DOMDataTreeCursorAwareTransaction tx = producer.createTransaction(false);
-        final DOMDataTreeWriteCursor cursor = tx.createCursor(ROOT);
+        final DOMDataTreeWriteCursor txCursor = tx.createCursor(ROOT);
 
-        assertNotNull(cursor);
-        cursor.write(TestModel.TEST_PATH.getLastPathArgument(), createCrossShardContainer());
+        assertNotNull(txCursor);
+        txCursor.write(TestModel.TEST_PATH.getLastPathArgument(), createCrossShardContainer());
 
         //check the lower shard got the correct modification
         verify(outerListCursor, times(2)).write(pathArgumentCaptor.capture(), nodeCaptor.capture());
@@ -171,13 +171,12 @@ public class DistributedShardFrontendTest {
         final MapNode actualInnerListNode = (MapNode) nodeCaptor.getAllValues().get(1);
         assertEquals(createInnerMapNode(1), actualInnerListNode);
 
-        cursor.close();
+        txCursor.close();
         tx.submit().checkedGet();
 
         verify(commitCohort, times(2)).canCommit();
         verify(commitCohort, times(2)).preCommit();
         verify(commitCohort, times(2)).commit();
-
     }
 
     private static MapNode createInnerMapNode(final int id) {

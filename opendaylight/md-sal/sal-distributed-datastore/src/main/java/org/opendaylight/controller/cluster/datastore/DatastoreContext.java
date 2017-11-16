@@ -35,6 +35,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
+// Noo-final for mocking
 public class DatastoreContext implements ClientActorConfig {
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
@@ -97,7 +98,7 @@ public class DatastoreContext implements ClientActorConfig {
         return GLOBAL_DATASTORE_NAMES;
     }
 
-    private DatastoreContext() {
+    DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
         setSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT);
         setHeartbeatInterval(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS);
@@ -348,7 +349,7 @@ public class DatastoreContext implements ClientActorConfig {
         private int maxShardDataStoreExecutorQueueSize =
                 InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE;
 
-        private Builder(final DatastoreContext datastoreContext) {
+        Builder(final DatastoreContext datastoreContext) {
             this.datastoreContext = datastoreContext;
 
             if (datastoreContext.getDataStoreProperties() != null) {
@@ -526,23 +527,23 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
-        public Builder maxShardDataChangeExecutorPoolSize(final int maxShardDataChangeExecutorPoolSize) {
-            this.maxShardDataChangeExecutorPoolSize = maxShardDataChangeExecutorPoolSize;
+        public Builder maxShardDataChangeExecutorPoolSize(final int newMaxShardDataChangeExecutorPoolSize) {
+            this.maxShardDataChangeExecutorPoolSize = newMaxShardDataChangeExecutorPoolSize;
             return this;
         }
 
-        public Builder maxShardDataChangeExecutorQueueSize(final int maxShardDataChangeExecutorQueueSize) {
-            this.maxShardDataChangeExecutorQueueSize = maxShardDataChangeExecutorQueueSize;
+        public Builder maxShardDataChangeExecutorQueueSize(final int newMaxShardDataChangeExecutorQueueSize) {
+            this.maxShardDataChangeExecutorQueueSize = newMaxShardDataChangeExecutorQueueSize;
             return this;
         }
 
-        public Builder maxShardDataChangeListenerQueueSize(final int maxShardDataChangeListenerQueueSize) {
-            this.maxShardDataChangeListenerQueueSize = maxShardDataChangeListenerQueueSize;
+        public Builder maxShardDataChangeListenerQueueSize(final int newMaxShardDataChangeListenerQueueSize) {
+            this.maxShardDataChangeListenerQueueSize = newMaxShardDataChangeListenerQueueSize;
             return this;
         }
 
-        public Builder maxShardDataStoreExecutorQueueSize(final int maxShardDataStoreExecutorQueueSize) {
-            this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+        public Builder maxShardDataStoreExecutorQueueSize(final int newMaxShardDataStoreExecutorQueueSize) {
+            this.maxShardDataStoreExecutorQueueSize = newMaxShardDataStoreExecutorQueueSize;
             return this;
         }
 

@@ -67,7 +67,7 @@ public class ValidationExceptionTest {
     public void testGetTrace() throws Exception {
         ValidationException.ExceptionMessageWithStackTrace exp =
                 new ValidationException.ExceptionMessageWithStackTrace();
-        exp.setTrace("trace");
+        exp.setStackTrace("trace");
         Assert.assertEquals(exp.getTrace(), "trace");
     }
 

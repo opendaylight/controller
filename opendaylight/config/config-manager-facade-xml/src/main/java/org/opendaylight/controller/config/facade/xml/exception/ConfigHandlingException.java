@@ -16,11 +16,21 @@ public class ConfigHandlingException extends DocumentedException {
 
     public ConfigHandlingException(final String message, final ErrorType errorType, final ErrorTag errorTag,
             final ErrorSeverity errorSeverity) {
-        this(message, errorType, errorTag, errorSeverity, Collections.<String, String>emptyMap());
+        this(message, null, errorType, errorTag, errorSeverity, Collections.emptyMap());
+    }
+
+    public ConfigHandlingException(final String message, final Exception cause, final ErrorType errorType,
+            final ErrorTag errorTag, final ErrorSeverity errorSeverity) {
+        this(message, cause, errorType, errorTag, errorSeverity, Collections.emptyMap());
     }
 
     public ConfigHandlingException(final String message, final ErrorType errorType, final ErrorTag errorTag,
             final ErrorSeverity errorSeverity, final Map<String, String> errorInfo) {
-        super(message, errorType, errorTag, errorSeverity, errorInfo);
+        this(message, null, errorType, errorTag, errorSeverity, errorInfo);
+    }
+
+    public ConfigHandlingException(final String message, final Exception cause, final ErrorType errorType,
+            final ErrorTag errorTag, final ErrorSeverity errorSeverity, final Map<String, String> errorInfo) {
+        super(message, cause, errorType, errorTag, errorSeverity, errorInfo);
     }
 }

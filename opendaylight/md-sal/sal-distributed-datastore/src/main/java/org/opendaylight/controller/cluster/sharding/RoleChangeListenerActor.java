@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
  * {@link LeaderLocationListener#onLeaderLocationChanged(LeaderLocation)}
  * events.
  */
-public class RoleChangeListenerActor extends AbstractUntypedActor {
+public final class RoleChangeListenerActor extends AbstractUntypedActor {
     private final LeaderLocationListener leaderLocationListener;
     private final ActorRef roleChangeNotifier;
 
