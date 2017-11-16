@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import akka.actor.ActorRef;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -31,7 +31,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
     private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
             final boolean withInstallSnapshot) throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(), testName);
                 watch(snapshotActor);

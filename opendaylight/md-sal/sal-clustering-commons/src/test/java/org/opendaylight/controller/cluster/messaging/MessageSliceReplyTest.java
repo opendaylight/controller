@@ -8,12 +8,14 @@
 package org.opendaylight.controller.cluster.messaging;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorSystem;
 import akka.actor.ExtendedActorSystem;
 import akka.serialization.JavaSerializer;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +36,7 @@ public class MessageSliceReplyTest {
 
     @After
     public void tearDown() {
-        JavaTestKit.shutdownActorSystem(actorSystem, Boolean.TRUE);
+        TestKit.shutdownActorSystem(actorSystem, true);
     }
 
     @Test
@@ -51,7 +53,7 @@ public class MessageSliceReplyTest {
         assertEquals("getIdentifier", expected.getIdentifier(), cloned.getIdentifier());
         assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());
         assertEquals("getSendTo", expected.getSendTo(), cloned.getSendTo());
-        assertEquals("getFailure present", Boolean.FALSE, cloned.getFailure().isPresent());
+        assertFalse("getFailure present", cloned.getFailure().isPresent());
     }
 
     private void testFailure() {
@@ -62,7 +64,7 @@ public class MessageSliceReplyTest {
         assertEquals("getIdentifier", expected.getIdentifier(), cloned.getIdentifier());
         assertEquals("getSliceIndex", expected.getSliceIndex(), cloned.getSliceIndex());
         assertEquals("getSendTo", expected.getSendTo(), cloned.getSendTo());
-        assertEquals("getFailure present", Boolean.TRUE, cloned.getFailure().isPresent());
+        assertTrue("getFailure present", cloned.getFailure().isPresent());
         assertEquals("getFailure message", expected.getFailure().get().getMessage(),
                 cloned.getFailure().get().getMessage());
         assertEquals("getFailure isRetriable", expected.getFailure().get().isRetriable(),

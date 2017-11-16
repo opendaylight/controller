@@ -19,7 +19,7 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -71,7 +71,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
     @Test(timeout = 10000)
     public void testSuccessfulRegistration() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorContext actorContext = new ActorContext(getSystem(), getRef(),
                         mock(ClusterWrapper.class), mock(Configuration.class));
@@ -122,7 +122,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
     @Test(timeout = 10000)
     public void testSuccessfulRegistrationForClusteredListener() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorContext actorContext = new ActorContext(getSystem(), getRef(),
                     mock(ClusterWrapper.class), mock(Configuration.class));
@@ -176,7 +176,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
     @Test(timeout = 10000)
     public void testLocalShardNotFound() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorContext actorContext = new ActorContext(getSystem(), getRef(),
                         mock(ClusterWrapper.class), mock(Configuration.class));
@@ -203,7 +203,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
     @Test(timeout = 10000)
     public void testLocalShardNotInitialized() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorContext actorContext = new ActorContext(getSystem(), getRef(),
                         mock(ClusterWrapper.class), mock(Configuration.class));
@@ -221,13 +221,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
                 reply(new NotInitializedException("not initialized"));
 
-                new Within(duration("1 seconds")) {
-                    @Override
-                    protected void run() {
-                        expectNoMsg();
-                    }
-                };
-
+                expectNoMsg(duration("1 seconds"));
                 proxy.close();
             }
         };
@@ -235,7 +229,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
     @Test
     public void testFailedRegistration() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorSystem mockActorSystem = mock(ActorSystem.class);
 
@@ -274,7 +268,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
     @Test
     public void testCloseBeforeRegistration() {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ActorContext actorContext = mock(ActorContext.class);
 

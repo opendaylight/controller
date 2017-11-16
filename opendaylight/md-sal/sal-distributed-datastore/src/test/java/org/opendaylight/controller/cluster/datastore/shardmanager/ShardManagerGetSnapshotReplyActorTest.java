@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +42,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
     @Test
     public void testSuccess() {
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         List<String> shardList = Arrays.asList("shard1", "shard2", "shard3");
         ShardManagerSnapshot shardManagerSnapshot = new ShardManagerSnapshot(shardList, Collections.emptyMap());
@@ -91,7 +91,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
     @Test
     public void testGetSnapshotFailureReply() {
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 Arrays.asList("shard1", "shard2"), "config", null, kit.getRef(), "shard-manager",
@@ -111,7 +111,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
     @Test
     public void testGetSnapshotTimeout() {
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        TestKit kit = new TestKit(getSystem());
 
         ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 Arrays.asList("shard1"), "config", null, kit.getRef(), "shard-manager",

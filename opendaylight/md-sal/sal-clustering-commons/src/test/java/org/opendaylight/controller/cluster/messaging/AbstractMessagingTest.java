@@ -13,8 +13,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,7 +71,7 @@ public class AbstractMessagingTest {
 
     @AfterClass
     public static void tearDownClass() {
-        JavaTestKit.shutdownActorSystem(ACTOR_SYSTEM, Boolean.TRUE);
+        TestKit.shutdownActorSystem(ACTOR_SYSTEM, true);
     }
 
     void setupMockFiledBackedStream(final FileBackedOutputStream mockOutputStream) throws IOException {

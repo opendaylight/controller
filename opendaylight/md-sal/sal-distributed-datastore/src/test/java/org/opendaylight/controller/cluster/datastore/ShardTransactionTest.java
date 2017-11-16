@@ -19,8 +19,8 @@ import akka.actor.Props;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
@@ -95,7 +95,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveReadData() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 testOnReceiveReadData(newTransactionActor(RO, readOnlyTransaction(), "testReadDataRO"));
 
@@ -115,7 +115,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveReadDataWhenDataNotFound() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 testOnReceiveReadDataWhenDataNotFound(
                         newTransactionActor(RO, readOnlyTransaction(), "testReadDataWhenDataNotFoundRO"));
@@ -136,7 +136,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveDataExistsPositive() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 testOnReceiveDataExistsPositive(
                         newTransactionActor(RO, readOnlyTransaction(), "testDataExistsPositiveRO"));
@@ -158,7 +158,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveDataExistsNegative() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 testOnReceiveDataExistsNegative(
                         newTransactionActor(RO, readOnlyTransaction(), "testDataExistsNegativeRO"));
@@ -179,7 +179,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveBatchedModifications() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 ShardDataTreeTransactionParent parent = Mockito.mock(ShardDataTreeTransactionParent.class);
                 DataTreeModification mockModification = Mockito.mock(DataTreeModification.class);
@@ -221,12 +221,12 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveBatchedModificationsReadyWithoutImmediateCommit() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
                         "testOnReceiveBatchedModificationsReadyWithoutImmediateCommit");
 
-                JavaTestKit watcher = new JavaTestKit(getSystem());
+                TestKit watcher = new TestKit(getSystem());
                 watcher.watch(transaction);
 
                 YangInstanceIdentifier writePath = TestModel.TEST_PATH;
@@ -256,12 +256,12 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveBatchedModificationsReadyWithImmediateCommit() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
                         "testOnReceiveBatchedModificationsReadyWithImmediateCommit");
 
-                JavaTestKit watcher = new JavaTestKit(getSystem());
+                TestKit watcher = new TestKit(getSystem());
                 watcher.watch(transaction);
 
                 YangInstanceIdentifier writePath = TestModel.TEST_PATH;
@@ -285,7 +285,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test(expected = TestException.class)
     public void testOnReceiveBatchedModificationsFailure() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
 
                 ShardDataTreeTransactionParent parent = Mockito.mock(ShardDataTreeTransactionParent.class);
@@ -295,7 +295,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 final ActorRef transaction = newTransactionActor(RW, mockWriteTx,
                         "testOnReceiveBatchedModificationsFailure");
 
-                JavaTestKit watcher = new JavaTestKit(getSystem());
+                TestKit watcher = new TestKit(getSystem());
                 watcher.watch(transaction);
 
                 YangInstanceIdentifier path = TestModel.TEST_PATH;
@@ -328,13 +328,13 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test(expected = IllegalStateException.class)
     public void testOnReceiveBatchedModificationsReadyWithIncorrectTotalMessageCount() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
 
                 final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
                         "testOnReceiveBatchedModificationsReadyWithIncorrectTotalMessageCount");
 
-                JavaTestKit watcher = new JavaTestKit(getSystem());
+                TestKit watcher = new TestKit(getSystem());
                 watcher.watch(transaction);
 
                 BatchedModifications batched = new BatchedModifications(nextTransactionId(),
@@ -358,7 +358,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testReadWriteTxOnReceiveCloseTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
                         "testReadWriteTxOnReceiveCloseTransaction");
@@ -375,7 +375,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testWriteOnlyTxOnReceiveCloseTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
                         "testWriteTxOnReceiveCloseTransaction");
@@ -392,7 +392,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testReadOnlyTxOnReceiveCloseTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef transaction = newTransactionActor(TransactionType.READ_ONLY, readOnlyTransaction(),
                         "testReadOnlyTxOnReceiveCloseTransaction");
@@ -411,7 +411,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         datastoreContext = DatastoreContext.newBuilder().shardTransactionIdleTimeout(
                 500, TimeUnit.MILLISECONDS).build();
 
-        new JavaTestKit(getSystem()) {
+        new TestKit(getSystem()) {
             {
                 final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
                         "testShardTransactionInactivity");

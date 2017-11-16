@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import java.net.URI;
 import java.util.Collection;
 import org.junit.AfterClass;
@@ -68,9 +68,9 @@ public class AbstractRpcTest {
     static RemoteRpcProviderConfig config2;
 
     protected ActorRef rpcInvoker1;
-    protected JavaTestKit rpcRegistry1Probe;
+    protected TestKit rpcRegistry1Probe;
     protected ActorRef rpcInvoker2;
-    protected JavaTestKit rpcRegistry2Probe;
+    protected TestKit rpcRegistry2Probe;
     protected SchemaContext schemaContext;
     protected RemoteRpcImplementation remoteRpcImpl1;
     protected RemoteRpcImplementation remoteRpcImpl2;
@@ -90,8 +90,8 @@ public class AbstractRpcTest {
 
     @AfterClass
     public static void teardown() {
-        JavaTestKit.shutdownActorSystem(node1);
-        JavaTestKit.shutdownActorSystem(node2);
+        TestKit.shutdownActorSystem(node1);
+        TestKit.shutdownActorSystem(node2);
         node1 = null;
         node2 = null;
     }
@@ -102,9 +102,9 @@ public class AbstractRpcTest {
 
         MockitoAnnotations.initMocks(this);
 
-        rpcRegistry1Probe = new JavaTestKit(node1);
+        rpcRegistry1Probe = new TestKit(node1);
         rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1));
-        rpcRegistry2Probe = new JavaTestKit(node2);
+        rpcRegistry2Probe = new TestKit(node2);
         rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2));
         remoteRpcImpl1 = new RemoteRpcImplementation(rpcInvoker2, config1);
         remoteRpcImpl2 = new RemoteRpcImplementation(rpcInvoker1, config2);

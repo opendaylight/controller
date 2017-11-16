@@ -16,8 +16,8 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import akka.actor.ActorRef;
 import akka.actor.Status;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Collections;
@@ -325,8 +325,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         createRaftActors();
         createRequestLeadershipResultCollectorActor();
 
-        factory.killActor(follower1Actor, new JavaTestKit(getSystem()));
-        factory.killActor(follower3Actor, new JavaTestKit(getSystem()));
+        factory.killActor(follower1Actor, new TestKit(getSystem()));
+        factory.killActor(follower3Actor, new TestKit(getSystem()));
 
         sendFollower2RequestLeadershipTransferToLeader();
 

@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.notifications;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.testkit.JavaTestKit;
 import akka.testkit.TestProbe;
+import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -38,7 +38,7 @@ public class RoleChangeNotifierTest {
 
     @After
     public void tearDown() throws Exception {
-        JavaTestKit.shutdownActorSystem(system);
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test
