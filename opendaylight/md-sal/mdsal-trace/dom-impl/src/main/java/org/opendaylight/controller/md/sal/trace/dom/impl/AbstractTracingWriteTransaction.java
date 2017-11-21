@@ -113,4 +113,21 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
     public Object getIdentifier() {
         return delegate.getIdentifier();
     }
+
+    // https://jira.opendaylight.org/browse/CONTROLLER-1792
+
+    @Override
+    public final boolean equals(Object object) {
+        return object == this || delegate.equals(object);
+    }
+
+    @Override
+    public final int hashCode() {
+        return delegate.hashCode();
+    }
+
+    @Override
+    public final String toString() {
+        return getClass().getName() + "; delegate=" + delegate;
+    }
 }
