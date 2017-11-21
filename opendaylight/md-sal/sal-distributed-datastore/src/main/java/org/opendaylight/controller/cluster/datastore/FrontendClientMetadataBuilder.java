@@ -115,7 +115,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         final FrontendHistoryMetadataBuilder history = getHistory(txId);
         if (history != null) {
             history.onTransactionAborted(txId);
-            LOG.debug("{}: Committed transaction {}", shardName, txId);
+            LOG.debug("{}: Aborted transaction {}", shardName, txId);
         } else {
             LOG.warn("{}: Unknown history for aborted transaction {}, ignoring", shardName, txId);
         }
@@ -125,7 +125,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         final FrontendHistoryMetadataBuilder history = getHistory(txId);
         if (history != null) {
             history.onTransactionCommitted(txId);
-            LOG.debug("{}: Aborted transaction {}", shardName, txId);
+            LOG.debug("{}: Committed transaction {}", shardName, txId);
         } else {
             LOG.warn("{}: Unknown history for commited transaction {}, ignoring", shardName, txId);
         }
