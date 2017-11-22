@@ -19,4 +19,8 @@ public class PacketException extends Exception {
     public PacketException(final String message) {
         super(message);
     }
+
+    public PacketException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
