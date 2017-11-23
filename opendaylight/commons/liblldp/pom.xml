@@ -11,7 +11,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>liblldp</artifactId>
-  <version>0.13.1-SNAPSHOT</version>
+  <version>0.13.1</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
