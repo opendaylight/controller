@@ -16,6 +16,23 @@
       "revId": "b2b558065b18841d32e4be3e33b4a2f2b2093d94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a245df4_c607aa80",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/actors/dds/TestUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-11-23T16:45:42Z",
+      "side": 1,
+      "message": "FYI https://git.opendaylight.org/gerrit/#/c/65297/2/common/util/src/main/java/org/opendaylight/infrautils/utils/function/CheckedRunnable.java ;-)",
+      "revId": "b2b558065b18841d32e4be3e33b4a2f2b2093d94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
