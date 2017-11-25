@@ -9,12 +9,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Terminated;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.common.actor.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminationMonitor extends UntypedActor {
+public class TerminationMonitor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
     public static final String ADDRESS = "termination-monitor";
 
@@ -23,7 +23,7 @@ public class TerminationMonitor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(final Object message) throws Exception {
         if (message instanceof Terminated) {
             Terminated terminated = (Terminated) message;
             LOG.debug("Actor terminated : {}", terminated.actor());

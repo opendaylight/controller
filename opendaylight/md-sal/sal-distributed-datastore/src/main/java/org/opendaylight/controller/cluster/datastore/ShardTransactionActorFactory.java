@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.AbstractActor.ActorContext;
 import akka.actor.ActorRef;
-import akka.actor.UntypedActorContext;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -29,13 +29,13 @@ class ShardTransactionActorFactory {
     private final DatastoreContext datastoreContext;
     private final String txnDispatcherPath;
     private final ShardStats shardMBean;
-    private final UntypedActorContext actorContext;
+    private final ActorContext actorContext;
     private final ActorRef shardActor;
     private final String shardName;
 
-    ShardTransactionActorFactory(ShardDataTree dataTree, DatastoreContext datastoreContext,
-            String txnDispatcherPath, ActorRef shardActor, UntypedActorContext actorContext, ShardStats shardMBean,
-            String shardName) {
+    ShardTransactionActorFactory(final ShardDataTree dataTree, final DatastoreContext datastoreContext,
+            final String txnDispatcherPath, final ActorRef shardActor, final ActorContext actorContext,
+            final ShardStats shardMBean, final String shardName) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.datastoreContext = Preconditions.checkNotNull(datastoreContext);
         this.txnDispatcherPath = Preconditions.checkNotNull(txnDispatcherPath);
@@ -62,7 +62,7 @@ class ShardTransactionActorFactory {
         return sb.append(txId.getTransactionId()).append('_').append(ACTOR_NAME_COUNTER.incrementAndGet()).toString();
     }
 
-    ActorRef newShardTransaction(TransactionType type, TransactionIdentifier transactionID) {
+    ActorRef newShardTransaction(final TransactionType type, final TransactionIdentifier transactionID) {
         final AbstractShardDataTreeTransaction<?> transaction;
         switch (type) {
             case READ_ONLY:
