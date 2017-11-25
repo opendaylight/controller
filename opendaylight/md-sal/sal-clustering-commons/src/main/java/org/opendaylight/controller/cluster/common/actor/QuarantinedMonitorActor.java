@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.japi.Effect;
 import akka.remote.ThisActorSystemQuarantinedEvent;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author Gary Wu gary.wu1@huawei.com
  *
  */
-public class QuarantinedMonitorActor extends UntypedActor {
+public class QuarantinedMonitorActor extends UntypedAbstractActor {
 
     private static final Logger LOG = LoggerFactory.getLogger(QuarantinedMonitorActor.class);
 
