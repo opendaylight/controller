@@ -9,12 +9,12 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.ActorRef;
-import akka.persistence.UntypedPersistentActor;
+import akka.persistence.AbstractPersistentActor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractUntypedPersistentActor extends UntypedPersistentActor implements ExecuteInSelfActor {
+public abstract class AbstractUntypedPersistentActor extends AbstractPersistentActor implements ExecuteInSelfActor {
 
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
