@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.japi.Procedure;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -31,7 +31,7 @@ public class MeteringBehavior implements Procedure<Object> {
 
     private static final String MSG_PROCESSING_RATE = "msg-rate";
 
-    private final UntypedActor meteredActor;
+    private final UntypedAbstractActor meteredActor;
 
     private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DOMAIN).getMetricsRegistry();
 
@@ -52,7 +52,7 @@ public class MeteringBehavior implements Procedure<Object> {
         init(actorName);
     }
 
-    public MeteringBehavior(final UntypedActor actor) {
+    public MeteringBehavior(final UntypedAbstractActor actor) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         this.meteredActor = actor;
 
