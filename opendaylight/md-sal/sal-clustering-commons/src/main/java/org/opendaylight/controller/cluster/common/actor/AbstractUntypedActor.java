@@ -9,12 +9,12 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractUntypedActor extends UntypedActor implements ExecuteInSelfActor {
+public abstract class AbstractUntypedActor extends UntypedAbstractActor implements ExecuteInSelfActor {
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
