@@ -15,6 +15,10 @@
 
     <dependencies>
         <dependency>
+           <groupId>com.google.guava</groupId>
+           <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -37,16 +41,6 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-persister-directory-xml-adapter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <version>1.6.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-           <groupId>com.google.guava</groupId>
-           <artifactId>guava</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -68,7 +62,6 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>org.opendaylight.controller.configpusherfeature.ConfigPusherFeatureActivator</Bundle-Activator>
                         <Private-Package>
-                            org.apache.karaf.features.internal.model,
                             org.apache.felix.utils.version,
                             org.opendaylight.controller.configpusherfeature.internal
                         </Private-Package>

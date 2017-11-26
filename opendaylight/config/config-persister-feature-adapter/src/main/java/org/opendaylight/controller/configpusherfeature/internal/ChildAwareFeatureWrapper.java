@@ -9,11 +9,9 @@ package org.opendaylight.controller.configpusherfeature.internal;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Dependency;
@@ -94,8 +92,8 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
 
     protected Feature extractFeatureFromDependency(final Dependency dependency) throws Exception {
         Feature[] features = featuresService.listFeatures();
-        VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency
-                .getVersion()) ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+        VersionRange range = dependency.hasVersion() ? new VersionRange(dependency.getVersion(), true, true)
+                : VersionRange.ANY_VERSION;
         Feature fi = null;
         for (Feature f : features) {
             if (f.getName().equals(dependency.getName())) {
