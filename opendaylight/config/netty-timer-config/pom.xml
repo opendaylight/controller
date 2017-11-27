@@ -85,11 +85,4 @@
     </plugins>
   </build>
 
-  <distributionManagement>
-    <site>
-      <id>${project.artifactId}</id>
-      <name>NETTY-TIMER-CONFIG Module site</name>
-      <url>${basedir}/target/site/${project.artifactId}</url>
-    </site>
-  </distributionManagement>
 </project>
