@@ -73,6 +73,12 @@
       <artifactId>akka-remote_${scala.version}</artifactId>
     </dependency>
     <dependency>
+      <!-- Enforce Netty’s optional dependency on servlet API -->
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-slf4j_${scala.version}</artifactId>
     </dependency>
