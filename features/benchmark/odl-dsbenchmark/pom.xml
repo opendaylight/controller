@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-dsbenchmark</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: dsbenchmark</name>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-broker</artifactId>
-            <version>1.6.1-SNAPSHOT</version>
+            <version>1.6.2-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

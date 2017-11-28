@@ -20,13 +20,13 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-broker-local</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.2-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MDSAL :: Broker</name>
 
     <properties>
-        <blueprint.version>0.7.1-SNAPSHOT</blueprint.version>
+        <blueprint.version>0.7.2-SNAPSHOT</blueprint.version>
         <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
         <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
     </properties>
@@ -43,35 +43,35 @@
             <dependency>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yangtools-artifacts</artifactId>
-                <version>1.2.1-SNAPSHOT</version>
+                <version>1.2.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.mdsal</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>2.3.1-SNAPSHOT</version>
+                <version>2.3.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.mdsal.model</groupId>
                 <artifactId>mdsal-model-artifacts</artifactId>
-                <version>0.11.1-SNAPSHOT</version>
+                <version>0.11.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>config-artifacts</artifactId>
-                <version>0.7.1-SNAPSHOT</version>
+                <version>0.7.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.6.1-SNAPSHOT</version>
+                <version>1.6.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -201,7 +201,7 @@
             <!-- TODO start-level="40" -->
             <groupId>${project.groupId}</groupId>
             <artifactId>blueprint</artifactId>
-            <version>0.7.1-SNAPSHOT</version>
+            <version>0.7.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <!-- finalname="${config.configfile.directory}/${config.mdsal.configfile}" -->

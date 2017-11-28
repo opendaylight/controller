@@ -20,7 +20,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-extras-all</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.2-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Extras :: All</name>

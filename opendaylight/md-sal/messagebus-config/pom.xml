@@ -18,7 +18,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>messagebus-config</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>Configuration files for message-bus</description>
 
