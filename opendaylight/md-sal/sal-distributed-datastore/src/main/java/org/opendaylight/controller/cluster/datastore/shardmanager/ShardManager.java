@@ -79,6 +79,7 @@ import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
+import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.RemoteFindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemovePrefixShardReplica;
@@ -1136,7 +1137,20 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             if (info.getActor() == null) {
                 LOG.debug("Creating Shard {}", info.getShardId());
-                info.setActor(newShardActor(info));
+                ActorRef shardActor = newShardActor(info);
+                info.setActor(shardActor);
+                // Send PeerAddressResolved to it for every existing peer memeber
+                // to avoid missing sending while UpdateSchemaContext comes after MemberUp.
+                String shardName = info.getShardName();
+                for (MemberName memberName : peerAddressResolver.getPeerMembers()) {
+                    String peerId = getShardIdentifier(memberName, shardName).toString() ;
+                    String peerAddress = peerAddressResolver.getShardActorAddress(shardName, memberName);
+                    PeerAddressResolved peerAddressResolved = new PeerAddressResolved(peerId, peerAddress);
+                    shardActor.tell(peerAddressResolved, getSelf());
+                    LOG.debug("{}: sent a PeerAddressResolved message {} for member {} to shard {} "
+                            + "whose actor address is {}",
+                            persistenceId(), peerAddressResolved, memberName, info.getShardId(), shardActor);
+                }
             } else {
                 info.getActor().tell(message, getSelf());
             }
