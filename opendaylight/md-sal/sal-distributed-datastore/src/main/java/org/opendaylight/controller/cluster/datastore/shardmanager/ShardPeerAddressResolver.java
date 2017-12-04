@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -45,6 +46,10 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
 
     void removePeerAddress(MemberName memberName) {
         memberNameToAddress.remove(memberName);
+    }
+
+    Set<MemberName> getPeerMembers() {
+        return this.memberNameToAddress.keySet();
     }
 
     Address getPeerAddress(MemberName memberName) {

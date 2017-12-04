@@ -1137,6 +1137,17 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             if (info.getActor() == null) {
                 LOG.debug("Creating Shard {}", info.getShardId());
                 info.setActor(newShardActor(info));
+                // Update peer address for every existing peer memeber to avoid missing sending
+                // PeerAddressResolved and PeerUp to this shard while UpdateSchemaContext comes after MemberUp.
+                String shardName = info.getShardName();
+                for (MemberName memberName : peerAddressResolver.getPeerMembers()) {
+                    String peerId = getShardIdentifier(memberName, shardName).toString() ;
+                    String peerAddress = peerAddressResolver.getShardActorAddress(shardName, memberName);
+                    info.updatePeerAddress(peerId, peerAddress, getSelf());
+                    info.peerUp(memberName, peerId, getSelf());
+                    LOG.debug("{}: updated peer {} on member {} with address {} on shard {} whose actor address is {}",
+                            persistenceId(), peerId, memberName, peerAddress, info.getShardId(), info.getActor());
+                }
             } else {
                 info.getActor().tell(message, getSelf());
             }
