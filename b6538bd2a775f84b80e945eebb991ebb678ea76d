@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a1969be_51db351b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1149,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-12-04T12:49:27Z",
+      "side": 1,
+      "message": "The above is equivalent to info.updatePeerAddress but I think it should mimic what addPeerAddress does, ei\n\n   info.updatePeerAddress(...)\n   info.peerUp(...)",
+      "revId": "b6538bd2a775f84b80e945eebb991ebb678ea76d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
