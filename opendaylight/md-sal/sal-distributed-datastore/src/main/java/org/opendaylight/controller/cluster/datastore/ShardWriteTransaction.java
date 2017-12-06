@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 /**
  * Actor for a shard write-only transaction.
  *
- * @author: syedbahm
+ * @author syedbahm
  */
 public class ShardWriteTransaction extends ShardTransaction {
 

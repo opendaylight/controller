@@ -17,7 +17,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 /**
  * Actor for a shard read transaction.
  *
- * @author: syedbahm
+ * @author syedbahm
  */
 public class ShardReadTransaction extends ShardTransaction {
     private final AbstractShardDataTreeTransaction<?> transaction;
