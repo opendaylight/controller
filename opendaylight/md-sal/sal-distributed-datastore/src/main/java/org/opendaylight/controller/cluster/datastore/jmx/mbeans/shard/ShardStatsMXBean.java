@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 /**
  * MXBean interface for shard stats.
  *
- * @author: syedbahm
+ * @author syedbahm
  */
 public interface ShardStatsMXBean {
 
