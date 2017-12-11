@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.CheckReturnValue;
 
 /**
  * Write transaction provides mutation capabilities for a data tree.
@@ -309,12 +310,14 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @throws IllegalStateException
      *             if the transaction is not {@link TransactionStatus#NEW}
      */
+    @CheckReturnValue
     CheckedFuture<Void,TransactionCommitFailedException> submit();
 
     /**
      * @deprecated Use {@link #submit()} instead.
      */
     @Deprecated
+    @CheckReturnValue
     ListenableFuture<RpcResult<TransactionStatus>> commit();
 
 }
