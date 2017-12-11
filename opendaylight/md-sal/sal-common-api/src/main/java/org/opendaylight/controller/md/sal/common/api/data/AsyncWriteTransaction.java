@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.CheckReturnValue;
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
@@ -331,5 +332,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @throws IllegalStateException
      *             if the transaction is not new
      */
+    @CheckReturnValue
     CheckedFuture<Void,TransactionCommitFailedException> submit();
 }
