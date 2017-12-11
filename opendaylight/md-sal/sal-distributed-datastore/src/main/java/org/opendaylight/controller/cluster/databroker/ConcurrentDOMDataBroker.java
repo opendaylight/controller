@@ -204,7 +204,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
             return;
         }
 
-        LOG.warn("Tx: {} Error during phase {}, starting Abort", transaction.getIdentifier(), phase, throwable);
+        // Use debug instead of warn level here because this exception gets propagate back to the caller via the Future
+        LOG.debug("Tx: {} Error during phase {}, starting Abort", transaction.getIdentifier(), phase, throwable);
 
         // Transaction failed - tell all cohorts to abort.
         @SuppressWarnings("unchecked")
