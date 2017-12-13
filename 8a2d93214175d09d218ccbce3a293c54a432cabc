@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4bc9310c_760df131",
+        "filename": "features/mdsal/odl-mdsal-clustering-commons/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2017-12-13T22:35:21Z",
+      "side": 1,
+      "message": "Are we going back to snapshot releases?",
+      "range": {
+        "startLine": 17,
+        "startChar": 17,
+        "endLine": 17,
+        "endChar": 31
+      },
+      "revId": "8a2d93214175d09d218ccbce3a293c54a432cabc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
