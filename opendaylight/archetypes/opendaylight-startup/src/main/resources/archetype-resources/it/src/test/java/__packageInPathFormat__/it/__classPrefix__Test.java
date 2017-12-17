@@ -15,6 +15,7 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
@@ -29,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ${classPrefix}IT extends AbstractMdsalTestBase {
-    private static final Logger LOG = LoggerFactory.getLogger(${classPrefix}IT.class);
+public class ${classPrefix}Test extends AbstractMdsalTestBase {
+    private static final Logger LOG = LoggerFactory.getLogger(${classPrefix}Test.class);
 
     @Override
     public MavenUrlReference getFeatureRepo() {
@@ -50,13 +51,14 @@ public class ${classPrefix}IT extends AbstractMdsalTestBase {
     @Override
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                logConfiguration(${classPrefix}IT.class),
+                logConfiguration(${classPrefix}Test.class),
                 LogLevel.INFO.name());
         option = composite(option, super.getLoggingOption());
         return option;
     }
 
     @Test
+    @Ignore // TODO https://jira.opendaylight.org/browse/CONTROLLER-1810
     public void test${artifactId}FeatureLoad() {
         Assert.assertTrue(true);
     }

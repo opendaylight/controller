@@ -27,10 +27,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>ODL :: ${groupId} :: ${project.artifactId}</name>
 
   <modules>
-    <module>features-X</module>
-    <module>odl-X-api</module>
-    <module>odl-X</module>
-    <module>odl-X-rest</module>
-    <module>odl-X-cli</module>
+    <module>features-${artifactId}</module>
+    <module>odl-${artifactId}-api</module>
+    <module>odl-${artifactId}</module>
+    <module>odl-${artifactId}-rest</module>
+    <module>odl-${artifactId}-cli</module>
   </modules>
 </project>

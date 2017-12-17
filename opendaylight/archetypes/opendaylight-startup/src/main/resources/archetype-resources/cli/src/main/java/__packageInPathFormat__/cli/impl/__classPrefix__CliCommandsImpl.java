@@ -11,9 +11,9 @@
 package ${package}.cli.impl;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import ${package}.cli.api.${classPrefix}CliCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ${package}.cli.api.${classPrefix}CliCommands;
 
 public class ${classPrefix}CliCommandsImpl implements ${classPrefix}CliCommands {
 
