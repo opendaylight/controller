@@ -7,6 +7,7 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
@@ -14,11 +15,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <version>3.0.2</version>
     <relativePath/>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
+
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-it-parent</artifactId>
   <version>1.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+
   <properties>
     <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
     <karaf.distro.groupId>org.opendaylight.odlparent</karaf.distro.groupId>
@@ -27,6 +29,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <karaf.distro.type>zip</karaf.distro.type>
     <karaf.keep.unpack>false</karaf.keep.unpack>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -126,6 +129,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.version}</version>
+          <configuration>
+              <systemPropertyVariables>
+                <!-- CONTROLLER-1799: Use the same repository for Pax Exam as is used for Maven -->
+                <org.ops4j.pax.url.mvn.localRepository>${settings.localRepository}</org.ops4j.pax.url.mvn.localRepository>
+              </systemPropertyVariables>
+          </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>

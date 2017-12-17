@@ -35,7 +35,6 @@
       <includes>
         <include>.gitreview</include>
         <include>pom.xml</include>
-        <include>deploy-site.xml</include>
         <include>src/**</include>
       </includes>
     </fileSet>
@@ -52,40 +51,9 @@
     <fileSet filtered="true" encoding="UTF-8">
         <directory>features</directory>
         <includes>
-            <include>pom.xml</include>
+            <include>**/pom.xml</include>
         </includes>
     </fileSet>
-    <fileSet filtered="true" encoding="UTF-8">
-        <directory>features/features-X</directory>
-        <includes>
-            <include>pom.xml</include>
-        </includes>
-    </fileSet>
-    <fileSet filtered="true" encoding="UTF-8">
-        <directory>features/odl-X-api</directory>
-        <includes>
-            <include>pom.xml</include>
-        </includes>
-    </fileSet>
-    <fileSet filtered="true" encoding="UTF-8">
-        <directory>features/odl-X</directory>
-        <includes>
-            <include>pom.xml</include>
-        </includes>
-    </fileSet>
-    <fileSet filtered="true" encoding="UTF-8">
-        <directory>features/odl-X-cli</directory>
-        <includes>
-            <include>pom.xml</include>
-        </includes>
-    </fileSet>
-    <fileSet filtered="true" encoding="UTF-8">
-        <directory>features/odl-X-rest</directory>
-        <includes>
-            <include>pom.xml</include>
-        </includes>
-    </fileSet>
-
     <!-- impl -->
     <fileSet filtered="true" encoding="UTF-8">
         <directory>impl</directory>
