@@ -27,7 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>ODL :: ${groupId} :: ${project.artifactId}</name>
 
   <properties>
-    <!-- TODO <karaf.localFeature>odl-${artifactId}-rest</karaf.localFeature> -->
+    <karaf.localFeature>odl-${artifactId}-rest</karaf.localFeature>
   </properties>
 
   <dependencyManagement>
