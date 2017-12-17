@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
  * This is an example class. The class name can be renamed to match the command implementation that it will invoke.
  * Specify command details by updating the fields in the Command annotation below.
  */
-@Command(name = "test-command", scope = "add the scope of the command, usually project name", description = "add a description for the command")
+@Command(name = "test-command", scope = "add the scope of the command, usually project name",
+        description = "add a description for the command")
 public class ${classPrefix}CliTestCommand extends AbstractAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(${classPrefix}CliTestCommand.class);
