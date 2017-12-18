@@ -9,7 +9,6 @@ package org.opendaylight.controller.configpusherfeature.internal;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
@@ -140,7 +138,7 @@ public class FeatureConfigPusher {
                     return true;
                 }
 
-                LOG.info("Karaf Feature Service has not yet finished installing feature {}/{} (retry {})", feature
+                LOG.debug("Karaf Feature Service has not yet finished installing feature {}/{} (retry {})", feature
                         .getName(), feature.getVersion(), retries);
             } catch (final Exception e) {
                 LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
@@ -148,8 +146,16 @@ public class FeatureConfigPusher {
 
             TimeUnit.MILLISECONDS.sleep(RETRY_PAUSE_MILLIS);
         }
-        LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet "
-                + "finished installing feature {} {}", MAX_RETRIES, feature.getName(), feature.getVersion());
+
+        // In karaf  4.1.3 we see this error logged for 2 system features, "jaas-boot" and "wrap", many times. It's
+        // unclear why listInstalledFeatures doesn't return them but it doesn't really matter since we're only
+        // interested in ODL features that have CSS files. Maybe the common denominator is that they don't have a
+        // version (ie it's 0.0.0) hence the following check to avoid logging the error. This check would not
+        // exclude any ODL feature since all ODL features are versioned (should be anyway).
+        if (!"0.0.0".equals(feature.getVersion())) {
+            LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet "
+                    + "finished installing feature {} {}", MAX_RETRIES, feature.getName(), feature.getVersion());
+        }
         return false;
     }
 }
