@@ -21,7 +21,7 @@ public abstract class AbstractClusterRefActorTest extends AbstractTest {
     @BeforeClass
     public static void setUpClass() throws IOException {
         System.setProperty("shard.persistent", "false");
-        system = ActorSystem.create("test", ConfigFactory.load().getConfig("test"));
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("common"));
     }
 
     @AfterClass
