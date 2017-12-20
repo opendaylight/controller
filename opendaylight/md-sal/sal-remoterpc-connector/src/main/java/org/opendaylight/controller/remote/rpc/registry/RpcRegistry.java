@@ -29,6 +29,7 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.Remo
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
+import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBeanImpl;
 
 /**
  * Registry to look up cluster nodes that have registered for a given RPC.
@@ -39,10 +40,12 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
  */
 public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private final ActorRef rpcRegistrar;
+    private final RemoteRpcRegistryMXBeanImpl mxBean;
 
     public RpcRegistry(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = Preconditions.checkNotNull(rpcRegistrar);
+        this.mxBean = new RemoteRpcRegistryMXBeanImpl(this);
     }
 
     /**
@@ -56,6 +59,14 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     public static Props props(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker,
             final ActorRef rpcRegistrar) {
         return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar);
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        super.postStop();
+        if (this.mxBean != null) {
+            this.mxBean.unregister();
+        }
     }
 
     @Override
