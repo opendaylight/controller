@@ -30,6 +30,7 @@ import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.dispatch.Dispatchers;
+import akka.dispatch.OnComplete;
 import akka.japi.Creator;
 import akka.pattern.Patterns;
 import akka.persistence.RecoveryCompleted;
@@ -912,6 +913,106 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         LOG.info("testShardAvailabilityChangeOnMemberUnreachableAndLeadershipChange ending");
     }
 
+    @Test
+    public void testShardAvailabilityChangeOnMemberWithNameContainedInLeaderIdUnreachable() throws Exception {
+        LOG.info("testShardAvailabilityChangeOnMemberWithNameContainedInLeaderIdUnreachable starting");
+        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+
+        MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
+                .put("default", Arrays.asList("member-256", "member-2")).build());
+
+        // Create an ActorSystem, ShardManager and actor for member-256.
+
+        final ActorSystem system256 = newActorSystem("Member256");
+        // 2562 is the tcp port of Member256 in src/test/resources/application.conf.
+        Cluster.get(system256).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2562"));
+
+        final ActorRef mockShardActor256 = newMockShardActor(system256, Shard.DEFAULT_NAME, "member-256");
+
+        final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
+
+        // ShardManager must be created with shard configuration to let its localShards has shards.
+        final TestActorRef<TestShardManager> shardManager256 = TestActorRef.create(system256,
+                newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor256)
+                        .cluster(new ClusterWrapperImpl(system256))
+                        .primaryShardInfoCache(primaryShardInfoCache).props()
+                        .withDispatcher(Dispatchers.DefaultDispatcherId()),
+                shardManagerID);
+
+        // Create an ActorSystem, ShardManager and actor for member-2 whose name is contained in member-256.
+
+        final ActorSystem system2 = newActorSystem("Member2");
+
+        // Join member-2 into the cluster of member-256.
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2562"));
+
+        final ActorRef mockShardActor2 = newMockShardActor(system2, Shard.DEFAULT_NAME, "member-2");
+
+        final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
+                newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor2).cluster(
+                        new ClusterWrapperImpl(system2)).props().withDispatcher(
+                                Dispatchers.DefaultDispatcherId()), shardManagerID);
+
+        new JavaTestKit(system256) {
+            {
+                shardManager256.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+                shardManager2.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+                shardManager256.tell(new ActorInitialized(), mockShardActor256);
+                shardManager2.tell(new ActorInitialized(), mockShardActor2);
+
+                String memberId256 = "member-256-shard-default-" + shardMrgIDSuffix;
+                String memberId2   = "member-2-shard-default-"   + shardMrgIDSuffix;
+                shardManager256.tell(new ShardLeaderStateChanged(memberId256, memberId256, mock(DataTree.class),
+                        DataStoreVersions.CURRENT_VERSION), mockShardActor256);
+                shardManager256.tell(
+                        new RoleChangeNotification(memberId256, RaftState.Candidate.name(), RaftState.Leader.name()),
+                        mockShardActor256);
+                shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId256, mock(DataTree.class),
+                        DataStoreVersions.CURRENT_VERSION), mockShardActor2);
+                shardManager2.tell(
+                        new RoleChangeNotification(memberId2, RaftState.Candidate.name(), RaftState.Follower.name()),
+                        mockShardActor2);
+                shardManager256.underlyingActor().waitForMemberUp();
+
+                shardManager256.tell(new FindPrimary("default", true), getRef());
+
+                LocalPrimaryShardFound found = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+                String path = found.getPrimaryPath();
+                assertTrue("Unexpected primary path " + path + " which must on member-256",
+                            path.contains("member-256-shard-default-config"));
+
+                PrimaryShardInfo primaryShardInfo = new PrimaryShardInfo(
+                        system256.actorSelection(mockShardActor256.path()), DataStoreVersions.CURRENT_VERSION);
+                primaryShardInfoCache.putSuccessful("default", primaryShardInfo);
+
+                // Simulate member-2 become unreachable.
+                shardManager256.tell(MockClusterWrapper.createUnreachableMember("member-2",
+                        "akka://cluster-test@127.0.0.1:2558"), getRef());
+                shardManager256.underlyingActor().waitForUnreachableMember();
+
+                // Make sure leader shard on member-256 is still leader and still in the cache.
+                shardManager256.tell(new FindPrimary("default", true), getRef());
+                found = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+                path = found.getPrimaryPath();
+                assertTrue("Unexpected primary path " + path + " which must still not on member-256",
+                            path.contains("member-256-shard-default-config"));
+                Future<PrimaryShardInfo> futurePrimaryShard = primaryShardInfoCache.getIfPresent("default");
+                futurePrimaryShard.onComplete(new OnComplete<PrimaryShardInfo>() {
+                    @Override
+                    public void onComplete(final Throwable failure, final PrimaryShardInfo futurePrimaryShardInfo) {
+                        if (failure != null) {
+                            assertTrue("Primary shard info is unexpectedly removed from primaryShardInfoCache", false);
+                        } else {
+                            assertEquals("Expected primaryShardInfoCache entry",
+                                        primaryShardInfo, futurePrimaryShardInfo);
+                        }
+                    }
+                }, system256.dispatchers().defaultGlobalDispatcher());
+            }
+        };
+
+        LOG.info("testShardAvailabilityChangeOnMemberWithNameContainedInLeaderIdUnreachable ending");
+    }
 
     @Test
     public void testOnReceiveFindLocalShardForNonExistentShard() throws Exception {

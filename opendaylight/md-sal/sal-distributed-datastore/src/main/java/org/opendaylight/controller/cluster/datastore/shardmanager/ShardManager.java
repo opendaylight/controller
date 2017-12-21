@@ -1044,11 +1044,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void markMemberUnavailable(final MemberName memberName) {
-        final String memberStr = memberName.getName();
         for (ShardInformation info : localShards.values()) {
             String leaderId = info.getLeaderId();
-            // XXX: why are we using String#contains() here?
-            if (leaderId != null && leaderId.contains(memberStr)) {
+            if (leaderId != null && ShardIdentifier.fromShardIdString(leaderId).getMemberName().equals(memberName)) {
                 LOG.debug("Marking Leader {} as unavailable.", leaderId);
                 info.setLeaderAvailable(false);
 
@@ -1060,11 +1058,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void markMemberAvailable(final MemberName memberName) {
-        final String memberStr = memberName.getName();
         for (ShardInformation info : localShards.values()) {
             String leaderId = info.getLeaderId();
-            // XXX: why are we using String#contains() here?
-            if (leaderId != null && leaderId.contains(memberStr)) {
+            if (leaderId != null && ShardIdentifier.fromShardIdString(leaderId).getMemberName().equals(memberName)) {
                 LOG.debug("Marking Leader {} as available.", leaderId);
                 info.setLeaderAvailable(true);
             }
