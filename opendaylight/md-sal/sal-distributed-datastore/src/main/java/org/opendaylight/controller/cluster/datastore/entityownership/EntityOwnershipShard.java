@@ -55,6 +55,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Un
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategy;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
 import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
@@ -64,6 +65,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -376,6 +378,28 @@ class EntityOwnershipShard extends Shard {
         super.onLeaderChanged(oldLeader, newLeader);
     }
 
+    @Override
+    protected void onVotingStateChanged() {
+        final List<Modification> modifications = new ArrayList<>();
+        searchForEntities((entityTypeNode, entityNode) -> {
+            YangInstanceIdentifier entityPath = YangInstanceIdentifier.builder(ENTITY_TYPES_PATH)
+                    .node(entityTypeNode.getIdentifier()).node(ENTITY_NODE_ID).node(entityNode.getIdentifier())
+                    .node(ENTITY_OWNER_NODE_ID).build();
+
+            Optional<String> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID).transform(
+                node -> node.getValue().toString());
+            String newOwner = newOwner(possibleOwner.orNull(), getCandidateNames(entityNode),
+                    getEntityOwnerElectionStrategy(entityPath));
+
+            if (!newOwner.equals(possibleOwner.or(""))) {
+                modifications.add(new WriteModification(entityPath,
+                        ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)));
+            }
+        });
+
+        commitCoordinator.commitModifications(modifications, this);
+    }
+
     private void initializeDownPeerMemberNamesFromClusterState() {
         java.util.Optional<Cluster> cluster = getRaftActorContext().getCluster();
         if (!cluster.isPresent()) {
@@ -623,10 +647,16 @@ class EntityOwnershipShard extends Shard {
     }
 
     private Collection<String> getViableCandidates(final Collection<String> candidates) {
+        Map<MemberName, VotingState> memberToVotingState = new HashMap<>();
+        getRaftActorContext().getPeers().forEach(peerInfo -> memberToVotingState.put(
+                ShardIdentifier.fromShardIdString(peerInfo.getId()).getMemberName(), peerInfo.getVotingState()));
+
         Collection<String> viableCandidates = new ArrayList<>();
 
         for (String candidate : candidates) {
-            if (!downPeerMemberNames.contains(MemberName.forName(candidate))) {
+            MemberName memberName = MemberName.forName(candidate);
+            if (memberToVotingState.get(memberName) != VotingState.NON_VOTING
+                    && !downPeerMemberNames.contains(memberName)) {
                 viableCandidates.add(candidate);
             }
         }

@@ -701,6 +701,8 @@ class RaftActorServerConfigurationSupport {
             if (succeeded && localServerChangedToNonVoting) {
                 LOG.debug("Leader changed to non-voting - trying leadership transfer");
                 raftActor.becomeNonVoting();
+            } else if (raftActor.isLeader()) {
+                raftActor.onVotingStateChanged();
             }
         }
 
