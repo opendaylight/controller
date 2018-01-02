@@ -27,9 +27,12 @@ import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
+import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
+import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -52,6 +55,7 @@ import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -67,6 +71,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * End-to-end integration tests for the entity ownership functionality.
@@ -725,6 +732,108 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-2");
+    }
+
+    @Test
+    public void testEntityOwnershipWithNonVotingMembers() throws Exception {
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(5)
+                .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+
+        String name = "testEntityOwnershipWithNonVotingMembers";
+        final MemberNode member1LeaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1")
+                .useAkkaArtery(false).testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+
+        final MemberNode member2FollowerNode = MemberNode.builder(memberNodes).akkaConfig("Member2")
+                .useAkkaArtery(false).testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        final MemberNode member3FollowerNode = MemberNode.builder(memberNodes).akkaConfig("Member3")
+                .useAkkaArtery(false).testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        final MemberNode member4FollowerNode = MemberNode.builder(memberNodes).akkaConfig("Member4")
+                .useAkkaArtery(false).testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        final MemberNode member5FollowerNode = MemberNode.builder(memberNodes).akkaConfig("Member5")
+                .useAkkaArtery(false).testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        AbstractDataStore leaderDistributedDataStore = member1LeaderNode.configDataStore();
+
+        leaderDistributedDataStore.waitTillReady();
+        member2FollowerNode.configDataStore().waitTillReady();
+        member3FollowerNode.configDataStore().waitTillReady();
+        member4FollowerNode.configDataStore().waitTillReady();
+        member5FollowerNode.configDataStore().waitTillReady();
+
+        member1LeaderNode.waitForMembersUp("member-2", "member-3", "member-4", "member-5");
+
+        final DOMEntityOwnershipService member3EntityOwnershipService =
+                newOwnershipService(member3FollowerNode.configDataStore());
+        final DOMEntityOwnershipService member4EntityOwnershipService =
+                newOwnershipService(member4FollowerNode.configDataStore());
+        final DOMEntityOwnershipService member5EntityOwnershipService =
+                newOwnershipService(member5FollowerNode.configDataStore());
+
+        newOwnershipService(member1LeaderNode.configDataStore());
+        member1LeaderNode.kit().waitUntilLeader(member1LeaderNode.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+
+        // Make member4 and member5 non-voting
+
+        Future<Object> future = Patterns.ask(leaderDistributedDataStore.getActorContext().getShardManager(),
+                new ChangeShardMembersVotingStatus(ENTITY_OWNERSHIP_SHARD_NAME,
+                        ImmutableMap.of("member-4", false, "member-5", false)), new Timeout(10, TimeUnit.SECONDS));
+        Object response = Await.result(future, FiniteDuration.apply(10, TimeUnit.SECONDS));
+        if (response instanceof Throwable) {
+            throw new AssertionError("ChangeShardMembersVotingStatus failed", (Throwable)response);
+        }
+
+        assertNull("Expected null Success response. Actual " + response, response);
+
+        // Register member4 candidate for entity1 - it should not become owner since it's non-voting
+
+        member4EntityOwnershipService.registerCandidate(ENTITY1);
+        verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-4");
+
+        // Register member5 candidate for entity2 - it should not become owner since it's non-voting
+
+        member5EntityOwnershipService.registerCandidate(ENTITY2);
+        verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-5");
+
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "");
+        verifyOwner(leaderDistributedDataStore, ENTITY2, "");
+
+        // Register member3 candidate for entity1 - it should become owner since it's voting
+
+        member3EntityOwnershipService.registerCandidate(ENTITY1);
+        verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-4", "member-3");
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "member-3");
+
+        // Switch member4 and member5 back to voting and member3 non-voting. This should result in member4 and member5
+        // to become entity owners.
+
+        future = Patterns.ask(leaderDistributedDataStore.getActorContext().getShardManager(),
+                new ChangeShardMembersVotingStatus(ENTITY_OWNERSHIP_SHARD_NAME,
+                        ImmutableMap.of("member-3", false, "member-4", true, "member-5", true)),
+                new Timeout(10, TimeUnit.SECONDS));
+        response = Await.result(future, FiniteDuration.apply(10, TimeUnit.SECONDS));
+        if (response instanceof Throwable) {
+            throw new AssertionError("ChangeShardMembersVotingStatus failed", (Throwable)response);
+        }
+
+        assertNull("Expected null Success response. Actual " + response, response);
+
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "member-4");
+        verifyOwner(leaderDistributedDataStore, ENTITY2, "member-5");
     }
 
     private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,

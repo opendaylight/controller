@@ -841,6 +841,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected abstract Optional<ActorRef> getRoleChangeNotifier();
 
     /**
+     * This method is called on the leader when a voting change operation completes.
+     */
+    protected void onVotingStateChangeComplete() {
+    }
+
+    /**
      * This method is called prior to operations such as leadership transfer and actor shutdown when the leader
      * must pause or stop its duties. This method allows derived classes to gracefully pause or finish current
      * work prior to performing the operation. On completion of any work, the run method must be called on the
@@ -1031,5 +1037,4 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             return new SimpleBehaviorState(lastValidLeaderId, lastLeaderId, behavior);
         }
     }
-
 }
