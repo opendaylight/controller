@@ -7,25 +7,19 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.dispatch.ExecutionContexts;
-import akka.dispatch.Futures;
-import akka.dispatch.OnComplete;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.CompletionStage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
 
 final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
@@ -116,28 +110,19 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         candidate = null;
         state = State.ABORTED;
 
-        final Optional<List<Future<Object>>> maybeAborts = userCohorts.abort();
+        final Optional<CompletionStage<?>> maybeAborts = userCohorts.abort();
         if (!maybeAborts.isPresent()) {
             abortCallback.onSuccess(null);
             return;
         }
 
-        final Future<Iterable<Object>> aborts = Futures.sequence(maybeAborts.get(), ExecutionContexts.global());
-        if (aborts.isCompleted()) {
-            abortCallback.onSuccess(null);
-            return;
-        }
-
-        aborts.onComplete(new OnComplete<Iterable<Object>>() {
-            @Override
-            public void onComplete(final Throwable failure, final Iterable<Object> objs) {
-                if (failure != null) {
-                    abortCallback.onFailure(failure);
-                } else {
-                    abortCallback.onSuccess(null);
-                }
+        maybeAborts.get().whenComplete((noop, failure) -> {
+            if (failure != null) {
+                abortCallback.onFailure(failure);
+            } else {
+                abortCallback.onSuccess(null);
             }
-        }, ExecutionContexts.global());
+        });
     }
 
     @Override
@@ -180,14 +165,40 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
      * any failure to validate is propagated before we record the transaction.
      *
      * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
-     * @throws ExecutionException if the operation fails
-     * @throws TimeoutException if the operation times out
+     * @param futureCallback the callback to invoke on completion, which may be immediate or async.
      */
-    // FIXME: this should be asynchronous
-    void userPreCommit(final DataTreeCandidate dataTreeCandidate) throws ExecutionException, TimeoutException {
+    void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Void> futureCallback) {
         userCohorts.reset();
-        userCohorts.canCommit(dataTreeCandidate);
-        userCohorts.preCommit();
+
+        final Optional<CompletionStage<Void>> maybeCanCommitFuture = userCohorts.canCommit(dataTreeCandidate);
+        if (!maybeCanCommitFuture.isPresent()) {
+            doUserPreCommit(futureCallback);
+            return;
+        }
+
+        maybeCanCommitFuture.get().whenComplete((noop, failure) -> {
+            if (failure != null) {
+                futureCallback.onFailure(failure);
+            } else {
+                doUserPreCommit(futureCallback);
+            }
+        });
+    }
+
+    private void doUserPreCommit(final FutureCallback<Void> futureCallback) {
+        final Optional<CompletionStage<Void>> maybePreCommitFuture = userCohorts.preCommit();
+        if (!maybePreCommitFuture.isPresent()) {
+            futureCallback.onSuccess(null);
+            return;
+        }
+
+        maybePreCommitFuture.get().whenComplete((noop, failure) -> {
+            if (failure != null) {
+                futureCallback.onFailure(failure);
+            } else {
+                futureCallback.onSuccess(null);
+            }
+        });
     }
 
     void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
@@ -196,7 +207,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
     }
 
-    void failedPreCommit(final Exception cause) {
+    void failedPreCommit(final Throwable cause) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Transaction {} failed to prepare", transaction, cause);
         } else {
@@ -207,15 +218,25 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         switchState(State.FAILED).onFailure(cause);
     }
 
-    void successfulCommit(final UnsignedLong journalIndex) {
-        try {
-            userCohorts.commit();
-        } catch (TimeoutException | ExecutionException e) {
-            // We are probably dead, depending on what the cohorts end up doing
-            LOG.error("User cohorts failed to commit", e);
+    void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
+        final Optional<CompletionStage<Void>> maybeCommitFuture = userCohorts.commit();
+        if (!maybeCommitFuture.isPresent()) {
+            finishSuccessfulCommit(journalIndex, onComplete);
+            return;
         }
 
+        maybeCommitFuture.get().whenComplete((noop, failure) -> {
+            if (failure != null) {
+                LOG.error("User cohorts failed to commit", failure);
+            }
+
+            finishSuccessfulCommit(journalIndex, onComplete);
+        });
+    }
+
+    private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
         switchState(State.COMMITTED).onSuccess(journalIndex);
+        onComplete.run();
     }
 
     void failedCommit(final Exception cause) {
