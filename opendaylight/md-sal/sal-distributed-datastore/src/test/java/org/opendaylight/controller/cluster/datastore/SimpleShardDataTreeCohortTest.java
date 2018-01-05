@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -19,7 +18,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -33,7 +31,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
-import scala.concurrent.Promise;
 
 /**
  * Unit tests for SimpleShardDataTreeCohort.
@@ -59,7 +56,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(mockUserCohorts).commit();
+        doReturn(Optional.empty()).when(mockUserCohorts).commit();
         doReturn(Optional.empty()).when(mockUserCohorts).abort();
 
         cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
@@ -139,7 +136,8 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         final DataTreeCandidateTip candidate = preCommitSuccess();
 
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).successfulCommit(UnsignedLong.valueOf(0));
+            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).successfulCommit(UnsignedLong.valueOf(0),
+                () -> { });
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
@@ -240,12 +238,9 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void testAbortWithCohorts() throws Exception {
         doReturn(true).when(mockShardDataTree).startAbort(cohort);
 
-        final Promise<Iterable<Object>> cohortFuture = akka.dispatch.Futures.promise();
-        doReturn(Optional.of(Collections.singletonList(cohortFuture.future()))).when(mockUserCohorts).abort();
+        doReturn(Optional.of(CompletableFuture.completedFuture(null))).when(mockUserCohorts).abort();
 
         final Future<?> abortFuture = abort(cohort);
-
-        cohortFuture.success(Collections.emptyList());
 
         abortFuture.get();
         verify(mockShardDataTree).startAbort(cohort);
