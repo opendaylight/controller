@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -219,7 +220,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     }
 
     CompositeDataTreeCohort createCohort(final SchemaContext schemaContext, final TransactionIdentifier txId,
-            final Timeout commitStepTimeout) {
-        return new CompositeDataTreeCohort(this, txId, schemaContext, commitStepTimeout);
+            final Executor callbackExecutor, final Timeout commitStepTimeout) {
+        return new CompositeDataTreeCohort(this, txId, schemaContext, callbackExecutor, commitStepTimeout);
     }
 }
