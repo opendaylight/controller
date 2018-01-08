@@ -7,8 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import akka.actor.ExtendedActorSystem;
 import akka.serialization.JSerializer;
+import akka.util.ClassLoaderObjectInputStream;
 import com.google.common.base.Preconditions;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModificationsCursor;
 
@@ -19,6 +23,13 @@ import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModifi
  * shards.
  */
 public final class ReadyLocalTransactionSerializer extends JSerializer {
+
+    private final ExtendedActorSystem system;
+
+    public ReadyLocalTransactionSerializer(final ExtendedActorSystem system) {
+        this.system = Preconditions.checkNotNull(system);
+    }
+
     @Override
     public int identifier() {
         return 97439437;
@@ -46,7 +57,12 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
 
     @Override
     public Object fromBinaryJava(final byte[] bytes, final Class<?> clazz) {
-        return SerializationUtils.deserialize(bytes);
+        try (ClassLoaderObjectInputStream is = new ClassLoaderObjectInputStream(system.dynamicAccess().classLoader(),
+            new ByteArrayInputStream(bytes))) {
+            return is.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new IllegalStateException("Failed to deserialize object", e);
+        }
     }
 
     private static final class BatchedCursor extends AbstractBatchedModificationsCursor {
