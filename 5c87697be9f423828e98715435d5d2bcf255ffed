@@ -22,6 +22,30 @@
       "revId": "5c87697be9f423828e98715435d5d2bcf255ffed",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8a2d62fb_c0ebaaa0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 847,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-08T15:46:43Z",
+      "side": 1,
+      "message": "yeah I\u0027ll call it onVotingStateChangeComplete",
+      "parentUuid": "c4169518_2f523a38",
+      "range": {
+        "startLine": 845,
+        "startChar": 0,
+        "endLine": 847,
+        "endChar": 43
+      },
+      "revId": "5c87697be9f423828e98715435d5d2bcf255ffed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
