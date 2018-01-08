@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import akka.actor.ExtendedActorSystem;
+import akka.testkit.JavaTestKit;
 import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -48,11 +50,15 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         TransactionIdentifier txId = nextTransactionId();
         ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
 
-        ReadyLocalTransactionSerializer serializer = new ReadyLocalTransactionSerializer();
-
-        byte[] bytes = serializer.toBinary(readyMessage);
-
-        Object deserialized = serializer.fromBinary(bytes, ReadyLocalTransaction.class);
+        final ExtendedActorSystem system = (ExtendedActorSystem) ExtendedActorSystem.create("test");
+        final Object deserialized;
+        try {
+            final ReadyLocalTransactionSerializer serializer = new ReadyLocalTransactionSerializer(system);
+            final byte[] bytes = serializer.toBinary(readyMessage);
+            deserialized = serializer.fromBinary(bytes, ReadyLocalTransaction.class);
+        } finally {
+            JavaTestKit.shutdownActorSystem(system);
+        }
 
         assertNotNull("fromBinary returned null", deserialized);
         assertEquals("fromBinary return type", BatchedModifications.class, deserialized.getClass());
