@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4169518_2f523a38",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 847,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-08T13:48:36Z",
+      "side": 1,
+      "message": "I think a better name/javadoc is needed:\n- \u0027as the leader\u0027 -\u003e \u0027on the leader\u0027\n- \u0027onVotingStateChanged would seem to imply it is invoked when a state change is actuated, but it is invoked whenever we complete an attempt, be it successfully or unsuccessfully -- making \u0027Changed\u0027 a bit misleading",
+      "range": {
+        "startLine": 845,
+        "startChar": 0,
+        "endLine": 847,
+        "endChar": 43
+      },
+      "revId": "5c87697be9f423828e98715435d5d2bcf255ffed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
