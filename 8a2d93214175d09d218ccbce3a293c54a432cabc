@@ -22,6 +22,30 @@
       "revId": "8a2d93214175d09d218ccbce3a293c54a432cabc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bc87956_1a12e1c3",
+        "filename": "features/mdsal/odl-mdsal-clustering-commons/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-01-08T15:45:40Z",
+      "side": 1,
+      "message": "No — this is explained in the commit message.",
+      "parentUuid": "4bc9310c_760df131",
+      "range": {
+        "startLine": 17,
+        "startChar": 17,
+        "endLine": 17,
+        "endChar": 31
+      },
+      "revId": "8a2d93214175d09d218ccbce3a293c54a432cabc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
