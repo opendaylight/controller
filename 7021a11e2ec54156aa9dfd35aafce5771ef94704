@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29edbe78_ff731b5b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-09T11:03:45Z",
+      "side": 1,
+      "message": "this is a bit weird dance around immediately-completed messages and their execution context. it deserves quite a bit of explanation of what is it that we are dealing with and why.\n\nFurthermore I think this would be better handled choosing the appropriate executor -- e.g. bridging to executeInSelf() or directExecutor().",
+      "range": {
+        "startLine": 195,
+        "startChar": 12,
+        "endLine": 195,
+        "endChar": 56
+      },
+      "revId": "7021a11e2ec54156aa9dfd35aafce5771ef94704",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a475abc_497038e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-09T11:03:45Z",
+      "side": 1,
+      "message": "This is a happy path test, do we have a test for when things go south with pipelining?\n\nI mean given tx1, tx2, what is going to happen if both go through canCommit(), but then tx1\u0027s canCommit fails -- in what state will tx2 be?",
+      "range": {
+        "startLine": 95,
+        "startChar": 16,
+        "endLine": 95,
+        "endChar": 45
+      },
+      "revId": "7021a11e2ec54156aa9dfd35aafce5771ef94704",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
