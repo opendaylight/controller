@@ -22,6 +22,30 @@
       "revId": "775bf93b660667e1bc1dc5ffb2e9da0ba262e0a5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9485546a_628c38a6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-09T11:20:22Z",
+      "side": 1,
+      "message": "Another option would be to switch from using ExecuteInSelfActor to either an ExecutionContext or an Executor -- hence the users would not be directly tied to an ExecuteInSelfActor.",
+      "parentUuid": "2a8f48b9_6c59651d",
+      "range": {
+        "startLine": 116,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 73
+      },
+      "revId": "775bf93b660667e1bc1dc5ffb2e9da0ba262e0a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
