@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c93cc94a_ecf9cada",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-09T15:42:25Z",
+      "side": 1,
+      "message": "I did this b/c most cohort implementations will likely be synchronous so don\u0027t need to incur the overhead of queueing a message. But this can be accomplished via the Executor passed to addCallback as you pointed out.",
+      "parentUuid": "29edbe78_ff731b5b",
+      "range": {
+        "startLine": 195,
+        "startChar": 12,
+        "endLine": 195,
+        "endChar": 56
+      },
+      "revId": "7021a11e2ec54156aa9dfd35aafce5771ef94704",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a475abc_497038e4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorTest.java",
         "patchSetId": 2
