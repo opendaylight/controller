@@ -46,6 +46,30 @@
       "revId": "775bf93b660667e1bc1dc5ffb2e9da0ba262e0a5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84a11467_dd8aa38b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-10T04:14:45Z",
+      "side": 1,
+      "message": "Now passes Executor that wraps executeInSelf",
+      "parentUuid": "9485546a_628c38a6",
+      "range": {
+        "startLine": 116,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 73
+      },
+      "revId": "775bf93b660667e1bc1dc5ffb2e9da0ba262e0a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
