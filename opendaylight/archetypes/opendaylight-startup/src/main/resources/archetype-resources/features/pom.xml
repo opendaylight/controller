@@ -31,6 +31,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <module>odl-X-api</module>
     <module>odl-X</module>
     <module>odl-X-rest</module>
-    <module>odl-X-cli</module>
   </modules>
 </project>
