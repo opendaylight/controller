@@ -21,7 +21,7 @@ public class AbstractClusterRefEntityOwnershipTest extends AbstractEntityOwnersh
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        system = ActorSystem.create("test", ConfigFactory.load().getConfig("test"));
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("test-config"));
     }
 
     @AfterClass
