@@ -22,6 +22,30 @@
       "revId": "0e12b3adba3e84b4732b56f2a9281a23d191c450",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2c6515d_41661fb7",
+        "filename": "opendaylight/archetypes/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-01-13T03:05:14Z",
+      "side": 1,
+      "message": "duh; yeah, that seems like a Great Idea (TM) (C) (R) ... ;-)",
+      "parentUuid": "7ee8fe05_fcb82cd6",
+      "range": {
+        "startLine": 23,
+        "startChar": 15,
+        "endLine": 23,
+        "endChar": 20
+      },
+      "revId": "0e12b3adba3e84b4732b56f2a9281a23d191c450",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
