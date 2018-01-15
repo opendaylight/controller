@@ -46,6 +46,30 @@
       "revId": "1809a14a84699915c44c93b66b0253aaf30d8d7f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eac31c94_01bd2759",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-15T12:58:03Z",
+      "side": 1,
+      "message": "It does not -- it handles only the \u0027no version present\u0027 case, which is squashed to \"0.0.0\" in getVersion() case.",
+      "parentUuid": "2b9041c9_6d36531e",
+      "range": {
+        "startLine": 155,
+        "startChar": 13,
+        "endLine": 155,
+        "endChar": 49
+      },
+      "revId": "1809a14a84699915c44c93b66b0253aaf30d8d7f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
