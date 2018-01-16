@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8784ef21_9ebe0a39",
+        "filename": "opendaylight/config/config-persister-feature-adapter/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-01-16T02:10:42Z",
+      "side": 0,
+      "message": "shouldn\u0027t this also be removed here now?",
+      "revId": "9dbb6de9c5d93f7058ae1c956149f9c9c0cc76f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
