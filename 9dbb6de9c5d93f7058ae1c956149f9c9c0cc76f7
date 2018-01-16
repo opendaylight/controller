@@ -16,6 +16,24 @@
       "revId": "9dbb6de9c5d93f7058ae1c956149f9c9c0cc76f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac897f35_1ad132f4",
+        "filename": "opendaylight/config/config-persister-feature-adapter/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-01-16T02:13:12Z",
+      "side": 0,
+      "message": "proposed in https://git.opendaylight.org/gerrit/#/c/67187/",
+      "parentUuid": "8784ef21_9ebe0a39",
+      "revId": "9dbb6de9c5d93f7058ae1c956149f9c9c0cc76f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
