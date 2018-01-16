@@ -62,7 +62,6 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Activator>org.opendaylight.controller.configpusherfeature.ConfigPusherFeatureActivator</Bundle-Activator>
                         <Private-Package>
-                            org.apache.felix.utils.version,
                             org.opendaylight.controller.configpusherfeature.internal
                         </Private-Package>
                     </instructions>
