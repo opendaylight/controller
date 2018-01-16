@@ -82,7 +82,6 @@
           <instructions>
             <Fragment-Host>${project.groupId}.config-persister-impl</Fragment-Host>
             <Provide-Capability>org.opendaylight.controller.config.persister.storage.adapter</Provide-Capability>
-            <Private-Package>org.opendaylight.controller.config.persist.storage.file.xml.model,</Private-Package>
           </instructions>
         </configuration>
       </plugin>
