@@ -80,8 +80,7 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.config.manager.impl.osgi.ConfigManagerActivator</Bundle-Activator>
-            <Private-Package>org.opendaylight.controller.config.manager.*,
-              javax.annotation.*,</Private-Package>
+            <Private-Package>org.opendaylight.controller.config.manager.*</Private-Package>
             <Export-Package></Export-Package>
           </instructions>
         </configuration>
