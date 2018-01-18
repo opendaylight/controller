@@ -8,6 +8,11 @@
 package org.opendaylight.controller.md.sal.binding.test;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
 public class DataBrokerTestModule {
 
@@ -16,6 +21,7 @@ public class DataBrokerTestModule {
     }
 
     private final boolean useMTDataTreeChangeListenerExecutor;
+    private ConstantSchemaAbstractDataBrokerTest dataBrokerTest;
 
     public DataBrokerTestModule(boolean useMTDataTreeChangeListenerExecutor) {
         this.useMTDataTreeChangeListenerExecutor = useMTDataTreeChangeListenerExecutor;
@@ -30,12 +36,31 @@ public class DataBrokerTestModule {
             // into this DataBrokerTestModule, and make AbstractDataBrokerTest
             // use it, instead of the way around it currently is (the opposite);
             // this is just for historical reasons... and works for now.
-            ConstantSchemaAbstractDataBrokerTest dataBrokerTest
-                = new ConstantSchemaAbstractDataBrokerTest(useMTDataTreeChangeListenerExecutor);
+            dataBrokerTest = new ConstantSchemaAbstractDataBrokerTest(useMTDataTreeChangeListenerExecutor);
             dataBrokerTest.setup();
             return dataBrokerTest.getDataBroker();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public DOMDataBroker getDOMDataBroker() {
+        return dataBrokerTest.getDomBroker();
+    }
+
+    public BindingToNormalizedNodeCodec getBindingToNormalizedNodeCodec() {
+        return dataBrokerTest.getDataBrokerTestCustomizer().getBindingToNormalized();
+    }
+
+    public DOMNotificationRouter getDOMNotificationRouter() {
+        return dataBrokerTest.getDataBrokerTestCustomizer().getDomNotificationRouter();
+    }
+
+    public SchemaService getSchemaService() {
+        return dataBrokerTest.getDataBrokerTestCustomizer().getSchemaService();
+    }
+
+    public SchemaContextProvider getSchemaContextProvider() {
+        return (SchemaContextProvider) dataBrokerTest.getDataBrokerTestCustomizer().getSchemaService();
     }
 }
