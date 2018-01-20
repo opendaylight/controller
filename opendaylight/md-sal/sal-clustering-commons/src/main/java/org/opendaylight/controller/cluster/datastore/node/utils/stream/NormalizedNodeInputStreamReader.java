@@ -27,6 +27,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -332,6 +333,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
             case ValueTypes.YANG_IDENTIFIER_TYPE :
                 return readYangInstanceIdentifierInternal();
+
+            case ValueTypes.EMPTY_TYPE:
+            case ValueTypes.NULL_TYPE:
+                return Empty.getInstance();
 
             default :
                 return null;

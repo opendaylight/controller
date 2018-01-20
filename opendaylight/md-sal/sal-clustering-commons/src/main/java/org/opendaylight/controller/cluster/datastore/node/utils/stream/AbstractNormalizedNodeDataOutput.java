@@ -484,7 +484,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
             case ValueTypes.YANG_IDENTIFIER_TYPE:
                 writeYangInstanceIdentifierInternal((YangInstanceIdentifier) value);
                 break;
-            case ValueTypes.NULL_TYPE :
+            case ValueTypes.EMPTY_TYPE :
                 break;
             case ValueTypes.STRING_BYTES_TYPE:
                 final byte[] valueBytes = value.toString().getBytes(StandardCharsets.UTF_8);
