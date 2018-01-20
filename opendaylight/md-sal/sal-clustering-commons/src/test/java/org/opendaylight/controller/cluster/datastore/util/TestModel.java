@@ -94,6 +94,7 @@ public final class TestModel {
     public static final QName CHOICE_QNAME = QName.create(TEST_QNAME, "choice");
     public static final QName SHOE_QNAME = QName.create(TEST_QNAME, "shoe");
     public static final QName ANY_XML_QNAME = QName.create(TEST_QNAME, "any");
+    public static final QName EMPTY_QNAME = QName.create(TEST_QNAME, "empty-leaf");
     public static final QName INVALID_QNAME = QName.create(TEST_QNAME, "invalid");
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
     private static final String DATASTORE_AUG_YANG = "/odl-datastore-augmentation.yang";

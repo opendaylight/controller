@@ -26,6 +26,7 @@ import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -92,6 +93,7 @@ public class NormalizedNodeStreamReaderWriterTest {
                         new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
                         .withChild(entry1).withChild(entry2).build())
                 .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1, 2, 3, 4}))
+                .withChild(ImmutableNodes.leafNode(TestModel.EMPTY_QNAME, Empty.getInstance()))
                 .withChild(Builders.orderedMapBuilder()
                       .withNodeIdentifier(new NodeIdentifier(TestModel.ORDERED_LIST_QNAME))
                       .withChild(ImmutableNodes.mapEntry(TestModel.ORDERED_LIST_ENTRY_QNAME,

@@ -160,5 +160,9 @@ module odl-datastore-test {
 
         anyxml any {
         }
+
+        leaf empty-leaf {
+            type empty;
+        }
     }
 }
