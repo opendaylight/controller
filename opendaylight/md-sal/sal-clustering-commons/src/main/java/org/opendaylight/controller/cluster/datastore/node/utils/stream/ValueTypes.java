@@ -13,7 +13,9 @@ import com.google.common.collect.ImmutableMap.Builder;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -33,8 +35,12 @@ final class ValueTypes {
     public static final byte BIG_INTEGER_TYPE = 10;
     public static final byte BIG_DECIMAL_TYPE = 11;
     public static final byte BINARY_TYPE = 12;
+    // Leaf nodes no longer allow null values. The "empty" type is now represented as
+    // org.opendaylight.yangtools.yang.common.Empty. This is kept for backwards compatibility.
+    @Deprecated
     public static final byte NULL_TYPE = 13;
     public static final byte STRING_BYTES_TYPE = 14;
+    public static final byte EMPTY_TYPE = 15;
 
     private static final Map<Class<?>, Byte> TYPES;
 
@@ -51,6 +57,7 @@ final class ValueTypes {
         b.put(BigInteger.class, BIG_INTEGER_TYPE);
         b.put(BigDecimal.class, BIG_DECIMAL_TYPE);
         b.put(byte[].class, BINARY_TYPE);
+        b.put(Empty.class, EMPTY_TYPE);
 
         TYPES = b.build();
     }
@@ -60,9 +67,7 @@ final class ValueTypes {
     }
 
     public static byte getSerializableType(Object node) {
-        if (node == null) {
-            return NULL_TYPE;
-        }
+        Objects.requireNonNull(node);
 
         final Byte type = TYPES.get(node.getClass());
         if (type != null) {
