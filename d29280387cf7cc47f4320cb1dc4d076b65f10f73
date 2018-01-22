@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0ad65a30_51361427",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataOutput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-22T16:52:46Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "0318901b_492145d4",
+      "range": {
+        "startLine": 487,
+        "startChar": 38,
+        "endLine": 487,
+        "endChar": 39
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3184581c_4347a5f5",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
         "patchSetId": 2
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "14c5b047_969d8d20",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-22T16:52:46Z",
+      "side": 1,
+      "message": "As discussed on skype, the potential fallout from this will likely be non-existent as only a BI user that sets a null String value that is persisted would be affected.  So I\u0027ll just add comments here.",
+      "parentUuid": "3184581c_4347a5f5",
+      "range": {
+        "startLine": 339,
+        "startChar": 16,
+        "endLine": 339,
+        "endChar": 43
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e879db6_6d35c174",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/ValueTypes.java",
         "patchSetId": 2
@@ -106,6 +154,30 @@
       "writtenOn": "2018-01-22T13:42:01Z",
       "side": 1,
       "message": "since we cannot emit NULL_TYPE, we should mark it as deprecated with an explanation...",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 44
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7cb70935_083a797b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/ValueTypes.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-22T16:52:46Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "8e879db6_6d35c174",
       "range": {
         "startLine": 38,
         "startChar": 4,
