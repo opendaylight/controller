@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -54,8 +53,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.blueprint.container.EventConstants;
-import org.osgi.service.event.EventHandler;
+import org.osgi.service.blueprint.container.BlueprintEvent;
+import org.osgi.service.blueprint.container.BlueprintListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -88,11 +87,12 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     public void restartContainer(final Bundle bundle, final List<Object> paths) {
+        LOG.debug("restartContainer for bundle {}", bundle);
+
         if (restartExecutor.isShutdown()) {
+            LOG.debug("Already closed - returning");
             return;
         }
-
-        LOG.debug("restartContainer for bundle {}", bundle);
 
         restartExecutor.execute(() -> {
             blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle));
@@ -131,10 +131,17 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         // restart config modules.
         final CountDownLatch containerCreationComplete = new CountDownLatch(containerBundles.size());
         ServiceRegistration<?> eventHandlerReg = registerEventHandler(forBundle.getBundleContext(), event -> {
-            final Bundle bundle = (Bundle) event.getProperty(EventConstants.BUNDLE);
-            LOG.debug("handleEvent {} for bundle {}", event.getTopic(), bundle);
-            if (containerBundles.contains(bundle)) {
+            final Bundle bundle = event.getBundle();
+            if (event.isReplay()) {
+                LOG.trace("Got replay BlueprintEvent {} for bundle {}", event.getType(), bundle);
+                return;
+            }
+
+            LOG.debug("Got BlueprintEvent {} for bundle {}", event.getType(), bundle);
+            if (containerBundles.contains(bundle)
+                    && (event.getType() == BlueprintEvent.CREATED || event.getType() == BlueprintEvent.FAILURE)) {
                 containerCreationComplete.countDown();
+                LOG.debug("containerCreationComplete is now {}", containerCreationComplete.getCount());
             }
         });
 
@@ -160,6 +167,8 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
         // Now restart any associated config system Modules.
         restartConfigModules(forBundle.getBundleContext(), configModules);
+
+        LOG.info("Finished restarting blueprint containers for bundle {} and its dependent bundles", forBundle);
     }
 
     /**
@@ -360,15 +369,15 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         return value.toString();
     }
 
-    private ServiceRegistration<?> registerEventHandler(final BundleContext bundleContext, final EventHandler handler) {
-        Dictionary<String, Object> props = new Hashtable<>();
-        props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC,
-                new String[]{EventConstants.TOPIC_CREATED, EventConstants.TOPIC_FAILURE});
-        return bundleContext.registerService(EventHandler.class.getName(), handler, props);
+    private ServiceRegistration<?> registerEventHandler(final BundleContext bundleContext,
+            final BlueprintListener listener) {
+        return bundleContext.registerService(BlueprintListener.class.getName(), listener, new Hashtable<>());
     }
 
     @Override
     public void close() {
+        LOG.debug("Closing");
+
         restartExecutor.shutdownNow();
     }
 }
