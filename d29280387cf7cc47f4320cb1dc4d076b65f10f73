@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9257443_a60ed021",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-22T13:42:01Z",
+      "side": 1,
+      "message": "This is a tough one: null used to be accepted as a value for LeafNodes, but normally this would be associated with Void (and hence empty type). This is true for all data coming from any of the serialization formats -- Binding, JSON, XML -- all of which did not allow nulls in other types and would rather use an empty string, or not serialize the value at all (binding).\n\nBI components, though, were not restricted in this regard and would allow string leaves to be set to null -- just like EOS used to do. Without explicit knowledge of the data model (e.g. have the SchemaNode) we cannot discern these two cases.\n\nTurning a NULL into an EMPTY runs the risk of having string leaves as Empty, which will explode once we touch them via code which has type knowledge -- like casting it to String or passing through binding-dom-codec.",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 23
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3184581c_4347a5f5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-22T13:42:01Z",
+      "side": 1,
+      "message": "as noted in the other comment, this is dangerous. I am not sure how else to handle it :(",
+      "range": {
+        "startLine": 339,
+        "startChar": 16,
+        "endLine": 339,
+        "endChar": 43
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e879db6_6d35c174",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/ValueTypes.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-01-22T13:42:01Z",
+      "side": 1,
+      "message": "since we cannot emit NULL_TYPE, we should mark it as deprecated with an explanation...",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 44
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
