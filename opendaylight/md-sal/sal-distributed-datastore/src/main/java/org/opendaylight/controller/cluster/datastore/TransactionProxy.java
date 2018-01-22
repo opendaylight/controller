@@ -86,7 +86,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         Preconditions.checkState(type != TransactionType.WRITE_ONLY,
                 "Reads from write-only transactions are not allowed");
 
-        LOG.debug("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
+        LOG.trace("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
 
         final SettableFuture<T> proxyFuture = SettableFuture.create();
         TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
@@ -105,7 +105,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         Preconditions.checkState(type != TransactionType.WRITE_ONLY,
                 "Reads from write-only transactions are not allowed");
 
-        LOG.debug("Tx {} read {}", getIdentifier(), path);
+        LOG.trace("Tx {} read {}", getIdentifier(), path);
 
         if (YangInstanceIdentifier.EMPTY.equals(path)) {
             return readAllData();
@@ -163,7 +163,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private void executeModification(final AbstractModification modification) {
         checkModificationState();
 
-        LOG.debug("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(),
+        LOG.trace("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(),
                 modification.getPath());
 
         TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
