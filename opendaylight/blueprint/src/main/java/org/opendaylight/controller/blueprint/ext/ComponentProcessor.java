@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.aries.blueprint.ComponentDefinitionRegistry;
 import org.apache.aries.blueprint.ComponentDefinitionRegistryProcessor;
 import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholder;
@@ -133,7 +135,8 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
         // Register a ManagedService so we get updates from the ConfigAdmin when the cfg file corresponding
         // to the persistentId changes.
         final ManagedService managedService = new ManagedService() {
-            private volatile boolean initialUpdate = true;
+            private final AtomicBoolean initialUpdate = new AtomicBoolean(true);
+            private volatile Dictionary<String, ?> previousProperties;
 
             @Override
             public void updated(final Dictionary<String, ?> properties) {
@@ -143,11 +146,11 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
                 // The first update occurs when the service is registered so ignore it as we want subsequent
                 // updates when it changes. The ConfigAdmin will send an update even if the cfg file doesn't
                 // yet exist.
-                if (initialUpdate) {
-                    initialUpdate = false;
-                } else {
+                if (!initialUpdate.compareAndSet(true, false) && !Objects.equals(previousProperties, properties)) {
                     blueprintContainerRestartService.restartContainerAndDependents(bundle);
                 }
+
+                previousProperties = properties;
             }
         };
 
