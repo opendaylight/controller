@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
@@ -30,9 +31,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.blueprint.container.BlueprintContainer;
-import org.osgi.service.blueprint.container.EventConstants;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import org.osgi.service.blueprint.container.BlueprintEvent;
+import org.osgi.service.blueprint.container.BlueprintListener;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.osgi.util.tracker.ServiceTracker;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCustomizer<Bundle>, EventHandler,
+public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCustomizer<Bundle>, BlueprintListener,
         SynchronousBundleListener {
     private static final Logger LOG = LoggerFactory.getLogger(BlueprintBundleTracker.class);
     private static final String BLUEPRINT_FILE_PATH = "org/opendaylight/blueprint/";
@@ -89,19 +89,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                     @Override
                     public BlueprintExtenderService addingService(
                             final ServiceReference<BlueprintExtenderService> reference) {
-                        blueprintExtenderService = reference.getBundle().getBundleContext().getService(reference);
-                        bundleTracker.open();
-
-                        context.addBundleListener(BlueprintBundleTracker.this);
-
-                        LOG.debug("Got BlueprintExtenderService");
-
-                        restartService.setBlueprintExtenderService(blueprintExtenderService);
-
-                        blueprintContainerRestartReg = context.registerService(
-                                BlueprintContainerRestartService.class.getName(), restartService, new Hashtable<>());
-
-                        return blueprintExtenderService;
+                        return onBlueprintExtenderServiceAdded(reference);
                     }
 
                     @Override
@@ -121,13 +109,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                     @Override
                     public QuiesceParticipant addingService(
                             final ServiceReference<QuiesceParticipant> reference) {
-                        quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
-
-                        LOG.debug("Got QuiesceParticipant");
-
-                        restartService.setQuiesceParticipant(quiesceParticipant);
-
-                        return quiesceParticipant;
+                        return onQuiesceParticipantAdded(reference);
                     }
 
                     @Override
@@ -143,6 +125,33 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         quiesceParticipantTracker.open();
     }
 
+    private QuiesceParticipant onQuiesceParticipantAdded(final ServiceReference<QuiesceParticipant> reference) {
+        quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
+
+        LOG.debug("Got QuiesceParticipant");
+
+        restartService.setQuiesceParticipant(quiesceParticipant);
+
+        return quiesceParticipant;
+    }
+
+    private BlueprintExtenderService onBlueprintExtenderServiceAdded(
+            final ServiceReference<BlueprintExtenderService> reference) {
+        blueprintExtenderService = reference.getBundle().getBundleContext().getService(reference);
+        bundleTracker.open();
+
+        bundleContext.addBundleListener(BlueprintBundleTracker.this);
+
+        LOG.debug("Got BlueprintExtenderService");
+
+        restartService.setBlueprintExtenderService(blueprintExtenderService);
+
+        blueprintContainerRestartReg = bundleContext.registerService(
+                BlueprintContainerRestartService.class.getName(), restartService, new Hashtable<>());
+
+        return blueprintExtenderService;
+    }
+
     private void registerNamespaceHandler(final BundleContext context) {
         Dictionary<String, Object> props = new Hashtable<>();
         props.put("osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0);
@@ -151,10 +160,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     private void registerBlueprintEventHandler(final BundleContext context) {
-        Dictionary<String, Object> props = new Hashtable<>();
-        props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC,
-                new String[]{EventConstants.TOPIC_CREATED, EventConstants.TOPIC_FAILURE});
-        eventHandlerReg = context.registerService(EventHandler.class.getName(), this, props);
+        eventHandlerReg = context.registerService(BlueprintListener.class.getName(), this, new Hashtable<>());
     }
 
     /**
@@ -221,30 +227,30 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     /**
-     * Implemented from EventHandler to listen for blueprint events.
+     * Implemented from BlueprintListener to listen for blueprint events.
      *
      * @param event the event to handle
      */
     @Override
-    public void handleEvent(final Event event) {
-        if (EventConstants.TOPIC_CREATED.equals(event.getTopic())) {
-            LOG.info("Blueprint container for bundle {} was successfully created",
-                    event.getProperty(EventConstants.BUNDLE));
-        } else if (EventConstants.TOPIC_FAILURE.equals(event.getTopic())) {
-            // If the container timed out waiting for dependencies, we'll destroy it and start it again. This
-            // is indicated via a non-null DEPENDENCIES property containing the missing dependencies. The
-            // default timeout is 5 min and ideally we would set this to infinite but the timeout can only
-            // be set at the bundle level in the manifest - there's no way to set it globally.
-            if (event.getProperty(EventConstants.DEPENDENCIES) != null) {
-                Bundle bundle = (Bundle) event.getProperty(EventConstants.BUNDLE);
+    public void blueprintEvent(BlueprintEvent event) {
+        if (event.getType() == BlueprintEvent.CREATED) {
+            LOG.info("Blueprint container for bundle {} was successfully created", event.getBundle());
+            return;
+        }
 
-                List<Object> paths = findBlueprintPaths(bundle);
-                if (!paths.isEmpty()) {
-                    LOG.warn("Blueprint container for bundle {} timed out waiting for dependencies - restarting it",
-                            event.getProperty(EventConstants.BUNDLE));
+        // If the container timed out waiting for dependencies, we'll destroy it and start it again. This
+        // is indicated via a non-null DEPENDENCIES property containing the missing dependencies. The
+        // default timeout is 5 min and ideally we would set this to infinite but the timeout can only
+        // be set at the bundle level in the manifest - there's no way to set it globally.
+        if (event.getType() == BlueprintEvent.FAILURE && event.getDependencies() != null) {
+            Bundle bundle = event.getBundle();
 
-                    restartService.restartContainer(bundle, paths);
-                }
+            List<Object> paths = findBlueprintPaths(bundle);
+            if (!paths.isEmpty()) {
+                LOG.warn("Blueprint container for bundle {} timed out waiting for dependencies - restarting it",
+                        bundle);
+
+                restartService.restartContainer(bundle, paths);
             }
         }
     }
@@ -321,32 +327,9 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
             // ID, we're picking the bundle that was (likely) started after all the others and thus
             // is likely the safest to destroy at this point.
 
-            ServiceReference<?> ref = null;
-            for (Bundle bundle : containerBundles) {
-                ServiceReference<?>[] references = bundle.getRegisteredServices();
-                if (references == null) {
-                    continue;
-                }
-
-                for (ServiceReference<?> reference : references) {
-                    // We did check the service usage above but it's possible the usage has changed since
-                    // then,
-                    if (getServiceUsage(reference) == 0) {
-                        continue;
-                    }
-
-                    // Choose 'reference' if it has a lower service ranking or, if the rankings are equal
-                    // which is usually the case, if it has a higher service ID. For the latter the < 0
-                    // check looks backwards but that's how ServiceReference#compareTo is documented to work.
-                    if (ref == null || reference.compareTo(ref) < 0) {
-                        LOG.debug("Currently selecting bundle {} for destroy (with reference {})", bundle, reference);
-                        ref = reference;
-                    }
-                }
-            }
-
-            if (ref != null) {
-                bundlesToDestroy.add(ref.getBundle());
+            Bundle bundle = findBundleWithHighestUsedServiceId(containerBundles);
+            if (bundle != null) {
+                bundlesToDestroy.add(bundle);
             }
 
             LOG.debug("Selected bundle {} for destroy (lowest ranking service or highest service ID)",
@@ -354,6 +337,34 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         }
 
         return bundlesToDestroy;
+    }
+
+    @Nullable
+    private Bundle findBundleWithHighestUsedServiceId(final Collection<Bundle> containerBundles) {
+        ServiceReference<?> highestServiceRef = null;
+        for (Bundle bundle : containerBundles) {
+            ServiceReference<?>[] references = bundle.getRegisteredServices();
+            if (references == null) {
+                continue;
+            }
+
+            for (ServiceReference<?> reference : references) {
+                // We did check the service usage previously but it's possible the usage has changed since then.
+                if (getServiceUsage(reference) == 0) {
+                    continue;
+                }
+
+                // Choose 'reference' if it has a lower service ranking or, if the rankings are equal
+                // which is usually the case, if it has a higher service ID. For the latter the < 0
+                // check looks backwards but that's how ServiceReference#compareTo is documented to work.
+                if (highestServiceRef == null || reference.compareTo(highestServiceRef) < 0) {
+                    LOG.debug("Currently selecting bundle {} for destroy (with reference {})", bundle, reference);
+                    highestServiceRef = reference;
+                }
+            }
+        }
+
+        return highestServiceRef == null ? null : highestServiceRef.getBundle();
     }
 
     private static int getServiceUsage(final ServiceReference<?> ref) {
