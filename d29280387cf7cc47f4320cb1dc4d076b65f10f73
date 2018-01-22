@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "27879ef0_96248e2d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-22T13:55:19Z",
+      "side": 1,
+      "message": "I was afraid of this - I rolled the dice that only the empty type yielded nulls before - I figured you would know for sure. We need the schema to tell the difference...",
+      "parentUuid": "f9257443_a60ed021",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 23
+      },
+      "revId": "d29280387cf7cc47f4320cb1dc4d076b65f10f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0318901b_492145d4",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataOutput.java",
         "patchSetId": 2
