@@ -89,16 +89,23 @@ public final class FollowerLogInformation {
     }
 
     /**
-     * Decrements the value of the follower's next index.
+     * Decrements the value of the follower's next index, taking into account its reported last log index.
      *
-     * @return true if the next index was decremented, ie it was previously &gt;= 0, false otherwise.
+     * @param followerLastIndex follower's last reported index.
+     * @return true if the next index was decremented, i.e. it was previously &gt;= 0, false otherwise.
      */
-    public boolean decrNextIndex() {
+    public boolean decrNextIndex(final long followerLastIndex) {
         if (nextIndex < 0) {
             return false;
         }
 
-        nextIndex--;
+        if (followerLastIndex >= 0 && nextIndex > followerLastIndex) {
+            // If the follower's last log index is lower than nextIndex, jump directly to it, so we converge
+            // on a common index more quickly.
+            nextIndex = followerLastIndex;
+        } else {
+            nextIndex--;
+        }
         return true;
     }
 
