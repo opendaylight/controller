@@ -201,7 +201,10 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
      */
     private void acquireOperation() {
         if (isOperationHandOffComplete()) {
-            limiter.acquire();
+            if (!limiter.acquire()) {
+                LOG.warn("Failed to acquire execute operation permit for transaction {} on actor {}", getIdentifier(),
+                    actor);
+            }
         }
     }
 

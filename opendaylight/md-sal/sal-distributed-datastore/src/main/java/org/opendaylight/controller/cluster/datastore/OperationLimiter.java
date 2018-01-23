@@ -39,21 +39,20 @@ public class OperationLimiter extends OnComplete<Object> {
         this.semaphore = new Semaphore(maxPermits);
     }
 
-    void acquire() {
-        acquire(1);
+    boolean acquire() {
+        return acquire(1);
     }
 
-    void acquire(final int acquirePermits) {
+    boolean acquire(final int acquirePermits) {
         try {
-            if (!semaphore.tryAcquire(acquirePermits, acquireTimeout, TimeUnit.NANOSECONDS)) {
-                LOG.warn("Failed to acquire operation permit for transaction {}", identifier);
-            }
+            return semaphore.tryAcquire(acquirePermits, acquireTimeout, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Interrupted when trying to acquire operation permit for transaction {}", identifier, e);
             } else {
                 LOG.warn("Interrupted when trying to acquire operation permit for transaction {}", identifier);
             }
+            return false;
         }
     }
 
@@ -66,7 +65,8 @@ public class OperationLimiter extends OnComplete<Object> {
         }
     }
 
-    public TransactionIdentifier getIdentifier() {
+    @VisibleForTesting
+    TransactionIdentifier getIdentifier() {
         return identifier;
     }
 

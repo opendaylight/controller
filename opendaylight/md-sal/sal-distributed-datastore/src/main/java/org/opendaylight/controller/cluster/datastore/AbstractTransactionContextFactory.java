@@ -116,7 +116,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent,
             final String shardName) {
         final TransactionContextWrapper transactionContextWrapper =
-                new TransactionContextWrapper(parent.getIdentifier(), actorContext);
+                new TransactionContextWrapper(parent.getIdentifier(), actorContext, shardName);
 
         Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier());
         if (findPrimaryFuture.isCompleted()) {
