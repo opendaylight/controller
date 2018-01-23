@@ -20,7 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>bundle</packaging>
 
   <properties>
-    <opendaylight.karaf.version>3.0.2</opendaylight.karaf.version>
+    <opendaylight.karaf.version>3.0.3-SNAPSHOT</opendaylight.karaf.version>
   </properties>
 
   <dependencyManagement>
