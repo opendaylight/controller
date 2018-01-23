@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.databroker;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -159,4 +160,8 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         Preconditions.checkState(impl != null, "Transaction %s is no longer running", getIdentifier());
     }
 
+    @Override
+    protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return super.addToStringAttributes(toStringHelper).add("running", commitImpl == null);
+    }
 }
