@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.databroker;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -104,5 +106,14 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
 
     protected DOMStoreTransactionFactory getTxFactory(LogicalDatastoreType type) {
         return storeTxFactories.get(type);
+    }
+
+    @Override
+    public final String toString() {
+        return addToStringAttributes(MoreObjects.toStringHelper(this).omitNullValues()).toString();
+    }
+
+    protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return toStringHelper.add("identifier", identifier);
     }
 }
