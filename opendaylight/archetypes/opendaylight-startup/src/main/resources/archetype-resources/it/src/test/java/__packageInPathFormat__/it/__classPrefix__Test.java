@@ -45,7 +45,7 @@ public class ${classPrefix}Test extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-${artifactId}-rest";
+        return "odl-${artifactId}";
     }
 
     @Override
@@ -58,7 +58,6 @@ public class ${classPrefix}Test extends AbstractMdsalTestBase {
     }
 
     @Test
-    @Ignore // TODO https://jira.opendaylight.org/browse/CONTROLLER-1810
     public void test${artifactId}FeatureLoad() {
         Assert.assertTrue(true);
     }
