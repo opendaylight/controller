@@ -32,7 +32,7 @@ public class TransactionContextWrapperTest {
         MockitoAnnotations.initMocks(this);
         doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
         transactionContextWrapper = new TransactionContextWrapper(MockIdentifiers.transactionIdentifier(
-            TransactionContextWrapperTest.class, "mock"), actorContext);
+            TransactionContextWrapperTest.class, "mock"), actorContext, "mock");
     }
 
     @Test
