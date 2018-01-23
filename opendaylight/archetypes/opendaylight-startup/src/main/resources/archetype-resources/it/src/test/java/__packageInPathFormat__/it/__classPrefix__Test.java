@@ -45,7 +45,7 @@ public class ${classPrefix}Test extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-${artifactId}-rest";
+        return "odl-${artifactId}";
     }
 
     @Override
