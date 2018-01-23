@@ -245,7 +245,16 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
      * @return True if a permit was successfully acquired, false otherwise
      */
     private boolean acquireOperation() {
-        return isOperationHandOffComplete() && limiter.acquire();
+        if (isOperationHandOffComplete()) {
+            if (limiter.acquire()) {
+                return true;
+            }
+
+            LOG.warn("Failed to acquire execute operation permit for transaction {} on actor {}", getIdentifier(),
+                actor);
+        }
+
+        return false;
     }
 
     @Override

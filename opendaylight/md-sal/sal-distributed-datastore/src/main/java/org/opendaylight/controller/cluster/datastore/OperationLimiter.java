@@ -45,8 +45,6 @@ public class OperationLimiter  {
             if (semaphore.tryAcquire(acquirePermits, acquireTimeout, TimeUnit.NANOSECONDS)) {
                 return true;
             }
-
-            LOG.warn("Failed to acquire operation permit for transaction {}", identifier);
         } catch (InterruptedException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Interrupted when trying to acquire operation permit for transaction {}", identifier, e);
@@ -66,7 +64,8 @@ public class OperationLimiter  {
         this.semaphore.release(permits);
     }
 
-    public TransactionIdentifier getIdentifier() {
+    @VisibleForTesting
+    TransactionIdentifier getIdentifier() {
         return identifier;
     }
 
