@@ -16,6 +16,24 @@
       "revId": "22873936a12403704cb07bdd0eb58d24dd057f47",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64fdf6b1_bdf8b581",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/ComponentProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-23T14:41:43Z",
+      "side": 1,
+      "message": "All events are logged on line 143.",
+      "parentUuid": "c04c2198_f477b70a",
+      "revId": "22873936a12403704cb07bdd0eb58d24dd057f47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
