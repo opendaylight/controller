@@ -121,13 +121,13 @@ public class FollowerLogInformationTest {
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 1, context);
 
-        assertTrue(followerLogInformation.decrNextIndex());
+        assertTrue(followerLogInformation.decrNextIndex(1));
         assertEquals("getNextIndex", 0, followerLogInformation.getNextIndex());
 
-        assertTrue(followerLogInformation.decrNextIndex());
+        assertTrue(followerLogInformation.decrNextIndex(1));
         assertEquals("getNextIndex", -1, followerLogInformation.getNextIndex());
 
-        assertFalse(followerLogInformation.decrNextIndex());
+        assertFalse(followerLogInformation.decrNextIndex(1));
         assertEquals("getNextIndex", -1, followerLogInformation.getNextIndex());
     }
 }
