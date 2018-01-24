@@ -146,6 +146,21 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
             frontend = tx.getFrontendTransaction();
         }
 
+        // FIXME: record currently-locked transaction in a killed wrapper, in case the user has improper locking in
+        //        place and does not synchronize transaction users with the failure callback
+        final PingPongTransaction victimTx = lockedTx;
+        if (victimTx != null) {
+            // We are being invoked and the user seems to have a locked transaction. If the user does not synchronize
+            // properly, they will call close() without clearing it first. We need to notice that and postpone the call
+            // to backend.
+
+            // FIXME: this should be a wrapper
+            final PingPongTransaction record = victimTx;
+            if (!LOCKED_UPDATER.compareAndSet(this, victimTx, record)) {
+                LOG.debug("Transaction chain {} observed victim movement, cannot mitigate client unsafety", chain);
+            }
+        }
+
         listener.onTransactionChainFailed(this, frontend, cause);
 
         synchronized (this) {
@@ -302,7 +317,34 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     void readyTransaction(@Nonnull final PingPongTransaction tx) {
         // First mark the transaction as not locked.
         final boolean lockedMatch = LOCKED_UPDATER.compareAndSet(this, tx, null);
-        Preconditions.checkState(lockedMatch, "Attempted to submit transaction %s while we have %s", tx, lockedTx);
+        if (!lockedMatch) {
+            // Submitted transaction is not what we are tracking. This would be an error, but in case we are recovering
+            // from the user calling error-path close() with an outstanding transaction, we will have a dummy stored
+            // which points to previous state.
+            final PingPongTransaction localLockedTx = lockedTx;
+            Preconditions.checkState(localLockedTx != null, "Attempted to submit transaction %s while none was pending",
+                    tx);
+
+            final PingPongTransaction victimTx = localLockedTx.getVictim();
+            Preconditions.checkState(victimTx != null,
+                "Attempted to submit transaction %s while we have %s", tx, localLockedTx);
+            Preconditions.checkState(victimTx.equals(tx),
+                "Attempted to submit transaction %s while we have victim %s", tx, victimTx);
+
+            final boolean clearedVictim = LOCKED_UPDATER.compareAndSet(this, localLockedTx, null);
+            Preconditions.checkState(clearedVictim, "Failed to clear victim %s: moved from %s to %s", tx, localLockedTx,
+                lockedTx);
+
+            LOG.debug("Victim transaction {} unlocked", tx);
+            final DOMDataReadWriteTransaction backendTx = tx.getTransaction();
+            backendTx.cancel();
+            LOG.debug("Backend transaction {} canceled", backendTx);
+
+            // All clear, now we can propagate closure to the backend
+
+            return;
+        }
+
         LOG.debug("Transaction {} unlocked", tx);
 
         /*

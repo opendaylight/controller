@@ -21,7 +21,7 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
  * We never leak this class to the user and have it implement the {@link FutureCallback}
  * interface so we have a simple way of propagating the result.
  */
-final class PingPongTransaction implements FutureCallback<CommitInfo> {
+class PingPongTransaction implements FutureCallback<CommitInfo> {
     private final DOMDataReadWriteTransaction delegate;
     private final SettableFuture<CommitInfo> future;
     private DOMDataReadWriteTransaction frontendTransaction;
@@ -66,5 +66,10 @@ final class PingPongTransaction implements FutureCallback<CommitInfo> {
 
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
         return toStringHelper.add("delegate", delegate);
+    }
+
+    PingPongTransaction getVictim() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
