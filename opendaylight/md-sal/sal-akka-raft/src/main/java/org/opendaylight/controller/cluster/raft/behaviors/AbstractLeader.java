@@ -34,7 +34,6 @@ import org.opendaylight.controller.cluster.messaging.SliceOptions;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
-import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -116,7 +115,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             trackers.addAll(initializeFromLeader.trackers);
         } else {
             for (PeerInfo peerInfo: context.getPeers()) {
-                FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
+                FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
                 followerToLog.put(peerInfo.getId(), followerLogInformation);
             }
         }
@@ -149,8 +148,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     public void addFollower(final String followerId) {
-        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(
-                context.getPeerInfo(followerId), -1, context);
+        FollowerLogInformation followerLogInformation = new FollowerLogInformation(context.getPeerInfo(followerId),
+            context);
         followerToLog.put(followerId, followerLogInformation);
 
         if (heartbeatSchedule == null) {
