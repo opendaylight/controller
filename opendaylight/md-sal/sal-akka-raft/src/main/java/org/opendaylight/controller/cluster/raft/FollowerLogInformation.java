@@ -215,10 +215,10 @@ public final class FollowerLogInformation {
     /**
      * Returns the time since the last activity occurred for the follower.
      *
-     * @return time in milliseconds since the last activity from the follower.
+     * @return time in nanoseconds since the last activity from the follower.
      */
-    public long timeSinceLastActivity() {
-        return stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    public long nanosSinceLastActivity() {
+        return stopwatch.elapsed(TimeUnit.NANOSECONDS);
     }
 
     /**
