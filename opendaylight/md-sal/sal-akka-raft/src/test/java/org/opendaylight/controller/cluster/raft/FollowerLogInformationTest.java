@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import scala.concurrent.duration.FiniteDuration;
 
-public class FollowerLogInformationImplTest {
+public class FollowerLogInformationTest {
 
     @Test
     public void testIsFollowerActive() {
@@ -31,7 +31,7 @@ public class FollowerLogInformationImplTest {
         context.setConfigParams(configParams);
 
         FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(new PeerInfo("follower1", null, VotingState.VOTING), 9, context);
+                new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 9, context);
 
         assertFalse("Follower should be termed inactive before stopwatch starts",
                 followerLogInformation.isFollowerActive());
@@ -68,7 +68,7 @@ public class FollowerLogInformationImplTest {
         MockRaftActorContext context = new MockRaftActorContext();
         context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(new PeerInfo("follower1", null, VotingState.VOTING), 10, context);
+                new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 10, context);
 
         assertTrue(followerLogInformation.okToReplicate());
         assertFalse(followerLogInformation.okToReplicate());
@@ -87,7 +87,7 @@ public class FollowerLogInformationImplTest {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.VOTING_NOT_INITIALIZED);
         MockRaftActorContext context = new MockRaftActorContext();
         context.setCommitIndex(0);
-        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
+        FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
         assertFalse(followerLogInformation.okToReplicate());
 
@@ -106,7 +106,7 @@ public class FollowerLogInformationImplTest {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.NON_VOTING);
         MockRaftActorContext context = new MockRaftActorContext();
         context.setCommitIndex(0);
-        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
+        FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
         assertTrue(followerLogInformation.okToReplicate());
 
@@ -119,7 +119,7 @@ public class FollowerLogInformationImplTest {
         MockRaftActorContext context = new MockRaftActorContext();
         context.setCommitIndex(1);
         FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(new PeerInfo("follower1", null, VotingState.VOTING), 1, context);
+                new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 1, context);
 
         assertTrue(followerLogInformation.decrNextIndex());
         assertEquals("getNextIndex", 0, followerLogInformation.getNextIndex());
