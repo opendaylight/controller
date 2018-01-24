@@ -484,7 +484,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             for (String id: followerIds) {
                 final FollowerLogInformation info = leader.getFollower(id);
                 followerInfoList.add(new FollowerInfo(id, info.getNextIndex(), info.getMatchIndex(),
-                        info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(info.timeSinceLastActivity()),
+                        info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(
+                            TimeUnit.NANOSECONDS.toMillis(info.nanosSinceLastActivity())),
                         context.getPeerInfo(info.getId()).isVoting()));
             }
 
