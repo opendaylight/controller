@@ -216,11 +216,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (followerLogInformation.timeSinceLastActivity()
-                > context.getConfigParams().getElectionTimeOutInterval().toMillis()) {
+        final long lastActivityNanos = followerLogInformation.nanosSinceLastActivity();
+        if (lastActivityNanos > context.getConfigParams().getElectionTimeOutInterval().toNanos()) {
             log.warn("{} : handleAppendEntriesReply delayed beyond election timeout, "
                     + "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
-                    logName(), appendEntriesReply, followerLogInformation.timeSinceLastActivity(),
+                    logName(), appendEntriesReply, TimeUnit.NANOSECONDS.toMillis(lastActivityNanos),
                     context.getLastApplied(), context.getCommitIndex());
         }
 
@@ -629,14 +629,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    protected void sendAppendEntries(final long timeSinceLastActivityInterval, final boolean isHeartbeat) {
+    protected void sendAppendEntries(final long timeSinceLastActivityIntervalNanos, final boolean isHeartbeat) {
         // Send an AppendEntries to all followers
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             final String followerId = e.getKey();
             final FollowerLogInformation followerLogInformation = e.getValue();
             // This checks helps not to send a repeat message to the follower
             if (!followerLogInformation.isFollowerActive()
-                    || followerLogInformation.timeSinceLastActivity() >= timeSinceLastActivityInterval) {
+                    || followerLogInformation.nanosSinceLastActivity() >= timeSinceLastActivityIntervalNanos) {
                 sendUpdatesToFollower(followerId, followerLogInformation, true, isHeartbeat);
             }
         }
@@ -949,7 +949,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void sendHeartBeat() {
         if (!followerToLog.isEmpty()) {
             log.trace("{}: Sending heartbeat", logName());
-            sendAppendEntries(context.getConfigParams().getHeartBeatInterval().toMillis(), true);
+            sendAppendEntries(context.getConfigParams().getHeartBeatInterval().toNanos(), true);
 
             appendEntriesMessageSlicer.checkExpiredSlicedMessageState();
         }
