@@ -16,6 +16,24 @@
       "revId": "387c19a06cbcde2e258a2f8b6338898a8bc3ba74",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7076a5c_c125df6c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 6757
+      },
+      "writtenOn": "2018-01-25T01:37:31Z",
+      "side": 1,
+      "message": "Yes, your are right. But for test, I have set custom-raft-policy-implementation\u003dorg.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy and invoked switchBehavior via the ShardManagerInfo JMX action.",
+      "parentUuid": "7ecdf098_0d7e7cc0",
+      "revId": "387c19a06cbcde2e258a2f8b6338898a8bc3ba74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
