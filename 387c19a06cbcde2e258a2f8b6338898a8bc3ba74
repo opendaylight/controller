@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ecdf098_0d7e7cc0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-01-25T00:40:02Z",
+      "side": 1,
+      "message": "The change looks fine but the EntityOwnershipShard does not invoke switchBehavior at all. In fact it is only invoked via the ShardManagerInfo JMX action.",
+      "revId": "387c19a06cbcde2e258a2f8b6338898a8bc3ba74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
