@@ -334,7 +334,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>odl-mdsal-common</artifactId>
+                <artifactId>odl-controller-mdsal-common</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
