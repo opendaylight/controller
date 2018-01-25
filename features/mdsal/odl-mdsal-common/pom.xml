@@ -41,10 +41,6 @@
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>net.java.dev.stax-utils</groupId>
-            <artifactId>stax-utils</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-common-api</artifactId>
             <version>${project.version}</version>
