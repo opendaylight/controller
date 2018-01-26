@@ -106,6 +106,14 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         return actor -> actor.updateRemoteBuckets(buckets);
     }
 
+    static ExecuteInActor getLocalDataMessage() {
+        return actor -> actor.getSender().tell(actor.getLocalData(), actor.getSelf());
+    }
+
+    static ExecuteInActor getRemoteBucketsMessage() {
+        return actor -> actor.getSender().tell(ImmutableMap.copyOf(actor.getRemoteBuckets()), actor.getSelf());
+    }
+
     public final T getLocalData() {
         return getLocalBucket().getData();
     }
