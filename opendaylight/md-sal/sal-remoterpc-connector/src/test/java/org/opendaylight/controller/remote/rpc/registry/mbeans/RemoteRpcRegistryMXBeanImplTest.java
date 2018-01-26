@@ -10,10 +10,11 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -56,12 +58,13 @@ public class RemoteRpcRegistryMXBeanImplTest {
         final JavaTestKit invoker = new JavaTestKit(system);
         final JavaTestKit registrar = new JavaTestKit(system);
         final JavaTestKit supervisor = new JavaTestKit(system);
-        final Props props = RpcRegistry.props(config, invoker.getRef(), registrar.getRef());
+        final Props props = RpcRegistry.props(config, invoker.getRef(), registrar.getRef()
+                .withDispatcher(Dispatchers.DefaultDispatcherId());
         testActor = new TestActorRef<>(system, props, supervisor.getRef(), "testActor");
-        final RpcRegistry rpcRegistry = testActor.underlyingActor();
 
-        mxBean = new RemoteRpcRegistryMXBeanImpl(rpcRegistry);
-        Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+        final Timeout timeout = Timeout.apply(10, TimeUnit.SECONDS);
+        mxBean = new RemoteRpcRegistryMXBeanImpl(new BucketStoreAccess(testActor, system.dispatcher(), timeout),
+                timeout);
     }
 
     @After
