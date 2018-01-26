@@ -8,10 +8,11 @@
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.getBucketsByMembersMessage;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.getLocalDataMessage;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.getRemoteBucketsMessage;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.removeBucketMessage;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor.updateRemoteBucketsMessage;
 
-import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.dispatch.OnComplete;
@@ -23,6 +24,8 @@ import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import scala.concurrent.ExecutionContext;
+import scala.concurrent.Future;
 
 /**
  * Convenience access to {@link BucketStoreActor}. Used mostly by {@link Gossiper}.
@@ -32,17 +35,19 @@ import java.util.function.Consumer;
 @Beta
 @VisibleForTesting
 public final class BucketStoreAccess {
-    private final ActorContext context;
+    private final ActorRef actorRef;
+    private final ExecutionContext dispatcher;
     private final Timeout timeout;
 
-    BucketStoreAccess(final ActorContext context, final Timeout timeout) {
-        this.context = Preconditions.checkNotNull(context);
+    public BucketStoreAccess(final ActorRef actorRef, final ExecutionContext dispatcher, final Timeout timeout) {
+        this.actorRef = Preconditions.checkNotNull(actorRef);
+        this.dispatcher = dispatcher;
         this.timeout = Preconditions.checkNotNull(timeout);
     }
 
     <T extends BucketData<T>> void getBucketsByMembers(final Collection<Address> members,
             final Consumer<Map<Address, Bucket<T>>> callback) {
-        Patterns.ask(context.parent(), getBucketsByMembersMessage(members), timeout)
+        Patterns.ask(actorRef, getBucketsByMembersMessage(members), timeout)
             .onComplete(new OnComplete<Object>() {
                 @SuppressWarnings("unchecked")
                 @Override
@@ -51,11 +56,11 @@ public final class BucketStoreAccess {
                         callback.accept((Map<Address, Bucket<T>>) success);
                     }
                 }
-            }, context.dispatcher());
+            }, dispatcher);
     }
 
     void getBucketVersions(final Consumer<Map<Address, Long>> callback) {
-        Patterns.ask(context.parent(), Singletons.GET_BUCKET_VERSIONS, timeout).onComplete(new OnComplete<Object>() {
+        Patterns.ask(actorRef, Singletons.GET_BUCKET_VERSIONS, timeout).onComplete(new OnComplete<Object>() {
             @SuppressWarnings("unchecked")
             @Override
             public void onComplete(final Throwable failure, final Object success) {
@@ -63,16 +68,31 @@ public final class BucketStoreAccess {
                     callback.accept((Map<Address, Long>) success);
                 }
             }
-        }, context.dispatcher());
+        }, dispatcher);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Future<Map<Address, Long>> getBucketVersions() {
+        return (Future) Patterns.ask(actorRef, Singletons.GET_BUCKET_VERSIONS, timeout);
     }
 
     @SuppressWarnings("unchecked")
     void updateRemoteBuckets(final Map<Address, ? extends Bucket<?>> buckets) {
-        context.parent().tell(updateRemoteBucketsMessage((Map<Address, Bucket<?>>) buckets), ActorRef.noSender());
+        actorRef.tell(updateRemoteBucketsMessage((Map<Address, Bucket<?>>) buckets), ActorRef.noSender());
     }
 
     void removeRemoteBucket(final Address addr) {
-        context.parent().tell(removeBucketMessage(addr), ActorRef.noSender());
+        actorRef.tell(removeBucketMessage(addr), ActorRef.noSender());
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends BucketData<T>> Future<T> getLocalData() {
+        return (Future<T>) Patterns.ask(actorRef, getLocalDataMessage(), timeout);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public <T extends BucketData<T>> Future<Map<Address, Bucket<T>>> getRemoteBuckets() {
+        return (Future) Patterns.ask(actorRef, getRemoteBucketsMessage(), timeout);
     }
 
     public enum Singletons {
