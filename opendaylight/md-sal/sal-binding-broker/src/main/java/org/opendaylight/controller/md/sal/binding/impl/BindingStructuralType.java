@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.LeafSetNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 
 /**
@@ -104,7 +105,7 @@ enum BindingStructuralType {
         if(isNotAddressable(data)) {
             return NOT_ADDRESSABLE;
         }
-        if(data instanceof MapNode) {
+        if(data instanceof MapNode || data instanceof UnkeyedListNode) {
             return INVISIBLE_LIST;
         }
         if(data instanceof ChoiceNode) {
