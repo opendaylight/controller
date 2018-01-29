@@ -44,7 +44,9 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     private final BindingCodecTreeNode<T> codec;
     private final DataTreeCandidateNode domData;
     private final PathArgument identifier;
-    private Collection<DataObjectModification<? extends DataObject>> childNodesCache;
+
+    private volatile Collection<DataObjectModification<? extends DataObject>> childNodesCache;
+    private volatile ModificationType modificationType;
 
     private LazyDataObjectModification(final BindingCodecTreeNode<T> codec, final DataTreeCandidateNode domData) {
         this.codec = Preconditions.checkNotNull(codec);
@@ -136,28 +138,68 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     }
 
     @Override
-    public DataObjectModification.ModificationType getModificationType() {
-        switch(domData.getModificationType()) {
+    public ModificationType getModificationType() {
+        ModificationType localType = modificationType;
+        if (localType != null) {
+            return localType;
+        }
+
+        switch (domData.getModificationType()) {
             case APPEARED:
             case WRITE:
-                return DataObjectModification.ModificationType.WRITE;
-            case SUBTREE_MODIFIED:
-                return DataObjectModification.ModificationType.SUBTREE_MODIFIED;
+                localType = ModificationType.WRITE;
+                break;
             case DISAPPEARED:
             case DELETE:
-                return DataObjectModification.ModificationType.DELETE;
+                localType = ModificationType.DELETE;
+                break;
+            case SUBTREE_MODIFIED:
+                localType = resolveSubtreeModificationType();
+                break;
             default:
                 // TODO: Should we lie about modification type instead of exception?
                 throw new IllegalStateException("Unsupported DOM Modification type " + domData.getModificationType());
+        }
+
+        modificationType = localType;
+        return localType;
+    }
+
+    private ModificationType resolveSubtreeModificationType() {
+        switch (codec.getChildAddressabilitySummary()) {
+            case ADDRESSABLE:
+                // All children are addressable, it is safe to report SUBTREE_MODIFIED
+                return ModificationType.SUBTREE_MODIFIED;
+            case UNADDRESSABLE:
+                // All children are non-addressable, report WRITE
+                return ModificationType.WRITE;
+            case MIXED:
+                // This case is not completely trivial, as we may have NOT_ADDRESSABLE nodes underneath us. If that
+                // is the case, we need to turn this modification into a WRITE operation, so that the user is able
+                // to observe those nodes being introduced. This is not efficient, but unfortunately unavoidable,
+                // as we cannot accurately represent such changes.
+                for (DataTreeCandidateNode child : domData.getChildNodes()) {
+                    if (BindingStructuralType.from(child) == BindingStructuralType.NOT_ADDRESSABLE) {
+                        // We have a non-addressable child, turn this modification into a write
+                        return ModificationType.WRITE;
+                    }
+                }
+
+                // No unaddressable children found, proceed in addressed mode
+                return ModificationType.SUBTREE_MODIFIED;
+            default:
+                throw new IllegalStateException("Unsupported child addressability summary "
+                        + codec.getChildAddressabilitySummary());
         }
     }
 
     @Override
     public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
-        if (childNodesCache == null) {
-            childNodesCache = from(codec, domData.getChildNodes());
+        Collection<DataObjectModification<? extends DataObject>> local = childNodesCache;
+        if (local == null) {
+            childNodesCache = local = from(codec, domData.getChildNodes());
         }
-        return childNodesCache;
+        return local;
     }
 
     @Override
