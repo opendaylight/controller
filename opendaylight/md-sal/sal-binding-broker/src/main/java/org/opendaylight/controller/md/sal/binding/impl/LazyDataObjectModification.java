@@ -138,9 +138,9 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     @Override
     public DataObjectModification.ModificationType getModificationType() {
         switch(domData.getModificationType()) {
+            case APPEARED:
             case WRITE:
                 return DataObjectModification.ModificationType.WRITE;
-            case APPEARED:
             case SUBTREE_MODIFIED:
                 return DataObjectModification.ModificationType.SUBTREE_MODIFIED;
             case DISAPPEARED:
