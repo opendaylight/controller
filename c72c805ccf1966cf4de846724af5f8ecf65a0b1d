@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0b8f2e1_4b0f9298",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-01T14:49:53Z",
+      "side": 1,
+      "message": "catch RuntimeException. Also final isn\u0027t needed here.",
+      "range": {
+        "startLine": 154,
+        "startChar": 17,
+        "endLine": 154,
+        "endChar": 22
+      },
+      "revId": "c72c805ccf1966cf4de846724af5f8ecf65a0b1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7f0a86a_11b42e37",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-01T14:49:53Z",
+      "side": 1,
+      "message": "From the bug desc, the runtime ex was due to a validation error for missing mandatory descendant which should be communicated to the caller via the returned Future during 3PC - thus, I don\u0027t think we should propagate the exception here as it\u0027s not really part of the API contract, which states IllegalStateException is thrown \"if the transaction is not NEW\" which is a user coding error. \n\nThis is really an issue in the back-end which shouldn\u0027t throw unchecked validation errors at this point, again that should be done during canCommit.  However I think this is only an issue with the in-memory datastore and not CDS.",
+      "revId": "c72c805ccf1966cf4de846724af5f8ecf65a0b1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
