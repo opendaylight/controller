@@ -14,9 +14,25 @@
   <version>0.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <properties>
-    <archetype.test.skip>true</archetype.test.skip>
-  </properties>
+  <!-- This is for the dependencies below required during autorelease -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>2.4.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>1.7.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -26,6 +42,109 @@
       <artifactId>opendaylight-karaf-empty</artifactId>
       <version>3.0.2</version>
       <type>zip</type>
+    </dependency>
+
+    <!-- Required to list all dependencies of archetypes, because otherwise autorelease fails after merging,
+         because without this Maven won't be able to figure out the dependencies needed to be built for the archetype.
+         NB that transitive dependency resolution does not seem to include dependencyManagement nor parent of POM, so we
+         have to list all the *-artifacts and some *-parent explicitly also for this to work. -->
+    <dependency>
+      <groupId>org.opendaylight.aaa</groupId>
+      <artifactId>aaa-artifacts</artifactId>
+      <version>0.7.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>netconf-artifacts</artifactId>
+      <version>1.4.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>netconf-parent</artifactId>
+      <version>1.4.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>restconf-artifacts</artifactId>
+      <version>1.7.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-artifacts</artifactId>
+      <version>2.4.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>mdsal-model-artifacts</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>binding-parent</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>yang-binding</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-artifacts</artifactId>
+      <version>0.8.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>mdsal-artifacts</artifactId>
+      <version>1.7.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>mdsal-it-parent</artifactId>
+      <version>1.7.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+      <version>1.7.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>odl-mdsal-broker</artifactId>
+      <version>1.7.0-SNAPSHOT</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>odl-restconf</artifactId>
+      <version>1.7.0-SNAPSHOT</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
