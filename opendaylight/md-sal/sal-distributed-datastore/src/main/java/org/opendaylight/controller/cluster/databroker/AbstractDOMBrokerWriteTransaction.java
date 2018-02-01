@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -130,6 +131,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     }
 
     @Override
+    @SuppressWarnings("checkstyle:illegalcatch")
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         final AbstractDOMTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
@@ -137,12 +139,17 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         final Collection<T> txns = getSubtransactions();
         final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
 
-        // FIXME: deal with errors thrown by backed (ready and submit can fail in theory)
-        for (final T txn : txns) {
-            cohorts.add(txn.ready());
-        }
+        CheckedFuture<Void, TransactionCommitFailedException> ret;
+        try {
+            for (final T txn : txns) {
+                cohorts.add(txn.ready());
+            }
 
-        final CheckedFuture<Void, TransactionCommitFailedException> ret = impl.submit(this, cohorts);
+            ret = impl.submit(this, cohorts);
+        } catch (RuntimeException e) {
+            ret = Futures.immediateFailedCheckedFuture(
+                    TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e));
+        }
         FUTURE_UPDATER.lazySet(this, ret);
         return ret;
     }
