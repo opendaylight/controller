@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "0b3d0625_ac60c5e4",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-01T09:54:32Z",
+      "side": 1,
+      "message": "I would prefer we have these two bits out of the try block, too, so we do not over-extend the block.",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 154,
+        "endChar": 23
+      },
+      "revId": "3999051a19f2ed18d758214c8255c310054323bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc7fe27a_424a001d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-01T09:54:32Z",
+      "side": 1,
+      "message": "Is Throwable really needed? This does include Errors, which should be fatal to our JVM, hence I think catching Exception should be sufficient.",
+      "range": {
+        "startLine": 155,
+        "startChar": 23,
+        "endLine": 155,
+        "endChar": 32
+      },
+      "revId": "3999051a19f2ed18d758214c8255c310054323bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b636080f_bf78d326",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransaction.java",
         "patchSetId": 1
