@@ -136,6 +136,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     @Override
+    @SuppressWarnings("checkstyle:illegalcatch")
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         final AbstractDOMForwardedTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
@@ -143,14 +144,18 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
         final Collection<T> txns = getSubtransactions();
         final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
 
-        // FIXME: deal with errors thrown by backed (ready and submit can fail in theory)
-        for (DOMStoreWriteTransaction txn : txns) {
-            cohorts.add(txn.ready());
-        }
+        try {
+            for (DOMStoreWriteTransaction txn : txns) {
+                cohorts.add(txn.ready());
+            }
 
-        final CheckedFuture<Void, TransactionCommitFailedException> ret = impl.submit(this, cohorts);
-        FUTURE_UPDATER.lazySet(this, ret);
-        return ret;
+            final CheckedFuture<Void, TransactionCommitFailedException> ret = impl.submit(this, cohorts);
+            FUTURE_UPDATER.lazySet(this, ret);
+            return ret;
+        } catch (final Throwable e) {
+            FUTURE_UPDATER.lazySet(this, CANCELLED_FUTURE);
+            throw e;
+        }
     }
 
     private void checkRunning(final AbstractDOMForwardedTransactionFactory<?> impl) {
