@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c52c76de_b2e17c56",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransactionTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-05T16:32:27Z",
+      "side": 1,
+      "message": "Minor thing but declare AbstractDOMBrokerWriteTransactionTestImpl inline here instead of on the previous line.",
+      "revId": "4422032f52f906aacd0d5603cf087c798da6312d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a64e0b13_cf7673f6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransactionTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-05T16:32:27Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "4422032f52f906aacd0d5603cf087c798da6312d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdc7b8ca_e6136c50",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransactionTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-05T16:32:27Z",
+      "side": 1,
+      "message": "Perhaps verify the cause of the TransactionCommitFailedException is the mock RuntimeException above?",
+      "revId": "4422032f52f906aacd0d5603cf087c798da6312d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbc3d779_4e2aa8cd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransactionTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-05T16:32:27Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "4422032f52f906aacd0d5603cf087c798da6312d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2645f213_2f34c0ef",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/test/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMForwardedWriteTransactionTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-05T16:32:27Z",
+      "side": 1,
+      "message": "Verify the cause of the TransactionCommitFailedException?",
+      "revId": "4422032f52f906aacd0d5603cf087c798da6312d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
