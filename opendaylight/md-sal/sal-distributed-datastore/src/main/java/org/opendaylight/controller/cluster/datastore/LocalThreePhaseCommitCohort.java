@@ -41,12 +41,13 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-            final DataTreeModification modification) {
+            final DataTreeModification modification,
+            final Exception operationError) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.leader = Preconditions.checkNotNull(leader);
         this.transaction = Preconditions.checkNotNull(transaction);
         this.modification = Preconditions.checkNotNull(modification);
-        this.operationError = null;
+        this.operationError = operationError;
     }
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,

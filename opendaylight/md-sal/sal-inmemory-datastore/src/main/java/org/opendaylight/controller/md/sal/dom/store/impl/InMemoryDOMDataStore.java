@@ -223,9 +223,11 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<String> tx, final DataTreeModification modification) {
+    protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<String> tx,
+                                                              final DataTreeModification modification,
+                                                              final Exception readyError) {
         LOG.debug("Tx: {} is submitted. Modifications: {}", tx.getIdentifier(), modification);
-        return new InMemoryDOMStoreThreePhaseCommitCohort(this, tx, modification);
+        return new InMemoryDOMStoreThreePhaseCommitCohort(this, tx, modification, readyError);
     }
 
     String nextIdentifier() {
