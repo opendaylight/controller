@@ -41,4 +41,16 @@ module odl-datastore-test {
             }
         }
     }
+
+    container mandatory-data-test {
+        presence "needs to be present when empty";
+
+        leaf optional-data {
+            type string;
+        }
+        leaf mandatory-data {
+            type string;
+            mandatory true;
+        }
+    }
 }

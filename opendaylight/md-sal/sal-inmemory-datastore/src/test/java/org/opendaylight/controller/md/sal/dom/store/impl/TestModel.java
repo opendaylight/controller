@@ -27,6 +27,16 @@ public class TestModel {
     public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
     public static final YangInstanceIdentifier OUTER_LIST_PATH =
             YangInstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
+
+    public static final QName MANDATORY_DATA_TEST_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test",
+                    "2014-03-13",
+                    "mandatory-data-test");
+    public static final QName OPTIONAL_QNAME = QName.create(MANDATORY_DATA_TEST_QNAME, "optional-data");
+    public static final QName MANDATORY_QNAME = QName.create(MANDATORY_DATA_TEST_QNAME, "mandatory-data");
+    public static final YangInstanceIdentifier MANDATORY_DATA_TEST_PATH =
+            YangInstanceIdentifier.of(MANDATORY_DATA_TEST_QNAME);
+
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 
     public static SchemaContext createTestContext() {

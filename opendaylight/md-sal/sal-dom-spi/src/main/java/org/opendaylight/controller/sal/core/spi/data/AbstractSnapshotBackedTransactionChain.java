@@ -180,7 +180,11 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
     }
 
     @Override
-    protected final DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<T> tx, final DataTreeModification tree) {
+    protected final DOMStoreThreePhaseCommitCohort transactionReady(
+            final SnapshotBackedWriteTransaction<T> tx,
+            final DataTreeModification tree,
+            final Exception readyError) {
+
         final State localState = state;
 
         if (localState instanceof Allocated) {
@@ -192,7 +196,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
             LOG.debug("Ignoring transaction {} readiness due to state {}", tx, localState);
         }
 
-        return createCohort(tx, tree);
+        return createCohort(tx, tree, readyError);
     }
 
     @Override
@@ -276,7 +280,10 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
      *
      * @param transaction Transaction handle
      * @param modification {@link DataTreeModification} which needs to be applied to the backend
+     * @param operationError Any previous error that could be reported through three phase commit
      * @return A {@link DOMStoreThreePhaseCommitCohort} cohort.
      */
-    protected abstract DOMStoreThreePhaseCommitCohort createCohort(final SnapshotBackedWriteTransaction<T> transaction, final DataTreeModification modification);
+    protected abstract DOMStoreThreePhaseCommitCohort createCohort(final SnapshotBackedWriteTransaction<T> transaction,
+                                                                   final DataTreeModification modification,
+                                                                   final Exception operationError);
 }

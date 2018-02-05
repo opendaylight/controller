@@ -67,8 +67,10 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     @Override
     protected DOMStoreThreePhaseCommitCohort transactionReady(
-            final SnapshotBackedWriteTransaction<TransactionIdentifier> tx, final DataTreeModification tree) {
-        return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree);
+            final SnapshotBackedWriteTransaction<TransactionIdentifier> tx,
+            final DataTreeModification tree,
+            final Exception readyError) {
+        return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree, readyError);
     }
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
@@ -81,13 +83,6 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
                     (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, operationError);
         }
 
-        try {
-            return (LocalThreePhaseCommitCohort) tx.ready();
-        } catch (Exception e) {
-            // Unfortunately we need to cast to SnapshotBackedWriteTransaction here as it's required by
-            // LocalThreePhaseCommitCohort.
-            return new LocalThreePhaseCommitCohort(actorContext, leader,
-                    (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, e);
-        }
+        return (LocalThreePhaseCommitCohort) tx.ready();
     }
 }

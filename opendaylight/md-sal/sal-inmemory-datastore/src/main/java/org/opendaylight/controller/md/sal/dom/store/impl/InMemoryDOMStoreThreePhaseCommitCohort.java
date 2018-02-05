@@ -32,11 +32,16 @@ class InMemoryDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommit
     private final DataTreeModification modification;
     private final InMemoryDOMDataStore store;
     private DataTreeCandidate candidate;
+    private final Exception operationError;
 
-    public InMemoryDOMStoreThreePhaseCommitCohort(final InMemoryDOMDataStore store, final SnapshotBackedWriteTransaction<String> writeTransaction, final DataTreeModification modification) {
+    public InMemoryDOMStoreThreePhaseCommitCohort(final InMemoryDOMDataStore store,
+                                                  final SnapshotBackedWriteTransaction<String> writeTransaction,
+                                                  final DataTreeModification modification,
+                                                  final Exception operationError) {
         this.transaction = Preconditions.checkNotNull(writeTransaction);
         this.modification = Preconditions.checkNotNull(modification);
         this.store = Preconditions.checkNotNull(store);
+        this.operationError = operationError;
     }
 
     private static void warnDebugContext(final AbstractDOMStoreTransaction<?> transaction) {
@@ -48,6 +53,10 @@ class InMemoryDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommit
 
     @Override
     public final ListenableFuture<Boolean> canCommit() {
+        if (operationError != null) {
+            return Futures.immediateFailedFuture(operationError);
+        }
+
         try {
             store.validate(modification);
             LOG.debug("Store Transaction: {} can be committed", getTransaction().getIdentifier());

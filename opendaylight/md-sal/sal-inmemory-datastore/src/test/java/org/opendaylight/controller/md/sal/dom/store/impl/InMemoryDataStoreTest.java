@@ -16,10 +16,12 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutionException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -31,10 +33,12 @@ import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransact
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -327,6 +331,23 @@ public class InMemoryDataStoreTest {
 
         // Should throw ex
         writeTx.ready();
+    }
+
+    @Test
+    public void testReadyWithMissingMandatoryData() throws InterruptedException {
+        DOMStoreWriteTransaction writeTx = domStore.newWriteOnlyTransaction();
+        NormalizedNode<?, ?> testNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(TestModel.MANDATORY_DATA_TEST_QNAME))
+                .addChild(ImmutableNodes.leafNode(TestModel.OPTIONAL_QNAME, "data"))
+                .build();
+        writeTx.write(TestModel.MANDATORY_DATA_TEST_PATH, testNode);
+        DOMStoreThreePhaseCommitCohort ready = writeTx.ready();
+        try {
+            ready.canCommit().get();
+            Assert.fail("Expected exception on canCommit");
+        } catch (ExecutionException e) {
+            // nop
+        }
     }
 
     @Test
