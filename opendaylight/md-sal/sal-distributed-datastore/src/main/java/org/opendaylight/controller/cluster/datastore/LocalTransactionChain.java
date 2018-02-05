@@ -61,8 +61,9 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     @Override
     protected DOMStoreThreePhaseCommitCohort createCohort(
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-            final DataTreeModification modification) {
-        return new LocalChainThreePhaseCommitCohort(transaction, modification);
+            final DataTreeModification modification,
+            final Exception operationError) {
+        return new LocalChainThreePhaseCommitCohort(transaction, modification, operationError);
     }
 
     @Override
@@ -102,8 +103,8 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     private class LocalChainThreePhaseCommitCohort extends LocalThreePhaseCommitCohort {
 
         protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-                DataTreeModification modification) {
-            super(parent.getActorContext(), leader, transaction, modification);
+                DataTreeModification modification, Exception operationError) {
+            super(parent.getActorContext(), leader, transaction, modification, operationError);
         }
 
         protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,

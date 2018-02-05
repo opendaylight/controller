@@ -15,6 +15,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import javax.annotation.Nullable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -138,8 +139,13 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
 
         final DataTreeModification tree = mutableTree;
         TREE_UPDATER.lazySet(this, null);
-        tree.ready();
-        return wasReady.transactionReady(this, tree);
+        try {
+            tree.ready();
+            return wasReady.transactionReady(this, tree, null);
+        } catch (RuntimeException e) {
+            LOG.warn("Store transaction: {}: unexpected failure when readying", getIdentifier(), e);
+            return wasReady.transactionReady(this, tree, e);
+        }
     }
 
     @Override
@@ -185,8 +191,12 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
          *            Transaction on which ready was invoked.
          * @param tree
          *            Modified data tree which has been constructed.
+         * @param readyError
+         *            Any error that has already happened when readying.
          * @return DOMStoreThreePhaseCommitCohort associated with transaction
          */
-        protected abstract DOMStoreThreePhaseCommitCohort transactionReady(SnapshotBackedWriteTransaction<T> tx, DataTreeModification tree);
+        protected abstract DOMStoreThreePhaseCommitCohort transactionReady(SnapshotBackedWriteTransaction<T> tx,
+                                                                           DataTreeModification tree,
+                                                                           @Nullable Exception readyError);
     }
 }
