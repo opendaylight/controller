@@ -123,7 +123,7 @@ public class ServiceInterfaceEntryTest extends AbstractYangTest {
                 is(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                         + ".threadpool.ThreadPool"));
 
-        String expectedDescription = "An extension of the simple pool of threads able to schedule "
+        String expectedDescription = "An extension of the simple pool of threads able to schedule\n"
                 + "work to be executed at some point in time.";
         assertThat(trimInnerSpacesOrNull(scheduled.getNullableDescription()),
                 is(expectedDescription));
