@@ -32,7 +32,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <mdsal.model.version>0.13.0-SNAPSHOT</mdsal.model.version>
     <mdsal.version>1.8.0-SNAPSHOT</mdsal.version>
     <restconf.version>1.8.0-SNAPSHOT</restconf.version>
-    <yangtools.version>2.0.1</yangtools.version>
+    <yangtools.version>2.0.2</yangtools.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
   </properties>
 
