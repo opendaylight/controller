@@ -33,6 +33,8 @@
         <dependency>
             <groupId>org.jolokia</groupId>
             <artifactId>jolokia-osgi</artifactId>
+            <!-- TODO: remove once the version upgrade makes it to odlparent -->
+            <version>1.5.0</version>
         </dependency>
         <dependency>
             <!-- finalname="/etc/org.jolokia.osgi.cfg" -->
