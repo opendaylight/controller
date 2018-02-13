@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- Copyright © 2016, 2017 Red Hat, Inc. and others.
+ Copyright © 2018 Pantheon Technologies, s.r.o. and others.
 
  This program and the accompanying materials are made available under the
  terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,16 +19,16 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>odl-config-core</artifactId>
+    <artifactId>odl-config-util</artifactId>
     <version>0.8.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.opendaylight.mdsal</groupId>
-                <artifactId>mdsal-artifacts</artifactId>
-                <version>2.4.0-SNAPSHOT</version>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yangtools-artifacts</artifactId>
+                <version>2.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -44,28 +44,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-binding-runtime</artifactId>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>odl-yangtools-data-api</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>odl-config-util</artifactId>
+            <artifactId>odl-config-api</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>yang-jmx-generator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>shutdown-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>shutdown-impl</artifactId>
+            <artifactId>config-util</artifactId>
         </dependency>
     </dependencies>
 
