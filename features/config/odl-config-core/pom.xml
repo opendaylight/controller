@@ -51,13 +51,9 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>odl-config-api</artifactId>
+            <artifactId>odl-config-util</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>config-util</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
