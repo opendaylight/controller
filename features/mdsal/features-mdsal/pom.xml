@@ -89,6 +89,13 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>odl-controller-model-topology</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-remoterpc-connector</artifactId>
             <version>${project.version}</version>
             <type>xml</type>
