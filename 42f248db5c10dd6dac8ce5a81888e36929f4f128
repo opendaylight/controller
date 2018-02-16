@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16e17ce6_7b61af64",
+        "filename": "features/mdsal/odl-mdsal-model-topology/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-02-16T12:55:58Z",
+      "side": 1,
+      "message": "3.0.2",
+      "revId": "42f248db5c10dd6dac8ce5a81888e36929f4f128",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
