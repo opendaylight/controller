@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91aca867_f6811818",
+        "filename": "features/mdsal/odl-controller-model-topology/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-19T17:29:10Z",
+      "side": 1,
+      "message": "This ends up with feature.xml that has:\n\n\u003cbundle\u003emvn:org.opendaylight.controller.model/model-topology/1.7.0-SNAPSHOT\u003c/bundle\u003e\u003cbundle\u003emvn:org.opendaylight.controller.model/model-inventory/1.7.0-SNAPSHOT\u003c/bundle\u003e\n\nSo this feature needs to depend on the inventory model feature.",
+      "range": {
+        "startLine": 81,
+        "startChar": 24,
+        "endLine": 81,
+        "endChar": 38
+      },
+      "revId": "ca5e3b782121def2c59ea447a34ffa065bed2dd5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
