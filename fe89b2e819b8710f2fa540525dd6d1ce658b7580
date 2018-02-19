@@ -46,6 +46,30 @@
       "revId": "fe89b2e819b8710f2fa540525dd6d1ce658b7580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54126d0_c2c3ce0a",
+        "filename": "features/mdsal/odl-mdsal-model-topology/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-19T11:00:04Z",
+      "side": 1,
+      "message": "It\u0027s not the wrong location, it\u0027s just that our features are not following latest best practices. Essentially the problem occurs if mdsal.git defines an odl-mdsal-foo feature, which is fully within its namespace.\n\nWe have had this problem with odl-mdsal-common, which was defined in both mdsal and controller -- and the latter was renamed to odl-controller-mdsal-common and still lives in this directory.\n\nGoing forward we want to eliminate this sort of issues by naming features odl-\u003cproject\u003e-whatever, hence my request for a different name.",
+      "parentUuid": "6d582f8b_99171da4",
+      "range": {
+        "startLine": 21,
+        "startChar": 19,
+        "endLine": 21,
+        "endChar": 25
+      },
+      "revId": "fe89b2e819b8710f2fa540525dd6d1ce658b7580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
