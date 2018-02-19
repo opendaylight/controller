@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ddff14f_7a2adfa7",
+        "filename": "features/mdsal/odl-mdsal-model-topology/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-19T09:44:36Z",
+      "side": 1,
+      "message": "this is controller, use odl-controller-model-topology",
+      "range": {
+        "startLine": 21,
+        "startChar": 19,
+        "endLine": 21,
+        "endChar": 25
+      },
+      "revId": "fe89b2e819b8710f2fa540525dd6d1ce658b7580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
