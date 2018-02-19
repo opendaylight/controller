@@ -22,6 +22,30 @@
       "revId": "fe89b2e819b8710f2fa540525dd6d1ce658b7580",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d582f8b_99171da4",
+        "filename": "features/mdsal/odl-mdsal-model-topology/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 817
+      },
+      "writtenOn": "2018-02-19T10:00:21Z",
+      "side": 1,
+      "message": "Did the naming like this, as feature is inside mdsal folder and all other features under this has similar naming convention. For eg : odl-mdsal-model-inventory. Is it the wrong location for the feature I am adding?",
+      "parentUuid": "5ddff14f_7a2adfa7",
+      "range": {
+        "startLine": 21,
+        "startChar": 19,
+        "endLine": 21,
+        "endChar": 25
+      },
+      "revId": "fe89b2e819b8710f2fa540525dd6d1ce658b7580",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
