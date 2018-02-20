@@ -22,6 +22,30 @@
       "revId": "ca5e3b782121def2c59ea447a34ffa065bed2dd5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86cc7d2a_fd09e83f",
+        "filename": "features/mdsal/odl-controller-model-topology/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 817
+      },
+      "writtenOn": "2018-02-20T09:24:49Z",
+      "side": 1,
+      "message": "Yes, But I thought we can have \u003cbundle\u003e dependencies within the same repo.. only for external dependencies we have to solve through features..Is that not correct?",
+      "parentUuid": "91aca867_f6811818",
+      "range": {
+        "startLine": 81,
+        "startChar": 24,
+        "endLine": 81,
+        "endChar": 38
+      },
+      "revId": "ca5e3b782121def2c59ea447a34ffa065bed2dd5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
