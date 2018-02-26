@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fdcf532c_eec8b5e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-26T14:58:39Z",
+      "side": 1,
+      "message": "due",
+      "range": {
+        "startLine": 158,
+        "startChar": 73,
+        "endLine": 158,
+        "endChar": 75
+      },
+      "revId": "3612d7cdfd641e0c0158e6ada835abc9774d473f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d51e757_9534cfe6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-26T14:58:39Z",
+      "side": 1,
+      "message": "Why not derive from AbstractActorTest which creates a static ActorSystem?",
+      "revId": "3612d7cdfd641e0c0158e6ada835abc9774d473f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "484018ce_13db8716",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-26T14:58:39Z",
+      "side": 1,
+      "message": "staticBefore",
+      "range": {
+        "startLine": 62,
+        "startChar": 23,
+        "endLine": 62,
+        "endChar": 35
+      },
+      "revId": "3612d7cdfd641e0c0158e6ada835abc9774d473f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
