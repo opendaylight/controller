@@ -3,6 +3,14 @@
     targetNamespace="http://opendaylight.org/xmlns/blueprint/v1.0.0" elementFormDefault="qualified"
     attributeFormDefault="unqualified" version="1.0.0">
 
+  <!--
+   Copyright © 2016, 2018 Brocade Communications Systems, Inc. and others.
+
+   This program and the accompanying materials are made available under the
+   terms of the Eclipse Public License v1.0 which accompanies this distribution,
+   and is available at http://www.eclipse.org/legal/epl-v10.html
+   -->
+
   <xsd:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/>
 
   <xsd:attribute name="restart-dependents-on-updates" type="xsd:boolean"/>

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright © 2016, 2018 Red Hat, Inc. and others.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+ -->
 <features name="odl-extras-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-jolokia" version="${project.version}">
         <configfile finalname="/etc/org.jolokia.osgi.cfg">mvn:org.opendaylight.controller/odl-jolokia-osgi/${odl-jolokia-osgi.version}/cfg/configuration</configfile>
