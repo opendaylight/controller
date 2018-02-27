@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "31b675db_3612db53",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-27T09:21:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fdcf532c_eec8b5e4",
+      "range": {
+        "startLine": 158,
+        "startChar": 73,
+        "endLine": 158,
+        "endChar": 75
+      },
+      "revId": "3612d7cdfd641e0c0158e6ada835abc9774d473f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d51e757_9534cfe6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextTest.java",
         "patchSetId": 2
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "2cb3b65f_924f5df3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-27T09:21:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d51e757_9534cfe6",
+      "revId": "3612d7cdfd641e0c0158e6ada835abc9774d473f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "484018ce_13db8716",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextTest.java",
         "patchSetId": 2
@@ -53,6 +95,30 @@
       "writtenOn": "2018-02-26T14:58:39Z",
       "side": 1,
       "message": "staticBefore",
+      "range": {
+        "startLine": 62,
+        "startChar": 23,
+        "endLine": 62,
+        "endChar": 35
+      },
+      "revId": "3612d7cdfd641e0c0158e6ada835abc9774d473f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02025b49_99c80dc8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-02-27T09:21:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "484018ce_13db8716",
       "range": {
         "startLine": 62,
         "startChar": 23,
