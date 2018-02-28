@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3ddf548_421f3a7e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-02-28T03:20:15Z",
+      "side": 1,
+      "message": "So on ready, we still send the message even if prior batch(es) failed. I assume the intent is to try to get the last batch thru to clean up the backend and that the backend will fail the transaction due to totalMessagesSent mismatch.",
+      "revId": "ca719b702f420e9015457388d12902da662cc261",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
