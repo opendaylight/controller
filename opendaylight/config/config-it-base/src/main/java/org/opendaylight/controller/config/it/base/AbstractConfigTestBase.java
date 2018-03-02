@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.config.it.base;
 
+import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -110,8 +111,13 @@ public abstract class AbstractConfigTestBase {
     public abstract String getFeatureName();
 
     public Option getLoggingOption() {
-        return editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG, logConfiguration(AbstractConfigTestBase.class),
-                LogLevel.INFO.name());
+        Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                "log4j2.logger.config-it-base.name",
+                AbstractConfigTestBase.class.getPackage().getName());
+        option = composite(option, editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                "log4j2.logger.config-it-base.level",
+                LogLevel.INFO.name()));
+        return option;
     }
 
     /**
@@ -121,10 +127,6 @@ public abstract class AbstractConfigTestBase {
      */
     protected Option[] getAdditionalOptions() {
         return null;
-    }
-
-    public String logConfiguration(final Class<?> klazz) {
-        return "log4j.logger." + klazz.getPackage().getName();
     }
 
     public String getKarafDistro() {
@@ -168,7 +170,7 @@ public abstract class AbstractConfigTestBase {
                 features(getFeatureRepo(), getFeatureName()),
                 mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"), getLoggingOption(),
                 mvnLocalRepoOption(),
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*") };
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
         return OptionUtils.combine(options, getAdditionalOptions());
     }
 
