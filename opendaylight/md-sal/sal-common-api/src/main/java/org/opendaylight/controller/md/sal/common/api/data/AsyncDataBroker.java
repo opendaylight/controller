@@ -232,6 +232,9 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      *         your listener using {@link ListenerRegistration#close()} to stop
      *         delivery of change events.
      */
-    ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener,
-            DataChangeScope triggeringScope);
+    @Deprecated
+    default ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener,
+            DataChangeScope triggeringScope) {
+        throw new UnsupportedOperationException("Data change listeners are no longer supported.");
+    }
 }
