@@ -57,7 +57,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     protected DataNormalizationOperation(final T identifier, final SchemaNode schema) {
         this.identifier = identifier;
-        if(schema instanceof DataSchemaNode) {
+        if (schema instanceof DataSchemaNode) {
             this.dataSchemaNode = Optional.of((DataSchemaNode) schema);
         } else {
             this.dataSchemaNode = Optional.absent();
@@ -77,7 +77,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return Collections.singleton(identifier.getNodeType());
     }
 
-    public abstract DataNormalizationOperation<?> getChild(final PathArgument child) throws DataNormalizationException;
+    public abstract DataNormalizationOperation<?> getChild(PathArgument child) throws DataNormalizationException;
 
     public abstract DataNormalizationOperation<?> getChild(QName child) throws DataNormalizationException;
 
@@ -89,7 +89,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return dataSchemaNode;
     }
 
-    private static abstract class SimpleTypeNormalization<T extends PathArgument> extends DataNormalizationOperation<T> {
+    private abstract static class SimpleTypeNormalization<T extends PathArgument>
+            extends DataNormalizationOperation<T> {
 
         protected SimpleTypeNormalization(final T identifier, final DataSchemaNode potential) {
             super(identifier,potential);
@@ -114,7 +115,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public boolean isLeaf() {
             return true;
         }
-
     }
 
     private static final class LeafNormalization extends SimpleTypeNormalization<NodeIdentifier> {
@@ -127,7 +127,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private static final class LeafListEntryNormalization extends SimpleTypeNormalization<NodeWithValue> {
 
-        public LeafListEntryNormalization(final LeafListSchemaNode potential) {
+        LeafListEntryNormalization(final LeafListSchemaNode potential) {
             super(new NodeWithValue(potential.getQName(), null),potential);
         }
 
@@ -137,8 +137,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static abstract class CompositeNodeNormalizationOperation<T extends PathArgument> extends
-    DataNormalizationOperation<T> {
+    private abstract static class CompositeNodeNormalizationOperation<T extends PathArgument>
+            extends DataNormalizationOperation<T> {
 
         protected CompositeNodeNormalizationOperation(final T identifier, final DataSchemaNode schema) {
             super(identifier,schema);
@@ -152,14 +152,15 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     }
 
-    private static abstract class DataContainerNormalizationOperation<T extends PathArgument> extends
-    CompositeNodeNormalizationOperation<T> {
+    private abstract static class DataContainerNormalizationOperation<T extends PathArgument>
+            extends CompositeNodeNormalizationOperation<T> {
 
         private final DataNodeContainer schema;
         private final Map<QName, DataNormalizationOperation<?>> byQName;
         private final Map<PathArgument, DataNormalizationOperation<?>> byArg;
 
-        protected DataContainerNormalizationOperation(final T identifier, final DataNodeContainer schema, final DataSchemaNode node) {
+        protected DataContainerNormalizationOperation(final T identifier, final DataNodeContainer schema,
+                final DataSchemaNode node) {
             super(identifier,node);
             this.schema = schema;
             this.byArg = new ConcurrentHashMap<>();
@@ -176,14 +177,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return register(potential);
         }
 
-        private DataNormalizationOperation<?> fromLocalSchema(final PathArgument child) throws DataNormalizationException {
-            if (child instanceof AugmentationIdentifier) {
-                return fromSchemaAndQNameChecked(schema, ((AugmentationIdentifier) child).getPossibleChildNames()
-                        .iterator().next());
-            }
-            return fromSchemaAndQNameChecked(schema, child.getNodeType());
-        }
-
         @Override
         public DataNormalizationOperation<?> getChild(final QName child) throws DataNormalizationException {
             DataNormalizationOperation<?> potential = byQName.get(child);
@@ -194,15 +187,25 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return register(potential);
         }
 
-        protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema2, final QName child) throws DataNormalizationException {
+        private DataNormalizationOperation<?> fromLocalSchema(final PathArgument child)
+                throws DataNormalizationException {
+            if (child instanceof AugmentationIdentifier) {
+                return fromSchemaAndQNameChecked(schema, ((AugmentationIdentifier) child).getPossibleChildNames()
+                        .iterator().next());
+            }
+            return fromSchemaAndQNameChecked(schema, child.getNodeType());
+        }
+
+        protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema2,
+                final QName child) throws DataNormalizationException {
             return fromSchemaAndQNameChecked(schema2, child);
         }
 
         private DataNormalizationOperation<?> register(final DataNormalizationOperation<?> potential) {
             if (potential != null) {
                 byArg.put(potential.getIdentifier(), potential);
-                for (final QName qName : potential.getQNameIdentifiers()) {
-                    byQName.put(qName, potential);
+                for (final QName qname : potential.getQNameIdentifiers()) {
+                    byQName.put(qname, potential);
                 }
             }
             return potential;
@@ -211,20 +214,18 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static final class ListItemNormalization extends
-    DataContainerNormalizationOperation<NodeIdentifierWithPredicates> {
-
-        private final List<QName> keyDefinition;
+            DataContainerNormalizationOperation<NodeIdentifierWithPredicates> {
 
         protected ListItemNormalization(final NodeIdentifierWithPredicates identifier, final ListSchemaNode schema) {
-            super(identifier, schema,schema);
-            keyDefinition = schema.getKeyDefinition();
+            super(identifier, schema, schema);
         }
 
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
                     .mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) currentArg);
-            for (final Entry<QName, Object> keyValue : ((NodeIdentifierWithPredicates) currentArg).getKeyValues().entrySet()) {
+            for (final Entry<QName, Object> keyValue :
+                    ((NodeIdentifierWithPredicates) currentArg).getKeyValues().entrySet()) {
                 builder.addChild(Builders.leafBuilder()
                         //
                         .withNodeIdentifier(new NodeIdentifier(keyValue.getKey())).withValue(keyValue.getValue())
@@ -240,7 +241,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static final class UnkeyedListItemNormalization extends DataContainerNormalizationOperation<NodeIdentifier> {
+    private static final class UnkeyedListItemNormalization
+            extends DataContainerNormalizationOperation<NodeIdentifier> {
 
         protected UnkeyedListItemNormalization(final ListSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()), schema,schema);
@@ -266,8 +268,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     }
 
-    private static abstract class MixinNormalizationOp<T extends PathArgument> extends
-    CompositeNodeNormalizationOperation<T> {
+    private abstract static class MixinNormalizationOp<T extends PathArgument>
+            extends CompositeNodeNormalizationOperation<T> {
 
         protected MixinNormalizationOp(final T identifier, final DataSchemaNode schema) {
             super(identifier,schema);
@@ -282,9 +284,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
 
     private static final class OrderedLeafListMixinNormalization extends UnorderedLeafListMixinNormalization {
-
-
-        public OrderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
+        OrderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
             super(potential);
         }
 
@@ -298,10 +298,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         private final DataNormalizationOperation<?> innerOp;
 
-        public UnorderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
+        UnorderedLeafListMixinNormalization(final LeafListSchemaNode potential) {
             super(new NodeIdentifier(potential.getQName()),potential);
             innerOp = new LeafListEntryNormalization(potential);
         }
+
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.leafSetBuilder().withNodeIdentifier(getIdentifier()).build();
@@ -324,9 +325,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
     }
 
-    private static final class AugmentationNormalization extends DataContainerNormalizationOperation<AugmentationIdentifier> {
+    private static final class AugmentationNormalization
+            extends DataContainerNormalizationOperation<AugmentationIdentifier> {
 
-        public AugmentationNormalization(final AugmentationSchemaNode augmentation, final DataNodeContainer schema) {
+        AugmentationNormalization(final AugmentationSchemaNode augmentation, final DataNodeContainer schema) {
             super(augmentationIdentifierFrom(augmentation), augmentationProxy(augmentation,schema),null);
         }
 
@@ -338,8 +340,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
 
         @Override
-        protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema, final QName child)
-                throws DataNormalizationException {
+        protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema,
+                final QName child) throws DataNormalizationException {
             final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
             if (!potential.isPresent()) {
                 return null;
@@ -369,10 +371,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         private final ListItemNormalization innerNode;
 
-        public UnorderedMapMixinNormalization(final ListSchemaNode list) {
+        UnorderedMapMixinNormalization(final ListSchemaNode list) {
             super(new NodeIdentifier(list.getQName()),list);
             this.innerNode = new ListItemNormalization(new NodeIdentifierWithPredicates(list.getQName(),
-                    Collections.<QName, Object> emptyMap()), list);
+                    Collections.<QName, Object>emptyMap()), list);
         }
 
         @Override
@@ -403,7 +405,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         private final UnkeyedListItemNormalization innerNode;
 
-        public UnkeyedListMixinNormalization(final ListSchemaNode list) {
+        UnkeyedListMixinNormalization(final ListSchemaNode list) {
             super(new NodeIdentifier(list.getQName()),list);
             this.innerNode = new UnkeyedListItemNormalization(list);
         }
@@ -433,7 +435,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private static final class OrderedMapMixinNormalization extends UnorderedMapMixinNormalization {
 
-        public OrderedMapMixinNormalization(final ListSchemaNode list) {
+        OrderedMapMixinNormalization(final ListSchemaNode list) {
             super(list);
         }
 
@@ -452,7 +454,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         protected ChoiceNodeNormalization(final ChoiceSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()),schema);
             final ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
-            final ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder = ImmutableMap.builder();
+            final ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder =
+                    ImmutableMap.builder();
 
             for (final CaseSchemaNode caze : schema.getCases().values()) {
                 for (final DataSchemaNode cazeChild : caze.getChildNodes()) {
@@ -485,17 +488,17 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private static class AnyXmlNormalization extends DataNormalizationOperation<NodeIdentifier> {
 
-        protected AnyXmlNormalization( final AnyXmlSchemaNode schema) {
-            super( new NodeIdentifier(schema.getQName()), schema);
+        protected AnyXmlNormalization(final AnyXmlSchemaNode schema) {
+            super(new NodeIdentifier(schema.getQName()), schema);
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild( final PathArgument child ) throws DataNormalizationException {
+        public DataNormalizationOperation<?> getChild(final PathArgument child) throws DataNormalizationException {
             return null;
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild( final QName child ) throws DataNormalizationException {
+        public DataNormalizationOperation<?> getChild(final QName child) throws DataNormalizationException {
             return null;
         }
 
@@ -505,15 +508,17 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        public NormalizedNode<?, ?> createDefault( final PathArgument currentArg ) {
+        public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return null;
         }
     }
 
-    private static final Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,final QName child) {
+    private static Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,
+            final QName child) {
         DataSchemaNode potential = parent.getDataChildByName(child);
         if (potential == null) {
-            final Iterable<ChoiceSchemaNode> choices = FluentIterable.from(parent.getChildNodes()).filter(ChoiceSchemaNode.class);
+            final Iterable<ChoiceSchemaNode> choices = FluentIterable.from(parent.getChildNodes())
+                    .filter(ChoiceSchemaNode.class);
             potential = findChoice(choices, child);
         }
         return Optional.fromNullable(potential);
@@ -524,7 +529,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
         if (!potential.isPresent()) {
-            throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child, schema,schema.getChildNodes()));
+            throw new DataNormalizationException(String.format(
+                    "Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child,
+                    schema,schema.getChildNodes()));
         }
 
         final DataSchemaNode result = potential.get();
@@ -566,18 +573,13 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     /**
-     * Returns a DataNormalizationOperation for provided child node
+     * Returns a DataNormalizationOperation for provided child node.
      *
+     * <p>
      * If supplied child is added by Augmentation this operation returns
      * a DataNormalizationOperation for augmentation,
      * otherwise returns a DataNormalizationOperation for child as
      * call for {@link #fromDataSchemaNode(DataSchemaNode)}.
-     *
-     *
-     * @param parent
-     * @param parentAug
-     * @param child
-     * @return
      */
     private static DataNormalizationOperation<?> fromAugmentation(final DataNodeContainer parent,
             final AugmentationTarget parentAug, final DataSchemaNode child) {
@@ -610,24 +612,24 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         } else if (potential instanceof LeafListSchemaNode) {
             return fromLeafListSchemaNode((LeafListSchemaNode) potential);
         } else if (potential instanceof AnyXmlSchemaNode) {
-            return new AnyXmlNormalization( (AnyXmlSchemaNode) potential);
+            return new AnyXmlNormalization((AnyXmlSchemaNode) potential);
         }
         return null;
     }
 
     private static DataNormalizationOperation<?> fromListSchemaNode(final ListSchemaNode potential) {
         final List<QName> keyDefinition = potential.getKeyDefinition();
-        if(keyDefinition == null || keyDefinition.isEmpty()) {
+        if (keyDefinition == null || keyDefinition.isEmpty()) {
             return new UnkeyedListMixinNormalization(potential);
         }
-        if(potential.isUserOrdered()) {
+        if (potential.isUserOrdered()) {
             return new OrderedMapMixinNormalization(potential);
         }
         return new UnorderedMapMixinNormalization(potential);
     }
 
     private static DataNormalizationOperation<?> fromLeafListSchemaNode(final LeafListSchemaNode potential) {
-        if(potential.isUserOrdered()) {
+        if (potential.isUserOrdered()) {
             return new OrderedLeafListMixinNormalization(potential);
         }
         return new UnorderedLeafListMixinNormalization(potential);
