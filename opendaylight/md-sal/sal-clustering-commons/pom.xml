@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
-    <relativePath>../../config/config-parent</relativePath>
+    <artifactId>mdsal-parent</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath>../parent</relativePath>
   </parent>
 
   <artifactId>sal-clustering-commons</artifactId>
@@ -15,13 +15,9 @@
   <dependencies>
     <!-- Java -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>xmlunit</groupId>
       <artifactId>xmlunit</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -103,14 +99,6 @@
     </dependency>
 
     <!-- Google -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava-testlib</artifactId>
