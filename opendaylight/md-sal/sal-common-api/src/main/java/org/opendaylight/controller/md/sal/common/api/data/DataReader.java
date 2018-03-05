@@ -12,6 +12,7 @@ import org.opendaylight.yangtools.concepts.Path;
 /**
  * Reader for reading YANG subtrees based on their path.
  *
+ * <p>
  * Reader is requested to return object at specified path and all it's subnodes
  * known to the reader or null if node is not found in this reader.
  *
@@ -20,13 +21,13 @@ import org.opendaylight.yangtools.concepts.Path;
  * @deprecated Replaced by org.opendaylight.controller.sal.core.spi.data.DOMStore contract.
  */
 @Deprecated
-public interface DataReader<P extends Path<P> ,D> {
+public interface DataReader<P extends Path<P>, D> {
 
     /**
-     * Reads data from Operational data store located at provided path
+     * Reads data from Operational data store located at provided path.
      *
      * @param path Path to data
-     * @return
+     * @return the data
      */
     D readOperationalData(P path);
 

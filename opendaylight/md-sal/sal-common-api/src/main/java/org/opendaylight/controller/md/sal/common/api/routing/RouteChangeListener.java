@@ -8,18 +8,17 @@
 package org.opendaylight.controller.md.sal.common.api.routing;
 
 import java.util.EventListener;
+
 /**
+ * Listener which is interested in receiving RouteChangeEvents for its local broker.
  *
- * Listener which is interested in receiving RouteChangeEvents
- * for its local broker.
  * <p>
- * Listener is registerd via {@link RouteChangePublisher#registerRouteChangeListener(RouteChangeListener)}
- *
+ * Listener is registered via {@link RouteChangePublisher#registerRouteChangeListener(RouteChangeListener)}
  *
  * @param <C> Type, which is used to represent Routing context.
  * @param <P> Type of data tree path, which is used to identify route.
  */
-public interface RouteChangeListener<C,P> extends EventListener {
+public interface RouteChangeListener<C, P> extends EventListener {
 
     /**
      * Callback which is invoked if there is an rpc routing table change.

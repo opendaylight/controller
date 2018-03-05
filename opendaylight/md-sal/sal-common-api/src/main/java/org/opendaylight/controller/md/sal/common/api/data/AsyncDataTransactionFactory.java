@@ -48,7 +48,8 @@ import org.opendaylight.yangtools.concepts.Path;
  * implementations may optimize the transaction for reading if they know ahead
  * of time that you only need to read data - such as not keeping additional meta-data,
  * which may be required for write transactions.
- *<p>
+ *
+ * <p>
  * <b>Implementation Note:</b> This interface is not intended to be implemented
  * by users of MD-SAL, but only to be consumed by them.
  *
@@ -64,9 +65,9 @@ import org.opendaylight.yangtools.concepts.Path;
 public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
 
     /**
-     * Allocates a new read-only transaction which provides an immutable snapshot of
-     * the data tree.
-     *<p>
+     * Allocates a new read-only transaction which provides an immutable snapshot of the data tree.
+     *
+     * <p>
      * The view of data tree is an immutable snapshot of current data tree state when
      * transaction was allocated.
      *
@@ -107,6 +108,7 @@ public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
      * used only by callers which are exclusive writers (exporters of data)
      * to the subtree they modify. This prevents optimistic
      * lock failures as described in {@link AsyncWriteTransaction#commit()}.
+     *
      * <p>
      * Exclusivity of writers to particular subtree SHOULD BE enforced by
      * external locking mechanism.

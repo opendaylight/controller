@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
 import java.util.EventListener;
-
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
@@ -16,7 +15,8 @@ import org.opendaylight.yangtools.concepts.Path;
  *
  * <p>
  * User-supplied implementations of this listener interface MUST register via
- * {@link AsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener, AsyncDataBroker.DataChangeScope)}
+ * {@link AsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener,
+ *     AsyncDataBroker.DataChangeScope)}
  * in order to start receiving data change events, which capture state changes
  * in a subtree.
  *
@@ -33,9 +33,9 @@ import org.opendaylight.yangtools.concepts.Path;
 @Deprecated
 public interface AsyncDataChangeListener<P extends Path<P>, D> extends EventListener {
     /**
-     *
      * Invoked when there is data change for the particular path, which was used to
      * register this listener.
+     *
      * <p>
      * This method may be also invoked during registration of the listener if
      * there is any preexisting data in the conceptual data tree for supplied path.

@@ -9,20 +9,19 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.yangtools.concepts.Path;
 
 public interface DataChange<P extends Path<P>, D> {
 
     /**
-     * Returns a map of paths and newly created objects
+     * Returns a map of paths and newly created objects.
      *
      * @return map of paths and newly created objects
      */
     Map<P, D> getCreatedOperationalData();
 
     /**
-     * Returns a map of paths and newly created objects
+     * Returns a map of paths and newly created objects.
      *
      * @return map of paths and newly created objects
      */
@@ -31,6 +30,7 @@ public interface DataChange<P extends Path<P>, D> {
     /**
      * Returns a map of paths and respective updated objects after update.
      *
+     * <p>
      * Original state of the object is in
      * {@link #getOriginalOperationalData()}
      *
@@ -41,6 +41,7 @@ public interface DataChange<P extends Path<P>, D> {
     /**
      * Returns a map of paths and respective updated objects after update.
      *
+     * <p>
      * Original state of the object is in
      * {@link #getOriginalConfigurationData()}
      *
@@ -53,6 +54,7 @@ public interface DataChange<P extends Path<P>, D> {
     /**
      * Returns a set of paths of removed objects.
      *
+     * <p>
      * Original state of the object is in
      * {@link #getOriginalConfigurationData()}
      *
@@ -63,6 +65,7 @@ public interface DataChange<P extends Path<P>, D> {
     /**
      * Returns a set of paths of removed objects.
      *
+     * <p>
      * Original state of the object is in
      * {@link #getOriginalOperationalData()}
      *

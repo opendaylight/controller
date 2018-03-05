@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.yangtools.concepts.Path;
 
-import com.google.common.util.concurrent.CheckedFuture;
-
 /**
- * User-supplied participant in three-phase commit of transaction for configuration data tree
+ * User-supplied participant in three-phase commit of transaction for configuration data tree.
  *
+ * <p>
  * Client-supplied implementation of commit handler for subtree, which
  * is responsible for processing CAN-COMMIT phase of three-phase commit protocol
  * and return CommitCohort, which provides access to additional transitions
@@ -28,9 +28,9 @@ import com.google.common.util.concurrent.CheckedFuture;
 public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
 
     /**
-     *
      * Requests a can commit phase
      *
+     * <p>
      * Implementations SHOULD NOT do any blocking operation during
      * processing this callback.
      *
@@ -44,7 +44,8 @@ public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
      * <ul>
      * <li><b>is successful</b> - invocation of {@link CheckedFuture#checkedGet()} on returned future MUST
      *     return {@link AsyncConfigurationCommitCohort} associated with request.</li>
-     * <li><b>is unsuccessful</b> - invocation of {@link CheckedFuture#checkedGet()} must throw instance of {@link DataValidationFailedException}
+     * <li><b>is unsuccessful</b> - invocation of {@link CheckedFuture#checkedGet()} must throw instance
+     *     of {@link DataValidationFailedException}
      * with human readable explanaition of error condition.
      * </li>
      * </ul>
@@ -63,9 +64,9 @@ public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
             ConfigurationCommitRequest<P, D> request);
 
     /**
-     *
      * Commit Request as was submitted by client code
      *
+     * <p>
      * Commit Request contains list view of created / updated / removed
      * path and read-only view of proposed client transaction,
      * which may be used to retrieve modified or referenced data.
@@ -80,30 +81,29 @@ public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
     interface ConfigurationCommitRequest<P extends Path<P>, D> {
 
         /**
-         *
          * Read-only transaction which provides access only to configuration
          * data tree as if submitted transaction successfully happened and
          * no other concurrent modifications happened between allocation
          * of client transactions and write of client transactions.
          *
+         * <p>
          * Implementations of Commit Handlers are REQUIRED to use this
          * read-only view to access any data from configuration data tree,
          * in order to capture them as preconditions for this transaction.
          *
          * @return Read-only transaction which provides access only to configuration
-         * data tree as if submitted transaction successfully happened
+         *     data tree as if submitted transaction successfully happened
          */
         AsyncReadTransaction<P, D> getReadOnlyView();
 
         /**
-         *
          * Returns iteration of paths, to data which was introduced by this transaction.
          *
          * @return Iteration of paths, which was introduced by this transaction.
          */
         Iterable<P> getCreatedPaths();
+
         /**
-         *
          * Returns iteration of paths, to data which was updated by this transaction.
          *
          * @return Iteration of paths, which was updated by this transaction.
@@ -111,7 +111,6 @@ public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
         Iterable<P> getUpdatedPaths();
 
         /**
-         *
          * Returns iteration of paths, to data which was removed by this transaction.
          *
          * @return Iteration of paths, which was removed by this transaction.

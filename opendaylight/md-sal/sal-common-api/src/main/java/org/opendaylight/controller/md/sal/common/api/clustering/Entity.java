@@ -42,8 +42,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public final class Entity implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final QName ENTITY_QNAME =
-        org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.core.general.entity.rev150820.Entity.QNAME;
+    private static final QName ENTITY_QNAME = org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang
+            .controller.md.sal.core.general.entity.rev150820.Entity.QNAME;
     private static final QName ENTITY_NAME = QName.create(ENTITY_QNAME, "name");
 
     private final String type;
@@ -74,34 +74,32 @@ public final class Entity implements Serializable {
     }
 
     /**
-     *
-     * @return id of entity
+     * Returns the id of entity.
      */
     @Nonnull
-    public YangInstanceIdentifier getId(){
+    public YangInstanceIdentifier getId() {
         return id;
     }
 
     /**
-     *
-     * @return type of entity
+     * Returns the type of entity.
      */
     @Nonnull
-    public String getType(){
+    public String getType() {
         return type;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        Entity entity = (Entity) o;
+        Entity entity = (Entity) obj;
 
         if (!id.equals(entity.id)) {
             return false;

@@ -20,11 +20,11 @@ public class ReadFailedException extends OperationFailedException {
     private static final long serialVersionUID = 1L;
 
     public static final ExceptionMapper<ReadFailedException> MAPPER =
-            new ExceptionMapper<ReadFailedException>("read", ReadFailedException.class) {
-                @Override
-                protected ReadFailedException newWithCause(String message, Throwable cause) {
-                    return new ReadFailedException(message, cause);
-                }
+        new ExceptionMapper<ReadFailedException>("read", ReadFailedException.class) {
+            @Override
+            protected ReadFailedException newWithCause(String message, Throwable cause) {
+                return new ReadFailedException(message, cause);
+            }
     };
 
     public ReadFailedException(String message, RpcError... errors) {

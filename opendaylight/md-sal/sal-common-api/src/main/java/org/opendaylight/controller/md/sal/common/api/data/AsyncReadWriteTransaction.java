@@ -40,6 +40,7 @@ import org.opendaylight.yangtools.concepts.Path;
  *
  * <h3>Transaction local state</h3>
  *
+ * <p>
  * Let assume initial state of data tree for <code>PATH</code> is <code>A</code>
  * .
  *
@@ -56,6 +57,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * tx1afterCommit.read(OPERATIONAL,PATH).get(); // returns Optional containing B
  * </pre>
  *
+ * <p>
  * As you could see read-write transaction provides capabilities as
  * {@link AsyncWriteTransaction} but also allows for reading proposed changes as
  * if they already happened.
@@ -119,8 +121,8 @@ import org.opendaylight.yangtools.concepts.Path;
  * <b>Note:</b> examples contains blocking calls on future only to illustrate
  * that action happened after other asynchronous action. Use of blocking call
  * {@link com.google.common.util.concurrent.ListenableFuture#get()} is discouraged for most uses and you should
- * use
- * {@link com.google.common.util.concurrent.Futures#addCallback(com.google.common.util.concurrent.ListenableFuture, com.google.common.util.concurrent.FutureCallback)}
+ * use {@link com.google.common.util.concurrent.Futures#addCallback(com.google.common.util.concurrent.ListenableFuture,
+ *      com.google.common.util.concurrent.FutureCallback)}
  * or other functions from {@link com.google.common.util.concurrent.Futures} to
  * register more specific listeners.
  *

@@ -8,18 +8,19 @@
 
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 /**
-*
 * Failure of asynchronous transaction commit caused by failure
 * of optimistic locking.
 *
+* <p>
 * This exception is raised and returned when transaction commit
 * failed, because other transaction finished successfully
 * and modified same data as failed transaction.
 *
+* <p>
 *  Clients may recover from this error condition by
 *  retrieving current state and submitting new updated
 *  transaction.
@@ -37,5 +38,4 @@ public class OptimisticLockFailedException extends TransactionCommitFailedExcept
     public OptimisticLockFailedException(final String message) {
         this(message, null);
     }
-
 }
