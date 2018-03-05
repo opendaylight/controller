@@ -11,9 +11,11 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Interface for publishing YANG-modeled notifications.
+ *
  * <p>
  * Users of this interface can publish any YANG-modeled notification which will
  * be delivered to all subscribed listeners.
+ *
  * <p>
  * Preferred way of publishing of notifications is done by invoking {@link #publish(Object)}.
  *
@@ -25,7 +27,7 @@ import java.util.concurrent.ExecutorService;
  * The metadata required to deliver a notification to the correct listeners is
  * extracted from the published notification.
  *
- *
+ * <p>
  * FIXME: Consider clarification of execution/delivery policy, how it will be
  * affected by Actor model and cluster-wide notifications.
  *
@@ -37,6 +39,7 @@ public interface NotificationPublishService<N> {
     /**
      * Publishes a notification and notifies subscribed listeners. All listener
      * notifications are done via a default executor.
+     *
      * <p>
      * <b>Note:</b> This call will block when the default executor is saturated
      * and the notification queue for this executor is full.
@@ -49,6 +52,7 @@ public interface NotificationPublishService<N> {
     /**
      * Publishes a notification and notifies subscribed listeners. All listener
      * notifications are done via the provided executor.
+     *
      * <p>
      * <b>Note:</b> Use only if necessary. Consider using
      * {@link #publish(Object)} for most use-cases.

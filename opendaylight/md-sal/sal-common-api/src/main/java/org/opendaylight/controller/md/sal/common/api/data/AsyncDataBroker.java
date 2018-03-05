@@ -11,7 +11,6 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
- *
  * Base interface that provides access to a conceptual data tree store and also provides the ability to
  * subscribe for changes to data under a given branch of the tree.
  *
@@ -57,16 +56,15 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
         AsyncDataTransactionFactory<P, D> {
 
     /**
-     *
      * Scope of Data Change
      *
      * <p>
      * Represents scope of data change (addition, replacement, deletion).
-     *
      * The terminology for scope types is reused from LDAP.
      *
      * <h2>Examples</h2>
      *
+     * <p>
      * Following is an example model with comments describing what notifications
      * you would receive based on the scope you specify, when you are
      * registering for changes on container a.
@@ -83,6 +81,7 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      *        id "b"            // scope SUBTREE
      * </pre>
      *
+     * <p>
      * Following is an example model with comments describing what notifications
      * you would receive based on the scope you specify, when you are
      * registering for changes on list list (without specifying concrete item in
@@ -112,12 +111,14 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
         /**
          * Represent a change (addition,replacement,deletion) of the node or one of its direct
          * children.
+         *
          * <p>
          * Note that this is done in the <i>binding independent</i> data tree and so the behavior
          * might be counterintuitive when used with <i>binding aware</i> interfaces particularly
          * when it comes to lists. The list itself is a node in the <i>binding independent</i> tree,
          * which means that if you want to listen on new elements you must listen on the list itself
          * with the scope of {@link #ONE}.
+         *
          * <p>
          * As an example, in the below YANG snippet, listening on <tt>node</tt> with scope
          * {@link #ONE} would tell you if the <tt>node-connector</tt> list was created or deleted,
@@ -140,6 +141,7 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
          * }
          * </pre>
          *
+         * <p>
          * This scope is superset of {@link #BASE}.
          *
          */
@@ -148,27 +150,19 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
          * Represents a change of the node or any of or any of its child nodes,
          * direct and nested.
          *
+         * <p>
          * This scope is superset of {@link #ONE} and {@link #BASE}.
          *
          */
         SUBTREE
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
 
@@ -176,16 +170,19 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * Registers a {@link AsyncDataChangeListener} to receive
      * notifications when data changes under a given path in the conceptual data
      * tree.
+     *
      * <p>
      * You are able to register for notifications  for any node or subtree
      * which can be reached via the supplied path.
+     *
      * <p>
      * If path type <code>P</code> allows it, you may specify paths up to the leaf nodes
      * then it is possible to listen on leaf nodes.
+     *
      * <p>
      * You are able to register for data change notifications for a subtree even
-     * if it does not exist. You will receive notification once that node is
-     * created.
+     * if it does not exist. You will receive notification once that node is created.
+     *
      * <p>
      * If there is any preexisting data in data tree on path for which you are
      * registering, you will receive initial data change event, which will
@@ -194,6 +191,7 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * <p>
      * You are also able to specify the scope of the changes you want to be
      * notified.
+     *
      * <p>
      * Supported scopes are:
      * <ul>
@@ -208,10 +206,12 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * or replaced.
      * </ul>
      * See {@link DataChangeScope} for examples.
+     *
      * <p>
      * This method returns a {@link ListenerRegistration} object. To
      * "unregister" your listener for changes call the "close" method on this
      * returned object.
+     *
      * <p>
      * You MUST call close when you no longer need to receive notifications
      * (such as during shutdown or for example if your bundle is shutting down).

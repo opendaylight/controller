@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.common.api.clustering;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;

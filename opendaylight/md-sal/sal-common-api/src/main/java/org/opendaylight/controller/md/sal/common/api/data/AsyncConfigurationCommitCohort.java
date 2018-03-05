@@ -7,14 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yangtools.concepts.Path;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 /**
- *
- * Three phase Commit Cohort for subtree, which is
- * uniquely associated with user submitted transcation.
+ * Three phase Commit Cohort for subtree, which is uniquely associated with user submitted transaction.
  *
  * @param <P>
  *            Type of path (subtree identifier), which represents location in
@@ -27,6 +24,7 @@ public interface AsyncConfigurationCommitCohort<P extends Path<P>, D> {
     /**
      * Initiates a pre-commit of associated request
      *
+     * <p>
      * Implementation MUST NOT do any blocking calls during this callback, all
      * pre-commit preparation SHOULD happen asynchronously and MUST result in
      * completing returned future object.
@@ -40,9 +38,9 @@ public interface AsyncConfigurationCommitCohort<P extends Path<P>, D> {
     ListenableFuture<Void> preCommit(AsyncReadTransaction<P, D> rebasedTransaction);
 
     /**
-     *
      * Initiates a commit phase of associated request
      *
+     * <p>
      * Implementation MUST NOT do any blocking calls during this callback, all
      * commit finalization SHOULD happen asynchronously and MUST result in
      * completing returned future object.
@@ -53,9 +51,9 @@ public interface AsyncConfigurationCommitCohort<P extends Path<P>, D> {
     ListenableFuture<Void> commit();
 
     /**
-     *
      * Initiates abort phase of associated request
      *
+     * <p>
      * Implementation MUST NOT do any blocking calls during this callback, all
      * commit finalization SHOULD happen asynchronously and MUST result in
      * completing returned future object.
