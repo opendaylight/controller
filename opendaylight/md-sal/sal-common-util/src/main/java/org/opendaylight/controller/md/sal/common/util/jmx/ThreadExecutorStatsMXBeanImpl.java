@@ -34,21 +34,21 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
      * Constructs an instance for the given {@link Executor}.
      *
      * @param executor the backing {@link Executor}
-     * @param mBeanName Used as the <code>name</code> property in the bean's ObjectName.
-     * @param mBeanType Used as the <code>type</code> property in the bean's ObjectName.
-     * @param mBeanCategory Used as the <code>Category</code> property in the bean's ObjectName.
+     * @param beanName Used as the <code>name</code> property in the bean's ObjectName.
+     * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
+     * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
-    public ThreadExecutorStatsMXBeanImpl(final ThreadPoolExecutor executor, final String mBeanName,
-            final String mBeanType, @Nullable final String mBeanCategory) {
-        super(mBeanName, mBeanType, mBeanCategory);
+    public ThreadExecutorStatsMXBeanImpl(final ThreadPoolExecutor executor, final String beanName,
+            final String beanType, @Nullable final String beanCategory) {
+        super(beanName, beanType, beanCategory);
         this.executor = Preconditions.checkNotNull(executor);
     }
 
     private static ThreadExecutorStatsMXBeanImpl createInternal(final Executor executor,
-            final String mBeanName, final String mBeanType, final String mBeanCategory) {
+            final String beanName, final String beanType, final String beanCategory) {
         if (executor instanceof ThreadPoolExecutor) {
             final ThreadExecutorStatsMXBeanImpl ret = new ThreadExecutorStatsMXBeanImpl(
-                    (ThreadPoolExecutor) executor, mBeanName, mBeanType, mBeanCategory);
+                    (ThreadPoolExecutor) executor, beanName, beanType, beanCategory);
             return ret;
         }
 
@@ -60,16 +60,16 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
      * Creates a new bean if the backing executor is a ThreadPoolExecutor and registers it.
      *
      * @param executor the backing {@link Executor}
-     * @param mBeanName Used as the <code>name</code> property in the bean's ObjectName.
-     * @param mBeanType Used as the <code>type</code> property in the bean's ObjectName.
-     * @param mBeanCategory Used as the <code>Category</code> property in the bean's ObjectName.
+     * @param beanName Used as the <code>name</code> property in the bean's ObjectName.
+     * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
+     * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      * @return a registered ThreadExecutorStatsMXBeanImpl instance if the backing executor
      *         is a ThreadPoolExecutor, otherwise null.
      */
-    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String mBeanName,
-            final String mBeanType, @Nullable final String mBeanCategory) {
-        ThreadExecutorStatsMXBeanImpl ret = createInternal(executor, mBeanName, mBeanType, mBeanCategory);
-        if(ret != null) {
+    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String beanName,
+            final String beanType, @Nullable final String beanCategory) {
+        ThreadExecutorStatsMXBeanImpl ret = createInternal(executor, beanName, beanType, beanCategory);
+        if (ret != null) {
             ret.registerMBean();
         }
 
@@ -110,7 +110,7 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
     @Override
     public Long getLargestQueueSize() {
         BlockingQueue<Runnable> queue = executor.getQueue();
-        if(queue instanceof TrackingLinkedBlockingQueue) {
+        if (queue instanceof TrackingLinkedBlockingQueue) {
             return Long.valueOf(((TrackingLinkedBlockingQueue<?>)queue).getLargestQueueSize());
         }
 
@@ -141,7 +141,7 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
     @Override
     public Long getRejectedTaskCount() {
         RejectedExecutionHandler rejectedHandler = executor.getRejectedExecutionHandler();
-        if(rejectedHandler instanceof CountingRejectedExecutionHandler) {
+        if (rejectedHandler instanceof CountingRejectedExecutionHandler) {
             return Long.valueOf(((CountingRejectedExecutionHandler)rejectedHandler)
                                                                      .getRejectedTaskCount());
         }

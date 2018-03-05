@@ -14,8 +14,7 @@ public final class Arguments {
     }
 
     /**
-     * Checks if value is instance of provided class
-     *
+     * Checks if value is instance of provided class.
      *
      * @param value Value to check
      * @param type Type to check
@@ -23,7 +22,7 @@ public final class Arguments {
      */
     @SuppressWarnings("unchecked")
     public static <T> T checkInstanceOf(Object value, Class<T> type) {
-        if(!type.isInstance(value)) {
+        if (!type.isInstance(value)) {
             throw new IllegalArgumentException(String.format("Value %s is not of type %s", value, type));
         }
         return (T) value;
