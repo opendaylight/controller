@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.sal.common.api.data;
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
- *
  * Marker interface for stateful read view of the data tree.
  *
  * <p>
@@ -46,7 +45,8 @@ import org.opendaylight.yangtools.concepts.Path;
  * that action happened after other asynchronous action. Use of blocking call
  * {@link com.google.common.util.concurrent.ListenableFuture#get()} is discouraged for most
  * uses and you should use
- * {@link com.google.common.util.concurrent.Futures#addCallback(com.google.common.util.concurrent.ListenableFuture, com.google.common.util.concurrent.FutureCallback)}
+ * {@link com.google.common.util.concurrent.Futures#addCallback(com.google.common.util.concurrent.ListenableFuture,
+ *     com.google.common.util.concurrent.FutureCallback)}
  * or other functions from {@link com.google.common.util.concurrent.Futures} to
  * register more specific listeners.
  *

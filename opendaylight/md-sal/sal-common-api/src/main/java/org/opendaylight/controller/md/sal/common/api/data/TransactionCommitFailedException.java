@@ -11,12 +11,7 @@ import org.opendaylight.yangtools.yang.common.OperationFailedException;
 import org.opendaylight.yangtools.yang.common.RpcError;
 
 /**
- *
- * Failed commit of asynchronous transaction
- *
- * This exception is raised and returned when transaction commit
- * failed.
- *
+ * Failed commit of asynchronous transaction. This exception is raised and returned when transaction commit failed.
  */
 public class TransactionCommitFailedException extends OperationFailedException {
 

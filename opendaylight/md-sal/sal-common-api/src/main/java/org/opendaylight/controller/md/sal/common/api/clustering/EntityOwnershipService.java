@@ -32,13 +32,14 @@ public interface EntityOwnershipService {
      * Registers a candidate for ownership of the given entity. Only one such request can be made per entity
      * per process. If multiple requests for registering a candidate for a given entity are received in the
      * current process a CandidateAlreadyRegisteredException will be thrown.
+     *
      * <p>
      * The registration is performed asynchronously and any registered {@link EntityOwnershipListener} is
      * notified of ownership status changes for the entity.
      *
      * @param entity the entity which the Candidate wants to own
      * @return a registration object that can be used to unregister the Candidate
-     * @throws org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException
+     * @throws CandidateAlreadyRegisteredException if the candidate is already registered
      */
     EntityOwnershipCandidateRegistration registerCandidate(@Nonnull Entity entity)
             throws CandidateAlreadyRegisteredException;
@@ -53,7 +54,8 @@ public interface EntityOwnershipService {
      * @param listener the listener that is interested in the entities
      * @return a registration object that can be used to unregister the Listener
      */
-    EntityOwnershipListenerRegistration registerListener(@Nonnull String entityType, @Nonnull EntityOwnershipListener listener);
+    EntityOwnershipListenerRegistration registerListener(@Nonnull String entityType,
+            @Nonnull EntityOwnershipListener listener);
 
     /**
      * Gets the current ownership state information for an entity.
@@ -64,9 +66,9 @@ public interface EntityOwnershipService {
     Optional<EntityOwnershipState> getOwnershipState(@Nonnull Entity forEntity);
 
     /**
-     * Check if a local candidate is registered for the given entity
+     * Check if a local candidate is registered for the given entity.
      *
-     * @param entity
+     * @param entity the entity
      * @return true if a candidate was registered locally, false otherwise
      */
     boolean isCandidateRegistered(@Nonnull Entity entity);

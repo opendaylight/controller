@@ -11,14 +11,16 @@ import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+
 /**
+ * Deprecated.
  *
  * @deprecated Replaced by {@link AsyncWriteTransaction}
  */
 @Deprecated
 public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>, DataReader<P, D> {
     /**
-     * Returns transaction identifier
+     * Returns transaction identifier.
      *
      * @return Transaction identifier
      */
@@ -32,16 +34,21 @@ public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>
      * overwritten will be preserved. This means that if you store a container,
      * its child lists will be merged. Performing the following put operations:
      *
+     * <p>
      * 1) container { list [ a ] }
      * 2) container { list [ b ] }
      *
+     * <p>
      * will result in the following data being present:
      *
+     * <p>
      * container { list [ a, b ] }
      *
+     * <p>
      * This also means that storing the container will preserve any augmentations
      * which have been attached to it.
      *
+     * <p>
      * If you require an explicit replace operation, perform
      * {@link removeOperationalData} first.
      */
@@ -53,16 +60,21 @@ public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>
      * overwritten will be preserved. This means that if you store a container,
      * its child lists will be merged. Performing the following put operations:
      *
+     * <p>
      * 1) container { list [ a ] }
      * 2) container { list [ b ] }
      *
+     * <p>
      * will result in the following data being present:
      *
+     * <p>
      * container { list [ a, b ] }
      *
+     * <p>
      * This also means that storing the container will preserve any augmentations
      * which have been attached to it.
      *
+     * <p>
      * If you require an explicit replace operation, perform
      * {@link removeConfigurationData} first.
      */

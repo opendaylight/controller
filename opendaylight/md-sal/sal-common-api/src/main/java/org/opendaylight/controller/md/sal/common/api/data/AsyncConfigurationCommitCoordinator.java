@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.concepts.Path;
 
 /**
  * Three Phase Commit Coordinator with support of user-supplied commit cohorts
- * which participates in three-phase commit protocols
+ * which participates in three-phase commit protocols.
  *
  * @param <P>
  *            Type of path (subtree identifier), which represents location in
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.Path;
 public interface AsyncConfigurationCommitCoordinator<P extends Path<P>, D> {
 
     /**
-     * Register configuration commit handler for particular subtree
+     * Register configuration commit handler for particular subtree.
      *
      * Configuration commit handler is invoked for all write transactions
      * which modifies <code>subtree</code>
