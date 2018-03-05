@@ -16,8 +16,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
+ * Deprecated.
+ *
  * @deprecated This class provides compatibility between XML semantics
- * and {@link org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree}
+ *     and {@link org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree}
  */
 @Deprecated
 public class DataNormalizer {
@@ -54,7 +56,8 @@ public class DataNormalizer {
         return YangInstanceIdentifier.create(normalizedArgs.build());
     }
 
-    public DataNormalizationOperation<?> getOperation(final YangInstanceIdentifier legacy) throws DataNormalizationException {
+    public DataNormalizationOperation<?> getOperation(final YangInstanceIdentifier legacy)
+            throws DataNormalizationException {
         DataNormalizationOperation<?> currentOp = operation;
 
         for (PathArgument pathArgument : legacy.getPathArguments()) {
@@ -78,5 +81,4 @@ public class DataNormalizer {
     public DataNormalizationOperation<?> getRootOperation() {
         return operation;
     }
-
 }
