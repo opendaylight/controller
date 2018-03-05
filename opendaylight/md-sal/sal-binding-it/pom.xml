@@ -30,30 +30,6 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-           <id>unpack-karaf-resources</id>
-           <goals>
-            <goal>unpack-dependencies</goal>
-           </goals>
-           <phase>process-test-resources</phase>
-           <configuration>
-            <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
-            <groupId>org.opendaylight.controller</groupId>
-            <includeArtifactIds>mockito-core,objenesis,config-it-base,mdsal-it-base</includeArtifactIds>
-            <excludes>META-INF\/**</excludes>
-            <ignorePermissions>false</ignorePermissions>
-           </configuration>
-          </execution>
-         </executions>
-      </plugin>
-    </plugins>
-  </build>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
