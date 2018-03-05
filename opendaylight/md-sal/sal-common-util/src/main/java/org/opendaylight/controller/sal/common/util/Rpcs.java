@@ -7,20 +7,22 @@
  */
 package org.opendaylight.controller.sal.common.util;
 
+import com.google.common.collect.ImmutableList;
 import java.io.Serializable;
 import java.util.Collection;
-
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import com.google.common.collect.ImmutableList;
-
 /**
+ * Deprecated.
+ *
  * @deprecated Use {@link org.opendaylight.yangtools.yang.common.RpcResultBuilder}
  */
 @Deprecated
-public class Rpcs {
+public final class Rpcs {
+    private Rpcs() {
+    }
 
     public static <T> RpcResult<T> getRpcResult(boolean successful) {
         return new RpcResultTO<>(successful, null, ImmutableList.of());
@@ -41,8 +43,7 @@ public class Rpcs {
         private final T result;
         private final boolean successful;
 
-        public RpcResultTO(boolean successful, T result,
-                Collection<RpcError> errors) {
+        RpcResultTO(boolean successful, T result, Collection<RpcError> errors) {
             this.successful = successful;
             this.result = result;
             this.errors = ImmutableList.copyOf(errors);
@@ -62,6 +63,5 @@ public class Rpcs {
         public Collection<RpcError> getErrors() {
             return errors;
         }
-
     }
 }

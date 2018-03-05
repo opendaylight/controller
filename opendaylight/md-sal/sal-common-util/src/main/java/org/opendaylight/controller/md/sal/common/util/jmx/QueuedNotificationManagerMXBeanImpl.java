@@ -8,12 +8,10 @@
 
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
+import com.google.common.base.Preconditions;
 import java.util.List;
-
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Implementation of the QueuedNotificationManagerMXBean interface.
@@ -31,10 +29,10 @@ public class QueuedNotificationManagerMXBeanImpl extends AbstractMXBean
 
     private final QueuedNotificationManager<?,?> manager;
 
-    public QueuedNotificationManagerMXBeanImpl( QueuedNotificationManager<?,?> manager,
-            String mBeanName, String mBeanType, String mBeanCategory ) {
-        super(mBeanName, mBeanType, mBeanCategory);
-        this.manager = Preconditions.checkNotNull( manager );
+    public QueuedNotificationManagerMXBeanImpl(QueuedNotificationManager<?,?> manager,
+            String beanName, String beanType, String beanCategory) {
+        super(beanName, beanType, beanCategory);
+        this.manager = Preconditions.checkNotNull(manager);
     }
 
     @Override
@@ -48,7 +46,6 @@ public class QueuedNotificationManagerMXBeanImpl extends AbstractMXBean
     }
 
     public QueuedNotificationManagerStats toQueuedNotificationManagerStats() {
-        return new QueuedNotificationManagerStats( getMaxListenerQueueSize(),
-                getCurrentListenerQueueStats() );
+        return new QueuedNotificationManagerStats(getMaxListenerQueueSize(), getCurrentListenerQueueStats());
     }
 }

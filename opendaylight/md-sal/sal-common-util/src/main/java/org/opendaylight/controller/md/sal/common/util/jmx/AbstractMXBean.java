@@ -12,16 +12,19 @@ import com.google.common.annotations.Beta;
 import java.lang.management.ManagementFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base for an MXBean implementation class.
+ *
  * <p>
  * This class is not intended for use outside of MD-SAL and its part of private
  * implementation (still exported as public to be reused across MD-SAL implementation
@@ -39,29 +42,29 @@ public abstract class AbstractMXBean {
 
     private final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
-    private final String mBeanName;
-    private final String mBeanType;
-    private final String mBeanCategory;
+    private final String beanName;
+    private final String beanType;
+    private final String beanCategory;
 
     /**
      * Constructor.
      *
-     * @param mBeanName Used as the <code>name</code> property in the bean's ObjectName.
-     * @param mBeanType Used as the <code>type</code> property in the bean's ObjectName.
-     * @param mBeanCategory Used as the <code>Category</code> property in the bean's ObjectName.
+     * @param beanName Used as the <code>name</code> property in the bean's ObjectName.
+     * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
+     * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
-    protected AbstractMXBean(@Nonnull String mBeanName, @Nonnull String mBeanType,
-            @Nullable String mBeanCategory) {
-        this.mBeanName = mBeanName;
-        this.mBeanType = mBeanType;
-        this.mBeanCategory = mBeanCategory;
+    protected AbstractMXBean(@Nonnull String beanName, @Nonnull String beanType,
+            @Nullable String beanCategory) {
+        this.beanName = beanName;
+        this.beanType = beanType;
+        this.beanCategory = beanCategory;
     }
 
     private ObjectName getMBeanObjectName() throws MalformedObjectNameException {
         StringBuilder builder = new StringBuilder(BASE_JMX_PREFIX)
                 .append("type=").append(getMBeanType());
 
-        if(getMBeanCategory() != null) {
+        if (getMBeanCategory() != null) {
             builder.append(",Category=").append(getMBeanCategory());
         }
 
@@ -92,14 +95,13 @@ public abstract class AbstractMXBean {
             LOG.debug("Register MBean {}", mbeanName);
 
             // unregistered if already registered
-            if(server.isRegistered(mbeanName)) {
+            if (server.isRegistered(mbeanName)) {
 
                 LOG.debug("MBean {} found to be already registered", mbeanName);
 
                 try {
                     unregisterMBean(mbeanName);
-                } catch(Exception e) {
-
+                } catch (MBeanRegistrationException | InstanceNotFoundException e) {
                     LOG.warn("unregister mbean {} resulted in exception {} ", mbeanName, e);
                 }
             }
@@ -107,10 +109,9 @@ public abstract class AbstractMXBean {
             registered = true;
 
             LOG.debug("MBean {} registered successfully", mbeanName.getCanonicalName());
-        } catch(Exception e) {
-
+        } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException
+                | MalformedObjectNameException e) {
             LOG.error("registration failed {}", e);
-
         }
         return registered;
     }
@@ -134,7 +135,7 @@ public abstract class AbstractMXBean {
             ObjectName mbeanName = this.getMBeanObjectName();
             unregisterMBean(mbeanName);
             unregister = true;
-        } catch(Exception e) {
+        } catch (MBeanRegistrationException | InstanceNotFoundException | MalformedObjectNameException e) {
             LOG.debug("Failed when unregistering MBean {}", e);
         }
 
@@ -150,20 +151,20 @@ public abstract class AbstractMXBean {
      * Returns the <code>name</code> property of the bean's ObjectName.
      */
     public String getMBeanName() {
-        return mBeanName;
+        return beanName;
     }
 
     /**
      * Returns the <code>type</code> property of the bean's ObjectName.
      */
     public String getMBeanType() {
-        return mBeanType;
+        return beanType;
     }
 
     /**
      * Returns the <code>Category</code> property of the bean's ObjectName.
      */
     public String getMBeanCategory() {
-        return mBeanCategory;
+        return beanCategory;
     }
 }
