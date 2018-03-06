@@ -22,6 +22,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 public interface NotificationListener<T extends Notification> extends EventListener {
     /**
      * Invoked to deliver a notification.
+     *
      * <p>
      * Note that this method may be invoked from a shared thread pool, so implementations SHOULD NOT
      * perform CPU-intensive operations and MUST NOT invoke any potentially blocking operations.

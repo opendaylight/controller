@@ -12,8 +12,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataTransactionFa
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface TransactionFactory extends AsyncDataTransactionFactory<InstanceIdentifier<?>, DataObject>{
-
+public interface TransactionFactory extends AsyncDataTransactionFactory<InstanceIdentifier<?>, DataObject> {
     @Override
     ReadOnlyTransaction newReadOnlyTransaction();
 
@@ -22,5 +21,4 @@ public interface TransactionFactory extends AsyncDataTransactionFactory<Instance
 
     @Override
     WriteTransaction newWriteOnlyTransaction();
-
 }

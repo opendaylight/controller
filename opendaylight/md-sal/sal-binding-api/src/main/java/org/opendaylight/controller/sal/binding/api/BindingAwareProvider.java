@@ -10,9 +10,9 @@ package org.opendaylight.controller.sal.binding.api;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 
 /**
- *
  * A developer implemented component that gets registered with the Broker.
  *
+ * <p>
  * Semantically, a provider may:
  *
  * <ol>
@@ -21,14 +21,13 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  *   <li> Write to the operational data tree </li>
  * </ol>
  *
+ * <p>
  * If a class is not doing at least one of those three, consider using
  * a BindingAwareConsumer instead:
- * @see org.opendaylight.controller.sal.binding.api.BindingAwareConsumer
+ * see {@link org.opendaylight.controller.sal.binding.api.BindingAwareConsumer}
  *
  * <p>
- *
- *In addition, a BindingAwareProvider can in pursuit of its goals:
- *
+ * In addition, a BindingAwareProvider can in pursuit of its goals:
  * <ol>
  *   <li>Subscribe for Notifications </li>
  *   <li>Invoke RPCs</li>
@@ -37,12 +36,10 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * </ol>
  * (All of the above are things a Consumer can also do).
  *
- *<p>
- *
+ * <p>
  * Examples:
  *
  *<p>
- *
  * To get a NotificationService:
  *
  * {@code
@@ -51,8 +48,9 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * }
  * }
  * For more information on sending notifications via the NotificationProviderService
- * @see org.opendaylight.controller.sal.binding.api.NotificationProviderService
+ * see {@link org.opendaylight.controller.sal.binding.api.NotificationProviderService}
  *
+ * <p>
  * To register an RPC implementation:
  *
  * {@code
@@ -62,35 +60,41 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * }
  *
  * <p>
- * Where MyService.class is a Service interface generated from a yang model with RPCs modeled in it and myImplementationInstance
- * is an instance of a class that implements MyService.
+ * Where MyService.class is a Service interface generated from a yang model with RPCs modeled in it and
+ * myImplementationInstance is an instance of a class that implements MyService.
  *
+ * <p>
  * To register a Routed RPC Implementation:
  * {@code
  * public void onSessionInitiated(ProviderContext session) {
- *   RoutedRpcRegistration<SalFlowService> flowRegistration = session.addRoutedRpcImplementation(SalFlowService.class, salFlowServiceImplementationInstance);
+ *   RoutedRpcRegistration<SalFlowService> flowRegistration = session.addRoutedRpcImplementation(SalFlowService.class,
+ *       salFlowServiceImplementationInstance);
      flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
  * }
  * }
  *
- * Where SalFlowService.class is a Service interface generated from a yang model with RPCs modeled in it and salFlowServiceImplementationInstance is an instance
- * of a class that implements SalFlowService.
+ * <p>
+ * Where SalFlowService.class is a Service interface generated from a yang model with RPCs modeled in it and
+ * salFlowServiceImplementationInstance is an instance of a class that implements SalFlowService.
+ *
  * <p>
  * The line:
  * {@code
  * flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
  * }
- * Is indicating that the RPC implementation is registered to handle RPC invocations that have their NodeContext pointing to the node with instance id nodeInstanceId.
- * This bears a bit of further explanation.  RoutedRPCs can be 'routed' to an implementation based upon 'context'.  'context' is a pointer (instanceId) to some place
- * in the data tree.  In this example, the 'context' is a pointer to a Node.  In this way, a provider can register its ability to provide a service for a particular
- * Node, but not *all* Nodes.  The Broker routes the RPC by 'context' to the correct implementation, without the caller having to do extra work.  Because of this when
- * a RoutedRPC is registered, it needs to also be able to indicate for which 'contexts' it is providing an implementation.
+ * Is indicating that the RPC implementation is registered to handle RPC invocations that have their NodeContext
+ * pointing to the node with instance id nodeInstanceId. This bears a bit of further explanation.  RoutedRPCs can be
+ * 'routed' to an implementation based upon 'context'.  'context' is a pointer (instanceId) to some place in the data
+ * tree.  In this example, the 'context' is a pointer to a Node.  In this way, a provider can register its ability to
+ * provide a service for a particular Node, but not *all* Nodes.  The Broker routes the RPC by 'context' to the correct
+ * implementation, without the caller having to do extra work.  Because of this when a RoutedRPC is registered, it
+ * needs to also be able to indicate for which 'contexts' it is providing an implementation.
  *
- * An example of a Routed RPC would be an updateFlow(node, flow) that would be routed based on node to the provider which had registered to provide
- * it *for that node*.
+ * <p>
+ * An example of a Routed RPC would be an updateFlow(node, flow) that would be routed based on node to the provider
+ * which had registered to provide it *for that node*.
  *
  *<p>
- *
  * To get a DataBroker to allow access to the data tree:
  *
  * {@code
@@ -104,9 +108,11 @@ public interface BindingAwareProvider {
     /**
      * Callback signaling initialization of the consumer session to the SAL.
      *
+     * <p>
      * The consumer MUST use the session for all communication with SAL or
      * retrieving SAL infrastructure services.
      *
+     * <p>
      * This method is invoked by
      * {@link BindingAwareBroker#registerProvider(BindingAwareProvider)}
      *

@@ -23,15 +23,9 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 @Deprecated
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     void publish(Notification notification);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     void publish(Notification notification, ExecutorService executor);
 
@@ -39,6 +33,7 @@ public interface NotificationProviderService extends NotificationService, Notifi
      * Registers a listener to be notified about notification subscriptions. This
      * enables a component to know when there is a notification listener subscribed
      * for a particular notification type.
+     *
      * <p>
      * On registration of this listener, the
      * {@link NotificationInterestListener#onNotificationSubscribtion(Class)} method
@@ -59,12 +54,13 @@ public interface NotificationProviderService extends NotificationService, Notifi
     interface NotificationInterestListener extends EventListener {
 
         /**
-         * Callback that is invoked when a notification listener subscribes for a
-         * particular notification type.
+         * Callback that is invoked when a notification listener subscribes for a particular notification type.
+         *
          * <p>
          * This method is only called for the first subscription that occurs for a
          * particular notification type. Subsequent subscriptions for the same
          * notification type do not trigger invocation of this method.
+         *
          * <p>
          * <b>Note:</b>This callback is delivered from thread not owned by this listener,
          * all processing should be as fast as possible and implementations should

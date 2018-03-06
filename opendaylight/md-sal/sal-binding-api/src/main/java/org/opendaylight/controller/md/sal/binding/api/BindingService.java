@@ -10,14 +10,15 @@ package org.opendaylight.controller.md.sal.binding.api;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 
 /**
- *
  * Marker interface for MD-SAL services which are available for users of MD-SAL.
  *
+ * <p>
  * BindingService is marker interface for infrastructure services provided by
  * the SAL. These services may be session-specific, and wrapped by custom
  * delegator patterns in order to introduce additional semantics / checks
  * to the system.
  *
+ * <p>
  * This interface extends {@link BindingAwareService}, order to be make
  * new services available via
  * {@link org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext}

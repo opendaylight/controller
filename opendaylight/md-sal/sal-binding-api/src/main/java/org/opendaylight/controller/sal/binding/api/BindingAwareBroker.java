@@ -17,16 +17,17 @@ import org.osgi.framework.BundleContext;
 /**
  * Binding-aware core of the SAL layer responsible for wiring the SAL consumers.
  *
+ * <p>
  * The responsibility of the broker is to maintain registration of SAL
  * functionality Consumers and Providers, store provider and
  * consumer specific context and functionality registration via
  * {@link ConsumerContext} and provide access to infrastructure services, which
  * removes direct dependencies between providers and consumers.
  *
+ * <p>
  * The Binding-aware broker is also responsible for translation from Java
  * classes modeling the functionality and data to binding-independent form which
  * is used in SAL Core.
- *
  *
  * <h3>Infrastructure services</h3> Some examples of infrastructure services:
  *
@@ -37,13 +38,16 @@ import org.osgi.framework.BundleContext;
  * {@link NotificationProviderService}
  * </ul>
  *
+ * <p>
  * The services are exposed via session.
  *
  * <h3>Session-based access</h3>
  *
+ * <p>
  * The providers and consumers needs to register in order to use the
  * binding-independent SAL layer and to expose functionality via SAL layer.
  *
+ * <p>
  * For more information about session-based access see {@link ConsumerContext}
  * and {@link ProviderContext}
  */
@@ -129,8 +133,7 @@ public interface BindingAwareBroker {
     interface ConsumerContext extends RpcConsumerRegistry {
 
         /**
-         * Returns a session specific instance (implementation) of requested
-         * binding-aware infrastructural service
+         * Returns a session specific instance (implementation) of requested binding-aware infrastructure service.
          *
          * @param service
          *            Broker service
@@ -186,25 +189,17 @@ public interface BindingAwareBroker {
             RoutedRegistration<Class<? extends BaseIdentity>, InstanceIdentifier<?>, T> {
 
         /**
-         * Register particular instance identifier to be processed by this
-         * RpcService
+         * Register particular instance identifier to be processed by this RpcService.
          *
-         * Deprecated in favor of RoutedRegistration#registerPath(Object, Object).
-         *
-         * @param context
-         * @param instance
+         * @deprecated in favor of RoutedRegistration#registerPath(Object, Object).
          */
         @Deprecated
         void registerInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance);
 
         /**
-         * Unregister particular instance identifier to be processed by this
-         * RpcService
+         * Unregister particular instance identifier to be processed by this RpcService.
          *
-         * Deprecated in favor of RoutedRegistration#unregisterPath(Class, InstanceIdentifier).
-         *
-         * @param context
-         * @param instance
+         * @deprecated in favor of RoutedRegistration#unregisterPath(Class, InstanceIdentifier).
          */
         @Deprecated
         void unregisterInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance);

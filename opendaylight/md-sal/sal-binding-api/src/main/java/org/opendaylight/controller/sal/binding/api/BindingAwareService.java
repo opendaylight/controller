@@ -17,13 +17,13 @@ package org.opendaylight.controller.sal.binding.api;
  * instance of the service with it's own context.
  *
  * <p>
- * The consumer's (or provider's) instance of specific service could be obtained
- * by invoking {@link org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext#getSALService(Class)} method on session
- * assigned to the consumer.
+ * The consumer's (or provider's) instance of specific service could be obtained by invoking
+ * {@link org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext#getSALService(Class)}
+ * method on session assigned to the consumer.
  *
  * <p>
- * {@link org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext} and {@link BindingAwareProvider} may seem
- * similar, but provider provides YANG model-based functionality and
+ * {@link org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext}
+ * and {@link BindingAwareProvider} may seem similar, but provider provides YANG model-based functionality and
  * {@link BindingAwareProvider} exposes the necessary supporting functionality
  * to implement specific functionality of YANG and to reuse it in the
  * development of {@link BindingAwareConsumer}s and {@link BindingAwareProvider}s.

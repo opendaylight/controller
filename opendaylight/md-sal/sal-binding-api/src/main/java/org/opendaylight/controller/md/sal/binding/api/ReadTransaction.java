@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 /**
  * A transaction that provides read access to a logical data store.
+ *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncReadTransaction}.
  */

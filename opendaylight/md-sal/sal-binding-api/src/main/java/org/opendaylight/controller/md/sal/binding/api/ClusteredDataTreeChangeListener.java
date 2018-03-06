@@ -12,6 +12,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 /**
  * ClusteredDataTreeChangeListener is a marker interface to enable data tree change notifications on all
  * instances in a cluster where this listener is registered.
+ *
  * <p>
  * Applications should implement ClusteredDataTreeChangeListener instead of {@link DataTreeChangeListener},
  * if they want to listen for data tree change notifications on any node of a clustered data store.

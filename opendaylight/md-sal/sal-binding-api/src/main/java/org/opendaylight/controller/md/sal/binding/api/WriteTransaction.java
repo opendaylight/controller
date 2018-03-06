@@ -14,6 +14,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * A transaction that provides mutation capabilities on a data tree.
+ *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncWriteTransaction}.
  */

@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  * data tree changes. This interface differs from {@link DataChangeListener}
  * in that it provides a cursor-based view of the change, which has potentially
  * lower overhead and allow more flexible consumption of change event.
+ *
  * <p>
  * Note: this interface enables notifications only at the leader of the data store, if clustered. If you want
  * notifications on all instances in a cluster, use the {@link ClusteredDataTreeChangeListener}.
@@ -37,6 +38,7 @@ public interface DataTreeChangeListener<T extends DataObject> extends EventListe
      * to recover from such events. Event producers are expected to exert reasonable
      * effort to suppress such events.
      *
+     * <p>
      * In other words, it is completely acceptable to observe
      * a {@link DataObjectModification}, while the state observed before and
      * after- data items compare as equal.

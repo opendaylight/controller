@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.sal.binding.api;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -82,5 +81,4 @@ public class ForwardingWriteTransaction extends ForwardingObject implements Writ
     public Object getIdentifier() {
         return delegate.getIdentifier();
     }
-
 }
