@@ -9,6 +9,8 @@ package org.opendaylight.controller.md.sal.binding.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.MutableClassToInstanceMap;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
@@ -24,10 +26,9 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.MutableClassToInstanceMap;
-
-public class BindingContextUtils {
+public final class BindingContextUtils {
+    private BindingContextUtils() {
+    }
 
     public static ConsumerContext createConsumerContext(BindingAwareConsumer consumer,
             ClassToInstanceMap<BindingAwareService> serviceProvider) {
@@ -67,7 +68,7 @@ public class BindingContextUtils {
         private ClassToInstanceMap<BindingAwareService> alreadyRetrievedServices;
         private ClassToInstanceMap<BindingAwareService> serviceProvider;
 
-        public SingleConsumerContextImpl(ClassToInstanceMap<BindingAwareService> serviceProvider) {
+        SingleConsumerContextImpl(ClassToInstanceMap<BindingAwareService> serviceProvider) {
             this.alreadyRetrievedServices = MutableClassToInstanceMap.create();
             this.serviceProvider = serviceProvider;
         }
@@ -81,7 +82,7 @@ public class BindingContextUtils {
         public final <T extends BindingAwareService> T getSALService(Class<T> service) {
             checkNotNull(service,"Service class should not be null.");
             T potential = alreadyRetrievedServices.getInstance(service);
-            if(potential != null) {
+            if (potential != null) {
                 return potential;
             }
             return tryToRetrieveSalService(service);
@@ -89,12 +90,12 @@ public class BindingContextUtils {
 
         private synchronized <T extends BindingAwareService> T tryToRetrieveSalService(Class<T> service) {
             final T potential = alreadyRetrievedServices.getInstance(service);
-            if(potential != null) {
+            if (potential != null) {
                 return potential;
             }
             final T requested = serviceProvider.getInstance(service);
-            if(requested == null) {
-                throw new IllegalArgumentException("Requested service "+service.getName() +" is not available.");
+            if (requested == null) {
+                throw new IllegalArgumentException("Requested service " + service.getName() + " is not available.");
             }
             final T retrieved = BindingContextUtils.createContextProxyOrReturnService(service,requested);
             alreadyRetrievedServices.put(service, retrieved);
@@ -110,13 +111,13 @@ public class BindingContextUtils {
 
     private static class SingleProviderContextImpl extends SingleConsumerContextImpl implements ProviderContext {
 
-        public SingleProviderContextImpl(ClassToInstanceMap<BindingAwareService> serviceProvider) {
+        SingleProviderContextImpl(ClassToInstanceMap<BindingAwareService> serviceProvider) {
             super(serviceProvider);
         }
 
         @Override
-        public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-                L listener) {
+        public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L>
+                registerRouteChangeListener(L listener) {
             return getSALService(RpcProviderRegistry.class).registerRouteChangeListener(listener);
         }
 

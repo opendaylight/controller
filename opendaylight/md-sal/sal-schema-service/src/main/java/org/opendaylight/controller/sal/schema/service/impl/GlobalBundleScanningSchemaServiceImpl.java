@@ -117,6 +117,6 @@ public final class GlobalBundleScanningSchemaServiceImpl implements SchemaContex
         }
 
         return Futures.makeChecked((ListenableFuture<YangTextSchemaSource>) yangProvider.getSource(sourceIdentifier),
-                e -> new SchemaSourceException("Error retrieving source", e));
+            e -> new SchemaSourceException("Error retrieving source", e));
     }
 }
