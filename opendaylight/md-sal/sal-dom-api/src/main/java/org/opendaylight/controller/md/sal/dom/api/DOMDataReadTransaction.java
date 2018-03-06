@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 /**
  * A transaction that provides read access to a logical data store.
+ *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncReadTransaction}.
  */
@@ -25,7 +25,8 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanc
 
     /**
      * Reads data from provided logical data store located at the provided path.
-     *<p>
+     *
+     * <p>
      * If the target is a subtree, then the whole subtree is read (and will be
      * accessible from the returned data object).
      *
@@ -51,8 +52,8 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanc
     /**
      /**
      * Checks if data is available in the logical data store located at provided path.
-     * <p>
      *
+     * <p>
      * Note: a successful result from this method makes no guarantee that a subsequent call to {@link #read}
      * will succeed. It is possible that the data resides in a data store on a remote node and, if that
      * node goes down or a network failure occurs, a subsequent read would fail. Another scenario is if
@@ -71,7 +72,5 @@ public interface DOMDataReadTransaction extends AsyncReadTransaction<YangInstanc
      *         {@link ReadFailedException} or an exception derived from ReadFailedException.</li>
      *         </ul>
      */
-    CheckedFuture<Boolean, ReadFailedException> exists(
-        LogicalDatastoreType store, YangInstanceIdentifier path);
-
+    CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store, YangInstanceIdentifier path);
 }

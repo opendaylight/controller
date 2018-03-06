@@ -8,11 +8,9 @@
 package org.opendaylight.controller.sal.core.api;
 
 import java.util.Collection;
-
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 
 /**
- *
  * Defines the component of controller and supplies additional metadata. A
  * component of the controller or application supplies a concrete implementation
  * of this interface.
@@ -21,8 +19,6 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
  * A user-implemented component (application) which facilitates the SAL and SAL
  * services to access infrastructure services and to provide functionality to
  * {@link Consumer}s and other providers.
- *
- *
  */
 public interface Provider {
 
@@ -42,9 +38,9 @@ public interface Provider {
     void onSessionInitiated(ProviderSession session);
 
     /**
-     * @deprecated - No longer used or needed
+     * Deprecated.
      *
-     * Suggested implementation until removed:
+     * @deprecated - No longer used or needed. Suggested implementation until removed:
      * {@code
      * public Collection<ProviderFunctionality> getProviderFunctionality() {
      *  return Collections.emptySet();
@@ -55,6 +51,8 @@ public interface Provider {
     Collection<ProviderFunctionality> getProviderFunctionality();
 
     /**
+     * Deprecated.
+     *
      * @deprecated - no longer used or needed
      */
     @Deprecated

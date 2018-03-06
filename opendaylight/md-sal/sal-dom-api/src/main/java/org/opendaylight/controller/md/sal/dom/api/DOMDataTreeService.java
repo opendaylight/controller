@@ -16,10 +16,12 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * with the data tree are split into data producers and consumers (listeners). Each
  * of them operate on a set of subtrees, which need to be declared at instantiation time.
  *
+ * <p>
  * Returned instances are not thread-safe and expected to be used by a single thread
  * at a time. Furthermore, producers may not be accessed from consumer callbacks
  * unless they were specified when the listener is registered.
  *
+ * <p>
  * The service maintains a loop-free topology of producers and consumers. What this means
  * is that a consumer is not allowed to access a producer, which affects any of the
  * subtrees it is subscribed to. This restriction is in place to ensure the system does
@@ -38,12 +40,14 @@ public interface DOMDataTreeService extends DOMDataTreeProducerFactory, DOMServi
      * is free to merge the changes, so that a smaller number of them will be reported,
      * possibly hiding some data transitions (like flaps).
      *
+     * <p>
      * If the listener wants to write into any producer, that producer has to be mentioned
      * in the call to this method. Those producers will be bound exclusively to the
      * registration, so that accessing them outside of this listener's callback will trigger
      * an error. Any producers mentioned must be idle, e.g. they may not have an open
      * transaction at the time this method is invoked.
      *
+     * <p>
      * Each listener instance can be registered at most once. Implementations of this
      * interface have to guarantee that the listener's methods will not be invoked
      * concurrently from multiple threads.
@@ -61,5 +65,6 @@ public interface DOMDataTreeService extends DOMDataTreeProducerFactory, DOMServi
      *                                  feedback loop
      */
     @Nonnull <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(@Nonnull T listener,
-        @Nonnull Collection<DOMDataTreeIdentifier> subtrees, boolean allowRxMerges, @Nonnull Collection<DOMDataTreeProducer> producers) throws DOMDataTreeLoopException;
+        @Nonnull Collection<DOMDataTreeIdentifier> subtrees, boolean allowRxMerges,
+        @Nonnull Collection<DOMDataTreeProducer> producers) throws DOMDataTreeLoopException;
 }

@@ -32,7 +32,8 @@ public interface DOMNotificationService extends DOMService, BrokerService {
      *         null or a SchemaPath which does not represent a valid {@link DOMNotification} type.
      * @throws NullPointerException if either of the arguments is null
      */
-    <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(@Nonnull T listener, @Nonnull Collection<SchemaPath> types);
+    <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(
+            @Nonnull T listener, @Nonnull Collection<SchemaPath> types);
 
     /**
      * Register a {@link DOMNotificationListener} to receive a set of notifications. As with
@@ -49,5 +50,6 @@ public interface DOMNotificationService extends DOMService, BrokerService {
      * @throws NullPointerException if listener is null
      */
     // FIXME: Java 8: provide a default implementation of this method.
-    <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(@Nonnull T listener, SchemaPath... types);
+    <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(
+            @Nonnull T listener, SchemaPath... types);
 }

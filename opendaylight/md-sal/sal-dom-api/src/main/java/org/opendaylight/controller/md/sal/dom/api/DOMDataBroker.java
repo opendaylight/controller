@@ -19,35 +19,25 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Data Broker which provides data transaction and data change listener functionality
  * using {@link NormalizedNode} data format.
  *
+ * <p>
  * This interface is type capture of generic interfaces and returns type captures
  * of results for client-code convenience.
  *
  */
 public interface DOMDataBroker extends
         AsyncDataBroker<YangInstanceIdentifier, NormalizedNode<?, ?>, DOMDataChangeListener>,
-        TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>, BrokerService, DOMExtensibleService<DOMDataBroker, DOMDataBrokerExtension> {
+        TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>, BrokerService,
+            DOMExtensibleService<DOMDataBroker, DOMDataBrokerExtension> {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     DOMDataReadOnlyTransaction newReadOnlyTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     DOMDataReadWriteTransaction newReadWriteTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     DOMDataWriteTransaction newWriteOnlyTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     DOMTransactionChain createTransactionChain(TransactionChainListener listener);
 }

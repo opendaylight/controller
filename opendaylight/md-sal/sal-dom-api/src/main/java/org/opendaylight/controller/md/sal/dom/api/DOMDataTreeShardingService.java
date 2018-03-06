@@ -16,11 +16,13 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * single {@link DOMDataTreeIdentifier}. Based on those data tree identifiers, the
  * shards are organized in a tree, where there is a logical parent/child relationship.
  *
+ * <p>
  * It is not allowed to attach two shards to the same data tree identifier, which means
  * the mapping of each piece of information has an unambiguous home. When accessing
  * the information, the shard with the longest matching data tree identifier is used,
  * which is why this interface treats it is a prefix.
  *
+ * <p>
  * Whenever a parent/child relationship is changed, the parent is notified, so it can
  * understand that a logical child has been attached.
  *
@@ -36,5 +38,6 @@ public interface DOMDataTreeShardingService extends DOMService {
      * @return A registration. To remove the shard's binding, close the registration.
      * @throws DOMDataTreeShardingConflictException if the prefix is already bound
      */
-    @Nonnull <T extends DOMDataTreeShard> ListenerRegistration<T> registerDataTreeShard(@Nonnull DOMDataTreeIdentifier prefix, @Nonnull T shard) throws DOMDataTreeShardingConflictException;
+    @Nonnull <T extends DOMDataTreeShard> ListenerRegistration<T> registerDataTreeShard(
+            @Nonnull DOMDataTreeIdentifier prefix, @Nonnull T shard) throws DOMDataTreeShardingConflictException;
 }

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 /**
- * <p>
  * This exception indicates that given notification can not be processed by corresponding mechanism.
  * More info can be provided in message.
  *

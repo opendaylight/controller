@@ -20,7 +20,8 @@ import javax.annotation.Nonnull;
  * @param <E> Extension type
  */
 @Beta
-public interface DOMExtensibleService<T extends DOMExtensibleService<T, E>, E extends DOMServiceExtension<T, E>> extends DOMService {
+public interface DOMExtensibleService<T extends DOMExtensibleService<T, E>,
+        E extends DOMServiceExtension<T, E>> extends DOMService {
     /**
      * Return a map of currently-supported extensions, along with accessor services
      * which provide access to the specific functionality bound to this service.

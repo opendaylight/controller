@@ -9,16 +9,14 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 /**
- * <p>ClusteredDOMDataChangeListener is a marker interface to enable data change notifications on all instances in a cluster,
- * where this listener is registered.</p>
+ * ClusteredDOMDataChangeListener is a marker interface to enable data change
+ * notifications on all instances in a cluster, where this listener is
+ * registered.
  *
- *
- * <p>Applications should implement ClusteredDOMDataChangeListener instead of DOMDataChangeListener, if they want to listen
- * to data change notifications on any node of clustered datastore. DOMDataChangeListener enables data change notifications
- * only at leader of the datastore shard.</p>
- *
+ * <p>
+ * Applications should implement ClusteredDOMDataChangeListener instead of DOMDataChangeListener, if they want to
+ * listen to data change notifications on any node of clustered datastore. DOMDataChangeListener enables data change
+ * notifications only at leader of the datastore shard.
  */
-
 public interface ClusteredDOMDataChangeListener extends DOMDataChangeListener{
-
 }

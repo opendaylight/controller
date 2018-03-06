@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.test.model.util;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeLeafOnlyUsesAugment;
@@ -26,9 +27,7 @@ import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import java.util.Arrays;
-
-public class ListsBindingUtils {
+public final class ListsBindingUtils {
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
 
@@ -54,7 +53,8 @@ public class ListsBindingUtils {
         return path(top).augmentation(TreeComplexUsesAugment.class).child(ListViaUses.class, uses);
     }
 
-    public static <T extends DataObject & Augmentation<TopLevelList>> InstanceIdentifier<T> path(final TopLevelListKey key, final Class<T> augmentation) {
+    public static <T extends DataObject & Augmentation<TopLevelList>> InstanceIdentifier<T> path(
+            final TopLevelListKey key, final Class<T> augmentation) {
         return path(key).augmentation(augmentation);
     }
 
@@ -73,7 +73,7 @@ public class ListsBindingUtils {
     }
 
     public static TreeComplexUsesAugment complexUsesAugment(final ListViaUsesKey... keys) {
-        ImmutableList.Builder<ListViaUses> listViaUses = ImmutableList.<ListViaUses> builder();
+        ImmutableList.Builder<ListViaUses> listViaUses = ImmutableList.<ListViaUses>builder();
         for (ListViaUsesKey key : keys) {
             listViaUses.add(new ListViaUsesBuilder().setKey(key).build());
         }

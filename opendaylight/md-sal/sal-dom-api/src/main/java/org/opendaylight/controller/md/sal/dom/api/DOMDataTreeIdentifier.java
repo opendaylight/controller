@@ -23,12 +23,14 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
  * A unique identifier for a particular subtree. It is composed of the logical
  * data store type and the instance identifier of the root node.
  */
-public final class DOMDataTreeIdentifier implements Immutable, Path<DOMDataTreeIdentifier>, Serializable, Comparable<DOMDataTreeIdentifier> {
+public final class DOMDataTreeIdentifier implements Immutable,
+        Path<DOMDataTreeIdentifier>, Serializable, Comparable<DOMDataTreeIdentifier> {
     private static final long serialVersionUID = 1L;
     private final YangInstanceIdentifier rootIdentifier;
     private final LogicalDatastoreType datastoreType;
 
-    public DOMDataTreeIdentifier(final LogicalDatastoreType datastoreType, final YangInstanceIdentifier rootIdentifier) {
+    public DOMDataTreeIdentifier(final LogicalDatastoreType datastoreType,
+            final YangInstanceIdentifier rootIdentifier) {
         this.datastoreType = Preconditions.checkNotNull(datastoreType);
         this.rootIdentifier = Preconditions.checkNotNull(rootIdentifier);
     }
@@ -81,14 +83,14 @@ public final class DOMDataTreeIdentifier implements Immutable, Path<DOMDataTreeI
     }
 
     @Override
-    public int compareTo(final DOMDataTreeIdentifier o) {
-        int i = datastoreType.compareTo(o.datastoreType);
-        if (i != 0) {
-            return i;
+    public int compareTo(final DOMDataTreeIdentifier obj) {
+        int cmp = datastoreType.compareTo(obj.datastoreType);
+        if (cmp != 0) {
+            return cmp;
         }
 
         final Iterator<PathArgument> mi = rootIdentifier.getPathArguments().iterator();
-        final Iterator<PathArgument> oi = o.rootIdentifier.getPathArguments().iterator();
+        final Iterator<PathArgument> oi = obj.rootIdentifier.getPathArguments().iterator();
 
         while (mi.hasNext()) {
             if (!oi.hasNext()) {
@@ -97,9 +99,9 @@ public final class DOMDataTreeIdentifier implements Immutable, Path<DOMDataTreeI
 
             final PathArgument ma = mi.next();
             final PathArgument oa = oi.next();
-            i = ma.compareTo(oa);
-            if (i != 0) {
-                return i;
+            cmp = ma.compareTo(oa);
+            if (cmp != 0) {
+                return cmp;
             }
         }
 

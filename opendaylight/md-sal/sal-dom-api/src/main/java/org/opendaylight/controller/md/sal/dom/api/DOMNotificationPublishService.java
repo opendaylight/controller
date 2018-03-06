@@ -29,7 +29,8 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * Well-known value indicating that the implementation is currently not
      * able to accept a notification.
      */
-    ListenableFuture<Object> REJECTED = Futures.immediateFailedFuture(new DOMNotificationRejectedException("Unacceptable blocking conditions encountered"));
+    ListenableFuture<Object> REJECTED = Futures.immediateFailedFuture(
+            new DOMNotificationRejectedException("Unacceptable blocking conditions encountered"));
 
     /**
      * Publish a notification. The result of this method is a {@link ListenableFuture}
@@ -38,6 +39,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * and implementations may use it to convey additional information related to the
      * publishing process.
      *
+     * <p>
      * Abstract subclasses can refine the return type as returning a promise of a
      * more specific type, e.g.:
      *
@@ -46,6 +48,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      *     ListenableFuture<? extends DeliveryStatus> putNotification(DOMNotification notification);
      * }
      *
+     * <p>
      * Once the Future succeeds, the resulting object can be queried for traits using
      * instanceof, e.g:
      *
@@ -58,10 +61,12 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      *     }
      * }
      *
+     * <p>
      * In case an implementation is running out of resources, it can block the calling
      * thread until enough resources become available to accept the notification for
      * processing, or it is interrupted.
      *
+     * <p>
      * Caution: completion here means that the implementation has completed processing
      *          of the notification. This does not mean that all existing registrants
      *          have seen the notification. Most importantly, the delivery process at

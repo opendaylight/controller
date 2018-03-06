@@ -8,15 +8,10 @@
 package org.opendaylight.controller.sal.core.api;
 
 import java.io.Serializable;
-
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.common.QName;
 
-public class RpcRoutingContext implements Immutable, Serializable {
-
-    /**
-     *
-     */
+public final class RpcRoutingContext implements Immutable, Serializable {
     private static final long serialVersionUID = -9079324728075883325L;
 
     private final QName context;
@@ -28,7 +23,7 @@ public class RpcRoutingContext implements Immutable, Serializable {
         this.rpc = rpc;
     }
 
-    public static final RpcRoutingContext create(QName context, QName rpc) {
+    public static RpcRoutingContext create(QName context, QName rpc) {
         return new RpcRoutingContext(context, rpc);
     }
 
@@ -49,30 +44,37 @@ public class RpcRoutingContext implements Immutable, Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((context == null) ? 0 : context.hashCode());
-        result = prime * result + ((rpc == null) ? 0 : rpc.hashCode());
+        result = prime * result + (context == null ? 0 : context.hashCode());
+        result = prime * result + (rpc == null ? 0 : rpc.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         RpcRoutingContext other = (RpcRoutingContext) obj;
         if (context == null) {
-            if (other.context != null)
+            if (other.context != null) {
                 return false;
-        } else if (!context.equals(other.context))
+            }
+        } else if (!context.equals(other.context)) {
             return false;
+        }
         if (rpc == null) {
-            if (other.rpc != null)
+            if (other.rpc != null) {
                 return false;
-        } else if (!rpc.equals(other.rpc))
+            }
+        } else if (!rpc.equals(other.rpc)) {
             return false;
+        }
         return true;
     }
 }
