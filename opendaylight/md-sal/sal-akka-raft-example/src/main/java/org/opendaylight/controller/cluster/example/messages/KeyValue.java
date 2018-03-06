@@ -19,7 +19,7 @@ public class KeyValue extends Payload implements Serializable {
     public KeyValue() {
     }
 
-    public KeyValue(String key, String value){
+    public KeyValue(String key, String value) {
         this.key = key;
         this.value = value;
     }
@@ -40,11 +40,9 @@ public class KeyValue extends Payload implements Serializable {
         this.value = value;
     }
 
-    @Override public String toString() {
-        return "KeyValue{" +
-            "key='" + key + '\'' +
-            ", value='" + value + '\'' +
-            '}';
+    @Override
+    public String toString() {
+        return "KeyValue{" + "key='" + key + '\'' + ", value='" + value + '\'' + '}';
     }
 
     @Override

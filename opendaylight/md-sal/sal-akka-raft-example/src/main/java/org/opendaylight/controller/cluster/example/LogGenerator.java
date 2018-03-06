@@ -9,23 +9,21 @@
 package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
-import org.opendaylight.controller.cluster.example.messages.KeyValue;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import org.opendaylight.controller.cluster.example.messages.KeyValue;
 
 /**
  * Created by kramesha on 7/16/14.
  */
 public class LogGenerator {
-    private Map<ActorRef, LoggingThread> clientToLoggingThread = new HashMap<>();
+    private final Map<ActorRef, LoggingThread> clientToLoggingThread = new HashMap<>();
 
     public void startLoggingForClient(ActorRef client) {
         LoggingThread lt = new LoggingThread(client);
         clientToLoggingThread.put(client, lt);
-        Thread t = new Thread(lt);
-        t.start();
+        new Thread(lt).start();
     }
 
     public void stopLoggingForClient(ActorRef client) {
@@ -35,25 +33,27 @@ public class LogGenerator {
 
     public class LoggingThread implements Runnable {
 
-        private ActorRef clientActor;
+        private final ActorRef clientActor;
         private volatile boolean stopLogging = false;
 
         public LoggingThread(ActorRef clientActor) {
             this.clientActor = clientActor;
         }
 
+        @Override
+        @SuppressWarnings("checkstyle:RegexpSingleLineJava")
         public void run() {
-            Random r = new Random();
+            Random random = new Random();
             while (true) {
                 if (stopLogging) {
                     System.out.println("Logging stopped for client:" + clientActor.path());
                     break;
                 }
                 String key = clientActor.path().name();
-                int random = r.nextInt(100);
-                clientActor.tell(new KeyValue(key+"-key-" + random, "value-" + random), null);
+                int randomInt = random.nextInt(100);
+                clientActor.tell(new KeyValue(key + "-key-" + randomInt, "value-" + randomInt), null);
                 try {
-                    Thread.sleep((random%10) * 1000);
+                    Thread.sleep(randomInt % 10 * 1000L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -67,9 +67,5 @@ public class LogGenerator {
         public void startLogging() {
             stopLogging = false;
         }
-
-
     }
-
-
 }
