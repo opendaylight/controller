@@ -38,7 +38,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
 /**
- * A sample actor showing how the RaftActor is to be extended
+ * A sample actor showing how the RaftActor is to be extended.
  */
 public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
     private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
@@ -69,23 +69,23 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @Override
     protected void handleNonRaftCommand(Object message) {
-        if(message instanceof KeyValue){
-            if(isLeader()) {
+        if (message instanceof KeyValue) {
+            if (isLeader()) {
                 persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message, false);
             } else {
-                if(getLeader() != null) {
+                if (getLeader() != null) {
                     getLeader().forward(message, getContext());
                 }
             }
 
         } else if (message instanceof PrintState) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("State of the node:{} has entries={}, {}",
                     getId(), state.size(), getReplicatedLogState());
             }
 
         } else if (message instanceof PrintRole) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
                     final String followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
                     LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
@@ -122,22 +122,23 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @Override
     protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
-        if(data instanceof KeyValue){
+        if (data instanceof KeyValue) {
             KeyValue kv = (KeyValue) data;
             state.put(kv.getKey(), kv.getValue());
-            if(clientActor != null) {
+            if (clientActor != null) {
                 clientActor.tell(new KeyValueSaved(), getSelf());
             }
         }
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
         try {
             if (installSnapshotStream.isPresent()) {
                 SerializationUtils.serialize((Serializable) state, installSnapshotStream.get());
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Exception in creating snapshot", e);
         }
 
@@ -147,12 +148,9 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     @Override
     public void applySnapshot(Snapshot.State snapshotState) {
         state.clear();
-        try {
-            state.putAll(((MapState)snapshotState).state);
-        } catch (Exception e) {
-           LOG.error("Exception in applying snapshot", e);
-        }
-        if(LOG.isDebugEnabled()) {
+        state.putAll(((MapState)snapshotState).state);
+
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Snapshot applied to state : {}", ((HashMap<?, ?>) state).size());
         }
     }

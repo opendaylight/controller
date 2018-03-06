@@ -29,9 +29,8 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
  * Each ExampleActor can have one or more ClientActors. Each ClientActor spawns
  * a thread and starts push logs to the actor its assigned to.
  */
+@SuppressWarnings("checkstyle:RegexpSingleLineJava")
 public class TestDriver {
-
-
     private static Map<String, String> allPeers = new HashMap<>();
     private static Map<String, ActorRef> clientActorRefs  = new HashMap<>();
     private static Map<String, ActorRef> actorRefs = new HashMap<>();
@@ -58,12 +57,10 @@ public class TestDriver {
      *  printNodes
      *  printState
      *
+     * <p>
      *  Note: when run on IDE and on debug log level, the debug logs in
      *  AbstractUptypedActor and AbstractUptypedPersistentActor would need to be commented out.
      *  Also RaftActor handleCommand(), debug log which prints for every command other than AE/AER
-     *
-     * @param args
-     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
 
@@ -79,26 +76,26 @@ public class TestDriver {
 
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        while(true) {
+        while (true) {
             String command = br.readLine();
             if (command.startsWith("bye")) {
                 System.exit(0);
 
             } else if (command.startsWith("createNodes")) {
                 String[] arr = command.split(":");
-                int n = Integer.parseInt(arr[1]);
-                td.createNodes(n);
+                int num = Integer.parseInt(arr[1]);
+                td.createNodes(num);
 
             } else if (command.startsWith("addClients")) {
                 String[] arr = command.split(":");
-                int n = Integer.parseInt(arr[1]);
-                td.addClients(n);
+                int num = Integer.parseInt(arr[1]);
+                td.addClients(num);
 
             } else if (command.startsWith("addClientsToNode")) {
                 String[] arr = command.split(":");
                 String nodeName = arr[1];
-                int n = Integer.parseInt(arr[1]);
-                td.addClientsToNode(nodeName, n);
+                int num = Integer.parseInt(arr[1]);
+                td.addClientsToNode(nodeName, num);
 
             } else if (command.startsWith("stopNode")) {
                 String[] arr = command.split(":");
@@ -135,7 +132,7 @@ public class TestDriver {
 
     // create the listener using a separate actor system for each example actor
     private static void createClusterRoleChangeListener(List<String> memberIds) {
-        System.out.println("memberIds="+memberIds);
+        System.out.println("memberIds=" + memberIds);
         for (String memberId : memberIds) {
             ActorRef listenerActor = listenerActorSystem.actorOf(
                 ExampleRoleChangeListener.getProps(memberId), memberId + "-role-change-listener");
@@ -149,16 +146,15 @@ public class TestDriver {
     }
 
     public void createNodes(int num) {
-        for (int i=0; i < num; i++)  {
+        for (int i = 0; i < num; i++)  {
             nameCounter = nameCounter + 1;
-            allPeers.put("example-"+nameCounter, "akka://raft-test/user/example-"+nameCounter);
+            allPeers.put("example-" + nameCounter, "akka://raft-test/user/example-" + nameCounter);
         }
 
         for (String s : allPeers.keySet())  {
             ActorRef exampleActor = createExampleActor(s);
             actorRefs.put(s, exampleActor);
-            System.out.println("Created node:"+s);
-
+            System.out.println("Created node:" + s);
         }
 
         createClusterRoleChangeListener(Lists.newArrayList(allPeers.keySet()));
@@ -166,8 +162,8 @@ public class TestDriver {
 
     // add num clients to all nodes in the system
     public void addClients(int num) {
-        for(Map.Entry<String,ActorRef> actorRefEntry : actorRefs.entrySet()) {
-            for (int i=0; i < num; i++) {
+        for (Map.Entry<String, ActorRef> actorRefEntry : actorRefs.entrySet()) {
+            for (int i = 0; i < num; i++) {
                 String clientName = "client-" + i + "-" + actorRefEntry.getKey();
                 ActorRef clientActor = actorSystem.actorOf(
                     ClientActor.props(actorRefEntry.getValue()), clientName);
@@ -180,7 +176,7 @@ public class TestDriver {
     // add num clients to a node
     public void addClientsToNode(String actorName, int num) {
         ActorRef actorRef = actorRefs.get(actorName);
-        for (int i=0; i < num; i++) {
+        for (int i = 0; i < num; i++) {
             String clientName = "client-" + i + "-" + actorName;
             clientActorRefs.put(clientName,
                 actorSystem.actorOf(ClientActor.props(actorRef), clientName));
@@ -203,7 +199,7 @@ public class TestDriver {
     }
 
     public void reinstateNode(String actorName) {
-        String address = "akka://default/user/"+actorName;
+        String address = "akka://default/user/" + actorName;
         allPeers.put(actorName, address);
 
         ActorRef exampleActor = createExampleActor(actorName);
@@ -213,15 +209,16 @@ public class TestDriver {
     }
 
     public void startAllLogging() {
-        if(!clientActorRefs.isEmpty()) {
-            for(Map.Entry<String,ActorRef> client : clientActorRefs.entrySet()) {
+        if (!clientActorRefs.isEmpty()) {
+            for (Map.Entry<String, ActorRef> client : clientActorRefs.entrySet()) {
                 logGenerator.startLoggingForClient(client.getValue());
-                System.out.println("Started logging for client:"+client.getKey());
+                System.out.println("Started logging for client:" + client.getKey());
             }
         } else {
-            System.out.println("There are no clients for any nodes. First create clients using commands- addClients:<num> or addClientsToNode:<nodename>:<num>");
+            System.out.println(
+                    "There are no clients for any nodes. First create clients using commands- addClients:<num> or "
+                    + "addClientsToNode:<nodename>:<num>");
         }
-
     }
 
     public void startLoggingForClient(ActorRef client) {
@@ -229,7 +226,7 @@ public class TestDriver {
     }
 
     public void stopAllLogging() {
-        for(Map.Entry<String,ActorRef> client : clientActorRefs.entrySet()) {
+        for (Map.Entry<String, ActorRef> client : clientActorRefs.entrySet()) {
             logGenerator.stopLoggingForClient(client.getValue());
         }
     }
