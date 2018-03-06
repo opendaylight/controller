@@ -23,13 +23,16 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * </ul>
  *
  * <h3>Generic Listener</h3>
+ *
  * <p>
  * A generic listener implements the {@link NotificationListener} interface which has one callback method
  * <code>onNotification</code> that is invoked for any notification type the listener is subscribed to.
+ *
  * <p>
  * A generic listener is subscribed using the {@link #registerNotificationListener(Class, NotificationListener)}
  * method by which you specify the type of notification to receive. A generic listener may be registered for
  * multiple notification types via multiple subscriptions.
+ *
  * <p>
  * Generic listeners allow for a more flexible approach, allowing you to subscribe for just
  * one type of notification from a YANG model. You could also have a general subscription
@@ -39,16 +42,18 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * </pre>
  *
  * <h3>Dispatch Listener</h3>
+ *
  * <p>
  * A dispatch listener implements a YANG-generated module interface <code>{ModuleName}Listener</code>
  * which handles all the notifications defined in the YANG model. Each notification type translates to
  * a specific method of the form <code>on{NotificationType}</code> on the generated interface.
  * The generated interface also extends the
  * {@link org.opendaylight.yangtools.yang.binding.NotificationListener} interface and implementations
- * are registered using {@link #registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener)}
- * method.
+ * are registered using
+ * {@link #registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener)} method.
  *
  * <h4>Dispatch Listener Example</h4>
+ *
  * <p>
  * Lets assume we have following YANG model:
  *
@@ -66,6 +71,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * }
  * }
  *
+ * <p>
  * The generated interface will be:
  * {@code
  *  public interface ExampleListener extends NotificationListener {

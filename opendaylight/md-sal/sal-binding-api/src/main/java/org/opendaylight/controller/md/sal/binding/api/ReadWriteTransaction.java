@@ -13,9 +13,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * A transaction that enables combined read/write capabilities.
+ *
  * <p>
  * For more information on usage and examples, please see the documentation in {@link AsyncReadWriteTransaction}.
  */
-public interface ReadWriteTransaction extends ReadTransaction, WriteTransaction, AsyncReadWriteTransaction<InstanceIdentifier<?>, DataObject> {
-
+public interface ReadWriteTransaction extends ReadTransaction, WriteTransaction,
+        AsyncReadWriteTransaction<InstanceIdentifier<?>, DataObject> {
 }

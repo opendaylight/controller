@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * A chain of transactions.
+ *
  * <p>
  * For more information about transaction chaining and transaction chains
  * see {@link TransactionChain}.
@@ -20,22 +21,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * @see TransactionChain
  *
  */
-public interface BindingTransactionChain extends TransactionFactory, TransactionChain<InstanceIdentifier<?>, DataObject> {
-    /**
-     * {@inheritDoc}
-     */
+public interface BindingTransactionChain extends TransactionFactory,
+        TransactionChain<InstanceIdentifier<?>, DataObject> {
     @Override
     ReadOnlyTransaction newReadOnlyTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     ReadWriteTransaction newReadWriteTransaction();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     WriteTransaction newWriteOnlyTransaction();
 }

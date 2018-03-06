@@ -13,10 +13,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * A transaction that provides a stateful read-only view of the data tree.
+ *
  * <p>
  * For more information on usage and examples, please see the documentation in
  *  {@link org.opendaylight.controller.md.sal.common.api.data.AsyncReadTransaction}.
  */
-public interface ReadOnlyTransaction extends ReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>, DataObject> {
-
+public interface ReadOnlyTransaction extends ReadTransaction, AsyncReadOnlyTransaction<InstanceIdentifier<?>,
+        DataObject> {
 }

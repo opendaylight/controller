@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.binding.api;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -18,16 +18,17 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
-    private static final ExecutorService mdActivationPool = Executors.newCachedThreadPool();
+    private static final ExecutorService MD_ACTIVATION_POOL = Executors.newCachedThreadPool();
     private BundleContext context;
     private ServiceTracker<BindingAwareBroker, BindingAwareBroker> tracker;
     private BindingAwareBroker broker;
-    private ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker> customizer = new ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker>() {
+    private final ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker> customizer =
+            new ServiceTrackerCustomizer<BindingAwareBroker, BindingAwareBroker>() {
 
         @Override
         public BindingAwareBroker addingService(ServiceReference<BindingAwareBroker> reference) {
             broker = context.getService(reference);
-            mdActivationPool.execute(() -> onBrokerAvailable(broker, context));
+            MD_ACTIVATION_POOL.execute(() -> onBrokerAvailable(broker, context));
             return broker;
         }
 
@@ -40,17 +41,17 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<BindingAwareBroker> reference, BindingAwareBroker service) {
             broker = context.getService(reference);
-            mdActivationPool.execute(() -> onBrokerRemoved(broker, context));
+            MD_ACTIVATION_POOL.execute(() -> onBrokerRemoved(broker, context));
         }
 
     };
 
 
     @Override
-    public final void start(BundleContext context) throws Exception {
-        this.context = context;
-        startImpl(context);
-        tracker = new ServiceTracker<>(context, BindingAwareBroker.class, customizer);
+    public final void start(BundleContext bundleContext) throws Exception {
+        this.context = bundleContext;
+        startImpl(bundleContext);
+        tracker = new ServiceTracker<>(bundleContext, BindingAwareBroker.class, customizer);
         tracker.open();
 
     }
@@ -58,11 +59,10 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
 
     @Override
-    public final  void stop(BundleContext context) throws Exception {
+    public final  void stop(BundleContext bundleContext) throws Exception {
         tracker.close();
-        stopImpl(context);
+        stopImpl(bundleContext);
     }
-
 
     /**
      * Called when this bundle is started (before
@@ -74,7 +74,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      * <p>
      * This method must complete and return to its caller in a timely manner.
      *
-     * @param context
+     * @param bundleContext
      *            The execution context of the bundle being started.
      * @throws RuntimeException
      *             If this method throws an exception, this bundle is marked as
@@ -82,7 +82,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      *             listeners, unregister all services registered by this bundle,
      *             and release all services used by this bundle.
      */
-    protected void startImpl(BundleContext context) {
+    protected void startImpl(BundleContext bundleContext) {
         // NOOP
     }
 
@@ -97,20 +97,19 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      * <p>
      * This method must complete and return to its caller in a timely manner.
      *
-     * @param context The execution context of the bundle being stopped.
+     * @param bundleContext The execution context of the bundle being stopped.
      * @throws RuntimeException If this method throws an exception, the bundle is still
      *         marked as stopped, and the Framework will remove the bundle's
      *         listeners, unregister all services registered by the bundle, and
      *         release all services used by the bundle.
      */
-    protected void stopImpl(BundleContext context) {
+    protected void stopImpl(BundleContext bundleContext) {
         // NOOP
     }
 
+    protected abstract void onBrokerAvailable(BindingAwareBroker bindingBroker, BundleContext bundleContext);
 
-    protected abstract void onBrokerAvailable(BindingAwareBroker broker, BundleContext context);
-
-    protected void onBrokerRemoved(BindingAwareBroker broker, BundleContext context) {
-        stopImpl(context);
+    protected void onBrokerRemoved(BindingAwareBroker bindingBroker, BundleContext bundleContext) {
+        stopImpl(bundleContext);
     }
 }

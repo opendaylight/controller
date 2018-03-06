@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.osgi.framework.BundleContext;
 
 @Deprecated
-public abstract class AbstractBindingAwareProvider extends AbstractBrokerAwareActivator implements BindingAwareProvider {
-
+public abstract class AbstractBindingAwareProvider extends AbstractBrokerAwareActivator
+        implements BindingAwareProvider {
     @Override
     protected final void onBrokerAvailable(BindingAwareBroker broker, BundleContext context) {
-        ProviderContext ctx = broker.registerProvider(this, context);
+        broker.registerProvider(this, context);
     }
 }

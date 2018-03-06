@@ -13,15 +13,17 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 /**
  * Notification broker which allows clients to subscribe for and publish YANG-modeled notifications.
  *
+ * <p>
  * Each YANG module which defines notifications results in a generated interface <code>{ModuleName}Listener</code>
  * which handles all the notifications defined in the YANG model. Each notification type translates to
  * a specific method of the form <code>on{NotificationType}</code> on the generated interface.
  * The generated interface also extends the
  * {@link org.opendaylight.yangtools.yang.binding.NotificationListener} interface and implementations
- * are registered using {@link #registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener)}
- * method.
+ * are registered using
+ *  {@link #registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener)} method.
  *
  * <h3>Dispatch Listener Example</h3>
+ *
  * <p>
  * Lets assume we have following YANG model:
  *
@@ -39,6 +41,7 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
  * }
  * </pre>
  *
+ * <p>
  * The generated interface will be:
  * {@code
  *  public interface ExampleListener extends NotificationListener {

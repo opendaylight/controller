@@ -20,14 +20,16 @@ public interface DataTreeChangeService extends BindingService {
      * Registers a {@link DataTreeChangeListener} to receive
      * notifications when data changes under a given path in the conceptual data
      * tree.
+     *
      * <p>
      * You are able to register for notifications  for any node or subtree
      * which can be represented using {@link DataTreeIdentifier}.
-     * <p>
      *
+     * <p>
      * You are able to register for data change notifications for a subtree or leaf
      * even if it does not exist. You will receive notification once that node is
      * created.
+     *
      * <p>
      * If there is any pre-existing data in the data tree for the path for which you are
      * registering, you will receive an initial data change event, which will
@@ -37,6 +39,7 @@ public interface DataTreeChangeService extends BindingService {
      * This method returns a {@link ListenerRegistration} object. To
      * "unregister" your listener for changes call the {@link ListenerRegistration#close()}
      * method on the returned object.
+     *
      * <p>
      * You MUST explicitly unregister your listener when you no longer want to receive
      * notifications. This is especially true in OSGi environments, where failure to
@@ -51,5 +54,6 @@ public interface DataTreeChangeService extends BindingService {
      *         your listener using {@link ListenerRegistration#close()} to stop
      *         delivery of change events.
      */
-    @Nonnull <T extends DataObject,L extends DataTreeChangeListener<T>> ListenerRegistration<L> registerDataTreeChangeListener(@Nonnull DataTreeIdentifier<T> treeId, @Nonnull L listener);
+    @Nonnull <T extends DataObject,L extends DataTreeChangeListener<T>> ListenerRegistration<L>
+            registerDataTreeChangeListener(@Nonnull DataTreeIdentifier<T> treeId, @Nonnull L listener);
 }

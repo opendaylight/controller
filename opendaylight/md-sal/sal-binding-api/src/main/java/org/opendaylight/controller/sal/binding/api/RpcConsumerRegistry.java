@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 /**
  * Provides access to registered Remote Procedure Call (RPC) service implementations. The RPCs are
  * defined in YANG models.
+ *
  * <p>
  * RPC implementations are registered using the {@link RpcProviderRegistry}.
  *
@@ -45,24 +46,24 @@ public interface RpcConsumerRegistry extends BindingAwareService, BindingService
      * RPC methods may be implemented asynchronously, callers should avoid blocking on the
      * {@link java.util.concurrent.Future Future} result. Instead, it is recommended to use
      * {@link com.google.common.util.concurrent.JdkFutureAdapters#listenInPoolThread(java.util.concurrent.Future)}
-     * or {@link com.google.common.util.concurrent.JdkFutureAdapters#listenInPoolThread(java.util.concurrent.Future, java.util.concurrent.Executor)}
+     * or {@link com.google.common.util.concurrent.JdkFutureAdapters#listenInPoolThread(java.util.concurrent.Future,
+     *     java.util.concurrent.Executor)}
      * to listen for Rpc Result. This will asynchronously listen for future result in executor and
      * will not block current thread.
      *
      * {@code
      *   final Future<RpcResult<SomeRpcOutput>> future = someRpcService.someRpc( ... );
-     *   Futures.addCallback(JdkFutureAdapters.listenInThreadPool(future), new FutureCallback<RpcResult<SomeRpcOutput>>() {
+     *   Futures.addCallback(JdkFutureAdapters.listenInThreadPool(future),
+     *       new FutureCallback<RpcResult<SomeRpcOutput>>() {
+     *           public void onSuccess(RpcResult<SomeRpcOutput> result) {
+     *               // process result ...
+     *           }
      *
-     *       public void onSuccess(RpcResult<SomeRpcOutput> result) {
-     *          // process result ...
-     *       }
-     *
-     *       public void onFailure(Throwable t) {
-     *          // RPC failed
-     *       }
-     *   );
-     * }
-     * }
+     *           public void onFailure(Throwable t) {
+     *              // RPC failed
+     *           }
+     *       });
+     *  }
      *
      * @param serviceInterface the interface of the RPC Service. Typically this is an interface generated
      *                         from a YANG model.
