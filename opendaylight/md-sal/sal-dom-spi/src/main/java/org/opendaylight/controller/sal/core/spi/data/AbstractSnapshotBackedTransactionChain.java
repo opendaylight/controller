@@ -19,14 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract implementation of the {@link DOMStoreTransactionChain} interface relying on {@link DataTreeSnapshot} supplier
- * and backend commit coordinator.
+ * Abstract implementation of the {@link DOMStoreTransactionChain} interface relying on {@link DataTreeSnapshot}
+ * supplier and backend commit coordinator.
  *
  * @param <T> transaction identifier type
  */
 @Beta
-public abstract class AbstractSnapshotBackedTransactionChain<T> extends TransactionReadyPrototype<T> implements DOMStoreTransactionChain {
-    private static abstract class State {
+public abstract class AbstractSnapshotBackedTransactionChain<T> extends TransactionReadyPrototype<T>
+        implements DOMStoreTransactionChain {
+    private abstract static class State {
         /**
          * Allocate a new snapshot.
          *
@@ -68,14 +69,16 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         @Override
         protected DataTreeSnapshot getSnapshot(Object transactionId) {
             final DataTreeSnapshot ret = snapshot;
-            Preconditions.checkState(ret != null, "Could not get snapshot for transaction %s - previous transaction %s is not ready yet",
+            Preconditions.checkState(ret != null,
+                    "Could not get snapshot for transaction %s - previous transaction %s is not ready yet",
                     transactionId, transaction.getIdentifier());
             return ret;
         }
 
         void setSnapshot(final DataTreeSnapshot snapshot) {
             final boolean success = SNAPSHOT_UPDATER.compareAndSet(this, null, snapshot);
-            Preconditions.checkState(success, "Transaction %s has already been marked as ready", transaction.getIdentifier());
+            Preconditions.checkState(success, "Transaction %s has already been marked as ready",
+                    transaction.getIdentifier());
         }
     }
 
@@ -115,8 +118,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
     }
 
     private boolean recordTransaction(final State expected, final DOMStoreWriteTransaction transaction) {
-        final State state = new Allocated(transaction);
-        return STATE_UPDATER.compareAndSet(this, expected, state);
+        final State localState = new Allocated(transaction);
+        return STATE_UPDATER.compareAndSet(this, expected, localState);
     }
 
     @Override
@@ -172,7 +175,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
             if (allocated.getTransaction().equals(tx)) {
                 final boolean success = STATE_UPDATER.compareAndSet(this, localState, idleState);
                 if (!success) {
-                    LOG.warn("Transaction {} aborted, but chain {} state already transitioned from {} to {}, very strange",
+                    LOG.warn(
+                        "Transaction {} aborted, but chain {} state already transitioned from {} to {}, very strange",
                         tx, this, localState, state);
                 }
             }
@@ -190,7 +194,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         if (localState instanceof Allocated) {
             final Allocated allocated = (Allocated)localState;
             final DOMStoreWriteTransaction transaction = allocated.getTransaction();
-            Preconditions.checkState(tx.equals(transaction), "Mis-ordered ready transaction %s last allocated was %s", tx, transaction);
+            Preconditions.checkState(tx.equals(transaction), "Mis-ordered ready transaction %s last allocated was %s",
+                    tx, transaction);
             allocated.setSnapshot(tree);
         } else {
             LOG.debug("Ignoring transaction {} readiness due to state {}", tx, localState);
@@ -239,7 +244,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         }
 
         if (!STATE_UPDATER.compareAndSet(this, localState, idleState)) {
-            LOG.debug("Transaction chain {} has already transitioned from {} to {}, not making it idle", this, localState, state);
+            LOG.debug("Transaction chain {} has already transitioned from {} to {}, not making it idle",
+                    this, localState, state);
         }
     }
 
@@ -249,7 +255,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
      * @param transaction Transaction which failed.
      * @param cause Failure cause
      */
-    protected final void onTransactionFailed(final SnapshotBackedWriteTransaction<T> transaction, final Throwable cause) {
+    protected final void onTransactionFailed(final SnapshotBackedWriteTransaction<T> transaction,
+            final Throwable cause) {
         LOG.debug("Transaction chain {} failed on transaction {}", this, transaction, cause);
         state = FAILED;
     }
@@ -283,7 +290,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
      * @param operationError Any previous error that could be reported through three phase commit
      * @return A {@link DOMStoreThreePhaseCommitCohort} cohort.
      */
-    protected abstract DOMStoreThreePhaseCommitCohort createCohort(final SnapshotBackedWriteTransaction<T> transaction,
-                                                                   final DataTreeModification modification,
-                                                                   final Exception operationError);
+    protected abstract DOMStoreThreePhaseCommitCohort createCohort(SnapshotBackedWriteTransaction<T> transaction,
+                                                                   DataTreeModification modification,
+                                                                   Exception operationError);
 }

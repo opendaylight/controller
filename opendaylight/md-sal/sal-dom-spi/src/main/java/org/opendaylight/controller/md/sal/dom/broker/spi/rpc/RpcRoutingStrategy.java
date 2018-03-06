@@ -27,21 +27,20 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
     }
 
     /**
-     * Returns leaf QName in which RPC Route is stored
-     *
+     * Returns leaf QName in which RPC Route is stored.
      *
      * @return leaf QName in which RPC Route is stored
      * @throws UnsupportedOperationException If RPC is not content routed.
-     *  ({@link #isContextBasedRouted()} returned <code>false</code>)
+     *     ({@link #isContextBasedRouted()} returned <code>false</code>)
      */
     public abstract QName getLeaf();
 
     /**
-     * Returns identity QName which represents RPC Routing context
+     * Returns identity QName which represents RPC Routing context.
      *
      * @return identity QName which represents RPC Routing context
      * @throws UnsupportedOperationException If RPC is not content routed.
-     *  ({@link #isContextBasedRouted()} returned <code>false</code>)
+     *     ({@link #isContextBasedRouted()} returned <code>false</code>)
      */
     public abstract QName getContext();
 
@@ -107,7 +106,7 @@ public abstract class RpcRoutingStrategy implements Identifiable<QName> {
 
     private static final class GlobalRpcStrategy extends RpcRoutingStrategy {
 
-        public GlobalRpcStrategy(final QName identifier) {
+        GlobalRpcStrategy(final QName identifier) {
             super(identifier);
         }
 

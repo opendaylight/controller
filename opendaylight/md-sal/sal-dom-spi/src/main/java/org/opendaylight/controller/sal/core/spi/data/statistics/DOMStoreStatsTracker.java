@@ -9,9 +9,7 @@
 package org.opendaylight.controller.sal.core.spi.data.statistics;
 
 import java.util.concurrent.ExecutorService;
-
 import javax.annotation.Nonnull;
-
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 
 /**
@@ -26,19 +24,19 @@ public interface DOMStoreStatsTracker {
      *
      * @param dclExecutor the executor
      */
-    void setDataChangeListenerExecutor( @Nonnull ExecutorService dclExecutor );
+    void setDataChangeListenerExecutor(@Nonnull ExecutorService dclExecutor);
 
     /**
      * Sets the executor used internally by the data store.
      *
      * @param dsExecutor the executor
      */
-    void setDataStoreExecutor( @Nonnull ExecutorService dsExecutor );
+    void setDataStoreExecutor(@Nonnull ExecutorService dsExecutor);
 
     /**
-     * Sets the QueuedNotificationManager use for DataChangeListener notifications,
+     * Sets the QueuedNotificationManager use for DataChangeListener notifications.
      *
      * @param manager the manager
      */
-    void setNotificationManager( @Nonnull QueuedNotificationManager<?, ?> manager );
+    void setNotificationManager(@Nonnull QueuedNotificationManager<?, ?> manager);
 }

@@ -16,8 +16,7 @@ package org.opendaylight.controller.sal.core.spi.data;
  * Underlying {@link DOMStore} or {@link DOMStoreTransactionChain}.
  *
  * <p>
- * See {@link DOMStore} or {@link DOMStoreTransactionChain} for concrete
- * variations of this factory.
+ * See DOMStore, DOMStoreTransactionChain for concrete variations of this factory.
  *
  * <p>
  * <b>Note:</b> This interface is used only to define common functionality
@@ -28,15 +27,13 @@ package org.opendaylight.controller.sal.core.spi.data;
 public interface DOMStoreTransactionFactory {
 
     /**
-     *
-     * Creates a read only transaction
+     * Creates a read only transaction.
      *
      * <p>
      * Creates a new read-only transaction, which provides read access to
      * snapshot of current state.
      *
-     * See {@link DOMStoreReadTransaction} for more information.
-     *
+     * @see DOMStoreReadTransaction for more information.
      * @return new {@link DOMStoreReadTransaction}
      * @throws IllegalStateException
      *             If state of factory prevents allocating new transaction.
@@ -45,22 +42,18 @@ public interface DOMStoreTransactionFactory {
     DOMStoreReadTransaction newReadOnlyTransaction();
 
     /**
-     * Creates write only transaction
+     * Creates write only transaction.
      *
-     * <p>
-     * See {@link DOMStoreWriteTransaction} for more information.
-     *
+     * @see DOMStoreWriteTransaction for more information.
      * @return new {@link DOMStoreWriteTransaction}
      * @throws IllegalStateException If state of factory prevents allocating new transaction.
      */
     DOMStoreWriteTransaction newWriteOnlyTransaction();
 
     /**
-     * Creates Read-Write transaction
+     * Creates Read-Write transaction.
      *
-     * <p>
-     * See {@link DOMStoreReadWriteTransaction} for more information.
-     *
+     * @see DOMStoreReadWriteTransaction for more information.
      * @return  new {@link DOMStoreWriteTransaction}
      * @throws IllegalStateException If state of factory prevents allocating new transaction.
      */

@@ -25,7 +25,8 @@ public abstract class ForwardingDOMRpcImplementation extends ForwardingObject im
     protected abstract @Nonnull DOMRpcImplementation delegate();
 
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier type, final NormalizedNode<?, ?> input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier type,
+            final NormalizedNode<?, ?> input) {
         return delegate().invokeRpc(type, input);
     }
 }
