@@ -24,7 +24,8 @@ public class DOMDataTreeInaccessibleException extends DOMDataTreeListeningExcept
         this.treeIdentifier = Preconditions.checkNotNull(treeIdentifier);
     }
 
-    public DOMDataTreeInaccessibleException(final DOMDataTreeIdentifier treeIdentifier, final String message, final Throwable cause) {
+    public DOMDataTreeInaccessibleException(final DOMDataTreeIdentifier treeIdentifier, final String message,
+            final Throwable cause) {
         super(message);
         this.treeIdentifier = Preconditions.checkNotNull(treeIdentifier);
     }

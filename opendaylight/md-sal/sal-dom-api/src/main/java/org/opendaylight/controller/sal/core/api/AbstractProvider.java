@@ -27,31 +27,32 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
     }
 
     @Override
-    public final void start(final BundleContext context) throws Exception {
-        this.context = context;
-        this.startImpl(context);
-        tracker = new ServiceTracker<>(context, Broker.class, this);
+    public final void start(final BundleContext bundleContext) throws Exception {
+        this.context = bundleContext;
+        this.startImpl(bundleContext);
+        tracker = new ServiceTracker<>(bundleContext, Broker.class, this);
         tracker.open();
     }
 
-    protected void startImpl(final BundleContext context) {
+    protected void startImpl(final BundleContext bundleContext) {
         // NOOP
     }
-    protected void stopImpl(final BundleContext context) {
+
+    protected void stopImpl(final BundleContext bundleContext) {
         // NOOP
     }
 
     @Override
-    public final void stop(final BundleContext context) throws Exception {
+    public final void stop(final BundleContext bundleContext) throws Exception {
         broker = null;
         tracker.close();
         tracker = null;
-        stopImpl(context);
+        stopImpl(bundleContext);
     }
 
     @Override
     public Broker addingService(final ServiceReference<Broker> reference) {
-        if(broker == null) {
+        if (broker == null) {
             broker = context.getService(reference);
             broker.registerProvider(this, context);
             return broker;
@@ -69,5 +70,4 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
     public void removedService(final ServiceReference<Broker> reference, final Broker service) {
         stopImpl(context);
     }
-
 }

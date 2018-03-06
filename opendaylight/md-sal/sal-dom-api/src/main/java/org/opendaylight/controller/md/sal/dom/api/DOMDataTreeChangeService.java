@@ -19,14 +19,16 @@ public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
      * Registers a {@link DOMDataTreeChangeListener} to receive
      * notifications when data changes under a given path in the conceptual data
      * tree.
+     *
      * <p>
      * You are able to register for notifications  for any node or subtree
      * which can be represented using {@link DOMDataTreeIdentifier}.
-     * <p>
      *
+     * <p>
      * You are able to register for data change notifications for a subtree or leaf
      * even if it does not exist. You will receive notification once that node is
      * created.
+     *
      * <p>
      * If there is any pre-existing data in the data tree for the path for which you are
      * registering, you will receive an initial data change event, which will
@@ -36,6 +38,7 @@ public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
      * This method returns a {@link ListenerRegistration} object. To
      * "unregister" your listener for changes call the {@link ListenerRegistration#close()}
      * method on the returned object.
+     *
      * <p>
      * You MUST explicitly unregister your listener when you no longer want to receive
      * notifications. This is especially true in OSGi environments, where failure to
@@ -50,5 +53,6 @@ public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
      *         your listener using {@link ListenerRegistration#close()} to stop
      *         delivery of change events.
      */
-    @Nonnull <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(@Nonnull DOMDataTreeIdentifier treeId, @Nonnull L listener);
+    @Nonnull <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
+            @Nonnull DOMDataTreeIdentifier treeId, @Nonnull L listener);
 }

@@ -15,29 +15,31 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Use {@link DOMSchemaService} instead.
  */
 @Deprecated
 public interface SchemaService extends BrokerService, DOMSchemaService {
 
     /**
-     * Registers a YANG module to session and global context
+     * Registers a YANG module to session and global context.
      */
     void addModule(Module module);
 
     /**
-     * Unregisters a YANG module from session context
+     * Unregisters a YANG module from session context.
      */
     void removeModule(Module module);
 
     /**
-     * Returns session specific YANG schema context
+     * Returns session specific YANG schema context.
      */
     @Override
     SchemaContext getSessionContext();
 
     /**
-     * Returns global schema context
+     * Returns global schema context.
      */
     @Override
     SchemaContext getGlobalContext();

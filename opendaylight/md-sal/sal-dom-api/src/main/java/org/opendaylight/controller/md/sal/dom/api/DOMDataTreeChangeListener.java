@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * data tree changes. This interface differs from {@link DOMDataChangeListener}
  * in that it provides a cursor-based view of the change, which has potentially
  * lower overhead.
+ *
  * <p>
  * Note: this interface enables notifications only at the leader of the data store, if clustered. If you want
  * notifications on all instances in a cluster, use the {@link ClusteredDOMDataTreeChangeListener}.
@@ -37,6 +38,7 @@ public interface DOMDataTreeChangeListener extends EventListener {
      * to recover from such events. Event producers are expected to exert reasonable
      * effort to suppress such events.
      *
+     * <p>
      * In other words, it is completely acceptable to observe
      * a {@link org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode},
      * which reports a {@link org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType}

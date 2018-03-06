@@ -12,25 +12,25 @@ import org.osgi.framework.BundleContext;
 /**
  * Core component of the SAL layer responsible for wiring the SAL consumers.
  *
+ * <p>
  * The responsibility of the broker is to maintain registration of SAL
  * functionality {@link Consumer}s and {@link Provider}s, store provider and
  * consumer specific context and functionality registration via
  * {@link ConsumerSession} and provide access to infrastructure services, which
  * removes direct dependencies between providers and consumers.
  *
- *
+ * <p>
  * The services are exposed via session.
  *
  * <h3>Session-based access</h3>
  *
+ * <p>
  * The providers and consumers needs to register in order to use the
  * binding-independent SAL layer and to expose functionality via SAL layer.
  *
+ * <p>
  * For more information about session-based access see {@link ConsumerSession}
  * and {@link ProviderSession}
- *
- *
- *
  */
 public interface Broker {
 
@@ -77,6 +77,7 @@ public interface Broker {
      * from consumer, using the {@link Provider#getProviderFunctionality()}, and
      * register that functionality into system and concrete infrastructure
      * services.
+     *
      * <p>
      * The consumer is <b>required to use</b> returned session for all
      * communication with broker or one of the broker services. The session is
@@ -121,8 +122,7 @@ public interface Broker {
         boolean isClosed();
 
         /**
-         * Returns a session specific instance (implementation) of requested
-         * service
+         * Returns a session specific instance (implementation) of requested service.
          *
          * @param service
          *            Broker service

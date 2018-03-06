@@ -22,26 +22,27 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator,Serv
     private Broker broker;
 
     @Override
-    public final void start(final BundleContext context) throws Exception {
-        this.context = context;
-        this.startImpl(context);
-        tracker = new ServiceTracker<>(context, Broker.class, this);
+    public final void start(final BundleContext bundleContext) throws Exception {
+        this.context = bundleContext;
+        this.startImpl(bundleContext);
+        tracker = new ServiceTracker<>(bundleContext, Broker.class, this);
         tracker.open();
     }
 
 
 
     @Override
-    public final void stop(final BundleContext context) throws Exception {
-        stopImpl(context);
+    public final void stop(final BundleContext bundleContext) throws Exception {
+        stopImpl(bundleContext);
         broker = null;
         tracker.close();
     }
 
-    protected void startImpl(final BundleContext context) {
+    protected void startImpl(final BundleContext bundleContext) {
         // NOOP
     }
-    protected void stopImpl(final BundleContext context) {
+
+    protected void stopImpl(final BundleContext bundleContext) {
         // NOOP
     }
 
@@ -53,7 +54,7 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator,Serv
 
     @Override
     public Broker addingService(final ServiceReference<Broker> reference) {
-        if(broker == null) {
+        if (broker == null) {
             broker = context.getService(reference);
             broker.registerConsumer(this, context);
             return broker;

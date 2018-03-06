@@ -71,7 +71,8 @@ public abstract class DOMRpcIdentifier {
      * @param contextReference Context reference, null means a global RPC identifier.
      * @return A global RPC identifier, guaranteed to be non-null.
      */
-    public static @Nonnull DOMRpcIdentifier create(final @Nonnull SchemaPath type, final @Nullable YangInstanceIdentifier contextReference) {
+    public static @Nonnull DOMRpcIdentifier create(final @Nonnull SchemaPath type,
+            final @Nullable YangInstanceIdentifier contextReference) {
         if (contextReference == null || contextReference.isEmpty()) {
             return new Global(type);
         }
@@ -120,6 +121,7 @@ public abstract class DOMRpcIdentifier {
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this).omitNullValues().add("type", type).add("contextReference", getContextReference()).toString();
+        return MoreObjects.toStringHelper(this).omitNullValues().add("type", type).add("contextReference",
+                getContextReference()).toString();
     }
 }
