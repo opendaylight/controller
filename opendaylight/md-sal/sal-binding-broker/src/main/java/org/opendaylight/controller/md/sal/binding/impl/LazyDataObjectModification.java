@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 final class LazyDataObjectModification<T extends DataObject> implements DataObjectModification<T> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LazyDataObjectModification.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LazyDataObjectModification.class);
 
     private final BindingCodecTreeNode<T> codec;
     private final DataTreeCandidateNode domData;
@@ -60,8 +60,8 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
         return new LazyDataObjectModification<>(codec,domData);
     }
 
-    private static Collection<DataObjectModification<? extends DataObject>> from(final BindingCodecTreeNode<?> parentCodec,
-            final Collection<DataTreeCandidateNode> domChildNodes) {
+    private static Collection<DataObjectModification<? extends DataObject>> from(
+            final BindingCodecTreeNode<?> parentCodec, final Collection<DataTreeCandidateNode> domChildNodes) {
         final List<DataObjectModification<? extends DataObject>> result = new ArrayList<>(domChildNodes.size());
         populateList(result, parentCodec, domChildNodes);
         return result;
@@ -106,6 +106,7 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
             case UNKNOWN:
             case VISIBLE_CONTAINER:
                 result.add(create(childCodec, domChildNode));
+                break;
             default:
                 break;
         }
@@ -220,9 +221,10 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
 
     @Override
     @SuppressWarnings("unchecked")
-    public <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
-            final Class<C> listItem, final K listKey) {
-        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.IdentifiableItem<>(listItem, listKey));
+    public <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C>
+            getModifiedChildListItem(final Class<C> listItem, final K listKey) {
+        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.IdentifiableItem<>(
+                listItem, listKey));
     }
 
     @Override

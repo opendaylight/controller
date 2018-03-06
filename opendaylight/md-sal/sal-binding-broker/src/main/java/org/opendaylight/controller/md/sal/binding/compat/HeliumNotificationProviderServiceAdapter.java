@@ -16,7 +16,8 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HeliumNotificationProviderServiceAdapter extends HeliumNotificationServiceAdapter implements NotificationProviderService, AutoCloseable {
+public class HeliumNotificationProviderServiceAdapter extends HeliumNotificationServiceAdapter
+        implements NotificationProviderService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(HeliumNotificationProviderServiceAdapter.class);
 
     private final NotificationPublishService notificationPublishService;
@@ -53,7 +54,5 @@ public class HeliumNotificationProviderServiceAdapter extends HeliumNotification
 
     @Override
     public void close() throws Exception {
-
     }
-
 }

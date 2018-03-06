@@ -7,20 +7,18 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import java.util.stream.Collectors;
-import org.opendaylight.yangtools.yang.binding.Notification;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.opendaylight.yangtools.yang.binding.Notification;
 
 /**
  * An immutable view of the current generation of listeners.
@@ -48,7 +46,8 @@ final class ListenerMapGeneration {
 
                     for (final Class<?> type : getNotificationTypes(key)) {
                         @SuppressWarnings("unchecked")
-                        final Collection<NotificationListenerRegistration<?>> l = typeToListeners.get((Class<? extends Notification>) type);
+                        final Collection<NotificationListenerRegistration<?>> l =
+                                typeToListeners.get((Class<? extends Notification>) type);
                         if (l != null) {
                             regs.addAll(l);
                         }
@@ -62,7 +61,8 @@ final class ListenerMapGeneration {
         typeToListeners = ImmutableMultimap.of();
     }
 
-    ListenerMapGeneration(final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> listeners) {
+    ListenerMapGeneration(final Multimap<Class<? extends Notification>,
+            NotificationListenerRegistration<?>> listeners) {
         this.typeToListeners = ImmutableMultimap.copyOf(listeners);
     }
 

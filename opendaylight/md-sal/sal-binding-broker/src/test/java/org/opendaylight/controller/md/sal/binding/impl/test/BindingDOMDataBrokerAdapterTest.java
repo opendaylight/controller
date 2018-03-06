@@ -55,7 +55,8 @@ public class BindingDOMDataBrokerAdapterTest {
     @Test
     public void testClusteredDataChangeListernerRegisteration() {
 
-        final BindingToNormalizedNodeCodec codec = new BindingToNormalizedNodeCodec(this.classLoadingStrategy, this.codecRegistry);
+        final BindingToNormalizedNodeCodec codec =
+                new BindingToNormalizedNodeCodec(this.classLoadingStrategy, this.codecRegistry);
 
         try (BindingDOMDataBrokerAdapter bindingDOMDataBrokerAdapter = new BindingDOMDataBrokerAdapter(this.dataBroker,
                 codec)) {
@@ -67,7 +68,7 @@ public class BindingDOMDataBrokerAdapterTest {
                     .forClass(LogicalDatastoreType.class);
             final ArgumentCaptor<AsyncDataBroker.DataChangeScope> dataChangeScope = ArgumentCaptor
                     .forClass(AsyncDataBroker.DataChangeScope.class);
-            final ArgumentCaptor<YangInstanceIdentifier> yangInstanceIdentifier = ArgumentCaptor
+            final ArgumentCaptor<YangInstanceIdentifier> yangIidCapture = ArgumentCaptor
                     .forClass(YangInstanceIdentifier.class);
 
             final TestListener listener = new TestListener();
@@ -75,7 +76,7 @@ public class BindingDOMDataBrokerAdapterTest {
             bindingDOMDataBrokerAdapter.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, TOP_PATH,
                     listener, AsyncDataBroker.DataChangeScope.BASE);
             Mockito.verify(this.dataBroker).registerDataChangeListener(logicalDatastoreType.capture(),
-                    yangInstanceIdentifier.capture(), clusteredDOMListener.capture(), dataChangeScope.capture());
+                    yangIidCapture.capture(), clusteredDOMListener.capture(), dataChangeScope.capture());
         }
 
     }

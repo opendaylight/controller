@@ -20,9 +20,7 @@ import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 abstract class ContextReferenceExtractor {
-
     private static final Logger LOG = LoggerFactory.getLogger(ContextReferenceExtractor.class);
     private static final ContextReferenceExtractor NULL_EXTRACTOR = new ContextReferenceExtractor() {
 
@@ -31,7 +29,6 @@ abstract class ContextReferenceExtractor {
             return null;
         }
     };
-
 
     private static final LoadingCache<Class<?>, ContextReferenceExtractor> EXTRACTORS = CacheBuilder.newBuilder()
             .weakKeys().build(new CacheLoader<Class<?>, ContextReferenceExtractor>() {
@@ -53,11 +50,10 @@ abstract class ContextReferenceExtractor {
      * Extract context-reference (Instance Identifier) from
      * Binding DataObject.
      *
-     * @param obj DataObject from which context reference
-     * should be extracted.
+     * @param obj DataObject from which context reference should be extracted.
      *
-     * @return Instance Identifier representing context reference
-     * or null, if data object does not contain context reference.
+     * @return Instance Identifier representing context reference or null, if data object does not contain
+     *     context reference.
      */
     abstract @Nullable InstanceIdentifier<?> extract(DataObject obj);
 
@@ -88,7 +84,7 @@ abstract class ContextReferenceExtractor {
     private static Method findGetValueMethod(final Class<?> type, final Class<?> returnType) {
         try {
             final Method method = type.getMethod(GET_VALUE_NAME);
-            if(returnType.equals(method.getReturnType())) {
+            if (returnType.equals(method.getReturnType())) {
                 return method;
             }
         } catch (final NoSuchMethodException e) {
@@ -105,7 +101,4 @@ abstract class ContextReferenceExtractor {
         }
         return null;
     }
-
-
-
 }

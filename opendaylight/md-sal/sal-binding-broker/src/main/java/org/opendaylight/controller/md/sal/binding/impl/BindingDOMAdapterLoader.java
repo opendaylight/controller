@@ -21,9 +21,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 
 public abstract class BindingDOMAdapterLoader extends AdapterLoader<BindingService, DOMService> {
-
-
-    private static final Map<Class<?>,BindingDOMAdapterBuilder.Factory<?>> FACTORIES = ImmutableMap.<Class<?>,BindingDOMAdapterBuilder.Factory<?>>builder()
+    private static final Map<Class<?>,BindingDOMAdapterBuilder.Factory<?>> FACTORIES =
+        ImmutableMap.<Class<?>,BindingDOMAdapterBuilder.Factory<?>>builder()
             .put(NotificationService.class,BindingDOMNotificationServiceAdapter.BUILDER_FACTORY)
             .put(NotificationPublishService.class,BindingDOMNotificationPublishServiceAdapter.BUILDER_FACTORY)
             .put(DataBroker.class,BindingDOMDataBrokerAdapter.BUILDER_FACTORY)
@@ -37,7 +36,8 @@ public abstract class BindingDOMAdapterLoader extends AdapterLoader<BindingServi
     }
 
     @Override
-    protected final AdapterBuilder<? extends BindingService, DOMService> createBuilder(final Class<? extends BindingService> key) {
+    protected final AdapterBuilder<? extends BindingService, DOMService> createBuilder(
+            final Class<? extends BindingService> key) {
         final Factory<?> factory = FACTORIES.get(key);
         Preconditions.checkArgument(factory != null, "Unsupported service type %s", key);
         final BindingDOMAdapterBuilder<?> builder = factory.newBuilder();

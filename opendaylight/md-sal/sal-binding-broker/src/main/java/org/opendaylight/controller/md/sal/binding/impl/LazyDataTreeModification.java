@@ -33,7 +33,8 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
     private final DataTreeIdentifier<T> path;
     private final DataObjectModification<T> rootNode;
 
-    LazyDataTreeModification(final LogicalDatastoreType datastoreType, final InstanceIdentifier<T> path, final BindingCodecTreeNode<T> codec, final DataTreeCandidate domChange) {
+    LazyDataTreeModification(final LogicalDatastoreType datastoreType, final InstanceIdentifier<T> path,
+            final BindingCodecTreeNode<T> codec, final DataTreeCandidate domChange) {
         this.path = new DataTreeIdentifier<>(datastoreType, path);
         this.rootNode = LazyDataObjectModification.create(codec, domChange.getRootNode());
     }
@@ -49,8 +50,8 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T extends DataObject> DataTreeModification<T> create(final BindingToNormalizedNodeCodec codec, final DataTreeCandidate domChange,
-            final LogicalDatastoreType datastoreType) {
+    static <T extends DataObject> DataTreeModification<T> create(final BindingToNormalizedNodeCodec codec,
+            final DataTreeCandidate domChange, final LogicalDatastoreType datastoreType) {
         final Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> codecCtx =
                 codec.getSubtreeCodec(domChange.getRootPath());
         return new LazyDataTreeModification(datastoreType, codecCtx.getKey(), codecCtx.getValue(), domChange);

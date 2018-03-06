@@ -32,7 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest{
+public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest {
     private static final InstanceIdentifier<Top> TOP = InstanceIdentifier.create(Top.class);
     private static final InstanceIdentifier<TopLevelList> TOP_FOO = TOP.child(TopLevelList.class, TOP_FOO_KEY);
     private static final InstanceIdentifier<TreeLeafOnlyUsesAugment> SIMPLE_AUGMENT =
@@ -46,7 +46,7 @@ public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest{
 
     @Test
     public void leafOnlyAugmentationCreatedTest() {
-        TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
+        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
                 AsyncDataBroker.DataChangeScope.SUBTREE, false);
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
@@ -67,7 +67,7 @@ public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest{
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
         writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf"));
         assertCommit(writeTx.submit());
-        TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
+        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
                 AsyncDataBroker.DataChangeScope.SUBTREE);
         writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf changed"));
@@ -86,7 +86,7 @@ public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest{
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
         writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf"));
         assertCommit(writeTx.submit());
-        TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
+        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
                 AsyncDataBroker.DataChangeScope.SUBTREE);
         writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.delete(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT);
@@ -100,7 +100,7 @@ public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest{
 
     @Test
     public void complexAugmentationCreatedTest() {
-        TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT,
+        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT,
                 AsyncDataBroker.DataChangeScope.SUBTREE, false);
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
@@ -122,7 +122,7 @@ public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest{
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
         writeTx.put(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugment(LIST_VIA_USES_KEY));
         assertCommit(writeTx.submit());
-        TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT,
+        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT,
                 AsyncDataBroker.DataChangeScope.SUBTREE);
         writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugment(LIST_VIA_USES_KEY_MOD));

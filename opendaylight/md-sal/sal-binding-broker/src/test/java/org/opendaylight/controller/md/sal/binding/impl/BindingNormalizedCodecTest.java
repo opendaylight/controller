@@ -55,12 +55,14 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     private static final TopLevelListKey TOP_FOO_KEY = new TopLevelListKey("foo");
     private static final InstanceIdentifier<TopLevelList> BA_TOP_LEVEL_LIST = InstanceIdentifier
             .builder(Top.class).child(TopLevelList.class, TOP_FOO_KEY).build();
-    private static final InstanceIdentifier<TreeLeafOnlyAugment> BA_TREE_LEAF_ONLY = BA_TOP_LEVEL_LIST.augmentation(TreeLeafOnlyAugment.class);
-    private static final InstanceIdentifier<TreeComplexUsesAugment> BA_TREE_COMPLEX_USES = BA_TOP_LEVEL_LIST.augmentation(TreeComplexUsesAugment.class);
+    private static final InstanceIdentifier<TreeLeafOnlyAugment> BA_TREE_LEAF_ONLY =
+            BA_TOP_LEVEL_LIST.augmentation(TreeLeafOnlyAugment.class);
+    private static final InstanceIdentifier<TreeComplexUsesAugment> BA_TREE_COMPLEX_USES =
+            BA_TOP_LEVEL_LIST.augmentation(TreeComplexUsesAugment.class);
     private static final QName SIMPLE_VALUE_QNAME = QName.create(TreeComplexUsesAugment.QNAME, "simple-value");
     private static final QName NAME_QNAME = QName.create(Top.QNAME, "name");
-    private static final YangInstanceIdentifier BI_TOP_LEVEL_LIST = YangInstanceIdentifier.builder().
-            node(Top.QNAME).node(TopLevelList.QNAME).nodeWithKey(
+    private static final YangInstanceIdentifier BI_TOP_LEVEL_LIST = YangInstanceIdentifier.builder()
+            .node(Top.QNAME).node(TopLevelList.QNAME).nodeWithKey(
                     TopLevelList.QNAME, NAME_QNAME, TOP_FOO_KEY.getName()).build();
 
 
@@ -68,11 +70,13 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     private SchemaContext context;
 
     @Override
-    protected void setupWithSchema(final SchemaContext context) {
-        this.context = context;
-        final DataObjectSerializerGenerator streamWriter = StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault()));
+    protected void setupWithSchema(final SchemaContext schemaContext) {
+        this.context = schemaContext;
+        final DataObjectSerializerGenerator streamWriter = StreamWriterGenerator
+                .create(JavassistUtils.forClassPool(ClassPool.getDefault()));
         final BindingNormalizedNodeCodecRegistry registry = new BindingNormalizedNodeCodecRegistry(streamWriter);
-        this.codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(), registry, true);
+        this.codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(),
+                registry, true);
     }
 
     @Test
@@ -86,22 +90,25 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     @Test
     public void testLeafOnlyAugmentationSerialization() {
         this.codec.onGlobalContextUpdated(this.context);
-        final PathArgument leafOnlyLastArg = this.codec.toYangInstanceIdentifier(BA_TREE_LEAF_ONLY).getLastPathArgument();
+        final PathArgument leafOnlyLastArg = this.codec.toYangInstanceIdentifier(BA_TREE_LEAF_ONLY)
+                .getLastPathArgument();
         assertTrue(leafOnlyLastArg instanceof AugmentationIdentifier);
         assertTrue(((AugmentationIdentifier) leafOnlyLastArg).getPossibleChildNames().contains(SIMPLE_VALUE_QNAME));
     }
 
     @Test
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void testToYangInstanceIdentifierBlocking() {
         this.codec.onGlobalContextUpdated(new EmptySchemaContext());
 
         final CountDownLatch done = new CountDownLatch(1);
         final AtomicReference<YangInstanceIdentifier> yangId = new AtomicReference<>();
         final AtomicReference<RuntimeException> error = new AtomicReference<>();
+
         new Thread(() -> {
             try {
                 yangId.set(BindingNormalizedCodecTest.this.codec.toYangInstanceIdentifierBlocking(BA_TOP_LEVEL_LIST));
-            } catch(final RuntimeException e) {
+            } catch (RuntimeException e) {
                 error.set(e);
             } finally {
                 done.countDown();
@@ -113,7 +120,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
 
         assertEquals("toYangInstanceIdentifierBlocking completed", true,
                 Uninterruptibles.awaitUninterruptibly(done, 3, TimeUnit.SECONDS));
-        if(error.get() != null) {
+        if (error.get() != null) {
             throw error.get();
         }
 
@@ -131,14 +138,16 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         testGetRpcMethodToSchemaPath();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void testGetRpcMethodToSchemaPath() {
         final CountDownLatch done = new CountDownLatch(1);
         final AtomicReference<ImmutableBiMap<Method, SchemaPath>> retMap = new AtomicReference<>();
         final AtomicReference<RuntimeException> error = new AtomicReference<>();
         new Thread(() -> {
             try {
-                retMap.set(BindingNormalizedCodecTest.this.codec.getRpcMethodToSchemaPath(OpendaylightTestRpcServiceService.class));
-            } catch(final RuntimeException e) {
+                retMap.set(BindingNormalizedCodecTest.this.codec.getRpcMethodToSchemaPath(
+                        OpendaylightTestRpcServiceService.class));
+            } catch (RuntimeException e) {
                 error.set(e);
             } finally {
                 done.countDown();
@@ -150,12 +159,12 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
 
         assertEquals("getRpcMethodToSchemaPath completed", true,
                 Uninterruptibles.awaitUninterruptibly(done, 3, TimeUnit.SECONDS));
-        if(error.get() != null) {
+        if (error.get() != null) {
             throw error.get();
         }
 
-        for(final Method method: retMap.get().keySet()) {
-            if(method.getName().equals("rockTheHouse")) {
+        for (final Method method: retMap.get().keySet()) {
+            if (method.getName().equals("rockTheHouse")) {
                 return;
             }
         }

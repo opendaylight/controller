@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 
 class FutureSchema implements AutoCloseable {
 
-    @GuardedBy(value="postponedOperations")
+    @GuardedBy(value = "postponedOperations")
     private final Set<FutureSchemaPredicate> postponedOperations = new LinkedHashSet<>();
     private final long duration;
     private final TimeUnit unit;
@@ -40,11 +40,11 @@ class FutureSchema implements AutoCloseable {
 
     BindingRuntimeContext runtimeContext() {
         final BindingRuntimeContext localRuntimeContext = this.runtimeContext;
-        if(localRuntimeContext != null) {
+        if (localRuntimeContext != null) {
             return localRuntimeContext;
         }
 
-        if(waitForSchema(Collections.emptyList())) {
+        if (waitForSchema(Collections.emptyList())) {
             return this.runtimeContext;
         }
 
@@ -52,7 +52,7 @@ class FutureSchema implements AutoCloseable {
     }
 
     void onRuntimeContextUpdated(final BindingRuntimeContext context) {
-        synchronized(this.postponedOperations) {
+        synchronized (this.postponedOperations) {
             this.runtimeContext = context;
             for (final FutureSchemaPredicate op : this.postponedOperations) {
                 op.unlockIfPossible(context);
@@ -70,7 +70,7 @@ class FutureSchema implements AutoCloseable {
 
     @Override
     public void close() {
-        synchronized(this.postponedOperations) {
+        synchronized (this.postponedOperations) {
             for (final FutureSchemaPredicate op : this.postponedOperations) {
                 op.cancel();
             }
@@ -111,16 +111,16 @@ class FutureSchema implements AutoCloseable {
     }
 
     private boolean addPostponedOpAndWait(final FutureSchemaPredicate postponedOp) {
-        if(!this.waitEnabled) {
+        if (!this.waitEnabled) {
             return false;
         }
 
         final BindingRuntimeContext localRuntimeContext = this.runtimeContext;
-        synchronized(this.postponedOperations) {
+        synchronized (this.postponedOperations) {
             this.postponedOperations.add(postponedOp);
 
             // If the runtimeContext changed, this op may now be satisfied so check it.
-            if(localRuntimeContext != this.runtimeContext) {
+            if (localRuntimeContext != this.runtimeContext) {
                 postponedOp.unlockIfPossible(this.runtimeContext);
             }
         }
@@ -139,7 +139,7 @@ class FutureSchema implements AutoCloseable {
             } catch (final TimeoutException e) {
                 return false;
             } finally {
-                synchronized(FutureSchema.this.postponedOperations) {
+                synchronized (FutureSchema.this.postponedOperations) {
                     FutureSchema.this.postponedOperations.remove(this);
                 }
             }
@@ -157,5 +157,4 @@ class FutureSchema implements AutoCloseable {
 
         private final SettableFuture<?> schemaPromise = SettableFuture.create();
     }
-
 }

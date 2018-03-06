@@ -31,7 +31,8 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
     private final NotificationListener delegate;
     private final Map<SchemaPath,NotificationListenerInvoker> invokers;
 
-    public BindingDOMNotificationListenerAdapter(final BindingNormalizedNodeSerializer codec, final NotificationListener delegate) {
+    BindingDOMNotificationListenerAdapter(final BindingNormalizedNodeSerializer codec,
+            final NotificationListener delegate) {
         this.codec = codec;
         this.delegate = delegate;
         this.invokers = createInvokerMapFor(delegate.getClass());
@@ -45,7 +46,7 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
     }
 
     private Notification deserialize(final DOMNotification notification) {
-        if(notification instanceof LazySerializedDOMNotification) {
+        if (notification instanceof LazySerializedDOMNotification) {
             return ((LazySerializedDOMNotification) notification).getBindingData();
         }
         return codec.fromNormalizedNodeNotification(notification.getType(), notification.getBody());
@@ -59,15 +60,17 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
         return invokers.keySet();
     }
 
-    public static Map<SchemaPath, NotificationListenerInvoker> createInvokerMapFor(final Class<? extends NotificationListener> implClz) {
+    public static Map<SchemaPath, NotificationListenerInvoker> createInvokerMapFor(
+            final Class<? extends NotificationListener> implClz) {
         final Map<SchemaPath, NotificationListenerInvoker> builder = new HashMap<>();
-        for(final TypeToken<?> ifaceToken : TypeToken.of(implClz).getTypes().interfaces()) {
+        for (final TypeToken<?> ifaceToken : TypeToken.of(implClz).getTypes().interfaces()) {
             Class<?> iface = ifaceToken.getRawType();
-            if(NotificationListener.class.isAssignableFrom(iface) && BindingReflections.isBindingClass(iface)) {
+            if (NotificationListener.class.isAssignableFrom(iface) && BindingReflections.isBindingClass(iface)) {
                 @SuppressWarnings("unchecked")
-                final Class<? extends NotificationListener> listenerType = (Class<? extends NotificationListener>) iface;
+                final Class<? extends NotificationListener> listenerType =
+                        (Class<? extends NotificationListener>) iface;
                 final NotificationListenerInvoker invoker = NotificationListenerInvoker.from(listenerType);
-                for(final SchemaPath path : getNotificationTypes(listenerType)) {
+                for (final SchemaPath path : getNotificationTypes(listenerType)) {
                     builder.put(path, invoker);
                 }
             }
@@ -79,8 +82,8 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
         // TODO: Investigate possibility and performance impact if we cache this or expose
         // it from NotificationListenerInvoker
         final Set<SchemaPath> ret = new HashSet<>();
-        for(final Method method : type.getMethods()) {
-            if(BindingReflections.isNotificationCallback(method)) {
+        for (final Method method : type.getMethods()) {
+            if (BindingReflections.isNotificationCallback(method)) {
                 final Class<?> notification = method.getParameterTypes()[0];
                 final QName name = BindingReflections.findQName(notification);
                 ret.add(SchemaPath.create(true, name));

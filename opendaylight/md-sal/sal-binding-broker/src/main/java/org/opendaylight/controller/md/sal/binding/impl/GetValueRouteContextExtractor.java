@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 final class GetValueRouteContextExtractor extends ContextReferenceExtractor {
 
-    private final static Lookup PUBLIC_LOOKUP = MethodHandles.publicLookup();
+    private static final Lookup PUBLIC_LOOKUP = MethodHandles.publicLookup();
     private final MethodHandle contextHandle;
     private final MethodHandle valueHandle;
 
@@ -36,6 +36,7 @@ final class GetValueRouteContextExtractor extends ContextReferenceExtractor {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     InstanceIdentifier<?> extract(final DataObject obj) {
         try {
             final Object ctx = contextHandle.invokeExact(obj);
@@ -43,10 +44,8 @@ final class GetValueRouteContextExtractor extends ContextReferenceExtractor {
                 return (InstanceIdentifier<?>) valueHandle.invokeExact(ctx);
             }
             return null;
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
             throw Throwables.propagate(e);
         }
     }
-
-
 }

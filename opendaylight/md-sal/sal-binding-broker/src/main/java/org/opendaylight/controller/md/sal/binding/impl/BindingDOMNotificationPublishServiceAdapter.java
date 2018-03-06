@@ -26,7 +26,8 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
     private final BindingToNormalizedNodeCodec codecRegistry;
     private final DOMNotificationPublishService domPublishService;
 
-    public BindingDOMNotificationPublishServiceAdapter(final BindingToNormalizedNodeCodec codec, final DOMNotificationPublishService domPublishService) {
+    public BindingDOMNotificationPublishServiceAdapter(final BindingToNormalizedNodeCodec codec,
+            final DOMNotificationPublishService domPublishService) {
         this.codecRegistry = codec;
         this.domPublishService = domPublishService;
     }
@@ -53,8 +54,10 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
     }
 
     @Override
-    public ListenableFuture<?> offerNotification(final Notification notification, final int timeout, final TimeUnit unit) throws InterruptedException {
-        ListenableFuture<?> offerResult = domPublishService.offerNotification(toDomNotification(notification), timeout, unit);
+    public ListenableFuture<?> offerNotification(final Notification notification, final int timeout,
+            final TimeUnit unit) throws InterruptedException {
+        ListenableFuture<?> offerResult = domPublishService.offerNotification(toDomNotification(notification),
+                timeout, unit);
         return DOMNotificationPublishService.REJECTED.equals(offerResult)
                 ? NotificationPublishService.REJECTED
                 : offerResult;
@@ -82,6 +85,5 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
             final DOMNotificationPublishService domPublish = delegates.getInstance(DOMNotificationPublishService.class);
             return new BindingDOMNotificationPublishServiceAdapter(codec, domPublish);
         }
-
     }
 }

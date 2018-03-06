@@ -19,25 +19,25 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 final class DirectGetterRouteContextExtractor extends ContextReferenceExtractor {
 
-    private final static Lookup PUBLIC_LOOKUP = MethodHandles.publicLookup();
+    private static final Lookup PUBLIC_LOOKUP = MethodHandles.publicLookup();
     private final MethodHandle handle;
 
     private DirectGetterRouteContextExtractor(final MethodHandle rawHandle) {
         handle = rawHandle.asType(MethodType.methodType(InstanceIdentifier.class, DataObject.class));
     }
 
-    static final ContextReferenceExtractor create(final Method getterMethod) throws IllegalAccessException {
+    static ContextReferenceExtractor create(final Method getterMethod) throws IllegalAccessException {
         final MethodHandle getterHandle = PUBLIC_LOOKUP.unreflect(getterMethod);
         return new DirectGetterRouteContextExtractor(getterHandle);
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     InstanceIdentifier<?> extract(final DataObject obj) {
         try {
             return (InstanceIdentifier<?>) handle.invokeExact(obj);
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
             throw Throwables.propagate(e);
         }
     }
-
 }

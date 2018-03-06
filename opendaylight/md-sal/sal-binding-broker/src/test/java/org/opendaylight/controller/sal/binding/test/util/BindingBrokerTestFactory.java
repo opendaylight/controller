@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.sal.binding.test.util;
 
-import java.util.concurrent.ExecutorService;
-
-import javassist.ClassPool;
-
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutorService;
+import javassist.ClassPool;
 
 @Beta
 public class BindingBrokerTestFactory {
@@ -49,7 +47,7 @@ public class BindingBrokerTestFactory {
     }
 
     public ClassPool getClassPool() {
-        if(classPool == null) {
+        if (classPool == null) {
             return CLASS_POOL;
         }
 
@@ -59,5 +57,4 @@ public class BindingBrokerTestFactory {
     public void setClassPool(final ClassPool classPool) {
         this.classPool = classPool;
     }
-
 }

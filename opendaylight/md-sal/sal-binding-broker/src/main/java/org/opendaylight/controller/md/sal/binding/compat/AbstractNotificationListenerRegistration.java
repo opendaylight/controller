@@ -7,21 +7,22 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.Notification;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Abstract implementation of {@link NotificationListenerRegistration}.
  *
  * @param <T> Notification type
  */
-abstract class AbstractNotificationListenerRegistration<T extends Notification> extends AbstractListenerRegistration<NotificationListener<T>> implements NotificationListenerRegistration<T> {
+abstract class AbstractNotificationListenerRegistration<T extends Notification>
+        extends AbstractListenerRegistration<NotificationListener<T>> implements NotificationListenerRegistration<T> {
     private final Class<? extends Notification> type;
 
-    protected AbstractNotificationListenerRegistration(final Class<? extends Notification> type, final NotificationListener<T> listener) {
+    protected AbstractNotificationListenerRegistration(final Class<? extends Notification> type,
+            final NotificationListener<T> listener) {
         super(listener);
         this.type = Preconditions.checkNotNull(type);
     }
