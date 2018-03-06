@@ -21,9 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
- *
- * Abstract Base Transaction for transactions which are backed by
- * {@link DOMDataWriteTransaction}
+ * Abstract Base Transaction for transactions which are backed by {@link DOMDataWriteTransaction}.
  */
 public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction> extends
         AbstractForwardedTransaction<T> {
@@ -61,7 +59,6 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     }
 
     /**
-     *
      * Ensures list parent if item is list, otherwise noop.
      *
      * <p>
@@ -83,7 +80,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
      * put("/nodes/node/node[key]",domNode);
      * </pre>
      *
-     *
+     * <p>
      * In order to allow that to be inserted if necessary, if we know
      * item is list item, we will try to merge empty MapNode or OrderedNodeMap
      * to ensure list exists.
@@ -104,6 +101,8 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     }
 
     /**
+     * Deprecated.
+     *
      * @deprecated Use {@link YangInstanceIdentifier#getParent()} instead.
      */
     @Deprecated
@@ -114,10 +113,6 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     /**
      * Subclasses of this class are required to implement creation of parent
      * nodes based on behaviour of their underlying transaction.
-     *
-     * @param store
-     * @param key
-     * @param path
      */
     protected abstract void ensureParentsByMerge(LogicalDatastoreType store,
             YangInstanceIdentifier key, InstanceIdentifier<?> path);
@@ -137,5 +132,4 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     protected final boolean doCancel() {
         return getDelegate().cancel();
     }
-
 }

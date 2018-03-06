@@ -20,12 +20,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 
 /**
- *
  * Adapter exposing Binding {@link DataTreeChangeService} and wrapping
  * {@link DOMDataTreeChangeService} and is responsible for translation
  * and instantiation of {@link BindingDOMDataTreeChangeListenerAdapter}
  * adapters.
  *
+ * <p>
  * Each registered {@link DataTreeChangeListener} is wrapped using
  * adapter and registered directly to DOM service.
  */
@@ -46,16 +46,16 @@ final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeServ
     }
 
     @Override
-    public <T extends DataObject, L extends DataTreeChangeListener<T>> ListenerRegistration<L> registerDataTreeChangeListener(
-            final DataTreeIdentifier<T> treeId, final L listener) {
+    public <T extends DataObject, L extends DataTreeChangeListener<T>> ListenerRegistration<L>
+            registerDataTreeChangeListener(final DataTreeIdentifier<T> treeId, final L listener) {
         final DOMDataTreeIdentifier domIdentifier = toDomTreeIdentifier(treeId);
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
         final BindingDOMDataTreeChangeListenerAdapter<T> domListener =
-                listener instanceof ClusteredDataTreeChangeListener ?
-                        new BindingClusteredDOMDataTreeChangeListenerAdapter<>(
-                                codec, (ClusteredDataTreeChangeListener) listener, treeId.getDatastoreType()) :
-                        new BindingDOMDataTreeChangeListenerAdapter<>(codec, listener, treeId.getDatastoreType());
+                listener instanceof ClusteredDataTreeChangeListener
+                        ? new BindingClusteredDOMDataTreeChangeListenerAdapter<>(
+                                codec, (ClusteredDataTreeChangeListener) listener, treeId.getDatastoreType())
+                        : new BindingDOMDataTreeChangeListenerAdapter<>(codec, listener, treeId.getDatastoreType());
 
         final ListenerRegistration<BindingDOMDataTreeChangeListenerAdapter<T>> domReg =
                 dataTreeChangeService.registerDataTreeChangeListener(domIdentifier, domListener);

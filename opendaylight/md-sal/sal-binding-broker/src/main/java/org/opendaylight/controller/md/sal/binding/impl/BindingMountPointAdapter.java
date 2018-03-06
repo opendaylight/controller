@@ -40,7 +40,7 @@ public class BindingMountPointAdapter implements MountPoint {
     @Override
     public <T extends BindingService> Optional<T> getService(Class<T> service) {
         Optional<BindingService> potential = services.getUnchecked(service);
-        if(potential.isPresent()) {
+        if (potential.isPresent()) {
             return Optional.of(service.cast(potential.get()));
         }
         return Optional.absent();

@@ -9,8 +9,8 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -23,9 +23,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-
-import com.google.common.base.Optional;
-
 
 public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
 
@@ -43,7 +40,8 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testPutCreateParentsSuccess() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testPutCreateParentsSuccess()
+            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
         writeTx.submit().checkedGet();
@@ -56,7 +54,8 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testMergeCreateParentsSuccess() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testMergeCreateParentsSuccess()
+            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.merge(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
         writeTx.submit().checkedGet();
@@ -67,5 +66,4 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
         Optional<TopLevelList> listNode = readTx.read(LogicalDatastoreType.OPERATIONAL, NODE_PATH).get();
         assertTrue("List node must exists after commit",listNode.isPresent());
     }
-
 }

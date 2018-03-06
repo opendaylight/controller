@@ -21,9 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class BindingDOMMountPointServiceAdapter implements MountPointService {
-
     public static final Logger LOG = LoggerFactory.getLogger(BindingDOMMountPointServiceAdapter.class);
 
     private final BindingToNormalizedNodeCodec codec;
@@ -47,7 +45,7 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
 
         YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(mountPoint);
         Optional<DOMMountPoint> domMount = mountService.getMountPoint(domPath);
-        if(domMount.isPresent()) {
+        if (domMount.isPresent()) {
             return Optional.<MountPoint>fromNullable(bindingMountpoints.getUnchecked(domMount.get()));
         }
         return Optional.absent();
@@ -58,5 +56,4 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
             T listener) {
         return new BindingDOMMountPointListenerAdapter<>(listener, codec, mountService);
     }
-
 }

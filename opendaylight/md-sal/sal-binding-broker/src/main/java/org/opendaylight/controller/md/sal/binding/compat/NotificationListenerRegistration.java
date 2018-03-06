@@ -18,7 +18,8 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  *
  * @param <T> Type of notification
  */
-interface NotificationListenerRegistration<T extends Notification> extends ListenerRegistration<NotificationListener<T>> {
+interface NotificationListenerRegistration<T extends Notification>
+        extends ListenerRegistration<NotificationListener<T>> {
     /**
      * Return the interface class of the notification type.
      *

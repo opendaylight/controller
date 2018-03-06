@@ -10,17 +10,16 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
-
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.test.AbstractNotificationBrokerTest;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.OpendaylightMdsalListTestListener;
@@ -39,7 +38,8 @@ public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificat
     public void initTest() {
         final NotificationService notificationService = getNotificationService();
         final NotificationPublishService notificationPublishService = getNotificationPublishService();
-        notificationProviderService = new HeliumNotificationProviderServiceAdapter(notificationPublishService, notificationService);
+        notificationProviderService = new HeliumNotificationProviderServiceAdapter(notificationPublishService,
+                notificationService);
     }
 
     private TwoLevelListChanged createTestData() {
@@ -66,15 +66,16 @@ public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificat
 
     private static class NotifTestListenerChild extends  NotifTestListener {
 
-        public NotifTestListenerChild(final CountDownLatch latch) {
+        NotifTestListenerChild(final CountDownLatch latch) {
             super(latch);
         }
     }
-    private static class NotifTestListener implements OpendaylightMdsalListTestListener {
-        private List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
-        private CountDownLatch latch;
 
-        public NotifTestListener(CountDownLatch latch) {
+    private static class NotifTestListener implements OpendaylightMdsalListTestListener {
+        private final List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
+        private final CountDownLatch latch;
+
+        NotifTestListener(CountDownLatch latch) {
             this.latch = latch;
         }
 
@@ -88,5 +89,4 @@ public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificat
             return receivedNotifications;
         }
     }
-
 }

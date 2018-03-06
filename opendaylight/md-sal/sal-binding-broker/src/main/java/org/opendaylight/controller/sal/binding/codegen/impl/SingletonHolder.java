@@ -19,13 +19,13 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javassist.ClassPool;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javassist.ClassPool;
 
-public class SingletonHolder {
+public final class SingletonHolder {
     private static final Logger LOG = LoggerFactory.getLogger(SingletonHolder.class);
 
     public static final ClassPool CLASS_POOL = ClassPool.getDefault();
@@ -42,7 +42,12 @@ public class SingletonHolder {
     private static ListeningExecutorService COMMIT_EXECUTOR = null;
     private static ListeningExecutorService CHANGE_EVENT_EXECUTOR = null;
 
+    private SingletonHolder() {
+    }
+
     /**
+     * Deprecated.
+     *
      * @deprecated This method is only used from configuration modules and thus callers of it
      *             should use service injection to make the executor configurable.
      */
@@ -74,28 +79,26 @@ public class SingletonHolder {
                 }
 
                 @Override
-                public boolean offer(final Runnable r) {
+                public boolean offer(final Runnable runnrunnableable) {
                     // ThreadPoolExecutor will spawn a new thread after core size is reached only
                     // if the queue.offer returns false.
                     return false;
                 }
             };
 
-            final ThreadFactory factory = new ThreadFactoryBuilder()
-            .setDaemon(true)
-            .setNameFormat("md-sal-binding-notification-%d")
-            .build();
+            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true)
+                    .setNameFormat("md-sal-binding-notification-%d").build();
 
-            final ThreadPoolExecutor executor = new ThreadPoolExecutor(CORE_NOTIFICATION_THREADS, MAX_NOTIFICATION_THREADS,
-                    NOTIFICATION_THREAD_LIFE, TimeUnit.SECONDS, queue, factory,
-                    // if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
-                    (r, executor1) -> {
-                        try {
-                            executor1.getQueue().put(r);
-                        } catch (final InterruptedException e) {
-                            throw new RejectedExecutionException("Interrupted while waiting on the queue", e);
-                        }
-                    });
+            final ThreadPoolExecutor executor = new ThreadPoolExecutor(CORE_NOTIFICATION_THREADS,
+                MAX_NOTIFICATION_THREADS, NOTIFICATION_THREAD_LIFE, TimeUnit.SECONDS, queue, factory,
+                // if the max threads are met, then it will raise a rejectedExecution. We then push to the queue.
+                (runnable, executor1) -> {
+                    try {
+                        executor1.getQueue().put(runnable);
+                    } catch (final InterruptedException e) {
+                        throw new RejectedExecutionException("Interrupted while waiting on the queue", e);
+                    }
+                });
 
             NOTIFICATION_EXECUTOR = MoreExecutors.listeningDecorator(executor);
         }
@@ -104,13 +107,16 @@ public class SingletonHolder {
     }
 
     /**
+     * Deprecated.
+     *
      * @deprecated This method is only used from configuration modules and thus callers of it
      *             should use service injection to make the executor configurable.
      */
     @Deprecated
     public static synchronized ListeningExecutorService getDefaultCommitExecutor() {
         if (COMMIT_EXECUTOR == null) {
-            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-commit-%d").build();
+            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true)
+                    .setNameFormat("md-sal-binding-commit-%d").build();
             /*
              * FIXME: this used to be newCacheThreadPool(), but MD-SAL does not have transaction
              *        ordering guarantees, which means that using a concurrent threadpool results
@@ -127,7 +133,8 @@ public class SingletonHolder {
 
     public static ExecutorService getDefaultChangeEventExecutor() {
         if (CHANGE_EVENT_EXECUTOR == null) {
-            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-change-%d").build();
+            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true)
+                    .setNameFormat("md-sal-binding-change-%d").build();
             /*
              * FIXME: this used to be newCacheThreadPool(), but MD-SAL does not have transaction
              *        ordering guarantees, which means that using a concurrent threadpool results

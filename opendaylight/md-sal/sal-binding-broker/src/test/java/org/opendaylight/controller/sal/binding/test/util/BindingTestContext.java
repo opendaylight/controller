@@ -60,8 +60,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
-
-
     private BindingToNormalizedNodeCodec codec;
 
     private RootBindingAwareBroker baBrokerImpl;
@@ -109,7 +107,8 @@ public class BindingTestContext implements AutoCloseable {
         return this.codec;
     }
 
-    protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool, final boolean startWithSchema) {
+    protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool,
+            final boolean startWithSchema) {
         this.executor = executor;
         this.classPool = classPool;
         this.startWithSchema = startWithSchema;
@@ -168,7 +167,8 @@ public class BindingTestContext implements AutoCloseable {
     public void startBindingToDomMappingService() {
         checkState(this.classPool != null, "ClassPool needs to be present");
 
-        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(this.classPool));
+        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(
+                JavassistUtils.forClassPool(this.classPool));
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
         final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
         this.codec = new BindingToNormalizedNodeCodec(loading,  codecRegistry);
@@ -262,6 +262,4 @@ public class BindingTestContext implements AutoCloseable {
     public DataBroker getDataBroker() {
         return this.dataBroker;
     }
-
-
 }

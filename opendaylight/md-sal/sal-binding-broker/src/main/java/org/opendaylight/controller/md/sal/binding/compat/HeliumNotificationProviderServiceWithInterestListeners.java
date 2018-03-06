@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
 
 public class HeliumNotificationProviderServiceWithInterestListeners extends HeliumNotificationProviderServiceAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HeliumNotificationProviderServiceWithInterestListeners.class);
+    private static final Logger LOG = LoggerFactory.getLogger(
+            HeliumNotificationProviderServiceWithInterestListeners.class);
 
     private final ListenerRegistry<NotificationInterestListener> interestListeners = ListenerRegistry.create();
     private final ListenerRegistration<Listener> domListener;
@@ -37,7 +38,9 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
     private final BindingToNormalizedNodeCodec codec;
 
     public HeliumNotificationProviderServiceWithInterestListeners(
-            final BindingDOMNotificationPublishServiceAdapter publishService, final BindingDOMNotificationServiceAdapter listenService, final DOMNotificationSubscriptionListenerRegistry registry) {
+            final BindingDOMNotificationPublishServiceAdapter publishService,
+            final BindingDOMNotificationServiceAdapter listenService,
+            final DOMNotificationSubscriptionListenerRegistry registry) {
         super(publishService, listenService);
         this.codec = publishService.getCodecRegistry();
         this.domListener = registry.registerSubscriptionListener(new Listener());
@@ -55,16 +58,17 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
         return codec.getNotificationClasses(added);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void notifyAllListeners(final Set<SchemaPath> added) {
         final Iterator<ListenerRegistration<NotificationInterestListener>> listeners = interestListeners.iterator();
-        if(listeners.hasNext()) {
+        if (listeners.hasNext()) {
             final Set<Class<? extends Notification>> baEvent = translate(added);
-            while(listeners.hasNext()) {
+            while (listeners.hasNext()) {
                 final NotificationInterestListener listenerRef = listeners.next().getInstance();
                 try {
-                    notifyListener(listenerRef,baEvent);
-                } catch (final Exception e) {
-                    LOG.warn("Unhandled exception during invoking listener {}",e, listenerRef);
+                    notifyListener(listenerRef, baEvent);
+                } catch (RuntimeException  e) {
+                    LOG.warn("Unhandled exception during invoking listener {}", e, listenerRef);
                 }
             }
         }
@@ -74,7 +78,8 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
     public <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
             final Class<T> type, final NotificationListener<T> listener) {
 
-        final FunctionalNotificationListenerAdapter<T> adapter = new FunctionalNotificationListenerAdapter<>(codec, type, listener);
+        final FunctionalNotificationListenerAdapter<T> adapter =
+                new FunctionalNotificationListenerAdapter<>(codec, type, listener);
         final SchemaPath domType = SchemaPath.create(true, BindingReflections.findQName(type));
         final ListenerRegistration<?> domReg = domService.registerNotificationListener(adapter, domType);
         return new AbstractListenerRegistration<NotificationListener<T>>(listener) {
@@ -82,12 +87,12 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
             protected void removeRegistration() {
                 domReg.close();
             }
-
         };
     }
 
-    private void notifyListener(final NotificationInterestListener listener, final Set<Class<? extends Notification>> baEvent) {
-        for(final Class<? extends Notification> event: baEvent) {
+    private void notifyListener(final NotificationInterestListener listener,
+            final Set<Class<? extends Notification>> baEvent) {
+        for (final Class<? extends Notification> event: baEvent) {
             listener.onNotificationSubscribtion(event);
         }
     }

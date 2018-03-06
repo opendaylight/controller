@@ -29,7 +29,7 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
     private final T delegate;
     private final BindingToNormalizedNodeCodec codec;
 
-    public AbstractForwardedTransaction(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
+    AbstractForwardedTransaction(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
         this.delegate = Preconditions.checkNotNull(delegateTx, "Delegate must not be null");
         this.codec = Preconditions.checkNotNull(codec, "Codec must not be null");
     }
@@ -46,7 +46,8 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
     }
 
     @SuppressWarnings("unchecked")
-    protected final <S extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>> S getDelegateChecked(final Class<S> txType) {
+    protected final <S extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+            S getDelegateChecked(final Class<S> txType) {
         Preconditions.checkState(txType.isInstance(delegate));
         return (S) delegate;
     }

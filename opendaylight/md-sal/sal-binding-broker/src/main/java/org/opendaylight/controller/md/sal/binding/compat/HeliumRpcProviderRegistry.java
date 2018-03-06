@@ -49,10 +49,9 @@ public class HeliumRpcProviderRegistry implements RpcProviderRegistry {
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-            final L arg0) {
+    public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L>
+            registerRouteChangeListener(final L listener) {
         // FIXME: Implement this only if necessary
         return null;
     }
-
 }

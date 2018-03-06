@@ -108,10 +108,10 @@ public class ForwardedNotificationAdapterTest extends AbstractNotificationBroker
     }
 
     private static class TestNotifListener implements OpendaylightMdsalListTestListener {
-        private List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
-        private CountDownLatch latch;
+        private final List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
+        private final CountDownLatch latch;
 
-        public TestNotifListener(CountDownLatch latch) {
+        TestNotifListener(CountDownLatch latch) {
             this.latch = latch;
         }
 

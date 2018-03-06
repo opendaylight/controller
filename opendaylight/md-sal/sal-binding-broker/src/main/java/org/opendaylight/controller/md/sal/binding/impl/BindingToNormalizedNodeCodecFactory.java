@@ -20,11 +20,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
  *
  * @author Thomas Pantelis
  */
-public class BindingToNormalizedNodeCodecFactory {
+public final class BindingToNormalizedNodeCodecFactory {
+    private BindingToNormalizedNodeCodecFactory() {
+    }
+
     /**
      * Creates a new BindingToNormalizedNodeCodec instance.
      *
-     * @param classLoadingStrategy
+     * @param classLoadingStrategy the ClassLoadingStrategy
      * @return the BindingToNormalizedNodeCodec instance
      */
     public static BindingToNormalizedNodeCodec newInstance(final ClassLoadingStrategy classLoadingStrategy) {
@@ -40,8 +43,8 @@ public class BindingToNormalizedNodeCodecFactory {
      * @param schemaService the SchemaService.
      * @return the ListenerRegistration
      */
-    public static ListenerRegistration<SchemaContextListener> registerInstance(final BindingToNormalizedNodeCodec instance,
-            final DOMSchemaService schemaService) {
+    public static ListenerRegistration<SchemaContextListener> registerInstance(
+            final BindingToNormalizedNodeCodec instance, final DOMSchemaService schemaService) {
         return schemaService.registerSchemaContextListener(instance);
     }
 }

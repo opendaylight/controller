@@ -36,14 +36,16 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation {
 
-    private static final Cache<Class<?>, RpcServiceInvoker> SERVICE_INVOKERS = CacheBuilder.newBuilder().weakKeys().build();
+    private static final Cache<Class<?>, RpcServiceInvoker> SERVICE_INVOKERS =
+            CacheBuilder.newBuilder().weakKeys().build();
 
     private final BindingNormalizedNodeSerializer codec;
     private final RpcServiceInvoker invoker;
     private final RpcService delegate;
     private final QName inputQname;
 
-    <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeSerializer codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
+    <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeSerializer codec,
+            final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
         try {
             this.invoker = SERVICE_INVOKERS.get(type, () -> {
                 final Map<QName, Method> map = new HashMap<>();
@@ -64,7 +66,8 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
 
     @Nonnull
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final DOMRpcIdentifier rpc,
+            final NormalizedNode<?, ?> input) {
         final SchemaPath schemaPath = rpc.getType();
         final DataObject bindingInput = input != null ? deserialize(rpc.getType(), input) : null;
         final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath, bindingInput);
@@ -83,7 +86,8 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
         return JdkFutureAdapters.listenInPoolThread(invoker.invokeRpc(delegate, schemaPath.getLastComponent(), input));
     }
 
-    private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(final ListenableFuture<RpcResult<?>> bindingResult) {
+    private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(
+            final ListenableFuture<RpcResult<?>> bindingResult) {
         return LazyDOMRpcResultFuture.create(codec, bindingResult);
     }
 

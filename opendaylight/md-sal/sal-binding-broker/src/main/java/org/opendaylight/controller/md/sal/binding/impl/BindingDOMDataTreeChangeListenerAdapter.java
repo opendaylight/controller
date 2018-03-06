@@ -28,8 +28,8 @@ class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implements D
     private final DataTreeChangeListener<T> listener;
     private final LogicalDatastoreType store;
 
-    BindingDOMDataTreeChangeListenerAdapter(final BindingToNormalizedNodeCodec codec, final DataTreeChangeListener<T> listener,
-            final LogicalDatastoreType store) {
+    BindingDOMDataTreeChangeListenerAdapter(final BindingToNormalizedNodeCodec codec,
+            final DataTreeChangeListener<T> listener, final LogicalDatastoreType store) {
         this.codec = Preconditions.checkNotNull(codec);
         this.listener = Preconditions.checkNotNull(listener);
         this.store = Preconditions.checkNotNull(store);
@@ -37,7 +37,8 @@ class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implements D
 
     @Override
     public void onDataTreeChanged(final Collection<DataTreeCandidate> domChanges) {
-        final Collection<DataTreeModification<T>> bindingChanges = LazyDataTreeModification.from(codec, domChanges, store);
+        final Collection<DataTreeModification<T>> bindingChanges =
+                LazyDataTreeModification.from(codec, domChanges, store);
         listener.onDataTreeChanged(bindingChanges);
     }
 

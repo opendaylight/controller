@@ -25,14 +25,16 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
     private final BindingNormalizedNodeSerializer codec;
     private final DOMNotificationService domNotifService;
 
-    public BindingDOMNotificationServiceAdapter(final BindingNormalizedNodeSerializer codec, final DOMNotificationService domNotifService) {
+    public BindingDOMNotificationServiceAdapter(final BindingNormalizedNodeSerializer codec,
+            final DOMNotificationService domNotifService) {
         this.codec = codec;
         this.domNotifService = domNotifService;
     }
 
     @Override
     public <T extends NotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener) {
-        final BindingDOMNotificationListenerAdapter domListener = new BindingDOMNotificationListenerAdapter(codec, listener);
+        final BindingDOMNotificationListenerAdapter domListener =
+                new BindingDOMNotificationListenerAdapter(codec, listener);
         final ListenerRegistration<BindingDOMNotificationListenerAdapter> domRegistration =
                 domNotifService.registerNotificationListener(domListener, domListener.getSupportedNotifications());
         return new ListenerRegistrationImpl<>(listener, domRegistration);
@@ -43,10 +45,11 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
 
     }
 
-    private static class ListenerRegistrationImpl<T extends NotificationListener> extends AbstractListenerRegistration<T> {
+    private static class ListenerRegistrationImpl<T extends NotificationListener>
+            extends AbstractListenerRegistration<T> {
         private final ListenerRegistration<?> listenerRegistration;
 
-        public ListenerRegistrationImpl(final T listener, final ListenerRegistration<?> listenerRegistration) {
+        ListenerRegistrationImpl(final T listener, final ListenerRegistration<?> listenerRegistration) {
             super(listener);
             this.listenerRegistration = listenerRegistration;
         }

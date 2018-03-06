@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -37,7 +38,7 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
     private final DelegateChainListener domListener;
     private final TransactionChainListener bindingListener;
 
-    public BindingDOMTransactionChainAdapter(final DOMDataBroker chainFactory,
+    BindingDOMTransactionChainAdapter(final DOMDataBroker chainFactory,
             final BindingToNormalizedNodeCodec codec, final TransactionChainListener listener) {
         Preconditions.checkNotNull(chainFactory, "DOM Transaction chain factory must not be null");
         this.domListener = new DelegateChainListener();
@@ -87,27 +88,27 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
             final WriteTransaction tx, final CheckedFuture<Void, TransactionCommitFailedException> future) {
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onFailure(final Throwable t) {
-                failTransactionChain(tx,t);
+            public void onFailure(final Throwable ex) {
+                failTransactionChain(tx,ex);
             }
 
             @Override
             public void onSuccess(final Void result) {
                 // Intentionally NOOP
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return future;
     }
 
-    private void failTransactionChain(final WriteTransaction tx, final Throwable t) {
+    private void failTransactionChain(final WriteTransaction tx, final Throwable ex) {
         /*
          *  We asume correct state change for underlaying transaction
          *
          * chain, so we are not changing any of our internal state
          * to mark that we failed.
          */
-        this.bindingListener.onTransactionChainFailed(this, tx, t);
+        this.bindingListener.onTransactionChainFailed(this, tx, ex);
     }
 
     @Override

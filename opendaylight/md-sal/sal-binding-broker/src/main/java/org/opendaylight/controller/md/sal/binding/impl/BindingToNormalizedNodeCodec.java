@@ -137,6 +137,7 @@ public class BindingToNormalizedNodeCodec
     /**
      * Converts Binding Map.Entry to DOM Map.Entry
      *
+     * <p>
      * Same as {@link #toNormalizedNode(InstanceIdentifier, DataObject)}.
      *
      * @param binding Map Entry with InstanceIdentifier as key and DataObject as value.
@@ -180,11 +181,15 @@ public class BindingToNormalizedNodeCodec
         return this.codecRegistry.toNormalizedNodeRpcData(data);
     }
 
+    public DataNormalizer getDataNormalizer() {
+        return this.legacyToNormalized;
+    }
+
     /**
-     *
      * Returns a Binding-Aware instance identifier from normalized
      * instance-identifier if it is possible to create representation.
      *
+     * <p>
      * Returns Optional.absent for cases where target is mixin node except
      * augmentation.
      *
@@ -197,10 +202,6 @@ public class BindingToNormalizedNodeCodec
         } catch (final IllegalArgumentException e) {
             return Optional.absent();
         }
-    }
-
-    public DataNormalizer getDataNormalizer() {
-        return this.legacyToNormalized;
     }
 
     public Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> toBinding(
@@ -315,14 +316,14 @@ public class BindingToNormalizedNodeCodec
         return module;
     }
 
-    private void waitForSchema(final Collection<Class<?>> binding, final MissingSchemaException e) {
+    private void waitForSchema(final Collection<Class<?>> binding, final MissingSchemaException ex) {
         LOG.warn("Blocking thread to wait for schema convergence updates for {} {}", this.futureSchema.getDuration(),
                 this.futureSchema.getUnit());
         if (this.futureSchema.waitForSchema(binding)) {
             return;
         }
 
-        throw e;
+        throw ex;
     }
 
     private Method findRpcMethod(final Class<? extends RpcService> key, final RpcDefinition rpcDef)
