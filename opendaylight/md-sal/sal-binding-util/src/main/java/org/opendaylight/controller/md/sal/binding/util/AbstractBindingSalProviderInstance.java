@@ -51,8 +51,8 @@ public abstract class AbstractBindingSalProviderInstance<N extends NotificationP
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-            final L listener) {
+    public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L>
+            registerRouteChangeListener(final L listener) {
         return getRpcRegistryChecked().registerRouteChangeListener(listener);
     }
 

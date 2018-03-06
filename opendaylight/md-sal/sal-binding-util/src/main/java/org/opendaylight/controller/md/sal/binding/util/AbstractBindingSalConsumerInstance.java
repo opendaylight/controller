@@ -56,8 +56,8 @@ public abstract class AbstractBindingSalConsumerInstance<N extends NotificationS
     }
 
     @Override
-    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(
-            org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
+    public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener>
+            registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
         return getNotificationBrokerChecked().registerNotificationListener(listener);
     }
 }
