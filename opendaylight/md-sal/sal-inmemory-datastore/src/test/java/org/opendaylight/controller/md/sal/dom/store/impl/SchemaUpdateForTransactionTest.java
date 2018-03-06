@@ -8,9 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static org.junit.Assert.assertNotNull;
-import com.google.common.base.Throwables;
+
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -30,25 +29,20 @@ public class SchemaUpdateForTransactionTest {
     private InMemoryDOMDataStore domStore;
 
     @Before
-    public void setupStore() {
+    public void setupStore() throws Exception {
         this.domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.newDirectExecutorService());
         loadSchemas(RockTheHouseInput.class);
     }
 
-    public void loadSchemas(final Class<?>... classes) {
-        YangModuleInfo moduleInfo;
-        try {
-            final ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
-            for (final Class<?> clz : classes) {
-                moduleInfo = BindingReflections.getModuleInfo(clz);
+    public void loadSchemas(final Class<?>... classes) throws Exception {
+        final ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
+        for (final Class<?> clz : classes) {
+            YangModuleInfo moduleInfo = BindingReflections.getModuleInfo(clz);
 
-                context.registerModuleInfo(moduleInfo);
-            }
-            this.schemaContext = context.tryToCreateSchemaContext().get();
-            this.domStore.onGlobalContextUpdated(this.schemaContext);
-        } catch (final Exception e) {
-            Throwables.propagateIfPossible(e);
+            context.registerModuleInfo(moduleInfo);
         }
+        this.schemaContext = context.tryToCreateSchemaContext().get();
+        this.domStore.onGlobalContextUpdated(this.schemaContext);
     }
 
     /**
@@ -57,16 +51,14 @@ public class SchemaUpdateForTransactionTest {
      * then triggering update of global schema context
      * and then performing write (according to new module).
      *
+     * <p>
      * If transaction between allocation and schema context was
      * unmodified, it is safe to change its schema context
      * to new one (e.g. it will be same as if allocated after
      * schema context update.)
-     *
-     * @throws InterruptedException
-     * @throws ExecutionException
      */
     @Test
-    public void testTransactionSchemaUpdate() throws InterruptedException, ExecutionException {
+    public void testTransactionSchemaUpdate() throws Exception {
 
         assertNotNull(this.domStore);
 
@@ -78,15 +70,11 @@ public class SchemaUpdateForTransactionTest {
         // we trigger schema context update to contain Lists model
         loadSchemas(RockTheHouseInput.class, Top.class);
 
-        /**
-         *
+        /*
          * Writes /test in writeTx, this write should not fail
          * with IllegalArgumentException since /test is in
          * schema context.
-         *
          */
         writeTx.write(TOP_PATH, ImmutableNodes.containerNode(Top.QNAME));
-
     }
-
 }

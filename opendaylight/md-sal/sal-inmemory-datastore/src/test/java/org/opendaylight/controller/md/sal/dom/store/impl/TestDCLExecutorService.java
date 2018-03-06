@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutorService;
 
 /**
- * A forwarding Executor used by unit tests for DataChangeListener notifications
+ * A forwarding Executor used by unit tests for DataChangeListener notifications.
  *
  * @author Thomas Pantelis
  */
@@ -26,7 +26,7 @@ public class TestDCLExecutorService extends ForwardingExecutorService {
     private final ExecutorService postSetupExecutor;
 
 
-    public TestDCLExecutorService( final ExecutorService postSetupExecutor ) {
+    public TestDCLExecutorService(final ExecutorService postSetupExecutor) {
         this.postSetupExecutor = postSetupExecutor;
     }
 

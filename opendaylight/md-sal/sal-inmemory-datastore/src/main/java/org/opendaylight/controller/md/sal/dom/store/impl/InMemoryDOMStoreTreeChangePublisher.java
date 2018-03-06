@@ -29,18 +29,21 @@ import org.slf4j.LoggerFactory;
 
 final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChangePublisher {
     private static final Invoker<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> MANAGER_INVOKER =
-            (listener, notification) -> {
-                // FIXME: this is inefficient, as we could grab the entire queue for the listener and post it
-                final DOMDataTreeChangeListener inst = listener.getInstance();
-                if (inst != null) {
-                    inst.onDataTreeChanged(Collections.singletonList(notification));
-                }
-            };
+        (listener, notification) -> {
+            // FIXME: this is inefficient, as we could grab the entire queue for the listener and post it
+            final DOMDataTreeChangeListener inst = listener.getInstance();
+            if (inst != null) {
+                inst.onDataTreeChanged(Collections.singletonList(notification));
+            }
+        };
+
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMStoreTreeChangePublisher.class);
-    private final QueuedNotificationManager<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> notificationManager;
+    private final QueuedNotificationManager<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate>
+            notificationManager;
 
     InMemoryDOMStoreTreeChangePublisher(final ExecutorService listenerExecutor, final int maxQueueSize) {
-        notificationManager = new QueuedNotificationManager<>(listenerExecutor, MANAGER_INVOKER, maxQueueSize, "DataTreeChangeListenerQueueMgr");
+        notificationManager = new QueuedNotificationManager<>(listenerExecutor, MANAGER_INVOKER, maxQueueSize,
+                "DataTreeChangeListenerQueueMgr");
     }
 
     private InMemoryDOMStoreTreeChangePublisher(QueuedNotificationManager<
@@ -49,7 +52,8 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
     }
 
     @Override
-    protected void notifyListeners(final Collection<AbstractDOMDataTreeChangeListenerRegistration<?>> registrations, final YangInstanceIdentifier path, final DataTreeCandidateNode node) {
+    protected void notifyListeners(final Collection<AbstractDOMDataTreeChangeListenerRegistration<?>> registrations,
+            final YangInstanceIdentifier path, final DataTreeCandidateNode node) {
         final DataTreeCandidate candidate = DataTreeCandidates.newDataTreeCandidate(path, node);
 
         for (AbstractDOMDataTreeChangeListenerRegistration<?> reg : registrations) {
@@ -59,13 +63,15 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
     }
 
     @Override
-    protected synchronized void registrationRemoved(final AbstractDOMDataTreeChangeListenerRegistration<?> registration) {
+    protected synchronized void registrationRemoved(
+            final AbstractDOMDataTreeChangeListenerRegistration<?> registration) {
         LOG.debug("Closing registration {}", registration);
 
         // FIXME: remove the queue for this registration and make sure we clear it
     }
 
-    <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener, final DataTreeSnapshot snapshot) {
+    <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
+            final YangInstanceIdentifier treeId, final L listener, final DataTreeSnapshot snapshot) {
         final AbstractDOMDataTreeChangeListenerRegistration<L> reg = registerTreeChangeListener(treeId, listener);
 
         final Optional<NormalizedNode<?, ?>> node = snapshot.readNode(YangInstanceIdentifier.EMPTY);

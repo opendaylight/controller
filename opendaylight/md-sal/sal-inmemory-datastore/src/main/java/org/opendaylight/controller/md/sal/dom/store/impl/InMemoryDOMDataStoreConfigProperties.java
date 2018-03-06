@@ -10,12 +10,12 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 
 /**
  * Holds configuration properties when creating an {@link InMemoryDOMDataStore} instance via the
- * {@link InMemoryDOMDataStoreFactory}
+ * {@link InMemoryDOMDataStoreFactory}.
  *
  * @author Thomas Pantelis
  * @see InMemoryDOMDataStoreFactory
  */
-public class InMemoryDOMDataStoreConfigProperties {
+public final class InMemoryDOMDataStoreConfigProperties {
 
     public static final int DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE = 1000;
     public static final int DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE = 20;

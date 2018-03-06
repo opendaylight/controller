@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.config.yang.inmemory_datastore_provider;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
@@ -18,13 +20,16 @@ import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreSt
  * The in-memory data store isn't used anymore. Deprecation notice in Carbon. Removal plan in Nitrogen.
  */
 @Deprecated
-public class InMemoryOperationalDataStoreProviderModule extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryOperationalDataStoreProviderModule {
+public class InMemoryOperationalDataStoreProviderModule extends AbstractInMemoryOperationalDataStoreProviderModule {
 
-    public InMemoryOperationalDataStoreProviderModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public InMemoryOperationalDataStoreProviderModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public InMemoryOperationalDataStoreProviderModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final org.opendaylight.controller.config.yang.inmemory_datastore_provider.InMemoryOperationalDataStoreProviderModule oldModule, final java.lang.AutoCloseable oldInstance) {
+    public InMemoryOperationalDataStoreProviderModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver, final InMemoryOperationalDataStoreProviderModule oldModule,
+            final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

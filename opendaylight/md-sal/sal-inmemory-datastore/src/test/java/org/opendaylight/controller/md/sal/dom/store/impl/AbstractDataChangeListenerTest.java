@@ -67,7 +67,7 @@ public abstract class AbstractDataChangeListenerTest {
 
     @After
     public void tearDown() {
-        if( this.dclExecutorService != null ) {
+        if (this.dclExecutorService != null) {
             this.dclExecutorService.shutdownNow();
         }
     }
@@ -120,15 +120,15 @@ public abstract class AbstractDataChangeListenerTest {
 
     }
 
-    protected static <K> void assertNotContains(final Collection<K> set, final K... values) {
-        for (final K key : values) {
-            Assert.assertFalse(set.contains(key));
-        }
-    }
-
     protected static <K> void assertContains(final Map<K,?> map, final K... values) {
         for (final K key : values) {
             Assert.assertTrue(map.containsKey(key));
+        }
+    }
+
+    protected static <K> void assertNotContains(final Collection<K> set, final K... values) {
+        for (final K key : values) {
+            Assert.assertFalse(set.contains(key));
         }
     }
 

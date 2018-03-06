@@ -10,10 +10,11 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -24,9 +25,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.SettableFuture;
 
 public class DatastoreTestTask {
 
@@ -50,8 +48,8 @@ public class DatastoreTestTask {
     }
 
     public DatastoreTestTask changeListener(final YangInstanceIdentifier path, final DataChangeScope scope,
-            final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> changeListener) {
-        this.changeListener = changeListener;
+            final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener) {
+        this.changeListener = listener;
         this.changePath = path;
         this.changeScope = scope;
         return this;
@@ -63,27 +61,27 @@ public class DatastoreTestTask {
         return this;
     }
 
-    public DatastoreTestTask setup(final WriteTransactionCustomizer setup) {
-        this.setup = setup;
+    public DatastoreTestTask setup(final WriteTransactionCustomizer customizer) {
+        this.setup = customizer;
         return this;
     }
 
-    public DatastoreTestTask test(final WriteTransactionCustomizer write) {
-        this.write = write;
+    public DatastoreTestTask test(final WriteTransactionCustomizer customizer) {
+        this.write = customizer;
         return this;
     }
 
-    public DatastoreTestTask read(final ReadTransactionVerifier read) {
-        this.read = read;
+    public DatastoreTestTask read(final ReadTransactionVerifier customizer) {
+        this.read = customizer;
         return this;
     }
 
-    public DatastoreTestTask cleanup(final WriteTransactionCustomizer cleanup) {
-        this.cleanup = cleanup;
+    public DatastoreTestTask cleanup(final WriteTransactionCustomizer customizer) {
+        this.cleanup = customizer;
         return this;
     }
 
-    public void run() throws InterruptedException, ExecutionException, TimeoutException {
+    public void run() throws Exception {
         if (setup != null) {
             execute(setup);
         }
@@ -113,25 +111,16 @@ public class DatastoreTestTask {
         }
     }
 
-    public AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> getChangeEvent() {
-        try {
-            return internalListener.receivedChange.get(10, TimeUnit.SECONDS);
-        } catch( Exception e ) {
-            fail( "Error getting the AsyncDataChangeEvent from the Future: " + e );
-        }
-
-        // won't get here
-        return null;
+    public AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> getChangeEvent() throws Exception {
+        return internalListener.receivedChange.get(10, TimeUnit.SECONDS);
     }
 
-    public void verifyNoChangeEvent() {
+    public void verifyNoChangeEvent() throws Exception {
         try {
             Object unexpected = internalListener.receivedChange.get(500, TimeUnit.MILLISECONDS);
-            fail( "Got unexpected AsyncDataChangeEvent from the Future: " + unexpected );
-        } catch( TimeoutException e ) {
+            fail("Got unexpected AsyncDataChangeEvent from the Future: " + unexpected);
+        } catch (TimeoutException e) {
             // Expected
-        } catch( Exception e ) {
-            fail( "Error getting the AsyncDataChangeEvent from the Future: " + e );
         }
     }
 
@@ -156,8 +145,8 @@ public class DatastoreTestTask {
     private final class ChangeEventListener implements
             AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
-        protected final SettableFuture<AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>> receivedChange = SettableFuture
-                .create();
+        protected final SettableFuture<AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+                receivedChange = SettableFuture.create();
 
         @Override
         public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {

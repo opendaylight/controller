@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Resolve Data Change Events based on modifications and listeners
  *
- * Computes data change events for all affected registered listeners in data
- * tree.
+ * <p>
+ * Computes data change events for all affected registered listeners in data tree.
  */
 @Beta
 public final class ResolveDataChangeEventsTask {
@@ -52,8 +52,9 @@ public final class ResolveDataChangeEventsTask {
     /**
      * Resolves and submits notification tasks to the specified manager.
      */
-    public synchronized void resolve(final NotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> manager) {
-        try (final RegistrationTreeSnapshot<DataChangeListenerRegistration<?>> w = listenerRoot.takeSnapshot()) {
+    public synchronized void resolve(final NotificationManager<DataChangeListenerRegistration<?>,
+            DOMImmutableDataChangeEvent> manager) {
+        try (RegistrationTreeSnapshot<DataChangeListenerRegistration<?>> w = listenerRoot.takeSnapshot()) {
             // Defensive: reset internal state
             collectedEvents = ArrayListMultimap.create();
 
@@ -65,7 +66,8 @@ public final class ResolveDataChangeEventsTask {
              * Convert to tasks, but be mindful of multiple values -- those indicate multiple
              * wildcard matches, which need to be merged.
              */
-            for (Entry<DataChangeListenerRegistration<?>, Collection<DOMImmutableDataChangeEvent>> e : collectedEvents.asMap().entrySet()) {
+            for (Entry<DataChangeListenerRegistration<?>, Collection<DOMImmutableDataChangeEvent>> e :
+                    collectedEvents.asMap().entrySet()) {
                 final Collection<DOMImmutableDataChangeEvent> col = e.getValue();
                 final DOMImmutableDataChangeEvent event;
 
@@ -87,7 +89,7 @@ public final class ResolveDataChangeEventsTask {
     }
 
     /**
-     * Resolves data change event for supplied node
+     * Resolves data change event for supplied node.
      *
      * @param path
      *            Path to current node in tree
@@ -116,31 +118,33 @@ public final class ResolveDataChangeEventsTask {
         // no before and after state is present
 
         switch (type) {
-        case SUBTREE_MODIFIED:
-            return resolveSubtreeChangeEvent(state, node);
-        case APPEARED:
-        case WRITE:
-            Preconditions.checkArgument(maybeAfter.isPresent(),
-                    "Modification at {} has type {} but no after-data", state.getPath(), type);
-            if (!maybeBefore.isPresent()) {
+            case SUBTREE_MODIFIED:
+                return resolveSubtreeChangeEvent(state, node);
+            case APPEARED:
+            case WRITE:
+                Preconditions.checkArgument(maybeAfter.isPresent(),
+                        "Modification at {} has type {} but no after-data", state.getPath(), type);
+                if (!maybeBefore.isPresent()) {
+                    @SuppressWarnings({ "unchecked", "rawtypes" })
+                    final NormalizedNode<PathArgument, ?> afterNode = (NormalizedNode)maybeAfter.get();
+                    resolveSameEventRecursivelly(state, afterNode, DOMImmutableDataChangeEvent.getCreateEventFactory());
+                    return true;
+                }
+
+                return resolveReplacedEvent(state, maybeBefore.get(), maybeAfter.get());
+            case DISAPPEARED:
+            case DELETE:
+                Preconditions.checkArgument(maybeBefore.isPresent(),
+                        "Modification at {} has type {} but no before-data", state.getPath(), type);
+
                 @SuppressWarnings({ "unchecked", "rawtypes" })
-                final NormalizedNode<PathArgument, ?> afterNode = (NormalizedNode)maybeAfter.get();
-                resolveSameEventRecursivelly(state, afterNode, DOMImmutableDataChangeEvent.getCreateEventFactory());
+                final NormalizedNode<PathArgument, ?> beforeNode = (NormalizedNode)maybeBefore.get();
+                resolveSameEventRecursivelly(state, beforeNode, DOMImmutableDataChangeEvent.getRemoveEventFactory());
                 return true;
-            }
-
-            return resolveReplacedEvent(state, maybeBefore.get(), maybeAfter.get());
-        case DISAPPEARED:
-        case DELETE:
-            Preconditions.checkArgument(maybeBefore.isPresent(),
-                    "Modification at {} has type {} but no before-data", state.getPath(), type);
-
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            final NormalizedNode<PathArgument, ?> beforeNode = (NormalizedNode)maybeBefore.get();
-            resolveSameEventRecursivelly(state, beforeNode, DOMImmutableDataChangeEvent.getRemoveEventFactory());
-            return true;
-        case UNMODIFIED:
-            return false;
+            case UNMODIFIED:
+                return false;
+            default:
+                break;
         }
 
         throw new IllegalStateException(String.format("Unhandled node state %s at %s", type, state.getPath()));
@@ -156,11 +160,14 @@ public final class ResolveDataChangeEventsTask {
              * resolution of changes on children level and can not
              * shortcut resolution.
              */
-            LOG.trace("Resolving subtree replace event for {} before {}, after {}", state.getPath(), beforeData, afterData);
+            LOG.trace("Resolving subtree replace event for {} before {}, after {}", state.getPath(), beforeData,
+                    afterData);
             @SuppressWarnings("unchecked")
-            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) beforeData;
+            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> beforeCont =
+                (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) beforeData;
             @SuppressWarnings("unchecked")
-            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) afterData;
+            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> afterCont =
+                (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) afterData;
             return resolveNodeContainerReplaced(state, beforeCont, afterCont);
         }
 
@@ -172,7 +179,8 @@ public final class ResolveDataChangeEventsTask {
         }
 
         LOG.trace("Resolving leaf replace event for {} , before {}, after {}", state.getPath(), beforeData, afterData);
-        DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE).addUpdated(state.getPath(), beforeData, afterData).build();
+        DOMImmutableDataChangeEvent event = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE)
+                .addUpdated(state.getPath(), beforeData, afterData).build();
         state.addEvent(event);
         state.collectEvents(beforeData, afterData, collectedEvents);
         return true;
@@ -205,7 +213,8 @@ public final class ResolveDataChangeEventsTask {
              * created.
              */
             if (!beforeCont.getChild(childId).isPresent()) {
-                resolveSameEventRecursivelly(state.child(childId), afterChild, DOMImmutableDataChangeEvent.getCreateEventFactory());
+                resolveSameEventRecursivelly(state.child(childId), afterChild,
+                        DOMImmutableDataChangeEvent.getCreateEventFactory());
                 childChanged = true;
             }
         }
@@ -247,7 +256,8 @@ public final class ResolveDataChangeEventsTask {
             // Node has children, so we will try to resolve it's children
             // changes.
             @SuppressWarnings("unchecked")
-            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> container = (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) node;
+            NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>> container =
+                (NormalizedNodeContainer<?, PathArgument, NormalizedNode<PathArgument, ?>>) node;
             for (NormalizedNode<PathArgument, ?> child : container.getValue()) {
                 final PathArgument childId = child.getIdentifier();
 
@@ -262,12 +272,15 @@ public final class ResolveDataChangeEventsTask {
         state.collectEvents(event.getOriginalSubtree(), event.getUpdatedSubtree(), collectedEvents);
     }
 
-    private boolean resolveSubtreeChangeEvent(final ResolveDataChangeState state, final DataTreeCandidateNode modification) {
+    private boolean resolveSubtreeChangeEvent(final ResolveDataChangeState state,
+            final DataTreeCandidateNode modification) {
         final Optional<NormalizedNode<?, ?>> maybeBefore = modification.getDataBefore();
         final Optional<NormalizedNode<?, ?>> maybeAfter = modification.getDataAfter();
 
-        Preconditions.checkArgument(maybeBefore.isPresent(), "Subtree change with before-data not present at path %s", state.getPath());
-        Preconditions.checkArgument(maybeAfter.isPresent(), "Subtree change with after-data not present at path %s", state.getPath());
+        Preconditions.checkArgument(maybeBefore.isPresent(), "Subtree change with before-data not present at path %s",
+                state.getPath());
+        Preconditions.checkArgument(maybeAfter.isPresent(), "Subtree change with after-data not present at path %s",
+                state.getPath());
 
         if (!state.needsProcessing()) {
             LOG.trace("Not processing modified subtree {}", state.getPath());
@@ -279,22 +292,24 @@ public final class ResolveDataChangeEventsTask {
             final ResolveDataChangeState childState = state.child(childMod.getIdentifier());
 
             switch (childMod.getModificationType()) {
-            case APPEARED:
-            case DELETE:
-            case DISAPPEARED:
-            case WRITE:
-                if (resolveAnyChangeEvent(childState, childMod)) {
-                    scope = DataChangeScope.ONE;
-                }
-                break;
-            case SUBTREE_MODIFIED:
-                if (resolveSubtreeChangeEvent(childState, childMod) && scope == null) {
-                    scope = DataChangeScope.SUBTREE;
-                }
-                break;
-            case UNMODIFIED:
-                // no-op
-                break;
+                case APPEARED:
+                case DELETE:
+                case DISAPPEARED:
+                case WRITE:
+                    if (resolveAnyChangeEvent(childState, childMod)) {
+                        scope = DataChangeScope.ONE;
+                    }
+                    break;
+                case SUBTREE_MODIFIED:
+                    if (resolveSubtreeChangeEvent(childState, childMod) && scope == null) {
+                        scope = DataChangeScope.SUBTREE;
+                    }
+                    break;
+                case UNMODIFIED:
+                    // no-op
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -302,7 +317,8 @@ public final class ResolveDataChangeEventsTask {
         final NormalizedNode<?, ?> after = maybeAfter.get();
 
         if (scope != null) {
-            DOMImmutableDataChangeEvent one = DOMImmutableDataChangeEvent.builder(scope).addUpdated(state.getPath(), before, after).build();
+            DOMImmutableDataChangeEvent one = DOMImmutableDataChangeEvent.builder(scope)
+                    .addUpdated(state.getPath(), before, after).build();
             state.addEvent(one);
         }
 
@@ -310,7 +326,8 @@ public final class ResolveDataChangeEventsTask {
         return scope != null;
     }
 
-    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
+    public static ResolveDataChangeEventsTask create(final DataTreeCandidate candidate,
+            final ListenerTree listenerTree) {
         return new ResolveDataChangeEventsTask(candidate, listenerTree);
     }
 }
