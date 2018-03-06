@@ -12,11 +12,10 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
+ * Deprecated.
  *
- *
- * @deprecated Use
- *             {@link org.opendaylight.controller.md.sal.binding.api.ReadTransaction#read(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, InstanceIdentifier)}
- *             instead.
+ * @deprecated Use {@link org.opendaylight.controller.md.sal.binding.api.ReadTransaction#read(
+ *     org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, InstanceIdentifier)} instead.
  */
 @Deprecated
 public final class TypeSafeDataReader {
