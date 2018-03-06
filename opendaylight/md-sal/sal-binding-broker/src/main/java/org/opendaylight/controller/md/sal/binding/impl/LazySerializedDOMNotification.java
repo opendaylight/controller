@@ -17,6 +17,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 /**
  * Lazy serialized implementation of DOM Notification.
  *
+ * <p>
  * This implementation performs serialization of data, only if receiver
  * of notification actually accessed data from notification.
  *
@@ -29,7 +30,8 @@ public final class LazySerializedDOMNotification implements DOMNotification {
 
     private ContainerNode domBody;
 
-    private LazySerializedDOMNotification(final BindingNormalizedNodeSerializer codec, final Notification data, final SchemaPath type) {
+    private LazySerializedDOMNotification(final BindingNormalizedNodeSerializer codec, final Notification data,
+            final SchemaPath type) {
         this.codec = codec;
         this.data = data;
         this.type = type;

@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -23,9 +24,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 
 class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> extends
         AbstractWriteTransaction<T> implements WriteTransaction {
@@ -49,7 +47,8 @@ class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> exten
 
     @Override
     protected void ensureParentsByMerge(final LogicalDatastoreType store,
-            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalizedPath, final InstanceIdentifier<?> path) {
+            final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier normalizedPath,
+            final InstanceIdentifier<?> path) {
         List<PathArgument> currentArguments = new ArrayList<>();
         DataNormalizationOperation<?> currentOp = getCodec().getDataNormalizer().getRootOperation();
         for (PathArgument currentArg : normalizedPath.getPathArguments()) {
@@ -68,7 +67,7 @@ class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> exten
 
     @Override
     public void delete(final LogicalDatastoreType store, final InstanceIdentifier<?> path) {
-        doDelete( store, path);
+        doDelete(store, path);
     }
 
     @Override

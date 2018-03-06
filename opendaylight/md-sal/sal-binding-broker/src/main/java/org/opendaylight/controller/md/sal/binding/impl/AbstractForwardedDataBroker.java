@@ -64,18 +64,19 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-            final InstanceIdentifier<?> path, final DataChangeListener listener, final DataChangeScope triggeringScope) {
+            final InstanceIdentifier<?> path, final DataChangeListener listener,
+            final DataChangeScope triggeringScope) {
         final DOMDataChangeListener domDataChangeListener;
 
-        if(listener instanceof ClusteredDataChangeListener) {
+        if (listener instanceof ClusteredDataChangeListener) {
             domDataChangeListener = new TranslatingClusteredDataChangeInvoker(store, path, listener, triggeringScope);
         } else {
             domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
         }
         final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(path);
-        final ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
-                domPath, domDataChangeListener, triggeringScope);
+        final ListenerRegistration<DOMDataChangeListener> domRegistration =
+                domDataBroker.registerDataChangeListener(store, domPath, domDataChangeListener, triggeringScope);
         return new ListenerRegistrationImpl(listener, domRegistration);
     }
 
@@ -85,7 +86,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         for (final Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized.entrySet()) {
             try {
-                final Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(entry);
+                final Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential =
+                        getCodec().toBinding(entry);
                 if (potential.isPresent()) {
                     final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
                     newMap.put(binding.getKey(), binding.getValue());
@@ -102,11 +104,13 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         final Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
         for (final YangInstanceIdentifier normalizedPath : normalized) {
             try {
-                final Optional<InstanceIdentifier<? extends DataObject>> potential = getCodec().toBinding(normalizedPath);
+                final Optional<InstanceIdentifier<? extends DataObject>> potential =
+                        getCodec().toBinding(normalizedPath);
                 if (potential.isPresent()) {
                     final InstanceIdentifier<? extends DataObject> binding = potential.get();
                     hashSet.add(binding);
-                } else if (normalizedPath.getLastPathArgument() instanceof YangInstanceIdentifier.AugmentationIdentifier) {
+                } else if (normalizedPath.getLastPathArgument()
+                        instanceof YangInstanceIdentifier.AugmentationIdentifier) {
                     hashSet.add(path);
                 }
             } catch (final DeserializationException e) {
@@ -120,7 +124,8 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         if (path.isWildcarded()) {
             return Optional.absent();
         }
-        return (Optional<DataObject>) getCodec().deserializeFunction(path).apply(Optional.<NormalizedNode<?, ?>> of(data));
+        return (Optional<DataObject>) getCodec().deserializeFunction(path)
+                .apply(Optional.<NormalizedNode<?, ?>>of(data));
     }
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
@@ -129,7 +134,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         private final InstanceIdentifier<?> path;
         private final DataChangeScope triggeringScope;
 
-        public TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
+        TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
                 final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
             this.store = store;
             this.path = path;
@@ -149,15 +154,13 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     /**
-     * Translator for ClusteredDataChangeListener
+     * Translator for ClusteredDataChangeListener.
      */
-
     private class TranslatingClusteredDataChangeInvoker extends TranslatingDataChangeInvoker implements
         ClusteredDOMDataChangeListener {
 
-        public TranslatingClusteredDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
-                                                     final DataChangeListener bindingDataChangeListener,
-                                                     final DataChangeScope triggeringScope) {
+        TranslatingClusteredDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
+                final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
             super(store, path, bindingDataChangeListener, triggeringScope);
         }
     }
@@ -173,7 +176,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         private Optional<DataObject> originalDataCache;
         private Optional<DataObject> updatedDataCache;
 
-        public TranslatedDataChangeEvent(
+        TranslatedDataChangeEvent(
                 final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change,
                 final InstanceIdentifier<?> path) {
             this.domEvent = change;
@@ -252,7 +255,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     private static class ListenerRegistrationImpl extends AbstractListenerRegistration<DataChangeListener> {
         private final ListenerRegistration<DOMDataChangeListener> registration;
 
-        public ListenerRegistrationImpl(final DataChangeListener listener,
+        ListenerRegistrationImpl(final DataChangeListener listener,
                 final ListenerRegistration<DOMDataChangeListener> registration) {
             super(listener);
             this.registration = registration;
@@ -267,5 +270,4 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     @Override
     public void close() {
     }
-
 }

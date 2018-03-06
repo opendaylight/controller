@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,8 @@ final class CompositeRoutedRpcRegistration<T extends RpcService> implements Rout
     private final BindingDOMRpcProviderServiceAdapter adapter;
     private final Map<InstanceIdentifier<?>, ObjectRegistration<T>> registrations = new HashMap<>(2);
 
-    CompositeRoutedRpcRegistration(final Class<T> type, final T impl, final BindingDOMRpcProviderServiceAdapter providerAdapter) {
+    CompositeRoutedRpcRegistration(final Class<T> type, final T impl,
+            final BindingDOMRpcProviderServiceAdapter providerAdapter) {
         this.type = type;
         this.instance = impl;
         this.adapter = providerAdapter;
@@ -48,9 +48,11 @@ final class CompositeRoutedRpcRegistration<T extends RpcService> implements Rout
     }
 
     @Override
-    public synchronized void registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
-        if(!registrations.containsKey(path)) {
-            registrations.put(path, adapter.registerRpcImplementation(type, instance, ImmutableSet.<InstanceIdentifier<?>>of(path)));
+    public synchronized void registerPath(final Class<? extends BaseIdentity> context,
+            final InstanceIdentifier<?> path) {
+        if (!registrations.containsKey(path)) {
+            registrations.put(path,
+                    adapter.registerRpcImplementation(type, instance, ImmutableSet.<InstanceIdentifier<?>>of(path)));
         }
     }
 
@@ -62,27 +64,18 @@ final class CompositeRoutedRpcRegistration<T extends RpcService> implements Rout
     }
 
     @Override
-    public synchronized  void unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
+    public synchronized  void unregisterPath(final Class<? extends BaseIdentity> context,
+            final InstanceIdentifier<?> path) {
         final ObjectRegistration<T> reg = registrations.remove(path);
-        if(reg != null) {
-            try {
-                reg.close();
-            } catch (final Exception e) {
-                // FIXME: Once we have proper subclass of ObjectRegistrationo
-                throw Throwables.propagate(e);
-            }
+        if (reg != null) {
+            reg.close();
         }
     }
 
     @Override
     public synchronized void close() {
-        try {
-            for(final ObjectRegistration<T> reg : registrations.values()) {
-                    reg.close();
-            }
-        } catch (final Exception e) {
-            throw Throwables.propagate(e);
+        for (final ObjectRegistration<T> reg : registrations.values()) {
+            reg.close();
         }
     }
-
 }

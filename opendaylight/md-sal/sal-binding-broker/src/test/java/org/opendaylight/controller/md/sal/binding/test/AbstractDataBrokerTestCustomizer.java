@@ -76,7 +76,8 @@ public abstract class AbstractDataBrokerTestCustomizer {
     }
 
     public NotificationService createNotificationService() {
-        return new BindingDOMNotificationServiceAdapter(this.bindingToNormalized.getCodecRegistry(), this.domNotificationRouter);
+        return new BindingDOMNotificationServiceAdapter(this.bindingToNormalized.getCodecRegistry(),
+                this.domNotificationRouter);
     }
 
     public NotificationPublishService createNotificationPublishService() {

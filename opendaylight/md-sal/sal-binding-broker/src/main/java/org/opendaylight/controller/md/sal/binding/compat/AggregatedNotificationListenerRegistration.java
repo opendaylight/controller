@@ -16,16 +16,19 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * interfaces at the same time. In order to support correct delivery, we need to maintain per-type registrations
  * which get squashed if a notification which implements multiple interfaces is encountered.
  *
+ * <p>
  * We take care of that by implementing alternate {@link #hashCode()}/{@link #equals(Object)}, which resolve
  * to the backing aggregator.
  *
  * @param <N> Notification type
  * @param <A> Aggregator type
  */
-abstract class AggregatedNotificationListenerRegistration<N extends Notification, A> extends AbstractNotificationListenerRegistration<N> {
+abstract class AggregatedNotificationListenerRegistration<N extends Notification, A>
+        extends AbstractNotificationListenerRegistration<N> {
     private final A aggregator;
 
-    protected AggregatedNotificationListenerRegistration(final Class<? extends Notification> type, final NotificationListener<N> listener, final A aggregator) {
+    protected AggregatedNotificationListenerRegistration(final Class<? extends Notification> type,
+            final NotificationListener<N> listener, final A aggregator) {
         super(type, listener);
         this.aggregator = Preconditions.checkNotNull(aggregator);
     }

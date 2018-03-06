@@ -75,8 +75,8 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
         private SettableFuture<Collection<DataTreeModification<T>>> changes = SettableFuture.create();
 
         @Override
-        public void onDataTreeChanged(final Collection<DataTreeModification<T>> changes) {
-            this.changes.set(changes);
+        public void onDataTreeChanged(final Collection<DataTreeModification<T>> modification) {
+            this.changes.set(modification);
 
         }
 
@@ -85,7 +85,6 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
             changes = SettableFuture.create();
             return result;
         }
-
     }
 
     @Override
@@ -109,23 +108,28 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
         createAndVerifyTop(listener);
 
         putTx(BAR_PATH, BAR_DATA).submit().checkedGet();
-        final DataObjectModification<Top> afterBarPutEvent = Iterables.getOnlyElement(listener.nextEvent()).getRootNode();
+        final DataObjectModification<Top> afterBarPutEvent = Iterables.getOnlyElement(listener.nextEvent())
+                .getRootNode();
         verifyModification(afterBarPutEvent, TOP_ARGUMENT, ModificationType.SUBTREE_MODIFIED);
-        final DataObjectModification<TopLevelList> barPutMod = afterBarPutEvent.getModifiedChildListItem(TopLevelList.class, TOP_BAR_KEY);
+        final DataObjectModification<TopLevelList> barPutMod = afterBarPutEvent
+                .getModifiedChildListItem(TopLevelList.class, TOP_BAR_KEY);
         assertNotNull(barPutMod);
         verifyModification(barPutMod, BAR_ARGUMENT, ModificationType.WRITE);
 
         deleteTx(BAR_PATH).submit().checkedGet();
-        final DataObjectModification<Top> afterBarDeleteEvent = Iterables.getOnlyElement(listener.nextEvent()).getRootNode();
+        final DataObjectModification<Top> afterBarDeleteEvent = Iterables.getOnlyElement(listener.nextEvent())
+                .getRootNode();
         verifyModification(afterBarDeleteEvent, TOP_ARGUMENT, ModificationType.SUBTREE_MODIFIED);
-        final DataObjectModification<TopLevelList> barDeleteMod = afterBarDeleteEvent.getModifiedChildListItem(TopLevelList.class, TOP_BAR_KEY);
+        final DataObjectModification<TopLevelList> barDeleteMod = afterBarDeleteEvent
+                .getModifiedChildListItem(TopLevelList.class, TOP_BAR_KEY);
         verifyModification(barDeleteMod, BAR_ARGUMENT, ModificationType.DELETE);
     }
 
     @Test
     public void testWildcardedListListener() throws Exception {
         final EventCapturingListener<TopLevelList> listener = new EventCapturingListener<>();
-        final DataTreeIdentifier<TopLevelList> wildcard = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, TOP_PATH.child(TopLevelList.class));
+        final DataTreeIdentifier<TopLevelList> wildcard = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL,
+                TOP_PATH.child(TopLevelList.class));
         dataBrokerImpl.registerDataTreeChangeListener(wildcard, listener);
 
         putTx(TOP_PATH, TOP_INITIAL_DATA).submit().checkedGet();
@@ -179,8 +183,8 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
         assertEquals(TOP_INITIAL_DATA, initialNode.getDataAfter());
     }
 
-    private void verifyModification(final DataObjectModification<? extends DataObject> barWrite, final PathArgument pathArg,
-            final ModificationType eventType) {
+    private void verifyModification(final DataObjectModification<? extends DataObject> barWrite,
+            final PathArgument pathArg, final ModificationType eventType) {
         assertEquals(pathArg.getType(), barWrite.getDataType());
         assertEquals(eventType,barWrite.getModificationType());
         assertEquals(pathArg, barWrite.getIdentifier());

@@ -12,7 +12,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-class BindingDataTreeChangeListenerRegistration<L extends DataTreeChangeListener<?>> extends AbstractListenerRegistration<L> {
+class BindingDataTreeChangeListenerRegistration<L extends DataTreeChangeListener<?>>
+        extends AbstractListenerRegistration<L> {
 
     private final ListenerRegistration<?> domReg;
 

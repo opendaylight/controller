@@ -21,7 +21,8 @@ final class FunctionalNotificationListenerAdapter<N extends Notification> implem
     private final NotificationListener<N> delegate;
     private final Class<N> type;
 
-    public FunctionalNotificationListenerAdapter(final BindingNormalizedNodeSerializer codec, final Class<N> type, final NotificationListener<N> delegate) {
+    FunctionalNotificationListenerAdapter(final BindingNormalizedNodeSerializer codec, final Class<N> type,
+            final NotificationListener<N> delegate) {
         this.codec = codec;
         this.type = type;
         this.delegate = delegate;
@@ -29,11 +30,11 @@ final class FunctionalNotificationListenerAdapter<N extends Notification> implem
 
     @Override
     public void onNotification(@Nonnull final DOMNotification notification) {
-        delegate.onNotification( type.cast(deserialize(notification)));
+        delegate.onNotification(type.cast(deserialize(notification)));
     }
 
     private Notification deserialize(final DOMNotification notification) {
-        if(notification instanceof LazySerializedDOMNotification) {
+        if (notification instanceof LazySerializedDOMNotification) {
             return ((LazySerializedDOMNotification) notification).getBindingData();
         }
         return codec.fromNormalizedNodeNotification(notification.getType(), notification.getBody());

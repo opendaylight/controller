@@ -26,7 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.opendaylight.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class Bug3090MultiKeyList extends AbstractDataChangeListenerTest{
+public class Bug3090MultiKeyList extends AbstractDataChangeListenerTest {
     private static final InstanceIdentifier<Root> ROOT_PATH = InstanceIdentifier.create(Root.class);
 
     private void write(final LogicalDatastoreType store) {

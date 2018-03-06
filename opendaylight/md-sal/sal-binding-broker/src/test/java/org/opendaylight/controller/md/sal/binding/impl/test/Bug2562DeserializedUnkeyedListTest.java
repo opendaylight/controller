@@ -35,10 +35,10 @@ public class Bug2562DeserializedUnkeyedListTest extends AbstractDataChangeListen
     private void writeRoot(final LogicalDatastoreType store) {
         final ReadWriteTransaction readWriteTransaction = getDataBroker().newReadWriteTransaction();
         final Barroot barRoot = new BarrootBuilder().setType(2).setValue(2).setKey(new BarrootKey(2)).build();
-        final ArrayList barRootList = new ArrayList();
+        final ArrayList<Barroot> barRootList = new ArrayList<>();
         barRootList.add(barRoot);
         final Fooroot fooRoot = new FoorootBuilder().setBarroot(barRootList).build();
-        final ArrayList fooRootList = new ArrayList();
+        final ArrayList<Fooroot> fooRootList = new ArrayList<>();
         fooRootList.add(fooRoot);
         final Root root = new RootBuilder().setFooroot(fooRootList).build();
 
@@ -48,8 +48,8 @@ public class Bug2562DeserializedUnkeyedListTest extends AbstractDataChangeListen
 
     @Test
     public void writeListToList2562Root() {
-        final AbstractDataChangeListenerTest.TestListener listenerRoot = createListener(LogicalDatastoreType.CONFIGURATION,
-                ROOT_PATH, AsyncDataBroker.DataChangeScope.ONE, false);
+        final AbstractDataChangeListenerTest.TestListener listenerRoot =
+            createListener(LogicalDatastoreType.CONFIGURATION, ROOT_PATH, AsyncDataBroker.DataChangeScope.ONE, false);
         writeRoot(LogicalDatastoreType.CONFIGURATION);
         final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> eventRoot = listenerRoot.event();
 

@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -63,7 +64,7 @@ class RpcServiceAdapter implements InvocationHandler {
 
     private ListenableFuture<RpcResult<?>> invoke0(final SchemaPath schemaPath, final NormalizedNode<?, ?> input) {
         final CheckedFuture<DOMRpcResult, DOMRpcException> result = delegate.invokeRpc(schemaPath, input);
-        if(result instanceof LazyDOMRpcResultFuture) {
+        if (result instanceof LazyDOMRpcResultFuture) {
             return ((LazyDOMRpcResultFuture) result).getBindingFuture();
         }
 
@@ -83,7 +84,7 @@ class RpcServiceAdapter implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+    public Object invoke(final Object proxyObj, final Method method, final Object[] args) throws Throwable {
 
         final RpcInvocationStrategy rpc = rpcNames.get(method);
         if (rpc != null) {
@@ -97,33 +98,33 @@ class RpcServiceAdapter implements InvocationHandler {
         }
 
         if (isObjectMethod(method)) {
-            return callObjectMethod(proxy, method, args);
+            return callObjectMethod(proxyObj, method, args);
         }
         throw new UnsupportedOperationException("Method " + method.toString() + "is unsupported.");
     }
 
-    private static boolean isObjectMethod(final Method m) {
-        switch (m.getName()) {
+    private static boolean isObjectMethod(final Method method) {
+        switch (method.getName()) {
             case "toString":
-                return (m.getReturnType().equals(String.class) && m.getParameterTypes().length == 0);
+                return method.getReturnType().equals(String.class) && method.getParameterTypes().length == 0;
             case "hashCode":
-                return (m.getReturnType().equals(int.class) && m.getParameterTypes().length == 0);
+                return method.getReturnType().equals(int.class) && method.getParameterTypes().length == 0;
             case "equals":
-                return (m.getReturnType().equals(boolean.class) && m.getParameterTypes().length == 1 && m
-                        .getParameterTypes()[0] == Object.class);
+                return method.getReturnType().equals(boolean.class) && method.getParameterTypes().length == 1 && method
+                        .getParameterTypes()[0] == Object.class;
             default:
                 return false;
         }
     }
 
-    private Object callObjectMethod(final Object self, final Method m, final Object[] args) {
-        switch (m.getName()) {
+    private Object callObjectMethod(final Object self, final Method method, final Object[] args) {
+        switch (method.getName()) {
             case "toString":
                 return type.getName() + "$Adapter{delegate=" + delegate.toString() + "}";
             case "hashCode":
                 return System.identityHashCode(self);
             case "equals":
-                return (self == args[0]);
+                return self == args[0];
             default:
                 return null;
         }
@@ -141,7 +142,7 @@ class RpcServiceAdapter implements InvocationHandler {
                 bindingResult = null;
             }
             return RpcResult.class.cast(RpcResultBuilder.success(bindingResult).build());
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private abstract class RpcInvocationStrategy {
@@ -165,7 +166,6 @@ class RpcServiceAdapter implements InvocationHandler {
         final SchemaPath getRpcName() {
             return rpcName;
         }
-
     }
 
     private final class NonRoutedStrategy extends RpcInvocationStrategy {
@@ -178,7 +178,6 @@ class RpcServiceAdapter implements InvocationHandler {
         NormalizedNode<?, ?> serialize(final DataObject input) {
             return LazySerializedContainerNode.create(getRpcName(), input, codec.getCodecRegistry());
         }
-
     }
 
     private final class RoutedStrategy extends RpcInvocationStrategy {
@@ -204,6 +203,5 @@ class RpcServiceAdapter implements InvocationHandler {
             }
             return LazySerializedContainerNode.create(getRpcName(), input, codec.getCodecRegistry());
         }
-
     }
 }

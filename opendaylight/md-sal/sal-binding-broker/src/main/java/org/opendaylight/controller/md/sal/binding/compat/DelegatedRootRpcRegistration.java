@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import com.google.common.base.Throwables;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -17,7 +16,7 @@ final class DelegatedRootRpcRegistration<T extends RpcService> implements RpcReg
     private final ObjectRegistration<T> delegate;
     private final Class<T> type;
 
-    public DelegatedRootRpcRegistration(final Class<T> type,final ObjectRegistration<T> impl) {
+    DelegatedRootRpcRegistration(final Class<T> type, final ObjectRegistration<T> impl) {
         this.delegate = impl;
         this.type = type;
     }
@@ -25,12 +24,7 @@ final class DelegatedRootRpcRegistration<T extends RpcService> implements RpcReg
 
     @Override
     public void close() {
-        try {
-            // FIXME: Should use more specific registration object.
-            delegate.close();
-        } catch (final Exception e) {
-            throw Throwables.propagate(e);
-        }
+        delegate.close();
     }
 
     @Override
@@ -42,5 +36,4 @@ final class DelegatedRootRpcRegistration<T extends RpcService> implements RpcReg
     public Class<T> getServiceType() {
         return type;
     }
-
 }

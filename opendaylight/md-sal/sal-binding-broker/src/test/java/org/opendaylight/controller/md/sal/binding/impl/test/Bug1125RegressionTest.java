@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * Regression test suite for Bug 1125 - Can't detect switch disconnection
- * https://bugs.opendaylight.org/show_bug.cgi?id=1125
+ * https://bugs.opendaylight.org/show_bug.cgi?id=1125.
  */
 public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
 

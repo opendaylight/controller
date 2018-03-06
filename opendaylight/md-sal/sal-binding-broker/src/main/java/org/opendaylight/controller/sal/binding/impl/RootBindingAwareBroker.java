@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class RootBindingAwareBroker implements Mutable, Identifiable<String>, BindingAwareBroker, AutoCloseable,
         RpcProviderRegistry {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RootBindingAwareBroker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RootBindingAwareBroker.class);
 
     RootSalInstance controllerRoot;
 
@@ -144,14 +144,14 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
     }
 
     @Override
-    public ProviderContext registerProvider(final BindingAwareProvider provider, final BundleContext ctx) {
-        return registerProvider(provider);
-    }
-
-    @Override
     public ConsumerContext registerConsumer(final BindingAwareConsumer consumer) {
         checkState(supportedConsumerServices != null, "Broker is not initialized.");
         return BindingContextUtils.createConsumerContextAndInitialize(consumer, supportedConsumerServices);
+    }
+
+    @Override
+    public ProviderContext registerProvider(final BindingAwareProvider provider, final BundleContext ctx) {
+        return registerProvider(provider);
     }
 
     @Override
@@ -183,9 +183,9 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
     }
 
     @Override
-    public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L> registerRouteChangeListener(
-            final L arg0) {
-        return getRoot().registerRouteChangeListener(arg0);
+    public <L extends RouteChangeListener<RpcContextIdentifier, InstanceIdentifier<?>>> ListenerRegistration<L>
+            registerRouteChangeListener(final L listener) {
+        return getRoot().registerRouteChangeListener(listener);
     }
 
     public class RootSalInstance extends
@@ -196,5 +196,4 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
             super(rpcRegistry, notificationBroker);
         }
     }
-
 }
