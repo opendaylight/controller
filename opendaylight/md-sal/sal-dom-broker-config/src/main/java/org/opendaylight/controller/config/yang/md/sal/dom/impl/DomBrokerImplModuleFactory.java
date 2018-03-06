@@ -13,11 +13,12 @@ import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
-public class DomBrokerImplModuleFactory extends
-        org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModuleFactory {
+public class DomBrokerImplModuleFactory extends AbstractDomBrokerImplModuleFactory {
 
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver,

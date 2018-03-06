@@ -17,6 +17,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated

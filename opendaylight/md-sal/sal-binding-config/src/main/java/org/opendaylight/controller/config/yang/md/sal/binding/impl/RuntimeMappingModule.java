@@ -13,6 +13,8 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.osgi.framework.BundleContext;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
