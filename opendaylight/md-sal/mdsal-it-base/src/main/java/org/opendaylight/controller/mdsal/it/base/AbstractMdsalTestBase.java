@@ -68,8 +68,11 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     @Override
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        logConfiguration(AbstractMdsalTestBase.class),
-                        LogLevel.INFO.name());
+                "log4j2.logger.mdsal-it-base.name",
+                AbstractMdsalTestBase.class.getPackage().getName());
+        option = composite(option, editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                "log4j2.logger.mdsal-it-base.level",
+                LogLevel.INFO.name()));
         option = composite(option, super.getLoggingOption());
         return option;
     }
