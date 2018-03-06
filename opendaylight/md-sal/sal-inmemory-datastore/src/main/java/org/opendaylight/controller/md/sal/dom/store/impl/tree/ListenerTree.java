@@ -43,8 +43,9 @@ public final class ListenerTree extends AbstractRegistrationTree<DataChangeListe
      * @param scope Scope of triggering event.
      * @return Listener registration
      */
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> registerDataChangeListener(final YangInstanceIdentifier path,
-            final L listener, final DataChangeScope scope) {
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+            DataChangeListenerRegistration<L> registerDataChangeListener(final YangInstanceIdentifier path,
+                final L listener, final DataChangeScope scope) {
 
         // Take the write lock
         takeLock();

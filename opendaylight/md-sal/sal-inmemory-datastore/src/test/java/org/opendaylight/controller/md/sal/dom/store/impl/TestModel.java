@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
-public class TestModel {
+public final class TestModel {
 
     public static final QName TEST_QNAME =
             QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
@@ -38,6 +38,9 @@ public class TestModel {
             YangInstanceIdentifier.of(MANDATORY_DATA_TEST_QNAME);
 
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
+
+    private TestModel() {
+    }
 
     public static SchemaContext createTestContext() {
         return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);

@@ -50,18 +50,23 @@ import org.slf4j.LoggerFactory;
 /**
  * In-memory DOM Data Store
  *
+ * <p>
  * Implementation of {@link DOMStore} which uses {@link DataTree} and other
  * classes such as {@link SnapshotBackedWriteTransaction}.
- * {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedReadTransaction} and {@link ResolveDataChangeEventsTask}
+ * {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedReadTransaction} and
+ * {@link ResolveDataChangeEventsTask}
  * to implement {@link DOMStore} contract.
  *
  */
-public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> implements DOMStore, Identifiable<String>, SchemaContextListener, AutoCloseable, DOMStoreTreeChangePublisher {
+public class InMemoryDOMDataStore extends TransactionReadyPrototype<String>
+        implements DOMStore, Identifiable<String>, SchemaContextListener, AutoCloseable, DOMStoreTreeChangePublisher {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
 
-    private static final Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> DCL_NOTIFICATION_MGR_INVOKER =
+    private static final Invoker<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent>
+        DCL_NOTIFICATION_MGR_INVOKER =
             (listener, notification) -> {
-                final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> inst = listener.getInstance();
+                final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> inst =
+                        listener.getInstance();
                 if (inst != null) {
                     inst.onDataChanged(notification);
                 }
@@ -71,7 +76,8 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     private final ListenerTree listenerTree = ListenerTree.create();
     private final AtomicLong txCounter = new AtomicLong(0);
 
-    private final QueuedNotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> dataChangeListenerNotificationManager;
+    private final QueuedNotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent>
+            dataChangeListenerNotificationManager;
     private final InMemoryDOMStoreTreeChangePublisher changePublisher;
     private final ExecutorService dataChangeListenerExecutor;
     private final boolean debugTransactions;
@@ -95,7 +101,8 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
                         DCL_NOTIFICATION_MGR_INVOKER, maxDataChangeListenerQueueSize,
                         "DataChangeListenerQueueMgr");
-        changePublisher = new InMemoryDOMStoreTreeChangePublisher(this.dataChangeListenerExecutor, maxDataChangeListenerQueueSize);
+        changePublisher = new InMemoryDOMStoreTreeChangePublisher(this.dataChangeListenerExecutor,
+                maxDataChangeListenerQueueSize);
 
         switch (type) {
             case CONFIGURATION:
@@ -124,17 +131,20 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return SnapshotBackedTransactions.newReadTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot());
+        return SnapshotBackedTransactions.newReadTransaction(nextIdentifier(), debugTransactions,
+                dataTree.takeSnapshot());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        return SnapshotBackedTransactions.newReadWriteTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot(), this);
+        return SnapshotBackedTransactions.newReadWriteTransaction(nextIdentifier(), debugTransactions,
+                dataTree.takeSnapshot(), this);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        return SnapshotBackedTransactions.newWriteTransaction(nextIdentifier(), debugTransactions, dataTree.takeSnapshot(), this);
+        return SnapshotBackedTransactions.newWriteTransaction(nextIdentifier(), debugTransactions,
+                dataTree.takeSnapshot(), this);
     }
 
     @Override
@@ -148,13 +158,14 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() {
         ExecutorServiceUtil.tryGracefulShutdown(dataChangeListenerExecutor, 30, TimeUnit.SECONDS);
 
-        if(closeable != null) {
+        if (closeable != null) {
             try {
                 closeable.close();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.debug("Error closing instance", e);
             }
         }
@@ -169,8 +180,8 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     }
 
     @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
-            final YangInstanceIdentifier path, final L listener, final DataChangeScope scope) {
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L>
+            registerChangeListener(final YangInstanceIdentifier path, final L listener, final DataChangeScope scope) {
 
         /*
          * Make sure commit is not occurring right now. Listener has to be
@@ -209,7 +220,8 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     }
 
     @Override
-    public synchronized <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
+    public synchronized <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
+            final YangInstanceIdentifier treeId, final L listener) {
         /*
          * Make sure commit is not occurring right now. Listener has to be
          * registered and its state capture enqueued at a consistent point.

@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
@@ -28,7 +27,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    public void putTopLevelOneNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    public void putTopLevelOneNested(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
@@ -38,7 +37,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
          * Created data must not contain nested-list item, since that is two-level deep.
          */
         assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR));
-        assertContains(change.getCreatedData(), path(FOO) );
+        assertContains(change.getCreatedData(), path(FOO));
 
         assertEmpty(change.getUpdatedData());
         assertEmpty(change.getRemovedPaths());
@@ -46,8 +45,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
@@ -67,8 +65,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
         assertNotNull(change);
@@ -83,8 +80,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    protected void twoNestedExistsOneIsDeleted(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    protected void twoNestedExistsOneIsDeleted(final DatastoreTestTask task) throws Exception {
 
         /*
          * Base listener should be notified only and only if actual node changed its state,
@@ -97,8 +93,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    public void nestedListExistsRootDeleted(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    public void nestedListExistsRootDeleted(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
@@ -115,7 +110,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    protected void existingOneNestedWriteAdditionalNested(final DatastoreTestTask task) {
+    protected void existingOneNestedWriteAdditionalNested(final DatastoreTestTask task) throws Exception {
         /*
          * One listener should be notified only and only if actual node changed its state,
          * since deletion of nested child (in this case /nested-list/nested-list[foo],
@@ -128,7 +123,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    protected void existingTopWriteTwoNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    protected void existingTopWriteTwoNested(final DatastoreTestTask task) throws Exception {
         /*
          * One listener should be notified only and only if actual node changed its state,
          * since deletion of nested child (in this case /nested-list/nested-list[foo],
@@ -141,7 +136,7 @@ public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite 
     }
 
     @Override
-    protected void existingTopWriteSibling(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    protected void existingTopWriteSibling(final DatastoreTestTask task) throws Exception {
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO_SIBLING));

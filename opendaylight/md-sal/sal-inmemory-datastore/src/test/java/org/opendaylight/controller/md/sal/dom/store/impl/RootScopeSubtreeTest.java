@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -22,7 +20,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    public void putTopLevelOneNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    public void putTopLevelOneNested(final DatastoreTestTask task) throws Exception {
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), TOP_LEVEL, path(FOO), path(FOO, BAR));
@@ -31,8 +29,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
@@ -42,8 +39,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
@@ -53,8 +49,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    protected void twoNestedExistsOneIsDeleted(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    protected void twoNestedExistsOneIsDeleted(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
@@ -64,8 +59,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    protected void nestedListExistsRootDeleted(final DatastoreTestTask task) throws InterruptedException,
-            ExecutionException {
+    protected void nestedListExistsRootDeleted(final DatastoreTestTask task) throws Exception {
 
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
@@ -75,7 +69,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    protected void existingOneNestedWriteAdditionalNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    protected void existingOneNestedWriteAdditionalNested(final DatastoreTestTask task) throws Exception {
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO,BAZ));
@@ -85,7 +79,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    protected void existingTopWriteTwoNested(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    protected void existingTopWriteTwoNested(final DatastoreTestTask task) throws Exception {
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO,BAR),path(FOO,BAZ));
@@ -95,7 +89,7 @@ public class RootScopeSubtreeTest extends DefaultDataChangeListenerTestSuite {
     }
 
     @Override
-    protected void existingTopWriteSibling(final DatastoreTestTask task) throws InterruptedException, ExecutionException {
+    protected void existingTopWriteSibling(final DatastoreTestTask task) throws Exception {
         AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
 
         assertContains(change.getCreatedData(), path(FOO_SIBLING));

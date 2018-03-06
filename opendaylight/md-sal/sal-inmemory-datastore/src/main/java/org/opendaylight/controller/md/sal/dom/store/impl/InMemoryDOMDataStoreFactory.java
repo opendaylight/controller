@@ -25,6 +25,8 @@ public final class InMemoryDOMDataStoreFactory {
     }
 
     /**
+     * Deprecated.
+     *
      * @deprecated Use {@link #create(String, DOMSchemaService)} instead.
      */
     @Deprecated
@@ -81,8 +83,8 @@ public final class InMemoryDOMDataStoreFactory {
      *                   default property values are used.
      * @return an InMemoryDOMDataStore instance
      *
-     * @deprecated Use {@link #create(String, LogicalDatastoreType, SchemaService, boolean, InMemoryDOMDataStoreConfigProperties)}
-     *             instead.
+     * @deprecated Use {@link #create(String, LogicalDatastoreType, SchemaService, boolean,
+     *     InMemoryDOMDataStoreConfigProperties)} instead.
      */
     @Deprecated
     public static InMemoryDOMDataStore create(final String name,
