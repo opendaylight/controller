@@ -25,6 +25,8 @@ import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExec
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by the clustered data store.
  */
 @Deprecated
@@ -54,15 +56,15 @@ public final class DomInmemoryDataBrokerModule extends
     public java.lang.AutoCloseable createInstance() {
         //Initializing Operational DOM DataStore defaulting to InMemoryDOMDataStore if one is not configured
         DOMStore operStore =  getOperationalDataStoreDependency();
-        if(operStore == null){
-           //we will default to InMemoryDOMDataStore creation
-          operStore = InMemoryDOMDataStoreFactory.create("DOM-OPER", getSchemaServiceDependency());
+        if (operStore == null) {
+            // we will default to InMemoryDOMDataStore creation
+            operStore = InMemoryDOMDataStoreFactory.create("DOM-OPER", getSchemaServiceDependency());
         }
 
         DOMStore configStore = getConfigDataStoreDependency();
-        if(configStore == null){
-           //we will default to InMemoryDOMDataStore creation
-           configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
+        if (configStore == null) {
+            // we will default to InMemoryDOMDataStore creation
+            configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
         }
 
         final Map<LogicalDatastoreType, DOMStore> datastores = new EnumMap<>(LogicalDatastoreType.class);
@@ -104,11 +106,11 @@ public final class DomInmemoryDataBrokerModule extends
         final AbstractMXBean commitExecutorStatsMXBean =
                 ThreadExecutorStatsMXBeanImpl.create(commitExecutor, "CommitExecutorStats",
                     JMX_BEAN_TYPE, null);
-        if(commitExecutorStatsMXBean != null) {
+        if (commitExecutorStatsMXBean != null) {
             mBeans.add(commitExecutorStatsMXBean);
         }
 
-        if(commitStatsTracker != null) {
+        if (commitStatsTracker != null) {
             final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(
                     commitStatsTracker, JMX_BEAN_TYPE);
             commitStatsMXBean.registerMBean();
@@ -118,7 +120,7 @@ public final class DomInmemoryDataBrokerModule extends
         final AbstractMXBean commitFutureStatsMXBean =
                 ThreadExecutorStatsMXBeanImpl.create(listenableFutureExecutor,
                         "CommitFutureExecutorStats", JMX_BEAN_TYPE, null);
-        if(commitFutureStatsMXBean != null) {
+        if (commitFutureStatsMXBean != null) {
             mBeans.add(commitFutureStatsMXBean);
         }
 

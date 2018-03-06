@@ -12,6 +12,8 @@ import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
 import java.util.ArrayList;
 import java.util.List;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -27,19 +29,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
-public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule{
+public final class DomBrokerImplModule extends AbstractDomBrokerImplModule {
     private static final Logger LOG = LoggerFactory.getLogger(DomBrokerImplModule.class);
 
     private BundleContext bundleContext;
 
-    public DomBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public DomBrokerImplModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DomBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, final DomBrokerImplModule oldModule, final java.lang.AutoCloseable oldInstance) {
+    public DomBrokerImplModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver,
+            final DomBrokerImplModule oldModule, final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -47,11 +52,13 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
     public void validate() {
         super.validate();
         final long depth = getNotificationQueueDepth().getValue();
-        Preconditions.checkArgument(Long.lowestOneBit(depth) == Long.highestOneBit(depth), "Queue depth %s is not power-of-two", depth);
+        Preconditions.checkArgument(Long.lowestOneBit(depth) == Long.highestOneBit(depth),
+                "Queue depth %s is not power-of-two", depth);
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public AutoCloseable createInstance() {
         // The services are provided via blueprint so retrieve then from the OSGi service registry for
         // backwards compatibility.
 
@@ -68,11 +75,11 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         DOMRpcProviderService domRpcProvider = newTracker(
                 DOMRpcProviderService.class, closeables).waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
-        DOMMountPointService mountService = newTracker(DOMMountPointService.class, closeables).
-                waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        DOMMountPointService mountService = newTracker(DOMMountPointService.class, closeables)
+                .waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
-        SchemaService globalSchemaService = newTracker(SchemaService.class, closeables).
-                waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        SchemaService globalSchemaService = newTracker(SchemaService.class, closeables)
+                .waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
         final DOMDataBroker dataBroker = getAsyncDataBrokerDependency();
 
@@ -113,7 +120,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
     private SchemaService getSchemaServiceImpl(SchemaService globalSchemaService) {
         final SchemaService schemaService;
-        if(getRootSchemaService() != null) {
+        if (getRootSchemaService() != null) {
             schemaService = getRootSchemaServiceDependency();
         } else {
             schemaService = globalSchemaService;

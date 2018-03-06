@@ -15,15 +15,20 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.sal.core.api.Broker;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
 public class BindingNotificationAdapterModule extends AbstractBindingNotificationAdapterModule  {
-    public BindingNotificationAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
+    public BindingNotificationAdapterModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public BindingNotificationAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver, final org.opendaylight.controller.config.yang.md.sal.binding.impl.BindingNotificationAdapterModule oldModule, final java.lang.AutoCloseable oldInstance) {
+    public BindingNotificationAdapterModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver, final BindingNotificationAdapterModule oldModule,
+            final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

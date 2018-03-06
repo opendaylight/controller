@@ -13,11 +13,12 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
-public class BindingAsyncDataBrokerImplModule extends
-        org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingAsyncDataBrokerImplModule {
+public class BindingAsyncDataBrokerImplModule extends AbstractBindingAsyncDataBrokerImplModule {
 
     public BindingAsyncDataBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -27,7 +28,7 @@ public class BindingAsyncDataBrokerImplModule extends
     public BindingAsyncDataBrokerImplModule(
             final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            final org.opendaylight.controller.config.yang.md.sal.binding.impl.BindingAsyncDataBrokerImplModule oldModule,
+            final BindingAsyncDataBrokerImplModule oldModule,
             final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
@@ -43,5 +44,4 @@ public class BindingAsyncDataBrokerImplModule extends
         final DOMDataBroker domDataBroker = getDomAsyncBrokerDependency();
         return new BindingDOMDataBrokerAdapter(domDataBroker, mappingService);
     }
-
 }
