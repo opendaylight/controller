@@ -17,11 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClientActor extends UntypedActor {
-    protected final Logger LOG = LoggerFactory.getLogger(getClass());
+    private static final Logger LOG = LoggerFactory.getLogger(ClientActor.class);
 
     private final ActorRef target;
 
-    public ClientActor(ActorRef target){
+    public ClientActor(ActorRef target) {
         this.target = target;
     }
 
@@ -30,9 +30,9 @@ public class ClientActor extends UntypedActor {
     }
 
     @Override public void onReceive(Object message) throws Exception {
-        if(message instanceof KeyValue) {
+        if (message instanceof KeyValue) {
             target.tell(message, getSelf());
-        } else if(message instanceof KeyValueSaved){
+        } else if (message instanceof KeyValueSaved) {
             LOG.info("KeyValue saved");
         }
     }

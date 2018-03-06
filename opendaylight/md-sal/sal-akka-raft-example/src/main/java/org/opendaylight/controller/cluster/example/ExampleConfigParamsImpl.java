@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.example;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 
 /**
- * Implementation of ConfigParams for Example
+ * Implementation of ConfigParams for Example.
  */
 public class ExampleConfigParamsImpl extends DefaultConfigParamsImpl {
     @Override
