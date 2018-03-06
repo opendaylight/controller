@@ -18,7 +18,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
  */
 public abstract class AbstractDOMRpcProviderService implements DOMRpcProviderService {
     @Override
-    public final <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(final T implementation, final DOMRpcIdentifier... types) {
+    public final <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            final T implementation, final DOMRpcIdentifier... types) {
         return registerRpcImplementation(implementation, ImmutableSet.copyOf(types));
     }
 }

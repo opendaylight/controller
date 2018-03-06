@@ -22,11 +22,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public interface DOMNotificationSubscriptionListener extends EventListener {
 
     /**
-     * Invoked when notification subscription changed
+     * Invoked when notification subscription changed.
      *
-     * @param currentTypes Set of notification types
-     * for which listeners are registered.
+     * @param currentTypes Set of notification types for which listeners are registered.
      */
     void onSubscriptionChanged(Set<SchemaPath> currentTypes);
-
 }

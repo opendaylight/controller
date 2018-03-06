@@ -77,7 +77,8 @@ public abstract class AbstractRegistrationTree<T> {
      * @param node Tree node
      * @param registration Registration instance
      */
-    protected final void removeRegistration(@Nonnull final RegistrationTreeNode<T> node, @Nonnull final T registration) {
+    protected final void removeRegistration(@Nonnull final RegistrationTreeNode<T> node,
+            @Nonnull final T registration) {
         // Take the write lock
         rwLock.writeLock().lock();
         try {

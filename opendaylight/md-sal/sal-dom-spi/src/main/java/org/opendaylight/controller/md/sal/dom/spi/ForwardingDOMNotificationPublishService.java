@@ -17,7 +17,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
  * Utility implementations of {@link DOMNotificationPublishService} which forwards
  * all requests to a delegate instance.
  */
-public abstract class ForwardingDOMNotificationPublishService extends ForwardingObject implements DOMNotificationPublishService {
+public abstract class ForwardingDOMNotificationPublishService extends ForwardingObject
+        implements DOMNotificationPublishService {
     @Override
     protected abstract DOMNotificationPublishService delegate();
 

@@ -21,17 +21,20 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Utility {@link DOMDataReadOnlyTransaction} implementation which forwards all interface
  * method invocation to a delegate instance.
  */
-public abstract class ForwardingDOMDataReadOnlyTransaction extends ForwardingObject implements DOMDataReadOnlyTransaction {
+public abstract class ForwardingDOMDataReadOnlyTransaction extends ForwardingObject
+        implements DOMDataReadOnlyTransaction {
     @Override
     protected abstract @Nonnull DOMDataReadOnlyTransaction delegate();
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
+            final YangInstanceIdentifier path) {
         return delegate().read(store, path);
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+            final YangInstanceIdentifier path) {
         return delegate().exists(store, path);
     }
 

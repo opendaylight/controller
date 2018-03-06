@@ -17,9 +17,11 @@ import javax.annotation.Nullable;
 /**
  * Abstract DOM Store Transaction.
  *
+ * <p>
  * Convenience super implementation of DOM Store transaction which provides
  * common implementation of {@link #toString()} and {@link #getIdentifier()}.
  *
+ * <p>
  * It can optionally capture the context where it was allocated.
  *
  * @param <T> identifier type

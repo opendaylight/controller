@@ -16,7 +16,8 @@ import com.google.common.util.concurrent.ListenableFuture;
  * which forward most of their functionality to a backend {@link #delegate()}.
  */
 @Beta
-public abstract class ForwardingDOMStoreThreePhaseCommitCohort extends ForwardingObject implements DOMStoreThreePhaseCommitCohort {
+public abstract class ForwardingDOMStoreThreePhaseCommitCohort extends ForwardingObject
+        implements DOMStoreThreePhaseCommitCohort {
     @Override
     protected abstract DOMStoreThreePhaseCommitCohort delegate();
 

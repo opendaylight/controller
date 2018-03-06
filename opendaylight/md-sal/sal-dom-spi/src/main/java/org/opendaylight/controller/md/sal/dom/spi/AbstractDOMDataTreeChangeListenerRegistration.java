@@ -16,7 +16,8 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
  *
  * @param <T> type of listener
  */
-public abstract class AbstractDOMDataTreeChangeListenerRegistration<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
+public abstract class AbstractDOMDataTreeChangeListenerRegistration<T extends DOMDataTreeChangeListener>
+        extends AbstractListenerRegistration<T> {
     protected AbstractDOMDataTreeChangeListenerRegistration(final T listener) {
         super(listener);
     }

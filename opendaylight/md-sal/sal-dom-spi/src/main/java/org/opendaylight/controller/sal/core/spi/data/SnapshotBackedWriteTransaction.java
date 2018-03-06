@@ -31,14 +31,17 @@ import org.slf4j.LoggerFactory;
  * @param <T> Identifier type
  */
 @Beta
-public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransaction<T> implements DOMStoreWriteTransaction {
+public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransaction<T>
+        implements DOMStoreWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedWriteTransaction.class);
     @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, TransactionReadyPrototype> READY_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, TransactionReadyPrototype.class, "readyImpl");
+    private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, TransactionReadyPrototype>
+        READY_UPDATER = AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class,
+                TransactionReadyPrototype.class, "readyImpl");
     @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, DataTreeModification> TREE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, DataTreeModification.class, "mutableTree");
+    private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, DataTreeModification>
+        TREE_UPDATER = AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class,
+                DataTreeModification.class, "mutableTree");
 
     // non-null when not ready
     private volatile TransactionReadyPrototype<T> readyImpl;
@@ -54,6 +57,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
 
@@ -63,7 +67,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
         try {
             tree.write(path, data);
             // FIXME: Add checked exception
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, tree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -74,6 +78,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkNotReady();
 
@@ -83,7 +88,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
         try {
             tree.merge(path, data);
             // FIXME: Add checked exception
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Tx: {}, failed to write {}:{} in {}", getIdentifier(), path, data, tree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -94,6 +99,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void delete(final YangInstanceIdentifier path) {
         checkNotReady();
 
@@ -103,7 +109,7 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
         try {
             tree.delete(path);
             // FIXME: Add checked exception
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Tx: {}, failed to delete {} in {}", getIdentifier(), path, tree, e);
             // Rethrow original ones if they are subclasses of RuntimeException
             // or Error
@@ -124,12 +130,13 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
         return readyImpl == null ? null : Optional.fromJavaUtil(mutableTree.readNode(path));
     }
 
-    private final void checkNotReady() {
+    private void checkNotReady() {
         checkState(readyImpl != null, "Transaction %s is no longer open. No further modifications allowed.",
                 getIdentifier());
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public DOMStoreThreePhaseCommitCohort ready() {
         @SuppressWarnings("unchecked")
         final TransactionReadyPrototype<T> wasReady = READY_UPDATER.getAndSet(this, null);
@@ -167,8 +174,8 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
     }
 
     /**
-     * This class is intended to be implemented by Transaction factories
-     * responsible for allocation of {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction} and
+     * This class is intended to be implemented by Transaction factories responsible for allocation of
+     * {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction} and
      * providing underlying logic for applying implementation.
      *
      * @param <T> identifier type
@@ -180,11 +187,12 @@ public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransacti
          *
          * @param tx Transaction which got aborted.
          */
-        protected abstract void transactionAborted(final SnapshotBackedWriteTransaction<T> tx);
+        protected abstract void transactionAborted(SnapshotBackedWriteTransaction<T> tx);
 
         /**
          * Returns a commit coordinator associated with supplied transactions.
          *
+         * <p>
          * This call must not fail.
          *
          * @param tx

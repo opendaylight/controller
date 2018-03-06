@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-
 public interface DOMStoreReadTransaction extends DOMStoreTransaction {
 
     /**
-     * Reads data from provided logical data store located at provided path
+     * Reads data from provided logical data store located at provided path.
      *
      * @param path
      *            Path which uniquely identifies subtree which client want to
@@ -37,8 +36,8 @@ public interface DOMStoreReadTransaction extends DOMStoreTransaction {
 
     /**
      * Checks if data is available in the logical data store located at provided path.
-     * <p>
      *
+     * <p>
      * Note: a successful result from this method makes no guarantee that a subsequent call to {@link #read}
      * will succeed. It is possible that the data resides in a data store on a remote node and, if that
      * node goes down or a network failure occurs, a subsequent read would fail. Another scenario is if

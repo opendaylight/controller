@@ -17,14 +17,12 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      * operation, which is to say that whole subtree will be replaced by
      * specified path.
      *
+     * <p>
      * If you need add or merge of current object with specified use
      * {@link #merge(YangInstanceIdentifier, NormalizedNode)}.
      *
-     *
-     * @param path
-     * @param data
-     *            Data object to be written
-     *
+     * @param path the path to write
+     * @param data data object to be written
      * @throws IllegalStateException
      *             if the client code already sealed transaction and invoked
      *             {@link #ready()}
@@ -36,10 +34,8 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      * operation, which is to say that whole subtree will be replaced by
      * specified path.
      *
-     * @param path
-     * @param data
-     *            Data object to be written
-     *
+     * @param path the path to write
+     * @param data data object to be written
      * @throws IllegalStateException
      *             if the client code already sealed transaction and invoked
      *             {@link #ready()}
@@ -47,11 +43,9 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
     void merge(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
     /**
-     *
      * Deletes data and whole subtree located at provided path.
      *
-     * @param path
-     *            Path to delete
+     * @param path path to delete
      * @throws IllegalStateException
      *             if the client code already sealed transaction and invoked
      *             {@link #ready()}
@@ -59,7 +53,6 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
     void delete(YangInstanceIdentifier path);
 
     /**
-     *
      * Seals transaction, and returns three-phase commit cohort associated
      * with this transaction and DOM Store to be coordinated by coordinator.
      *

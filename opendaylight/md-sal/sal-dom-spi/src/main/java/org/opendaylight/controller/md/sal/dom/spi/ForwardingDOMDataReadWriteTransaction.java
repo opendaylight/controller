@@ -25,17 +25,20 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Utility {@link DOMDataReadWriteTransaction} implementation which forwards all interface
  * method invocation to a delegate instance.
  */
-public abstract class ForwardingDOMDataReadWriteTransaction extends ForwardingObject implements DOMDataReadWriteTransaction {
+public abstract class ForwardingDOMDataReadWriteTransaction extends ForwardingObject
+        implements DOMDataReadWriteTransaction {
     @Override
     protected abstract @Nonnull DOMDataReadWriteTransaction delegate();
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
+            final YangInstanceIdentifier path) {
         return delegate().read(store, path);
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+            final YangInstanceIdentifier path) {
         return delegate().exists(store, path);
     }
 
@@ -45,12 +48,14 @@ public abstract class ForwardingDOMDataReadWriteTransaction extends ForwardingOb
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data) {
         delegate().put(store, path, data);
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data) {
         delegate().merge(store, path, data);
     }
 

@@ -8,9 +8,8 @@
 package org.opendaylight.controller.sal.core.spi;
 
 import java.util.Set;
-
-import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
+import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer.ConsumerFunctionality;
 import org.opendaylight.controller.sal.core.api.Provider.ProviderFunctionality;
 

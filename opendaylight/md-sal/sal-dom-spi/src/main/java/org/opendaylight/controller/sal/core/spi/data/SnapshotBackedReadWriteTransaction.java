@@ -8,12 +8,12 @@
 package org.opendaylight.controller.sal.core.spi.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
  * @param <T> identifier type
  */
 @Beta
-public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedWriteTransaction<T> implements DOMStoreReadWriteTransaction {
+public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedWriteTransaction<T>
+        implements DOMStoreReadWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadWriteTransaction.class);
 
     SnapshotBackedReadWriteTransaction(final T identifier, final boolean debug,
@@ -36,6 +37,7 @@ public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedW
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
         checkNotNull(path, "Path must not be null.");
@@ -43,7 +45,7 @@ public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedW
         final Optional<NormalizedNode<?, ?>> result;
         try {
             result = readSnapshotNode(path);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed", e));
         }

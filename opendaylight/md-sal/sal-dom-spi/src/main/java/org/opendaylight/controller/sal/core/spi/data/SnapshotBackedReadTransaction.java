@@ -22,16 +22,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Implementation of read-only transaction backed by {@link DataTreeSnapshot}.
  *
- * Implementation of read-only transaction backed by {@link DataTreeSnapshot}
- *
+ * <p>
  * Implementation of read-only transaction backed by {@link DataTreeSnapshot}
  * which delegates most of its calls to similar methods provided by underlying snapshot.
  *
  * @param <T> identifier type
  */
 @Beta
-public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTransaction<T> implements DOMStoreReadTransaction {
+public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTransaction<T>
+        implements DOMStoreReadTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadTransaction.class);
     private volatile DataTreeSnapshot stableSnapshot;
 
@@ -55,6 +56,7 @@ public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTran
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
         checkNotNull(path, "Path must not be null.");
@@ -66,7 +68,7 @@ public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTran
 
         try {
             return Futures.immediateCheckedFuture(Optional.fromJavaUtil(snapshot.readNode(path)));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.error("Tx: {} Failed Read of {}", getIdentifier(), path, e);
             return Futures.immediateFailedCheckedFuture(new ReadFailedException("Read failed",e));
         }
