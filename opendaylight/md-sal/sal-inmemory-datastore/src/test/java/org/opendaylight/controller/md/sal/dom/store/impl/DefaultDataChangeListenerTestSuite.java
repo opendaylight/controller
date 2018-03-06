@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import java.util.concurrent.ExecutionException;
-
 import org.junit.Test;
 
 /**
@@ -23,7 +21,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
      *
      * @param task Update task configuration as needed
      */
-    abstract protected void customizeTask(DatastoreTestTask task);
+    protected abstract void customizeTask(DatastoreTestTask task);
 
     @Test
     public final void putTopLevelOneNested() throws Exception {
@@ -34,45 +32,44 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
         putTopLevelOneNested(task);
     }
 
+    protected abstract void putTopLevelOneNested(DatastoreTestTask task) throws Exception;
+
     @Test
     public final void existingTopWriteSibling() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO)).test(
-                tx -> tx.write(path(FOO_SIBLING), topLevelList(FOO_SIBLING).build()));
+            tx -> tx.write(path(FOO_SIBLING), topLevelList(FOO_SIBLING).build()));
         customizeTask(task);
         task.run();
         existingTopWriteSibling(task);
     }
 
-    protected abstract void existingTopWriteSibling(DatastoreTestTask task) throws InterruptedException, ExecutionException;
-
+    protected abstract void existingTopWriteSibling(DatastoreTestTask task) throws Exception;
 
     @Test
     public final void existingTopWriteTwoNested() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO)).test(
-                tx -> {
-                    tx.write(path(FOO,BAR), nestedList(BAR).build());
-                    tx.write(path(FOO,BAZ), nestedList(BAZ).build());
-                });
+            tx -> {
+                tx.write(path(FOO,BAR), nestedList(BAR).build());
+                tx.write(path(FOO,BAZ), nestedList(BAZ).build());
+            });
         customizeTask(task);
         task.run();
         existingTopWriteTwoNested(task);
     }
 
-    protected abstract void existingTopWriteTwoNested(DatastoreTestTask task) throws InterruptedException, ExecutionException;
+    protected abstract void existingTopWriteTwoNested(DatastoreTestTask task) throws Exception;
 
 
     @Test
     public final void existingOneNestedWriteAdditionalNested() throws Exception {
         DatastoreTestTask task = newTestTask().setup(writeOneTopMultipleNested(FOO, BAR)).test(
-                tx -> tx.write(path(FOO,BAZ), nestedList(BAZ).build()));
+            tx -> tx.write(path(FOO,BAZ), nestedList(BAZ).build()));
         customizeTask(task);
         task.run();
         existingOneNestedWriteAdditionalNested(task);
     }
 
-    protected abstract void existingOneNestedWriteAdditionalNested(DatastoreTestTask task) throws InterruptedException, ExecutionException;
-
-    protected abstract void putTopLevelOneNested(DatastoreTestTask task) throws Exception;
+    protected abstract void existingOneNestedWriteAdditionalNested(DatastoreTestTask task) throws Exception;
 
     @Test
     public final void replaceTopLevelNestedChanged() throws Exception {
@@ -83,8 +80,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
         replaceTopLevelNestedChanged(task);
     }
 
-    protected abstract void replaceTopLevelNestedChanged(DatastoreTestTask task) throws InterruptedException,
-            ExecutionException;
+    protected abstract void replaceTopLevelNestedChanged(DatastoreTestTask task) throws Exception;
 
     @Test
     public final void putTopLevelWithTwoNested() throws Exception {
@@ -95,8 +91,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
         putTopLevelWithTwoNested(task);
     }
 
-    protected abstract void putTopLevelWithTwoNested(DatastoreTestTask task) throws InterruptedException,
-            ExecutionException;
+    protected abstract void putTopLevelWithTwoNested(DatastoreTestTask task) throws Exception;
 
     @Test
     public final void twoNestedExistsOneIsDeleted() throws Exception {
@@ -108,8 +103,7 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
         twoNestedExistsOneIsDeleted(task);
     }
 
-    protected abstract void twoNestedExistsOneIsDeleted(DatastoreTestTask task) throws InterruptedException,
-            ExecutionException;
+    protected abstract void twoNestedExistsOneIsDeleted(DatastoreTestTask task) throws Exception;
 
     @Test
     public final void nestedListExistsRootDeleted() throws Exception {
@@ -121,6 +115,5 @@ public abstract class DefaultDataChangeListenerTestSuite extends AbstractDataCha
         nestedListExistsRootDeleted(task);
     }
 
-    protected abstract void nestedListExistsRootDeleted(DatastoreTestTask task) throws InterruptedException,
-            ExecutionException;
+    protected abstract void nestedListExistsRootDeleted(DatastoreTestTask task) throws Exception;
 }

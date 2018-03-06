@@ -37,12 +37,14 @@ import org.slf4j.LoggerFactory;
  */
 final class ResolveDataChangeState {
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeState.class);
+
     /**
-     * Inherited from all parents
+     * Inherited from all parents.
      */
     private final Iterable<Builder> inheritedSub;
+
     /**
-     * Inherited from immediate parent
+     * Inherited from immediate parent.
      */
     private final Collection<Builder> inheritedOne;
     private final YangInstanceIdentifier nodeId;
@@ -70,15 +72,17 @@ final class ResolveDataChangeState {
             for (DataChangeListenerRegistration<?> l : n.getRegistrations()) {
                 final Builder b = DOMImmutableDataChangeEvent.builder(DataChangeScope.BASE);
                 switch (l.getScope()) {
-                case BASE:
-                    base.put(l, b);
-                    break;
-                case ONE:
-                    one.put(l, b);
-                    break;
-                case SUBTREE:
-                    sub.put(l, b);
-                    break;
+                    case BASE:
+                        base.put(l, b);
+                        break;
+                    case ONE:
+                        one.put(l, b);
+                        break;
+                    case SUBTREE:
+                        sub.put(l, b);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -100,9 +104,9 @@ final class ResolveDataChangeState {
      *
      * @param rootId root instance identifier
      * @param registrationTreeNode root node
-     * @return
      */
-    public static ResolveDataChangeState initial(final YangInstanceIdentifier rootId, final RegistrationTreeNode<DataChangeListenerRegistration<?>> registrationTreeNode) {
+    public static ResolveDataChangeState initial(final YangInstanceIdentifier rootId,
+            final RegistrationTreeNode<DataChangeListenerRegistration<?>> registrationTreeNode) {
         return new ResolveDataChangeState(rootId, Collections.<Builder>emptyList(),
             Collections.<Builder>emptyList(), Collections.singletonList(registrationTreeNode));
     }
@@ -150,7 +154,7 @@ final class ResolveDataChangeState {
     }
 
     /**
-     * Get the current path
+     * Get the current path.
      *
      * @return Current path.
      */
@@ -195,8 +199,6 @@ final class ResolveDataChangeState {
 
     /**
      * Add an event to all current listeners.
-     *
-     * @param event
      */
     public void addEvent(final DOMImmutableDataChangeEvent event) {
         // Subtree builders get always notified
@@ -254,7 +256,8 @@ final class ResolveDataChangeState {
         LOG.trace("Collected events {}", map);
     }
 
-    private static Collection<RegistrationTreeNode<DataChangeListenerRegistration<?>>> getListenerChildrenWildcarded(final Collection<RegistrationTreeNode<DataChangeListenerRegistration<?>>> parentNodes,
+    private static Collection<RegistrationTreeNode<DataChangeListenerRegistration<?>>> getListenerChildrenWildcarded(
+            final Collection<RegistrationTreeNode<DataChangeListenerRegistration<?>>> parentNodes,
             final PathArgument child) {
         if (parentNodes.isEmpty()) {
             return Collections.emptyList();
@@ -269,7 +272,9 @@ final class ResolveDataChangeState {
         return result;
     }
 
-    private static void addChildNodes(final List<RegistrationTreeNode<DataChangeListenerRegistration<?>>> result, final Collection<RegistrationTreeNode<DataChangeListenerRegistration<?>>> parentNodes, final PathArgument childIdentifier) {
+    private static void addChildNodes(final List<RegistrationTreeNode<DataChangeListenerRegistration<?>>> result,
+            final Collection<RegistrationTreeNode<DataChangeListenerRegistration<?>>> parentNodes,
+            final PathArgument childIdentifier) {
         for (RegistrationTreeNode<DataChangeListenerRegistration<?>> node : parentNodes) {
             RegistrationTreeNode<DataChangeListenerRegistration<?>> child = node.getExactChild(childIdentifier);
             if (child != null) {

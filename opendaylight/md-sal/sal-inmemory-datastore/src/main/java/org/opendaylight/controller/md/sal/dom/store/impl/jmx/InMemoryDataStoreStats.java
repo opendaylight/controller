@@ -24,14 +24,14 @@ public class InMemoryDataStoreStats implements AutoCloseable {
     private final AbstractMXBean notificationExecutorStatsBean;
     private final QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
-    public InMemoryDataStoreStats(final String mBeanType, final QueuedNotificationManager<?, ?> manager) {
+    public InMemoryDataStoreStats(final String beanType, final QueuedNotificationManager<?, ?> manager) {
 
         notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
-                "notification-manager", mBeanType, null);
+                "notification-manager", beanType, null);
         notificationManagerStatsBean.registerMBean();
 
         notificationExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(manager.getExecutor(),
-                "notification-executor", mBeanType, null);
+                "notification-executor", beanType, null);
         if (notificationExecutorStatsBean != null) {
             notificationExecutorStatsBean.registerMBean();
         }
@@ -43,11 +43,11 @@ public class InMemoryDataStoreStats implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if(notificationExecutorStatsBean != null) {
+        if (notificationExecutorStatsBean != null) {
             notificationExecutorStatsBean.unregisterMBean();
         }
 
-        if(notificationManagerStatsBean != null) {
+        if (notificationManagerStatsBean != null) {
             notificationManagerStatsBean.unregisterMBean();
         }
     }

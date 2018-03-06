@@ -13,8 +13,9 @@ import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-abstract class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> implements DataChangeListenerRegistration<T> {
-    public DataChangeListenerRegistrationImpl(final T listener) {
+abstract class DataChangeListenerRegistrationImpl<T extends AsyncDataChangeListener<YangInstanceIdentifier,
+        NormalizedNode<?, ?>>> extends AbstractListenerRegistration<T> implements DataChangeListenerRegistration<T> {
+    DataChangeListenerRegistrationImpl(final T listener) {
         super(listener);
     }
 }

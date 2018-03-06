@@ -18,17 +18,21 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.osgi.framework.BundleContext;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
 public class LegacyEntityOwnershipServiceProviderModule extends AbstractLegacyEntityOwnershipServiceProviderModule {
     private BundleContext bundleContext;
 
-    public LegacyEntityOwnershipServiceProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
+    public LegacyEntityOwnershipServiceProviderModule(ModuleIdentifier identifier,
+            DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public LegacyEntityOwnershipServiceProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver,
+    public LegacyEntityOwnershipServiceProviderModule(ModuleIdentifier identifier,
+            DependencyResolver dependencyResolver,
             LegacyEntityOwnershipServiceProviderModule oldModule, java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
@@ -46,6 +50,7 @@ public class LegacyEntityOwnershipServiceProviderModule extends AbstractLegacyEn
 
         return Reflection.newProxy(AutoCloseableEntityOwnershipService.class, new AbstractInvocationHandler() {
             @Override
+            @SuppressWarnings("checkstyle:AvoidHidingCauseException")
             protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
                 if (method.getName().equals("close")) {
                     tracker.close();

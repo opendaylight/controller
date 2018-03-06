@@ -9,6 +9,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -34,10 +35,9 @@ class InMemoryDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommit
     private DataTreeCandidate candidate;
     private final Exception operationError;
 
-    public InMemoryDOMStoreThreePhaseCommitCohort(final InMemoryDOMDataStore store,
-                                                  final SnapshotBackedWriteTransaction<String> writeTransaction,
-                                                  final DataTreeModification modification,
-                                                  final Exception operationError) {
+    InMemoryDOMStoreThreePhaseCommitCohort(final InMemoryDOMDataStore store,
+            final SnapshotBackedWriteTransaction<String> writeTransaction, final DataTreeModification modification,
+            final Exception operationError) {
         this.transaction = Preconditions.checkNotNull(writeTransaction);
         this.modification = Preconditions.checkNotNull(modification);
         this.store = Preconditions.checkNotNull(store);
@@ -52,6 +52,7 @@ class InMemoryDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommit
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public final ListenableFuture<Boolean> canCommit() {
         if (operationError != null) {
             return Futures.immediateFailedFuture(operationError);
@@ -75,19 +76,21 @@ class InMemoryDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommit
             // precondition log, it should allow us to understand what went on.
             LOG.trace("Store Tx: {} modifications: {} tree: {}", modification, store);
 
-            return Futures.immediateFailedFuture(new TransactionCommitFailedException("Data did not pass validation.", e));
-        } catch (Exception e) {
+            return Futures.immediateFailedFuture(new TransactionCommitFailedException(
+                    "Data did not pass validation.", e));
+        } catch (RuntimeException e) {
             LOG.warn("Unexpected failure in validation phase", e);
             return Futures.immediateFailedFuture(e);
         }
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public final ListenableFuture<Void> preCommit() {
         try {
             candidate = store.prepare(modification);
             return SUCCESSFUL_FUTURE;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.warn("Unexpected failure in pre-commit phase", e);
             return Futures.immediateFailedFuture(e);
         }
