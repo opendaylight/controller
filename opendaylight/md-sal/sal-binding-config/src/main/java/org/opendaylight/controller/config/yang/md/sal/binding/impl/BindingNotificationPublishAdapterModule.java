@@ -15,15 +15,20 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.sal.core.api.Broker;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
 public class BindingNotificationPublishAdapterModule extends AbstractBindingNotificationPublishAdapterModule {
-    public BindingNotificationPublishAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
+    public BindingNotificationPublishAdapterModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public BindingNotificationPublishAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver, final BindingNotificationPublishAdapterModule oldModule, final java.lang.AutoCloseable oldInstance) {
+    public BindingNotificationPublishAdapterModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver, final BindingNotificationPublishAdapterModule oldModule,
+            final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -33,7 +38,7 @@ public class BindingNotificationPublishAdapterModule extends AbstractBindingNoti
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
+    public AutoCloseable createInstance() {
         final BindingToNormalizedNodeCodec codec = getBindingMappingServiceDependency();
         final Broker.ProviderSession session = getDomAsyncBrokerDependency().registerProvider(new DummyDOMProvider());
         final DOMNotificationPublishService publishService = session.getService(DOMNotificationPublishService.class);

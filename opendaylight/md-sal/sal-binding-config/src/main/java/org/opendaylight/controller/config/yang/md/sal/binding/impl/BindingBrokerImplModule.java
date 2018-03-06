@@ -31,6 +31,8 @@ import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
@@ -79,23 +81,25 @@ public final class BindingBrokerImplModule extends
     private BindingDOMRpcProviderServiceAdapter createRpcProvider(final BindingToNormalizedNodeCodec codec,
             final ProviderSession session) {
         final DOMRpcProviderService domService = session.getService(DOMRpcProviderService.class);
-        if(domService != null) {
+        if (domService != null) {
             return new BindingDOMRpcProviderServiceAdapter(domService, codec);
         }
         return null;
     }
 
-    private BindingDOMRpcServiceAdapter createRpcConsumer(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
+    private BindingDOMRpcServiceAdapter createRpcConsumer(final BindingToNormalizedNodeCodec codec,
+            final ProviderSession session) {
         final DOMRpcService domService = session.getService(DOMRpcService.class);
-        if(domService != null) {
+        if (domService != null) {
             return new BindingDOMRpcServiceAdapter(domService, codec);
         }
         return null;
     }
 
-    private MountPointService createMountPointAdapter(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
+    private MountPointService createMountPointAdapter(final BindingToNormalizedNodeCodec codec,
+            final ProviderSession session) {
         final DOMMountPointService domService = session.getService(DOMMountPointService.class);
-        if(domService != null) {
+        if (domService != null) {
             return new BindingDOMMountPointServiceAdapter(domService, codec);
         }
         return null;

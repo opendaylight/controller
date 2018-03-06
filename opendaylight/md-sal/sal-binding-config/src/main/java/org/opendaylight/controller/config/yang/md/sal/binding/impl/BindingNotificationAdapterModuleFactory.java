@@ -8,9 +8,11 @@
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
-public class BindingNotificationAdapterModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingNotificationAdapterModuleFactory {
+public class BindingNotificationAdapterModuleFactory extends AbstractBindingNotificationAdapterModuleFactory {
 
 }

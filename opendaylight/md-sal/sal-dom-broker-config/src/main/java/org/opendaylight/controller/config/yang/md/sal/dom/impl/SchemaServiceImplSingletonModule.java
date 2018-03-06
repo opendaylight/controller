@@ -22,11 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
-public final class SchemaServiceImplSingletonModule extends
-org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImplSingletonModule {
+public final class SchemaServiceImplSingletonModule extends AbstractSchemaServiceImplSingletonModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchemaServiceImplSingletonModule.class);
 
@@ -69,7 +70,8 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
 
         final WaitingServiceTracker<YangTextSourceProvider> sourceProviderTracker =
                 WaitingServiceTracker.create(YangTextSourceProvider.class, bundleContext);
-        final YangTextSourceProvider sourceProvider = sourceProviderTracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        final YangTextSourceProvider sourceProvider =
+                sourceProviderTracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
         class GlobalSchemaServiceProxy implements AutoCloseable, SchemaService, YangTextSourceProvider {
             @Override
@@ -94,7 +96,8 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
             }
 
             @Override
-            public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(final SchemaContextListener arg0) {
+            public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(
+                    final SchemaContextListener arg0) {
                 return schemaService.registerSchemaContextListener(arg0);
             }
 

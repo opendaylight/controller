@@ -12,6 +12,8 @@ import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.md.sal.dom.broker.impl.PingPongDataBroker;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
@@ -20,7 +22,8 @@ public class PingpongDataBrokerModule extends AbstractPingpongDataBrokerModule {
         super(identifier, dependencyResolver);
     }
 
-    public PingpongDataBrokerModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver, final PingpongDataBrokerModule oldModule, final java.lang.AutoCloseable oldInstance) {
+    public PingpongDataBrokerModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver,
+            final PingpongDataBrokerModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

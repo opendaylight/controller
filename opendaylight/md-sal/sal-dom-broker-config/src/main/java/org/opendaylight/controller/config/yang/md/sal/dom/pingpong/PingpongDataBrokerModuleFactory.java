@@ -8,6 +8,8 @@
 package org.opendaylight.controller.config.yang.md.sal.dom.pingpong;
 
 /**
+ * Deprecated.
+ *
  * @deprecated Replaced by blueprint wiring
  */
 @Deprecated
