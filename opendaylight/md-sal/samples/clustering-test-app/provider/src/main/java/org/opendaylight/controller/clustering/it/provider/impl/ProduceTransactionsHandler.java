@@ -16,7 +16,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SplittableRandom;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -38,7 +40,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProduceTransactionsHandler extends AbstractTransactionHandler {
+public final class ProduceTransactionsHandler extends AbstractTransactionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ProduceTransactionsHandler.class);
 
     private final SettableFuture<RpcResult<ProduceTransactionsOutput>> future = SettableFuture.create();
@@ -76,8 +78,8 @@ public class ProduceTransactionsHandler extends AbstractTransactionHandler {
         cursor.close();
 
         try {
-            tx.submit().checkedGet(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (final Exception e) {
+            tx.submit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Unable to fill the initial item list.", e);
             closeProducer(itemProducer);
 

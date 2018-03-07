@@ -10,6 +10,7 @@ package org.opendaylight.controller.clustering.it.listener;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -26,46 +27,45 @@ import org.slf4j.LoggerFactory;
 
 public class PeopleCarListener implements CarPurchaseListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PeopleCarListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PeopleCarListener.class);
 
-  private DataBroker dataProvider;
-
-
-
-  public void setDataProvider(final DataBroker salDataProvider) {
-    this.dataProvider = salDataProvider;
-  }
-
-  @Override
-  public void onCarBought(CarBought notification) {
-
-    final CarPersonBuilder carPersonBuilder = new CarPersonBuilder();
-    carPersonBuilder.setCarId(notification.getCarId());
-    carPersonBuilder.setPersonId(notification.getPersonId());
-    CarPersonKey key = new CarPersonKey(notification.getCarId(), notification.getPersonId());
-    carPersonBuilder.setKey(key);
-    final CarPerson carPerson = carPersonBuilder.build();
-
-    LOG.info("Car bought, adding car-person entry: [{}]", carPerson);
-
-    InstanceIdentifier<CarPerson> carPersonIId =
-        InstanceIdentifier.<CarPeople>builder(CarPeople.class).child(CarPerson.class, carPerson.getKey()).build();
+    private DataBroker dataProvider;
 
 
-    WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-    tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson, true);
 
-    Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
-      @Override
-      public void onSuccess(final Void result) {
-        LOG.info("Successfully added car-person entry: [{}]", carPerson);
-      }
+    public void setDataProvider(final DataBroker salDataProvider) {
+        this.dataProvider = salDataProvider;
+    }
 
-      @Override
-      public void onFailure(final Throwable t) {
-        LOG.error(String.format("Failed to add car-person entry: [%s]", carPerson), t);
-      }
-    });
+    @Override
+    public void onCarBought(CarBought notification) {
 
-  }
+        final CarPersonBuilder carPersonBuilder = new CarPersonBuilder();
+        carPersonBuilder.setCarId(notification.getCarId());
+        carPersonBuilder.setPersonId(notification.getPersonId());
+        CarPersonKey key = new CarPersonKey(notification.getCarId(), notification.getPersonId());
+        carPersonBuilder.setKey(key);
+        final CarPerson carPerson = carPersonBuilder.build();
+
+        LOG.info("Car bought, adding car-person entry: [{}]", carPerson);
+
+        InstanceIdentifier<CarPerson> carPersonIId = InstanceIdentifier.<CarPeople>builder(CarPeople.class)
+                .child(CarPerson.class, carPerson.getKey()).build();
+
+
+        WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
+        tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson, true);
+
+        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+                LOG.info("Successfully added car-person entry: [{}]", carPerson);
+            }
+
+            @Override
+            public void onFailure(final Throwable ex) {
+                LOG.error(String.format("Failed to add car-person entry: [%s]", carPerson), ex);
+            }
+        }, MoreExecutors.directExecutor());
+    }
 }

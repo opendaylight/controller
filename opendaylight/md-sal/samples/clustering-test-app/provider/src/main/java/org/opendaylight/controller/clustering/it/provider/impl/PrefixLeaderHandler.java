@@ -46,7 +46,7 @@ public class PrefixLeaderHandler {
         final YangInstanceIdentifier yid = serializer.toYangInstanceIdentifier(input.getPrefix());
         final DOMDataTreeIdentifier prefix = new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, yid);
 
-        try (final CDSDataTreeProducer producer =
+        try (CDSDataTreeProducer producer =
                      (CDSDataTreeProducer) domDataTreeService.createProducer(Collections.singleton(prefix))) {
 
             final CDSShardAccess shardAccess = producer.getShardAccess(prefix);

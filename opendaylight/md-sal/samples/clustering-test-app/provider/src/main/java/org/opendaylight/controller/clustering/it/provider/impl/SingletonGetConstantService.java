@@ -35,7 +35,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SingletonGetConstantService implements DOMRpcImplementation, ClusterSingletonService {
+public final class SingletonGetConstantService implements DOMRpcImplementation, ClusterSingletonService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SingletonGetConstantService.class);
 
@@ -64,9 +64,9 @@ public class SingletonGetConstantService implements DOMRpcImplementation, Cluste
         this.constant = constant;
     }
 
-    public static ClusterSingletonServiceRegistration registerNew(final ClusterSingletonServiceProvider singletonService,
-                                                                  final DOMRpcProviderService rpcProviderService,
-                                                                  final String constant) {
+    public static ClusterSingletonServiceRegistration registerNew(
+            final ClusterSingletonServiceProvider singletonService, final DOMRpcProviderService rpcProviderService,
+            final String constant) {
         LOG.debug("Registering get-singleton-constant into ClusterSingletonService, value {}", constant);
 
         return singletonService
@@ -75,7 +75,8 @@ public class SingletonGetConstantService implements DOMRpcImplementation, Cluste
 
     @Nonnull
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull DOMRpcIdentifier rpc, @Nullable NormalizedNode<?, ?> input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull DOMRpcIdentifier rpc,
+            @Nullable NormalizedNode<?, ?> input) {
         LOG.debug("get-singleton-constant invoked, current value: {}", constant);
 
         final LeafNode<Object> value = ImmutableLeafNodeBuilder.create()

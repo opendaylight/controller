@@ -13,10 +13,10 @@ import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTr
 import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ID_INTS;
 import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ITEM;
 
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
@@ -82,7 +81,7 @@ public class PrefixShardHandler {
         final YangInstanceIdentifier identifier = serializer.toYangInstanceIdentifier(input.getPrefix());
 
         try {
-             completionStage = shardFactory.createDistributedShard(
+            completionStage = shardFactory.createDistributedShard(
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, identifier),
                     input.getReplicas().stream().map(MemberName::forName).collect(Collectors.toList()));
 
@@ -90,7 +89,7 @@ public class PrefixShardHandler {
                 LOG.debug("Shard[{}] created successfully.", identifier);
                 registrations.put(identifier, registration);
 
-                final CheckedFuture<Void, TransactionCommitFailedException> ensureFuture = ensureListExists();
+                final ListenableFuture<Void> ensureFuture = ensureListExists();
                 Futures.addCallback(ensureFuture, new FutureCallback<Void>() {
                     @Override
                     public void onSuccess(@Nullable final Void result) {
@@ -102,12 +101,11 @@ public class PrefixShardHandler {
                     public void onFailure(final Throwable throwable) {
                         LOG.warn("Shard[{}] creation failed:", identifier, throwable);
 
-                        final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "create-shard-failed",
-                                "Shard creation failed", "cluster-test-app", "", throwable);
+                        final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION,
+                                "create-shard-failed", "Shard creation failed", "cluster-test-app", "", throwable);
                         future.set(RpcResultBuilder.<Void>failed().withRpcError(error).build());
                     }
-                });
-
+                }, MoreExecutors.directExecutor());
             });
             completionStage.exceptionally(throwable -> {
                 LOG.warn("Shard[{}] creation failed:", identifier, throwable);
@@ -155,7 +153,7 @@ public class PrefixShardHandler {
         return future;
     }
 
-    private CheckedFuture<Void, TransactionCommitFailedException> ensureListExists() {
+    private ListenableFuture<Void> ensureListExists() {
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ID_INT);
 
@@ -185,7 +183,7 @@ public class PrefixShardHandler {
         cursor.merge(containerNode.getIdentifier(), containerNode);
         cursor.close();
 
-        final CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
+        final ListenableFuture<Void> future = tx.submit();
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
             public void onSuccess(@Nullable final Void result) {
@@ -201,7 +199,7 @@ public class PrefixShardHandler {
             public void onFailure(final Throwable throwable) {
                 //NOOP handled by the caller of this method.
             }
-        });
+        }, MoreExecutors.directExecutor());
         return future;
     }
 }

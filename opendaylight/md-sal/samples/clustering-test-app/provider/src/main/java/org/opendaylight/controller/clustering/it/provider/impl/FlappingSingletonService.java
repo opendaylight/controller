@@ -43,6 +43,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void instantiateServiceInstance() {
         LOG.debug("Instantiating flapping-singleton-service.");
 
@@ -52,7 +53,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
             try {
                 registration.close();
                 registration = null;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("There was a problem closing flapping singleton service.", e);
                 setInactive();
                 flapCount = -flapCount;
@@ -61,6 +62,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public ListenableFuture<Void> closeServiceInstance() {
         LOG.debug("Closing flapping-singleton-service, flapCount: {}", flapCount);
 
@@ -73,7 +75,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
                 LOG.debug("Running re-registration");
                 try {
                     registration = singletonServiceProvider.registerClusterSingletonService(this);
-                } catch (final Exception e) {
+                } catch (RuntimeException e) {
                     LOG.warn("There was a problem re-registering flapping singleton service.", e);
                     setInactive();
                     flapCount = -flapCount - 1;

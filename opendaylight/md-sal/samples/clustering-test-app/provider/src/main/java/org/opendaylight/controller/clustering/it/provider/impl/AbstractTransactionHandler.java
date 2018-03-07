@@ -224,7 +224,7 @@ abstract class AbstractTransactionHandler {
         runTimedOut(new TimeoutException("Collection did not finish in " + DEAD_TIMEOUT_SECONDS + " seconds"));
     }
 
-    abstract ListenableFuture<Void> execWrite(final long txId);
+    abstract ListenableFuture<Void> execWrite(long txId);
 
     abstract void runFailed(Throwable cause);
 

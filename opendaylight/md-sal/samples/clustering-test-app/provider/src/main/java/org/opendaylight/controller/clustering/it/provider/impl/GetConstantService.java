@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetConstantService implements DOMRpcImplementation {
+public final class GetConstantService implements DOMRpcImplementation {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetConstantService.class);
 
