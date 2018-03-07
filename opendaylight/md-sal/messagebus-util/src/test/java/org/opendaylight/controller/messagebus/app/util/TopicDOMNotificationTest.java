@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class TopicDOMNotificationTest {
 
-    private static final String containerNodeBodyMockToString = "containerNodeBodyMock";
+    private static final String CONTAINER_NODE_BODY_MOCK_TO_STRING = "containerNodeBodyMock";
     ContainerNode containerNodeBodyMock;
     TopicDOMNotification topicDOMNotification;
 
@@ -32,7 +32,7 @@ public class TopicDOMNotificationTest {
     @Before
     public void setUp() throws Exception {
         containerNodeBodyMock = mock(ContainerNode.class);
-        doReturn(containerNodeBodyMockToString).when(containerNodeBodyMock).toString();
+        doReturn(CONTAINER_NODE_BODY_MOCK_TO_STRING).when(containerNodeBodyMock).toString();
         topicDOMNotification = new TopicDOMNotification(containerNodeBodyMock);
     }
 
@@ -43,8 +43,8 @@ public class TopicDOMNotificationTest {
 
     @Test
     public void getTypeTest() {
-        SchemaPath TOPIC_NOTIFICATION_ID = SchemaPath.create(true, TopicNotification.QNAME);
-        assertEquals("Type has not been created correctly.", TOPIC_NOTIFICATION_ID, topicDOMNotification.getType());
+        SchemaPath topicNotificationId = SchemaPath.create(true, TopicNotification.QNAME);
+        assertEquals("Type has not been created correctly.", topicNotificationId, topicDOMNotification.getType());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class TopicDOMNotificationTest {
 
     @Test
     public void getToStringTest() {
-        String bodyString = "TopicDOMNotification [body=" + containerNodeBodyMockToString + "]";
+        String bodyString = "TopicDOMNotification [body=" + CONTAINER_NODE_BODY_MOCK_TO_STRING + "]";
         assertEquals("String has not been created correctly.", bodyString, topicDOMNotification.toString());
     }
 }

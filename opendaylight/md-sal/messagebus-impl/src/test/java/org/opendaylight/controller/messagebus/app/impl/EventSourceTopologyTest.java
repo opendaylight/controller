@@ -74,37 +74,40 @@ public class EventSourceTopologyTest {
         assertNotNull("Instance has not been created correctly.", eventSourceTopology);
     }
 
-    private void constructorTestHelper(){
+    private void constructorTestHelper() {
         aggregatorRpcReg = mock(RpcRegistration.class);
         EventSourceService eventSourceService = mock(EventSourceService.class);
-        doReturn(aggregatorRpcReg).when(rpcProviderRegistryMock).addRpcImplementation(eq(EventAggregatorService.class), any(EventSourceTopology.class));
+        doReturn(aggregatorRpcReg).when(rpcProviderRegistryMock).addRpcImplementation(eq(EventAggregatorService.class),
+                any(EventSourceTopology.class));
         doReturn(eventSourceService).when(rpcProviderRegistryMock).getRpcService(EventSourceService.class);
         WriteTransaction writeTransactionMock = mock(WriteTransaction.class);
         doReturn(writeTransactionMock).when(dataBrokerMock).newWriteOnlyTransaction();
-        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(DataObject.class),eq(true));
+        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+                any(DataObject.class),eq(true));
         CheckedFuture checkedFutureMock = mock(CheckedFuture.class);
         doReturn(checkedFutureMock).when(writeTransactionMock).submit();
     }
 
     @Test
-    public void createTopicTest() throws Exception{
+    public void createTopicTest() throws Exception {
         topicTestHelper();
         assertNotNull("Topic has not been created correctly.", eventSourceTopology.createTopic(createTopicInputMock));
     }
 
     @Test
-    public void destroyTopicTest() throws Exception{
+    public void destroyTopicTest() throws Exception {
         topicTestHelper();
         TopicId topicId = new TopicId("topic-id-007");
         Map<TopicId,EventSourceTopic> localMap = getEventSourceTopicMap();
-        EventSourceTopic eventSourceTopicMock = mock(EventSourceTopic.class);
-        localMap.put(topicId, eventSourceTopicMock);
+        EventSourceTopic eventSourceTopic = EventSourceTopic.create(new NotificationPattern("foo"),
+                "pattern", eventSourceTopology);
+        localMap.put(topicId, eventSourceTopic);
         DestroyTopicInput input = new DestroyTopicInputBuilder().setTopicId(topicId).build();
         eventSourceTopology.destroyTopic(input);
-        verify(eventSourceTopicMock, times(1)).close();
+        verify(listenerRegistrationMock, times(1)).close();
     }
 
-    private void topicTestHelper() throws Exception{
+    private void topicTestHelper() throws Exception {
         constructorTestHelper();
         createTopicInputMock = mock(CreateTopicInput.class);
         eventSourceTopology = new EventSourceTopology(dataBrokerMock, rpcProviderRegistryMock);
@@ -140,16 +143,17 @@ public class EventSourceTopologyTest {
     }
 
     @Test
-    public void closeTest() throws Exception{
+    public void closeTest() throws Exception {
         constructorTestHelper();
         topicTestHelper();
         Map<TopicId,EventSourceTopic> localMap = getEventSourceTopicMap();
         TopicId topicIdMock = mock(TopicId.class);
-        EventSourceTopic eventSourceTopicMock = mock(EventSourceTopic.class);
-        localMap.put(topicIdMock, eventSourceTopicMock);
+        EventSourceTopic eventSourceTopic = EventSourceTopic.create(new NotificationPattern("foo"),
+                "pattern", eventSourceTopology);
+        localMap.put(topicIdMock, eventSourceTopic);
         eventSourceTopology.close();
         verify(aggregatorRpcReg, times(1)).close();
-        verify(eventSourceTopicMock, times(1)).close();
+        verify(listenerRegistrationMock, times(1)).close();
     }
 
     @Test
@@ -161,11 +165,15 @@ public class EventSourceTopologyTest {
         nodeKey = new NodeKey(nodeId);
         doReturn(nodeKey).when(nodeMock).getKey();
         doReturn(nodeKey).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration routedRpcRegistrationMock = mock(BindingAwareBroker.RoutedRpcRegistration.class);
-        doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock).addRoutedRpcImplementation(EventSourceService.class, eventSourceMock);
-        doNothing().when(routedRpcRegistrationMock).registerPath(eq(NodeContext.class), any(KeyedInstanceIdentifier.class));
+        BindingAwareBroker.RoutedRpcRegistration routedRpcRegistrationMock = mock(
+                BindingAwareBroker.RoutedRpcRegistration.class);
+        doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock)
+                .addRoutedRpcImplementation(EventSourceService.class, eventSourceMock);
+        doNothing().when(routedRpcRegistrationMock).registerPath(eq(NodeContext.class),
+                any(KeyedInstanceIdentifier.class));
         eventSourceTopology.register(eventSourceMock);
-        verify(routedRpcRegistrationMock, times(1)).registerPath(eq(NodeContext.class), any(KeyedInstanceIdentifier.class));
+        verify(routedRpcRegistrationMock, times(1)).registerPath(eq(NodeContext.class),
+                any(KeyedInstanceIdentifier.class));
     }
 
     @Test
@@ -174,10 +182,12 @@ public class EventSourceTopologyTest {
         EventSource eventSourceMock = mock(EventSource.class);
         NodeId nodeId = new NodeId("nodeIdValue1");
         nodeKey = new NodeKey(nodeId);
-        Map<NodeKey, BindingAwareBroker.RoutedRpcRegistration<EventSourceService>> localMap = getRoutedRpcRegistrations();
+        Map<NodeKey, BindingAwareBroker.RoutedRpcRegistration<EventSourceService>> localMap =
+                getRoutedRpcRegistrations();
         NodeKey nodeKeyMock = mock(NodeKey.class);
         doReturn(nodeKeyMock).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock = mock(BindingAwareBroker.RoutedRpcRegistration.class);
+        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock =
+                mock(BindingAwareBroker.RoutedRpcRegistration.class);
         localMap.put(nodeKeyMock, routedRpcRegistrationMock);
         eventSourceTopology.unRegister(eventSourceMock);
         verify(routedRpcRegistrationMock, times(1)).close();
@@ -192,19 +202,23 @@ public class EventSourceTopologyTest {
         nodeKey = new NodeKey(nodeId);
         doReturn(nodeKey).when(nodeMock).getKey();
         doReturn(nodeKey).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration routedRpcRegistrationMock = mock(BindingAwareBroker.RoutedRpcRegistration.class);
-        doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock).addRoutedRpcImplementation(EventSourceService.class, eventSourceMock);
-        doNothing().when(routedRpcRegistrationMock).registerPath(eq(NodeContext.class), any(KeyedInstanceIdentifier.class));
-        assertNotNull("Return value has not been created correctly.", eventSourceTopology.registerEventSource(eventSourceMock));
+        BindingAwareBroker.RoutedRpcRegistration routedRpcRegistrationMock = mock(
+                BindingAwareBroker.RoutedRpcRegistration.class);
+        doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock)
+                .addRoutedRpcImplementation(EventSourceService.class, eventSourceMock);
+        doNothing().when(routedRpcRegistrationMock).registerPath(eq(NodeContext.class),
+                any(KeyedInstanceIdentifier.class));
+        assertNotNull("Return value has not been created correctly.",
+                eventSourceTopology.registerEventSource(eventSourceMock));
     }
 
-    private Map getEventSourceTopicMap() throws Exception{
+    private Map getEventSourceTopicMap() throws Exception {
         Field nesField = EventSourceTopology.class.getDeclaredField("eventSourceTopicMap");
         nesField.setAccessible(true);
         return (Map) nesField.get(eventSourceTopology);
     }
 
-    private Map getRoutedRpcRegistrations() throws Exception{
+    private Map getRoutedRpcRegistrations() throws Exception {
         Field nesField = EventSourceTopology.class.getDeclaredField("routedRpcRegistrations");
         nesField.setAccessible(true);
         return (Map) nesField.get(eventSourceTopology);

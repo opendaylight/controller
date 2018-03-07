@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.messagebus.app.impl;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opendaylight.controller.messagebus.spi.EventSource;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opendaylight.controller.messagebus.spi.EventSource;
 
 public class EventSourceRegistrationImplTest {
 
@@ -30,7 +30,8 @@ public class EventSourceRegistrationImplTest {
     public void setUp() throws Exception {
         EventSource eventSourceMock = mock(EventSource.class);
         eventSourceTopologyMock = mock(EventSourceTopology.class);
-        eventSourceRegistrationImplLocal = new EventSourceRegistrationImplLocal(eventSourceMock, eventSourceTopologyMock);
+        eventSourceRegistrationImplLocal = new EventSourceRegistrationImplLocal(eventSourceMock,
+                eventSourceTopologyMock);
     }
 
     @Test
@@ -40,13 +41,8 @@ public class EventSourceRegistrationImplTest {
     }
 
 
-    private class EventSourceRegistrationImplLocal extends EventSourceRegistrationImpl{
-
-        /**
-         * @param instance of EventSource that has been registered by {@link EventSourceRegistryImpl#registerEventSource(Node, org.opendaylight.controller.messagebus.spi.EventSource)}
-         * @param eventSourceTopology
-         */
-        public EventSourceRegistrationImplLocal(EventSource instance, EventSourceTopology eventSourceTopology) {
+    private class EventSourceRegistrationImplLocal extends EventSourceRegistrationImpl<EventSource> {
+        EventSourceRegistrationImplLocal(EventSource instance, EventSourceTopology eventSourceTopology) {
             super(instance, eventSourceTopology);
         }
     }

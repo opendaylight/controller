@@ -17,8 +17,8 @@ public interface EventSourceRegistry extends AutoCloseable {
      * associated with the node identified via {@link EventSource#getSourceNodeKey}.
      *
      * @param eventSource the EventSource instance to register
-     * @return an EventSourceRegistration instance that is used to unregister the EventSource via {@link EventSourceRegistration#close()}.
+     * @return an EventSourceRegistration instance that is used to unregister the EventSource
+     * via {@link EventSourceRegistration#close()}.
      */
     <T extends EventSource> EventSourceRegistration<T> registerEventSource(T eventSource);
-
 }
