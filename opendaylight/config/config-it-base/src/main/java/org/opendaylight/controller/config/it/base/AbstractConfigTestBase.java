@@ -129,6 +129,18 @@ public abstract class AbstractConfigTestBase {
         return null;
     }
 
+    /**
+     * Returns a Log4J logging configuration property name for the given class's package name of the form
+     * "log4j.logger.package_name".
+     *
+     * @deprecated The karaf logging provider is now Log4J2 so logging configurations must conform to the Log4J2 style.
+     *     This method is kept for compilation backwards compatibility but will be removed in a future release.
+     */
+    @Deprecated
+    public String logConfiguration(final Class<?> klazz) {
+        return "log4j.logger." + klazz.getPackage().getName();
+    }
+
     public String getKarafDistro() {
         String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP, KARAF_DISTRO_GROUPID);
         String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP, KARAF_DISTRO_ARTIFACTID);
