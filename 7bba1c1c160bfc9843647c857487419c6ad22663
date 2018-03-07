@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65419d0e_13ef5c4a",
+        "filename": "opendaylight/md-sal/sal-dom-config/src/main/java/org/opendaylight/controller/config/yang/config/legacy_entity_ownership_service_provider/LegacyEntityOwnershipServiceProviderModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-07T12:47:42Z",
+      "side": 1,
+      "message": "OK",
+      "revId": "7bba1c1c160bfc9843647c857487419c6ad22663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27155342_78625121",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/InMemoryDOMDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-07T12:47:42Z",
+      "side": 1,
+      "message": "OK, for a close()",
+      "revId": "7bba1c1c160bfc9843647c857487419c6ad22663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb792a4e_074301f6",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/InMemoryDOMStoreThreePhaseCommitCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-07T12:47:42Z",
+      "side": 1,
+      "message": "OK",
+      "revId": "7bba1c1c160bfc9843647c857487419c6ad22663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37742c27_875cc75e",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/InMemoryDOMStoreThreePhaseCommitCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-07T12:47:42Z",
+      "side": 1,
+      "message": "right",
+      "revId": "7bba1c1c160bfc9843647c857487419c6ad22663",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
