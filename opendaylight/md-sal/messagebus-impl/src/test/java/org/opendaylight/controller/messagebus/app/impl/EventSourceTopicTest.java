@@ -50,7 +50,7 @@ public class EventSourceTopicTest {
 
     @Before
     public void setUp() throws Exception {
-        NotificationPattern notificationPattern = new NotificationPattern("value1");
+        final NotificationPattern notificationPattern = new NotificationPattern("value1");
         eventSourceServiceMock = mock(EventSourceService.class);
         eventSourceTopologyMock = mock(EventSourceTopology.class);
         dataBrokerMock = mock(DataBroker.class);
@@ -59,14 +59,16 @@ public class EventSourceTopicTest {
 
         WriteTransaction writeTransactionMock = mock(WriteTransaction.class);
         doReturn(writeTransactionMock).when(dataBrokerMock).newWriteOnlyTransaction();
-        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(DataObject.class),eq(true));
+        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class),eq(true));
         CheckedFuture checkedFutureWriteMock = mock(CheckedFuture.class);
         doReturn(checkedFutureWriteMock).when(writeTransactionMock).submit();
 
         ReadOnlyTransaction readOnlyTransactionMock = mock(ReadOnlyTransaction.class);
         doReturn(readOnlyTransactionMock).when(dataBrokerMock).newReadOnlyTransaction();
         CheckedFuture checkedFutureReadMock = mock(CheckedFuture.class);
-        doReturn(checkedFutureReadMock).when(readOnlyTransactionMock).read(LogicalDatastoreType.OPERATIONAL, EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
+        doReturn(checkedFutureReadMock).when(readOnlyTransactionMock).read(LogicalDatastoreType.OPERATIONAL,
+                EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
         eventSourceTopic = EventSourceTopic.create(notificationPattern, "nodeIdPattern1", eventSourceTopologyMock);
     }
 
@@ -111,7 +113,7 @@ public class EventSourceTopicTest {
         verify(eventSourceServiceMock, times(1)).joinTopic(any(JoinTopicInput.class));
     }
 
-    public NodeKey getNodeKey(String nodeId){
+    public NodeKey getNodeKey(String nodeId) {
         return new NodeKey(new NodeId(nodeId));
     }
 }

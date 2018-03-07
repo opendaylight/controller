@@ -14,9 +14,8 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
  * and it is used to unregister EventSource.
  *
  */
-public interface EventSourceRegistration <T extends EventSource> extends ObjectRegistration<T>{
+public interface EventSourceRegistration<T extends EventSource> extends ObjectRegistration<T> {
 
     @Override
     void close();
-
 }

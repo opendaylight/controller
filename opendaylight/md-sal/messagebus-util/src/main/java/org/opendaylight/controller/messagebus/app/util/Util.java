@@ -8,19 +8,18 @@
 
 package org.opendaylight.controller.messagebus.app.util;
 
+import com.google.common.util.concurrent.Futures;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-import com.google.common.util.concurrent.Futures;
-
-
 public final class Util {
+    private Util() {
+    }
 
     public static <T> Future<RpcResult<T>> resultRpcSuccessFor(final T output) {
         final RpcResult<T> result = RpcResultBuilder.success(output).build();
@@ -28,9 +27,9 @@ public final class Util {
     }
 
     /**
-     * Method filters qnames based on wildcard strings
+     * Method filters qnames based on wildcard strings.
      *
-     * @param list
+     * @param list list of SchemaPaths
      * @param pattern matching pattern
      * @return list of filtered qnames
      */
@@ -47,15 +46,13 @@ public final class Util {
     }
 
     /**
-     * CREDIT to http://www.rgagnon.com/javadetails/java-0515.html
-     * @param wildcard
-     * @return
+     * CREDIT to http://www.rgagnon.com/javadetails/java-0515.html.
      */
-    public static String wildcardToRegex(final String wildcard){
+    public static String wildcardToRegex(final String wildcard) {
         final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         for (final char c : wildcard.toCharArray()) {
-            switch(c) {
+            switch (c) {
                 case '*':
                     s.append(".*");
                     break;

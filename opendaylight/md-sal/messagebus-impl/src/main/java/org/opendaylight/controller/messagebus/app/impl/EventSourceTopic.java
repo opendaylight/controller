@@ -10,9 +10,10 @@ package org.opendaylight.controller.messagebus.app.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.DisJoinTopicInput;
@@ -43,7 +43,7 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.LoggerFactory;
 
-public class EventSourceTopic implements DataTreeChangeListener<Node>, AutoCloseable {
+public final class EventSourceTopic implements DataTreeChangeListener<Node>, AutoCloseable {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EventSourceTopic.class);
     private final NotificationPattern notificationPattern;
     private final EventSourceService sourceService;
@@ -52,14 +52,17 @@ public class EventSourceTopic implements DataTreeChangeListener<Node>, AutoClose
     private ListenerRegistration<?> listenerRegistration;
     private final CopyOnWriteArraySet<InstanceIdentifier<?>> joinedEventSources = new CopyOnWriteArraySet<>();
 
-    public static EventSourceTopic create(final NotificationPattern notificationPattern, final String nodeIdRegexPattern, final EventSourceTopology eventSourceTopology){
-        final EventSourceTopic est = new EventSourceTopic(notificationPattern, nodeIdRegexPattern, eventSourceTopology.getEventSourceService());
+    public static EventSourceTopic create(final NotificationPattern notificationPattern,
+            final String nodeIdRegexPattern, final EventSourceTopology eventSourceTopology) {
+        final EventSourceTopic est = new EventSourceTopic(notificationPattern, nodeIdRegexPattern,
+                eventSourceTopology.getEventSourceService());
         est.registerListner(eventSourceTopology);
         est.notifyExistingNodes(eventSourceTopology);
         return est;
     }
 
-    private EventSourceTopic(final NotificationPattern notificationPattern, final String nodeIdRegexPattern, final EventSourceService sourceService) {
+    private EventSourceTopic(final NotificationPattern notificationPattern, final String nodeIdRegexPattern,
+            final EventSourceService sourceService) {
         this.notificationPattern = Preconditions.checkNotNull(notificationPattern);
         this.sourceService = Preconditions.checkNotNull(sourceService);
         this.nodeIdPattern = Pattern.compile(nodeIdRegexPattern);
@@ -93,52 +96,52 @@ public class EventSourceTopic implements DataTreeChangeListener<Node>, AutoClose
     public void notifyNode(final InstanceIdentifier<?> nodeId) {
         LOG.debug("Notify node: {}", nodeId);
         try {
-            final RpcResult<JoinTopicOutput> rpcResultJoinTopic = sourceService.joinTopic(getJoinTopicInputArgument(nodeId)).get();
-            if(rpcResultJoinTopic.isSuccessful() == false){
-                for(final RpcError err : rpcResultJoinTopic.getErrors()){
-                    LOG.error("Can not join topic: [{}] on node: [{}]. Error: {}",getTopicId().getValue(),nodeId.toString(),err.toString());
+            final RpcResult<JoinTopicOutput> rpcResultJoinTopic =
+                    sourceService.joinTopic(getJoinTopicInputArgument(nodeId)).get();
+            if (!rpcResultJoinTopic.isSuccessful()) {
+                for (final RpcError err : rpcResultJoinTopic.getErrors()) {
+                    LOG.error("Can not join topic: [{}] on node: [{}]. Error: {}", getTopicId().getValue(),
+                            nodeId.toString(), err.toString());
                 }
             } else {
                 joinedEventSources.add(nodeId);
             }
-        } catch (final Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Could not invoke join topic for node {}", nodeId);
         }
     }
 
-    private void notifyExistingNodes(final EventSourceTopology eventSourceTopology){
+    private void notifyExistingNodes(final EventSourceTopology eventSourceTopology) {
         LOG.debug("Notify existing nodes");
         final Pattern nodeRegex = this.nodeIdPattern;
 
         final ReadOnlyTransaction tx = eventSourceTopology.getDataBroker().newReadOnlyTransaction();
-        final CheckedFuture<Optional<Topology>, ReadFailedException> future =
+        final ListenableFuture<Optional<Topology>> future =
                 tx.read(LogicalDatastoreType.OPERATIONAL, EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
 
-        Futures.addCallback(future, new FutureCallback<Optional<Topology>>(){
-
+        Futures.addCallback(future, new FutureCallback<Optional<Topology>>() {
             @Override
             public void onSuccess(final Optional<Topology> data) {
-                if(data.isPresent()) {
-                     final List<Node> nodes = data.get().getNode();
-                     if(nodes != null){
+                if (data.isPresent()) {
+                    final List<Node> nodes = data.get().getNode();
+                    if (nodes != null) {
                         for (final Node node : nodes) {
-                             if (nodeRegex.matcher(node.getNodeId().getValue()).matches()) {
-                                 notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey()));
-                             }
-                         }
-                     }
+                            if (nodeRegex.matcher(node.getNodeId().getValue()).matches()) {
+                                notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class,
+                                        node.getKey()));
+                            }
+                        }
+                    }
                 }
                 tx.close();
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                LOG.error("Can not notify existing nodes", t);
+            public void onFailure(final Throwable ex) {
+                LOG.error("Can not notify existing nodes", ex);
                 tx.close();
             }
-
-        });
-
+        }, MoreExecutors.directExecutor());
     }
 
     private JoinTopicInput getJoinTopicInputArgument(final InstanceIdentifier<?> path) {
@@ -156,7 +159,7 @@ public class EventSourceTopic implements DataTreeChangeListener<Node>, AutoClose
         return nodeIdPattern;
     }
 
-    private DisJoinTopicInput getDisJoinTopicInputArgument(final InstanceIdentifier<?> eventSourceNodeId){
+    private DisJoinTopicInput getDisJoinTopicInputArgument(final InstanceIdentifier<?> eventSourceNodeId) {
         final NodeRef nodeRef = new NodeRef(eventSourceNodeId);
         final DisJoinTopicInput dji = new DisJoinTopicInputBuilder()
                 .setNode(nodeRef.getValue())
@@ -175,25 +178,28 @@ public class EventSourceTopic implements DataTreeChangeListener<Node>, AutoClose
 
     @Override
     public void close() {
-        if(this.listenerRegistration != null){
+        if (this.listenerRegistration != null) {
             this.listenerRegistration.close();
         }
-        for(final InstanceIdentifier<?> eventSourceNodeId : joinedEventSources){
+        for (final InstanceIdentifier<?> eventSourceNodeId : joinedEventSources) {
             try {
-                final RpcResult<Void> result = sourceService.disJoinTopic(getDisJoinTopicInputArgument(eventSourceNodeId)).get();
-                if(result.isSuccessful() == false){
-                    for(final RpcError err : result.getErrors()){
-                        LOG.error("Can not destroy topic: [{}] on node: [{}]. Error: {}",getTopicId().getValue(),eventSourceNodeId,err.toString());
+                final RpcResult<Void> result = sourceService
+                        .disJoinTopic(getDisJoinTopicInputArgument(eventSourceNodeId)).get();
+                if (result.isSuccessful() == false) {
+                    for (final RpcError err : result.getErrors()) {
+                        LOG.error("Can not destroy topic: [{}] on node: [{}]. Error: {}", getTopicId().getValue(),
+                                eventSourceNodeId, err.toString());
                     }
                 }
             } catch (InterruptedException | ExecutionException ex) {
-                LOG.error("Can not close event source topic / destroy topic {} on node {}.", this.topicId.getValue(), eventSourceNodeId, ex);
+                LOG.error("Can not close event source topic / destroy topic {} on node {}.", this.topicId.getValue(),
+                        eventSourceNodeId, ex);
             }
         }
         joinedEventSources.clear();
     }
 
-    private static String getUUIDIdent(){
+    private static String getUUIDIdent() {
         final UUID uuid = UUID.randomUUID();
         return uuid.toString();
     }
