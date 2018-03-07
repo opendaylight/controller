@@ -8,7 +8,6 @@
 package org.opendaylight.controller.messagebus.spi;
 
 import java.util.List;
-
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -25,7 +24,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public interface EventSource extends EventSourceService, AutoCloseable {
 
     /**
-     * Identifier of node associated with event source
+     * Identifier of node associated with event source.
      *
      * @return instance of NodeKey
      */
@@ -37,5 +36,4 @@ public interface EventSource extends EventSourceService, AutoCloseable {
      * @return list of available notification
      */
     List<SchemaPath> getAvailableNotifications();
-
 }

@@ -31,11 +31,14 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicInput;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicStatus;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 public class EventSourceTopicTest {
 
@@ -50,8 +53,11 @@ public class EventSourceTopicTest {
 
     @Before
     public void setUp() throws Exception {
-        NotificationPattern notificationPattern = new NotificationPattern("value1");
+        final NotificationPattern notificationPattern = new NotificationPattern("value1");
         eventSourceServiceMock = mock(EventSourceService.class);
+        doReturn(RpcResultBuilder.success(new JoinTopicOutputBuilder().setStatus(JoinTopicStatus.Up).build())
+                .buildFuture()).when(eventSourceServiceMock).joinTopic(any(JoinTopicInput.class));
+
         eventSourceTopologyMock = mock(EventSourceTopology.class);
         dataBrokerMock = mock(DataBroker.class);
         doReturn(eventSourceServiceMock).when(eventSourceTopologyMock).getEventSourceService();
@@ -59,14 +65,16 @@ public class EventSourceTopicTest {
 
         WriteTransaction writeTransactionMock = mock(WriteTransaction.class);
         doReturn(writeTransactionMock).when(dataBrokerMock).newWriteOnlyTransaction();
-        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(DataObject.class),eq(true));
+        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class),eq(true));
         CheckedFuture checkedFutureWriteMock = mock(CheckedFuture.class);
         doReturn(checkedFutureWriteMock).when(writeTransactionMock).submit();
 
         ReadOnlyTransaction readOnlyTransactionMock = mock(ReadOnlyTransaction.class);
         doReturn(readOnlyTransactionMock).when(dataBrokerMock).newReadOnlyTransaction();
         CheckedFuture checkedFutureReadMock = mock(CheckedFuture.class);
-        doReturn(checkedFutureReadMock).when(readOnlyTransactionMock).read(LogicalDatastoreType.OPERATIONAL, EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
+        doReturn(checkedFutureReadMock).when(readOnlyTransactionMock).read(LogicalDatastoreType.OPERATIONAL,
+                EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
         eventSourceTopic = EventSourceTopic.create(notificationPattern, "nodeIdPattern1", eventSourceTopologyMock);
     }
 
@@ -111,7 +119,7 @@ public class EventSourceTopicTest {
         verify(eventSourceServiceMock, times(1)).joinTopic(any(JoinTopicInput.class));
     }
 
-    public NodeKey getNodeKey(String nodeId){
+    public NodeKey getNodeKey(String nodeId) {
         return new NodeKey(new NodeId(nodeId));
     }
 }
