@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "717e2504_9dbe509d",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/main/java/org/opendaylight/controller/md/sal/common/impl/util/compat/DataNormalizationOperation.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-07T11:53:18Z",
+      "side": 0,
+      "message": "un-used",
+      "revId": "3b8cc2e666e4a4b3c760317127fa45ee7a6f677c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
