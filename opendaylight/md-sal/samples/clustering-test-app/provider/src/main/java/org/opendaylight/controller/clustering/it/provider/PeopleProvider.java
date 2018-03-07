@@ -10,6 +10,7 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -32,59 +33,58 @@ import org.slf4j.LoggerFactory;
 
 public class PeopleProvider implements PeopleService, AutoCloseable {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PeopleProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PeopleProvider.class);
 
-  private DataBroker dataProvider;
+    private DataBroker dataProvider;
 
-  private BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration;
+    private BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration;
 
-  public void setDataProvider(final DataBroker salDataProvider) {
-    this.dataProvider = salDataProvider;
-  }
+    public void setDataProvider(final DataBroker salDataProvider) {
+        this.dataProvider = salDataProvider;
+    }
 
 
-  public void setRpcRegistration(final BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration) {
-    this.rpcRegistration = rpcRegistration;
-  }
+    public void setRpcRegistration(final BindingAwareBroker.RoutedRpcRegistration<CarPurchaseService> rpcRegistration) {
+        this.rpcRegistration = rpcRegistration;
+    }
 
-  @Override
-  public Future<RpcResult<Void>> addPerson(final AddPersonInput input) {
-    LOG.info("RPC addPerson : adding person [{}]", input);
+    @Override
+    public Future<RpcResult<Void>> addPerson(final AddPersonInput input) {
+        LOG.info("RPC addPerson : adding person [{}]", input);
 
-    PersonBuilder builder = new PersonBuilder(input);
-    final Person person = builder.build();
-    final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
+        PersonBuilder builder = new PersonBuilder(input);
+        final Person person = builder.build();
+        final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
 
-    // Each entry will be identifiable by a unique key, we have to create that identifier
-    final InstanceIdentifier.InstanceIdentifierBuilder<Person> personIdBuilder =
-        InstanceIdentifier.<People>builder(People.class)
-            .child(Person.class, person.getKey());
-    final InstanceIdentifier<Person> personId = personIdBuilder.build();
-    // Place entry in data store tree
-    WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-    tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);
+        // Each entry will be identifiable by a unique key, we have to create that identifier
+        final InstanceIdentifier.InstanceIdentifierBuilder<Person> personIdBuilder =
+                InstanceIdentifier.<People>builder(People.class)
+                .child(Person.class, person.getKey());
+        final InstanceIdentifier<Person> personId = personIdBuilder.build();
+        // Place entry in data store tree
+        WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
+        tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);
 
-    Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
-      @Override
-      public void onSuccess(final Void result) {
-        LOG.info("RPC addPerson : person added successfully [{}]", person);
-        rpcRegistration.registerPath(PersonContext.class, personId);
-        LOG.info("RPC addPerson : routed rpc registered for instance ID [{}]", personId);
-        futureResult.set(RpcResultBuilder.<Void>success().build());
-      }
+        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+                LOG.info("RPC addPerson : person added successfully [{}]", person);
+                rpcRegistration.registerPath(PersonContext.class, personId);
+                LOG.info("RPC addPerson : routed rpc registered for instance ID [{}]", personId);
+                futureResult.set(RpcResultBuilder.<Void>success().build());
+            }
 
-      @Override
-      public void onFailure(final Throwable t) {
-        LOG.error(String.format("RPC addPerson : person addition failed [%s]", person), t);
-        futureResult.set(RpcResultBuilder.<Void>failed()
-            .withError(RpcError.ErrorType.APPLICATION, t.getMessage()).build());
-      }
-    });
-    return futureResult;
-  }
+            @Override
+            public void onFailure(final Throwable ex) {
+                LOG.error(String.format("RPC addPerson : person addition failed [%s]", person), ex);
+                futureResult.set(RpcResultBuilder.<Void>failed()
+                        .withError(RpcError.ErrorType.APPLICATION, ex.getMessage()).build());
+            }
+        }, MoreExecutors.directExecutor());
+        return futureResult;
+    }
 
-  @Override
-  public void close() throws Exception {
-
-  }
+    @Override
+    public void close() throws Exception {
+    }
 }

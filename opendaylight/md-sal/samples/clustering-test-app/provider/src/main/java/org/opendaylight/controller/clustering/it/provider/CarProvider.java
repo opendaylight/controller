@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Implementation of CarService.
+ *
  * @author Thomas Pantelis
  */
 public class CarProvider implements CarService {
@@ -97,12 +100,14 @@ public class CarProvider implements CarService {
     }
 
     private void stopThread() {
-        if(testThread != null) {
+        if (testThread != null) {
             stopThread = true;
             testThread.interrupt();
             try {
                 testThread.join();
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+                // don't care
+            }
             testThread = null;
         }
     }
@@ -150,10 +155,10 @@ public class CarProvider implements CarService {
         testThread = new Thread(() -> {
             sw.start();
             AtomicLong count = new AtomicLong();
-            while(!stopThread) {
+            while (!stopThread) {
                 long id = count.incrementAndGet();
                 WriteTransaction tx1 = dataProvider.newWriteOnlyTransaction();
-                CarEntry car = new CarEntryBuilder().setId(new CarId("car"+id)).build();
+                CarEntry car = new CarEntryBuilder().setId(new CarId("car" + id)).build();
                 tx1.put(LogicalDatastoreType.CONFIGURATION,
                         InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.getKey()).build(),
                         car);
@@ -167,19 +172,19 @@ public class CarProvider implements CarService {
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
+                    public void onFailure(final Throwable ex) {
                         // Transaction failed
                         failureCounter.getAndIncrement();
-                        LOG_CAR_PROVIDER.error("Put Cars failed", t);
+                        LOG_CAR_PROVIDER.error("Put Cars failed", ex);
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 try {
                     TimeUnit.NANOSECONDS.sleep(sleep);
                 } catch (InterruptedException e) {
                     break;
                 }
 
-                if(count.get() % 1000 == 0) {
+                if (count.get() % 1000 == 0) {
                     LOG_PURCHASE_CAR.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
                 }
 
@@ -204,9 +209,9 @@ public class CarProvider implements CarService {
                 .setSuccessCount(succcessCounter.longValue())
                 .setFailureCount(failureCounter.longValue());
 
-        StopStressTestOutput result = stopStressTestOutput.build();
-        LOG_PURCHASE_CAR.info("Executed Stop Stress test; No. of cars created {}; " +
-                "No. of cars failed {}; ", succcessCounter, failureCounter);
+        final StopStressTestOutput result = stopStressTestOutput.build();
+        LOG_PURCHASE_CAR.info("Executed Stop Stress test; No. of cars created {}; "
+                + "No. of cars failed {}; ", succcessCounter, failureCounter);
         // clear counters
         succcessCounter.set(0);
         failureCounter.set(0);
@@ -216,7 +221,7 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<Void>> registerOwnership(final RegisterOwnershipInput input) {
-        if(registeredListener.compareAndSet(false, true)) {
+        if (registeredListener.compareAndSet(false, true)) {
             ownershipService.registerListener(ENTITY_TYPE, ownershipListener);
         }
 

@@ -30,7 +30,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private static final long SECOND_AS_NANO = 1000000000;
 
     private NormalizedNode<?, ?> localCopy = null;
-    private AtomicLong lastNotifTimestamp = new AtomicLong(0);
+    private final AtomicLong lastNotifTimestamp = new AtomicLong(0);
     private ScheduledExecutorService executorService;
     private ScheduledFuture<?> scheduledFuture;
 
@@ -76,7 +76,8 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
         executorService = Executors.newSingleThreadScheduledExecutor();
         final SettableFuture<Void> settableFuture = SettableFuture.create();
 
-        scheduledFuture = executorService.scheduleAtFixedRate(new CheckFinishedTask(settableFuture), 0, 1, TimeUnit.SECONDS);
+        scheduledFuture = executorService.scheduleAtFixedRate(new CheckFinishedTask(settableFuture),
+                0, 1, TimeUnit.SECONDS);
         return settableFuture;
     }
 
@@ -84,7 +85,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
 
         private final SettableFuture<Void> future;
 
-        public CheckFinishedTask(final SettableFuture<Void> future) {
+        CheckFinishedTask(final SettableFuture<Void> future) {
             this.future = future;
         }
 

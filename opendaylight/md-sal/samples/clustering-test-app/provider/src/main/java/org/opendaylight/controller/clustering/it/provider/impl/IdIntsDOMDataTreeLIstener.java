@@ -33,7 +33,7 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
     private static final long SECOND_AS_NANO = 1000000000;
 
     private NormalizedNode<?, ?> localCopy = null;
-    private AtomicLong lastNotifTimestamp = new AtomicLong(0);
+    private final AtomicLong lastNotifTimestamp = new AtomicLong(0);
     private ScheduledFuture<?> scheduledFuture;
     private ScheduledExecutorService executorService;
 
@@ -81,7 +81,8 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
         executorService = Executors.newSingleThreadScheduledExecutor();
         final SettableFuture<Void> settableFuture = SettableFuture.create();
 
-        scheduledFuture = executorService.scheduleAtFixedRate(new CheckFinishedTask(settableFuture), 0, 1, TimeUnit.SECONDS);
+        scheduledFuture = executorService.scheduleAtFixedRate(new CheckFinishedTask(settableFuture),
+                0, 1, TimeUnit.SECONDS);
         return settableFuture;
     }
 
@@ -99,7 +100,7 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
 
         @Override
         public void run() {
-            if (System.nanoTime() - lastNotifTimestamp.get() > (SECOND_AS_NANO * 4)) {
+            if (System.nanoTime() - lastNotifTimestamp.get() > SECOND_AS_NANO * 4) {
                 scheduledFuture.cancel(false);
                 future.set(null);
 
@@ -107,5 +108,4 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
             }
         }
     }
-
 }

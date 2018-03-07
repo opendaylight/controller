@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A simple ScheduledExecutorService, which shutds down its threads after a period of inactivity. It is safe to not
+ * A simple ScheduledExecutorService, which shuts down its threads after a period of inactivity. It is safe to not
  * shutdown this
  *
  * @author Robert Varga
@@ -30,6 +30,7 @@ final class FinalizableScheduledExecutorService extends ScheduledThreadPoolExecu
 
     // This is a bit ugly, but allows
     @Override
+    @SuppressWarnings("checkstyle:NoFinalizer")
     protected void finalize() {
         super.shutdownNow();
     }
