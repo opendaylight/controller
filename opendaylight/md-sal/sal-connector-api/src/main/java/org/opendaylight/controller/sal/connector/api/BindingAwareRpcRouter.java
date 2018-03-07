@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.connector.api;
 
 import java.util.concurrent.Future;
-
 import org.opendaylight.yangtools.concepts.Immutable;
 
 public interface BindingAwareRpcRouter extends RpcRouter<String, String, String, byte[]> {
@@ -27,6 +26,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
             this.payload = payload;
         }
 
+        @Override
         public BindingAwareRouteIdentifier getRoutingInformation() {
             return this.routingInformation;
         }
@@ -50,9 +50,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
         }
 
         /**
-         * Java class name of Rpc Context
-         *
-         *
+         * Java class name of Rpc Context.
          */
         @Override
         public String getContext() {
@@ -69,8 +67,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
         }
 
         /**
-         * Java class name of Rpc Type e.g org.opendaylight.AddFlowInput
-         *
+         * Java class name of Rpc Type e.g org.opendaylight.AddFlowInput.
          */
         @Override
         public String getType() {
@@ -81,39 +78,46 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((content == null) ? 0 : content.hashCode());
-            result = prime * result + ((route == null) ? 0 : route.hashCode());
-            result = prime * result + ((type == null) ? 0 : type.hashCode());
+            result = prime * result + (content == null ? 0 : content.hashCode());
+            result = prime * result + (route == null ? 0 : route.hashCode());
+            result = prime * result + (type == null ? 0 : type.hashCode());
             return result;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             BindingAwareRouteIdentifier other = (BindingAwareRouteIdentifier) obj;
             if (content == null) {
-                if (other.content != null)
+                if (other.content != null) {
                     return false;
-            } else if (!content.equals(other.content))
+                }
+            } else if (!content.equals(other.content)) {
                 return false;
+            }
             if (route == null) {
-                if (other.route != null)
+                if (other.route != null) {
                     return false;
-            } else if (!route.equals(other.route))
+                }
+            } else if (!route.equals(other.route)) {
                 return false;
+            }
             if (type == null) {
-                if (other.type != null)
+                if (other.type != null) {
                     return false;
-            } else if (!type.equals(other.type))
+                }
+            } else if (!type.equals(other.type)) {
                 return false;
+            }
             return true;
         }
-
     }
-
 }
