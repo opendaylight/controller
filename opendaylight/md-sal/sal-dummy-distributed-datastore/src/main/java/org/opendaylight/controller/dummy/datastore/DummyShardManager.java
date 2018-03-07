@@ -14,16 +14,17 @@ import akka.actor.UntypedActor;
 import akka.japi.Creator;
 
 public class DummyShardManager extends UntypedActor {
-    public DummyShardManager(Configuration configuration, String memberName, String[] shardNames, String type) throws Exception {
+    public DummyShardManager(Configuration configuration, String memberName, String[] shardNames,
+            String type) throws Exception {
         new DummyShardsCreator(configuration, context(), memberName, shardNames, type).create();
     }
 
     @Override
-    public void onReceive(Object o) throws Exception {
+    public void onReceive(Object message) throws Exception {
 
     }
 
-    public static Props props(Configuration configuration, String memberName, String[] shardNames, String type){
+    public static Props props(Configuration configuration, String memberName, String[] shardNames, String type) {
         return Props.create(new DummyShardManagerCreator(configuration, memberName, shardNames, type));
     }
 
@@ -34,7 +35,7 @@ public class DummyShardManager extends UntypedActor {
         private final String[] shardNames;
         private final String type;
 
-        public DummyShardManagerCreator(Configuration configuration, String memberName, String[] shardNames, String type) {
+        DummyShardManagerCreator(Configuration configuration, String memberName, String[] shardNames, String type) {
             this.configuration = configuration;
             this.memberName = memberName;
             this.shardNames = shardNames;
@@ -43,7 +44,7 @@ public class DummyShardManager extends UntypedActor {
 
         @Override
         public DummyShardManager create() throws Exception {
-            return new DummyShardManager(configuration, memberName, shardNames, type );
+            return new DummyShardManager(configuration, memberName, shardNames, type);
         }
     }
 
@@ -54,7 +55,8 @@ public class DummyShardManager extends UntypedActor {
         private final String[] shardNames;
         private final String type;
 
-        DummyShardsCreator(Configuration configuration, ActorContext actorSystem, String memberName, String[] shardNames, String type){
+        DummyShardsCreator(Configuration configuration, ActorContext actorSystem, String memberName,
+                String[] shardNames, String type) {
             this.configuration = configuration;
             this.actorSystem = actorSystem;
             this.memberName = memberName;
@@ -62,8 +64,8 @@ public class DummyShardManager extends UntypedActor {
             this.type = type;
         }
 
-        void create(){
-            for(String shardName : shardNames){
+        void create() {
+            for (String shardName : shardNames) {
                 String shardId = memberName + "-shard-" + shardName + "-" + type;
                 actorSystem.actorOf(DummyShard.props(configuration, shardId), shardId);
             }

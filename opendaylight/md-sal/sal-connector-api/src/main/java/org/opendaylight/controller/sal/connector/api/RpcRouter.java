@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.connector.api;
 import java.util.concurrent.Future;
 
 /**
+ * Interface for an RPC router.
  *
  * @author ttkacik
  *
@@ -19,31 +20,30 @@ import java.util.concurrent.Future;
  * @param <D> Data Type
  */
 public interface RpcRouter<C,T,R,D> {
-
-
-
     Future<RpcReply<D>> sendRpc(RpcRequest<C, T, R, D> input);
 
 
     /**
-     *
-     * @author
+     * Interface for an RPC request.
      *
      * @param <C> Routing Context Identifier
-        * @param <R> Route Type
-        * @param <T> Rpc Type
-        * @param <D> Data Type
+     * @param <R> Route Type
+     * @param <T> Rpc Type
+     * @param <D> Data Type
      */
     interface RpcRequest<C,T,R,D> {
 
         RouteIdentifier<C,T,R> getRoutingInformation();
+
         D getPayload();
     }
 
     interface RouteIdentifier<C,T,R> {
 
         C getContext(); // defines a routing table (e.g. NodeContext)
+
         T getType(); // rpc type
+
         R getRoute(); // e.g. (node identity)
     }
 
