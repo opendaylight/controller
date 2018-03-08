@@ -31,10 +31,7 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
     private static final Invoker<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> MANAGER_INVOKER =
         (listener, notification) -> {
             // FIXME: this is inefficient, as we could grab the entire queue for the listener and post it
-            final DOMDataTreeChangeListener inst = listener.getInstance();
-            if (inst != null) {
-                inst.onDataTreeChanged(Collections.singletonList(notification));
-            }
+            listener.getInstance().onDataTreeChanged(Collections.singletonList(notification));
         };
 
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMStoreTreeChangePublisher.class);

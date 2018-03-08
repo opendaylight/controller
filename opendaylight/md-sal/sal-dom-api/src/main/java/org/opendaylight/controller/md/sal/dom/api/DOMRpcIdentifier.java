@@ -100,7 +100,7 @@ public abstract class DOMRpcIdentifier {
         final int prime = 31;
         int result = 1;
         result = prime * result + type.hashCode();
-        result = prime * result + (getContextReference() == null ? 0 : getContextReference().hashCode());
+        result = prime * result + getContextReference().hashCode();
         return result;
     }
 

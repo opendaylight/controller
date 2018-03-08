@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public final class RegistrationTreeNode<T> implements Identifiable<PathArgument>
      * @param arg Child identifier
      * @return Collection of children, guaranteed to be non-null.
      */
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED")
     public @Nonnull Collection<RegistrationTreeNode<T>> getInexactChildren(@Nonnull final PathArgument arg) {
         Preconditions.checkNotNull(arg);
         if (arg instanceof NodeWithValue || arg instanceof NodeIdentifierWithPredicates) {

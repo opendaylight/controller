@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -232,6 +233,7 @@ final class ResolveDataChangeState {
      * @param after after-image
      * @param map target map
      */
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED")
     public void collectEvents(final NormalizedNode<?, ?> before, final NormalizedNode<?, ?> after,
             final Multimap<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> map) {
         for (Entry<DataChangeListenerRegistration<?>, Builder> e : baseBuilders.entrySet()) {

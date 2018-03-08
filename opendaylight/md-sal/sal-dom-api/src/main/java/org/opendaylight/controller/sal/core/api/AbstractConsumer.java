@@ -29,13 +29,14 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator,Serv
         tracker.open();
     }
 
-
-
     @Override
     public final void stop(final BundleContext bundleContext) throws Exception {
         stopImpl(bundleContext);
         broker = null;
-        tracker.close();
+
+        if (tracker != null) {
+            tracker.close();
+        }
     }
 
     protected void startImpl(final BundleContext bundleContext) {
@@ -54,7 +55,7 @@ public abstract class AbstractConsumer implements Consumer, BundleActivator,Serv
 
     @Override
     public Broker addingService(final ServiceReference<Broker> reference) {
-        if (broker == null) {
+        if (broker == null && context != null) {
             broker = context.getService(reference);
             broker.registerConsumer(this, context);
             return broker;

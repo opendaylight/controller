@@ -13,6 +13,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -38,6 +39,7 @@ public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedW
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED")
     public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
         LOG.debug("Tx: {} Read: {}", getIdentifier(), path);
         checkNotNull(path, "Path must not be null.");

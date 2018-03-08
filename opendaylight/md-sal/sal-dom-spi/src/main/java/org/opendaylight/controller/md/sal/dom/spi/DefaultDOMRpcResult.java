@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +27,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 @Beta
 public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Serializable {
     private static final long serialVersionUID = 1L;
+
+    // Flagged as "Non-transient non-serializable instance field" - the Collection is Serializable but the RpcError
+    // interface isn't. In lieu of changing the interface, we assume the implementation is Serializable which is
+    // reasonable since the only implementation that is actually used is from the RpcResultBuilder.
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final Collection<RpcError> errors;
+
+    // Unfortunately the NormalizedNode interface isn't Serializable but we assume the implementations are.
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final NormalizedNode<?, ?> result;
 
     private static Collection<RpcError> asCollection(final RpcError... errors) {
