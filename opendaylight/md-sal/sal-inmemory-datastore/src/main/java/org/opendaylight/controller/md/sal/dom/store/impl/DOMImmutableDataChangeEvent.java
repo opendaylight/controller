@@ -133,8 +133,7 @@ public final class DOMImmutableDataChangeEvent implements
         private final Set<YangInstanceIdentifier> removed = new HashSet<>();
 
         private Builder(final DataChangeScope scope) {
-            Preconditions.checkNotNull(scope, "Data change scope should not be null.");
-            this.scope = scope;
+            this.scope = Preconditions.checkNotNull(scope, "Data change scope should not be null.");
         }
 
         public Builder setAfter(final NormalizedNode<?, ?> node) {

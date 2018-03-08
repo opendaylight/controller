@@ -38,7 +38,7 @@ public abstract class AbstractMXBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMXBean.class);
 
-    public static String BASE_JMX_PREFIX = "org.opendaylight.controller:";
+    public static final String BASE_JMX_PREFIX = "org.opendaylight.controller:";
 
     private final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 

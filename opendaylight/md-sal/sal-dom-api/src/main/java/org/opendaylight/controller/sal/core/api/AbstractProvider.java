@@ -45,14 +45,18 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
     @Override
     public final void stop(final BundleContext bundleContext) throws Exception {
         broker = null;
-        tracker.close();
+
+        if (tracker != null) {
+            tracker.close();
+        }
+
         tracker = null;
         stopImpl(bundleContext);
     }
 
     @Override
     public Broker addingService(final ServiceReference<Broker> reference) {
-        if (broker == null) {
+        if (broker == null && context != null) {
             broker = context.getService(reference);
             broker.registerProvider(this, context);
             return broker;

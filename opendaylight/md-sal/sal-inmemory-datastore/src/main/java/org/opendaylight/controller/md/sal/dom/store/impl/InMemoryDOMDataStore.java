@@ -67,9 +67,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String>
             (listener, notification) -> {
                 final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> inst =
                         listener.getInstance();
-                if (inst != null) {
-                    inst.onDataChanged(notification);
-                }
+                inst.onDataChanged(notification);
             };
 
     private final DataTree dataTree;
