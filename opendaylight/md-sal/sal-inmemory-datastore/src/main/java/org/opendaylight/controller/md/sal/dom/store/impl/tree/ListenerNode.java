@@ -67,7 +67,11 @@ public class ListenerNode implements StoreTreeNode<ListenerNode>, Identifiable<P
 
     @Override
     public boolean equals(final Object obj) {
-        return delegate.equals(obj);
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        return delegate.equals(((ListenerNode)obj).delegate);
     }
 
     @Override

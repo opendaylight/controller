@@ -60,7 +60,9 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
     @Override
     public final  void stop(BundleContext bundleContext) throws Exception {
-        tracker.close();
+        if (tracker != null) {
+            tracker.close();
+        }
         stopImpl(bundleContext);
     }
 

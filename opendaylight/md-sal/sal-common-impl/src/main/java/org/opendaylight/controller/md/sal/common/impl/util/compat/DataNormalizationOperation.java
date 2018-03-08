@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -221,6 +222,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
+        @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
                     .mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) currentArg);
@@ -249,6 +251,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
+        @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.unkeyedListEntryBuilder().withNodeIdentifier((NodeIdentifier) currentArg).build();
         }
@@ -262,6 +265,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
+        @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.containerBuilder().withNodeIdentifier((NodeIdentifier) currentArg).build();
         }

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.common.util;
 
 import com.google.common.collect.ImmutableList;
-import java.io.Serializable;
 import java.util.Collection;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -37,8 +36,7 @@ public final class Rpcs {
         return new RpcResultTO<>(successful, null, errors);
     }
 
-    private static class RpcResultTO<T> implements RpcResult<T>, Serializable, Immutable {
-        private static final long serialVersionUID = 1L;
+    private static class RpcResultTO<T> implements RpcResult<T>, Immutable {
         private final Collection<RpcError> errors;
         private final T result;
         private final boolean successful;
