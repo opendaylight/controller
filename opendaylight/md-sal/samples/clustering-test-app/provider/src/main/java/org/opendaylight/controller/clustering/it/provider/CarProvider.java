@@ -96,7 +96,7 @@ public class CarProvider implements CarService {
 
     public void close() {
         stopThread();
-        unregisterCommitCohort();
+        closeCommitCohortRegistration();
     }
 
     private void stopThread() {
@@ -254,11 +254,8 @@ public class CarProvider implements CarService {
         final ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration =
                 dataProvider.registerDataTreeChangeListener(CARS_DTID, new CarDataTreeChangeListener());
 
-        if (carsDtclRegistration != null) {
-            carsDtclRegistrations.add(carsDtclRegistration);
-            return RpcResultBuilder.<Void>success().buildFuture();
-        }
-        return RpcResultBuilder.<Void>failed().buildFuture();
+        carsDtclRegistrations.add(carsDtclRegistration);
+        return RpcResultBuilder.<Void>success().buildFuture();
     }
 
     @Override
@@ -279,18 +276,17 @@ public class CarProvider implements CarService {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public Future<RpcResult<Void>> unregisterCommitCohort() {
-        final DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort> reg = commitCohortReg.getAndSet(null);
-        if (reg != null) {
-            try {
-                reg.close();
-                LOG_CAR_PROVIDER.info("Unregistered commit cohort");
-            } catch (Exception e) {
-                return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
-                        "Error closing commit cohort registration", e).buildFuture();
-            }
-        }
+        closeCommitCohortRegistration();
 
         return RpcResultBuilder.<Void>success().buildFuture();
+    }
+
+    private void closeCommitCohortRegistration() {
+        final DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort> reg = commitCohortReg.getAndSet(null);
+        if (reg != null) {
+            reg.close();
+            LOG_CAR_PROVIDER.info("Unregistered commit cohort");
+        }
     }
 
     @Override

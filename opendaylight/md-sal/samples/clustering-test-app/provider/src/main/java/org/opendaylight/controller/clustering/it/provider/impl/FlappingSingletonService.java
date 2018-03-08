@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
@@ -32,7 +33,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
     private final ClusterSingletonServiceProvider singletonServiceProvider;
     private final AtomicBoolean active = new AtomicBoolean(true);
 
-    private volatile long flapCount = 0;
+    private final AtomicLong flapCount = new AtomicLong();
     private volatile ClusterSingletonServiceRegistration registration;
 
     public FlappingSingletonService(final ClusterSingletonServiceProvider singletonServiceProvider) {
@@ -56,7 +57,9 @@ public class FlappingSingletonService implements ClusterSingletonService {
             } catch (Exception e) {
                 LOG.warn("There was a problem closing flapping singleton service.", e);
                 setInactive();
-                flapCount = -flapCount;
+
+                final long count = flapCount.get();
+                flapCount.compareAndSet(count, -count);
             }
         });
     }
@@ -66,7 +69,7 @@ public class FlappingSingletonService implements ClusterSingletonService {
     public ListenableFuture<Void> closeServiceInstance() {
         LOG.debug("Closing flapping-singleton-service, flapCount: {}", flapCount);
 
-        flapCount++;
+        flapCount.incrementAndGet();
         if (active.get()) {
             // TODO direct registration/close seem to trigger a bug in singleton state transitions,
             // remove  whole executor shenanigans after it's fixed.
@@ -78,7 +81,9 @@ public class FlappingSingletonService implements ClusterSingletonService {
                 } catch (RuntimeException e) {
                     LOG.warn("There was a problem re-registering flapping singleton service.", e);
                     setInactive();
-                    flapCount = -flapCount - 1;
+
+                    final long count = flapCount.get();
+                    flapCount.compareAndSet(count, -count - 1);
                 }
 
             }, 200, TimeUnit.MILLISECONDS);
@@ -96,6 +101,6 @@ public class FlappingSingletonService implements ClusterSingletonService {
         LOG.debug("Setting flapping-singleton-service to inactive, flap-count: {}", flapCount);
 
         active.set(false);
-        return flapCount;
+        return flapCount.get();
     }
 }

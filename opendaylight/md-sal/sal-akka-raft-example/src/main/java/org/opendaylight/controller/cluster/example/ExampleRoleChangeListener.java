@@ -88,13 +88,11 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     private void populateRegistry(String memberName) {
-        for (String shard: SHARDS_TO_MONITOR) {
-            String notifier = new StringBuilder().append(NOTIFIER_AKKA_URL).append(memberName)
+        String notifier = new StringBuilder().append(NOTIFIER_AKKA_URL).append(memberName)
                 .append("/").append(memberName).append("-notifier").toString();
 
-            if (!notifierRegistrationStatus.containsKey(notifier)) {
-                notifierRegistrationStatus.put(notifier, false);
-            }
+        if (!notifierRegistrationStatus.containsKey(notifier)) {
+            notifierRegistrationStatus.put(notifier, false);
         }
 
         if (!registrationSchedule.isCancelled()) {

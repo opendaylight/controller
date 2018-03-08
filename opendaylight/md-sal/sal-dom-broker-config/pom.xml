@@ -12,6 +12,13 @@
   <version>1.8.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <properties>
+    <!-- The Java classes are mostly config yang-generated wjich we don't want analyzed by findbugs.
+         However the generated package names don't conform to the findbugs exclusion filter
+         hence we explicitly skip findbugs. -->
+    <findbugs.skip>true</findbugs.skip>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

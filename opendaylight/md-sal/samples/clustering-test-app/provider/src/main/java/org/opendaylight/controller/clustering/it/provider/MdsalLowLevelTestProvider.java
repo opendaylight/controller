@@ -21,8 +21,6 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -552,10 +550,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                 new CheckPublishNotificationsOutputBuilder().setActive(!task.isFinished());
 
         if (task.getLastError() != null) {
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw);
             LOG.error("Last error for {}", task, task.getLastError());
-            checkPublishNotificationsOutputBuilder.setLastError(task.getLastError().toString() + sw.toString());
+            checkPublishNotificationsOutputBuilder.setLastError(task.getLastError().toString());
         }
 
         final CheckPublishNotificationsOutput output =

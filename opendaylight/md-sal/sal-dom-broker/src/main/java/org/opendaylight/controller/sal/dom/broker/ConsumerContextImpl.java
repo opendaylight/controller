@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
 import java.util.Collection;
-import javax.annotation.concurrent.GuardedBy;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer;
@@ -24,9 +24,8 @@ class ConsumerContextImpl implements ConsumerSession {
     private final ClassToInstanceMap<BrokerService> instantiatedServices = MutableClassToInstanceMap.create();
     private final Consumer consumer;
 
-    private BrokerImpl broker = null;
-    @GuardedBy("this")
-    private boolean closed = false;
+    private final BrokerImpl broker;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     ConsumerContextImpl(final Consumer provider, final BrokerImpl brokerImpl) {
         broker = brokerImpl;
@@ -52,27 +51,21 @@ class ConsumerContextImpl implements ConsumerSession {
 
     @Override
     public void close() {
-        synchronized (this) {
-            if (closed) {
-                return;
+        if (closed.compareAndSet(false, true)) {
+            Collection<BrokerService> toStop = instantiatedServices.values();
+            for (BrokerService brokerService : toStop) {
+                if (brokerService instanceof AbstractBrokerServiceProxy<?>) {
+                    ((AbstractBrokerServiceProxy<?>) brokerService).close();
+                }
             }
-            this.closed = true;
+            broker.consumerSessionClosed(this);
         }
-
-        Collection<BrokerService> toStop = instantiatedServices.values();
-        for (BrokerService brokerService : toStop) {
-            if (brokerService instanceof AbstractBrokerServiceProxy<?>) {
-                ((AbstractBrokerServiceProxy<?>) brokerService).close();
-            }
-        }
-        broker.consumerSessionClosed(this);
-        broker = null;
     }
 
 
     @Override
-    public synchronized boolean isClosed() {
-        return closed;
+    public boolean isClosed() {
+        return closed.get();
     }
 
     /**
@@ -95,6 +88,6 @@ class ConsumerContextImpl implements ConsumerSession {
     }
 
     protected final void checkNotClosed() {
-        Preconditions.checkState(!closed, "Session is closed.");
+        Preconditions.checkState(!closed.get(), "Session is closed.");
     }
 }

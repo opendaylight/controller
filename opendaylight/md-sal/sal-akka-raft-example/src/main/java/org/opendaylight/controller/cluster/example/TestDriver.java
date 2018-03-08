@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +76,12 @@ public class TestDriver {
         System.out.println("Enter command (type bye to exit):");
 
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));
         while (true) {
             String command = br.readLine();
+            if (command == null) {
+                continue;
+            }
             if (command.startsWith("bye")) {
                 System.exit(0);
 
