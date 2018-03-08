@@ -32,6 +32,7 @@ final class FinalizableScheduledExecutorService extends ScheduledThreadPoolExecu
     @Override
     @SuppressWarnings("checkstyle:NoFinalizer")
     protected void finalize() {
+        super.finalize();
         super.shutdownNow();
     }
 }

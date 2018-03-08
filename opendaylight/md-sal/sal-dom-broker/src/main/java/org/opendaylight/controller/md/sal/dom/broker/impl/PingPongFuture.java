@@ -22,10 +22,11 @@ final class PingPongFuture extends AbstractCheckedFuture<Void, TransactionCommit
 
     @Override
     protected TransactionCommitFailedException mapException(final Exception exception) {
-        if (exception.getCause() instanceof TransactionCommitFailedException) {
-            return (TransactionCommitFailedException) exception.getCause();
+        final Throwable cause = exception.getCause();
+        if (cause instanceof TransactionCommitFailedException) {
+            return (TransactionCommitFailedException) cause;
         } else {
-            return new TransactionCommitFailedException(exception.getMessage(), exception.getCause());
+            return new TransactionCommitFailedException(exception.getMessage(), cause);
         }
     }
 }

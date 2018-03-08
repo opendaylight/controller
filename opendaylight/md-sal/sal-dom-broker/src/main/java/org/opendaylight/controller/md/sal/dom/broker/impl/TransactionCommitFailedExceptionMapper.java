@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 
@@ -34,5 +35,11 @@ public final class TransactionCommitFailedExceptionMapper extends ExceptionMappe
     @Override
     protected TransactionCommitFailedException newWithCause(final String message, final Throwable cause) {
         return new TransactionCommitFailedException(message, cause);
+    }
+
+    @Override
+    @SuppressFBWarnings("BC_UNCONFIRMED_CAST_OF_RETURN_VALUE")
+    public TransactionCommitFailedException apply(Exception input) {
+        return super.apply(input);
     }
 }
