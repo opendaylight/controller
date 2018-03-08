@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.clustering.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -135,9 +136,11 @@ public class LegacyEntityOwnershipServiceAdapter implements EntityOwnershipServi
         }
 
         @Override
+        @SuppressFBWarnings("BC_UNCONFIRMED_CAST_OF_RETURN_VALUE")
         public void ownershipChanged(final DOMEntityOwnershipChange ownershipChange) {
-            Entity entity = new Entity(ownershipChange.getEntity().getType(),
-                                       ownershipChange.getEntity().getIdentifier());
+            final DOMEntity domEntity = ownershipChange.getEntity();
+            Entity entity = new Entity(domEntity.getType(),
+                                       domEntity.getIdentifier());
             delegateListener.ownershipChanged(new EntityOwnershipChange(entity, ownershipChange.getState().wasOwner(),
                                                                         ownershipChange.getState().isOwner(),
                                                                         ownershipChange.getState().hasOwner(),

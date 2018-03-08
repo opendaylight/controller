@@ -48,11 +48,9 @@ final class DOMNotificationRouterEvent {
         LOG.trace("Start delivery of notification {}", notification);
         for (ListenerRegistration<? extends DOMNotificationListener> r : subscribers) {
             final DOMNotificationListener listener = r.getInstance();
-            if (listener != null) {
-                LOG.trace("Notifying listener {}", listener);
-                listener.onNotification(notification);
-                LOG.trace("Listener notification completed");
-            }
+            LOG.trace("Notifying listener {}", listener);
+            listener.onNotification(notification);
+            LOG.trace("Listener notification completed");
         }
         LOG.trace("Delivery completed");
     }

@@ -31,7 +31,7 @@ public class LogGenerator {
         clientToLoggingThread.remove(client);
     }
 
-    public class LoggingThread implements Runnable {
+    public static class LoggingThread implements Runnable {
 
         private final ActorRef clientActor;
         private volatile boolean stopLogging = false;

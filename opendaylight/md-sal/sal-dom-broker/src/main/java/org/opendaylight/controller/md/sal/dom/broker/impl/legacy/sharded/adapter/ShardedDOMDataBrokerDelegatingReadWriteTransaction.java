@@ -24,7 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.Queue;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -131,7 +131,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
         final Queue<Modification> currentHistory = Lists.newLinkedList(modificationHistoryMap.get(store));
         Futures.addCallback(initialReadMap.get(store), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
             @Override
-            public void onSuccess(@Nullable final Optional<NormalizedNode<?, ?>> result) {
+            public void onSuccess(@Nonnull final Optional<NormalizedNode<?, ?>> result) {
                 final DataTreeModification mod = snapshotMap.get(store).newModification();
                 if (result.isPresent()) {
                     mod.write(path, result.get());

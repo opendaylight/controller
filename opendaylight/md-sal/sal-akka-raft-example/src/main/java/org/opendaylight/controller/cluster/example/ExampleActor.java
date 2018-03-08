@@ -151,7 +151,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         state.putAll(((MapState)snapshotState).state);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Snapshot applied to state : {}", ((HashMap<?, ?>) state).size());
+            LOG.debug("Snapshot applied to state : {}", state.size());
         }
     }
 

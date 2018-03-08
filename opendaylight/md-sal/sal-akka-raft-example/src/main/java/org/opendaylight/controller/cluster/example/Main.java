@@ -14,6 +14,7 @@ import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ public final class Main {
 
         ActorRef clientActor = ACTOR_SYSTEM.actorOf(ClientActor.props(example1Actor));
         BufferedReader br =
-            new BufferedReader(new InputStreamReader(System.in));
+            new BufferedReader(new InputStreamReader(System.in, Charset.defaultCharset()));
 
         System.out.println("Usage :");
         System.out.println("s <1-3> to start a peer");
@@ -64,6 +65,9 @@ public final class Main {
             System.out.print("Enter command (0 to exit):");
             try {
                 String line = br.readLine();
+                if (line == null) {
+                    continue;
+                }
                 String[] split = line.split(" ");
                 if (split.length > 1) {
                     String command = split[0];

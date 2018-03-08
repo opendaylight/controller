@@ -157,7 +157,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
     private void notifyListenerTypesChanged(final Set<SchemaPath> typesAfter) {
         final List<ListenerRegistration<DOMNotificationSubscriptionListener>> listenersAfter = ImmutableList
                 .copyOf(subscriptionListeners.getListeners());
-        executor.submit(() -> {
+        executor.execute(() -> {
             for (final ListenerRegistration<DOMNotificationSubscriptionListener> subListener : listenersAfter) {
                 try {
                     subListener.getInstance().onSubscriptionChanged(typesAfter);
@@ -172,7 +172,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
     public <L extends DOMNotificationSubscriptionListener> ListenerRegistration<L> registerSubscriptionListener(
             final L listener) {
         final Set<SchemaPath> initialTypes = listeners.keySet();
-        executor.submit(() -> listener.onSubscriptionChanged(initialTypes));
+        executor.execute(() -> listener.onSubscriptionChanged(initialTypes));
         return subscriptionListeners.registerWithType(listener);
     }
 
