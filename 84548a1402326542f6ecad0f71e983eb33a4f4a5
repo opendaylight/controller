@@ -16,6 +16,24 @@
       "revId": "84548a1402326542f6ecad0f71e983eb33a4f4a5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "61fa73c1_cd7ff598",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FinalizableScheduledExecutorService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-09T15:42:35Z",
+      "side": 1,
+      "message": "yeah - I wasn\u0027t worried about it",
+      "parentUuid": "bb9b89ab_c97bb792",
+      "revId": "84548a1402326542f6ecad0f71e983eb33a4f4a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
