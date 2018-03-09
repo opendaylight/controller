@@ -16,6 +16,24 @@
       "revId": "993d41a0791c6444b2b05d24a9a3de4168e23115",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20d2c970_151f8b69",
+        "filename": "opendaylight/md-sal/sal-binding-config/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/BindingBrokerImplModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-09T15:36:53Z",
+      "side": 1,
+      "message": "oh yeah - this class will be going away anyway - I hope in Flourine.",
+      "parentUuid": "0acbaa83_8592a7cd",
+      "revId": "993d41a0791c6444b2b05d24a9a3de4168e23115",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
