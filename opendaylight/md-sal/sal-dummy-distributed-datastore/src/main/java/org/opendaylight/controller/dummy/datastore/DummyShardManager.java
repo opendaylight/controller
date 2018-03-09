@@ -11,7 +11,6 @@ package org.opendaylight.controller.dummy.datastore;
 import akka.actor.ActorContext;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.japi.Creator;
 
 public class DummyShardManager extends UntypedActor {
     public DummyShardManager(Configuration configuration, String memberName, String[] shardNames,
@@ -25,27 +24,7 @@ public class DummyShardManager extends UntypedActor {
     }
 
     public static Props props(Configuration configuration, String memberName, String[] shardNames, String type) {
-        return Props.create(new DummyShardManagerCreator(configuration, memberName, shardNames, type));
-    }
-
-    private static class DummyShardManagerCreator implements Creator<DummyShardManager> {
-
-        private final Configuration configuration;
-        private final String memberName;
-        private final String[] shardNames;
-        private final String type;
-
-        DummyShardManagerCreator(Configuration configuration, String memberName, String[] shardNames, String type) {
-            this.configuration = configuration;
-            this.memberName = memberName;
-            this.shardNames = shardNames;
-            this.type = type;
-        }
-
-        @Override
-        public DummyShardManager create() throws Exception {
-            return new DummyShardManager(configuration, memberName, shardNames, type);
-        }
+        return Props.create(DummyShardManager.class, configuration, memberName, shardNames, type);
     }
 
     private static class DummyShardsCreator {

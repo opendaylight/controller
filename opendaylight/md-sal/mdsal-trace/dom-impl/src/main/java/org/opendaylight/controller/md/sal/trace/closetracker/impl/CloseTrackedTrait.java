@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -45,6 +46,7 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
 
     @Override
     @Nullable
+    @SuppressFBWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
     public StackTraceElement[] getAllocationContextStackTrace() {
         return allocationContext != null ? allocationContext.getStackTrace() : null;
     }

@@ -22,13 +22,11 @@ class TracingReadOnlyTransaction
         implements DOMDataReadOnlyTransaction {
 
     private final DOMDataReadOnlyTransaction delegate;
-    private final TracingBroker tracingBroker;
 
-    TracingReadOnlyTransaction(DOMDataReadOnlyTransaction delegate, TracingBroker tracingBroker,
+    TracingReadOnlyTransaction(DOMDataReadOnlyTransaction delegate,
             CloseTrackedRegistry<TracingReadOnlyTransaction> readOnlyTransactionsRegistry) {
         super(readOnlyTransactionsRegistry);
         this.delegate = delegate;
-        this.tracingBroker = tracingBroker;
     }
 
     @Override

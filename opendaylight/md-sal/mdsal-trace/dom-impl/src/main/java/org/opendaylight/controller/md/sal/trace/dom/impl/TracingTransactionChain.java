@@ -40,7 +40,7 @@ class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionCha
     @SuppressWarnings("resource")
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         final DOMDataReadOnlyTransaction tx = delegate.newReadOnlyTransaction();
-        return new TracingReadOnlyTransaction(tx, tracingBroker, readOnlyTransactionsRegistry);
+        return new TracingReadOnlyTransaction(tx, readOnlyTransactionsRegistry);
     }
 
     @Override

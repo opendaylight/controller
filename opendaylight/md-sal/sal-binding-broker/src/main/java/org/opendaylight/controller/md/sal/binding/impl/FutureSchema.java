@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
@@ -90,7 +91,7 @@ class FutureSchema implements AutoCloseable {
     boolean waitForSchema(final QNameModule module) {
         return addPostponedOpAndWait(new FutureSchemaPredicate() {
             @Override
-            public boolean apply(final BindingRuntimeContext input) {
+            public boolean apply(@Nonnull final BindingRuntimeContext input) {
                 return input.getSchemaContext().findModule(module).isPresent();
             }
         });
