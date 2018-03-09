@@ -16,6 +16,24 @@
       "revId": "c84db396c1c5b1496cdf0f924427fae2cc2e9e2b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ffbb098a_700cd0c3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopic.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-09T15:44:39Z",
+      "side": 1,
+      "message": "I recall from the past there is actually a CS rule about this but apparently we don\u0027t have it enabled (or it might have been a PMD rule).",
+      "parentUuid": "027c4f97_7d62513d",
+      "revId": "c84db396c1c5b1496cdf0f924427fae2cc2e9e2b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
