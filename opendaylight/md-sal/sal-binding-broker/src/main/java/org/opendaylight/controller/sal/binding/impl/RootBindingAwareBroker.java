@@ -188,7 +188,7 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
         return getRoot().registerRouteChangeListener(listener);
     }
 
-    public class RootSalInstance extends
+    public static class RootSalInstance extends
             AbstractBindingSalProviderInstance<NotificationProviderService, RpcProviderRegistry> {
 
         public RootSalInstance(final RpcProviderRegistry rpcRegistry,

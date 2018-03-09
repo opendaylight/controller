@@ -71,8 +71,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         if (listener instanceof ClusteredDataChangeListener) {
             domDataChangeListener = new TranslatingClusteredDataChangeInvoker(store, path, listener, triggeringScope);
         } else {
-            domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
-                triggeringScope);
+            domDataChangeListener = new TranslatingDataChangeInvoker(path, listener);
         }
         final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(path);
         final ListenerRegistration<DOMDataChangeListener> domRegistration =
@@ -130,16 +129,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
         private final DataChangeListener bindingDataChangeListener;
-        private final LogicalDatastoreType store;
         private final InstanceIdentifier<?> path;
-        private final DataChangeScope triggeringScope;
 
-        TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
-                final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
-            this.store = store;
+        TranslatingDataChangeInvoker(final InstanceIdentifier<?> path,
+                final DataChangeListener bindingDataChangeListener) {
             this.path = path;
             this.bindingDataChangeListener = bindingDataChangeListener;
-            this.triggeringScope = triggeringScope;
         }
 
         @Override
@@ -161,7 +156,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         TranslatingClusteredDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
                 final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
-            super(store, path, bindingDataChangeListener, triggeringScope);
+            super(path, bindingDataChangeListener);
         }
     }
 

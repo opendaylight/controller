@@ -29,10 +29,4 @@ public class BindingAwareZeroMqRpcRouter implements BindingAwareRpcRouter {
         return null;
     }
 
-    // Receiver part - invoked when request is received and deserialized
-    private Future<RpcReply<byte[]>> receivedRequest(RpcRequest<String, String, String, byte[]> input) {
-
-        return mdSalRouter.sendRpc(input);
-    }
-
 }
