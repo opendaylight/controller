@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HeliumNotificationProviderServiceAdapter extends HeliumNotificationServiceAdapter
-        implements NotificationProviderService, AutoCloseable {
+        implements NotificationProviderService {
     private static final Logger LOG = LoggerFactory.getLogger(HeliumNotificationProviderServiceAdapter.class);
 
     private final NotificationPublishService notificationPublishService;

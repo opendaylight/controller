@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.connector.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.Future;
 import org.opendaylight.yangtools.concepts.Immutable;
 
@@ -16,6 +17,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
     Future<org.opendaylight.controller.sal.connector.api.RpcRouter.RpcReply<byte[]>> sendRpc(
             RpcRequest<String, String, String, byte[]> input);
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     class BindingAwareRequest implements RpcRequest<String, String, String, byte[]>, Immutable {
 
         private final BindingAwareRouteIdentifier routingInformation;
@@ -32,6 +34,7 @@ public interface BindingAwareRpcRouter extends RpcRouter<String, String, String,
         }
 
         @Override
+        @SuppressFBWarnings("EI_EXPOSE_REP")
         public byte[] getPayload() {
             return payload;
         }

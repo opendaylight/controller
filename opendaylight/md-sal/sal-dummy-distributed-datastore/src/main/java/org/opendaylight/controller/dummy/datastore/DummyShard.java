@@ -10,7 +10,6 @@ package org.opendaylight.controller.dummy.datastore;
 
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.japi.Creator;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -110,24 +109,6 @@ public class DummyShard extends UntypedActor {
     }
 
     public static Props props(Configuration configuration, final String followerId) {
-
-        return Props.create(new DummyShardCreator(configuration, followerId));
-    }
-
-    private static class DummyShardCreator implements Creator<DummyShard> {
-
-        private static final long serialVersionUID = 1L;
-        private final Configuration configuration;
-        private final String followerId;
-
-        DummyShardCreator(Configuration configuration, String followerId) {
-            this.configuration = configuration;
-            this.followerId = followerId;
-        }
-
-        @Override
-        public DummyShard create() throws Exception {
-            return new DummyShard(configuration, followerId);
-        }
+        return Props.create(DummyShard.class, configuration, followerId);
     }
 }

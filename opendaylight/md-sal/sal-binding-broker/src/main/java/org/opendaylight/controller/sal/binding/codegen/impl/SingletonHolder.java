@@ -131,7 +131,7 @@ public final class SingletonHolder {
         return COMMIT_EXECUTOR;
     }
 
-    public static ExecutorService getDefaultChangeEventExecutor() {
+    public static synchronized ExecutorService getDefaultChangeEventExecutor() {
         if (CHANGE_EVENT_EXECUTOR == null) {
             final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true)
                     .setNameFormat("md-sal-binding-change-%d").build();
