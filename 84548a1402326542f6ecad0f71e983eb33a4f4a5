@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb9b89ab_c97bb792",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FinalizableScheduledExecutorService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-09T15:23:03Z",
+      "side": 1,
+      "message": "If this were not in a samples/*test-app I would have suggested we look more into this, but as it is... I\u0027m fine with forgetting about this.",
+      "revId": "84548a1402326542f6ecad0f71e983eb33a4f4a5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
