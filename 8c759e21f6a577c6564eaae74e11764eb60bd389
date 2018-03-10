@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30fcf4e4_4d0f4a5a",
+        "filename": "opendaylight/md-sal/sal-akka-raft-example/src/main/java/org/opendaylight/controller/cluster/example/Main.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 1,
+      "message": "Dereference of the result of readLine() without nullcheck - the read blocks on input so won\u0027t ever be null but doesn\u0027t hurt to check anyway.",
+      "revId": "8c759e21f6a577c6564eaae74e11764eb60bd389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34d3dba6_987275a6",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/TransactionCommitFailedExceptionMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 1,
+      "message": "Unfortunately the parameterized return type is erased so FB sees it as Exception. Overriding the method with correct return type fixes the violation at the call sites so we only have to suppress here.",
+      "revId": "8c759e21f6a577c6564eaae74e11764eb60bd389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f398c11_78bf240b",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FinalizableScheduledExecutorService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 1,
+      "message": "Finalizer does not call superclass finalizer",
+      "revId": "8c759e21f6a577c6564eaae74e11764eb60bd389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

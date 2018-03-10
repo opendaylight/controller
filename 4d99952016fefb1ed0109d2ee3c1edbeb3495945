@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6cda15a_3e2f9d06",
+        "filename": "opendaylight/md-sal/sal-akka-raft-example/src/main/java/org/opendaylight/controller/cluster/example/ExampleActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Questionable cast to concrete collection",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2006e856_8ad55567",
+        "filename": "opendaylight/md-sal/sal-akka-raft-example/src/main/java/org/opendaylight/controller/cluster/example/ExampleRoleChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Dead store to local variable - shard is not used to construct the map key (maybe it should be or was at some point) so the loop is useless.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d5ceff6_6dcc4cd5",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMNotificationRouter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Method ignores return value",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2584b6d7_e22384f4",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/DOMNotificationRouterEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Redundant nullcheck of value known to be non-null",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2e507bc_2a68a824",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongFuture.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Unchecked/unconfirmed cast of return value from method - FB doesn\u0027t recognize that it is confirmed via getCause() but does when getCause() is put in a local.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b39735f_0d41e0b1",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Field not guarded against concurrent access - \u0027closed\u0027 is guarded by \u0027this\u0027 elsewhere. Make it an AtomicBoolean.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13f7aa5f_0c3004b3",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/osgi/ProxyFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Load of known null value \u0027service\u0027.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c704078_4305cf3d",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangSchemaUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "This class had many violations - rather than fixing them, a search revealed it is no longer used so remove it.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48bb87d9_e3c2e148",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Method ignores return value",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25cea703_05dfee22",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "Nothing\u0027s ever written to \u0027sw\u0027 so it\u0027s useless.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05eef30b_34daecc7",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FlappingSingletonService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T03:49:20Z",
+      "side": 0,
+      "message": "An increment to a volatile field isn\u0027t atomic - convert to AtomicLong.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
