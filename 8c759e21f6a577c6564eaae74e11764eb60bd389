@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1615e20e_50e84f6c",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/sal/binding/codegen/impl/SingletonHolder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T04:01:29Z",
+      "side": 0,
+      "message": "Incorrect lazy initialization of static field",
+      "range": {
+        "startLine": 135,
+        "startChar": 12,
+        "endLine": 135,
+        "endChar": 33
+      },
+      "revId": "8c759e21f6a577c6564eaae74e11764eb60bd389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58579d39_0b70c3ed",
+        "filename": "opendaylight/md-sal/sal-dummy-distributed-datastore/src/main/java/org/opendaylight/controller/dummy/datastore/DummyShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-10T04:01:29Z",
+      "side": 0,
+      "message": "Non-transient non-serializable instance field in serializable class - we don\u0027t need to use a Creator class to create the actor instance.",
+      "revId": "8c759e21f6a577c6564eaae74e11764eb60bd389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
