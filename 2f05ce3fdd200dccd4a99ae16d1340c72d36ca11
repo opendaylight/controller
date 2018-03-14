@@ -90,6 +90,24 @@
       "revId": "2f05ce3fdd200dccd4a99ae16d1340c72d36ca11",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67bb103c_536533c9",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/ListenerNode.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-14T21:20:01Z",
+      "side": 0,
+      "message": "Oups, you fixed a real bug here! It didn\u0027t do obj.delegate before!  As this class is not final, the equals() could be wrong because it would return true for an obj of a subclass that has th same delegate but has additional other fields, so better not use getClass() but ListenerNode.class ?  Or make this final.",
+      "parentUuid": "a68f0985_7922a3da",
+      "revId": "2f05ce3fdd200dccd4a99ae16d1340c72d36ca11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
