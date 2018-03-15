@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5741d74a_dc89135f",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-15T14:27:16Z",
+      "side": 1,
+      "message": "Right. Tell you what, I\u0027ve opened YANGTOOLS-865 and we\u0027ll move forward with this as is anyway.",
+      "parentUuid": "bcbb8959_c275290e",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45662a54_53d49674",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
         "patchSetId": 2
