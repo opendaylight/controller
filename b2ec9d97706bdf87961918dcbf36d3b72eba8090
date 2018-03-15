@@ -16,6 +16,24 @@
       "revId": "b2ec9d97706bdf87961918dcbf36d3b72eba8090",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "632249a2_97eded88",
+        "filename": "opendaylight/md-sal/sal-connector-api/src/main/java/org/opendaylight/controller/sal/connector/api/BindingAwareRpcRouter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-15T22:29:38Z",
+      "side": 1,
+      "message": "it adds overhead so I\u0027m wary of it. You also have to copy on the way out. Is it worth it?",
+      "parentUuid": "ad197a73_041e6de2",
+      "revId": "b2ec9d97706bdf87961918dcbf36d3b72eba8090",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
