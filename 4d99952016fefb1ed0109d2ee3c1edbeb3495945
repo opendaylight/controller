@@ -87,6 +87,41 @@
     },
     {
       "key": {
+        "uuid": "0e583145_eb5ef8b2",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongFuture.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-15T21:45:25Z",
+      "side": 0,
+      "message": "LGTM (and does not change cause rethrow behaviour)",
+      "parentUuid": "f2e507bc_2a68a824",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "26db1e06_d554e7d7",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-15T21:45:25Z",
+      "side": 0,
+      "message": "this tehcnically changes behaviour, no?  However with methods getService() and getBrokerChecked() protected by checkNotClosed(), this seems safe... BTW we (now) have this in org.opendaylight.infrautils.inject.AbstractLifecycle as well.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b39735f_0d41e0b1",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
         "patchSetId": 2
@@ -121,6 +156,24 @@
     },
     {
       "key": {
+        "uuid": "81c17c31_bd635f3f",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/osgi/ProxyFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-15T21:45:25Z",
+      "side": 0,
+      "message": "LGTM",
+      "parentUuid": "13f7aa5f_0c3004b3",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6c704078_4305cf3d",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangSchemaUtils.java",
         "patchSetId": 2
@@ -132,6 +185,24 @@
       "writtenOn": "2018-03-10T03:49:20Z",
       "side": 0,
       "message": "This class had many violations - rather than fixing them, a search revealed it is no longer used so remove it.",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "06763205_1ca29cfd",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/util/YangSchemaUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-15T21:45:25Z",
+      "side": 0,
+      "message": "LGTM (I\u0027ve done a quick search in all of autorelease)",
+      "parentUuid": "6c704078_4305cf3d",
       "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

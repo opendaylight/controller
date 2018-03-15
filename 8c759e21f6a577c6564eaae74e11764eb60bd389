@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "00cbbeaf_7b62314b",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/AbstractDOMDataBroker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-03-15T21:45:25Z",
+      "side": 1,
+      "message": "OK because AbstractDOMForwardedTransactionFactory implements AutoCloseable",
+      "revId": "8c759e21f6a577c6564eaae74e11764eb60bd389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34d3dba6_987275a6",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/TransactionCommitFailedExceptionMapper.java",
         "patchSetId": 2
