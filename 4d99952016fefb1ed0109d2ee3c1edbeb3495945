@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bcbb8959_c275290e",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-15T00:51:11Z",
+      "side": 1,
+      "message": "That would be nice but  it\u0027s in yangtools :)  Nothing I can do about that here right now. However the RpcError impl in yangtools is Serializable.",
+      "parentUuid": "c6f883d8_ca769114",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45662a54_53d49674",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2018-03-14T21:20:01Z",
       "side": 1,
       "message": "this is a bit scary.  I don\u0027t suppose you think we could and really should just make NormalizedNode Serializable ?",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6acfe3c9_3d030abb",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/spi/DefaultDOMRpcResult.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-15T00:51:11Z",
+      "side": 1,
+      "message": "Again would be nice - yangtools....",
+      "parentUuid": "45662a54_53d49674",
       "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -108,6 +108,24 @@
       "revId": "2f05ce3fdd200dccd4a99ae16d1340c72d36ca11",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dab85a6c_701b73f0",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/dom/store/impl/tree/ListenerNode.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-15T00:51:11Z",
+      "side": 0,
+      "message": "yeah - to be complete. But this class is local to this bundle and is deprecated and eclipse reveals this class isn\u0027t even used. Also this is the in-memory DS which is only used by UTs.  I plan on making a sweep thru the controller and remove long-deprecated code/classes. Given all that I don\u0027t think this is worth getting perfect.",
+      "parentUuid": "67bb103c_536533c9",
+      "revId": "2f05ce3fdd200dccd4a99ae16d1340c72d36ca11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
