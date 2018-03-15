@@ -122,6 +122,24 @@
     },
     {
       "key": {
+        "uuid": "ba42d50d_837919e2",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-15T22:21:35Z",
+      "side": 0,
+      "message": "yeah plus broker can be final if we don\u0027t null it out",
+      "parentUuid": "26db1e06_d554e7d7",
+      "revId": "4d99952016fefb1ed0109d2ee3c1edbeb3495945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b39735f_0d41e0b1",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/ConsumerContextImpl.java",
         "patchSetId": 2
