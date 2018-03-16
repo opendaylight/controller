@@ -52,6 +52,24 @@
       "revId": "b2ec9d97706bdf87961918dcbf36d3b72eba8090",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0f36e72_f663d1e0",
+        "filename": "opendaylight/md-sal/sal-connector-api/src/main/java/org/opendaylight/controller/sal/connector/api/BindingAwareRpcRouter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-03-16T02:02:54Z",
+      "side": 1,
+      "message": "It\u0027s telling us something but that doesn\u0027t mean we have to listen :) In this case I see the point - technically it\u0027s a vulnerability but in this case to alleviate it, you have to sacrifice performance. Trade-offs. That said I\u0027m fine either way as performance probably doesn\u0027t matter here.",
+      "parentUuid": "e4cd002e_087ccd49",
+      "revId": "b2ec9d97706bdf87961918dcbf36d3b72eba8090",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
