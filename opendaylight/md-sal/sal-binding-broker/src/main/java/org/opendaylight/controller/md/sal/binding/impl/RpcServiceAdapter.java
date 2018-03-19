@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -18,6 +17,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -30,6 +30,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -132,7 +134,7 @@ class RpcServiceAdapter implements InvocationHandler {
 
     private static ListenableFuture<RpcResult<?>> transformFuture(final SchemaPath rpc,
             final ListenableFuture<DOMRpcResult> domFuture, final BindingNormalizedNodeSerializer codec) {
-        return Futures.transform(domFuture, (Function<DOMRpcResult, RpcResult<?>>) input -> {
+        return Futures.transform(domFuture, input -> {
             final NormalizedNode<?, ?> domData = input.getResult();
             final DataObject bindingResult;
             if (domData != null) {
@@ -141,7 +143,13 @@ class RpcServiceAdapter implements InvocationHandler {
             } else {
                 bindingResult = null;
             }
-            return RpcResult.class.cast(RpcResultBuilder.success(bindingResult).build());
+
+            // DOMRpcResult does not have a notion of success, hence we have to reverse-engineer it by looking
+            // at reported errors and checking whether they are just warnings.
+            final Collection<RpcError> errors = input.getErrors();
+            return RpcResult.class.cast(RpcResultBuilder.status(errors.stream()
+                .noneMatch(error -> error.getSeverity() == ErrorSeverity.ERROR))
+                .withResult(bindingResult).withRpcErrors(errors).build());
         }, MoreExecutors.directExecutor());
     }
 
