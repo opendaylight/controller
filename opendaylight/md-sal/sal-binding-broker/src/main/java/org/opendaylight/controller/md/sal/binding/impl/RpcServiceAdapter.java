@@ -140,7 +140,17 @@ class RpcServiceAdapter implements InvocationHandler {
             } else {
                 bindingResult = null;
             }
-            return RpcResult.class.cast(RpcResultBuilder.success(bindingResult).build());
+            if (input.getErrors().isEmpty()) {
+                return RpcResult.class.cast(
+                        RpcResultBuilder.success(bindingResult)
+                                .build());
+            } else {
+                return RpcResult.class.cast(
+                        RpcResultBuilder.failed()
+                                .withRpcErrors(input.getErrors())
+                                .withResult(bindingResult)
+                                .build());
+            }
         });
     }
 
