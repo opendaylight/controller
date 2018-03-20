@@ -21,6 +21,7 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.mdsal.binding.model.api.JavaTypeName;
 import org.opendaylight.mdsal.binding.model.api.Type;
 import org.opendaylight.mdsal.binding.model.util.ReferencedTypeImpl;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
@@ -205,7 +206,7 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     @Override
     public Type getType() {
         // TODO: ReferencedTypeImpl from Types
-        return new ReferencedTypeImpl(this.packageName, getUpperCaseCammelCase());
+        return new ReferencedTypeImpl(JavaTypeName.create(this.packageName, getUpperCaseCammelCase()));
     }
 
     @Override

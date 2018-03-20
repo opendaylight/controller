@@ -47,6 +47,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Meth
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.ModuleField;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
+import org.opendaylight.mdsal.binding.model.api.JavaTypeName;
 import org.opendaylight.mdsal.binding.model.api.ParameterizedType;
 import org.opendaylight.mdsal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
@@ -202,7 +203,7 @@ public class TemplateFactory {
 
         boolean generateRuntime = false;
         String registratorFullyQualifiedName = null;
-        if ((mbe.getRuntimeBeans() != null)
+        if (mbe.getRuntimeBeans() != null
                 && !mbe.getRuntimeBeans().isEmpty()) {
             generateRuntime = true;
             final RuntimeBeanEntry rootEntry = RuntimeRegistratorFtlTemplate
@@ -288,7 +289,7 @@ public class TemplateFactory {
             if (returnType instanceof JavaAttribute) {
                 continue;
             }
-            if ((returnType instanceof ListAttribute) && (returnType.getOpenType() instanceof SimpleType)) {
+            if (returnType instanceof ListAttribute && returnType.getOpenType() instanceof SimpleType) {
                 continue;
             }
 
@@ -492,7 +493,7 @@ public class TemplateFactory {
                     final TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
                     returnType = serializeType(typedAttribute.getType());
 
-                    if ((attributeIfc instanceof JavaAttribute) && ((JavaAttribute)attrEntry.getValue()).isIdentityRef()) {
+                    if (attributeIfc instanceof JavaAttribute && ((JavaAttribute)attrEntry.getValue()).isIdentityRef()) {
                         returnType = serializeType(identityRefType);
                     }
 
@@ -531,20 +532,11 @@ public class TemplateFactory {
 
     private static final Type identityRefType = new Type() {
         public final Class<IdentityAttributeRef> IDENTITY_ATTRIBUTE_REF_CLASS = IdentityAttributeRef.class;
+        private final JavaTypeName identifier = JavaTypeName.create(IDENTITY_ATTRIBUTE_REF_CLASS);
 
         @Override
-        public String getPackageName() {
-            return this.IDENTITY_ATTRIBUTE_REF_CLASS.getPackage().getName();
-        }
-
-        @Override
-        public String getName() {
-            return this.IDENTITY_ATTRIBUTE_REF_CLASS.getSimpleName();
-        }
-
-        @Override
-        public String getFullyQualifiedName() {
-            return this.IDENTITY_ATTRIBUTE_REF_CLASS.getName();
+        public JavaTypeName getIdentifier() {
+            return identifier;
         }
     };
 
