@@ -8,8 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeSnapshot;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
+import org.opendaylight.mdsal.dom.spi.RegistrationTreeSnapshot;
 
 /**
  * A walking context, pretty much equivalent to an iterator, but it
