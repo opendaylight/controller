@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ForwardingObject;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -74,6 +75,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeLoopException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeServiceExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShard;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService;
@@ -283,6 +285,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers)
             throws DOMDataTreeLoopException {
         return shardedDOMDataTree.registerListener(listener, subtrees, allowRxMerges, producers);
+    }
+
+    @Override
+    public Map<Class<? extends DOMDataTreeServiceExtension>, DOMDataTreeServiceExtension> getSupportedExtensions() {
+        return ImmutableMap.of();
     }
 
     @Nonnull
