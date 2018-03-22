@@ -12,6 +12,7 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -78,6 +79,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         getSubtransaction(store).write(path, data);
     }
 
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF", justification = "Unrecognised NullableDecl")
     private static void checkInstanceIdentifierReferencesData(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
         Preconditions.checkArgument(data != null, "Attempted to store null data at %s", path);
