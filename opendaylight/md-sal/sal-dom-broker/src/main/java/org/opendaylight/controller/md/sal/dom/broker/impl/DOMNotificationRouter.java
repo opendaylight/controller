@@ -21,6 +21,7 @@ import com.lmax.disruptor.PhasedBackoffWaitStrategy;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
  * {@link #offerNotification(DOMNotification, long, TimeUnit)}
  * is realized by arming a background wakeup interrupt.
  */
+@SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "Void is the only allowed value")
 public final class DOMNotificationRouter implements AutoCloseable, DOMNotificationPublishService,
         DOMNotificationService, DOMNotificationSubscriptionListenerRegistry {
 
