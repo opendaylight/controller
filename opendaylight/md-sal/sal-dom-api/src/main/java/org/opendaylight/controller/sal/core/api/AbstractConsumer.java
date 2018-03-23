@@ -15,6 +15,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+/**
+ * Deprecated.
+ *
+ * @deprecated Use blueprint instead for code wiring.
+ */
+@Deprecated
 public abstract class AbstractConsumer implements Consumer, BundleActivator,ServiceTrackerCustomizer<Broker, Broker> {
 
     private BundleContext context;

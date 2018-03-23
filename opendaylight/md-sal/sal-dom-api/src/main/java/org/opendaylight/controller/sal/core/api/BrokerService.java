@@ -28,8 +28,9 @@ package org.opendaylight.controller.sal.core.api;
  * YANG and to reuse it in the development of {@link Consumer}s and
  * {@link Provider}s.
  *
- *
+ * @deprecated Use blueprint instead for code wiring.
  */
+@Deprecated
 public interface BrokerService {
 
 }

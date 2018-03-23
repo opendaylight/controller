@@ -31,7 +31,10 @@ import org.osgi.framework.BundleContext;
  * <p>
  * For more information about session-based access see {@link ConsumerSession}
  * and {@link ProviderSession}
+ *
+ * @deprecated Use blueprint instead for code wiring.
  */
+@Deprecated
 public interface Broker {
 
     /**

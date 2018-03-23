@@ -13,6 +13,12 @@ import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer.ConsumerFunctionality;
 import org.opendaylight.controller.sal.core.api.Provider.ProviderFunctionality;
 
+/**
+ * Deprecated.
+ *
+ * @deprecated Use blueprint instead for code wiring.
+ */
+@Deprecated
 public interface BrokerModule {
 
     Set<Class<? extends BrokerService>> getProvidedServices();

@@ -37,6 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(BrokerImpl.class);
 
