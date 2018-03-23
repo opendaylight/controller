@@ -12,13 +12,9 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
  * Transaction context. Tracks the relationship with the backend transaction.
@@ -27,7 +23,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  */
 final class PingPongTransaction implements FutureCallback<Void> {
     private final CheckedFuture<Void, TransactionCommitFailedException> submitFuture;
-    private final ListenableFuture<RpcResult<TransactionStatus>> commitFuture;
     private final DOMDataReadWriteTransaction delegate;
     private final SettableFuture<Void> future;
     private DOMDataReadWriteTransaction frontendTransaction;
@@ -36,7 +31,6 @@ final class PingPongTransaction implements FutureCallback<Void> {
         this.delegate = Preconditions.checkNotNull(delegate);
         future = SettableFuture.create();
         submitFuture = new PingPongFuture(future);
-        commitFuture = AbstractDataTransaction.convertToLegacyCommitFuture(submitFuture);
     }
 
     DOMDataReadWriteTransaction getTransaction() {
@@ -49,10 +43,6 @@ final class PingPongTransaction implements FutureCallback<Void> {
 
     CheckedFuture<Void, TransactionCommitFailedException> getSubmitFuture() {
         return submitFuture;
-    }
-
-    ListenableFuture<RpcResult<TransactionStatus>> getCommitFuture() {
-        return commitFuture;
     }
 
     @Override

@@ -39,7 +39,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * For a detailed explanation of how transaction are isolated and how transaction-local
  * changes are committed to global data tree, see
  * {@link AsyncReadTransaction}, {@link AsyncWriteTransaction},
- * {@link AsyncReadWriteTransaction} and {@link AsyncWriteTransaction#commit()}.
+ * {@link AsyncReadWriteTransaction} and {@link AsyncWriteTransaction#submit()}.
  *
  * <p>
  * It is strongly recommended to use the type of transaction, which
@@ -83,7 +83,7 @@ public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
      * Preconditions for mutation of data tree are captured from the snapshot of
      * data tree state, when the transaction is allocated. If data was
      * changed during transaction in an incompatible way then the commit of this transaction
-     * will fail. See {@link AsyncWriteTransaction#commit()} for more
+     * will fail. See {@link AsyncWriteTransaction#submit()} for more
      * details about conflicting and not-conflicting changes and
      * failure scenarios.
      *
@@ -99,7 +99,7 @@ public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
      * Preconditions for mutation of data tree are captured from the snapshot of
      * data tree state, when the transaction is allocated. If data was
      * changed during transaction in an incompatible way then the commit of this transaction
-     * will fail. See {@link AsyncWriteTransaction#commit()} for more
+     * will fail. See {@link AsyncWriteTransaction#submit()} for more
      * details about conflicting and not-conflicting changes and
      * failure scenarios.
      *
@@ -107,7 +107,7 @@ public interface AsyncDataTransactionFactory<P extends Path<P>, D> {
      * Since this transaction does not provide a view of the data it SHOULD BE
      * used only by callers which are exclusive writers (exporters of data)
      * to the subtree they modify. This prevents optimistic
-     * lock failures as described in {@link AsyncWriteTransaction#commit()}.
+     * lock failures as described in {@link AsyncWriteTransaction#submit()}.
      *
      * <p>
      * Exclusivity of writers to particular subtree SHOULD BE enforced by

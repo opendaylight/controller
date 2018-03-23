@@ -26,15 +26,12 @@ import java.util.Map;
 import java.util.Queue;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -61,9 +58,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 // FIXME explicitly enforce just one subtree requirement
 @NotThreadSafe
 class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadWriteTransaction {
-    private static final ListenableFuture<RpcResult<TransactionStatus>> SUCCESS_FUTURE = Futures
-            .immediateFuture(RpcResultBuilder.success(TransactionStatus.COMMITED).build());
-
     private final DOMDataReadOnlyTransaction readTxDelegate;
     private final DOMDataWriteTransaction writeTxDelegate;
     private final Object txIdentifier;
@@ -115,11 +109,6 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         return writeTxDelegate.submit();
-    }
-
-    @Override
-    public ListenableFuture<RpcResult<TransactionStatus>> commit() {
-        return Futures.transformAsync(submit(), input -> SUCCESS_FUTURE, MoreExecutors.directExecutor());
     }
 
     @Override
