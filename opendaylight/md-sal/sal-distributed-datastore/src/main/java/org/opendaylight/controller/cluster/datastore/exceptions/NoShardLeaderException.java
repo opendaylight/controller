@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 import com.google.common.base.Strings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import javax.annotation.Nullable;
 
 /**
  * Exception indicating a shard has no current leader.
@@ -21,7 +23,9 @@ public class NoShardLeaderException extends RuntimeException {
         super(message);
     }
 
-    public NoShardLeaderException(String message, String shardName) {
+    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+            justification = "Unrecognised NullableDecl")
+    public NoShardLeaderException(@Nullable String message, String shardName) {
         super(String.format("%sShard %s currently has no leader. Try again later.",
                 (Strings.isNullOrEmpty(message) ? "" : message + ". "), shardName));
     }

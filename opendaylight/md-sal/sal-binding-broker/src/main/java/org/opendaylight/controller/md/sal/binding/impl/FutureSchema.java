@@ -11,6 +11,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.SettableFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -145,6 +146,7 @@ class FutureSchema implements AutoCloseable {
             }
         }
 
+        @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "Void is the only allowed value")
         final void unlockIfPossible(final BindingRuntimeContext context) {
             if (!this.schemaPromise.isDone() && apply(context)) {
                 this.schemaPromise.set(null);

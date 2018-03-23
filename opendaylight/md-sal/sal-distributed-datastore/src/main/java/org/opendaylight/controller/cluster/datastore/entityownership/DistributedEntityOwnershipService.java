@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -179,6 +180,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     }
 
     @Override
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF", justification = "Unrecognised NullableDecl")
     public Optional<EntityOwnershipState> getOwnershipState(final DOMEntity forEntity) {
         Preconditions.checkNotNull(forEntity, "forEntity cannot be null");
 
