@@ -8,6 +8,7 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Strings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
@@ -157,6 +158,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         return component;
     }
 
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF", justification = "Unrecognised NullableDecl")
     private static ComponentMetadata decorateServiceReferenceType(final Attr attr, final ComponentMetadata component,
             final ParserContext context) {
         if (!(component instanceof MutableServiceReferenceMetadata)) {

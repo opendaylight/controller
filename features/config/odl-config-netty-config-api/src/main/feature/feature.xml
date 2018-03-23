@@ -8,6 +8,6 @@
   -->
 <features name="odl-controller-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
     <feature name="odl-config-netty-config-api" version="${project.version}">
-        <feature version="[3.0.0,4)">odl-netty-4</feature>
+        <feature version="[3.1.0,4)">odl-netty-4</feature>
     </feature>
 </features>

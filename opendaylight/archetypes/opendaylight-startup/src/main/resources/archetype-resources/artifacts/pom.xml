@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>3.0.2</version>
+    <version>3.1.0</version>
     <relativePath/>
   </parent>
 
