@@ -10,6 +10,12 @@ package org.opendaylight.controller.sal.core.spi;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 
+/**
+ * Deprecated.
+ *
+ * @deprecated Use blueprint instead for code wiring.
+ */
+@Deprecated
 public abstract class ForwardingConsumerSession implements ConsumerSession {
 
     protected abstract ConsumerSession delegate();

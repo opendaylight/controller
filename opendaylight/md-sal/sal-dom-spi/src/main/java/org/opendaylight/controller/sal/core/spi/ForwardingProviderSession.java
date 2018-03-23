@@ -11,6 +11,12 @@ package org.opendaylight.controller.sal.core.spi;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 
+/**
+ * Deprecated.
+ *
+ * @deprecated Use blueprint instead for code wiring.
+ */
+@Deprecated
 public abstract class ForwardingProviderSession implements ProviderSession {
 
     protected abstract ProviderSession delegate();

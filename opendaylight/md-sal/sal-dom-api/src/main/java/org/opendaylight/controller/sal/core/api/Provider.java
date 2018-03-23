@@ -19,7 +19,10 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
  * A user-implemented component (application) which facilitates the SAL and SAL
  * services to access infrastructure services and to provide functionality to
  * {@link Consumer}s and other providers.
+ *
+ * @deprecated Use blueprint instead for code wiring.
  */
+@Deprecated
 public interface Provider {
 
     /**

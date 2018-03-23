@@ -19,6 +19,7 @@ import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.dom.broker.osgi.AbstractBrokerServiceProxy;
 import org.opendaylight.controller.sal.dom.broker.osgi.ProxyFactory;
 
+@Deprecated
 class ConsumerContextImpl implements ConsumerSession {
 
     private final ClassToInstanceMap<BrokerService> instantiatedServices = MutableClassToInstanceMap.create();

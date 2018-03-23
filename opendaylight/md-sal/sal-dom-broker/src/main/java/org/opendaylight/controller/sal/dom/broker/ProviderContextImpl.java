@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.dom.broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 
+@Deprecated
 class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession {
     private final Provider provider;
 

@@ -18,7 +18,10 @@ import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
  * <p>
  * A user-implemented component (application) which facilitates the SAL and SAL
  * services to access infrastructure services or providers' functionality.
+ *
+ * @deprecated Use blueprint instead for code wiring.
  */
+@Deprecated
 public interface Consumer {
 
     /**
