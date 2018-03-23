@@ -9,13 +9,10 @@ package org.opendaylight.controller.md.sal.binding.api;
 
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
  * Utility {@link WriteTransaction} implementation which forwards all interface method
@@ -70,11 +67,6 @@ public class ForwardingWriteTransaction extends ForwardingObject implements Writ
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         return delegate.submit();
-    }
-
-    @Override
-    public ListenableFuture<RpcResult<TransactionStatus>> commit() {
-        return delegate.commit();
     }
 
     @Override

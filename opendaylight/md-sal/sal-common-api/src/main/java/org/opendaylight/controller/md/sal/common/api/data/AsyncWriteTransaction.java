@@ -102,17 +102,14 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * Cancels the transaction.
      *
      * <p>
-     * Transactions can only be cancelled if it's status is
-     * {@link TransactionStatus#NEW} or {@link TransactionStatus#SUBMITED}
+     * Transactions can only be cancelled if it's state is new or submitted.
      *
      * <p>
-     * Invoking cancel() on {@link TransactionStatus#FAILED} or
-     * {@link TransactionStatus#CANCELED} will have no effect, and transaction
+     * Invoking cancel() on a failed or cancelled transaction will have no effect, and transaction
      * is considered cancelled.
      *
      * <p>
-     * Invoking cancel() on finished transaction  (future returned by {@link #submit()}
-     * already completed with {@link TransactionStatus#COMMITED}) will always
+     * Invoking cancel() on a finished transaction (future returned by {@link #submit()} already completed will always
      * fail (return false).
      *
      * @return <tt>false</tt> if the task could not be cancelled, typically because it has already completed normally
@@ -130,7 +127,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @param path
      *            Data object path
      * @throws IllegalStateException
-     *             if the transaction is no longer {@link TransactionStatus#NEW}
+     *             if the transaction as already been submitted or cancelled
      */
     void delete(LogicalDatastoreType store, P path);
 
@@ -149,8 +146,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * {@link IllegalStateException}.
      *
      * <p>
-     * The transaction is marked as {@link TransactionStatus#SUBMITED} and
-     * enqueued into the data store back-end for processing.
+     * The transaction is marked as submitted and enqueued into the data store back-end for processing.
      *
      * <p>
      * Whether or not the commit is successful is determined by versioning
@@ -335,7 +331,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *         derived from TransactionCommitFailedException.
      *
      * @throws IllegalStateException
-     *             if the transaction is not {@link TransactionStatus#NEW}
+     *             if the transaction is not new
      */
     CheckedFuture<Void,TransactionCommitFailedException> submit();
 
@@ -345,6 +341,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @deprecated Use {@link #submit()} instead.
      */
     @Deprecated
-    ListenableFuture<RpcResult<TransactionStatus>> commit();
-
+    default ListenableFuture<RpcResult<TransactionStatus>> commit() {
+        throw new UnsupportedOperationException("commit() is deprecated, use submit() instead");
+    }
 }
