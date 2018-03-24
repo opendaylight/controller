@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
+import javassist.ClassPool;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -21,6 +22,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
  * @author Thomas Pantelis
  */
 public final class BindingToNormalizedNodeCodecFactory {
+    private static final JavassistUtils JAVASSIST = JavassistUtils.forClassPool(ClassPool.getDefault());
+
     private BindingToNormalizedNodeCodecFactory() {
     }
 
@@ -32,7 +35,7 @@ public final class BindingToNormalizedNodeCodecFactory {
      */
     public static BindingToNormalizedNodeCodec newInstance(final ClassLoadingStrategy classLoadingStrategy) {
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
-                StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
+                StreamWriterGenerator.create(JAVASSIST));
         return new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry, true);
     }
 
