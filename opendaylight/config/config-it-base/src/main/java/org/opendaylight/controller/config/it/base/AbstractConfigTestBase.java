@@ -180,7 +180,11 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY)).useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
-                mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"), getLoggingOption(),
+                mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"),
+                mavenBundle("org.apache.logging.log4j", "log4j-api").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.logging", "pax-logging-log4j2").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.logging", "pax-logging-api").versionAsInProject(),
+                getLoggingOption(),
                 mvnLocalRepoOption(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
         return OptionUtils.combine(options, getAdditionalOptions());
