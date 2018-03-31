@@ -12,12 +12,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.After;
@@ -44,7 +41,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.Revision;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -98,14 +94,9 @@ public class DOMRpcServiceTestBugfix560 {
         assertNotNull(moduleInfo);
 
         schemaContext = YangParserTestUtils.parseYangSources(StatementParserMode.DEFAULT_MODE, null,
-            YangTextSchemaSource.delegateForByteSource(RevisionSourceIdentifier.create(moduleInfo.getName(),
-                Revision.ofNullable(moduleInfo.getRevision())), new ByteSource() {
-
-                @Override
-                public InputStream openStream() throws IOException {
-                    return moduleInfo.getModuleSourceStream();
-                }
-            }));
+            YangTextSchemaSource.delegateForByteSource(RevisionSourceIdentifier.create(
+                    moduleInfo.getName().getLocalName(), moduleInfo.getName().getRevision()),
+                moduleInfo.getYangTextByteSource()));
     }
 
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBITllIdentifier(
