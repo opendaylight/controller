@@ -70,7 +70,7 @@ public class IdentityAttributeRefTest {
         verify(res).validateIdentity(attr, Identity.class, jmxAttr);
     }
 
-    static class Identity extends BaseIdentity {}
+    interface Identity extends BaseIdentity {}
 
-    static class SubIdentity extends Identity {}
+    interface SubIdentity extends Identity {}
 }
