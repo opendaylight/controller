@@ -9,9 +9,7 @@ package org.opendaylight.controller.md.sal.common.api.data;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
  * Write transaction provides mutation capabilities for a data tree.
@@ -334,14 +332,4 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *             if the transaction is not new
      */
     CheckedFuture<Void,TransactionCommitFailedException> submit();
-
-    /**
-     * Deprecated.
-     *
-     * @deprecated Use {@link #submit()} instead.
-     */
-    @Deprecated
-    default ListenableFuture<RpcResult<TransactionStatus>> commit() {
-        throw new UnsupportedOperationException("commit() is deprecated, use submit() instead");
-    }
 }
