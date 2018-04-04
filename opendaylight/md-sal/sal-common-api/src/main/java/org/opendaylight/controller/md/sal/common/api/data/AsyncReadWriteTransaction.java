@@ -24,14 +24,14 @@ import org.opendaylight.yangtools.concepts.Path;
  * transactions.
  *
  * <p>
- * Applications publish the changes proposed in the transaction by calling {@link #commit}
+ * Applications publish the changes proposed in the transaction by calling {@link #submit}
  * on the transaction. This seals the transaction
  * (preventing any further writes using this transaction) and submits it to be
  * processed and applied to global conceptual data tree.
  *
  * <p>
  * The transaction commit may fail due to a concurrent transaction modifying and committing data in
- * an incompatible way. See {@link #commit()} for more concrete commit failure examples.
+ * an incompatible way. See {@link #submit()} for more concrete commit failure examples.
  *
  * <b>Implementation Note:</b> This interface is not intended to be implemented
  * by users of MD-SAL, but only to be consumed by them.

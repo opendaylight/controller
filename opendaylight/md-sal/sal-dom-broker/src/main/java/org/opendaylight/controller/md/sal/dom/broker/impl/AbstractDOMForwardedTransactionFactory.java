@@ -72,7 +72,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      * on transaction created by this factory.
      *
      * @param transaction
-     *            Transaction on which {@link DOMDataWriteTransaction#commit()}
+     *            Transaction on which {@link DOMDataWriteTransaction#submit()}
      *            was invoked.
      * @param cohorts
      *            Iteratable of cohorts for subtransactions associated with
@@ -142,7 +142,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      * {@link DOMStoreWriteTransaction#delete(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier)} is
      * invoked on
      * selected subtransaction.
-     * </li><li> {@link DOMDataWriteTransaction#commit()} - results in invoking
+     * </li><li> {@link DOMDataWriteTransaction#submit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
      * and then invoking finalized implementation callback
      * {@link #submit(DOMDataWriteTransaction, Collection)} with transaction which
@@ -207,7 +207,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      * {@link DOMStoreWriteTransaction#delete(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier)} is
      * invoked on
      * selected subtransaction.
-     * <li> {@link DOMDataWriteTransaction#commit()} - results in invoking
+     * <li> {@link DOMDataWriteTransaction#submit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
      * and then invoking finalized implementation callback
      * {@link #submit(DOMDataWriteTransaction, Collection)} with transaction which
