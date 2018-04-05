@@ -68,7 +68,8 @@ public class LocalTransactionContextTest {
     public void testWrite() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
-        localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode));
+        localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode),
+            null);
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
     }
 
@@ -76,14 +77,15 @@ public class LocalTransactionContextTest {
     public void testMerge() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
-        localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode));
+        localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode),
+            null);
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
     }
 
     @Test
     public void testDelete() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
-        localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier));
+        localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier), null);
         verify(readWriteTransaction).delete(yangInstanceIdentifier);
     }
 
@@ -95,7 +97,7 @@ public class LocalTransactionContextTest {
         doReturn(Futures.immediateCheckedFuture(Optional.of(normalizedNode))).when(readWriteTransaction)
             .read(yangInstanceIdentifier);
         localTransactionContext.executeRead(new ReadData(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
-                SettableFuture.<Optional<NormalizedNode<?,?>>>create());
+                SettableFuture.create(), null);
         verify(readWriteTransaction).read(yangInstanceIdentifier);
     }
 
@@ -104,7 +106,7 @@ public class LocalTransactionContextTest {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         doReturn(Futures.immediateCheckedFuture(true)).when(readWriteTransaction).exists(yangInstanceIdentifier);
         localTransactionContext.executeRead(new DataExists(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
-                SettableFuture.<Boolean>create());
+                SettableFuture.create(), null);
         verify(readWriteTransaction).exists(yangInstanceIdentifier);
     }
 
@@ -114,7 +116,7 @@ public class LocalTransactionContextTest {
         doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
         doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction, null);
 
-        Future<ActorSelection> future = localTransactionContext.readyTransaction();
+        Future<ActorSelection> future = localTransactionContext.readyTransaction(null);
         assertTrue(future.isCompleted());
 
         verify(mockReadySupport).onTransactionReady(readWriteTransaction, null);
@@ -127,8 +129,10 @@ public class LocalTransactionContextTest {
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
 
-        localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode));
-        localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode));
+        localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode),
+            null);
+        localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode),
+            null);
 
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
 
@@ -142,8 +146,10 @@ public class LocalTransactionContextTest {
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
 
-        localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode));
-        localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode));
+        localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode),
+            null);
+        localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode),
+            null);
 
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
 
@@ -156,19 +162,19 @@ public class LocalTransactionContextTest {
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).delete(yangInstanceIdentifier);
 
-        localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier));
-        localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier));
+        localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier), null);
+        localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier), null);
 
         verify(readWriteTransaction).delete(yangInstanceIdentifier);
 
         doReadyWithExpectedError(error);
     }
 
-    private void doReadyWithExpectedError(RuntimeException expError) {
+    private void doReadyWithExpectedError(final RuntimeException expError) {
         LocalThreePhaseCommitCohort mockCohort = mock(LocalThreePhaseCommitCohort.class);
         doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
         doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction, expError);
 
-        localTransactionContext.readyTransaction();
+        localTransactionContext.readyTransaction(null);
     }
 }

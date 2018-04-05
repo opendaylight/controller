@@ -72,8 +72,8 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
      */
     @Test
     public void testLimiterOnFailure() throws TimeoutException, InterruptedException {
-        txContext.executeModification(DELETE);
-        txContext.executeModification(DELETE);
+        txContext.executeModification(DELETE, null);
+        txContext.executeModification(DELETE, null);
         assertEquals(2, limiter.availablePermits());
 
         Future<Object> future = txContext.sendBatchedModifications();
@@ -90,12 +90,12 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
                 assertEquals(4, limiter.availablePermits());
 
                 // The transaction has failed, no throttling should occur
-                txContext.executeModification(DELETE);
+                txContext.executeModification(DELETE, null);
                 assertEquals(4, limiter.availablePermits());
 
                 // Executing a read should result in immediate failure
                 final SettableFuture<Boolean> readFuture = SettableFuture.create();
-                txContext.executeRead(new DataExists(), readFuture);
+                txContext.executeRead(new DataExists(), readFuture, null);
                 assertTrue(readFuture.isDone());
                 try {
                     readFuture.get();
@@ -106,7 +106,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
             }
         });
 
-        future = txContext.directCommit();
+        future = txContext.directCommit(null);
 
         msg = kit.expectMsgClass(BatchedModifications.class);
         // Modification should have been thrown away by the dropped transmit induced by executeRead()
@@ -131,12 +131,12 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
      */
     @Test
     public void testLimiterOnOverflowFailure() throws TimeoutException, InterruptedException {
-        txContext.executeModification(DELETE);
-        txContext.executeModification(DELETE);
-        txContext.executeModification(DELETE);
-        txContext.executeModification(DELETE);
+        txContext.executeModification(DELETE, null);
+        txContext.executeModification(DELETE, null);
+        txContext.executeModification(DELETE, null);
+        txContext.executeModification(DELETE, null);
         assertEquals(0, limiter.availablePermits());
-        txContext.executeModification(DELETE);
+        txContext.executeModification(DELETE, null);
         // Last acquire should have failed ...
         assertEquals(0, limiter.availablePermits());
 

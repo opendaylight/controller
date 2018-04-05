@@ -90,8 +90,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
-            public void invoke(TransactionContext transactionContext) {
-                transactionContext.executeRead(readCmd, proxyFuture);
+            public void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
+                transactionContext.executeRead(readCmd, proxyFuture, havePermit);
             }
         });
 
@@ -167,8 +167,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
-            protected void invoke(TransactionContext transactionContext) {
-                transactionContext.executeModification(modification);
+            protected void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
+                transactionContext.executeModification(modification, havePermit);
             }
         });
     }
@@ -201,7 +201,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         for (TransactionContextWrapper contextWrapper : txContextWrappers.values()) {
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
-                public void invoke(TransactionContext transactionContext) {
+                public void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
                     transactionContext.closeTransaction();
                 }
             });
@@ -255,27 +255,28 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             final Promise promise = akka.dispatch.Futures.promise();
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
-                public void invoke(TransactionContext newTransactionContext) {
-                    promise.completeWith(getDirectCommitFuture(newTransactionContext, operationCallbackRef));
+                public void invoke(final TransactionContext newTransactionContext, final Boolean havePermit) {
+                    promise.completeWith(getDirectCommitFuture(newTransactionContext, operationCallbackRef,
+                        havePermit));
                 }
             });
             future = promise.future();
         } else {
             // avoid the creation of a promise and a TransactionOperation
-            future = getDirectCommitFuture(transactionContext, operationCallbackRef);
+            future = getDirectCommitFuture(transactionContext, operationCallbackRef, null);
         }
 
         return new SingleCommitCohortProxy(txContextFactory.getActorContext(), future, getIdentifier(),
             operationCallbackRef);
     }
 
-    private Future<?> getDirectCommitFuture(TransactionContext transactionContext,
-            OperationCallback.Reference operationCallbackRef) {
+    private Future<?> getDirectCommitFuture(final TransactionContext transactionContext,
+            final OperationCallback.Reference operationCallbackRef, final Boolean havePermit) {
         TransactionRateLimitingCallback rateLimitingCallback = new TransactionRateLimitingCallback(
                 txContextFactory.getActorContext());
         operationCallbackRef.set(rateLimitingCallback);
         rateLimitingCallback.run();
-        return transactionContext.directCommit();
+        return transactionContext.directCommit(havePermit);
     }
 
     private AbstractThreePhaseCommitCohort<ActorSelection> createMultiCommitCohort(
