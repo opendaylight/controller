@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2968da58_55726163",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-04-05T14:49:56Z",
+      "side": 1,
+      "message": "not really, see https://git.opendaylight.org/gerrit/#/c/70376/ ...",
+      "revId": "9958ef4e1096731404d3c8060ef8376cd105f8ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
