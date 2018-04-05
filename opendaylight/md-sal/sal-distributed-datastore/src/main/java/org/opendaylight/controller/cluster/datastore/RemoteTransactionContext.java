@@ -50,8 +50,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
      */
     private volatile Throwable failedModification;
 
-    protected RemoteTransactionContext(TransactionIdentifier identifier, ActorSelection actor,
-            ActorContext actorContext, short remoteTransactionVersion, OperationLimiter limiter) {
+    protected RemoteTransactionContext(final TransactionIdentifier identifier, final ActorSelection actor,
+            final ActorContext actorContext, final short remoteTransactionVersion, final OperationLimiter limiter) {
         super(identifier, remoteTransactionVersion);
         this.limiter = Preconditions.checkNotNull(limiter);
         this.actor = actor;
@@ -75,25 +75,32 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<Object> directCommit() {
+    public Future<Object> directCommit(final Boolean havePermit) {
         LOG.debug("Tx {} directCommit called", getIdentifier());
 
         // Send the remaining batched modifications, if any, with the ready flag set.
-
+        bumpPermits(havePermit);
         return sendBatchedModifications(true, true);
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction() {
+    public Future<ActorSelection> readyTransaction(final Boolean havePermit) {
         logModificationCount();
 
         LOG.debug("Tx {} readyTransaction called", getIdentifier());
 
         // Send the remaining batched modifications, if any, with the ready flag set.
 
+        bumpPermits(havePermit);
         Future<Object> lastModificationsFuture = sendBatchedModifications(true, false);
 
         return transformReadyReply(lastModificationsFuture);
+    }
+
+    private void bumpPermits(final Boolean havePermit) {
+        if (Boolean.TRUE.equals(havePermit)) {
+            ++batchPermits;
+        }
     }
 
     protected Future<ActorSelection> transformReadyReply(final Future<Object> readyReplyFuture) {
@@ -107,7 +114,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         return new BatchedModifications(getIdentifier(), getTransactionVersion());
     }
 
-    private void batchModification(Modification modification, boolean havePermit) {
+    private void batchModification(final Modification modification, final boolean havePermit) {
         incrementModificationCount();
         if (havePermit) {
             ++batchPermits;
@@ -129,7 +136,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         return sendBatchedModifications(false, false);
     }
 
-    protected Future<Object> sendBatchedModifications(boolean ready, boolean doCommitOnReady) {
+    protected Future<Object> sendBatchedModifications(final boolean ready, final boolean doCommitOnReady) {
         Future<Object> sent = null;
         if (ready || batchedModifications != null && !batchedModifications.getModifications().isEmpty()) {
             if (batchedModifications == null) {
@@ -167,7 +174,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
                 actorContext.getTransactionCommitOperationTimeout());
             sent.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(Throwable failure, Object success) {
+                public void onComplete(final Throwable failure, final Object success) {
                     if (failure != null) {
                         LOG.debug("Tx {} modifications failed", getIdentifier(), failure);
                         failedModification = failure;
@@ -183,16 +190,23 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void executeModification(AbstractModification modification) {
+    public void executeModification(final AbstractModification modification, final Boolean havePermit) {
         LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(),
                 modification.getClass().getSimpleName(), modification.getPath());
 
-        final boolean havePermit = failedModification == null && acquireOperation();
-        batchModification(modification, havePermit);
+        final boolean permitToRelease;
+        if (havePermit == null) {
+            permitToRelease = failedModification == null && acquireOperation();
+        } else {
+            permitToRelease = havePermit.booleanValue();
+        }
+
+        batchModification(modification, permitToRelease);
     }
 
     @Override
-    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> returnFuture) {
+    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> returnFuture,
+            final Boolean havePermit) {
         LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(),
                 readCmd.getPath());
 
@@ -209,14 +223,14 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
         // public API contract.
 
-        final boolean havePermit = acquireOperation();
+        final boolean permitToRelease = havePermit == null ? acquireOperation() : havePermit.booleanValue();
         sendBatchedModifications();
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object response) {
+            public void onComplete(final Throwable failure, final Object response) {
                 // We have previously acquired an operation, now release it, no matter what happened
-                if (havePermit) {
+                if (permitToRelease) {
                     limiter.release();
                 }
 
@@ -245,15 +259,15 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
      * @return True if a permit was successfully acquired, false otherwise
      */
     private boolean acquireOperation() {
-        if (isOperationHandOffComplete()) {
-            if (limiter.acquire()) {
-                return true;
-            }
+        Preconditions.checkState(!isOperationHandOffComplete(),
+            "Attempted to acquire execute operation permit for transaction %s on actor %s during handoff",
+            getIdentifier(), actor);
 
-            LOG.warn("Failed to acquire execute operation permit for transaction {} on actor {}", getIdentifier(),
-                actor);
+        if (limiter.acquire()) {
+            return true;
         }
 
+        LOG.warn("Failed to acquire execute operation permit for transaction {} on actor {}", getIdentifier(), actor);
         return false;
     }
 

@@ -42,7 +42,7 @@ final class TransactionContextCleanup extends FinalizablePhantomReference<Transa
 
     private final TransactionContext cleanup;
 
-    private TransactionContextCleanup(TransactionProxy referent, TransactionContext cleanup) {
+    private TransactionContextCleanup(final TransactionProxy referent, final TransactionContext cleanup) {
         super(referent, QUEUE);
         this.cleanup = cleanup;
     }
