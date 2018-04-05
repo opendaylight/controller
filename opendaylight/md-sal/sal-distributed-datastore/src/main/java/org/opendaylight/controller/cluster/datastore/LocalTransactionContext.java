@@ -45,7 +45,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void executeModification(final AbstractModification modification) {
+    public void executeModification(final AbstractModification modification, final Boolean havePermit) {
         incrementModificationCount();
         if (operationError == null) {
             try {
@@ -57,7 +57,8 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture) {
+    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture,
+            final Boolean havePermit) {
         Futures.addCallback(readCmd.apply(getReadDelegate()), new FutureCallback<T>() {
             @Override
             public void onSuccess(final T result) {
@@ -77,13 +78,13 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction() {
+    public Future<ActorSelection> readyTransaction(final Boolean havePermit) {
         final LocalThreePhaseCommitCohort cohort = ready();
         return cohort.initiateCoordinatedCommit();
     }
 
     @Override
-    public Future<Object> directCommit() {
+    public Future<Object> directCommit(final Boolean havePermit) {
         final LocalThreePhaseCommitCohort cohort = ready();
         return cohort.initiateDirectCommit();
     }
