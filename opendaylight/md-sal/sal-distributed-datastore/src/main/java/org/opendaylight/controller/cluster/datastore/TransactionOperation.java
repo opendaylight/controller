@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Abstract superclass for transaction operations which should be executed
  * on a {@link TransactionContext} at a later point in time.
@@ -16,6 +18,8 @@ abstract class TransactionOperation {
      * Execute the delayed operation.
      *
      * @param transactionContext the TransactionContext
+     * @param havePermit Boolean indicator if this operation has tried and acquired a permit, null if there was no
+     *                   attempt to acquire a permit.
      */
-    protected abstract void invoke(TransactionContext transactionContext);
+    protected abstract void invoke(TransactionContext transactionContext, @Nullable Boolean havePermit);
 }
