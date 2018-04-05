@@ -24,7 +24,7 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
 
     private final Throwable failure;
 
-    NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier) {
+    NoOpTransactionContext(final Throwable failure, final TransactionIdentifier identifier) {
         super(identifier);
         this.failure = failure;
     }
@@ -35,25 +35,26 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<Object> directCommit() {
+    public Future<Object> directCommit(final Boolean havePermit) {
         LOG.debug("Tx {} directCommit called, failure: {}", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction() {
+    public Future<ActorSelection> readyTransaction(final Boolean havePermit) {
         LOG.debug("Tx {} readyTransaction called, failure: {}", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
-    public void executeModification(AbstractModification modification) {
+    public void executeModification(final AbstractModification modification, final Boolean havePermit) {
         LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(),
                 modification.getClass().getSimpleName(), modification.getPath());
     }
 
     @Override
-    public <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> proxyFuture) {
+    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> proxyFuture,
+            final Boolean havePermit) {
         LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(),
                 readCmd.getPath());
 
