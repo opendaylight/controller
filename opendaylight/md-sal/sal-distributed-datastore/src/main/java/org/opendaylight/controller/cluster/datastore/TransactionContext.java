@@ -20,13 +20,13 @@ import scala.concurrent.Future;
 interface TransactionContext {
     void closeTransaction();
 
-    Future<ActorSelection> readyTransaction();
+    Future<ActorSelection> readyTransaction(Boolean havePermit);
 
-    void executeModification(AbstractModification modification);
+    void executeModification(AbstractModification modification, Boolean havePermit);
 
-    <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise);
+    <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise, Boolean havePermit);
 
-    Future<Object> directCommit();
+    Future<Object> directCommit(Boolean havePermit);
 
     /**
      * Invoked by {@link TransactionContextWrapper} when it has finished handing
