@@ -16,7 +16,7 @@ import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CU
 
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.dispatch.Dispatchers;
 import akka.dispatch.Futures;
 import akka.testkit.TestActorRef;
@@ -308,7 +308,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         assertEquals("canCommit", expected, actual);
     }
 
-    private static class CohortActor extends UntypedActor {
+    private static class CohortActor extends UntypedAbstractActor {
         private final Builder builder;
         private final AtomicInteger canCommitCount = new AtomicInteger();
         private final AtomicInteger commitCount = new AtomicInteger();

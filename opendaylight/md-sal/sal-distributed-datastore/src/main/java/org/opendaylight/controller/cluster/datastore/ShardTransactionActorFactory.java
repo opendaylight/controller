@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.AbstractActor.ActorContext;
 import akka.actor.ActorRef;
-import akka.actor.UntypedActorContext;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -29,12 +29,12 @@ class ShardTransactionActorFactory {
     private final DatastoreContext datastoreContext;
     private final String txnDispatcherPath;
     private final ShardStats shardMBean;
-    private final UntypedActorContext actorContext;
+    private final ActorContext actorContext;
     private final ActorRef shardActor;
     private final String shardName;
 
     ShardTransactionActorFactory(ShardDataTree dataTree, DatastoreContext datastoreContext,
-            String txnDispatcherPath, ActorRef shardActor, UntypedActorContext actorContext, ShardStats shardMBean,
+            String txnDispatcherPath, ActorRef shardActor, ActorContext actorContext, ShardStats shardMBean,
             String shardName) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.datastoreContext = Preconditions.checkNotNull(datastoreContext);

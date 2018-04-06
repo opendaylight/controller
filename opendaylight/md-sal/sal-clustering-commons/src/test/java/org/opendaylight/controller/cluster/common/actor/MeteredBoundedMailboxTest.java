@@ -11,7 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.testkit.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +73,7 @@ public class MeteredBoundedMailboxTest {
     /**
      * For testing.
      */
-    public static class PingPongActor extends UntypedActor {
+    public static class PingPongActor extends UntypedAbstractActor {
 
         ReentrantLock lock;
 

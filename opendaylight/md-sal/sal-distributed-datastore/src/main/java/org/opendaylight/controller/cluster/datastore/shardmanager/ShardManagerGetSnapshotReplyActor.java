@@ -12,7 +12,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.actor.Status.Failure;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,7 +34,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-final class ShardManagerGetSnapshotReplyActor extends UntypedActor {
+final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerGetSnapshotReplyActor.class);
 
     private final Set<String> remainingShardNames;
