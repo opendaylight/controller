@@ -10,7 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.EventFilter;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Optional;
@@ -25,36 +26,23 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-public class RaftActorTestKit extends JavaTestKit {
+public class RaftActorTestKit extends TestKit {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorTestKit.class);
     private final ActorRef raftActor;
 
-    public RaftActorTestKit(ActorSystem actorSystem, String actorName) {
+    public RaftActorTestKit(final ActorSystem actorSystem, final String actorName) {
         super(actorSystem);
-
         raftActor = this.getSystem().actorOf(MockRaftActor.builder().id(actorName).props(), actorName);
-
     }
-
 
     public ActorRef getRaftActor() {
         return raftActor;
     }
 
-    public boolean waitForLogMessage(final Class<?> logEventClass, String message) {
+    public boolean waitForLogMessage(final Class<?> logEventClass, final String message) {
         // Wait for a specific log message to show up
-        return
-            new JavaTestKit.EventFilter<Boolean>(logEventClass
-            ) {
-                @Override
-                protected Boolean run() {
-                    return true;
-                }
-            }.from(raftActor.path().toString())
-                .message(message)
-                .occurrences(1).exec();
-
-
+        return new EventFilter(logEventClass, getSystem()).from(raftActor.path().toString()).message(message)
+                .occurrences(1).intercept(() -> Boolean.TRUE);
     }
 
     protected void waitUntilLeader() {
@@ -62,7 +50,7 @@ public class RaftActorTestKit extends JavaTestKit {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static void waitUntilLeader(ActorRef actorRef) {
+    public static void waitUntilLeader(final ActorRef actorRef) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
@@ -80,5 +68,4 @@ public class RaftActorTestKit extends JavaTestKit {
 
         Assert.fail("Leader not found for actorRef " + actorRef.path());
     }
-
 }
