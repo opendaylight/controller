@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import akka.actor.ExtendedActorSystem;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.TestKit;
 import java.io.NotSerializableException;
 import java.util.List;
 import org.junit.Test;
@@ -58,7 +58,7 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
             final byte[] bytes = serializer.toBinary(readyMessage);
             deserialized = serializer.fromBinary(bytes, ReadyLocalTransaction.class);
         } finally {
-            JavaTestKit.shutdownActorSystem(system);
+            TestKit.shutdownActorSystem(system);
         }
 
         assertNotNull("fromBinary returned null", deserialized);
