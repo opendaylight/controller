@@ -8,15 +8,15 @@
 
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 
 /**
  * The EchoActor simply responds back with the same message that it receives.
  */
-public class EchoActor extends UntypedActor {
+public class EchoActor extends UntypedAbstractActor {
 
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(final Object message) throws Exception {
         getSender().tell(message, getSelf());
     }
 }
