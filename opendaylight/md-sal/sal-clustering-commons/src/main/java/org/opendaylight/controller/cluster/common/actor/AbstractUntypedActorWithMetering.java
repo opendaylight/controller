@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
+import akka.japi.pf.ReceiveBuilder;
+
 /**
  * Actor with its behaviour metered. Metering is enabled by configuration.
  */
@@ -16,15 +18,16 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
     private String actorNameOverride;
 
     public AbstractUntypedActorWithMetering() {
+
         if (isMetricsCaptureEnabled()) {
-            getContext().become(new MeteringBehavior(this));
+            getContext().become(createMeteringReceive());
         }
     }
 
-    public AbstractUntypedActorWithMetering(String actorNameOverride) {
+    public AbstractUntypedActorWithMetering(final String actorNameOverride) {
         this.actorNameOverride = actorNameOverride;
         if (isMetricsCaptureEnabled()) {
-            getContext().become(new MeteringBehavior(this));
+            getContext().become(createMeteringReceive());
         }
     }
 
@@ -35,5 +38,9 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
 
     public String getActorNameOverride() {
         return actorNameOverride;
+    }
+
+    private Receive createMeteringReceive() {
+        return ReceiveBuilder.create().matchAny(new MeteringBehavior(this)).build();
     }
 }
