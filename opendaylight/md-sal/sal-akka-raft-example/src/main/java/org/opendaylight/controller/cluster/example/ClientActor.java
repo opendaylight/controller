@@ -10,18 +10,18 @@ package org.opendaylight.controller.cluster.example;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientActor extends UntypedActor {
+public class ClientActor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(ClientActor.class);
 
     private final ActorRef target;
 
-    public ClientActor(ActorRef target) {
+    public ClientActor(final ActorRef target) {
         this.target = target;
     }
 
@@ -29,7 +29,7 @@ public class ClientActor extends UntypedActor {
         return Props.create(ClientActor.class, target);
     }
 
-    @Override public void onReceive(Object message) throws Exception {
+    @Override public void onReceive(final Object message) throws Exception {
         if (message instanceof KeyValue) {
             target.tell(message, getSelf());
         } else if (message instanceof KeyValueSaved) {
