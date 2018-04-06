@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.testkit.TestActorRef;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -78,7 +78,7 @@ public class RemoteRpcProviderConfigTest {
         Assert.assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
     }
 
-    public static class ConfigTestActor extends UntypedActor {
+    public static class ConfigTestActor extends UntypedAbstractActor {
 
         private final Config actorSystemConfig;
 

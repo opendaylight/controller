@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.dispatch.ControlMessage;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
@@ -30,7 +30,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-public class MessageCollectorActor extends UntypedActor {
+public class MessageCollectorActor extends UntypedAbstractActor {
     private static final String ARE_YOU_READY = "ARE_YOU_READY";
     public static final String GET_ALL_MESSAGES = "messages";
 

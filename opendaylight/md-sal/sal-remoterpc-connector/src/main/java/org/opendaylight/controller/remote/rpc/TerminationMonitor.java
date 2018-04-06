@@ -9,12 +9,12 @@
 package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.Terminated;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.common.actor.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminationMonitor extends UntypedActor {
+public class TerminationMonitor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
 
     public TerminationMonitor() {

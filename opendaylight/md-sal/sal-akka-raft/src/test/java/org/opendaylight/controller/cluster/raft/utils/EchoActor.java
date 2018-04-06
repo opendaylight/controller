@@ -5,18 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 
 /**
  * The EchoActor simply responds back with the same message that it receives.
  */
-public class EchoActor extends UntypedActor {
-
+public class EchoActor extends UntypedAbstractActor {
     @Override
-    public void onReceive(Object message) {
+    public void onReceive(final Object message) {
         getSender().tell(message, getSelf());
     }
 }

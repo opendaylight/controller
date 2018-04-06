@@ -9,7 +9,7 @@
 package org.opendaylight.controller.dummy.datastore;
 
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DummyShard extends UntypedActor {
+public class DummyShard extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(DummyShard.class);
 
     private final Configuration configuration;
