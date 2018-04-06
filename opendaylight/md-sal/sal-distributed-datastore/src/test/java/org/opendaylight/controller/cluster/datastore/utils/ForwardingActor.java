@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 
-public final class ForwardingActor extends UntypedActor {
+public final class ForwardingActor extends UntypedAbstractActor {
     private final ActorRef target;
 
     private ForwardingActor(final ActorRef target) {
@@ -22,5 +21,4 @@ public final class ForwardingActor extends UntypedActor {
     public void onReceive(final Object obj) {
         target.forward(obj, context());
     }
-
 }

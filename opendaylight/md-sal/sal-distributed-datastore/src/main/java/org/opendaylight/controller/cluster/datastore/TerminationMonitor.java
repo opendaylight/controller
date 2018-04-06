@@ -5,16 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Terminated;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.common.actor.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminationMonitor extends UntypedActor {
+public class TerminationMonitor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
     public static final String ADDRESS = "termination-monitor";
 
@@ -23,7 +22,7 @@ public class TerminationMonitor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message) {
+    public void onReceive(final Object message) {
         if (message instanceof Terminated) {
             Terminated terminated = (Terminated) message;
             LOG.debug("Actor terminated : {}", terminated.actor());

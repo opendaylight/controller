@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.UntypedActor;
-import akka.japi.Procedure;
+import akka.actor.UntypedAbstractActor;
+import akka.japi.pf.FI.UnitApply;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
@@ -16,7 +16,7 @@ import com.google.common.base.Throwables;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 
 /**
- * Represents behaviour that can be exhibited by actors of type {@link akka.actor.UntypedActor}
+ * Represents behaviour that can be exhibited by actors of type {@link akka.actor.AbstractActor}
  *
  * <p>
  * This behaviour meters actor's default behaviour. It captures 2 metrics:
@@ -26,12 +26,12 @@ import org.opendaylight.controller.cluster.reporting.MetricsReporter;
  * </ul>
  * The information is reported to {@link org.opendaylight.controller.cluster.reporting.MetricsReporter}
  */
-public class MeteringBehavior implements Procedure<Object> {
+public class MeteringBehavior implements UnitApply<Object> {
     public static final String DOMAIN = "org.opendaylight.controller.actor.metric";
 
     private static final String MSG_PROCESSING_RATE = "msg-rate";
 
-    private final UntypedActor meteredActor;
+    private final UntypedAbstractActor meteredActor;
 
     private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DOMAIN).getMetricsRegistry();
 
@@ -52,7 +52,7 @@ public class MeteringBehavior implements Procedure<Object> {
         init(actorName);
     }
 
-    public MeteringBehavior(final UntypedActor actor) {
+    public MeteringBehavior(final UntypedAbstractActor actor) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         this.meteredActor = actor;
 

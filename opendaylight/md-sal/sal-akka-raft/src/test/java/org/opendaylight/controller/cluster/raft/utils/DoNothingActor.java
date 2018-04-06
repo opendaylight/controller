@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 
-public class DoNothingActor extends UntypedActor {
-    @Override public void onReceive(Object message) {
+public class DoNothingActor extends UntypedAbstractActor {
+    @Override
+    public void onReceive(final Object message) throws Exception {
 
     }
 }

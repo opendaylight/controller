@@ -5,25 +5,24 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.dummy.datastore;
 
-import akka.actor.ActorContext;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 
-public class DummyShardManager extends UntypedActor {
-    public DummyShardManager(Configuration configuration, String memberName, String[] shardNames,
-            String type) {
-        new DummyShardsCreator(configuration, context(), memberName, shardNames, type).create();
+public class DummyShardManager extends UntypedAbstractActor {
+    public DummyShardManager(final Configuration configuration, final String memberName, final String[] shardNames,
+            final String type) {
+        new DummyShardsCreator(configuration, getContext(), memberName, shardNames, type).create();
     }
 
     @Override
-    public void onReceive(Object message) {
+    public void onReceive(final Object message) {
 
     }
 
-    public static Props props(Configuration configuration, String memberName, String[] shardNames, String type) {
+    public static Props props(final Configuration configuration, final String memberName, final String[] shardNames,
+            final String type) {
         return Props.create(DummyShardManager.class, configuration, memberName, shardNames, type);
     }
 
@@ -34,8 +33,8 @@ public class DummyShardManager extends UntypedActor {
         private final String[] shardNames;
         private final String type;
 
-        DummyShardsCreator(Configuration configuration, ActorContext actorSystem, String memberName,
-                String[] shardNames, String type) {
+        DummyShardsCreator(final Configuration configuration, final ActorContext actorSystem, final String memberName,
+                final String[] shardNames, final String type) {
             this.configuration = configuration;
             this.actorSystem = actorSystem;
             this.memberName = memberName;

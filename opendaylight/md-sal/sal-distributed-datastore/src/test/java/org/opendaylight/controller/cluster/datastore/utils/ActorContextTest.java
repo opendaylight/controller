@@ -23,7 +23,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import akka.dispatch.Futures;
 import akka.japi.Creator;
 import akka.testkit.TestActorRef;
@@ -73,7 +73,7 @@ public class ActorContextTest extends AbstractActorTest {
     private static class TestMessage {
     }
 
-    private static final class MockShardManager extends UntypedActor {
+    private static final class MockShardManager extends UntypedAbstractActor {
 
         private final boolean found;
         private final ActorRef actorRef;
