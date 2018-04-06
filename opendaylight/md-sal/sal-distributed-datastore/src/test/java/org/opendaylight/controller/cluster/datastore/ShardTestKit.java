@@ -7,16 +7,19 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
-import akka.testkit.JavaTestKit;
+import akka.testkit.javadsl.EventFilter;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.junit.Assert;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.slf4j.Logger;
@@ -26,7 +29,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-public class ShardTestKit extends JavaTestKit {
+public class ShardTestKit extends TestKit {
     private static final Logger LOG = LoggerFactory.getLogger(ShardTestKit.class);
 
     public ShardTestKit(final ActorSystem actorSystem) {
@@ -35,19 +38,9 @@ public class ShardTestKit extends JavaTestKit {
 
     public void waitForLogMessage(final Class<?> logLevel, final ActorRef subject, final String logMessage) {
         // Wait for a specific log message to show up
-        final boolean result =
-            new JavaTestKit.EventFilter<Boolean>(logLevel
-            ) {
-                @Override
-                protected Boolean run() {
-                    return true;
-                }
-            }.from(subject.path().toString())
-                .message(logMessage)
-                .occurrences(1).exec();
-
-        Assert.assertEquals(true, result);
-
+        final Boolean result = new EventFilter(logLevel, getSystem()).from(subject.path().toString())
+                .message(logMessage).occurrences(1).intercept(() -> Boolean.TRUE);
+        assertEquals(Boolean.TRUE, result);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -70,7 +63,7 @@ public class ShardTestKit extends JavaTestKit {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail("Leader not found for shard " + shard.path());
+        fail("Leader not found for shard " + shard.path());
         return null;
     }
 
@@ -104,6 +97,6 @@ public class ShardTestKit extends JavaTestKit {
                             .initCause((Throwable)lastResponse);
         }
 
-        Assert.fail(String.format("Unexpected leader %s found for shard %s", lastResponse, shard.path()));
+        fail(String.format("Unexpected leader %s found for shard %s", lastResponse, shard.path()));
     }
 }
