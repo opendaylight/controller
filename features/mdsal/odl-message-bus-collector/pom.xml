@@ -67,13 +67,5 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>messagebus-impl</artifactId>
         </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/05-message-bus.xml" -->
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>messagebus-config</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-        </dependency>
     </dependencies>
 </project>
