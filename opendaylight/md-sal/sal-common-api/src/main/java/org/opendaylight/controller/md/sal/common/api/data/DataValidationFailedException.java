@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -28,6 +29,7 @@ public class DataValidationFailedException extends TransactionCommitFailedExcept
 
     private static final long serialVersionUID = 1L;
 
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final Path<?> path;
 
     private final Class<? extends Path<?>> pathType;
