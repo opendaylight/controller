@@ -80,7 +80,6 @@
     <module>messagebus-spi</module>
     <module>messagebus-impl</module>
     <module>messagebus-util</module>
-    <module>messagebus-config</module>
 
     <!-- PAX EXAM ITs -->
     <module>sal-binding-it</module>
