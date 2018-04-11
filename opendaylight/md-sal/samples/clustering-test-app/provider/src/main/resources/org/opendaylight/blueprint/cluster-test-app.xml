@@ -6,7 +6,7 @@
 
   <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
   <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
-  <reference id="entityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"/>
+  <reference id="entityOwnershipService" interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService"/>
   <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
   <reference id="domRpcProviderService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
