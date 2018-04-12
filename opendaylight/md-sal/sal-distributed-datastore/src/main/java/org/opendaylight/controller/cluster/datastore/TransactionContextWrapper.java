@@ -183,11 +183,16 @@ class TransactionContextWrapper {
                 queuedTxOperations.clear();
             }
 
-            // Invoke TransactionOperations outside the sync block to avoid unnecessary blocking.
-            // A slight down-side is that we need to re-acquire the lock below but this should
-            // be negligible.
+            // Invoke TransactionOperations outside the sync block to avoid unnecessary blocking. A slight down-side is
+            // that we need to re-acquire the lock below but this should be negligible.
             for (Entry<TransactionOperation, Boolean> oper : operationsBatch) {
-                oper.getKey().invoke(localTransactionContext, oper.getValue());
+                final Boolean permit = oper.getValue();
+                if (permit.booleanValue() && !localTransactionContext.usesOperationLimiting()) {
+                    // If the context is not using limiting we need to release operations as we are queueing them, so
+                    // user threads are not charged for them.
+                    limiter.release();
+                }
+                oper.getKey().invoke(localTransactionContext, permit);
             }
         }
     }
