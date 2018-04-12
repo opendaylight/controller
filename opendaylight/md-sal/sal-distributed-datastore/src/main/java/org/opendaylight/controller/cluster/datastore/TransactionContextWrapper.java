@@ -166,9 +166,6 @@ class TransactionContextWrapper {
                     if (!pendingEnqueue) {
                         // We're done invoking the TransactionOperations so we can now publish the TransactionContext.
                         localTransactionContext.operationHandOffComplete();
-                        if (!localTransactionContext.usesOperationLimiting()) {
-                            limiter.releaseAll();
-                        }
 
                         // This is null-to-non-null transition after which we are releasing the lock and not doing
                         // any further processing.
@@ -185,9 +182,17 @@ class TransactionContextWrapper {
 
             // Invoke TransactionOperations outside the sync block to avoid unnecessary blocking.
             // A slight down-side is that we need to re-acquire the lock below but this should
-            // be negligible.
+            // be negligible. Also if the context is not using limiting release the operations as we push
+            // it at it.
+            int toRelease = operationsBatch.size();
             for (Entry<TransactionOperation, Boolean> oper : operationsBatch) {
                 oper.getKey().invoke(localTransactionContext, oper.getValue());
+                if (!oper.getValue().booleanValue()) {
+                    toRelease--;
+                }
+            }
+            if (!localTransactionContext.usesOperationLimiting()) {
+                limiter.release(toRelease);
             }
         }
     }
