@@ -186,8 +186,15 @@ class TransactionContextWrapper {
             // Invoke TransactionOperations outside the sync block to avoid unnecessary blocking.
             // A slight down-side is that we need to re-acquire the lock below but this should
             // be negligible.
+            int toRelease = 0;
             for (Entry<TransactionOperation, Boolean> oper : operationsBatch) {
                 oper.getKey().invoke(localTransactionContext, oper.getValue());
+                if (oper.getValue().booleanValue()) {
+                    toRelease++;
+                }
+            }
+            if (!localTransactionContext.usesOperationLimiting()) {
+                limiter.release(toRelease);
             }
         }
     }
