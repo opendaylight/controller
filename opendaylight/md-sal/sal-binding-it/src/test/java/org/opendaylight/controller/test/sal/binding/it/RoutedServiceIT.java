@@ -13,14 +13,14 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.util.concurrent.Futures;
+import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
-import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.OpendaylightTestRoutedRpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInputBuilder;
@@ -31,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.ops4j.pax.exam.util.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +46,9 @@ public class RoutedServiceIT extends AbstractIT {
     protected OpendaylightTestRoutedRpcService odlRoutedService1;
     protected OpendaylightTestRoutedRpcService odlRoutedService2;
 
-    protected OpendaylightTestRoutedRpcService consumerService;
-
-    protected RoutedRpcRegistration<OpendaylightTestRoutedRpcService> firstReg;
-    protected RoutedRpcRegistration<OpendaylightTestRoutedRpcService> secondReg;
+    @Inject
+    @Filter(timeout = 120 * 1000)
+    RpcProviderRegistry rpcProviderRegistry;
 
     /**
      * prepare mocks
@@ -65,43 +65,26 @@ public class RoutedServiceIT extends AbstractIT {
 
     @Test
     public void testServiceRegistration() {
-
-        assertNotNull(broker);
-
-        final BindingAwareProvider provider1 = new AbstractTestProvider() {
-            @Override
-            public void onSessionInitiated(final ProviderContext session) {
-                assertNotNull(session);
-                firstReg = session.addRoutedRpcImplementation(OpendaylightTestRoutedRpcService.class, odlRoutedService1);
-            }
-        };
-
         LOG.info("Register provider 1 with first implementation of routeSimpleService - service1");
-        broker.registerProvider(provider1);
+
+        RoutedRpcRegistration<OpendaylightTestRoutedRpcService> firstReg = rpcProviderRegistry
+                .addRoutedRpcImplementation(OpendaylightTestRoutedRpcService.class, odlRoutedService1);
         assertNotNull("Registration should not be null", firstReg);
         assertSame(odlRoutedService1, firstReg.getInstance());
 
-        final BindingAwareProvider provider2 = new AbstractTestProvider() {
-            @Override
-            public void onSessionInitiated(final ProviderContext session) {
-                assertNotNull(session);
-                secondReg = session.addRoutedRpcImplementation(OpendaylightTestRoutedRpcService.class, odlRoutedService2);
-            }
-        };
-
         LOG.info("Register provider 2 with second implementation of routeSimpleService - service2");
-        broker.registerProvider(provider2);
+
+        RoutedRpcRegistration<OpendaylightTestRoutedRpcService> secondReg = rpcProviderRegistry
+                .addRoutedRpcImplementation(OpendaylightTestRoutedRpcService.class, odlRoutedService2);
         assertNotNull("Registration should not be null", firstReg);
         assertSame(odlRoutedService2, secondReg.getInstance());
         assertNotSame(secondReg, firstReg);
 
-        final BindingAwareConsumer consumer =
-                session -> consumerService = session.getRpcService(OpendaylightTestRoutedRpcService.class);
-        LOG.info("Register routeService consumer");
-        broker.registerConsumer(consumer);
-
+        OpendaylightTestRoutedRpcService consumerService =
+                rpcProviderRegistry.getRpcService(OpendaylightTestRoutedRpcService.class);
         assertNotNull("MD-SAL instance of test Service should be returned", consumerService);
-        assertNotSame("Provider instance and consumer instance should not be same.", odlRoutedService1, consumerService);
+        assertNotSame("Provider instance and consumer instance should not be same.", odlRoutedService1,
+                consumerService);
 
         final InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
 
