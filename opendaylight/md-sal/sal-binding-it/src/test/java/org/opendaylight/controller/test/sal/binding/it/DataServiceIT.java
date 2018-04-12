@@ -14,23 +14,26 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.ops4j.pax.exam.util.Filter;
 
 /**
  * covers creating, reading and deleting of an item in dataStore
  */
 public class DataServiceIT extends AbstractIT {
-    protected DataBroker dataBroker;
+    @Inject
+    @Filter(timeout = 120 * 1000)
+    DataBroker dataBroker;
 
     /**
      *
@@ -42,13 +45,6 @@ public class DataServiceIT extends AbstractIT {
      */
     @Test
     public void test() throws Exception {
-        BindingAwareConsumer consumer = session -> dataBroker = session.getSALService(DataBroker.class);
-
-        broker.registerConsumer(consumer);
-
-        assertNotNull(dataBroker);
-
-
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         assertNotNull(transaction);
 
