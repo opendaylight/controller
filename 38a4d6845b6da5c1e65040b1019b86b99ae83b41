@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04bd76fb_ec7989ad",
+        "filename": "opendaylight/md-sal/sal-akka-raft-example/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2018-04-12T17:32:26Z",
+      "side": 1,
+      "message": "This is not right.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 8
+      },
+      "revId": "38a4d6845b6da5c1e65040b1019b86b99ae83b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
