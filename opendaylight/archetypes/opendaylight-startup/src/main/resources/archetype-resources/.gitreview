@@ -1,5 +1,0 @@
-[gerrit]
-host=git.opendaylight.org
-port=29418
-project=${artifactId}.git
-defaultbranch=master
