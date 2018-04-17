@@ -8,11 +8,11 @@
 
 package org.opendaylight.controller.mdsal.it.base;
 
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import javax.inject.Inject;
-
 import org.junit.Before;
 import org.opendaylight.controller.config.it.base.AbstractConfigTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -77,4 +77,10 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
         return option;
     }
 
+    @Override
+    protected Option[] getAdditionalOptions() {
+        return new Option[] {
+            configureConsole().ignoreLocalConsole()
+        };
+    }
 }
