@@ -12,6 +12,7 @@ import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
@@ -182,7 +183,9 @@ public abstract class AbstractConfigTestBase {
                 features(getFeatureRepo(), getFeatureName()),
                 mavenBundle("org.apache.aries.quiesce", "org.apache.aries.quiesce.api", "1.0.0"), getLoggingOption(),
                 mvnLocalRepoOption(),
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO"),
+                configureConsole().ignoreLocalConsole(),
+                editConfigurationFilePut("etc/config.properties", "karaf.framework", "equinox") };
         return OptionUtils.combine(options, getAdditionalOptions());
     }
 
