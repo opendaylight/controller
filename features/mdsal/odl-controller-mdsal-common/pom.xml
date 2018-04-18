@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-controller-mdsal-common</artifactId>
-    <version>1.7.1-SNAPSHOT</version>
+    <version>1.7.1</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: MDSAL :: Common</name>
@@ -27,14 +27,14 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-config-api</artifactId>
-            <version>0.8.1-SNAPSHOT</version>
+            <version>0.8.1</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-binding-runtime</artifactId>
-            <version>2.4.1-SNAPSHOT</version>
+            <version>2.4.1</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
