@@ -6,7 +6,7 @@ module ${artifactId} {
     namespace "urn:opendaylight:params:xml:ns:yang:${artifactId}";
     prefix "${artifactId}";
 
-    revision "2017-08-30" { // TODO change revision to date of model creation
+    revision "2018-04-19" { // TODO change revision to date of model creation
         description "Initial revision of ${artifactId} model";
     }
 }
