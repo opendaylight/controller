@@ -13,13 +13,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>bundle-parent</artifactId>
-    <version>1.8.4-SNAPSHOT</version>
+    <version>1.8.4-Carbon</version>
     <relativePath />
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-trace-cli</artifactId>
-  <version>1.5.4-SNAPSHOT</version>
+  <version>1.5.4-Carbon</version>
   <packaging>bundle</packaging>
 
   <dependencyManagement>
