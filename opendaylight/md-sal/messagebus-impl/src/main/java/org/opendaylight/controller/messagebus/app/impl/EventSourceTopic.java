@@ -31,6 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.DisJoinTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.DisJoinTopicInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.DisJoinTopicOutput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicInputBuilder;
@@ -77,7 +78,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change: changes) {
             final DataObjectModification<Node> rootNode = change.getRootNode();
             switch (rootNode.getModificationType()) {
@@ -184,7 +185,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
         }
         for (final InstanceIdentifier<?> eventSourceNodeId : joinedEventSources) {
             try {
-                final RpcResult<Void> result = sourceService
+                final RpcResult<DisJoinTopicOutput> result = sourceService
                         .disJoinTopic(getDisJoinTopicInputArgument(eventSourceNodeId)).get();
                 if (result.isSuccessful() == false) {
                     for (final RpcError err : result.getErrors()) {

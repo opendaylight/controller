@@ -8,8 +8,8 @@
 
 package rpcbenchmark.impl;
 
-import java.util.concurrent.Future;
-
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchInput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOutput;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBenchOutputBuilder;
@@ -22,8 +22,6 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.Futures;
-
 public class GlobalBindingRTCServer implements RpcbenchPayloadService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBindingRTCServer.class);
@@ -34,8 +32,7 @@ public class GlobalBindingRTCServer implements RpcbenchPayloadService {
     }
 
     @Override
-    public Future<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(
-            final GlobalRpcBenchInput input) {
+    public ListenableFuture<RpcResult<GlobalRpcBenchOutput>> globalRpcBench(final GlobalRpcBenchInput input) {
         GlobalRpcBenchOutput output = new GlobalRpcBenchOutputBuilder(input).build();
         RpcResult<GlobalRpcBenchOutput> result = RpcResultBuilder.success(output).build();
         numRpcs++;
@@ -43,8 +40,7 @@ public class GlobalBindingRTCServer implements RpcbenchPayloadService {
     }
 
     @Override
-    public Future<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(
-            final RoutedRpcBenchInput input) {
+    public ListenableFuture<RpcResult<RoutedRpcBenchOutput>> routedRpcBench(final RoutedRpcBenchInput input) {
         RoutedRpcBenchOutput output = new RoutedRpcBenchOutputBuilder(input).build();
         RpcResult<RoutedRpcBenchOutput> result = RpcResultBuilder.success(output).build();
         numRpcs++;

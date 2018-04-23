@@ -5,14 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package rpcbenchmark.impl;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
@@ -26,6 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.StartTestOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput.ExecStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutputBuilder;
@@ -60,7 +60,7 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
     }
 
     @Override
-    public Future<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
+    public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         LOG.debug("startTest {}", input);
 
         final RTCClient client;
@@ -135,7 +135,7 @@ public class RpcbenchmarkProvider implements AutoCloseable, RpcbenchmarkService 
     }
 
     @Override
-    public Future<RpcResult<TestStatusOutput>> testStatus() {
+    public ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
         LOG.info("testStatus");
         TestStatusOutput output = new TestStatusOutputBuilder()
                                         .setGlobalServerCnt((long)globalServer.getNumRpcs())

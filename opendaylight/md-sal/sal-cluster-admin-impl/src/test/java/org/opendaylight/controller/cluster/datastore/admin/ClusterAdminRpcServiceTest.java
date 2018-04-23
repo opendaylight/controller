@@ -82,13 +82,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.People;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInputBuilder;
@@ -97,11 +103,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingStateBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
@@ -146,7 +155,7 @@ public class ClusterAdminRpcServiceTest {
 
         ClusterAdminRpcService service = new ClusterAdminRpcService(node.configDataStore(), node.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service .backupDatastore(new BackupDatastoreInputBuilder()
+        RpcResult<BackupDatastoreOutput> rpcResult = service .backupDatastore(new BackupDatastoreInputBuilder()
                 .setFilePath(fileName).build()).get(5, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
@@ -178,8 +187,8 @@ public class ClusterAdminRpcServiceTest {
         assertEquals("getErrors", 1, rpcResult.getErrors().size());
     }
 
-    private static void verifyDatastoreSnapshot(String type, DatastoreSnapshot datastoreSnapshot,
-            String... expShardNames) {
+    private static void verifyDatastoreSnapshot(final String type, final DatastoreSnapshot datastoreSnapshot,
+            final String... expShardNames) {
         assertNotNull("Missing DatastoreSnapshot for type " + type, datastoreSnapshot);
         Set<String> shardNames = new HashSet<>();
         for (DatastoreSnapshot.ShardSnapshot s: datastoreSnapshot.getShardSnapshots()) {
@@ -414,7 +423,7 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
                 memberNode.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+        RpcResult<AddShardReplicaOutput> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
                 .setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
@@ -427,8 +436,8 @@ public class ClusterAdminRpcServiceTest {
         verifyFailedRpcResult(rpcResult);
     }
 
-    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(AbstractDataStore writeToStore,
-            AbstractDataStore readFromStore) throws Exception {
+    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(final AbstractDataStore writeToStore,
+            final AbstractDataStore readFromStore) throws Exception {
         DOMStoreWriteTransaction writeTx = writeToStore.newWriteOnlyTransaction();
         NormalizedNode<?, ?> carsNode = CarsModel.create();
         writeTx.write(CarsModel.BASE_PATH, carsNode);
@@ -443,17 +452,16 @@ public class ClusterAdminRpcServiceTest {
         return carsNode;
     }
 
-    private static void readCarsNodeAndVerify(AbstractDataStore readFromStore,
-            NormalizedNode<?, ?> expCarsNode) throws Exception {
+    private static void readCarsNodeAndVerify(final AbstractDataStore readFromStore,
+            final NormalizedNode<?, ?> expCarsNode) throws Exception {
         Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction()
                 .read(CarsModel.BASE_PATH).get(15, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());
     }
 
-    private RpcResult<GetShardRoleOutput> getShardRole(final MemberNode memberNode,
-                                                       final BindingNormalizedNodeSerializer serializer,
-                                                       final String shardName) throws Exception {
+    private static RpcResult<GetShardRoleOutput> getShardRole(final MemberNode memberNode,
+            final BindingNormalizedNodeSerializer serializer, final String shardName) throws Exception {
 
         final GetShardRoleInput input = new GetShardRoleInputBuilder()
                 .setDataStoreType(DataStoreType.Config)
@@ -464,10 +472,9 @@ public class ClusterAdminRpcServiceTest {
                 new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
 
         return service.getShardRole(input).get(10, TimeUnit.SECONDS);
-
     }
 
-    private RpcResult<GetPrefixShardRoleOutput> getPrefixShardRole(
+    private static RpcResult<GetPrefixShardRoleOutput> getPrefixShardRole(
             final MemberNode memberNode,
             final InstanceIdentifier<?> identifier,
             final BindingNormalizedNodeSerializer serializer) throws Exception {
@@ -481,14 +488,11 @@ public class ClusterAdminRpcServiceTest {
                 new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
 
         return service.getPrefixShardRole(input).get(10, TimeUnit.SECONDS);
-
     }
 
-    private void addPrefixShardReplica(final MemberNode memberNode,
-                                       final InstanceIdentifier<?> identifier,
-                                       final BindingNormalizedNodeSerializer serializer,
-                                       final String shardName,
-                                       final String... peerMemberNames) throws Exception {
+    private static void addPrefixShardReplica(final MemberNode memberNode, final InstanceIdentifier<?> identifier,
+            final BindingNormalizedNodeSerializer serializer, final String shardName,
+            final String... peerMemberNames) throws Exception {
 
         final AddPrefixShardReplicaInput input = new AddPrefixShardReplicaInputBuilder()
                 .setShardPrefix(identifier)
@@ -497,7 +501,8 @@ public class ClusterAdminRpcServiceTest {
         final ClusterAdminRpcService service =
                 new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
 
-        final RpcResult<Void> rpcResult = service.addPrefixShardReplica(input).get(10, TimeUnit.SECONDS);
+        final RpcResult<AddPrefixShardReplicaOutput> rpcResult = service.addPrefixShardReplica(input)
+                .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
@@ -505,12 +510,9 @@ public class ClusterAdminRpcServiceTest {
         assertTrue("Replica shard not present", optional.isPresent());
     }
 
-    private void removePrefixShardReplica(final MemberNode memberNode,
-                                          final InstanceIdentifier<?> identifier,
-                                          final String removeFromMember,
-                                          final BindingNormalizedNodeSerializer serializer,
-                                          final String shardName,
-                                          final String... peerMemberNames) throws Exception {
+    private static void removePrefixShardReplica(final MemberNode memberNode, final InstanceIdentifier<?> identifier,
+            final String removeFromMember, final BindingNormalizedNodeSerializer serializer, final String shardName,
+            final String... peerMemberNames) throws Exception {
         final RemovePrefixShardReplicaInput input = new RemovePrefixShardReplicaInputBuilder()
                 .setDataStoreType(DataStoreType.Config)
                 .setShardPrefix(identifier)
@@ -519,21 +521,22 @@ public class ClusterAdminRpcServiceTest {
         final ClusterAdminRpcService service =
                 new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), serializer);
 
-        final RpcResult<Void> rpcResult = service.removePrefixShardReplica(input).get(10, TimeUnit.SECONDS);
+        final RpcResult<RemovePrefixShardReplicaOutput> rpcResult = service.removePrefixShardReplica(input)
+                .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
     }
 
-    private static void doAddShardReplica(MemberNode memberNode, String shardName, String... peerMemberNames)
-            throws Exception {
+    private static void doAddShardReplica(final MemberNode memberNode, final String shardName,
+            final String... peerMemberNames) throws Exception {
         memberNode.waitForMembersUp(peerMemberNames);
 
         ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
                 memberNode.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName(shardName)
-                .setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        RpcResult<AddShardReplicaOutput> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+            .setShardName(shardName).setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
@@ -548,12 +551,12 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(memberNode.operDataStore(), shardName, peerMemberNames);
     }
 
-    private static void doMakeShardLeaderLocal(final MemberNode memberNode, String shardName, String newLeader)
-            throws Exception {
+    private static void doMakeShardLeaderLocal(final MemberNode memberNode, final String shardName,
+            final String newLeader) throws Exception {
         ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
                 memberNode.operDataStore(), null);
 
-        final RpcResult<Void> rpcResult = service.makeLeaderLocal(new MakeLeaderLocalInputBuilder()
+        final RpcResult<MakeLeaderLocalOutput> rpcResult = service.makeLeaderLocal(new MakeLeaderLocalInputBuilder()
                 .setDataStoreType(DataStoreType.Config).setShardName(shardName).build())
                 .get(10, TimeUnit.SECONDS);
 
@@ -561,10 +564,9 @@ public class ClusterAdminRpcServiceTest {
 
         verifyRaftState(memberNode.configDataStore(), shardName, raftState -> assertThat(raftState.getLeader(),
                 containsString(newLeader)));
-
     }
 
-    private static <T> T verifySuccessfulRpcResult(RpcResult<T> rpcResult) {
+    private static <T> T verifySuccessfulRpcResult(final RpcResult<T> rpcResult) {
         if (!rpcResult.isSuccessful()) {
             if (rpcResult.getErrors().size() > 0) {
                 RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
@@ -577,7 +579,7 @@ public class ClusterAdminRpcServiceTest {
         return rpcResult.getResult();
     }
 
-    private static void verifyFailedRpcResult(RpcResult<?> rpcResult) {
+    private static void verifyFailedRpcResult(final RpcResult<?> rpcResult) {
         assertFalse("RpcResult", rpcResult.isSuccessful());
         assertEquals("RpcResult errors size", 1, rpcResult.getErrors().size());
         RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
@@ -610,7 +612,7 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
                 replicaNode3.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder()
+        RpcResult<RemoveShardReplicaOutput> rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder()
                 .setShardName("cars").setMemberName("member-3").setDataStoreType(DataStoreType.Config).build())
                 .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -671,7 +673,7 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
                 leaderNode1.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
+        RpcResult<RemoveShardReplicaOutput> rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
                 .setShardName("cars").setMemberName("member-1").setDataStoreType(DataStoreType.Config).build())
                 .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -721,8 +723,8 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service = new ClusterAdminRpcService(newReplicaNode2.configDataStore(),
                 newReplicaNode2.operDataStore(), null);
 
-        RpcResult<AddReplicasForAllShardsOutput> rpcResult =
-                service.addReplicasForAllShards().get(10, TimeUnit.SECONDS);
+        RpcResult<AddReplicasForAllShardsOutput> rpcResult = service.addReplicasForAllShards(
+            new AddReplicasForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
         AddReplicasForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -825,7 +827,7 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
                 replicaNode3.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service3
+        RpcResult<ChangeMemberVotingStatesForShardOutput> rpcResult = service3
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName("cars").setDataStoreType(DataStoreType.Config)
                         .setMemberVotingState(ImmutableList.of(
@@ -859,7 +861,7 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service = new ClusterAdminRpcService(leaderNode.configDataStore(),
                 leaderNode.operDataStore(), null);
 
-        RpcResult<Void> rpcResult = service
+        RpcResult<ChangeMemberVotingStatesForShardOutput> rpcResult = service
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName("cars").setDataStoreType(DataStoreType.Config)
                         .setMemberVotingState(ImmutableList
@@ -951,8 +953,8 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
                 replicaNode3.operDataStore(), null);
 
-        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service3.flipMemberVotingStatesForAllShards()
-                .get(10, TimeUnit.SECONDS);
+        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service3.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
         FlipMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -981,7 +983,8 @@ public class ClusterAdminRpcServiceTest {
 
         // Flip the voting states back to the original states.
 
-        rpcResult = service3.flipMemberVotingStatesForAllShards(). get(10, TimeUnit.SECONDS);
+        rpcResult = service3.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
         result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -1045,8 +1048,8 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service1 = new ClusterAdminRpcService(replicaNode1.configDataStore(),
                 replicaNode1.operDataStore(), null);
 
-        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service1.flipMemberVotingStatesForAllShards()
-                .get(10, TimeUnit.SECONDS);
+        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service1.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
         FlipMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -1112,8 +1115,8 @@ public class ClusterAdminRpcServiceTest {
         ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
                 leaderNode1.operDataStore(), null);
 
-        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service1.flipMemberVotingStatesForAllShards()
-                .get(10, TimeUnit.SECONDS);
+        RpcResult<FlipMemberVotingStatesForAllShardsOutput> rpcResult = service1.flipMemberVotingStatesForAllShards(
+            new FlipMemberVotingStatesForAllShardsInputBuilder().build()).get(10, TimeUnit.SECONDS);
         FlipMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
                 successShardResult("people", DataStoreType.Config),
@@ -1137,8 +1140,8 @@ public class ClusterAdminRpcServiceTest {
         });
     }
 
-    private static void setupPersistedServerConfigPayload(ServerConfigurationPayload serverConfig,
-            String member, String datastoreTypeSuffix, String... shards) {
+    private static void setupPersistedServerConfigPayload(final ServerConfigurationPayload serverConfig,
+            final String member, final String datastoreTypeSuffix, final String... shards) {
         String[] datastoreTypes = {"config_", "oper_"};
         for (String type : datastoreTypes) {
             for (String shard : shards) {
@@ -1158,8 +1161,8 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @SafeVarargs
-    private static void verifyVotingStates(AbstractDataStore[] datastores, String[] shards,
-            SimpleEntry<String, Boolean>... expStates) throws Exception {
+    private static void verifyVotingStates(final AbstractDataStore[] datastores, final String[] shards,
+            final SimpleEntry<String, Boolean>... expStates) throws Exception {
         for (AbstractDataStore datastore: datastores) {
             for (String shard: shards) {
                 verifyVotingStates(datastore, shard, expStates);
@@ -1168,8 +1171,8 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @SafeVarargs
-    private static void verifyVotingStates(AbstractDataStore datastore, String shardName,
-            SimpleEntry<String, Boolean>... expStates) throws Exception {
+    private static void verifyVotingStates(final AbstractDataStore datastore, final String shardName,
+            final SimpleEntry<String, Boolean>... expStates) throws Exception {
         String localMemberName = datastore.getActorContext().getCurrentMemberName().getName();
         Map<String, Boolean> expStateMap = new HashMap<>();
         for (Entry<String, Boolean> e: expStates) {
@@ -1187,7 +1190,7 @@ public class ClusterAdminRpcServiceTest {
         });
     }
 
-    private static void verifyShardResults(List<ShardResult> shardResults, ShardResult... expShardResults) {
+    private static void verifyShardResults(final List<ShardResult> shardResults, final ShardResult... expShardResults) {
         Map<String, ShardResult> expResultsMap = new HashMap<>();
         for (ShardResult r: expShardResults) {
             expResultsMap.put(r.getShardName() + "-" + r.getDataStoreType(), r);
@@ -1210,11 +1213,11 @@ public class ClusterAdminRpcServiceTest {
         }
     }
 
-    private static ShardResult successShardResult(String shardName, DataStoreType type) {
+    private static ShardResult successShardResult(final String shardName, final DataStoreType type) {
         return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(TRUE).build();
     }
 
-    private static ShardResult failedShardResult(String shardName, DataStoreType type) {
+    private static ShardResult failedShardResult(final String shardName, final DataStoreType type) {
         return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(FALSE).build();
     }
 }

@@ -5,15 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package ntfbenchmark.impl;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
@@ -22,6 +21,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestInput.ProducerType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.StartTestOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbenchmark.rev150105.TestStatusOutput;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -53,7 +53,7 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
     }
 
     @Override
-    public Future<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
+    public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         final int producerCount = input.getProducers().intValue();
         final int listenerCount = input.getListeners().intValue();
         final int iterations = input.getIterations().intValue();
@@ -135,7 +135,7 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
     }
 
     @Override
-    public Future<RpcResult<TestStatusOutput>> testStatus() {
+    public ListenableFuture<RpcResult<TestStatusOutput>> testStatus(final TestStatusInput input) {
         // TODO Auto-generated method stub
         return null;
     }
