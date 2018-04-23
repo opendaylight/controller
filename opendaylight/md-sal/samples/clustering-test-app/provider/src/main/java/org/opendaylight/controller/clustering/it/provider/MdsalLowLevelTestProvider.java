@@ -20,12 +20,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
@@ -70,30 +70,75 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CheckPublishNotificationsOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.DeconfigureIdIntsShardInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.DeconfigureIdIntsShardOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.IsClientAbortedOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.OdlMdsalLowlevelControlService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ProduceTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterBoundConstantOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterConstantOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterDefaultConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterFlappingSingletonOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RegisterSingletonConstantOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemoveShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownPrefixShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownPrefixShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownPrefixShardReplicaOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.ShutdownShardReplicaOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.StartPublishNotificationsOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDdtlOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeDtclOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.SubscribeYnlOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterBoundConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterDefaultConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterDefaultConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterFlappingSingletonOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnregisterSingletonConstantOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDdtlOutputBuilder;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeDtclOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlInput;
@@ -189,14 +234,16 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Future<RpcResult<Void>> unregisterSingletonConstant() {
+    public ListenableFuture<RpcResult<UnregisterSingletonConstantOutput>> unregisterSingletonConstant(
+            final UnregisterSingletonConstantInput input) {
         LOG.debug("unregister-singleton-constant");
 
         if (getSingletonConstantRegistration == null) {
             LOG.debug("No get-singleton-constant registration present.");
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "missing-registration",
                     "No get-singleton-constant rpc registration present.");
-            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
+            final RpcResult<UnregisterSingletonConstantOutput> result =
+                    RpcResultBuilder.<UnregisterSingletonConstantOutput>failed().withRpcError(rpcError).build();
             return Futures.immediateFuture(result);
         }
 
@@ -204,18 +251,21 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             getSingletonConstantRegistration.close();
             getSingletonConstantRegistration = null;
 
-            return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+            return Futures.immediateFuture(RpcResultBuilder.success(
+                new UnregisterSingletonConstantOutputBuilder().build()).build());
         } catch (Exception e) {
             LOG.debug("There was a problem closing the singleton constant service", e);
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "error-closing",
                     "There was a problem closing get-singleton-constant");
-            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
+            final RpcResult<UnregisterSingletonConstantOutput> result =
+                    RpcResultBuilder.<UnregisterSingletonConstantOutput>failed().withRpcError(rpcError).build();
             return Futures.immediateFuture(result);
         }
     }
 
     @Override
-    public Future<RpcResult<Void>> startPublishNotifications(final StartPublishNotificationsInput input) {
+    public ListenableFuture<RpcResult<StartPublishNotificationsOutput>> startPublishNotifications(
+            final StartPublishNotificationsInput input) {
         LOG.debug("publish-notifications, input: {}", input);
 
         final PublishNotificationsTask task = new PublishNotificationsTask(notificationPublishService, input.getId(),
@@ -225,16 +275,17 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         task.start();
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new StartPublishNotificationsOutputBuilder().build())
+            .build());
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeDtcl() {
+    public ListenableFuture<RpcResult<SubscribeDtclOutput>> subscribeDtcl(final SubscribeDtclInput input) {
 
         if (dtclReg != null) {
             final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
                     "There is already dataTreeChangeListener registered on id-ints list.");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<SubscribeDtclOutput>failed().withRpcError(error).build());
         }
 
         idIntsListener = new IdIntsListener();
@@ -245,58 +296,61 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                                 CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID),
                         idIntsListener);
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new SubscribeDtclOutputBuilder().build()).build());
     }
 
     @Override
-    public Future<RpcResult<WriteTransactionsOutput>> writeTransactions(final WriteTransactionsInput input) {
+    public ListenableFuture<RpcResult<WriteTransactionsOutput>> writeTransactions(final WriteTransactionsInput input) {
         LOG.debug("write-transactions, input: {}", input);
         return WriteTransactionsHandler.start(domDataBroker, input);
     }
 
     @Override
-    public Future<RpcResult<IsClientAbortedOutput>> isClientAborted() {
+    public ListenableFuture<RpcResult<IsClientAbortedOutput>> isClientAborted(final IsClientAbortedInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> removeShardReplica(final RemoveShardReplicaInput input) {
+    public ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(
+            final RemoveShardReplicaInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeYnl(final SubscribeYnlInput input) {
+    public ListenableFuture<RpcResult<SubscribeYnlOutput>> subscribeYnl(final SubscribeYnlInput input) {
 
         LOG.debug("subscribe-ynl, input: {}", input);
 
         if (ynlRegistrations.containsKey(input.getId())) {
             final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
                     "There is already ynl listener registered for this id: " + input.getId());
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<SubscribeYnlOutput>failed().withRpcError(error).build());
         }
 
         ynlRegistrations.put(input.getId(),
                 notificationService.registerNotificationListener(new YnlListener(input.getId())));
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new SubscribeYnlOutputBuilder().build()).build());
     }
 
     @Override
-    public Future<RpcResult<Void>> removePrefixShard(final RemovePrefixShardInput input) {
+    public ListenableFuture<RpcResult<RemovePrefixShardOutput>> removePrefixShard(final RemovePrefixShardInput input) {
         LOG.debug("remove-prefix-shard, input: {}", input);
 
         return prefixShardHandler.onRemovePrefixShard(input);
     }
 
     @Override
-    public Future<RpcResult<Void>> becomePrefixLeader(final BecomePrefixLeaderInput input) {
+    public ListenableFuture<RpcResult<BecomePrefixLeaderOutput>> becomePrefixLeader(
+            final BecomePrefixLeaderInput input) {
         LOG.debug("become-prefix-leader, input: {}", input);
 
         return prefixLeaderHandler.makeLeaderLocal(input);
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterBoundConstant(final UnregisterBoundConstantInput input) {
+    public ListenableFuture<RpcResult<UnregisterBoundConstantOutput>> unregisterBoundConstant(
+            final UnregisterBoundConstantInput input) {
         LOG.debug("unregister-bound-constant, {}", input);
 
         final DOMRpcImplementationRegistration<RoutedGetConstantService> rpcRegistration =
@@ -306,54 +360,62 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             LOG.debug("No get-contexted-constant registration for context: {}", input.getContext());
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "missing-registration",
                     "No get-constant rpc registration present.");
-            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
+            final RpcResult<UnregisterBoundConstantOutput> result =
+                    RpcResultBuilder.<UnregisterBoundConstantOutput>failed().withRpcError(rpcError).build();
             return Futures.immediateFuture(result);
         }
 
         rpcRegistration.close();
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new UnregisterBoundConstantOutputBuilder().build())
+            .build());
     }
 
     @Override
-    public Future<RpcResult<Void>> registerSingletonConstant(final RegisterSingletonConstantInput input) {
+    public ListenableFuture<RpcResult<RegisterSingletonConstantOutput>> registerSingletonConstant(
+            final RegisterSingletonConstantInput input) {
 
         LOG.debug("Received register-singleton-constant rpc, input: {}", input);
 
         if (input.getConstant() == null) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.RPC, "Invalid input.", "Constant value is null");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterSingletonConstantOutput>failed()
+                .withRpcError(error).build());
         }
 
         getSingletonConstantRegistration =
                 SingletonGetConstantService.registerNew(singletonService, domRpcService, input.getConstant());
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new RegisterSingletonConstantOutputBuilder().build())
+            .build());
     }
 
     @Override
-    public Future<RpcResult<Void>> registerDefaultConstant(final RegisterDefaultConstantInput input) {
+    public ListenableFuture<RpcResult<RegisterDefaultConstantOutput>> registerDefaultConstant(
+            final RegisterDefaultConstantInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterConstant() {
+    public ListenableFuture<RpcResult<UnregisterConstantOutput>> unregisterConstant(
+            final UnregisterConstantInput input) {
 
         if (globalGetConstantRegistration == null) {
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "missing-registration",
                     "No get-constant rpc registration present.");
-            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
-            return Futures.immediateFuture(result);
+            return Futures.immediateFuture(RpcResultBuilder.<UnregisterConstantOutput>failed().withRpcError(rpcError)
+                .build());
         }
 
         globalGetConstantRegistration.close();
         globalGetConstantRegistration = null;
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new UnregisterConstantOutputBuilder().build()).build());
     }
 
     @Override
-    public Future<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton() {
+    public ListenableFuture<RpcResult<UnregisterFlappingSingletonOutput>> unregisterFlappingSingleton(
+            final UnregisterFlappingSingletonInput input) {
         LOG.debug("unregister-flapping-singleton received.");
 
         if (flappingSingletonService == null) {
@@ -374,17 +436,17 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> addShardReplica(final AddShardReplicaInput input) {
+    public ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<Void>> subscribeDdtl() {
+    public ListenableFuture<RpcResult<SubscribeDdtlOutput>> subscribeDdtl(final SubscribeDdtlInput input) {
 
         if (ddtlReg != null) {
             final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
                     "There is already dataTreeChangeListener registered on id-ints list.");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<SubscribeDdtlOutput>failed().withRpcError(error).build());
         }
 
         idIntsDdtl = new IdIntsDOMDataTreeLIstener();
@@ -396,32 +458,35 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                     true, Collections.emptyList());
         } catch (DOMDataTreeLoopException e) {
             LOG.error("Failed to register DOMDataTreeListener.", e);
-
         }
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new SubscribeDdtlOutputBuilder().build()).build());
     }
 
     @Override
-    public Future<RpcResult<Void>> registerBoundConstant(final RegisterBoundConstantInput input) {
+    public ListenableFuture<RpcResult<RegisterBoundConstantOutput>> registerBoundConstant(
+            final RegisterBoundConstantInput input) {
         LOG.debug("register-bound-constant: {}", input);
 
         if (input.getContext() == null) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.RPC, "Invalid input.", "Context value is null");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterBoundConstantOutput>failed().withRpcError(error)
+                .build());
         }
 
         if (input.getConstant() == null) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.RPC, "Invalid input.", "Constant value is null");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterBoundConstantOutput>failed().withRpcError(error)
+                .build());
         }
 
         if (routedRegistrations.containsKey(input.getContext())) {
             final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
                     "There is already a rpc registered for context: " + input.getContext());
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterBoundConstantOutput>failed().withRpcError(error)
+                .build());
         }
 
         final DOMRpcImplementationRegistration<RoutedGetConstantService> rpcRegistration =
@@ -429,26 +494,30 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                         input.getConstant(), input.getContext());
 
         routedRegistrations.put(input.getContext(), rpcRegistration);
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new RegisterBoundConstantOutputBuilder().build())
+            .build());
     }
 
     @Override
-    public Future<RpcResult<Void>> registerFlappingSingleton() {
+    public ListenableFuture<RpcResult<RegisterFlappingSingletonOutput>> registerFlappingSingleton(
+            final RegisterFlappingSingletonInput input) {
         LOG.debug("Received register-flapping-singleton.");
 
         if (flappingSingletonService != null) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.RPC, "Registration present.", "flapping-singleton already registered");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterFlappingSingletonOutput>failed()
+                .withRpcError(error).build());
         }
 
         flappingSingletonService = new FlappingSingletonService(singletonService);
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new RegisterFlappingSingletonOutputBuilder().build())
+            .build());
     }
 
     @Override
-    public Future<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl() {
+    public ListenableFuture<RpcResult<UnsubscribeDtclOutput>> unsubscribeDtcl(final UnsubscribeDtclInput input) {
         LOG.debug("Received unsubscribe-dtcl");
 
         if (idIntsListener == null || dtclReg == null) {
@@ -504,19 +573,20 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> createPrefixShard(final CreatePrefixShardInput input) {
+    public ListenableFuture<RpcResult<CreatePrefixShardOutput>> createPrefixShard(final CreatePrefixShardInput input) {
         LOG.debug("create-prefix-shard, input: {}", input);
 
         return prefixShardHandler.onCreatePrefixShard(input);
     }
 
     @Override
-    public Future<RpcResult<Void>> deconfigureIdIntsShard() {
+    public ListenableFuture<RpcResult<DeconfigureIdIntsShardOutput>> deconfigureIdIntsShard(
+            final DeconfigureIdIntsShardInput input) {
         return null;
     }
 
     @Override
-    public Future<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
+    public ListenableFuture<RpcResult<UnsubscribeYnlOutput>> unsubscribeYnl(final UnsubscribeYnlInput input) {
         LOG.debug("Received unsubscribe-ynl, input: {}", input);
 
         if (!ynlRegistrations.containsKey(input.getId())) {
@@ -536,7 +606,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<CheckPublishNotificationsOutput>> checkPublishNotifications(
+    public ListenableFuture<RpcResult<CheckPublishNotificationsOutput>> checkPublishNotifications(
             final CheckPublishNotificationsInput input) {
 
         final PublishNotificationsTask task = publishNotificationsTasks.get(input.getId());
@@ -561,27 +631,31 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<ProduceTransactionsOutput>> produceTransactions(final ProduceTransactionsInput input) {
+    public ListenableFuture<RpcResult<ProduceTransactionsOutput>> produceTransactions(
+            final ProduceTransactionsInput input) {
         LOG.debug("producer-transactions, input: {}", input);
         return ProduceTransactionsHandler.start(domDataTreeService, input);
     }
 
     @Override
-    public Future<RpcResult<Void>> shutdownShardReplica(final ShutdownShardReplicaInput input) {
+    public ListenableFuture<RpcResult<ShutdownShardReplicaOutput>> shutdownShardReplica(
+            final ShutdownShardReplicaInput input) {
         LOG.debug("Received shutdown-shard-replica rpc, input: {}", input);
 
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
                     "A valid shard name must be specified");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+            return Futures.immediateFuture(RpcResultBuilder.<ShutdownShardReplicaOutput>failed().withRpcError(rpcError)
+                .build());
         }
 
-        return shutdownShardGracefully(shardName);
+        return shutdownShardGracefully(shardName, new ShutdownShardReplicaOutputBuilder().build());
     }
 
     @Override
-    public Future<RpcResult<Void>> shutdownPrefixShardReplica(final ShutdownPrefixShardReplicaInput input) {
+    public ListenableFuture<RpcResult<ShutdownPrefixShardReplicaOutput>> shutdownPrefixShardReplica(
+            final ShutdownPrefixShardReplicaInput input) {
         LOG.debug("Received shutdown-prefix-shard-replica rpc, input: {}", input);
 
         final InstanceIdentifier<?> shardPrefix = input.getPrefix();
@@ -589,17 +663,18 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         if (shardPrefix == null) {
             final RpcError rpcError = RpcResultBuilder.newError(ErrorType.APPLICATION, "bad-element",
                     "A valid shard prefix must be specified");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(rpcError).build());
+            return Futures.immediateFuture(RpcResultBuilder.<ShutdownPrefixShardReplicaOutput>failed()
+                .withRpcError(rpcError).build());
         }
 
         final YangInstanceIdentifier shardPath = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(shardPrefix);
         final String cleanPrefixShardName = ClusterUtils.getCleanShardName(shardPath);
 
-        return shutdownShardGracefully(cleanPrefixShardName);
+        return shutdownShardGracefully(cleanPrefixShardName, new ShutdownPrefixShardReplicaOutputBuilder().build());
     }
 
-    private SettableFuture<RpcResult<Void>> shutdownShardGracefully(final String shardName) {
-        final SettableFuture<RpcResult<Void>> rpcResult = SettableFuture.create();
+    private <T> SettableFuture<RpcResult<T>> shutdownShardGracefully(final String shardName, final T success) {
+        final SettableFuture<RpcResult<T>> rpcResult = SettableFuture.create();
         final ActorContext context = configDataStore.getActorContext();
 
         long timeoutInMS = Math.max(context.getDatastoreContext().getShardRaftConfig()
@@ -622,13 +697,13 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             @Override
             public void onComplete(final Throwable throwable, final Boolean gracefulStopResult) throws Throwable {
                 if (throwable != null) {
-                    final RpcResult<Void> failedResult = RpcResultBuilder.<Void>failed()
+                    final RpcResult<T> failedResult = RpcResultBuilder.<T>failed()
                             .withError(ErrorType.APPLICATION, "Failed to gracefully shutdown shard", throwable).build();
                     rpcResult.set(failedResult);
                 } else {
                     // according to Patterns.gracefulStop API, we don't have to
                     // check value of gracefulStopResult
-                    rpcResult.set(RpcResultBuilder.<Void>success().build());
+                    rpcResult.set(RpcResultBuilder.success(success).build());
                 }
             }
         }, context.getClientDispatcher());
@@ -636,34 +711,37 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerConstant(final RegisterConstantInput input) {
+    public ListenableFuture<RpcResult<RegisterConstantOutput>> registerConstant(final RegisterConstantInput input) {
 
         LOG.debug("Received register-constant rpc, input: {}", input);
 
         if (input.getConstant() == null) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.RPC, "Invalid input.", "Constant value is null");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterConstantOutput>failed().withRpcError(error)
+                .build());
         }
 
         if (globalGetConstantRegistration != null) {
             final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
                     "There is already a get-constant rpc registered.");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RegisterConstantOutput>failed().withRpcError(error)
+                .build());
         }
 
         globalGetConstantRegistration = GetConstantService.registerNew(domRpcService, input.getConstant());
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new RegisterConstantOutputBuilder().build()).build());
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterDefaultConstant() {
+    public ListenableFuture<RpcResult<UnregisterDefaultConstantOutput>> unregisterDefaultConstant(
+            final UnregisterDefaultConstantInput input) {
         return null;
     }
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Future<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl() {
+    public ListenableFuture<RpcResult<UnsubscribeDdtlOutput>> unsubscribeDdtl(final UnsubscribeDdtlInput input) {
         LOG.debug("Received unsubscribe-ddtl.");
 
         if (idIntsDdtl == null || ddtlReg == null) {
