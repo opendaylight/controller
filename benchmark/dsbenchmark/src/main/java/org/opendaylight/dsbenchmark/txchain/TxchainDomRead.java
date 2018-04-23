@@ -9,10 +9,10 @@
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -67,13 +67,13 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
             for (int l = 0; l < outerListElem; l++) {
                 YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
                 Optional<NormalizedNode<?,?>> optionalDataObject;
-                CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture = tx.read(dsType, yid);
+                ListenableFuture<Optional<NormalizedNode<?,?>>> submitFuture = tx.read(dsType, yid);
                 try {
-                    optionalDataObject = submitFuture.checkedGet();
+                    optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         txOk++;
                     }
-                } catch (final ReadFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }
