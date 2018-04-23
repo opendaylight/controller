@@ -27,6 +27,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -76,9 +77,9 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
         // NOTE: In a real test we would want to override the Thread.sleep() to
         // prevent our junit test
         // for sleeping for a second...
-        Future<RpcResult<Void>> makeToast = toaster.makeToast(toastInput);
+        Future<RpcResult<MakeToastOutput>> makeToast = toaster.makeToast(toastInput);
 
-        RpcResult<Void> rpcResult = makeToast.get();
+        RpcResult<MakeToastOutput> rpcResult = makeToast.get();
 
         assertNotNull(rpcResult);
         assertTrue(rpcResult.isSuccessful());

@@ -10,10 +10,10 @@ package org.opendaylight.controller.messagebus.app.impl;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -28,6 +28,8 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.CreateTopicOutput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.CreateTopicOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicInput;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicOutput;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.EventAggregatorService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
@@ -143,7 +145,7 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
     }
 
     @Override
-    public Future<RpcResult<CreateTopicOutput>> createTopic(final CreateTopicInput input) {
+    public ListenableFuture<RpcResult<CreateTopicOutput>> createTopic(final CreateTopicInput input) {
         LOG.debug("Received Topic creation request: NotificationPattern -> {}, NodeIdPattern -> {}",
                 input.getNotificationPattern(),
                 input.getNodeIdPattern());
@@ -167,12 +169,12 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
     }
 
     @Override
-    public Future<RpcResult<Void>> destroyTopic(final DestroyTopicInput input) {
+    public ListenableFuture<RpcResult<DestroyTopicOutput>> destroyTopic(final DestroyTopicInput input) {
         final EventSourceTopic topicToDestroy = eventSourceTopicMap.remove(input.getTopicId());
         if (topicToDestroy != null) {
             topicToDestroy.close();
         }
-        return Util.resultRpcSuccessFor((Void) null);
+        return Util.resultRpcSuccessFor(new DestroyTopicOutputBuilder().build());
     }
 
     @Override

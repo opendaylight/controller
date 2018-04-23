@@ -37,7 +37,11 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.CreatePrefixShardOutputBuilder;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.RemovePrefixShardOutputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -73,9 +77,10 @@ public class PrefixShardHandler {
         this.serializer = serializer;
     }
 
-    public ListenableFuture<RpcResult<Void>> onCreatePrefixShard(final CreatePrefixShardInput input) {
+    public ListenableFuture<RpcResult<CreatePrefixShardOutput>> onCreatePrefixShard(
+            final CreatePrefixShardInput input) {
 
-        final SettableFuture<RpcResult<Void>> future = SettableFuture.create();
+        final SettableFuture<RpcResult<CreatePrefixShardOutput>> future = SettableFuture.create();
 
         final CompletionStage<DistributedShardRegistration> completionStage;
         final YangInstanceIdentifier identifier = serializer.toYangInstanceIdentifier(input.getPrefix());
@@ -94,7 +99,7 @@ public class PrefixShardHandler {
                     @Override
                     public void onSuccess(@Nullable final Void result) {
                         LOG.debug("Initial list write successful.");
-                        future.set(RpcResultBuilder.<Void>success().build());
+                        future.set(RpcResultBuilder.success(new CreatePrefixShardOutputBuilder().build()).build());
                     }
 
                     @Override
@@ -103,7 +108,7 @@ public class PrefixShardHandler {
 
                         final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION,
                                 "create-shard-failed", "Shard creation failed", "cluster-test-app", "", throwable);
-                        future.set(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+                        future.set(RpcResultBuilder.<CreatePrefixShardOutput>failed().withRpcError(error).build());
                     }
                 }, MoreExecutors.directExecutor());
             });
@@ -112,7 +117,7 @@ public class PrefixShardHandler {
 
                 final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "create-shard-failed",
                         "Shard creation failed", "cluster-test-app", "", throwable);
-                future.set(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+                future.set(RpcResultBuilder.<CreatePrefixShardOutput>failed().withRpcError(error).build());
                 return null;
             });
         } catch (final DOMDataTreeShardingConflictException e) {
@@ -120,13 +125,14 @@ public class PrefixShardHandler {
 
             final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "create-shard-failed",
                     "Sharding conflict", "cluster-test-app", "", e);
-            future.set(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            future.set(RpcResultBuilder.<CreatePrefixShardOutput>failed().withRpcError(error).build());
         }
 
         return future;
     }
 
-    public ListenableFuture<RpcResult<Void>> onRemovePrefixShard(final RemovePrefixShardInput input) {
+    public ListenableFuture<RpcResult<RemovePrefixShardOutput>> onRemovePrefixShard(
+            final RemovePrefixShardInput input) {
 
         final YangInstanceIdentifier identifier = serializer.toYangInstanceIdentifier(input.getPrefix());
         final DistributedShardRegistration registration = registrations.get(identifier);
@@ -134,19 +140,20 @@ public class PrefixShardHandler {
         if (registration == null) {
             final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "registration-missing",
                     "No shard registered at this prefix.");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            return Futures.immediateFuture(RpcResultBuilder.<RemovePrefixShardOutput>failed().withRpcError(error)
+                .build());
         }
 
-        final SettableFuture<RpcResult<Void>> future = SettableFuture.create();
+        final SettableFuture<RpcResult<RemovePrefixShardOutput>> future = SettableFuture.create();
 
         final CompletionStage<Void> close = registration.close();
-        close.thenRun(() -> future.set(RpcResultBuilder.<Void>success().build()));
+        close.thenRun(() -> future.set(RpcResultBuilder.success(new RemovePrefixShardOutputBuilder().build()).build()));
         close.exceptionally(throwable -> {
             LOG.warn("Shard[{}] removal failed:", identifier, throwable);
 
             final RpcError error = RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "remove-shard-failed",
                     "Shard removal failed", "cluster-test-app", "", throwable);
-            future.set(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+            future.set(RpcResultBuilder.<RemovePrefixShardOutput>failed().withRpcError(error).build());
             return null;
         });
 

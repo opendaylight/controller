@@ -11,7 +11,6 @@ package org.opendaylight.controller.sample.kitchen.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -25,6 +24,8 @@ import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.controller.sample.kitchen.api.KitchenServiceRuntimeMXBean;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToastType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterListener;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBread;
@@ -42,6 +43,7 @@ public class KitchenServiceImpl extends AbstractMXBean
         implements KitchenService, KitchenServiceRuntimeMXBean, ToasterListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(KitchenServiceImpl.class);
+    private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
 
     private final ToasterService toaster;
 
@@ -49,25 +51,24 @@ public class KitchenServiceImpl extends AbstractMXBean
 
     private volatile boolean toasterOutOfBread;
 
-    public KitchenServiceImpl(ToasterService toaster) {
+    public KitchenServiceImpl(final ToasterService toaster) {
         super("KitchenService", "toaster-consumer", null);
         this.toaster = toaster;
     }
 
     @Override
-    public Future<RpcResult<Void>> makeBreakfast(EggsType eggsType, Class<? extends ToastType> toastType,
-            int toastDoneness) {
+    public Future<RpcResult<Void>> makeBreakfast(final EggsType eggsType, final Class<? extends ToastType> toastType,
+            final int toastDoneness) {
         // Call makeToast and use JdkFutureAdapters to convert the Future to a ListenableFuture, The
         // OpendaylightToaster impl already returns a ListenableFuture so the conversion is actually a no-op.
 
-        ListenableFuture<RpcResult<Void>> makeToastFuture = JdkFutureAdapters
-                .listenInPoolThread(makeToast(toastType, toastDoneness), executor);
+        ListenableFuture<RpcResult<MakeToastOutput>> makeToastFuture = makeToast(toastType, toastDoneness);
 
         ListenableFuture<RpcResult<Void>> makeEggsFuture = makeEggs(eggsType);
 
         // Combine the 2 ListenableFutures into 1 containing a list RpcResults.
 
-        ListenableFuture<List<RpcResult<Void>>> combinedFutures = Futures
+        ListenableFuture<List<RpcResult<? extends Object>>> combinedFutures = Futures
                 .allAsList(ImmutableList.of(makeToastFuture, makeEggsFuture));
 
         // Then transform the RpcResults into 1.
@@ -75,7 +76,7 @@ public class KitchenServiceImpl extends AbstractMXBean
         return Futures.transformAsync(combinedFutures, results -> {
             boolean atLeastOneSucceeded = false;
             Builder<RpcError> errorList = ImmutableList.builder();
-            for (RpcResult<Void> result : results) {
+            for (RpcResult<? extends Object> result : results) {
                 if (result.isSuccessful()) {
                     atLeastOneSucceeded = true;
                 }
@@ -87,19 +88,21 @@ public class KitchenServiceImpl extends AbstractMXBean
 
             return Futures.immediateFuture(RpcResultBuilder.<Void>status(atLeastOneSucceeded)
                     .withRpcErrors(errorList.build()).build());
-        });
+        }, MoreExecutors.directExecutor());
     }
 
-    private ListenableFuture<RpcResult<Void>> makeEggs(EggsType eggsType) {
+    private ListenableFuture<RpcResult<Void>> makeEggs(final EggsType eggsType) {
         return executor.submit(() -> RpcResultBuilder.<Void>success().build());
     }
 
-    private Future<RpcResult<Void>> makeToast(Class<? extends ToastType> toastType, int toastDoneness) {
+    private ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final Class<? extends ToastType> toastType,
+            final int toastDoneness) {
 
         if (toasterOutOfBread) {
             LOG.info("We're out of toast but we can make eggs");
-            return Futures.immediateFuture(RpcResultBuilder.<Void>success().withWarning(ErrorType.APPLICATION,
-                    "partial-operation", "Toaster is out of bread but we can make you eggs").build());
+            return Futures.immediateFuture(RpcResultBuilder.success(EMPTY_MAKE_OUTPUT)
+                .withWarning(ErrorType.APPLICATION, "partial-operation",
+                    "Toaster is out of bread but we can make you eggs").build());
         }
 
         // Access the ToasterService to make the toast.
@@ -134,7 +137,7 @@ public class KitchenServiceImpl extends AbstractMXBean
      * Implemented from the ToasterListener interface.
      */
     @Override
-    public void onToasterOutOfBread(ToasterOutOfBread notification) {
+    public void onToasterOutOfBread(final ToasterOutOfBread notification) {
         LOG.info("ToasterOutOfBread notification");
         toasterOutOfBread = true;
     }
@@ -143,7 +146,7 @@ public class KitchenServiceImpl extends AbstractMXBean
      * Implemented from the ToasterListener interface.
      */
     @Override
-    public void onToasterRestocked(ToasterRestocked notification) {
+    public void onToasterRestocked(final ToasterRestocked notification) {
         LOG.info("ToasterRestocked notification - amountOfBread: " + notification.getAmountOfBread());
         toasterOutOfBread = false;
     }

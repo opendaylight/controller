@@ -9,9 +9,9 @@
 package org.opendaylight.controller.messagebus.app.util;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -21,9 +21,8 @@ public final class Util {
     private Util() {
     }
 
-    public static <T> Future<RpcResult<T>> resultRpcSuccessFor(final T output) {
-        final RpcResult<T> result = RpcResultBuilder.success(output).build();
-        return Futures.immediateFuture(result);
+    public static <T> ListenableFuture<RpcResult<T>> resultRpcSuccessFor(final T output) {
+        return Futures.immediateFuture(RpcResultBuilder.success(output).build());
     }
 
     /**

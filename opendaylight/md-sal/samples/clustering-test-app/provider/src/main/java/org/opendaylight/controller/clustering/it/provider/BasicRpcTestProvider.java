@@ -10,12 +10,14 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.mdsal.singleton.common.api.ServiceGroupIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicGlobalOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.controller.basic.rpc.test.rev160120.BasicRpcTestService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -59,9 +61,9 @@ public class BasicRpcTestProvider implements ClusterSingletonService, BasicRpcTe
     }
 
     @Override
-    public Future<RpcResult<Void>> basicGlobal() {
+    public ListenableFuture<RpcResult<BasicGlobalOutput>> basicGlobal(final BasicGlobalInput input) {
         LOG.info("Basic test global rpc invoked");
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new BasicGlobalOutputBuilder().build()).build());
     }
 }

@@ -14,9 +14,9 @@ import static org.junit.Assert.fail;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactor
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.OpendaylightTestRpcServiceService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.RockTheHouseInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.RockTheHouseOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
@@ -143,7 +144,7 @@ public class DOMRpcServiceTestBugfix560 {
         assertNotNull(rpcService);
 
         try {
-            final Future<RpcResult<Void>> result = rpcService
+            final ListenableFuture<RpcResult<RockTheHouseOutput>> result = rpcService
                     .rockTheHouse(new RockTheHouseInputBuilder().build());
             assertTrue(result.get().isSuccessful());
         } catch (final IllegalStateException ex) {
