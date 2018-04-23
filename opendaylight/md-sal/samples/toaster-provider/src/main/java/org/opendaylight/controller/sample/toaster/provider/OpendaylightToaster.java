@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -38,9 +39,16 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastInput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastOutput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastOutputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastOutputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterInput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterOutput;
+import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.RestockToasterOutputBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster.ToasterStatus;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterBuilder;
@@ -61,6 +69,10 @@ import org.slf4j.LoggerFactory;
 
 public class OpendaylightToaster extends AbstractMXBean
         implements ToasterService, ToasterProviderRuntimeMXBean, DataTreeChangeListener<Toaster>, AutoCloseable {
+
+    private static final CancelToastOutput EMPTY_CANCEL_OUTPUT = new CancelToastOutputBuilder().build();
+    private static final MakeToastOutput EMPTY_MAKE_OUTPUT = new MakeToastOutputBuilder().build();
+    private static final RestockToasterOutput EMPTY_RESTOCK_OUTPUT = new RestockToasterOutputBuilder().build();
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightToaster.class);
 
@@ -89,7 +101,7 @@ public class OpendaylightToaster extends AbstractMXBean
                 .setMaxMakeToastTries(2).build());
     }
 
-    public OpendaylightToaster(ToasterAppConfig toasterAppConfig) {
+    public OpendaylightToaster(final ToasterAppConfig toasterAppConfig) {
         super("OpendaylightToaster", "toaster-provider", null);
         executor = Executors.newFixedThreadPool(1);
         this.toasterAppConfig = toasterAppConfig;
@@ -145,7 +157,7 @@ public class OpendaylightToaster extends AbstractMXBean
                 public void onFailure(final Throwable failure) {
                     LOG.error("Delete of the operational Toaster failed", failure);
                 }
-            });
+            }, MoreExecutors.directExecutor());
         }
     }
 
@@ -161,7 +173,7 @@ public class OpendaylightToaster extends AbstractMXBean
      * Implemented from the DataTreeChangeListener interface.
      */
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Toaster>> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeModification<Toaster>> changes) {
         for (DataTreeModification<Toaster> change: changes) {
             DataObjectModification<Toaster> rootNode = change.getRootNode();
             if (rootNode.getModificationType() == WRITE) {
@@ -186,41 +198,41 @@ public class OpendaylightToaster extends AbstractMXBean
      * RPC call implemented from the ToasterService interface that cancels the current toast, if any.
      */
     @Override
-    public Future<RpcResult<Void>> cancelToast() {
+    public ListenableFuture<RpcResult<CancelToastOutput>> cancelToast(final CancelToastInput input) {
         Future<?> current = currentMakeToastTask.getAndSet(null);
         if (current != null) {
             current.cancel(true);
         }
 
         // Always return success from the cancel toast call
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(EMPTY_CANCEL_OUTPUT).build());
     }
 
     /**
      * RPC call implemented from the ToasterService interface that attempts to make toast.
      */
     @Override
-    public Future<RpcResult<Void>> makeToast(final MakeToastInput input) {
+    public ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final MakeToastInput input) {
         LOG.info("makeToast: " + input);
 
-        final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
+        final SettableFuture<RpcResult<MakeToastOutput>> futureResult = SettableFuture.create();
 
         checkStatusAndMakeToast(input, futureResult, toasterAppConfig.getMaxMakeToastTries());
 
         return futureResult;
     }
 
-    private RpcError makeToasterOutOfBreadError() {
+    private static RpcError makeToasterOutOfBreadError() {
         return RpcResultBuilder.newError(APPLICATION, "resource-denied", "Toaster is out of bread", "out-of-stock",
                 null, null);
     }
 
-    private RpcError makeToasterInUseError() {
+    private static RpcError makeToasterInUseError() {
         return RpcResultBuilder.newWarning(APPLICATION, "in-use", "Toaster is busy", null, null, null);
     }
 
-    private void checkStatusAndMakeToast(final MakeToastInput input, final SettableFuture<RpcResult<Void>> futureResult,
-            final int tries) {
+    private void checkStatusAndMakeToast(final MakeToastInput input,
+            final SettableFuture<RpcResult<MakeToastOutput>> futureResult, final int tries) {
         // Read the ToasterStatus and, if currently Up, try to write the status to Down.
         // If that succeeds, then we essentially have an exclusive lock and can proceed
         // to make toast.
@@ -260,7 +272,7 @@ public class OpendaylightToaster extends AbstractMXBean
                 // TransactionStatus in the RpcResult as an error condition.
                 return Futures.immediateFailedCheckedFuture(
                         new TransactionCommitFailedException("", makeToasterInUseError()));
-            });
+            }, MoreExecutors.directExecutor());
 
         Futures.addCallback(commitFuture, new FutureCallback<Void>() {
             @Override
@@ -281,22 +293,22 @@ public class OpendaylightToaster extends AbstractMXBean
                         LOG.debug("Got OptimisticLockFailedException - trying again");
                         checkStatusAndMakeToast(input, futureResult, tries - 1);
                     } else {
-                        futureResult.set(RpcResultBuilder.<Void>failed()
+                        futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
                                 .withError(ErrorType.APPLICATION, ex.getMessage()).build());
                     }
                 } else if (ex instanceof TransactionCommitFailedException) {
                     LOG.debug("Failed to commit Toaster status", ex);
 
                     // Probably already making toast.
-                    futureResult.set(RpcResultBuilder.<Void>failed()
+                    futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
                             .withRpcErrors(((TransactionCommitFailedException)ex).getErrorList()).build());
                 } else {
                     LOG.debug("Unexpected error committing Toaster status", ex);
-                    futureResult.set(RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
+                    futureResult.set(RpcResultBuilder.<MakeToastOutput>failed().withError(ErrorType.APPLICATION,
                             "Unexpected error committing Toaster status", ex).build());
                 }
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     /**
@@ -305,7 +317,7 @@ public class OpendaylightToaster extends AbstractMXBean
      * ToasterRestocked notification.
      */
     @Override
-    public Future<RpcResult<java.lang.Void>> restockToaster(final RestockToasterInput input) {
+    public ListenableFuture<RpcResult<RestockToasterOutput>> restockToaster(final RestockToasterInput input) {
         LOG.info("restockToaster: " + input);
 
         amountOfBreadInStock.set(input.getAmountOfBreadToStock());
@@ -316,7 +328,7 @@ public class OpendaylightToaster extends AbstractMXBean
             notificationProvider.offerNotification(reStockedNotification);
         }
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(EMPTY_RESTOCK_OUTPUT).build());
     }
 
     /**
@@ -336,7 +348,7 @@ public class OpendaylightToaster extends AbstractMXBean
         return toastsMade.get();
     }
 
-    private void setToasterStatusUp(final Function<Boolean,Void> resultCallback) {
+    private void setToasterStatusUp(final Function<Boolean, MakeToastOutput> resultCallback) {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         tx.put(OPERATIONAL,TOASTER_IID, buildToaster(ToasterStatus.Up));
 
@@ -361,7 +373,7 @@ public class OpendaylightToaster extends AbstractMXBean
                     resultCallback.apply(result);
                 }
             }
-        });
+        }, MoreExecutors.directExecutor());
     }
 
     private boolean outOfBread() {
@@ -371,9 +383,10 @@ public class OpendaylightToaster extends AbstractMXBean
     private class MakeToastTask implements Callable<Void> {
 
         final MakeToastInput toastRequest;
-        final SettableFuture<RpcResult<Void>> futureResult;
+        final SettableFuture<RpcResult<MakeToastOutput>> futureResult;
 
-        MakeToastTask(final MakeToastInput toastRequest, final SettableFuture<RpcResult<Void>> futureResult) {
+        MakeToastTask(final MakeToastInput toastRequest,
+            final SettableFuture<RpcResult<MakeToastOutput>> futureResult) {
             this.toastRequest = toastRequest;
             this.futureResult = futureResult;
         }
@@ -404,7 +417,7 @@ public class OpendaylightToaster extends AbstractMXBean
             setToasterStatusUp(result -> {
                 currentMakeToastTask.set(null);
                 LOG.debug("Toast done");
-                futureResult.set(RpcResultBuilder.<Void>success().build());
+                futureResult.set(RpcResultBuilder.success(EMPTY_MAKE_OUTPUT).build());
                 return null;
             });
 
