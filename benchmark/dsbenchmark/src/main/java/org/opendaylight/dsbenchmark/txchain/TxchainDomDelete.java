@@ -83,8 +83,8 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        LOG.error("Transaction failed, {}", t);
+                    public void onFailure(final Throwable cause) {
+                        LOG.error("Transaction failed", cause);
                         txError++;
                     }
                 }, MoreExecutors.directExecutor());

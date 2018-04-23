@@ -36,8 +36,8 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
     private final DOMDataBroker domDataBroker;
     private List<MapEntryNode> list;
 
-    public TxchainDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper, final int outerListElem,
-            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+    public TxchainDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
+            final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.debug("Created TxchainDomWrite");
@@ -81,8 +81,8 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        LOG.error("Transaction failed, {}", t);
+                    public void onFailure(final Throwable cause) {
+                        LOG.error("Transaction failed", cause);
                         txError++;
                     }
                 }, MoreExecutors.directExecutor());

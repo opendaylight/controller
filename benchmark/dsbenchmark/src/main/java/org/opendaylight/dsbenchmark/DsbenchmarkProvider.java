@@ -73,6 +73,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         this.simpleTxDataBroker = simpleTxDataBroker;
     }
 
+    @SuppressWarnings("checkstyle:illegalCatch")
     public void init() {
         listenerProvider.setDataBroker(simpleTxDataBroker);
 
@@ -100,6 +101,7 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:illegalCatch")
     public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
@@ -120,14 +122,14 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         // Create listeners on OPERATIONAL and CONFIG test data subtrees
         listenerProvider.createAndRegisterListeners(input.getListeners().intValue());
 
-        long startTime, endTime, listCreateTime, execTime;
 
-        startTime = System.nanoTime();
+        long startTime = System.nanoTime();
         dsWriter.createList();
-        endTime = System.nanoTime();
-        listCreateTime = (endTime - startTime) / 1000;
+        long endTime = System.nanoTime();
+        final long listCreateTime = (endTime - startTime) / 1000;
 
         // Run the test and measure the execution time
+        long execTime;
         try {
             startTime = System.nanoTime();
             dsWriter.executeList();

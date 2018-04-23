@@ -31,7 +31,7 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
     private List<MapEntryNode> list;
 
     public SimpletxDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
-                                    final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore ) {
+            final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, putsPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.debug("Created SimpletxDomWrite");

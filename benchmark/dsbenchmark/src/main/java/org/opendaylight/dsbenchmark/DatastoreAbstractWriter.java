@@ -24,13 +24,11 @@ public abstract class DatastoreAbstractWriter {
     protected final StartTestInput.DataStore dataStore;
     protected final Random rn = new Random();
 
-
     protected int txOk = 0;
     protected int txError = 0;
 
-
     public DatastoreAbstractWriter(final StartTestInput.Operation oper,
-                                   final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+            final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         this.outerListElem = outerListElem;
         this.innerListElem = innerListElem;
         this.writesPerTx = writesPerTx;

@@ -36,7 +36,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     private List<OuterList> list;
 
     public TxchainBaWrite(final DataBroker bindingDataBroker, final Operation oper,
-                          final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+            final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.debug("Created TxchainBaWrite");
@@ -77,8 +77,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        LOG.error("Transaction failed, {}", t);
+                    public void onFailure(final Throwable cause) {
+                        LOG.error("Transaction failed", cause);
                         txError++;
                     }
                 }, MoreExecutors.directExecutor());

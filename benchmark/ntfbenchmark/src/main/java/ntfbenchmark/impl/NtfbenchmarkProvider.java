@@ -30,11 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService {
-
     private static final Logger LOG = LoggerFactory.getLogger(NtfbenchmarkProvider.class);
+    private static final int TEST_TIMEOUT = 5;
+
     private final NotificationService listenService;
     private final NotificationPublishService publishService;
-    private static final int testTimeout = 5;
 
     public NtfbenchmarkProvider(final NotificationService listenServiceDependency,
             final NotificationPublishService publishServiceDependency) {
@@ -87,12 +87,12 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
             }
             executor.shutdown();
             try {
-                executor.awaitTermination(testTimeout, TimeUnit.MINUTES);
+                executor.awaitTermination(TEST_TIMEOUT, TimeUnit.MINUTES);
                 for (ListenerRegistration<NtfbenchTestListener> listenerRegistration : listeners) {
                     listenerRegistration.getInstance().getAllDone().get();
                 }
             } catch (final InterruptedException | ExecutionException e) {
-                LOG.error("Out of time: test did not finish within the {} min deadline ", testTimeout);
+                LOG.error("Out of time: test did not finish within the {} min deadline ", TEST_TIMEOUT);
             }
 
             final long producerEndTime = System.nanoTime();
