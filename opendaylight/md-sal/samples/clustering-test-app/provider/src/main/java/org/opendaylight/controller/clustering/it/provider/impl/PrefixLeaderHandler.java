@@ -21,6 +21,8 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderOutput;
+import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderOutputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -41,7 +43,7 @@ public class PrefixLeaderHandler {
         this.serializer = serializer;
     }
 
-    public ListenableFuture<RpcResult<Void>> makeLeaderLocal(final BecomePrefixLeaderInput input) {
+    public ListenableFuture<RpcResult<BecomePrefixLeaderOutput>> makeLeaderLocal(final BecomePrefixLeaderInput input) {
 
         final YangInstanceIdentifier yid = serializer.toYangInstanceIdentifier(input.getPrefix());
         final DOMDataTreeIdentifier prefix = new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, yid);
@@ -66,6 +68,6 @@ public class PrefixLeaderHandler {
                     "clustering-it", e));
         }
 
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new BecomePrefixLeaderOutputBuilder().build()).build());
     }
 }
