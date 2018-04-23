@@ -24,6 +24,7 @@ import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.OpendaylightTestRoutedRpcService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.RoutedSimpleRouteOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.TestContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
@@ -58,9 +59,9 @@ public class RoutedServiceIT extends AbstractIT {
         odlRoutedService1 = mock(OpendaylightTestRoutedRpcService.class, "First Flow Service");
         odlRoutedService2 = mock(OpendaylightTestRoutedRpcService.class, "Second Flow Service");
         Mockito.when(odlRoutedService1.routedSimpleRoute(Mockito.<RoutedSimpleRouteInput>any()))
-            .thenReturn(Futures.<RpcResult<Void>>immediateFuture(null));
+            .thenReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null));
         Mockito.when(odlRoutedService2.routedSimpleRoute(Mockito.<RoutedSimpleRouteInput>any()))
-            .thenReturn(Futures.<RpcResult<Void>>immediateFuture(null));
+            .thenReturn(Futures.<RpcResult<RoutedSimpleRouteOutput>>immediateFuture(null));
     }
 
     @Test

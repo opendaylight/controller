@@ -8,10 +8,12 @@
 
 package org.opendaylight.controller.clustering.it.provider;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.BuyCarOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarBoughtBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -32,14 +34,14 @@ public class PurchaseCarProvider implements CarPurchaseService, AutoCloseable {
 
 
     @Override
-    public Future<RpcResult<Void>> buyCar(BuyCarInput input) {
+    public ListenableFuture<RpcResult<BuyCarOutput>> buyCar(final BuyCarInput input) {
         LOG.info("Routed RPC buyCar : generating notification for buying car [{}]", input);
-        final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
+        final SettableFuture<RpcResult<BuyCarOutput>> futureResult = SettableFuture.create();
         CarBoughtBuilder carBoughtBuilder = new CarBoughtBuilder();
         carBoughtBuilder.setCarId(input.getCarId());
         carBoughtBuilder.setPersonId(input.getPersonId());
         notificationProvider.publish(carBoughtBuilder.build());
-        futureResult.set(RpcResultBuilder.<Void>success().build());
+        futureResult.set(RpcResultBuilder.success(new BuyCarOutputBuilder().build()).build());
         return futureResult;
     }
 
