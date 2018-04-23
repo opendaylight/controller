@@ -53,4 +53,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupid>org.apache.maven.plugins</groupid>
+        <artifactid>maven-checkstyle-plugin</artifactid>
+        <configuration>
+          <propertyexpansion>checkstyle.violationseverity=error</propertyexpansion>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

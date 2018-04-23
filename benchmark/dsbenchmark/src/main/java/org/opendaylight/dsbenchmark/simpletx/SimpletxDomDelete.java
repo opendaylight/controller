@@ -8,8 +8,8 @@
 
 package org.opendaylight.dsbenchmark.simpletx;
 
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
@@ -67,9 +67,9 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
             writeCnt++;
             if (writeCnt == writesPerTx) {
                 try {
-                    tx.submit().checkedGet();
+                    tx.submit().get();
                     txOk++;
-                } catch (final TransactionCommitFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.error("Transaction failed: {}", e);
                     txError++;
                 }
@@ -79,8 +79,8 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
         }
         if (writeCnt != 0) {
             try {
-                tx.submit().checkedGet();
-            } catch (final TransactionCommitFailedException e) {
+                tx.submit().get();
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Transaction failed: {}", e);
             }
         }
