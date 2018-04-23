@@ -9,7 +9,6 @@
 package org.opendaylight.dsbenchmark;
 
 import java.util.Random;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
@@ -31,8 +30,8 @@ public abstract class DatastoreAbstractWriter {
     protected int txError = 0;
 
 
-    public DatastoreAbstractWriter(final StartTestInput.Operation oper,
-                                   final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+    public DatastoreAbstractWriter(final StartTestInput.Operation oper, final int outerListElem,
+            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         this.outerListElem = outerListElem;
         this.innerListElem = innerListElem;
         this.writesPerTx = writesPerTx;

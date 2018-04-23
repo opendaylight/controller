@@ -21,7 +21,12 @@ public abstract class AbstractNtfbenchProducer implements Runnable {
     protected final int iterations;
     protected final Ntfbench ntf;
 
+    protected int ntfOk = 0;
+    protected int ntfError = 0;
+
     /**
+     * Return number of successful notifications.
+     *
      * @return the ntfOk
      */
     public int getNtfOk() {
@@ -29,14 +34,13 @@ public abstract class AbstractNtfbenchProducer implements Runnable {
     }
 
     /**
+     * Return number of unsuccessful notifications.
+     *
      * @return the ntfError
      */
     public int getNtfError() {
         return ntfError;
     }
-
-    protected int ntfOk = 0;
-    protected int ntfError = 0;
 
     public AbstractNtfbenchProducer(final NotificationPublishService publishService, final int iterations,
             final int payloadSize) {
