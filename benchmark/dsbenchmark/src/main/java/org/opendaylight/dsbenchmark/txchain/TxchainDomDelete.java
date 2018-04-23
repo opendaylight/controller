@@ -5,16 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
@@ -46,12 +46,8 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
-        TxchainDomWrite dd = new TxchainDomWrite(domDataBroker,
-                                                 StartTestInput.Operation.PUT,
-                                                 outerListElem,
-                                                 innerListElem,
-                                                 outerListElem,
-                                                 dataStore);
+        TxchainDomWrite dd = new TxchainDomWrite(domDataBroker, StartTestInput.Operation.PUT, outerListElem,
+            innerListElem, outerListElem, dataStore);
         dd.createList();
         dd.executeList();
     }
@@ -83,11 +79,11 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        LOG.error("Transaction failed, {}", t);
+                    public void onFailure(final Throwable cause) {
+                        LOG.error("Transaction failed", cause);
                         txError++;
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 tx = chain.newWriteOnlyTransaction();
                 writeCnt = 0;
             }
@@ -98,9 +94,9 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
         // We need to empty the transaction chain before closing it
         try {
             txSubmitted++;
-            tx.submit().checkedGet();
+            tx.submit().get();
             txOk++;
-        } catch (final TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Transaction failed", e);
             txError++;
         }
@@ -109,7 +105,7 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
         } catch (final IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
-        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, txOk + txError);
     }
 
     @Override

@@ -9,12 +9,12 @@
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
@@ -64,11 +64,10 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
 
                 InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                         .child(OuterList.class, new OuterListKey((int) l));
-                CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
-                        tx.read(dsType, iid);
+                ListenableFuture<Optional<OuterList>> submitFuture = tx.read(dsType, iid);
 
                 try {
-                    Optional<OuterList> optionalDataObject = submitFuture.checkedGet();
+                    Optional<OuterList> optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         OuterList outerList = optionalDataObject.get();
 
@@ -91,7 +90,7 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
                     } else {
                         txError++;
                     }
-                } catch (final ReadFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }

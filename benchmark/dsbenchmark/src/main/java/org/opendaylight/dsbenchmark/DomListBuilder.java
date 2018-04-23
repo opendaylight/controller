@@ -10,7 +10,6 @@ package org.opendaylight.dsbenchmark;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.outer.list.InnerList;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -28,6 +27,10 @@ public final class DomListBuilder {
     // Outer List Qname identifier for yang model's 'id'
     private static final org.opendaylight.yangtools.yang.common.QName OL_ID = QName.create(OuterList.QNAME, "id");
 
+    private DomListBuilder() {
+
+    }
+
     public static List<MapEntryNode> buildOuterList(final int outerElements, final int innerElements) {
         List<MapEntryNode> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
@@ -40,7 +43,7 @@ public final class DomListBuilder {
         return outerList;
     }
 
-    private static MapNode buildInnerList(final int index, final int elements ) {
+    private static MapNode buildInnerList(final int index, final int elements) {
         CollectionNodeBuilder<MapEntryNode, MapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";

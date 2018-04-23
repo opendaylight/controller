@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -19,7 +19,6 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
@@ -36,8 +35,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     private final DataBroker bindingDataBroker;
     private List<OuterList> list;
 
-    public TxchainBaWrite(final DataBroker bindingDataBroker, final Operation oper,
-                          final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+    public TxchainBaWrite(final DataBroker bindingDataBroker, final Operation oper, final int outerListElem,
+            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.debug("Created TxchainBaWrite");
@@ -78,8 +77,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        LOG.error("Transaction failed, {}", t);
+                    public void onFailure(final Throwable cause) {
+                        LOG.error("Transaction failed", cause);
                         txError++;
                     }
                 }, MoreExecutors.directExecutor());
@@ -93,9 +92,9 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
         // We need to empty the transaction chain before closing it
         try {
             txSubmitted++;
-            tx.submit().checkedGet();
+            tx.submit().get();
             txOk++;
-        } catch (final TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Transaction failed", e);
             txError++;
         }
