@@ -8,8 +8,8 @@
 package org.opendaylight.dsbenchmark;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -29,6 +29,9 @@ import org.opendaylight.dsbenchmark.txchain.TxchainBaWrite;
 import org.opendaylight.dsbenchmark.txchain.TxchainDomDelete;
 import org.opendaylight.dsbenchmark.txchain.TxchainDomRead;
 import org.opendaylight.dsbenchmark.txchain.TxchainDomWrite;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStoreInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStoreOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.CleanupStoreOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.DsbenchmarkService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestOutput;
@@ -90,14 +93,14 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
     }
 
     @Override
-    public Future<RpcResult<Void>> cleanupStore() {
+    public ListenableFuture<RpcResult<CleanupStoreOutput>> cleanupStore(final CleanupStoreInput input) {
         cleanupTestStore();
         LOG.debug("Data Store cleaned up");
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        return Futures.immediateFuture(RpcResultBuilder.success(new CleanupStoreOutputBuilder().build()).build());
     }
 
     @Override
-    public Future<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
+    public ListenableFuture<RpcResult<StartTestOutput>> startTest(final StartTestInput input) {
         LOG.info("Starting the data store benchmark test, input: {}", input);
 
         // Check if there is a test in progress
