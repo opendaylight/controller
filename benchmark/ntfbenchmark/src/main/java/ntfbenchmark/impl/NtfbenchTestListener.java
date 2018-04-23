@@ -5,15 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package ntfbenchmark.impl;
 
+import com.google.common.util.concurrent.Futures;
 import java.util.concurrent.Future;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.Ntfbench;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ntfbench.payload.rev150709.NtfbenchPayloadListener;
-
-import com.google.common.util.concurrent.Futures;
 
 public class NtfbenchTestListener implements NtfbenchPayloadListener {
 
@@ -38,5 +35,4 @@ public class NtfbenchTestListener implements NtfbenchPayloadListener {
     public Future<?> getAllDone() {
         return Futures.immediateFuture(null);
     }
-
 }

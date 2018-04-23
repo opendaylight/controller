@@ -10,12 +10,13 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
@@ -36,8 +37,8 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
     private final DOMDataBroker domDataBroker;
     private List<MapEntryNode> list;
 
-    public TxchainDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper, final int outerListElem,
-            final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+    public TxchainDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
+            final int outerListElem, final int innerListElem, final long writesPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.debug("Created TxchainDomWrite");
@@ -81,11 +82,11 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
                     }
 
                     @Override
-                    public void onFailure(final Throwable t) {
-                        LOG.error("Transaction failed, {}", t);
+                    public void onFailure(final Throwable cause) {
+                        LOG.error("Transaction failed", cause);
                         txError++;
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 tx = chain.newWriteOnlyTransaction();
                 writeCnt = 0;
             }
@@ -97,9 +98,9 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
 
         try {
             txSubmitted++;
-            tx.submit().checkedGet();
+            tx.submit().get();
             txOk++;
-        } catch (final TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Transaction failed", e);
             txError++;
         }
@@ -109,7 +110,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
             LOG.error("Transaction close failed,", e);
         }
 
-        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, txOk + txError);
     }
 
     @Override

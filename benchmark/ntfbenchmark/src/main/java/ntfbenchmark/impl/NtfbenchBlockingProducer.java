@@ -18,6 +18,7 @@ public class NtfbenchBlockingProducer extends AbstractNtfbenchProducer {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:illegalCatch")
     public void run() {
         int ntfOk = 0;
         int ntfError = 0;
