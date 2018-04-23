@@ -9,8 +9,9 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.util.concurrent.Future;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockInput;
@@ -20,21 +21,18 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 public class MessageCapturingFlowService implements OpendaylightOfMigrationTestModelService, AutoCloseable {
 
-    private Future<RpcResult<KnockKnockOutput>> knockKnockResult;
+    private ListenableFuture<RpcResult<KnockKnockOutput>> knockKnockResult;
 
     private final Multimap<InstanceIdentifier<?>, KnockKnockInput> receivedKnocks = HashMultimap.create();
     private RoutedRpcRegistration<OpendaylightOfMigrationTestModelService> registration;
 
-    public Future<RpcResult<KnockKnockOutput>> getKnockKnockResult() {
+    public ListenableFuture<RpcResult<KnockKnockOutput>> getKnockKnockResult() {
         return knockKnockResult;
     }
 
-    public MessageCapturingFlowService setKnockKnockResult(Future<RpcResult<KnockKnockOutput>> kkOutput) {
+    public MessageCapturingFlowService setKnockKnockResult(final ListenableFuture<RpcResult<KnockKnockOutput>> kkOutput) {
         this.knockKnockResult = kkOutput;
         return this;
     }
@@ -43,22 +41,23 @@ public class MessageCapturingFlowService implements OpendaylightOfMigrationTestM
         return receivedKnocks;
     }
 
-    public MessageCapturingFlowService registerTo(RpcProviderRegistry registry) {
+    public MessageCapturingFlowService registerTo(final RpcProviderRegistry registry) {
         registration = registry.addRoutedRpcImplementation(OpendaylightOfMigrationTestModelService.class, this);
         assertNotNull(registration);
         return this;
     }
 
+    @Override
     public void close() throws Exception {
         registration.close();
     }
 
-    public MessageCapturingFlowService registerPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+    public MessageCapturingFlowService registerPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
         registration.registerPath(context, path);
         return this;
     }
 
-    public MessageCapturingFlowService unregisterPath(Class<? extends BaseIdentity> context, InstanceIdentifier<?> path) {
+    public MessageCapturingFlowService unregisterPath(final Class<? extends BaseIdentity> context, final InstanceIdentifier<?> path) {
         registration.unregisterPath(context, path);
         return this;
     }
@@ -67,14 +66,14 @@ public class MessageCapturingFlowService implements OpendaylightOfMigrationTestM
         return new MessageCapturingFlowService();
     }
 
-    public static MessageCapturingFlowService create(RpcProviderRegistry registry) {
+    public static MessageCapturingFlowService create(final RpcProviderRegistry registry) {
         MessageCapturingFlowService ret = new MessageCapturingFlowService();
         ret.registerTo(registry);
         return ret;
     }
 
     @Override
-    public Future<RpcResult<KnockKnockOutput>> knockKnock(KnockKnockInput input) {
+    public ListenableFuture<RpcResult<KnockKnockOutput>> knockKnock(final KnockKnockInput input) {
         receivedKnocks.put(input.getKnockerId(), input);
         return knockKnockResult;
     }

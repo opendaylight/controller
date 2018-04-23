@@ -40,20 +40,10 @@ public interface RpcConsumerRegistry extends BindingAwareService, BindingService
      *
      * The returned proxy is automatically updated with the most recent
      * registered implementation.
-     * <p>
-     * The generated RPC method APIs require implementors to return a {@link java.util.concurrent.Future Future}
-     * instance that wraps the {@link org.opendaylight.yangtools.yang.common.RpcResult RpcResult}. Since
-     * RPC methods may be implemented asynchronously, callers should avoid blocking on the
-     * {@link java.util.concurrent.Future Future} result. Instead, it is recommended to use
-     * {@link com.google.common.util.concurrent.JdkFutureAdapters#listenInPoolThread(java.util.concurrent.Future)}
-     * or {@link com.google.common.util.concurrent.JdkFutureAdapters#listenInPoolThread(java.util.concurrent.Future,
-     *     java.util.concurrent.Executor)}
-     * to listen for Rpc Result. This will asynchronously listen for future result in executor and
-     * will not block current thread.
      *
      * {@code
      *   final Future<RpcResult<SomeRpcOutput>> future = someRpcService.someRpc( ... );
-     *   Futures.addCallback(JdkFutureAdapters.listenInThreadPool(future),
+     *   Futures.addCallback(future,
      *       new FutureCallback<RpcResult<SomeRpcOutput>>() {
      *           public void onSuccess(RpcResult<SomeRpcOutput> result) {
      *               // process result ...

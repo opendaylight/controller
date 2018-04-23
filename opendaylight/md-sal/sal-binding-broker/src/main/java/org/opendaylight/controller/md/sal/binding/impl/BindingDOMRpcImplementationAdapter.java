@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -83,7 +82,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     }
 
     private ListenableFuture<RpcResult<?>> invoke(final SchemaPath schemaPath, final DataObject input) {
-        return JdkFutureAdapters.listenInPoolThread(invoker.invokeRpc(delegate, schemaPath.getLastComponent(), input));
+        return invoker.invokeRpc(delegate, schemaPath.getLastComponent(), input);
     }
 
     private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(

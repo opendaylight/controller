@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.Future;
 import org.junit.After;
@@ -64,7 +65,8 @@ public class CrossBrokerRpcTest {
     public static final InstanceIdentifier<TopLevelList> BA_NODE_B_ID = NODES_PATH.child(TopLevelList.class, NODE_B);
     public static final InstanceIdentifier<TopLevelList> BA_NODE_C_ID = NODES_PATH.child(TopLevelList.class, NODE_C);
 
-    public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_NODE_C_ID = createBINodeIdentifier(NODE_C);
+    public static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_NODE_C_ID =
+            createBINodeIdentifier(NODE_C);
 
 
     @Before
@@ -122,7 +124,8 @@ public class CrossBrokerRpcTest {
 
         OpendaylightOfMigrationTestModelService baKnockInvoker =
                 providerRegistry.getRpcService(OpendaylightOfMigrationTestModelService.class);
-        Future<RpcResult<KnockKnockOutput>> baResult = baKnockInvoker.knockKnock((knockKnock(BA_NODE_C_ID).setQuestion("Who's there?").build()));
+        Future<RpcResult<KnockKnockOutput>> baResult = baKnockInvoker.knockKnock(knockKnock(BA_NODE_C_ID)
+            .setQuestion("Who's there?").build());
         assertNotNull(baResult);
         assertEquals(output, baResult.get().getResult());
     }
@@ -136,16 +139,18 @@ public class CrossBrokerRpcTest {
         testContext.close();
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(final TopLevelListKey listKey) {
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(
+            final TopLevelListKey listKey) {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder().node(Top.QNAME)
                 .node(TopLevelList.QNAME)
                 .nodeWithKey(TopLevelList.QNAME, NODE_ID_QNAME, listKey.getName()).build();
     }
 
-    private Future<RpcResult<KnockKnockOutput>> knockResult(final boolean success, final String answer) {
-        KnockKnockOutput output = new KnockKnockOutputBuilder() //
-                .setAnswer(answer).build();
-        RpcResult<KnockKnockOutput> result = RpcResultBuilder.<KnockKnockOutput>status(success).withResult(output).build();
+    private static ListenableFuture<RpcResult<KnockKnockOutput>> knockResult(final boolean success,
+            final String answer) {
+        KnockKnockOutput output = new KnockKnockOutputBuilder().setAnswer(answer).build();
+        RpcResult<KnockKnockOutput> result = RpcResultBuilder.<KnockKnockOutput>status(success).withResult(output)
+                .build();
         return Futures.immediateFuture(result);
     }
 
