@@ -12,7 +12,6 @@ import akka.actor.Status.Success;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -51,16 +49,26 @@ import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddPrefixShardReplicaOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetPrefixShardRoleInput;
@@ -70,11 +78,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.GetShardRoleOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemovePrefixShardReplicaOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
@@ -101,9 +115,9 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private final BindingNormalizedNodeSerializer serializer;
     private final Timeout makeLeaderLocalTimeout;
 
-    public ClusterAdminRpcService(DistributedDataStoreInterface configDataStore,
-            DistributedDataStoreInterface operDataStore,
-            BindingNormalizedNodeSerializer serializer) {
+    public ClusterAdminRpcService(final DistributedDataStoreInterface configDataStore,
+            final DistributedDataStoreInterface operDataStore,
+            final BindingNormalizedNodeSerializer serializer) {
         this.configDataStore = configDataStore;
         this.operDataStore = operDataStore;
         this.serializer = serializer;
@@ -114,7 +128,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> addShardReplica(final AddShardReplicaInput input) {
+    public ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -127,17 +141,17 @@ public class ClusterAdminRpcService implements ClusterAdminService {
 
         LOG.info("Adding replica for shard {}", shardName);
 
-        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        final SettableFuture<RpcResult<AddShardReplicaOutput>> returnFuture = SettableFuture.create();
         ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType, new AddShardReplica(shardName));
         Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
-            public void onSuccess(Success success) {
+            public void onSuccess(final Success success) {
                 LOG.info("Successfully added replica for shard {}", shardName);
-                returnFuture.set(newSuccessfulResult());
+                returnFuture.set(newSuccessfulResult(new AddShardReplicaOutputBuilder().build()));
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 onMessageFailure(String.format("Failed to add replica for shard %s", shardName),
                         returnFuture, failure);
             }
@@ -147,7 +161,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
+    public ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(
+            final RemoveShardReplicaInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -165,18 +180,18 @@ public class ClusterAdminRpcService implements ClusterAdminService {
 
         LOG.info("Removing replica for shard {} memberName {}, datastoreType {}", shardName, memberName, dataStoreType);
 
-        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        final SettableFuture<RpcResult<RemoveShardReplicaOutput>> returnFuture = SettableFuture.create();
         ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType,
                 new RemoveShardReplica(shardName, MemberName.forName(memberName)));
         Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
-            public void onSuccess(Success success) {
+            public void onSuccess(final Success success) {
                 LOG.info("Successfully removed replica for shard {}", shardName);
-                returnFuture.set(newSuccessfulResult());
+                returnFuture.set(newSuccessfulResult(new RemoveShardReplicaOutputBuilder().build()));
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 onMessageFailure(String.format("Failed to remove replica for shard %s", shardName),
                         returnFuture, failure);
             }
@@ -186,7 +201,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> makeLeaderLocal(final MakeLeaderLocalInput input) {
+    public ListenableFuture<RpcResult<MakeLeaderLocalOutput>> makeLeaderLocal(final MakeLeaderLocalInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -223,19 +238,19 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             }
         }, actorContext.getClientDispatcher());
 
-        final SettableFuture<RpcResult<Void>> future = SettableFuture.create();
+        final SettableFuture<RpcResult<MakeLeaderLocalOutput>> future = SettableFuture.create();
         makeLeaderLocalAsk.future().onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) throws Throwable {
                 if (failure != null) {
                     LOG.error("Leadership transfer failed for shard {}.", shardName, failure);
-                    future.set(RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
+                    future.set(RpcResultBuilder.<MakeLeaderLocalOutput>failed().withError(ErrorType.APPLICATION,
                             "leadership transfer failed", failure).build());
                     return;
                 }
 
                 LOG.debug("Leadership transfer complete");
-                future.set(RpcResultBuilder.<Void>success().build());
+                future.set(RpcResultBuilder.success(new MakeLeaderLocalOutputBuilder().build()).build());
             }
         }, actorContext.getClientDispatcher());
 
@@ -243,7 +258,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> addPrefixShardReplica(final AddPrefixShardReplicaInput input) {
+    public ListenableFuture<RpcResult<AddPrefixShardReplicaOutput>> addPrefixShardReplica(
+            final AddPrefixShardReplicaInput input) {
 
         final InstanceIdentifier<?> identifier = input.getShardPrefix();
         if (identifier == null) {
@@ -258,17 +274,17 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.info("Adding replica for shard {}, datastore type {}", identifier, dataStoreType);
 
         final YangInstanceIdentifier prefix = serializer.toYangInstanceIdentifier(identifier);
-        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        final SettableFuture<RpcResult<AddPrefixShardReplicaOutput>> returnFuture = SettableFuture.create();
         ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType, new AddPrefixShardReplica(prefix));
         Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
-            public void onSuccess(Success success) {
+            public void onSuccess(final Success success) {
                 LOG.info("Successfully added replica for shard {}", prefix);
-                returnFuture.set(newSuccessfulResult());
+                returnFuture.set(newSuccessfulResult(new AddPrefixShardReplicaOutputBuilder().build()));
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 onMessageFailure(String.format("Failed to add replica for shard %s", prefix),
                         returnFuture, failure);
             }
@@ -278,7 +294,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> removePrefixShardReplica(final RemovePrefixShardReplicaInput input) {
+    public ListenableFuture<RpcResult<RemovePrefixShardReplicaOutput>> removePrefixShardReplica(
+            final RemovePrefixShardReplicaInput input) {
 
         final InstanceIdentifier<?> identifier = input.getShardPrefix();
         if (identifier == null) {
@@ -299,14 +316,14 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 identifier, memberName, dataStoreType);
         final YangInstanceIdentifier prefix = serializer.toYangInstanceIdentifier(identifier);
 
-        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        final SettableFuture<RpcResult<RemovePrefixShardReplicaOutput>> returnFuture = SettableFuture.create();
         final ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType,
                 new RemovePrefixShardReplica(prefix, MemberName.forName(memberName)));
         Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
             public void onSuccess(final Success success) {
                 LOG.info("Successfully removed replica for shard {}", prefix);
-                returnFuture.set(newSuccessfulResult());
+                returnFuture.set(newSuccessfulResult(new RemovePrefixShardReplicaOutputBuilder().build()));
             }
 
             @Override
@@ -320,7 +337,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<AddReplicasForAllShardsOutput>> addReplicasForAllShards() {
+    public ListenableFuture<RpcResult<AddReplicasForAllShardsOutput>> addReplicasForAllShards(
+            final AddReplicasForAllShardsInput input) {
         LOG.info("Adding replicas for all shards");
 
         final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
@@ -336,7 +354,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
 
 
     @Override
-    public Future<RpcResult<RemoveAllShardReplicasOutput>> removeAllShardReplicas(RemoveAllShardReplicasInput input) {
+    public ListenableFuture<RpcResult<RemoveAllShardReplicasOutput>> removeAllShardReplicas(
+            final RemoveAllShardReplicasInput input) {
         LOG.info("Removing replicas for all shards");
 
         final String memberName = input.getMemberName();
@@ -357,7 +376,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> changeMemberVotingStatesForShard(ChangeMemberVotingStatesForShardInput input) {
+    public ListenableFuture<RpcResult<ChangeMemberVotingStatesForShardOutput>> changeMemberVotingStatesForShard(
+            final ChangeMemberVotingStatesForShardInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -379,17 +399,17 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.info("Change member voting states for shard {}: {}", shardName,
                 changeVotingStatus.getMeberVotingStatusMap());
 
-        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        final SettableFuture<RpcResult<ChangeMemberVotingStatesForShardOutput>> returnFuture = SettableFuture.create();
         ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType, changeVotingStatus);
         Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
-            public void onSuccess(Success success) {
+            public void onSuccess(final Success success) {
                 LOG.info("Successfully changed member voting states for shard {}", shardName);
-                returnFuture.set(newSuccessfulResult());
+                returnFuture.set(newSuccessfulResult(new ChangeMemberVotingStatesForShardOutputBuilder().build()));
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 onMessageFailure(String.format("Failed to change member voting states for shard %s", shardName),
                         returnFuture, failure);
             }
@@ -399,7 +419,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<ChangeMemberVotingStatesForAllShardsOutput>> changeMemberVotingStatesForAllShards(
+    public ListenableFuture<RpcResult<ChangeMemberVotingStatesForAllShardsOutput>> changeMemberVotingStatesForAllShards(
             final ChangeMemberVotingStatesForAllShardsInput input) {
         List<MemberVotingState> memberVotingStates = input.getMemberVotingState();
         if (memberVotingStates == null || memberVotingStates.isEmpty()) {
@@ -421,7 +441,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<FlipMemberVotingStatesForAllShardsOutput>> flipMemberVotingStatesForAllShards() {
+    public ListenableFuture<RpcResult<FlipMemberVotingStatesForAllShardsOutput>> flipMemberVotingStatesForAllShards(
+            final FlipMemberVotingStatesForAllShardsInput input) {
         final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
         Function<String, Object> messageSupplier = FlipShardMembersVotingStatus::new;
 
@@ -436,7 +457,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<GetShardRoleOutput>> getShardRole(final GetShardRoleInput input) {
+    public ListenableFuture<RpcResult<GetShardRoleOutput>> getShardRole(final GetShardRoleInput input) {
         final String shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
@@ -479,7 +500,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<GetPrefixShardRoleOutput>> getPrefixShardRole(final GetPrefixShardRoleInput input) {
+    public ListenableFuture<RpcResult<GetPrefixShardRoleOutput>> getPrefixShardRole(
+            final GetPrefixShardRoleInput input) {
         final InstanceIdentifier<?> identifier = input.getShardPrefix();
         if (identifier == null) {
             return newFailedRpcResultFuture("A valid shard identifier must be specified");
@@ -525,23 +547,23 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @Override
-    public Future<RpcResult<Void>> backupDatastore(final BackupDatastoreInput input) {
+    public ListenableFuture<RpcResult<BackupDatastoreOutput>> backupDatastore(final BackupDatastoreInput input) {
         LOG.debug("backupDatastore: {}", input);
 
         if (Strings.isNullOrEmpty(input.getFilePath())) {
             return newFailedRpcResultFuture("A valid file path must be specified");
         }
 
-        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture = SettableFuture.create();
         ListenableFuture<List<DatastoreSnapshot>> future = sendMessageToShardManagers(GetSnapshot.INSTANCE);
         Futures.addCallback(future, new FutureCallback<List<DatastoreSnapshot>>() {
             @Override
-            public void onSuccess(List<DatastoreSnapshot> snapshots) {
+            public void onSuccess(final List<DatastoreSnapshot> snapshots) {
                 saveSnapshotsToFile(new DatastoreSnapshotList(snapshots), input.getFilePath(), returnFuture);
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 onDatastoreBackupFailure(input.getFilePath(), returnFuture, failure);
             }
         }, MoreExecutors.directExecutor());
@@ -549,8 +571,8 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    private ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final String shardName,
-            List<MemberVotingState> memberVotingStatus) {
+    private static ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final String shardName,
+            final List<MemberVotingState> memberVotingStatus) {
         Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
         for (MemberVotingState memberStatus: memberVotingStatus) {
             serverVotingStatusMap.put(memberStatus.getMemberName(), memberStatus.isVoting());
@@ -567,7 +589,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         for (final Entry<ListenableFuture<Success>, ShardResultBuilder> entry : shardResultData) {
             Futures.addCallback(entry.getKey(), new FutureCallback<Success>() {
                 @Override
-                public void onSuccess(Success result) {
+                public void onSuccess(final Success result) {
                     synchronized (shardResults) {
                         ShardResultBuilder shardResult = entry.getValue();
                         LOG.debug("onSuccess for shard {}, type {}", shardResult.getShardName(),
@@ -578,7 +600,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 }
 
                 @Override
-                public void onFailure(Throwable failure) {
+                public void onFailure(final Throwable failure) {
                     synchronized (shardResults) {
                         ShardResultBuilder shardResult = entry.getValue();
                         LOG.warn("{} for shard {}, type {}", failureLogMsgPrefix, shardResult.getShardName(),
@@ -600,9 +622,9 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    private <T> void sendMessageToManagerForConfiguredShards(DataStoreType dataStoreType,
-            List<Entry<ListenableFuture<T>, ShardResultBuilder>> shardResultData,
-            Function<String, Object> messageSupplier) {
+    private <T> void sendMessageToManagerForConfiguredShards(final DataStoreType dataStoreType,
+            final List<Entry<ListenableFuture<T>, ShardResultBuilder>> shardResultData,
+            final Function<String, Object> messageSupplier) {
         ActorContext actorContext = dataStoreType == DataStoreType.Config ? configDataStore.getActorContext()
                 : operDataStore.getActorContext();
         Set<String> allShardNames = actorContext.getConfiguration().getAllShardNames();
@@ -617,8 +639,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> ListenableFuture<List<T>> sendMessageToShardManagers(Object message) {
+    private <T> ListenableFuture<List<T>> sendMessageToShardManagers(final Object message) {
         Timeout timeout = SHARD_MGR_TIMEOUT;
         ListenableFuture<T> configFuture = ask(configDataStore.getActorContext().getShardManager(), message, timeout);
         ListenableFuture<T> operFuture = ask(operDataStore.getActorContext().getShardManager(), message, timeout);
@@ -626,7 +647,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return Futures.allAsList(configFuture, operFuture);
     }
 
-    private <T> ListenableFuture<T> sendMessageToShardManager(DataStoreType dataStoreType, Object message) {
+    private <T> ListenableFuture<T> sendMessageToShardManager(final DataStoreType dataStoreType, final Object message) {
         ActorRef shardManager = dataStoreType == DataStoreType.Config
                 ? configDataStore.getActorContext().getShardManager()
                         : operDataStore.getActorContext().getShardManager();
@@ -634,38 +655,38 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static void saveSnapshotsToFile(DatastoreSnapshotList snapshots, String fileName,
-            SettableFuture<RpcResult<Void>> returnFuture) {
+    private static void saveSnapshotsToFile(final DatastoreSnapshotList snapshots, final String fileName,
+            final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture) {
         try (FileOutputStream fos = new FileOutputStream(fileName)) {
             SerializationUtils.serialize(snapshots, fos);
 
-            returnFuture.set(newSuccessfulResult());
+            returnFuture.set(newSuccessfulResult(new BackupDatastoreOutputBuilder().build()));
             LOG.info("Successfully backed up datastore to file {}", fileName);
         } catch (IOException | RuntimeException e) {
             onDatastoreBackupFailure(fileName, returnFuture, e);
         }
     }
 
-    private static void onDatastoreBackupFailure(String fileName, SettableFuture<RpcResult<Void>> returnFuture,
-            Throwable failure) {
+    private static <T> void onDatastoreBackupFailure(final String fileName,
+            final SettableFuture<RpcResult<T>> returnFuture, final Throwable failure) {
         onMessageFailure(String.format("Failed to back up datastore to file %s", fileName), returnFuture, failure);
     }
 
-    private static void onMessageFailure(String msg, final SettableFuture<RpcResult<Void>> returnFuture,
-            Throwable failure) {
+    private static <T> void onMessageFailure(final String msg, final SettableFuture<RpcResult<T>> returnFuture,
+            final Throwable failure) {
         LOG.error(msg, failure);
-        returnFuture.set(ClusterAdminRpcService.<Void>newFailedRpcResultBuilder(String.format("%s: %s", msg,
+        returnFuture.set(ClusterAdminRpcService.<T>newFailedRpcResultBuilder(String.format("%s: %s", msg,
                 failure.getMessage())).build());
     }
 
-    private <T> ListenableFuture<T> ask(ActorRef actor, Object message, Timeout timeout) {
+    private <T> ListenableFuture<T> ask(final ActorRef actor, final Object message, final Timeout timeout) {
         final SettableFuture<T> returnFuture = SettableFuture.create();
 
         @SuppressWarnings("unchecked")
         scala.concurrent.Future<T> askFuture = (scala.concurrent.Future<T>) Patterns.ask(actor, message, timeout);
         askFuture.onComplete(new OnComplete<T>() {
             @Override
-            public void onComplete(Throwable failure, T resp) {
+            public void onComplete(final Throwable failure, final T resp) {
                 if (failure != null) {
                     returnFuture.setException(failure);
                 } else {
@@ -677,23 +698,19 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         return returnFuture;
     }
 
-    private static <T> ListenableFuture<RpcResult<T>> newFailedRpcResultFuture(String message) {
+    private static <T> ListenableFuture<RpcResult<T>> newFailedRpcResultFuture(final String message) {
         return ClusterAdminRpcService.<T>newFailedRpcResultBuilder(message).buildFuture();
     }
 
-    private static <T> RpcResultBuilder<T> newFailedRpcResultBuilder(String message) {
+    private static <T> RpcResultBuilder<T> newFailedRpcResultBuilder(final String message) {
         return newFailedRpcResultBuilder(message, null);
     }
 
-    private static <T> RpcResultBuilder<T> newFailedRpcResultBuilder(String message, Throwable cause) {
+    private static <T> RpcResultBuilder<T> newFailedRpcResultBuilder(final String message, final Throwable cause) {
         return RpcResultBuilder.<T>failed().withError(ErrorType.RPC, message, cause);
     }
 
-    private static RpcResult<Void> newSuccessfulResult() {
-        return newSuccessfulResult(null);
-    }
-
-    private static <T> RpcResult<T> newSuccessfulResult(T data) {
+    private static <T> RpcResult<T> newSuccessfulResult(final T data) {
         return RpcResultBuilder.success(data).build();
     }
 }
