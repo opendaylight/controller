@@ -8,7 +8,6 @@
 
 package ntfbenchmark.impl;
 
-import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;
@@ -51,7 +50,7 @@ public class NtfbenchNonblockingProducer extends AbstractNtfbenchProducer {
             try {
                 lastOkFuture.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         }
     }
