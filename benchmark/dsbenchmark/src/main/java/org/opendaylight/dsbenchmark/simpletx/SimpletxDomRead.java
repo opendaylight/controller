@@ -5,14 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.simpletx;
 
-
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
@@ -27,13 +25,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SimpletxDomRead extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxDomRead.class);
     private final DOMDataBroker domDataBroker;
 
-    public SimpletxDomRead(final DOMDataBroker domDataBroker, final int outerListElem,
-                           final int innerListElem, final long writesPerTx, final DataStore dataStore) {
+    public SimpletxDomRead(final DOMDataBroker domDataBroker, final int outerListElem, final int innerListElem,
+            final long writesPerTx, final DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.debug("Created simpleTxDomRead");
@@ -45,12 +42,8 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
         LOG.debug("SimpletxDomRead: creating data in the data store");
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
-        SimpletxDomWrite dd = new SimpletxDomWrite(domDataBroker,
-                                                   StartTestInput.Operation.PUT,
-                                                   outerListElem,
-                                                   innerListElem,
-                                                   outerListElem,
-                                                   dataStore);
+        SimpletxDomWrite dd = new SimpletxDomWrite(domDataBroker, StartTestInput.Operation.PUT, outerListElem,
+            innerListElem, outerListElem, dataStore);
         dd.createList();
         dd.executeList();
     }
@@ -65,9 +58,9 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
         try (DOMDataReadOnlyTransaction tx = domDataBroker.newReadOnlyTransaction()) {
             for (int l = 0; l < outerListElem; l++) {
                 YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
-                CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture = tx.read(dsType, yid);
+                ListenableFuture<Optional<NormalizedNode<?,?>>> submitFuture = tx.read(dsType, yid);
                 try {
-                    Optional<NormalizedNode<?,?>> optionalDataObject = submitFuture.checkedGet();
+                    Optional<NormalizedNode<?,?>> optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         NormalizedNode<?, ?> ret = optionalDataObject.get();
                         LOG.trace("optionalDataObject is {}", ret);
@@ -76,7 +69,7 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
                         txError++;
                         LOG.warn("optionalDataObject is either null or .isPresent is false");
                     }
-                } catch (final ReadFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark;
 
 import java.util.ArrayList;
@@ -18,27 +17,31 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.outer.list.InnerListKey;
 
 public final class BaListBuilder {
+    private BaListBuilder() {
+
+    }
+
     public static List<OuterList> buildOuterList(final int outerElements, final int innerElements) {
         List<OuterList> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(new OuterListBuilder()
-                                .setId( j )
+                                .setId(j)
                                 .setInnerList(buildInnerList(j, innerElements))
-                                .withKey(new OuterListKey( j ))
+                                .withKey(new OuterListKey(j))
                                 .build());
         }
         return outerList;
     }
 
-    private static List<InnerList> buildInnerList( final int index, final int elements ) {
-        List<InnerList> innerList = new ArrayList<>( elements );
+    private static List<InnerList> buildInnerList(final int index, final int elements) {
+        List<InnerList> innerList = new ArrayList<>(elements);
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";
         for (int i = 0; i < elements; i++) {
             innerList.add(new InnerListBuilder()
-                                .withKey( new InnerListKey( i ) )
+                                .withKey(new InnerListKey(i))
                                 .setName(i)
-                                .setValue( itemStr + String.valueOf( i ) )
+                                .setValue(itemStr + String.valueOf(i))
                                 .build());
         }
         return innerList;
