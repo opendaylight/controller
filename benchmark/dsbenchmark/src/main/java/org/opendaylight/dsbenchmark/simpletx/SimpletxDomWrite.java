@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.simpletx;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
@@ -31,7 +30,7 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
     private List<MapEntryNode> list;
 
     public SimpletxDomWrite(final DOMDataBroker domDataBroker, final StartTestInput.Operation oper,
-                                    final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore ) {
+            final int outerListElem, final int innerListElem, final long putsPerTx, final DataStore dataStore) {
         super(oper, outerListElem, innerListElem, putsPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.debug("Created SimpletxDomWrite");
@@ -65,9 +64,9 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
 
             if (writeCnt == writesPerTx) {
                 try {
-                    tx.submit().checkedGet();
+                    tx.submit().get();
                     txOk++;
-                } catch (final TransactionCommitFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.error("Transaction failed", e);
                     txError++;
                 }
@@ -78,12 +77,10 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
 
         if (writeCnt != 0) {
             try {
-                tx.submit().checkedGet();
-            } catch (final TransactionCommitFailedException e) {
+                tx.submit().get();
+            } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Transaction failed", e);
             }
         }
-
     }
-
 }
