@@ -22,8 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- * FIXME: THis test should be moved to sal-binding-broker and rewriten
- * to use new DataBroker API
+ * FIXME: THis test should be moved to sal-binding-broker and rewritten to use new DataBroker API
  */
 public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
 
@@ -40,8 +39,8 @@ public class ConcurrentImplicitCreateTest extends AbstractDataServiceTest {
         WriteTransaction fooTx = dataBroker.newWriteOnlyTransaction();
         WriteTransaction barTx = dataBroker.newWriteOnlyTransaction();
 
-        fooTx.put(LogicalDatastoreType.OPERATIONAL, FOO_PATH, new TopLevelListBuilder().setKey(FOO_KEY).build());
-        barTx.put(LogicalDatastoreType.OPERATIONAL, BAR_PATH, new TopLevelListBuilder().setKey(BAR_KEY).build());
+        fooTx.put(LogicalDatastoreType.OPERATIONAL, FOO_PATH, new TopLevelListBuilder().withKey(FOO_KEY).build());
+        barTx.put(LogicalDatastoreType.OPERATIONAL, BAR_PATH, new TopLevelListBuilder().withKey(BAR_KEY).build());
 
         fooTx.submit().get(5, TimeUnit.SECONDS);
         barTx.submit().get(5, TimeUnit.SECONDS);

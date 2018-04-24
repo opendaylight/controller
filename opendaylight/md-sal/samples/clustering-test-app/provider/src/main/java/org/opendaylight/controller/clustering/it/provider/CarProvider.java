@@ -9,7 +9,6 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -159,7 +158,7 @@ public class CarProvider implements CarService {
         failureCounter.set(0);
 
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-        InstanceIdentifier<Cars> carsId = InstanceIdentifier.<Cars>builder(Cars.class).build();
+        InstanceIdentifier<Cars> carsId = InstanceIdentifier.create(Cars.class);
         tx.merge(LogicalDatastoreType.CONFIGURATION, carsId, new CarsBuilder().build());
         try {
             tx.submit().checkedGet(5, TimeUnit.SECONDS);
@@ -179,10 +178,8 @@ public class CarProvider implements CarService {
                 WriteTransaction tx1 = dataProvider.newWriteOnlyTransaction();
                 CarEntry car = new CarEntryBuilder().setId(new CarId("car" + id)).build();
                 tx1.put(LogicalDatastoreType.CONFIGURATION,
-                        InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.getKey()).build(),
-                        car);
-                CheckedFuture<Void, TransactionCommitFailedException> future = tx1.submit();
-                Futures.addCallback(future, new FutureCallback<Void>() {
+                        InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.key()).build(), car);
+                Futures.addCallback(tx1.submit(), new FutureCallback<Void>() {
 
                     @Override
                     public void onSuccess(final Void result) {

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertEquals;
@@ -60,7 +59,7 @@ public class WriteParentListenAugmentTest extends AbstractDataTreeChangeListener
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
-        TopLevelList tll = new TopLevelListBuilder().setKey(TLL_KEY)
+        TopLevelList tll = new TopLevelListBuilder().withKey(TLL_KEY)
                 .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment).build();
         transaction.put(OPERATIONAL, TLL_INSTANCE_ID_BA, tll, true);
         transaction.submit().get(5, TimeUnit.SECONDS);

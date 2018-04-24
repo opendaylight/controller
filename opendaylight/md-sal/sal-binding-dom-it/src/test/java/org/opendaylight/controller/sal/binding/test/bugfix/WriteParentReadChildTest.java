@@ -43,14 +43,14 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
     private static final List11Key LIST11_KEY = new List11Key(LIST11_ID);
     private static final List1Key LIST1_KEY = new List1Key(LIST1_NAME);
 
-    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
+    private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class)
             .child(TopLevelList.class, TLL_KEY).build();
 
-    private static final InstanceIdentifier<List1> LIST1_INSTANCE_ID_BA = //
-            TLL_INSTANCE_ID_BA.builder() //
+    private static final InstanceIdentifier<List1> LIST1_INSTANCE_ID_BA =
+            TLL_INSTANCE_ID_BA.builder()
             .augmentation(TllComplexAugment.class).child(List1.class, LIST1_KEY).build();
 
-    private static final InstanceIdentifier<? extends DataObject> LIST11_INSTANCE_ID_BA = //
+    private static final InstanceIdentifier<? extends DataObject> LIST11_INSTANCE_ID_BA =
             LIST1_INSTANCE_ID_BA.child(List11.class, LIST11_KEY);
 
     /**
@@ -64,12 +64,8 @@ public class WriteParentReadChildTest extends AbstractDataServiceTest {
         DataBroker dataBroker = testContext.getDataBroker();
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
-        List11 list11 = new List11Builder() //
-                .setKey(LIST11_KEY) //
-                .setAttrStr("primary")
-                .build();
-
-        List1 list1 = new List1Builder().setKey(LIST1_KEY).setList11(ImmutableList.of(list11)).build();
+        List11 list11 = new List11Builder().withKey(LIST11_KEY).setAttrStr("primary").build();
+        List1 list1 = new List1Builder().withKey(LIST1_KEY).setList11(ImmutableList.of(list11)).build();
 
         transaction.put(LogicalDatastoreType.OPERATIONAL, LIST1_INSTANCE_ID_BA, list1, true);
         transaction.submit().get(5, TimeUnit.SECONDS);
