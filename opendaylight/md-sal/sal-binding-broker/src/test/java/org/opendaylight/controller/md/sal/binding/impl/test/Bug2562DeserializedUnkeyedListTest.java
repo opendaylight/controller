@@ -34,7 +34,7 @@ public class Bug2562DeserializedUnkeyedListTest extends AbstractDataChangeListen
 
     private void writeRoot(final LogicalDatastoreType store) {
         final ReadWriteTransaction readWriteTransaction = getDataBroker().newReadWriteTransaction();
-        final Barroot barRoot = new BarrootBuilder().setType(2).setValue(2).setKey(new BarrootKey(2)).build();
+        final Barroot barRoot = new BarrootBuilder().setType(2).setValue(2).withKey(new BarrootKey(2)).build();
         final ArrayList<Barroot> barRootList = new ArrayList<>();
         barRootList.add(barRoot);
         final Fooroot fooRoot = new FoorootBuilder().setBarroot(barRootList).build();

@@ -31,7 +31,7 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
     private static final TopLevelListKey TOP_LIST_KEY = new TopLevelListKey("foo");
     private static final InstanceIdentifier<TopLevelList> NODE_PATH = TOP_PATH.child(TopLevelList.class, TOP_LIST_KEY);
-    private static final TopLevelList NODE = new TopLevelListBuilder().setKey(TOP_LIST_KEY).build();
+    private static final TopLevelList NODE = new TopLevelListBuilder().withKey(TOP_LIST_KEY).build();
 
     @Test
     @Deprecated

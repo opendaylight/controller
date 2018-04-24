@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.messagebus.app.impl;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -217,5 +218,14 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
     EventSourceService getEventSourceService() {
         return eventSourceService;
     }
-}
 
+    @VisibleForTesting
+    Map<NodeKey, RoutedRpcRegistration<EventSourceService>> getRoutedRpcRegistrations() {
+        return routedRpcRegistrations;
+    }
+
+    @VisibleForTesting
+    Map<TopicId, EventSourceTopic> getEventSourceTopicMap() {
+        return eventSourceTopicMap;
+    }
+}

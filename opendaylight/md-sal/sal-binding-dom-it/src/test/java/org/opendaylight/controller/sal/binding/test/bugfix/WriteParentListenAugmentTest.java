@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertEquals;
@@ -50,14 +49,14 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
         final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
         DataBroker dataBroker = testContext.getDataBroker();
-        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> dclRegistration =
-                dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, AUGMENT_WILDCARDED_PATH,
-                    change -> event.set(change), DataChangeScope.SUBTREE);
+        ListenerRegistration<?> dclRegistration = dataBroker.registerDataChangeListener(
+            LogicalDatastoreType.OPERATIONAL, AUGMENT_WILDCARDED_PATH, change -> event.set(change),
+            DataChangeScope.SUBTREE);
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
         TopLevelList tll = new TopLevelListBuilder()
-                .setKey(TLL_KEY)
+                .withKey(TLL_KEY)
                 .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment("one")).build();
         transaction.put(LogicalDatastoreType.OPERATIONAL, TLL_INSTANCE_ID_BA, tll, true);
         transaction.submit().get(5, TimeUnit.SECONDS);
