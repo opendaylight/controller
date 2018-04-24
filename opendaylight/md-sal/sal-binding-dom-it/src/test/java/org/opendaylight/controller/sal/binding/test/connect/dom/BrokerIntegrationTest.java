@@ -39,7 +39,7 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
 
         DataBroker dataBroker = testContext.getDataBroker();
         Optional<TopLevelList> tllFoo = dataBroker.newReadOnlyTransaction().read(
-                LogicalDatastoreType.CONFIGURATION, FOO_PATH).checkedGet(5, TimeUnit.SECONDS);
+                LogicalDatastoreType.CONFIGURATION, FOO_PATH).get(5, TimeUnit.SECONDS);
         assertFalse(tllFoo.isPresent());
 
         TopLevelList tllFooData = createTll(TLL_FOO_KEY);
@@ -49,9 +49,9 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         transaction.submit().get(5, TimeUnit.SECONDS);
 
         Optional<TopLevelList> readedData = dataBroker.newReadOnlyTransaction().read(
-                LogicalDatastoreType.CONFIGURATION, FOO_PATH).checkedGet(5, TimeUnit.SECONDS);
+                LogicalDatastoreType.CONFIGURATION, FOO_PATH).get(5, TimeUnit.SECONDS);
         assertTrue(readedData.isPresent());
-        assertEquals(tllFooData.getKey(), readedData.get().getKey());
+        assertEquals(tllFooData.key(), readedData.get().key());
 
         TopLevelList nodeBarData = createTll(TLL_BAR_KEY);
         TopLevelList nodeBazData = createTll(TLL_BAZ_KEY);
@@ -62,7 +62,7 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         insertMoreTr.submit().get(5, TimeUnit.SECONDS);
 
         Optional<Top> top = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION, TOP_PATH)
-                .checkedGet(5, TimeUnit.SECONDS);
+                .get(5, TimeUnit.SECONDS);
         assertTrue(top.isPresent());
         assertEquals(3, top.get().getTopLevelList().size());
 
@@ -76,13 +76,11 @@ public class BrokerIntegrationTest extends AbstractDataServiceTest {
         removalTransaction.submit().get(5, TimeUnit.SECONDS);
 
         Optional<TopLevelList> readedData2 = dataBroker.newReadOnlyTransaction().read(
-                LogicalDatastoreType.CONFIGURATION, BAR_PATH).checkedGet(5, TimeUnit.SECONDS);
+                LogicalDatastoreType.CONFIGURATION, BAR_PATH).get(5, TimeUnit.SECONDS);
         assertFalse(readedData2.isPresent());
     }
 
     private static TopLevelList createTll(final TopLevelListKey key) {
-        TopLevelListBuilder ret = new TopLevelListBuilder();
-        ret.setKey(key);
-        return ret.build();
+        return new TopLevelListBuilder().withKey(key).build();
     }
 }
