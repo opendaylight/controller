@@ -44,7 +44,7 @@ public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificat
 
     private TwoLevelListChanged createTestData() {
         final TwoLevelListChangedBuilder tb = new TwoLevelListChangedBuilder();
-        tb.setTopLevelList(ImmutableList.of(new TopLevelListBuilder().setKey(new TopLevelListKey("test")).build()));
+        tb.setTopLevelList(ImmutableList.of(new TopLevelListBuilder().withKey(new TopLevelListKey("test")).build()));
         return tb.build();
     }
 
@@ -75,12 +75,12 @@ public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificat
         private final List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
         private final CountDownLatch latch;
 
-        NotifTestListener(CountDownLatch latch) {
+        NotifTestListener(final CountDownLatch latch) {
             this.latch = latch;
         }
 
         @Override
-        public void onTwoLevelListChanged(TwoLevelListChanged notification) {
+        public void onTwoLevelListChanged(final TwoLevelListChanged notification) {
             receivedNotifications.add(notification);
             latch.countDown();
         }
