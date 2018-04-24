@@ -46,41 +46,40 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
 
     protected static final InstanceIdentifier<ListViaUses> DEEP_WILDCARDED_PATH = InstanceIdentifier
             .builder(Top.class)
-            .child(TopLevelList.class) //
-            .augmentation(TreeComplexUsesAugment.class) //
-            .child(ListViaUses.class) //
+            .child(TopLevelList.class)
+            .augmentation(TreeComplexUsesAugment.class)
+            .child(ListViaUses.class)
             .build();
 
     private static final InstanceIdentifier<TreeComplexUsesAugment> NODE_0_TCU_PATH = InstanceIdentifier
             .builder(Top.class)
-            .child(TopLevelList.class, TOP_LEVEL_LIST_0_KEY) //
-            .augmentation(TreeComplexUsesAugment.class) //
+            .child(TopLevelList.class, TOP_LEVEL_LIST_0_KEY)
+            .augmentation(TreeComplexUsesAugment.class)
             .build();
 
     private static final InstanceIdentifier<TreeComplexUsesAugment> NODE_1_TCU_PATH = InstanceIdentifier
             .builder(Top.class)
-            .child(TopLevelList.class, TOP_LEVEL_LIST_1_KEY) //
-            .augmentation(TreeComplexUsesAugment.class) //
+            .child(TopLevelList.class, TOP_LEVEL_LIST_1_KEY)
+            .augmentation(TreeComplexUsesAugment.class)
             .build();
 
 
     private static final ListViaUsesKey LIST_VIA_USES_KEY = new ListViaUsesKey("test");
 
-    private static final InstanceIdentifier<ListViaUses> NODE_0_LVU_PATH = NODE_0_TCU_PATH.child(ListViaUses.class, LIST_VIA_USES_KEY);
+    private static final InstanceIdentifier<ListViaUses> NODE_0_LVU_PATH = NODE_0_TCU_PATH.child(ListViaUses.class,
+        LIST_VIA_USES_KEY);
 
-    private static final InstanceIdentifier<ListViaUses> NODE_1_LVU_PATH = NODE_1_TCU_PATH.child(ListViaUses.class, LIST_VIA_USES_KEY);
+    private static final InstanceIdentifier<ListViaUses> NODE_1_LVU_PATH = NODE_1_TCU_PATH.child(ListViaUses.class,
+        LIST_VIA_USES_KEY);
 
     private static final InstanceIdentifier<ContainerWithUses> NODE_0_CWU_PATH =
             NODE_0_TCU_PATH.child(ContainerWithUses.class);
 
-    private static final ContainerWithUses CWU= new ContainerWithUsesBuilder()//
-            .setLeafFromGrouping("some container value") //
-            .build();
+    private static final ContainerWithUses CWU = new ContainerWithUsesBuilder()
+            .setLeafFromGrouping("some container value").build();
 
-    private static final ListViaUses LVU = new ListViaUsesBuilder() //
-            .setKey(LIST_VIA_USES_KEY) //
-            .setName("john")
-            .build();
+    private static final ListViaUses LVU = new ListViaUsesBuilder()
+            .withKey(LIST_VIA_USES_KEY).setName("john").build();
 
     @Test
     public void testSeparateWrites() throws InterruptedException, TimeoutException, ExecutionException {
@@ -157,7 +156,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
         assertNotNull(event);
         // Data change should contains NODE_1 Flow - which was added
         assertTrue(event.getCreatedData().containsKey(NODE_1_LVU_PATH));
-        // Data change must not containe NODE_0 Flow which was replaced with same value.
+        // Data change must not contain NODE_0 Flow which was replaced with same value.
         assertFalse(event.getUpdatedData().containsKey(NODE_0_LVU_PATH));
     }
 

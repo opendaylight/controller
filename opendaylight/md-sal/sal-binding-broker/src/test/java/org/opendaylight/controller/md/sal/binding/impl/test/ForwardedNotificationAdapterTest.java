@@ -44,9 +44,9 @@ public class ForwardedNotificationAdapterTest extends AbstractNotificationBroker
 
     }
 
-    private TwoLevelListChanged createTestData() {
+    private static TwoLevelListChanged createTestData() {
         final TwoLevelListChangedBuilder tb = new TwoLevelListChangedBuilder();
-        tb.setTopLevelList(ImmutableList.of(new TopLevelListBuilder().setKey(new TopLevelListKey("test")).build()));
+        tb.setTopLevelList(ImmutableList.of(new TopLevelListBuilder().withKey(new TopLevelListKey("test")).build()));
         return tb.build();
     }
 
@@ -111,12 +111,12 @@ public class ForwardedNotificationAdapterTest extends AbstractNotificationBroker
         private final List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
         private final CountDownLatch latch;
 
-        TestNotifListener(CountDownLatch latch) {
+        TestNotifListener(final CountDownLatch latch) {
             this.latch = latch;
         }
 
         @Override
-        public void onTwoLevelListChanged(TwoLevelListChanged notification) {
+        public void onTwoLevelListChanged(final TwoLevelListChanged notification) {
             receivedNotifications.add(notification);
             latch.countDown();
         }
