@@ -10,6 +10,7 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -58,7 +59,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
         for (OuterList element : this.list) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                                                    .child(OuterList.class, element.getKey());
+                                                    .child(OuterList.class, element.key());
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, iid, element);
@@ -81,7 +82,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
                         LOG.error("Transaction failed, {}", t);
                         txError++;
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 tx = chain.newWriteOnlyTransaction();
                 writeCnt = 0;
             }
@@ -103,7 +104,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
         } catch (final IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
-        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, txOk + txError);
     }
 
     @Override

@@ -40,7 +40,8 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataTreeCh
 
     private static final List11Key LIST11_KEY = new List11Key(100);
 
-    private static final InstanceIdentifier<TllComplexAugment> TLL_COMPLEX_AUGMENT_PATH = InstanceIdentifier.builder(Top.class)
+    private static final InstanceIdentifier<TllComplexAugment> TLL_COMPLEX_AUGMENT_PATH = InstanceIdentifier
+            .builder(Top.class)
             .child(TopLevelList.class,FOO_KEY)
             .augmentation(TllComplexAugment.class)
             .build();
@@ -65,7 +66,7 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataTreeCh
         initTx.put(LogicalDatastoreType.OPERATIONAL, LIST11_PATH, list11Before, true);
         initTx.submit().get(5, TimeUnit.SECONDS);
 
-        List11 list11After = new List11Builder().setKey(LIST11_KEY).setAttrStr("good").build();
+        List11 list11After = new List11Builder().withKey(LIST11_KEY).setAttrStr("good").build();
 
         final TestListener<List11> listener = createListener(LogicalDatastoreType.OPERATIONAL, LIST11_PATH,
                 added(LIST11_PATH, list11Before), subtreeModified(LIST11_PATH, list11Before, list11After));
@@ -77,9 +78,9 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataTreeCh
         listener.verify();
     }
 
-    private List11 createList11() {
+    private static List11 createList11() {
         List11Builder builder = new List11Builder()
-            .setKey(LIST11_KEY)
+            .withKey(LIST11_KEY)
             .addAugmentation(List11SimpleAugment.class,new List11SimpleAugmentBuilder()
                     .setAttrStr2("bad").build())
             .setAttrStr("good");

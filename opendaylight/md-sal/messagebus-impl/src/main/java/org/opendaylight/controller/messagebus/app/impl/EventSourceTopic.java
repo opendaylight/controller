@@ -130,7 +130,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
                         for (final Node node : nodes) {
                             if (nodeRegex.matcher(node.getNodeId().getValue()).matches()) {
                                 notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class,
-                                        node.getKey()));
+                                    node.key()));
                             }
                         }
                     }
