@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.listener;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -24,33 +23,30 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class PeopleCarListener implements CarPurchaseListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(PeopleCarListener.class);
 
     private DataBroker dataProvider;
 
-
-
     public void setDataProvider(final DataBroker salDataProvider) {
         this.dataProvider = salDataProvider;
     }
 
     @Override
-    public void onCarBought(CarBought notification) {
+    public void onCarBought(final CarBought notification) {
 
         final CarPersonBuilder carPersonBuilder = new CarPersonBuilder();
         carPersonBuilder.setCarId(notification.getCarId());
         carPersonBuilder.setPersonId(notification.getPersonId());
         CarPersonKey key = new CarPersonKey(notification.getCarId(), notification.getPersonId());
-        carPersonBuilder.setKey(key);
+        carPersonBuilder.withKey(key);
         final CarPerson carPerson = carPersonBuilder.build();
 
         LOG.info("Car bought, adding car-person entry: [{}]", carPerson);
 
-        InstanceIdentifier<CarPerson> carPersonIId = InstanceIdentifier.<CarPeople>builder(CarPeople.class)
-                .child(CarPerson.class, carPerson.getKey()).build();
+        InstanceIdentifier<CarPerson> carPersonIId = InstanceIdentifier.builder(CarPeople.class)
+                .child(CarPerson.class, carPerson.key()).build();
 
 
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();

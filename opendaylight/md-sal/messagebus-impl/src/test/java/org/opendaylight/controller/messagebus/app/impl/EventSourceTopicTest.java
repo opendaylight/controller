@@ -100,7 +100,7 @@ public class EventSourceTopicTest {
         doReturn(DataObjectModification.ModificationType.WRITE).when(mockModification).getModificationType();
 
         Node dataObjectNodeMock = mock(Node.class);
-        doReturn(getNodeKey("testNodeId01")).when(dataObjectNodeMock).getKey();
+        doReturn(getNodeKey("testNodeId01")).when(dataObjectNodeMock).key();
         NodeId nodeIdMock = mock(NodeId.class);
         doReturn(nodeIdMock).when(dataObjectNodeMock).getNodeId();
         doReturn("nodeIdPattern1").when(nodeIdMock).getValue();
@@ -119,7 +119,7 @@ public class EventSourceTopicTest {
         verify(eventSourceServiceMock, times(1)).joinTopic(any(JoinTopicInput.class));
     }
 
-    public NodeKey getNodeKey(String nodeId) {
+    public NodeKey getNodeKey(final String nodeId) {
         return new NodeKey(new NodeId(nodeId));
     }
 }

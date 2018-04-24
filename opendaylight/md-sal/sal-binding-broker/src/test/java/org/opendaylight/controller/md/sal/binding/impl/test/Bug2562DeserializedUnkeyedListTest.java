@@ -35,7 +35,7 @@ public class Bug2562DeserializedUnkeyedListTest extends AbstractDataTreeChangeLi
 
     @Test
     public void writeListToList2562Root() {
-        final Barroot barRoot = new BarrootBuilder().setType(2).setValue(2).setKey(new BarrootKey(2)).build();
+        final Barroot barRoot = new BarrootBuilder().setType(2).setValue(2).withKey(new BarrootKey(2)).build();
         final Fooroot fooRoot = new FoorootBuilder().setBarroot(Arrays.asList(barRoot)).build();
         final Root root = new RootBuilder().setFooroot(Arrays.asList(fooRoot)).build();
 
