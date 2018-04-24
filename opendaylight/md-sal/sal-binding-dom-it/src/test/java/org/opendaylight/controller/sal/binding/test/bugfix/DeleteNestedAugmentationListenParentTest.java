@@ -43,7 +43,8 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
 
     private static final List11Key LIST11_KEY = new List11Key(100);
 
-    private static final InstanceIdentifier<TllComplexAugment> TLL_COMPLEX_AUGMENT_PATH = InstanceIdentifier.builder(Top.class)
+    private static final InstanceIdentifier<TllComplexAugment> TLL_COMPLEX_AUGMENT_PATH = InstanceIdentifier
+            .builder(Top.class)
             .child(TopLevelList.class,FOO_KEY)
             .augmentation(TllComplexAugment.class)
             .build();
@@ -74,13 +75,12 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
         assertFalse(receivedEvent.getRemovedPaths().contains(TLL_COMPLEX_AUGMENT_PATH));
     }
 
-    private List11 createList11() {
+    private static List11 createList11() {
         List11Builder builder = new List11Builder()
-            .setKey(LIST11_KEY)
+            .withKey(LIST11_KEY)
             .addAugmentation(List11SimpleAugment.class,new List11SimpleAugmentBuilder()
                     .setAttrStr2("bad").build())
             .setAttrStr("good");
         return builder.build();
     }
-
 }

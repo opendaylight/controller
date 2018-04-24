@@ -49,7 +49,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
 
         for (OuterList element : this.list) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                                                    .child(OuterList.class, element.getKey());
+                                                    .child(OuterList.class, element.key());
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, iid, element);
             } else {

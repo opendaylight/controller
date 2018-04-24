@@ -77,7 +77,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change: changes) {
             final DataObjectModification<Node> rootNode = change.getRootNode();
             switch (rootNode.getModificationType()) {
@@ -129,7 +129,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
                         for (final Node node : nodes) {
                             if (nodeRegex.matcher(node.getNodeId().getValue()).matches()) {
                                 notifyNode(EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class,
-                                        node.getKey()));
+                                    node.key()));
                             }
                         }
                     }
