@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -57,10 +56,8 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
         final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
 
         // Each entry will be identifiable by a unique key, we have to create that identifier
-        final InstanceIdentifier.InstanceIdentifierBuilder<Person> personIdBuilder =
-                InstanceIdentifier.<People>builder(People.class)
-                .child(Person.class, person.getKey());
-        final InstanceIdentifier<Person> personId = personIdBuilder.build();
+        final InstanceIdentifier<Person> personId = InstanceIdentifier.builder(People.class)
+                .child(Person.class, person.key()).build();
         // Place entry in data store tree
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, personId, person, true);

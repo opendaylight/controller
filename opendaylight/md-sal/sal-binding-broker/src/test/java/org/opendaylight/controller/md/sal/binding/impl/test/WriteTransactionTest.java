@@ -16,7 +16,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
@@ -29,7 +28,7 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
     private static final TopLevelListKey TOP_LIST_KEY = new TopLevelListKey("foo");
     private static final InstanceIdentifier<TopLevelList> NODE_PATH = TOP_PATH.child(TopLevelList.class, TOP_LIST_KEY);
-    private static final TopLevelList NODE = new TopLevelListBuilder().setKey(TOP_LIST_KEY).build();
+    private static final TopLevelList NODE = new TopLevelListBuilder().withKey(TOP_LIST_KEY).build();
 
     @Test
     public void test() throws InterruptedException, ExecutionException {
@@ -40,11 +39,10 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testPutCreateParentsSuccess()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testPutCreateParentsSuccess() throws InterruptedException, ExecutionException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
-        writeTx.submit().checkedGet();
+        writeTx.submit().get();
 
         ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
         Optional<Top> topNode = readTx.read(LogicalDatastoreType.OPERATIONAL, TOP_PATH).get();
@@ -54,11 +52,10 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testMergeCreateParentsSuccess()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testMergeCreateParentsSuccess() throws InterruptedException, ExecutionException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.merge(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
-        writeTx.submit().checkedGet();
+        writeTx.submit().get();
 
         ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
         Optional<Top> topNode = readTx.read(LogicalDatastoreType.OPERATIONAL, TOP_PATH).get();

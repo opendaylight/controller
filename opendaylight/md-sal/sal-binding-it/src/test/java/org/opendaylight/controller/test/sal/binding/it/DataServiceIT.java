@@ -50,40 +50,41 @@ public class DataServiceIT extends AbstractIT {
 
         InstanceIdentifier<UnorderedList> node1 = createNodeRef("0");
         Optional<UnorderedList> node = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL, node1)
-                .checkedGet(5, TimeUnit.SECONDS);
+                .get(5, TimeUnit.SECONDS);
         assertFalse(node.isPresent());
         UnorderedList nodeData1 = createNode("0");
 
         transaction.put(LogicalDatastoreType.OPERATIONAL, node1, nodeData1);
-        transaction.submit().checkedGet(5, TimeUnit.SECONDS);
+        transaction.submit().get(5, TimeUnit.SECONDS);
 
         Optional<UnorderedList> readedData = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                node1).checkedGet(5, TimeUnit.SECONDS);
+                node1).get(5, TimeUnit.SECONDS);
         assertTrue(readedData.isPresent());
-        assertEquals(nodeData1.getKey(), readedData.get().getKey());
+        assertEquals(nodeData1.key(), readedData.get().key());
 
         final WriteTransaction transaction2 = dataBroker.newWriteOnlyTransaction();
         assertNotNull(transaction2);
 
         transaction2.delete(LogicalDatastoreType.OPERATIONAL, node1);
 
-        transaction2.submit().checkedGet(5, TimeUnit.SECONDS);
+        transaction2.submit().get(5, TimeUnit.SECONDS);
 
         Optional<UnorderedList> readedData2 = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                node1).checkedGet(5, TimeUnit.SECONDS);
+                node1).get(5, TimeUnit.SECONDS);
         assertFalse(readedData2.isPresent());
     }
 
 
     private static InstanceIdentifier<UnorderedList> createNodeRef(final String string) {
         UnorderedListKey key = new UnorderedListKey(string);
-        return  InstanceIdentifier.builder(Lists.class).child(UnorderedContainer.class).child(UnorderedList.class, key).build();
+        return InstanceIdentifier.builder(Lists.class).child(UnorderedContainer.class).child(UnorderedList.class, key)
+                .build();
     }
 
     private static UnorderedList createNode(final String string) {
         UnorderedListBuilder ret = new UnorderedListBuilder();
         UnorderedListKey nodeKey = new UnorderedListKey(string);
-        ret.setKey(nodeKey);
+        ret.withKey(nodeKey);
         ret.setName("name of " + string);
         ret.setName("value of " + string);
         return ret.build();

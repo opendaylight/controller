@@ -44,6 +44,7 @@ import org.xml.sax.SAXException;
  * @author Thomas Pantelis (originally; re-factored by Michael Vorburger.ch)
  */
 public abstract class BindingContext {
+    private static String GET_KEY_METHOD = "key";
 
     public static BindingContext create(final String logName, final Class<? extends DataObject> klass,
             final String appConfigListKeyValue) {
@@ -138,7 +139,7 @@ public abstract class BindingContext {
                 final String listKeyValue) throws InstantiationException, IllegalAccessException,
                 IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
-            Identifier keyInstance = (Identifier) bindingClass.getMethod("getKey").getReturnType()
+            Identifier keyInstance = (Identifier) bindingClass.getMethod(GET_KEY_METHOD).getReturnType()
                     .getConstructor(String.class).newInstance(listKeyValue);
             InstanceIdentifier appConfigPath = InstanceIdentifier.builder((Class)bindingClass, keyInstance).build();
             return new ListBindingContext(bindingClass, appConfigPath, listKeyValue);
