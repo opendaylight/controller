@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- vi: set et smarttab sw=4 tabstop=4: --><!--
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
 Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
 
 This program and the accompanying materials are made available under the
@@ -19,7 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>bundle</packaging>
 
   <properties>
-    <opendaylight.karaf.version>2.0.5</opendaylight.karaf.version>
+    <opendaylight.karaf.version>2.0.6</opendaylight.karaf.version>
   </properties>
 
   <dependencyManagement>
@@ -41,7 +42,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
-      <version>${opendaylight.karaf.version}</version>
+      <version>2.0.6</version>
       <type>zip</type>
     </dependency>
 
