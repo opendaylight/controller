@@ -17,7 +17,10 @@ import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
  * A factory for creating InMemoryDOMDataStore instances.
  *
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreFactory} instead.
  */
+@Deprecated
 public final class InMemoryDOMDataStoreFactory {
 
     private InMemoryDOMDataStoreFactory() {

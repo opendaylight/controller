@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.store.impl.jmx;
 
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.yangtools.concepts.AbstractRegistration;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 
 /**
@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
  *
  * @author Thomas Pantelis
  */
-public class InMemoryDataStoreStats implements AutoCloseable {
+public class InMemoryDataStoreStats extends AbstractRegistration {
 
     private final AbstractMXBean notificationExecutorStatsBean;
     private final QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
@@ -42,7 +42,7 @@ public class InMemoryDataStoreStats implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    protected void removeRegistration() {
         if (notificationExecutorStatsBean != null) {
             notificationExecutorStatsBean.unregisterMBean();
         }
