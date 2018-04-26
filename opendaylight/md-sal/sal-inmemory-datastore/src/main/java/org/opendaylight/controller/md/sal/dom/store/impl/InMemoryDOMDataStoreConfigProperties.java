@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 /**
@@ -14,7 +13,10 @@ package org.opendaylight.controller.md.sal.dom.store.impl;
  *
  * @author Thomas Pantelis
  * @see InMemoryDOMDataStoreFactory
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigProperties} instead.
  */
+@Deprecated
 public final class InMemoryDOMDataStoreConfigProperties {
 
     public static final int DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE = 1000;
