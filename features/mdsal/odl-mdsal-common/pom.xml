@@ -14,13 +14,13 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>1.8.4-SNAPSHOT</version>
+        <version>1.8.5-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-mdsal-common</artifactId>
-    <version>1.5.4-SNAPSHOT</version>
+    <version>1.5.5-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: Config :: All</name>
@@ -29,21 +29,21 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>odl-yangtools-yang-data</artifactId>
-            <version>1.1.4-SNAPSHOT</version>
+            <version>1.1.5-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-config-api</artifactId>
-            <version>0.6.4-SNAPSHOT</version>
+            <version>0.6.5-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-binding-runtime</artifactId>
-            <version>2.2.4-SNAPSHOT</version>
+            <version>2.2.5-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
