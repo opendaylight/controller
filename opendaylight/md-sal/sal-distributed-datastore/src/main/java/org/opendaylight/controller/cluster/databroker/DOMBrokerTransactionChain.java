@@ -9,18 +9,17 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionChainListener;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -80,17 +79,17 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
     }
 
     @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit(
+    public FluentFuture<? extends CommitInfo> commit(
             final DOMDataTreeWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
         checkNotFailed();
         checkNotClosed();
 
-        final CheckedFuture<Void, TransactionCommitFailedException> ret = broker.submit(transaction, cohorts);
+        final FluentFuture<? extends CommitInfo> ret = broker.commit(transaction, cohorts);
 
         COUNTER_UPDATER.incrementAndGet(this);
-        Futures.addCallback(ret, new FutureCallback<Void>() {
+        ret.addCallback(new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 transactionCompleted();
             }
 

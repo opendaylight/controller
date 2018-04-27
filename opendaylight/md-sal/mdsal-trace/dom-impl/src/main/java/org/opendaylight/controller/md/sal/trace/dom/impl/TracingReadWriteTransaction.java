@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Objects;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -17,6 +18,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedTrait;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -49,6 +51,12 @@ class TracingReadWriteTransaction
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         closeTracker.removeFromTrackedRegistry();
         return super.submit();
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        closeTracker.removeFromTrackedRegistry();
+        return super.commit();
     }
 
     @Override

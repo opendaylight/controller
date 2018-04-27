@@ -74,7 +74,7 @@ public class AbstractDOMBrokerWriteTransactionTest {
     @Test
     public void submitRuntimeExceptionAndCancel() {
         RuntimeException thrown = new RuntimeException();
-        doThrow(thrown).when(abstractDOMTransactionFactory).submit(any(), any());
+        doThrow(thrown).when(abstractDOMTransactionFactory).commit(any(), any());
         AbstractDOMBrokerWriteTransactionTestImpl abstractDOMBrokerWriteTransactionTestImpl
                 = new AbstractDOMBrokerWriteTransactionTestImpl();
 

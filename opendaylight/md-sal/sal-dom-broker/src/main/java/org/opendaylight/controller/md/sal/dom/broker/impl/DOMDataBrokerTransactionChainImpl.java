@@ -9,9 +9,9 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -19,11 +19,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,19 +83,17 @@ final class DOMDataBrokerTransactionChainImpl extends
     }
 
     @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-                                                                        final
-                                                                        Collection<DOMStoreThreePhaseCommitCohort>
-                                                                                cohorts) {
+    public FluentFuture<? extends CommitInfo> commit(final DOMDataWriteTransaction transaction,
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
         checkNotFailed();
         checkNotClosed();
 
-        final CheckedFuture<Void, TransactionCommitFailedException> ret = broker.submit(transaction, cohorts);
+        final FluentFuture<? extends CommitInfo> ret = broker.commit(transaction, cohorts);
 
         COUNTER_UPDATER.incrementAndGet(this);
-        Futures.addCallback(ret, new FutureCallback<Void>() {
+        ret.addCallback(new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 transactionCompleted();
             }
 
@@ -103,7 +101,7 @@ final class DOMDataBrokerTransactionChainImpl extends
             public void onFailure(final Throwable throwable) {
                 transactionFailed(transaction, throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return ret;
     }

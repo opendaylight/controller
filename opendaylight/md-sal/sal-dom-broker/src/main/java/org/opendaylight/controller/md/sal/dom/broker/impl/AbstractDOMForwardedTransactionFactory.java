@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
@@ -24,6 +24,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -64,26 +65,25 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
     protected abstract Object newTransactionIdentifier();
 
     /**
-     * User-supplied implementation of {@link DOMDataWriteTransaction#submit()}
+     * User-supplied implementation of {@link DOMDataWriteTransaction#commit()}
      * for transaction.
      *
      * <p>
-     * Callback invoked when {@link DOMDataWriteTransaction#submit()} is invoked
+     * Callback invoked when {@link DOMDataWriteTransaction#commit()} is invoked
      * on transaction created by this factory.
      *
      * @param transaction
-     *            Transaction on which {@link DOMDataWriteTransaction#submit()}
+     *            Transaction on which {@link DOMDataWriteTransaction#commit()}
      *            was invoked.
      * @param cohorts
      *            Iteratable of cohorts for subtransactions associated with
      *            the transaction being committed.
-     * @return a CheckedFuture. if commit coordination on cohorts finished successfully,
-     *         nothing is returned from the Future, On failure,
+     * @return a FluentFuture. if commit coordination on cohorts finished successfully,
+     *         a CommitInfo is returned from the Future, On failure,
      *         the Future fails with a {@link TransactionCommitFailedException}.
      */
-    protected abstract CheckedFuture<Void,
-            TransactionCommitFailedException>
-                submit(DOMDataWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts);
+    protected abstract FluentFuture<? extends CommitInfo> commit(DOMDataWriteTransaction transaction,
+            Collection<DOMStoreThreePhaseCommitCohort> cohorts);
 
     /**
      * Creates a new composite read-only transaction
@@ -142,7 +142,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      * {@link DOMStoreWriteTransaction#delete(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier)} is
      * invoked on
      * selected subtransaction.
-     * </li><li> {@link DOMDataWriteTransaction#submit()} - results in invoking
+     * </li><li> {@link DOMDataWriteTransaction#commit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
      * and then invoking finalized implementation callback
      * {@link #submit(DOMDataWriteTransaction, Collection)} with transaction which
@@ -207,7 +207,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
      * {@link DOMStoreWriteTransaction#delete(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier)} is
      * invoked on
      * selected subtransaction.
-     * <li> {@link DOMDataWriteTransaction#submit()} - results in invoking
+     * <li> {@link DOMDataWriteTransaction#commit()} - results in invoking
      * {@link DOMStoreWriteTransaction#ready()}, gathering all resulting cohorts
      * and then invoking finalized implementation callback
      * {@link #submit(DOMDataWriteTransaction, Collection)} with transaction which
