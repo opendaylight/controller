@@ -14,7 +14,7 @@ import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedException
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
@@ -77,7 +77,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     @Override
-    protected CheckedFuture<Void, TransactionCommitFailedException> submit(
+    protected FluentFuture<? extends CommitInfo> commit(
             final DOMDataTreeWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
@@ -85,7 +85,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
         if (cohorts.isEmpty()) {
-            return Futures.immediateCheckedFuture(null);
+            return CommitInfo.emptyFluentFuture();
         }
 
         final AsyncNotifyingSettableFuture clientSubmitFuture =
@@ -93,7 +93,8 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
         doCanCommit(clientSubmitFuture, transaction, cohorts);
 
-        return MappingCheckedFuture.create(clientSubmitFuture, COMMIT_ERROR_MAPPER);
+        return FluentFuture.from(clientSubmitFuture).transform(ignored -> CommitInfo.empty(),
+                MoreExecutors.directExecutor());
     }
 
     private void doCanCommit(final AsyncNotifyingSettableFuture clientSubmitFuture,

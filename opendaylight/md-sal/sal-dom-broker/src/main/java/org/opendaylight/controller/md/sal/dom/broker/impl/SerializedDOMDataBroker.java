@@ -9,7 +9,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -21,7 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,23 +63,21 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
     }
 
     @Override
-    protected CheckedFuture<Void, TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-                                                                           final
-                                                                           Collection<DOMStoreThreePhaseCommitCohort>
-                                                                                   cohorts) {
+    protected FluentFuture<? extends CommitInfo> commit(final DOMDataWriteTransaction transaction,
+            final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
-        ListenableFuture<Void> commitFuture = null;
+        ListenableFuture<? extends CommitInfo> commitFuture;
         try {
             commitFuture = executor.submit(new CommitCoordinationTask(transaction, cohorts, commitStatsTracker));
         } catch (RejectedExecutionException e) {
             LOG.error("The commit executor's queue is full - submit task was rejected. \n" + executor, e);
-            return Futures.immediateFailedCheckedFuture(new TransactionCommitFailedException(
+            commitFuture = Futures.immediateFailedFuture(new TransactionCommitFailedException(
                     "Could not submit the commit task - the commit queue capacity has been exceeded.", e));
         }
 
-        return MappingCheckedFuture.create(commitFuture, TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+        return FluentFuture.from(commitFuture);
     }
 }

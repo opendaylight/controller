@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -32,6 +33,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.spi.ForwardingDOMDataReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -192,7 +195,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
             return slowAllocateTransaction();
         }
 
-        // Fast path: reuse current transaction. We will check failures and similar on submit().
+        // Fast path: reuse current transaction. We will check failures and similar on commit().
         if (!LOCKED_UPDATER.compareAndSet(this, null, oldTx)) {
             // Ouch. Delegate chain has not detected a duplicate transaction allocation. This is the best we can do.
             oldTx.getTransaction().cancel();
@@ -450,9 +453,16 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
             @Override
             public CheckedFuture<Void, TransactionCommitFailedException> submit() {
+                return MappingCheckedFuture.create(FluentFuture.from(commit()).transform(ignored -> null,
+                        MoreExecutors.directExecutor()), TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+            }
+
+            @Override
+            public FluentFuture<? extends CommitInfo> commit() {
                 readyTransaction(tx);
                 isOpen = false;
-                return tx.getSubmitFuture();
+                return FluentFuture.from(tx.getSubmitFuture()).transformAsync(
+                    ignored -> CommitInfo.emptyFluentFuture(), MoreExecutors.directExecutor());
             }
 
             @Override

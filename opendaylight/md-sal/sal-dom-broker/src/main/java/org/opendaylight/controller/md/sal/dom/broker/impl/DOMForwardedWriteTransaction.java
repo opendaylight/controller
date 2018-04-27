@@ -9,7 +9,9 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -20,6 +22,8 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -128,22 +132,29 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     @Override
     @SuppressWarnings("checkstyle:illegalcatch")
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
+        return MappingCheckedFuture.create(FluentFuture.from(commit()).transform(ignored -> null,
+                MoreExecutors.directExecutor()), TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+    }
+
+    @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public FluentFuture<? extends CommitInfo> commit() {
         final AbstractDOMForwardedTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
 
         final Collection<T> txns = getSubtransactions();
         final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
 
-        CheckedFuture<Void, TransactionCommitFailedException> ret;
+        FluentFuture<? extends CommitInfo> ret;
         try {
             for (DOMStoreWriteTransaction txn : txns) {
                 cohorts.add(txn.ready());
             }
 
-            ret = impl.submit(this, cohorts);
+            ret = impl.commit(this, cohorts);
         } catch (RuntimeException e) {
-            ret = Futures.immediateFailedCheckedFuture(
-                    TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e));
+            ret = FluentFuture.from(Futures.immediateFailedFuture(
+                    TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e)));
         }
         FUTURE_UPDATER.lazySet(this, ret);
         return ret;

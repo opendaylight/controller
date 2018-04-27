@@ -8,11 +8,13 @@
 package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedTrait;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 
 class TracingWriteTransaction extends AbstractTracingWriteTransaction
         implements CloseTracked<TracingWriteTransaction> {
@@ -29,6 +31,12 @@ class TracingWriteTransaction extends AbstractTracingWriteTransaction
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         closeTracker.removeFromTrackedRegistry();
         return super.submit();
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        closeTracker.removeFromTrackedRegistry();
+        return super.commit();
     }
 
     @Override

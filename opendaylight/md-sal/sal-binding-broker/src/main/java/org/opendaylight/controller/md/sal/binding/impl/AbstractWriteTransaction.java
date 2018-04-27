@@ -9,11 +9,11 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -125,8 +125,8 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
         getDelegate().delete(store, normalized);
     }
 
-    protected final CheckedFuture<Void,TransactionCommitFailedException> doSubmit() {
-        return getDelegate().submit();
+    protected final FluentFuture<? extends CommitInfo> doCommit() {
+        return getDelegate().commit();
     }
 
     protected final boolean doCancel() {

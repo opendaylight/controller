@@ -9,8 +9,10 @@ package org.opendaylight.controller.md.sal.binding.api;
 
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -67,6 +69,11 @@ public class ForwardingWriteTransaction extends ForwardingObject implements Writ
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         return delegate.submit();
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        return delegate.commit();
     }
 
     @Override
