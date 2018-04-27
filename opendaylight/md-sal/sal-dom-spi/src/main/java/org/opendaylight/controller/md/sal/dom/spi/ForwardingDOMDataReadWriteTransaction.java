@@ -10,11 +10,13 @@ package org.opendaylight.controller.md.sal.dom.spi;
 import com.google.common.base.Optional;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -69,5 +71,10 @@ public abstract class ForwardingDOMDataReadWriteTransaction extends ForwardingOb
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         return delegate().submit();
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        return delegate().commit();
     }
 }

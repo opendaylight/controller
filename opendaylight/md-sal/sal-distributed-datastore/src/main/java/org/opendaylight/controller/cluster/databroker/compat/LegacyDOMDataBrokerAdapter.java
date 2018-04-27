@@ -15,6 +15,7 @@ import com.google.common.collect.ForwardingObject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
@@ -40,6 +41,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistr
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
@@ -299,6 +301,11 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         @Override
         public CheckedFuture<Void, TransactionCommitFailedException> submit() {
             return MappingCheckedFuture.create(writeDelegate().submit(), SUBMIT_EX_MAPPER);
+        }
+
+        @Override
+        public FluentFuture<? extends CommitInfo> commit() {
+            return writeDelegate().commit();
         }
     }
 

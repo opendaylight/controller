@@ -8,8 +8,11 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -20,6 +23,8 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -68,7 +73,7 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
 
     /**
      * Future task of transaction commit. It starts off as null, but is
-     * set appropriately on {@link #submit()} and {@link #cancel()} via
+     * set appropriately on {@link #commit()} and {@link #cancel()} via
      * {@link AtomicReferenceFieldUpdater#lazySet(Object, Object)}.
      *
      * <p>
@@ -126,24 +131,34 @@ class DOMForwardedWriteTransaction<T extends DOMStoreWriteTransaction> extends
     }
 
     @Override
-    @SuppressWarnings("checkstyle:illegalcatch")
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
+        return MappingCheckedFuture.create(doCommit(() -> null),
+                TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        return FluentFuture.from(doCommit(CommitInfo::empty));
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private <V> ListenableFuture<V> doCommit(Supplier<V> futureValueSupplier) {
         final AbstractDOMForwardedTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
 
         final Collection<T> txns = getSubtransactions();
         final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
 
-        CheckedFuture<Void, TransactionCommitFailedException> ret;
+        ListenableFuture<V> ret;
         try {
             for (DOMStoreWriteTransaction txn : txns) {
                 cohorts.add(txn.ready());
             }
 
-            ret = impl.submit(this, cohorts);
+            ret = impl.commit(this, cohorts, futureValueSupplier);
         } catch (RuntimeException e) {
-            ret = Futures.immediateFailedCheckedFuture(
-                    TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e));
+            ret = FluentFuture.from(Futures.immediateFailedFuture(
+                    TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e)));
         }
         FUTURE_UPDATER.lazySet(this, ret);
         return ret;

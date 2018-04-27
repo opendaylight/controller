@@ -24,11 +24,13 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -57,6 +59,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistr
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -450,6 +453,22 @@ public class LegacyDOMDataBrokerAdapterTest {
         assertEquals("ListenerRegistration<DOMDataChangeListener>", mockReg, reg);
 
         verify(mockConfigStore).registerChangeListener(TestModel.TEST_PATH, listener, DataChangeScope.ONE);
+    }
+
+    @Test
+    public void testCommit() throws Exception {
+        DOMDataWriteTransaction tx = adapter.newWriteOnlyTransaction();
+
+        tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+        verify(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
+
+        @NonNull FluentFuture<? extends @NonNull CommitInfo> commitFuture = tx.commit();
+        commitFuture.get(5, TimeUnit.SECONDS);
+
+        InOrder inOrder = inOrder(mockCommitCohort);
+        inOrder.verify(mockCommitCohort).canCommit();
+        inOrder.verify(mockCommitCohort).preCommit();
+        inOrder.verify(mockCommitCohort).commit();
     }
 
     private interface TestDOMStore extends DistributedDataStoreInterface, DOMStoreTreeChangePublisher,

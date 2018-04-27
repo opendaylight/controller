@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -98,6 +100,12 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         logOps();
         return delegate.submit();
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        logOps();
+        return delegate.commit();
     }
 
     @Override
