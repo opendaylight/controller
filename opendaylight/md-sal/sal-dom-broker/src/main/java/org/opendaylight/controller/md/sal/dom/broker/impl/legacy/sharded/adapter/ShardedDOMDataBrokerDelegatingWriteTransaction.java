@@ -11,11 +11,13 @@ package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapte
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -55,6 +57,11 @@ class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTran
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         return Futures.makeChecked(delegateTx.submit(), TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        return delegateTx.commit();
     }
 
     @Override

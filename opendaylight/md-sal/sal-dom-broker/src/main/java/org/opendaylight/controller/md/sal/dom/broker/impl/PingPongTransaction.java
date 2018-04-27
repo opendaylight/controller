@@ -10,27 +10,25 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 
 /**
  * Transaction context. Tracks the relationship with the backend transaction.
  * We never leak this class to the user and have it implement the {@link FutureCallback}
  * interface so we have a simple way of propagating the result.
  */
-final class PingPongTransaction implements FutureCallback<Void> {
-    private final CheckedFuture<Void, TransactionCommitFailedException> submitFuture;
+final class PingPongTransaction implements FutureCallback<CommitInfo> {
     private final DOMDataReadWriteTransaction delegate;
-    private final SettableFuture<Void> future;
+    private final SettableFuture<CommitInfo> future;
     private DOMDataReadWriteTransaction frontendTransaction;
 
     PingPongTransaction(final DOMDataReadWriteTransaction delegate) {
         this.delegate = Preconditions.checkNotNull(delegate);
         future = SettableFuture.create();
-        submitFuture = new PingPongFuture(future);
     }
 
     DOMDataReadWriteTransaction getTransaction() {
@@ -41,12 +39,12 @@ final class PingPongTransaction implements FutureCallback<Void> {
         return frontendTransaction;
     }
 
-    CheckedFuture<Void, TransactionCommitFailedException> getSubmitFuture() {
-        return submitFuture;
+    ListenableFuture<CommitInfo> getSubmitFuture() {
+        return future;
     }
 
     @Override
-    public void onSuccess(final Void result) {
+    public void onSuccess(final CommitInfo result) {
         future.set(result);
     }
 

@@ -58,7 +58,7 @@ public class DOMForwardedWriteTransactionTest {
     public void submitRuntimeExceptionAndCancel() {
         RuntimeException thrown = new RuntimeException();
         doReturn(null).when(domStoreWriteTransaction).ready();
-        doThrow(thrown).when(abstractDOMForwardedTransactionFactory).submit(any(), any());
+        doThrow(thrown).when(abstractDOMForwardedTransactionFactory).commit(any(), any());
         DOMForwardedWriteTransaction<DOMStoreWriteTransaction> domForwardedWriteTransaction =
                 new DOMForwardedWriteTransaction<>(
                     new Object(),

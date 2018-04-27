@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -48,6 +49,7 @@ import org.mockito.InOrder;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionChainListener;
@@ -61,6 +63,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -135,13 +138,14 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).preCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).commit();
 
-        ListenableFuture<Void> future = coordinator.submit(transaction, Arrays.asList(mockCohort1, mockCohort2));
+        ListenableFuture<? extends CommitInfo> future =
+                coordinator.commit(transaction, Arrays.asList(mockCohort1, mockCohort2));
 
         final CountDownLatch doneLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
-        Futures.addCallback(future, new FutureCallback<Void>() {
+        Futures.addCallback(future, new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 doneLatch.countDown();
             }
 
@@ -184,21 +188,22 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFuture(false)).when(mockCohort3).canCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort3).abort();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+        ListenableFuture<? extends CommitInfo> future = coordinator.commit(
                 transaction, Arrays.asList(mockCohort1, mockCohort2, mockCohort3));
 
         assertFailure(future, null, mockCohort1, mockCohort2, mockCohort3);
     }
 
-    private static void assertFailure(final CheckedFuture<Void, TransactionCommitFailedException> future,
+    private static void assertFailure(final ListenableFuture<?> future,
             final Exception expCause, final DOMStoreThreePhaseCommitCohort... mockCohorts)
                     throws Exception {
         try {
-            future.checkedGet(5, TimeUnit.SECONDS);
+            future.get(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
-        } catch (TransactionCommitFailedException e) {
+        } catch (ExecutionException e) {
+            TransactionCommitFailedException tcf = TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER.apply(e);
             if (expCause != null) {
-                assertSame("Expected cause", expCause.getClass(), e.getCause().getClass());
+                assertSame("Expected cause", expCause.getClass(), tcf.getCause().getClass());
             }
 
             InOrder inOrder = inOrder((Object[])mockCohorts);
@@ -219,7 +224,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).canCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).abort();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+        FluentFuture<? extends CommitInfo> future = coordinator.commit(
                 transaction, Arrays.asList(mockCohort1, mockCohort2));
 
         assertFailure(future, cause, mockCohort1, mockCohort2);
@@ -234,7 +239,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFailedFuture(rootCause)).when(mockCohort2).canCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).abort();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+        FluentFuture<? extends CommitInfo> future = coordinator.commit(
             transaction, Arrays.asList(mockCohort1, mockCohort2));
 
         assertFailure(future, cause, mockCohort1, mockCohort2);
@@ -257,7 +262,7 @@ public class ConcurrentDOMDataBrokerTest {
                 .when(mockCohort3).preCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort3).abort();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+        FluentFuture<? extends CommitInfo> future = coordinator.commit(
                 transaction, Arrays.asList(mockCohort1, mockCohort2, mockCohort3));
 
         assertFailure(future, cause, mockCohort1, mockCohort2, mockCohort3);
@@ -283,7 +288,7 @@ public class ConcurrentDOMDataBrokerTest {
                 .when(mockCohort3).commit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort3).abort();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+        FluentFuture<? extends CommitInfo> future = coordinator.commit(
                 transaction, Arrays.asList(mockCohort1, mockCohort2, mockCohort3));
 
         assertFailure(future, cause, mockCohort1, mockCohort2, mockCohort3);
@@ -299,7 +304,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).canCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).abort();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+        FluentFuture<? extends CommitInfo> future = coordinator.commit(
                 transaction, Arrays.asList(mockCohort1, mockCohort2));
 
         assertFailure(future, cause, mockCohort1, mockCohort2);
@@ -443,11 +448,11 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor) {
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataTreeWriteTransaction writeTx,
+            public FluentFuture<? extends CommitInfo> commit(DOMDataTreeWriteTransaction writeTx,
                     Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);
                 latch.countDown();
-                return super.submit(writeTx, cohorts);
+                return super.commit(writeTx, cohorts);
             }
         }) {
             DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
@@ -490,11 +495,11 @@ public class ConcurrentDOMDataBrokerTest {
                 configDomStore), futureExecutor) {
             @Override
             @SuppressWarnings("checkstyle:hiddenField")
-            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataTreeWriteTransaction writeTx,
+            public FluentFuture<? extends CommitInfo> commit(DOMDataTreeWriteTransaction writeTx,
                     Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);
                 latch.countDown();
-                return super.submit(writeTx, cohorts);
+                return super.commit(writeTx, cohorts);
             }
         }) {
             DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
