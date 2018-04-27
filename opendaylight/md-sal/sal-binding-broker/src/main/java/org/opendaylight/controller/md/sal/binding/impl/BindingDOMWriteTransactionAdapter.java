@@ -8,6 +8,8 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -16,6 +18,9 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -68,7 +73,13 @@ class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> exten
 
     @Override
     public CheckedFuture<Void,TransactionCommitFailedException> submit() {
-        return doSubmit();
+        return MappingCheckedFuture.create(commit().transform(ignored -> null,
+                MoreExecutors.directExecutor()), TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
+    }
+
+    @Override
+    public FluentFuture<? extends CommitInfo> commit() {
+        return doCommit();
     }
 
     @Override

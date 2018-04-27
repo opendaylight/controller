@@ -8,9 +8,8 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -19,12 +18,12 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +63,8 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
         return new BindingDOMReadWriteTransactionAdapter(delegateTx, codec) {
 
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-                return listenForFailure(this,super.submit());
+            public FluentFuture<? extends CommitInfo> commit() {
+                return listenForFailure(this, super.commit());
             }
 
         };
@@ -77,23 +76,23 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
         return new BindingDOMWriteTransactionAdapter<DOMDataWriteTransaction>(delegateTx, codec) {
 
             @Override
-            public CheckedFuture<Void,TransactionCommitFailedException> submit() {
-                return listenForFailure(this,super.submit());
+            public FluentFuture<? extends CommitInfo> commit() {
+                return listenForFailure(this, super.commit());
             }
 
         };
     }
 
-    private CheckedFuture<Void, TransactionCommitFailedException> listenForFailure(
-            final WriteTransaction tx, final CheckedFuture<Void, TransactionCommitFailedException> future) {
-        Futures.addCallback(future, new FutureCallback<Void>() {
+    private FluentFuture<? extends CommitInfo> listenForFailure(
+            final WriteTransaction tx, final FluentFuture<? extends CommitInfo> future) {
+        future.addCallback(new FutureCallback<CommitInfo>() {
             @Override
             public void onFailure(final Throwable ex) {
                 failTransactionChain(tx,ex);
             }
 
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 // Intentionally NOOP
             }
         }, MoreExecutors.directExecutor());

@@ -8,7 +8,12 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import javax.annotation.CheckReturnValue;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
@@ -330,6 +335,43 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *
      * @throws IllegalStateException
      *             if the transaction is not new
+     * @deprecated Use {@link #commit()} instead.
      */
+    @Deprecated
     CheckedFuture<Void,TransactionCommitFailedException> submit();
+
+    /**
+     * Submits this transaction to be asynchronously applied to update the logical data tree. The returned
+     * {@link FluentFuture} conveys the result of applying the data changes.
+     *
+     * <p>
+     * This call logically seals the transaction, which prevents the client from further changing the data tree using
+     * this transaction. Any subsequent calls to <code>put(LogicalDatastoreType, Path, Object)</code>,
+     * <code>merge(LogicalDatastoreType, Path, Object)</code>, <code>delete(LogicalDatastoreType, Path)</code> will fail
+     * with {@link IllegalStateException}. The transaction is marked as submitted and enqueued into the data store
+     * back-end for processing.
+     *
+     * <p>
+     * Whether or not the commit is successful is determined by versioning of the data tree and validation of registered
+     * commit participants if the transaction changes the data tree.
+     *
+     * <p>
+     * The effects of a successful commit of data depends on listeners and commit participants that are registered with
+     * the data broker.
+     *
+     * <p>
+     * A successful commit produces implementation-specific {@link CommitInfo} structure, which is used to communicate
+     * post-condition information to the caller. Such information can contain commit-id, timing information or any
+     * other information the implementation wishes to share.
+     *
+     * @return a FluentFuture containing the result of the commit information. The Future blocks until the commit
+     *         operation is complete. A successful commit returns nothing. On failure, the Future will fail with a
+     *         {@link TransactionCommitFailedException} or an exception derived from TransactionCommitFailedException.
+     * @throws IllegalStateException if the transaction is already committed or was canceled.
+     */
+    @CheckReturnValue
+    default @NonNull FluentFuture<? extends @NonNull CommitInfo> commit() {
+        return FluentFuture.from(submit()).transformAsync(ignored -> CommitInfo.emptyFluentFuture(),
+            MoreExecutors.directExecutor());
+    }
 }

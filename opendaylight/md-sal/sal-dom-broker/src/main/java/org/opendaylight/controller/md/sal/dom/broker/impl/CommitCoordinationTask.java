@@ -9,6 +9,7 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Implementation of blocking three-phase commit-coordination tasks without
  * support of cancellation.
  */
-final class CommitCoordinationTask implements Callable<Void> {
+final class CommitCoordinationTask<T> implements Callable<T> {
     private enum Phase {
         canCommit,
         preCommit,
@@ -37,17 +38,20 @@ final class CommitCoordinationTask implements Callable<Void> {
     private final Collection<DOMStoreThreePhaseCommitCohort> cohorts;
     private final DurationStatisticsTracker commitStatTracker;
     private final DOMDataWriteTransaction tx;
+    private final Supplier<T> futureValueSupplier;
 
     CommitCoordinationTask(final DOMDataWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
-            final DurationStatisticsTracker commitStatTracker) {
+            final DurationStatisticsTracker commitStatTracker,
+            final Supplier<T> futureValueSupplier) {
         this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
         this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
         this.commitStatTracker = commitStatTracker;
+        this.futureValueSupplier = futureValueSupplier;
     }
 
     @Override
-    public Void call() throws TransactionCommitFailedException {
+    public T call() throws TransactionCommitFailedException {
         final long startTime = commitStatTracker != null ? System.nanoTime() : 0;
 
         Phase phase = Phase.canCommit;
@@ -65,7 +69,7 @@ final class CommitCoordinationTask implements Callable<Void> {
             commitBlocking();
 
             LOG.debug("Transaction {}: doCommit completed", tx.getIdentifier());
-            return null;
+            return futureValueSupplier.get();
         } catch (final TransactionCommitFailedException e) {
             LOG.warn("Tx: {} Error during phase {}, starting Abort", tx.getIdentifier(), phase, e);
             abortBlocking(e);

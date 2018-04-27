@@ -9,13 +9,13 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
@@ -48,8 +48,8 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
      * @param cohorts the associated cohorts
      * @return a resulting Future
      */
-    protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(
-            DOMDataTreeWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts);
+    protected abstract FluentFuture<? extends CommitInfo> commit(DOMDataTreeWriteTransaction transaction,
+            Collection<DOMStoreThreePhaseCommitCohort> cohorts);
 
     /**
      * Creates a new read-only transaction.
