@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
+import org.opendaylight.controller.sal.core.compat.DataChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
