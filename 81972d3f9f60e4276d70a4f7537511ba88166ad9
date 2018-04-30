@@ -16,6 +16,24 @@
       "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d331ad_b89e2a37",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-04-30T11:10:00Z",
+      "side": 1,
+      "message": "I am not sure I follow. path \u003d\u003d null will hit trigger a NPE in ShardStrategyFactory.getStrategy() without any other effects -- so the only difference is the message produced. This method takes a single argument, I am not sure how useful it is to re-iterate that.",
+      "parentUuid": "d09449ea_25d16883",
+      "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
