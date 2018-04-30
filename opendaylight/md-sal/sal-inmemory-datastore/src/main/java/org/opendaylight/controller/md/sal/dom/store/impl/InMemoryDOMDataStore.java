@@ -16,8 +16,10 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.controller.sal.core.compat.DOMImmutableDataChangeEvent;
 import org.opendaylight.controller.sal.core.compat.DataChangeListenerRegistration;
 import org.opendaylight.controller.sal.core.compat.ListenerTree;
+import org.opendaylight.controller.sal.core.compat.ResolveDataChangeEventsTask;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
