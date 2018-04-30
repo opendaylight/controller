@@ -34,6 +34,24 @@
       "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d61e1388_24fbb759",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-04-30T11:35:59Z",
+      "side": 1,
+      "message": "The current behaviour is that equals returns false if path is null, then we get an explicit precondition check in shardNameFromIdentifier.\n\nThe new behaviour is that is path is null, we get a NPE in line 110 (path.isEmpty()).\n\nIt seems to me that since NPE-liable paths are currently protected by explicit precondition checks, we should continue that trend and therefore introduce an explicit precondition check before the potential (new) NPE in this method.\n\nI hope that’s clearer!",
+      "parentUuid": "b0d331ad_b89e2a37",
+      "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
