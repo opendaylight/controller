@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import java.util.Objects;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
@@ -45,12 +44,6 @@ class TracingReadWriteTransaction
     @Override
     public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store, YangInstanceIdentifier yiid) {
         return delegate.exists(store, yiid);
-    }
-
-    @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-        closeTracker.removeFromTrackedRegistry();
-        return super.submit();
     }
 
     @Override
