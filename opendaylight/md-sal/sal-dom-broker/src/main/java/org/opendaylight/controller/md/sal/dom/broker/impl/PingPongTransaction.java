@@ -39,7 +39,7 @@ final class PingPongTransaction implements FutureCallback<CommitInfo> {
         return frontendTransaction;
     }
 
-    ListenableFuture<CommitInfo> getSubmitFuture() {
+    ListenableFuture<CommitInfo> getCommitFuture() {
         return future;
     }
 

@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
@@ -133,7 +134,7 @@ public class DOMBrokerTest {
     }
 
     @Test(timeout = 10000)
-    public void testTransactionCommit() throws InterruptedException, ExecutionException {
+    public void testTransactionCommit() throws InterruptedException, ExecutionException, TimeoutException {
 
         DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
         assertNotNull(writeTx);
@@ -152,7 +153,35 @@ public class DOMBrokerTest {
                 .read(OPERATIONAL, TestModel.TEST_PATH);
         assertTrue(writeTxContainer.get().isPresent());
 
-        writeTx.submit().get();
+        writeTx.commit().get(5, TimeUnit.SECONDS);
+
+        Optional<NormalizedNode<?, ?>> afterCommitRead = domBroker.newReadOnlyTransaction()
+                .read(OPERATIONAL, TestModel.TEST_PATH).get();
+        assertTrue(afterCommitRead.isPresent());
+    }
+
+    @Test(timeout = 10000)
+    @Deprecated
+    public void testTransactionSubmit() throws InterruptedException, ExecutionException, TimeoutException {
+
+        DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
+        assertNotNull(writeTx);
+        /**
+         *
+         * Writes /test in writeTx
+         *
+         */
+        writeTx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+        /**
+         * Reads /test from writeTx Read should return container.
+         *
+         */
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> writeTxContainer = writeTx
+                .read(OPERATIONAL, TestModel.TEST_PATH);
+        assertTrue(writeTxContainer.get().isPresent());
+
+        writeTx.submit().get(5, TimeUnit.SECONDS);
 
         Optional<NormalizedNode<?, ?>> afterCommitRead = domBroker.newReadOnlyTransaction()
                 .read(OPERATIONAL, TestModel.TEST_PATH).get();
@@ -160,7 +189,8 @@ public class DOMBrokerTest {
     }
 
     @Test(expected = TransactionCommitFailedException.class)
-    public void testRejectedCommit() throws Exception {
+    @SuppressWarnings({"checkstyle:IllegalThrows", "checkstyle:AvoidHidingCauseException"})
+    public void testRejectedCommit() throws Throwable {
 
         commitExecutor.delegate = Mockito.mock(ExecutorService.class);
         Mockito.doThrow(new RejectedExecutionException("mock")).when(commitExecutor.delegate)
@@ -174,7 +204,11 @@ public class DOMBrokerTest {
         DOMDataReadWriteTransaction writeTx = domBroker.newReadWriteTransaction();
         writeTx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+        try {
+            writeTx.commit().get(5, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
     }
 
     /**
@@ -235,7 +269,7 @@ public class DOMBrokerTest {
                         caughtCommitEx.set(throwable);
                         commitCompletedLatch.countDown();
                     }
-                });
+                }, MoreExecutors.directExecutor());
 
                 super.onDataChanged(change);
             }
@@ -279,7 +313,7 @@ public class DOMBrokerTest {
                 DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
                 writeTx.put(OPERATIONAL, TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME));
                 try {
-                    writeTx.submit().get();
+                    writeTx.commit().get();
                 } catch (ExecutionException e) {
                     caughtCommitEx.set(e.getCause());
                 } catch (Exception e) {
@@ -315,7 +349,7 @@ public class DOMBrokerTest {
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
         new Thread(() -> {
             try {
-                writeTx.submit();
+                writeTx.commit();
             } catch (Throwable e) {
                 caughtEx.set(e);
             }
