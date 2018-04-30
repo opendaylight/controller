@@ -14,7 +14,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import javax.annotation.CheckReturnValue;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 
 /**
  * Write transaction provides mutation capabilities for a data tree.
@@ -339,7 +341,10 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      */
     @Deprecated
     @CheckReturnValue
-    CheckedFuture<Void,TransactionCommitFailedException> submit();
+    default CheckedFuture<Void, TransactionCommitFailedException> submit() {
+        return MappingCheckedFuture.create(commit().transform(ignored -> null, MoreExecutors.directExecutor()),
+                SUBMIT_EXCEPTION_MAPPER);
+    }
 
     /**
      * Submits this transaction to be asynchronously applied to update the logical data tree. The returned
@@ -371,8 +376,17 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @throws IllegalStateException if the transaction is already committed or was canceled.
      */
     @CheckReturnValue
-    default @NonNull FluentFuture<? extends @NonNull CommitInfo> commit() {
-        return FluentFuture.from(submit()).transformAsync(ignored -> CommitInfo.emptyFluentFuture(),
-            MoreExecutors.directExecutor());
-    }
+    @NonNull FluentFuture<? extends @NonNull CommitInfo> commit();
+
+    /**
+     * This only exists for reuse by the deprecated {@link #submit} method and is not intended for general use.
+     */
+    @Deprecated
+    ExceptionMapper<TransactionCommitFailedException> SUBMIT_EXCEPTION_MAPPER =
+        new ExceptionMapper<TransactionCommitFailedException>("submit", TransactionCommitFailedException.class) {
+            @Override
+            protected TransactionCommitFailedException newWithCause(String message, Throwable cause) {
+                return new TransactionCommitFailedException(message, cause);
+            }
+        };
 }

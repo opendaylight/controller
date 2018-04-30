@@ -25,7 +25,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -33,7 +32,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.spi.ForwardingDOMDataReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -451,16 +449,10 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
             }
 
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-                return MappingCheckedFuture.create(commit().transform(ignored -> null,
-                        MoreExecutors.directExecutor()), TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
-            }
-
-            @Override
             public FluentFuture<? extends CommitInfo> commit() {
                 readyTransaction(tx);
                 isOpen = false;
-                return FluentFuture.from(tx.getSubmitFuture()).transformAsync(
+                return FluentFuture.from(tx.getCommitFuture()).transformAsync(
                     ignored -> CommitInfo.emptyFluentFuture(), MoreExecutors.directExecutor());
             }
 
