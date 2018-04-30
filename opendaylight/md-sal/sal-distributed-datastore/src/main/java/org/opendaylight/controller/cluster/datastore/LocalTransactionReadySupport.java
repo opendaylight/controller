@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 
 /**
  * Interface for a class that can "ready" a transaction.
