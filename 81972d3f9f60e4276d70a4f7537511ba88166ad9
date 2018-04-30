@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d09449ea_25d16883",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-04-30T09:13:18Z",
+      "side": 1,
+      "message": "In the current version, path \u003d\u003d null is caught by the explicit check in shardNameFromIdentifier(). Perhaps we need an explicit precondition here now...",
+      "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
