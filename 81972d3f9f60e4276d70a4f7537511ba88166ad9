@@ -52,6 +52,24 @@
       "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40685e90_d021e23e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-04-30T12:05:22Z",
+      "side": 1,
+      "message": "So externally-observable behaviour does not change, it\u0027s just a matter of preference of how the null check is done.\n\nI don\u0027t care that much, but prefer brevity with equivalent functionality :)",
+      "parentUuid": "d61e1388_24fbb759",
+      "revId": "81972d3f9f60e4276d70a4f7537511ba88166ad9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
