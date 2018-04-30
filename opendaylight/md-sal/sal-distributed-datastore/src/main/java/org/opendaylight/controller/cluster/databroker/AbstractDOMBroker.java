@@ -62,7 +62,7 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
             extBuilder.put(DOMDataTreeCommitCohortRegistry.class, new DOMDataTreeCommitCohortRegistry() {
                 @Override
                 public <T extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<T> registerCommitCohort(
-                        DOMDataTreeIdentifier path, T cohort) {
+                        final DOMDataTreeIdentifier path, final T cohort) {
                     DOMStore store = getDOMStore(path.getDatastoreType());
                     return ((DOMDataTreeCommitCohortRegistry) store).registerCommitCohort(path, cohort);
                 }
@@ -72,15 +72,9 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
         extensions = extBuilder.build();
     }
 
-    private static boolean isSupported(Map<LogicalDatastoreType, DOMStore> datastores,
-            Class<?> expDOMStoreInterface) {
-        for (DOMStore ds : datastores.values()) {
-            if (!expDOMStoreInterface.isAssignableFrom(ds.getClass())) {
-                return false;
-            }
-        }
-
-        return true;
+    private static boolean isSupported(final Map<LogicalDatastoreType, DOMStore> datastores,
+            final Class<?> expDOMStoreInterface) {
+        return datastores.values().stream().allMatch(expDOMStoreInterface::isInstance);
     }
 
     public void setCloseable(final AutoCloseable closeable) {
