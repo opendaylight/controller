@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -72,11 +71,6 @@ public class ForwardingReadWriteTransaction extends ForwardingObject implements 
     public <T extends DataObject> void merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data,
             boolean createMissingParents) {
         delegate.merge(store, path, data, createMissingParents);
-    }
-
-    @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-        return delegate.submit();
     }
 
     @Override

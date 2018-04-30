@@ -7,16 +7,18 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
@@ -32,19 +34,37 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     private static final TopLevelList NODE = new TopLevelListBuilder().setKey(TOP_LIST_KEY).build();
 
     @Test
-    public void test() throws InterruptedException, ExecutionException {
+    @Deprecated
+    public void testSubmit() throws InterruptedException, ExecutionException, TimeoutException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.OPERATIONAL, TOP_PATH, new TopBuilder().build());
         writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE);
-        writeTx.submit().get();
+        writeTx.submit().get(5, TimeUnit.SECONDS);
+
+        ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
+        Optional<TopLevelList> listNode = readTx.read(LogicalDatastoreType.OPERATIONAL, NODE_PATH).get();
+        assertTrue("List node must exists after commit", listNode.isPresent());
+        assertEquals("List node", NODE, listNode.get());
     }
 
     @Test
-    public void testPutCreateParentsSuccess()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testCommit() throws InterruptedException, ExecutionException, TimeoutException {
+        WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
+        writeTx.put(LogicalDatastoreType.OPERATIONAL, TOP_PATH, new TopBuilder().build());
+        writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE);
+        writeTx.commit().get(5, TimeUnit.SECONDS);
+
+        ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
+        Optional<TopLevelList> listNode = readTx.read(LogicalDatastoreType.OPERATIONAL, NODE_PATH).get();
+        assertTrue("List node must exists after commit", listNode.isPresent());
+        assertEquals("List node", NODE, listNode.get());
+    }
+
+    @Test
+    public void testPutCreateParentsSuccess() throws InterruptedException, ExecutionException, TimeoutException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get(5, TimeUnit.SECONDS);
 
         ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
         Optional<Top> topNode = readTx.read(LogicalDatastoreType.OPERATIONAL, TOP_PATH).get();
@@ -54,11 +74,10 @@ public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testMergeCreateParentsSuccess()
-            throws TransactionCommitFailedException, InterruptedException, ExecutionException {
+    public void testMergeCreateParentsSuccess() throws InterruptedException, ExecutionException, TimeoutException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.merge(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get(5, TimeUnit.SECONDS);
 
         ReadOnlyTransaction readTx = getDataBroker().newReadOnlyTransaction();
         Optional<Top> topNode = readTx.read(LogicalDatastoreType.OPERATIONAL, TOP_PATH).get();

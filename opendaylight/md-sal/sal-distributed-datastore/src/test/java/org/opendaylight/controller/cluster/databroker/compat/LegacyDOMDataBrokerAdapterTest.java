@@ -24,13 +24,13 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.jdt.annotation.NonNull;
+import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -59,7 +59,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistr
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -198,8 +197,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         tx.delete(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
         verify(mockWriteTx).delete(TestModel.TEST_PATH);
 
-        CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
-        submitFuture.get(5, TimeUnit.SECONDS);
+        tx.commit().get(5, TimeUnit.SECONDS);
 
         InOrder inOrder = inOrder(mockCommitCohort);
         inOrder.verify(mockCommitCohort).canCommit();
@@ -223,8 +221,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         try {
             tx = adapter.newWriteOnlyTransaction();
             tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-            submitFuture = tx.submit();
-            submitFuture.checkedGet(5, TimeUnit.SECONDS);
+            commit(tx);
             fail("Expected OptimisticLockFailedException");
         } catch (OptimisticLockFailedException e) {
             assertEquals("getMessage", errorMsg, e.getMessage());
@@ -241,8 +238,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         try {
             tx = adapter.newWriteOnlyTransaction();
             tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-            submitFuture = tx.submit();
-            submitFuture.checkedGet(5, TimeUnit.SECONDS);
+            commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
             assertEquals("getMessage", errorMsg, e.getMessage());
@@ -258,8 +254,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         try {
             tx = adapter.newWriteOnlyTransaction();
             tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-            submitFuture = tx.submit();
-            submitFuture.checkedGet(5, TimeUnit.SECONDS);
+            commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
             assertEquals("getCause type", DataStoreUnavailableException.class, e.getCause().getClass());
@@ -275,8 +270,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         try {
             tx = adapter.newWriteOnlyTransaction();
             tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-            submitFuture = tx.submit();
-            submitFuture.checkedGet(5, TimeUnit.SECONDS);
+            commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
             assertEquals("getCause", cause, e.getCause());
@@ -296,8 +290,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
         verify(mockReadWriteTx).write(TestModel.TEST_PATH, dataNode);
 
-        CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
-        submitFuture.get(5, TimeUnit.SECONDS);
+        tx.commit().get(5, TimeUnit.SECONDS);
 
         InOrder inOrder = inOrder(mockCommitCohort);
         inOrder.verify(mockCommitCohort).canCommit();
@@ -330,8 +323,7 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
         verify(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
-        CheckedFuture<Void, TransactionCommitFailedException> submitFuture = writeTx.submit();
-        submitFuture.get(5, TimeUnit.SECONDS);
+        writeTx.commit().get(5, TimeUnit.SECONDS);
 
         InOrder inOrder = inOrder(mockCommitCohort);
         inOrder.verify(mockCommitCohort).canCommit();
@@ -361,7 +353,7 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         try {
             writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-            writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+            commit(writeTx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
             // expected
@@ -456,19 +448,46 @@ public class LegacyDOMDataBrokerAdapterTest {
     }
 
     @Test
-    public void testCommit() throws Exception {
+    @Deprecated
+    public void testSubmit() throws Exception {
         DOMDataWriteTransaction tx = adapter.newWriteOnlyTransaction();
 
         tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
         verify(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
 
-        @NonNull FluentFuture<? extends @NonNull CommitInfo> commitFuture = tx.commit();
-        commitFuture.get(5, TimeUnit.SECONDS);
+        tx.submit().get(5, TimeUnit.SECONDS);
 
         InOrder inOrder = inOrder(mockCommitCohort);
         inOrder.verify(mockCommitCohort).canCommit();
         inOrder.verify(mockCommitCohort).preCommit();
         inOrder.verify(mockCommitCohort).commit();
+
+        String errorMsg = "mock OptimisticLockFailedException";
+        Throwable cause = new ConflictingModificationAppliedException(TestModel.TEST_PATH, "mock");
+        doReturn(Futures.immediateFailedFuture(new org.opendaylight.mdsal.common.api.TransactionCommitFailedException(
+                errorMsg, cause))).when(mockCommitCohort).canCommit();
+
+        try {
+            tx = adapter.newWriteOnlyTransaction();
+            tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            commit(tx);
+            fail("Expected TransactionCommitFailedException");
+        } catch (TransactionCommitFailedException e) {
+            assertEquals("getMessage", errorMsg, e.getMessage());
+            assertEquals("getCause", cause, e.getCause());
+        }
+    }
+
+    @SuppressWarnings("checkstyle:AvoidHidingCauseException")
+    private static void commit(DOMDataWriteTransaction tx)
+            throws TransactionCommitFailedException, InterruptedException, TimeoutException {
+        try {
+            tx.commit().get(5, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            assertTrue("Expected TransactionCommitFailedException. Actual: " + e.getCause(),
+                    e.getCause() instanceof TransactionCommitFailedException);
+            throw (TransactionCommitFailedException)e.getCause();
+        }
     }
 
     private interface TestDOMStore extends DistributedDataStoreInterface, DOMStoreTreeChangePublisher,

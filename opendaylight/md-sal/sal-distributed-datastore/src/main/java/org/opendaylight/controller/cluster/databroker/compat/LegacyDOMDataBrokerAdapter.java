@@ -16,6 +16,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
@@ -59,8 +62,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMDataBroker {
-    private static final ExceptionMapper<TransactionCommitFailedException> SUBMIT_EX_MAPPER =
-            new ExceptionMapper<TransactionCommitFailedException>("submit", TransactionCommitFailedException.class) {
+    private static final ExceptionMapper<TransactionCommitFailedException> COMMIT_EX_MAPPER =
+            new ExceptionMapper<TransactionCommitFailedException>("commit", TransactionCommitFailedException.class) {
         @Override
         protected TransactionCommitFailedException newWithCause(String message, Throwable cause) {
             if (cause instanceof org.opendaylight.mdsal.common.api.OptimisticLockFailedException) {
@@ -177,7 +180,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
                     final org.opendaylight.mdsal.common.api.AsyncTransaction<?, ?> transaction, final Throwable cause) {
                 listener.onTransactionChainFailed(legacyChain.get(),
                         (AsyncTransaction) () -> transaction.getIdentifier(),
-                            cause instanceof Exception ? SUBMIT_EX_MAPPER.apply((Exception)cause) : cause);
+                            cause instanceof Exception ? COMMIT_EX_MAPPER.apply((Exception)cause) : cause);
             }
 
             @Override
@@ -299,13 +302,25 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         }
 
         @Override
-        public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-            return MappingCheckedFuture.create(writeDelegate().submit(), SUBMIT_EX_MAPPER);
-        }
-
-        @Override
         public FluentFuture<? extends CommitInfo> commit() {
-            return writeDelegate().commit();
+            final SettableFuture<CommitInfo> resultFuture = SettableFuture.create();
+            writeDelegate().commit().addCallback(new FutureCallback<CommitInfo>() {
+                @Override
+                public void onSuccess(CommitInfo result) {
+                    resultFuture.set(result);
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    if (ex instanceof Exception) {
+                        resultFuture.setException(COMMIT_EX_MAPPER.apply((Exception)ex));
+                    } else {
+                        resultFuture.setException(ex);
+                    }
+                }
+            }, MoreExecutors.directExecutor());
+
+            return FluentFuture.from(resultFuture);
         }
     }
 
