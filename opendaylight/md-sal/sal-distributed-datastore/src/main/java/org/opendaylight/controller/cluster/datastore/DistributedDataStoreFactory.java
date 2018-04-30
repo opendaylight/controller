@@ -14,6 +14,8 @@ import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathSchemaContextFactory;
+import org.opendaylight.yangtools.yang.data.jaxen.JaxenSchemaContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,9 @@ public final class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
     private static final String DEFAULT_MODULE_SHARDS_PATH = "./configuration/initial/module-shards.conf";
     private static final String DEFAULT_MODULES_PATH = "./configuration/initial/modules.conf";
+
+    // FIXME: inject this from yangtools-2.0.5 service
+    private static final XPathSchemaContextFactory XPATH_CONTEXT_FACTORY = new JaxenSchemaContextFactory();
 
     private DistributedDataStoreFactory() {
     }
@@ -63,8 +68,8 @@ public final class DistributedDataStoreFactory {
                 restoreFromSnapshot);
             LOG.info("Data store {} is using tell-based protocol", datastoreName);
         } else {
-            dataStore = new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
-                restoreFromSnapshot);
+            dataStore = new XPathAwareDistributedDataStore(actorSystem, clusterWrapper, config, contextFactory,
+                restoreFromSnapshot, XPATH_CONTEXT_FACTORY);
             LOG.info("Data store {} is using ask-based protocol", datastoreName);
         }
         updater.setListener(dataStore);

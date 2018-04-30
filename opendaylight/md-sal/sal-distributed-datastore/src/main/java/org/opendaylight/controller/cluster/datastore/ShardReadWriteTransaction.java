@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.CompileAndEvaluateXPath;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 
@@ -30,6 +31,8 @@ public class ShardReadWriteTransaction extends ShardWriteTransaction {
             readData(ReadData.fromSerializable(message));
         } else if (DataExists.isSerializedType(message)) {
             dataExists((DataExists) message);
+        } else if (message instanceof CompileAndEvaluateXPath) {
+            compileAndEvaluate((CompileAndEvaluateXPath) message);
         } else {
             super.handleReceive(message);
         }

@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -127,5 +128,10 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         return dataTree.createReadyCohort(txId, mod);
+    }
+
+    @Override
+    SnapshotBackedTransactionXPathSupport getXPathSupport() {
+        return dataTree.getXPathSupport();
     }
 }

@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +81,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         return null;
     }
 
-    private void onFindPrimaryShardSuccess(PrimaryShardInfo primaryShardInfo, TransactionProxy parent,
-            String shardName, TransactionContextWrapper transactionContextWrapper) {
+    private void onFindPrimaryShardSuccess(final PrimaryShardInfo primaryShardInfo, final TransactionProxy parent,
+            final String shardName, final TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Found primary {} for shard {}", parent.getIdentifier(),
                 primaryShardInfo.getPrimaryShardActor(), shardName);
 
@@ -101,8 +102,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         }
     }
 
-    private void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
-            String shardName, TransactionContextWrapper transactionContextWrapper) {
+    private void onFindPrimaryShardFailure(final Throwable failure, final TransactionProxy parent,
+            final String shardName, final TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 
         try {
@@ -206,6 +207,13 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param transactionId the ID of the transaction.
      */
     protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId);
+
+    /**
+     * Return SnapshotBackedTransactionXPathSupport if available.
+     *
+     * @return SnapshotBackedTransactionXPathSupport or absent if not available.
+     */
+    abstract Optional<SnapshotBackedTransactionXPathSupport> getXPathSupport();
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {

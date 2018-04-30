@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
@@ -18,6 +18,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 
 /**
  * Implements a distributed DOMStore using Akka Patterns.ask().
@@ -26,11 +27,17 @@ public class DistributedDataStore extends AbstractDataStore {
 
     private final TransactionContextFactory txContextFactory;
 
+    DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster, final Configuration configuration,
+            final DatastoreContextFactory datastoreContextFactory, final DatastoreSnapshot restoreFromSnapshot,
+            final @Nullable SnapshotBackedTransactionXPathSupport xpathSupport) {
+        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+        this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier(), xpathSupport);
+    }
+
     public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
-        this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier());
+        this(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot, null);
     }
 
     @VisibleForTesting
@@ -38,7 +45,6 @@ public class DistributedDataStore extends AbstractDataStore {
         super(actorContext, identifier);
         this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier());
     }
-
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {

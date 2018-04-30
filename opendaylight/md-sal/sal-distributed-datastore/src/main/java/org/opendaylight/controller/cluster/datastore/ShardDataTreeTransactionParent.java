@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 abstract class ShardDataTreeTransactionParent {
@@ -22,4 +23,6 @@ abstract class ShardDataTreeTransactionParent {
 
     abstract ShardDataTreeCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
             Exception failure);
+
+    abstract SnapshotBackedTransactionXPathSupport getXPathSupport();
 }

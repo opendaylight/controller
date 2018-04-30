@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -17,6 +18,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -121,5 +123,10 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
         protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
             onTransactionCommited(transaction);
         }
+    }
+
+    @Override
+    public Optional<SnapshotBackedTransactionXPathSupport> getXPathSupport() {
+        return parent.getXPathSupport();
     }
 }

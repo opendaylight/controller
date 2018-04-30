@@ -61,6 +61,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -77,6 +78,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.data.jaxen.JaxenSchemaContextFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +106,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private static final Timeout COMMIT_STEP_TIMEOUT = new Timeout(Duration.create(5, TimeUnit.SECONDS));
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
+
+    // TODO: once we have yangtools-2.0.5, populate XPathSchemaContextFactory from OSGi Service Registry
+    private static final SnapshotBackedTransactionXPathSupport XPATH_SUPPORT =
+            SnapshotBackedTransactionXPathSupport.forXPathContextFactory(new JaxenSchemaContextFactory());
 
     /**
      * Process this many transactions in a single batched run. If we exceed this limit, we need to schedule later
@@ -194,6 +200,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     SchemaContext getSchemaContext() {
         return schemaContext;
+    }
+
+    @Override
+    SnapshotBackedTransactionXPathSupport getXPathSupport() {
+        return XPATH_SUPPORT;
     }
 
     void updateSchemaContext(final SchemaContext newSchemaContext) {

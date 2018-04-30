@@ -7,18 +7,34 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import javax.xml.xpath.XPathException;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.mdsal.dom.api.xpath.DOMXPathCallback;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
+import org.opendaylight.yangtools.concepts.CheckedValue;
+import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathResult;
 import scala.concurrent.Future;
 
 /**
@@ -30,13 +46,16 @@ import scala.concurrent.Future;
 abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreTransaction txDelegate;
     private final LocalTransactionReadySupport readySupport;
+    private final @Nullable SnapshotBackedTransactionXPathSupport xpathSupport;
+
     private Exception operationError;
 
     LocalTransactionContext(final DOMStoreTransaction txDelegate, final TransactionIdentifier identifier,
-            final LocalTransactionReadySupport readySupport) {
+            final LocalTransactionFactory txFactory) {
         super(identifier);
         this.txDelegate = Preconditions.checkNotNull(txDelegate);
-        this.readySupport = readySupport;
+        this.readySupport = txFactory;
+        this.xpathSupport = txFactory.getXPathSupport().orElse(null);
     }
 
     protected abstract DOMStoreWriteTransaction getWriteDelegate();
@@ -92,5 +111,17 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     @Override
     public void closeTransaction() {
         txDelegate.close();
+    }
+
+    @Override
+    public void executeEvaluate(@NonNull final YangInstanceIdentifier path, @NonNull final String xpath,
+            @NonNull final BiMap<String, QNameModule> prefixMapping, @NonNull final DOMXPathCallback callback,
+            @NonNull final Executor callbackExecutor, @Nullable final Boolean havePermit) {
+        final DOMStoreReadTransaction delegate = getReadDelegate();
+        verify(delegate instanceof SnapshotBackedTransaction);
+
+        final CheckedValue<@NonNull Optional<? extends @NonNull XPathResult<?>>, @NonNull XPathException> result =
+                verifyNotNull(xpathSupport).evaluate((SnapshotBackedTransaction) delegate, path, xpath, prefixMapping);
+        callbackExecutor.execute(() -> callback.accept(result));
     }
 }

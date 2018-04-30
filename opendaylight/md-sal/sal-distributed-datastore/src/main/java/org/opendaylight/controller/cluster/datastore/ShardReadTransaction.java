@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
+import org.opendaylight.controller.cluster.datastore.messages.CompileAndEvaluateXPath;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 
@@ -34,6 +35,8 @@ public class ShardReadTransaction extends ShardTransaction {
             readData(transaction, ReadData.fromSerializable(message));
         } else if (DataExists.isSerializedType(message)) {
             dataExists(transaction, DataExists.fromSerializable(message));
+        } else if (message instanceof CompileAndEvaluateXPath) {
+            compileAndEvaluate(transaction, (CompileAndEvaluateXPath) message);
         } else {
             super.handleReceive(message);
         }
