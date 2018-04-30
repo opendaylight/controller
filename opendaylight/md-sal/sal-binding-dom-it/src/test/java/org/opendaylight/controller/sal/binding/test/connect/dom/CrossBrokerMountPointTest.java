@@ -28,7 +28,6 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
@@ -195,11 +194,6 @@ public class CrossBrokerMountPointTest {
                         @Override
                         public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
                                 final NormalizedNode<?, ?> data) {
-                            throw new UnsupportedOperationException();
-                        }
-
-                        @Override
-                        public CheckedFuture<Void, TransactionCommitFailedException> submit() {
                             throw new UnsupportedOperationException();
                         }
 

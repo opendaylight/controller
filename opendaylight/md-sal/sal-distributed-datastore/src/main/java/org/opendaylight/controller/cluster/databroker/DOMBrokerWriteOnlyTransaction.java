@@ -31,5 +31,4 @@ public class DOMBrokerWriteOnlyTransaction extends AbstractDOMBrokerWriteTransac
     protected DOMStoreWriteTransaction createTransaction(LogicalDatastoreType key) {
         return getTxFactory(key).newWriteOnlyTransaction();
     }
-
 }

@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -106,11 +105,6 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
 
         modificationHistoryMap.get(store).add(new Modification(Modification.Operation.DELETE, path, null));
         writeTxDelegate.delete(store, path);
-    }
-
-    @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-        return writeTxDelegate.submit();
     }
 
     @Override
