@@ -12,12 +12,12 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.sal.core.spi.data.AbstractSnapshotBackedTransactionChain;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.AbstractSnapshotBackedTransactionChain;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -67,24 +67,24 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     }
 
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadTransaction newReadOnlyTransaction(final TransactionIdentifier identifier) {
         return super.newReadOnlyTransaction(identifier);
     }
 
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadWriteTransaction newReadWriteTransaction(final TransactionIdentifier identifier) {
         return super.newReadWriteTransaction(identifier);
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(final TransactionIdentifier identifier) {
         return super.newWriteOnlyTransaction(identifier);
     }
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
-    public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
-            @Nullable Exception operationError) {
+    public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull final DOMStoreWriteTransaction tx,
+            @Nullable final Exception operationError) {
         Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx,
@@ -102,23 +102,23 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
     private class LocalChainThreePhaseCommitCohort extends LocalThreePhaseCommitCohort {
 
-        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-                DataTreeModification modification, Exception operationError) {
+        protected LocalChainThreePhaseCommitCohort(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+                final DataTreeModification modification, final Exception operationError) {
             super(parent.getActorContext(), leader, transaction, modification, operationError);
         }
 
-        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
-                Exception operationError) {
+        protected LocalChainThreePhaseCommitCohort(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+                final Exception operationError) {
             super(parent.getActorContext(), leader, transaction, operationError);
         }
 
         @Override
-        protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+        protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
             onTransactionFailed(transaction, ABORTED);
         }
 
         @Override
-        protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+        protected void transactionCommitted(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
             onTransactionCommited(transaction);
         }
     }

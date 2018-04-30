@@ -12,8 +12,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -23,18 +23,19 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     public ReadData() {
     }
 
-    public ReadData(final YangInstanceIdentifier path, short version) {
+    public ReadData(final YangInstanceIdentifier path, final short version) {
         super(path, version);
     }
 
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> apply(
-            DOMStoreReadTransaction readDelegate) {
+            final DOMStoreReadTransaction readDelegate) {
         return readDelegate.read(getPath());
     }
 
     @Override
-    public void processResponse(Object readResponse, SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
+    public void processResponse(final Object readResponse,
+            final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
         if (ReadDataReply.isSerializedType(readResponse)) {
             ReadDataReply reply = ReadDataReply.fromSerializable(readResponse);
             returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
@@ -44,7 +45,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     }
 
     @Override
-    protected AbstractRead<Optional<NormalizedNode<?, ?>>> newInstance(short withVersion) {
+    protected AbstractRead<Optional<NormalizedNode<?, ?>>> newInstance(final short withVersion) {
         return new ReadData(getPath(), withVersion);
     }
 
@@ -53,7 +54,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
         return (ReadData)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof ReadData;
     }
 }

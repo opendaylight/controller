@@ -21,9 +21,9 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +80,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         return null;
     }
 
-    private void onFindPrimaryShardSuccess(PrimaryShardInfo primaryShardInfo, TransactionProxy parent,
-            String shardName, TransactionContextWrapper transactionContextWrapper) {
+    private void onFindPrimaryShardSuccess(final PrimaryShardInfo primaryShardInfo, final TransactionProxy parent,
+            final String shardName, final TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Found primary {} for shard {}", parent.getIdentifier(),
                 primaryShardInfo.getPrimaryShardActor(), shardName);
 
@@ -101,8 +101,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         }
     }
 
-    private void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
-            String shardName, TransactionContextWrapper transactionContextWrapper) {
+    private void onFindPrimaryShardFailure(final Throwable failure, final TransactionProxy parent,
+            final String shardName, final TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 
         try {

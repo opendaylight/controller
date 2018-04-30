@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import java.io.IOException;
 import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -26,7 +26,7 @@ public class MergeModification extends WriteModification {
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public MergeModification(short version) {
+    public MergeModification(final short version) {
         super(version);
     }
 
@@ -49,7 +49,7 @@ public class MergeModification extends WriteModification {
         return MERGE;
     }
 
-    public static MergeModification fromStream(ObjectInput in, short version)
+    public static MergeModification fromStream(final ObjectInput in, final short version)
             throws ClassNotFoundException, IOException {
         MergeModification mod = new MergeModification(version);
         mod.readExternal(in);

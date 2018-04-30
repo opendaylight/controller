@@ -13,13 +13,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedTransactions;
-import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -46,17 +46,17 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     }
 
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadTransaction newReadOnlyTransaction(final TransactionIdentifier identifier) {
         return SnapshotBackedTransactions.newReadTransaction(identifier, false, dataTree.takeSnapshot());
     }
 
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadWriteTransaction newReadWriteTransaction(final TransactionIdentifier identifier) {
         return SnapshotBackedTransactions.newReadWriteTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(final TransactionIdentifier identifier) {
         return SnapshotBackedTransactions.newWriteTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
@@ -75,8 +75,8 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
-    public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
-            @Nullable Exception operationError) {
+    public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull final DOMStoreWriteTransaction tx,
+            @Nullable final Exception operationError) {
         Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalThreePhaseCommitCohort(actorContext, leader,

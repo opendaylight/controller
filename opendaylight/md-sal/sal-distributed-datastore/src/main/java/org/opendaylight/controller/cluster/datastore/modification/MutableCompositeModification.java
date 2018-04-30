@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
@@ -35,19 +35,19 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public MutableCompositeModification(short version) {
+    public MutableCompositeModification(final short version) {
         super(version);
     }
 
     @Override
-    public void apply(DOMStoreWriteTransaction transaction) {
+    public void apply(final DOMStoreWriteTransaction transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
     }
 
     @Override
-    public void apply(DataTreeModification transaction) {
+    public void apply(final DataTreeModification transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
@@ -63,12 +63,12 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
      *
      * @param modification the modification to add.
      */
-    public void addModification(Modification modification) {
+    public void addModification(final Modification modification) {
         Preconditions.checkNotNull(modification);
         modifications.add(modification);
     }
 
-    public void addModifications(Iterable<Modification> newMods) {
+    public void addModifications(final Iterable<Modification> newMods) {
         for (Modification mod : newMods) {
             addModification(mod);
         }
@@ -84,7 +84,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
 
         int size = in.readInt();
@@ -118,7 +118,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
 
         out.writeInt(modifications.size());
@@ -137,7 +137,7 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         }
     }
 
-    public static MutableCompositeModification fromSerializable(Object serializable) {
+    public static MutableCompositeModification fromSerializable(final Object serializable) {
         Preconditions.checkArgument(serializable instanceof MutableCompositeModification);
         return (MutableCompositeModification)serializable;
     }

@@ -14,7 +14,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils.Applier;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -31,7 +31,7 @@ public class WriteModification extends AbstractModification {
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public WriteModification(short version) {
+    public WriteModification(final short version) {
         super(version);
     }
 
@@ -60,16 +60,16 @@ public class WriteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         SerializationUtils.deserializePathAndNode(in, this, APPLIER);
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         SerializationUtils.serializePathAndNode(getPath(), data, out);
     }
 
-    public static WriteModification fromStream(ObjectInput in, short version)
+    public static WriteModification fromStream(final ObjectInput in, final short version)
             throws ClassNotFoundException, IOException {
         WriteModification mod = new WriteModification(version);
         mod.readExternal(in);

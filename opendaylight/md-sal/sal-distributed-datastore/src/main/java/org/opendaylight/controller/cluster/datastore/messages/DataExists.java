@@ -11,8 +11,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class DataExists extends AbstractRead<Boolean> {
@@ -26,12 +26,12 @@ public class DataExists extends AbstractRead<Boolean> {
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> apply(DOMStoreReadTransaction readDelegate) {
+    public CheckedFuture<Boolean, ReadFailedException> apply(final DOMStoreReadTransaction readDelegate) {
         return readDelegate.exists(getPath());
     }
 
     @Override
-    public void processResponse(Object response, SettableFuture<Boolean> returnFuture) {
+    public void processResponse(final Object response, final SettableFuture<Boolean> returnFuture) {
         if (DataExistsReply.isSerializedType(response)) {
             returnFuture.set(Boolean.valueOf(DataExistsReply.fromSerializable(response).exists()));
         } else {
@@ -41,7 +41,7 @@ public class DataExists extends AbstractRead<Boolean> {
     }
 
     @Override
-    protected AbstractRead<Boolean> newInstance(short withVersion) {
+    protected AbstractRead<Boolean> newInstance(final short withVersion) {
         return new DataExists(getPath(), withVersion);
     }
 
@@ -50,7 +50,7 @@ public class DataExists extends AbstractRead<Boolean> {
         return (DataExists)serializable;
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof DataExists;
     }
 }

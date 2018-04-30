@@ -13,7 +13,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -27,21 +27,21 @@ public class DeleteModification extends AbstractModification {
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
-    public DeleteModification(short version) {
+    public DeleteModification(final short version) {
         super(version);
     }
 
-    public DeleteModification(YangInstanceIdentifier path) {
+    public DeleteModification(final YangInstanceIdentifier path) {
         super(path);
     }
 
     @Override
-    public void apply(DOMStoreWriteTransaction transaction) {
+    public void apply(final DOMStoreWriteTransaction transaction) {
         transaction.delete(getPath());
     }
 
     @Override
-    public void apply(DataTreeModification transaction) {
+    public void apply(final DataTreeModification transaction) {
         transaction.delete(getPath());
     }
 
@@ -51,16 +51,16 @@ public class DeleteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         setPath(SerializationUtils.deserializePath(in));
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         SerializationUtils.serializePath(getPath(), out);
     }
 
-    public static DeleteModification fromStream(ObjectInput in, short version)
+    public static DeleteModification fromStream(final ObjectInput in, final short version)
             throws ClassNotFoundException, IOException {
         DeleteModification mod = new DeleteModification(version);
         mod.readExternal(in);
