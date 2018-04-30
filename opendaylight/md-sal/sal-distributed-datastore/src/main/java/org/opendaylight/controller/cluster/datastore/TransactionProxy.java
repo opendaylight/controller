@@ -107,7 +107,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
         LOG.trace("Tx {} read {}", getIdentifier(), path);
 
-        if (YangInstanceIdentifier.EMPTY.equals(path)) {
+        if (path.isEmpty()) {
             return readAllData();
         } else {
             return singleShardRead(shardNameFromIdentifier(path), path);
