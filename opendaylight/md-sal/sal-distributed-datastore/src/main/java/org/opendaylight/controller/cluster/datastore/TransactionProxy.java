@@ -104,14 +104,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
         Preconditions.checkState(type != TransactionType.WRITE_ONLY,
                 "Reads from write-only transactions are not allowed");
+        Preconditions.checkNotNull(path, "path should not be null");
 
         LOG.trace("Tx {} read {}", getIdentifier(), path);
-
-        if (YangInstanceIdentifier.EMPTY.equals(path)) {
-            return readAllData();
-        } else {
-            return singleShardRead(shardNameFromIdentifier(path), path);
-        }
+        return path.isEmpty() ? readAllData() :  singleShardRead(shardNameFromIdentifier(path), path);
     }
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> singleShardRead(
