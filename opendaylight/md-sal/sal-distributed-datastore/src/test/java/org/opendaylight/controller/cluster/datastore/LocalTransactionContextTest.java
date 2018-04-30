@@ -42,7 +42,7 @@ public class LocalTransactionContextTest {
     private DOMStoreReadWriteTransaction readWriteTransaction;
 
     @Mock
-    private LocalTransactionReadySupport mockReadySupport;
+    private LocalTransactionFactory mockReadySupport;
 
     private LocalTransactionContext localTransactionContext;
 

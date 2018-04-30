@@ -13,8 +13,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -26,6 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathExpressionException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -38,11 +45,18 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
 import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.xpath.DOMXPathCallback;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.yangtools.concepts.CheckedValue;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathExpression;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathResult;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathSchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -60,6 +74,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
+    private static final CheckedValue<java.util.Optional<? extends @NonNull XPathResult<?>>, @NonNull XPathException>
+        EMPTY_EVAL_RESULT = CheckedValue.ofValue(java.util.Optional.empty());
 
     private final Map<String, TransactionContextWrapper> txContextWrappers = new HashMap<>();
     private final AbstractTransactionContextFactory<?> txContextFactory;
@@ -326,5 +342,81 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     ActorContext getActorContext() {
         return txContextFactory.getActorContext();
+    }
+
+    void evaluate(@NonNull final YangInstanceIdentifier path, @NonNull final String xpath,
+            @NonNull final BiMap<String, QNameModule> prefixMapping, @NonNull final DOMXPathCallback callback,
+            @NonNull final Executor callbackExecutor) {
+        Preconditions.checkState(type != TransactionType.WRITE_ONLY,
+                "Evaluation from write-only transactions are not allowed");
+
+        LOG.trace("Tx {} read {}", getIdentifier(), path);
+
+        if (path.isEmpty()) {
+            evaluateAllData(xpath, prefixMapping, callback, callbackExecutor);
+        } else {
+            singleShardEvaluate(shardNameFromIdentifier(path), path, xpath, prefixMapping, callback, callbackExecutor);
+        }
+    }
+
+    private void singleShardEvaluate(final String shardName, @NonNull final YangInstanceIdentifier path,
+            @NonNull final String xpath, @NonNull final BiMap<String, QNameModule> prefixMapping,
+            @NonNull final DOMXPathCallback callback, @NonNull final Executor callbackExecutor) {
+
+        final TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
+        contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
+            @Override
+            public void invoke(final TransactionContext transactionContext, final Boolean havePermit) {
+                transactionContext.executeEvaluate(path, xpath, prefixMapping, callback, callbackExecutor, havePermit);
+            }
+        });
+    }
+
+    private void evaluateAllData(@NonNull final String xpath, @NonNull final BiMap<String, QNameModule> prefixMapping,
+            @NonNull final DOMXPathCallback callback, @NonNull final Executor callbackExecutor) {
+        final XPathSchemaContext support = txContextFactory.getXPathSupport()
+                .orElseThrow(() -> new IllegalStateException("XPath queries are not supported"))
+                .getXPathContext(getActorContext().getSchemaContext());
+
+        // Issue a read to all shards, which may take some time
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> readFuture = readAllData();
+
+        // Compile the expression while read is running
+        final XPathExpression expression;
+        try {
+            expression = support.compileExpression(SchemaPath.ROOT, Maps.asConverter(prefixMapping), xpath);
+        } catch (XPathExpressionException e) {
+            readFuture.cancel(false);
+            callbackExecutor.execute(() -> callback.accept(CheckedValue.ofException(e)));
+            return;
+        }
+
+        Futures.addCallback(readFuture, new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+            @Override
+            public void onSuccess(final Optional<NormalizedNode<?, ?>> optData) {
+                if (!optData.isPresent()) {
+                    callbackExecutor.execute(() -> callback.accept(EMPTY_EVAL_RESULT));
+                    return;
+                }
+
+                final NormalizedNode<?, ?> data = optData.get();
+                final java.util.Optional<? extends XPathResult<?>> result;
+                try {
+                    result = expression.evaluate(support.createDocument(data), YangInstanceIdentifier.EMPTY);
+                } catch (XPathExpressionException e) {
+                    callbackExecutor.execute(() -> callback.accept(CheckedValue.ofException(e)));
+                    return;
+                }
+
+                callbackExecutor.execute(() -> callback.accept(CheckedValue.ofValue(result)));
+            }
+
+            @Override
+            public void onFailure(final Throwable cause) {
+                final XPathException ex = cause instanceof XPathException ? (XPathException) cause
+                        : new XPathException(cause);
+                callbackExecutor.execute(() -> callback.accept(CheckedValue.ofException(ex)));
+            }
+        }, getActorContext().getClientDispatcher()::execute);
     }
 }

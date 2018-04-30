@@ -14,19 +14,34 @@ import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Optional;
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathExpressionException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CompileAndEvaluateXPath;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
+import org.opendaylight.controller.cluster.datastore.messages.EvaluateXPathReply;
 import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathResult;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathSchemaContext;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContextNode;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * The ShardTransaction Actor represents a remote transaction that delegates all actions to DOMDataReadWriteTransaction.
@@ -116,6 +131,51 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final YangInstanceIdentifier path = message.getPath();
         boolean exists = transaction.getSnapshot().readNode(path).isPresent();
         getSender().tell(new DataExistsReply(exists, message.getVersion()).toSerializable(), getSelf());
+    }
+
+    protected void compileAndEvaluate(final AbstractShardDataTreeTransaction<?> transaction,
+            final CompileAndEvaluateXPath message) {
+        if (checkClosed(transaction)) {
+            return;
+        }
+
+        final DataTreeSnapshot snap = transaction.getSnapshot();
+        final YangInstanceIdentifier path = message.getPath();
+        final Optional<NormalizedNode<?, ?>> optData = snap.readNode(path);
+        if (!optData.isPresent()) {
+            getSender().tell(new EvaluateXPathReply(null, message.getVersion()), getSelf());
+            return;
+        }
+
+        // Acquire DataSchemaNode for specified path
+        final SchemaContext schemaContext = snap.getSchemaContext();
+        final Optional<DataSchemaNode> optSchema = DataSchemaContextTree.from(schemaContext).findChild(path)
+                .map(DataSchemaContextNode::getDataSchemaNode);
+        if (!optSchema.isPresent()) {
+            getSender().tell(new akka.actor.Status.Failure(new XPathException("Failed to find schema for " + path)),
+                getSelf());
+            return;
+        }
+
+        final Optional<SnapshotBackedTransactionXPathSupport> optSupport = transaction.getParent().getXPathSupport();
+        if (!optSupport.isPresent()) {
+            getSender().tell(new akka.actor.Status.Failure(new XPathException("XPath evaluation is not supported")),
+                getSelf());
+            return;
+        }
+
+
+        final XPathSchemaContext support = optSupport.get().getXPathContext(snap.getSchemaContext());
+        final Optional<? extends XPathResult<?>> result;
+        try {
+            result = support.compileExpression(optSchema.get().getPath(), Maps.asConverter(message.getPrefixMapping()),
+                message.getXPath()).evaluate(support.createDocument(optData.get()), path);
+        } catch (XPathExpressionException e) {
+            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+            return;
+        }
+
+        getSender().tell(new EvaluateXPathReply(result.orElse(null), message.getVersion()), getSelf());
     }
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Some fields are not Serializable but we don't "

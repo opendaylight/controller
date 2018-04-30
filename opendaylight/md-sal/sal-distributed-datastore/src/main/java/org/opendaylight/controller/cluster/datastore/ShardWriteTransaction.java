@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
+import org.opendaylight.controller.cluster.datastore.messages.CompileAndEvaluateXPath;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -97,6 +98,10 @@ public class ShardWriteTransaction extends ShardTransaction {
 
     protected final void readData(ReadData message) {
         super.readData(transaction, message);
+    }
+
+    protected final void compileAndEvaluate(CompileAndEvaluateXPath message) {
+        super.compileAndEvaluate(transaction, message);
     }
 
     private boolean checkClosed() {

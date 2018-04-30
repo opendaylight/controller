@@ -8,9 +8,16 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import com.google.common.collect.BiMap;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.Executor;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.mdsal.dom.api.xpath.DOMXPathCallback;
+import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.Future;
 
 /*
@@ -25,6 +32,10 @@ interface TransactionContext {
     void executeModification(AbstractModification modification, Boolean havePermit);
 
     <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise, Boolean havePermit);
+
+    void executeEvaluate(@NonNull YangInstanceIdentifier path, @NonNull String xpath,
+            @NonNull BiMap<String, QNameModule> prefixMapping, @NonNull DOMXPathCallback callback,
+            @NonNull Executor callbackExecutor, @Nullable Boolean havePermit);
 
     Future<Object> directCommit(Boolean havePermit);
 

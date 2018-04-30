@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,6 +207,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param transactionId the ID of the transaction.
      */
     protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId);
+
+    protected abstract Optional<SnapshotBackedTransactionXPathSupport> getXPathSupport();
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {

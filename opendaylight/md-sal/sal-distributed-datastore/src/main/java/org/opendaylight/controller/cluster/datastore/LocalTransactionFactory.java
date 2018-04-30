@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 
 /**
  * A factory for creating local transactions used by {@link AbstractTransactionContextFactory} to instantiate
@@ -24,4 +26,6 @@ interface LocalTransactionFactory extends LocalTransactionReadySupport {
     DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier);
 
     DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier);
+
+    Optional<SnapshotBackedTransactionXPathSupport> getXPathSupport();
 }

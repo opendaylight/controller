@@ -12,15 +12,28 @@ import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import javax.xml.xpath.XPathException;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CompileAndEvaluateXPath;
+import org.opendaylight.controller.cluster.datastore.messages.EvaluateXPathReply;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.xpath.DOMXPathCallback;
+import org.opendaylight.yangtools.concepts.CheckedValue;
+import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.xpath.XPathResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -250,6 +263,54 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         final Future<Object> future = actorContext.executeOperationAsync(getActor(),
             readCmd.asVersion(getTransactionVersion()).toSerializable(), actorContext.getOperationTimeout());
         future.onComplete(onComplete, actorContext.getClientDispatcher());
+    }
+
+    @Override
+    public void executeEvaluate(final @NonNull YangInstanceIdentifier path, final @NonNull String xpath,
+            final @NonNull BiMap<String, QNameModule> prefixMapping, final @NonNull DOMXPathCallback callback,
+            final @NonNull Executor callbackExecutor, final @Nullable Boolean havePermit) {
+        LOG.debug("Tx {} executeEvaluate {} called path = {}", getIdentifier(), xpath, path);
+
+        final Throwable failure = failedModification;
+        if (failure != null) {
+            // If we know there was a previous modification failure, we must not send a evaluate request, as it risks
+            // returning incorrect data. We check this before acquiring an operation simply because we want the app
+            // to complete this transaction as soon as possible.
+            callbackExecutor.execute(() -> callback.accept(CheckedValue.ofException(new XPathException(failure))));
+            return;
+        }
+
+        final boolean permitToRelease = havePermit == null ? acquireOperation() : havePermit.booleanValue();
+        final Future<Object> future = actorContext.executeOperationAsync(getActor(),
+            new CompileAndEvaluateXPath(path, xpath, prefixMapping, getTransactionVersion()),
+            actorContext.getOperationTimeout());
+        future.onComplete(new OnComplete<Object>() {
+            @Override
+            public void onComplete(final Throwable failure, final Object success) throws Throwable {
+                // We have previously acquired an operation, now release it, no matter what happened
+                if (permitToRelease) {
+                    limiter.release();
+                }
+
+                final CheckedValue<Optional<? extends @NonNull XPathResult<?>>, @NonNull XPathException> result;
+                if (failure == null) {
+                    LOG.debug("Tx {} evaluate operation succeeded", getIdentifier());
+                    if (success instanceof EvaluateXPathReply) {
+                        result = CheckedValue.ofValue(((EvaluateXPathReply) success).getResult());
+                    } else {
+                        result = CheckedValue.ofException(new XPathException("Unexpected reply " + success));
+                    }
+                } else {
+                    LOG.debug("Tx {} evaluate operation failed", getIdentifier(), failure);
+                    final XPathException ex = failure instanceof XPathException ? (XPathException) failure
+                            : new XPathException(failure);
+                    result = CheckedValue.ofException(ex);
+                }
+
+                callbackExecutor.execute(() -> callback.accept(result));
+            }
+
+        }, actorContext.getClientDispatcher());
     }
 
     /**

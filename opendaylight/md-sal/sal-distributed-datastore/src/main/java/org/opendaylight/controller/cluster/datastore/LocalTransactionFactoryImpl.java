@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -17,6 +18,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactionXPathSupport;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedTransactions;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
@@ -34,11 +36,14 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     private final ActorSelection leader;
     private final DataTree dataTree;
     private final ActorContext actorContext;
+    private final SnapshotBackedTransactionXPathSupport xpathSupport;
 
-    LocalTransactionFactoryImpl(final ActorContext actorContext, final ActorSelection leader, final DataTree dataTree) {
+    LocalTransactionFactoryImpl(final ActorContext actorContext, final ActorSelection leader, final DataTree dataTree,
+        final @Nullable SnapshotBackedTransactionXPathSupport xpathSupport) {
         this.leader = Preconditions.checkNotNull(leader);
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.actorContext = actorContext;
+        this.xpathSupport = xpathSupport;
     }
 
     DataTree getDataTree() {
@@ -84,5 +89,10 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
         }
 
         return (LocalThreePhaseCommitCohort) tx.ready();
+    }
+
+    @Override
+    public Optional<SnapshotBackedTransactionXPathSupport> getXPathSupport() {
+        return Optional.ofNullable(xpathSupport);
     }
 }

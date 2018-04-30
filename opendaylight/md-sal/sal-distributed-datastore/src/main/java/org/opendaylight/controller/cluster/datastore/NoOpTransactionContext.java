@@ -8,13 +8,22 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import com.google.common.collect.BiMap;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.Executor;
+import javax.xml.xpath.XPathException;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.xpath.DOMXPathCallback;
+import org.opendaylight.yangtools.concepts.CheckedValue;
+import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -66,5 +75,13 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
         }
         proxyFuture.setException(new ReadFailedException("Error executeRead " + readCmd.getClass().getSimpleName()
                 + " for path " + readCmd.getPath(), t));
+    }
+
+    @Override
+    public void executeEvaluate(@NonNull final YangInstanceIdentifier path, @NonNull final String xpath,
+            @NonNull final BiMap<String, QNameModule> prefixMapping, @NonNull final DOMXPathCallback callback,
+            @NonNull final Executor callbackExecutor, @Nullable final Boolean havePermit) {
+        LOG.debug("Tx {} executeEvaluate {} called path = {}", getIdentifier(), xpath, path);
+        callbackExecutor.execute(() -> callback.accept(CheckedValue.ofException(new XPathException(failure))));
     }
 }
