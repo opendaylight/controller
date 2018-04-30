@@ -5,15 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.databroker;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionChainListener;
@@ -25,15 +27,39 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.xpath.DOMDataBrokerTransactionXPathSupport;
+import org.opendaylight.mdsal.dom.api.xpath.DOMXPathCallback;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
+import org.opendaylight.mdsal.dom.spi.store.XPathAwareDOMStore;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore> implements DOMDataBroker {
+    private final class TransactionXPathSupport implements DOMDataBrokerTransactionXPathSupport {
+        @Override
+        public void evaluate(final DOMDataTreeReadTransaction transaction, final DOMDataTreeIdentifier path,
+                final String xpath, final BiMap<String, QNameModule> prefixMapping,
+                final DOMXPathCallback callback, final Executor callbackExecutor) {
+            final LogicalDatastoreType storeType = path.getDatastoreType();
+            final DOMStoreReadTransaction txn = extractTransaction(transaction, storeType);
+            getXPathStore(storeType).evaluate(txn, path.getRootIdentifier(), xpath, prefixMapping, callback,
+                callbackExecutor);
+        }
+
+        private XPathAwareDOMStore getXPathStore(final LogicalDatastoreType type) {
+            final DOMStore store = getStore(type);
+            checkState(store instanceof XPathAwareDOMStore);
+            return (XPathAwareDOMStore) store;
+        }
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBroker.class);
 
@@ -67,6 +93,10 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
                     return ((DOMDataTreeCommitCohortRegistry) store).registerCommitCohort(path, cohort);
                 }
             });
+        }
+
+        if (isSupported(datastores, XPathAwareDOMStore.class)) {
+            extBuilder.put(DOMDataBrokerTransactionXPathSupport.class, new TransactionXPathSupport());
         }
 
         extensions = extBuilder.build();
@@ -125,5 +155,20 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
         DOMStore store = getTxFactories().get(type);
         checkState(store != null, "Requested logical data store is not available.");
         return store;
+    }
+
+    static DOMStoreReadTransaction extractTransaction(final DOMDataTreeReadTransaction transaction,
+            final LogicalDatastoreType storeType) {
+        checkArgument(transaction instanceof AbstractDOMBrokerTransaction);
+        final DOMStoreTransaction sub = ((AbstractDOMBrokerTransaction<?>) transaction)
+                .getSubtransaction(storeType);
+        checkArgument(sub instanceof DOMStoreReadTransaction);
+        return (DOMStoreReadTransaction) sub;
+    }
+
+    DOMStore getStore(final LogicalDatastoreType storeType) {
+        final DOMStore ret = getTxFactories().get(storeType);
+        checkState(ret != null, "Requested logical data store %s is not available.", storeType);
+        return ret;
     }
 }
