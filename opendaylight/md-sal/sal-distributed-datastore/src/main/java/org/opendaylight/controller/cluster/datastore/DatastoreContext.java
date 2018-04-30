@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.util.Timeout;
@@ -22,8 +21,8 @@ import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationRea
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -616,9 +615,12 @@ public class DatastoreContext implements ClientActorConfig {
 
         @Override
         public DatastoreContext build() {
-            datastoreContext.dataStoreProperties = InMemoryDOMDataStoreConfigProperties.create(
-                    maxShardDataChangeExecutorPoolSize, maxShardDataChangeExecutorQueueSize,
-                    maxShardDataChangeListenerQueueSize, maxShardDataStoreExecutorQueueSize);
+            datastoreContext.dataStoreProperties = InMemoryDOMDataStoreConfigProperties.builder()
+                    .maxDataChangeExecutorPoolSize(maxShardDataChangeExecutorPoolSize)
+                    .maxDataChangeExecutorQueueSize(maxShardDataChangeExecutorQueueSize)
+                    .maxDataChangeListenerQueueSize(maxShardDataChangeListenerQueueSize)
+                    .maxDataStoreExecutorQueueSize(maxShardDataStoreExecutorQueueSize)
+                    .build();
 
             if (datastoreContext.dataStoreName != null) {
                 GLOBAL_DATASTORE_NAMES.add(datastoreContext.dataStoreName);
