@@ -78,7 +78,6 @@ import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.PersistAbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -183,8 +182,6 @@ public class Shard extends RaftActor {
     private final ShardSnapshotCohort snapshotCohort;
 
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
-    private final DataChangeListenerSupport changeSupport = new DataChangeListenerSupport(this);
-
 
     private ShardSnapshot restoreFromSnapshot;
 
@@ -214,15 +211,12 @@ public class Shard extends RaftActor {
 
         ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
-        ShardDataChangeListenerPublisherActorProxy dataChangeListenerPublisher =
-                new ShardDataChangeListenerPublisherActorProxy(getContext(), name + "-DCL-publisher", name);
         if (builder.getDataTree() != null) {
             store = new ShardDataTree(this, builder.getSchemaContext(), builder.getDataTree(),
-                    treeChangeListenerPublisher, dataChangeListenerPublisher, name, frontendMetadata);
+                    treeChangeListenerPublisher, name, frontendMetadata);
         } else {
             store = new ShardDataTree(this, builder.getSchemaContext(), builder.getTreeType(),
-                    builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher,
-                    dataChangeListenerPublisher, name, frontendMetadata);
+                    builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher, name, frontendMetadata);
         }
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name, datastoreContext.getDataStoreMXBeanType(), this);
@@ -339,8 +333,6 @@ public class Shard extends RaftActor {
                 handleAbortTransaction(AbortTransaction.fromSerializable(message));
             } else if (CloseTransactionChain.isSerializedType(message)) {
                 closeTransactionChain(CloseTransactionChain.fromSerializable(message));
-            } else if (message instanceof RegisterChangeListener) {
-                changeSupport.onMessage((RegisterChangeListener) message, isLeader(), hasLeader());
             } else if (message instanceof RegisterDataTreeChangeListener) {
                 treeChangeSupport.onMessage((RegisterDataTreeChangeListener) message, isLeader(), hasLeader());
             } else if (message instanceof UpdateSchemaContext) {
@@ -883,7 +875,6 @@ public class Shard extends RaftActor {
     protected void onStateChanged() {
         boolean isLeader = isLeader();
         boolean hasLeader = hasLeader();
-        changeSupport.onLeadershipChange(isLeader, hasLeader);
         treeChangeSupport.onLeadershipChange(isLeader, hasLeader);
 
         // If this actor is no longer the leader close all the transaction chains
@@ -986,7 +977,6 @@ public class Shard extends RaftActor {
     @Override
     protected OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {
         return OnDemandShardState.newBuilder().treeChangeListenerActors(treeChangeSupport.getListenerActors())
-                .dataChangeListenerActors(changeSupport.getListenerActors())
                 .commitCohortActors(store.getCohortActors());
     }
 

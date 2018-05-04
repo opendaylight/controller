@@ -17,7 +17,4 @@ import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerIn
  */
 public interface ShardDataTreeListenerInfoMXBean {
     List<DataTreeListenerInfo> getDataTreeChangeListenerInfo();
-
-    @Deprecated
-    List<DataTreeListenerInfo> getDataChangeListenerInfo();
 }
