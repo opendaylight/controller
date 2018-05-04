@@ -47,11 +47,6 @@ public class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implemen
         return getListenerActorsInfo(getState().getTreeChangeListenerActors());
     }
 
-    @Override
-    public List<DataTreeListenerInfo> getDataChangeListenerInfo() {
-        return getListenerActorsInfo(getState().getDataChangeListenerActors());
-    }
-
     @SuppressWarnings("checkstyle:IllegalCatch")
     private OnDemandShardState getState() {
         try {

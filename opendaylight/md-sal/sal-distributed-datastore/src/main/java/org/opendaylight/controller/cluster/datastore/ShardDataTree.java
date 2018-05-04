@@ -58,8 +58,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -127,7 +125,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final Map<Payload, Runnable> replicationCallbacks = new HashMap<>();
 
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
-    private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
     private final Collection<ShardDataTreeMetadata<?>> metadata;
     private final DataTree dataTree;
     private final String logContext;
@@ -148,14 +145,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ShardDataTree(final Shard shard, final SchemaContext schemaContext, final DataTree dataTree,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext,
+            final String logContext,
             final ShardDataTreeMetadata<?>... metadata) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         updateSchemaContext(schemaContext);
 
         this.shard = Preconditions.checkNotNull(shard);
         this.treeChangeListenerPublisher = Preconditions.checkNotNull(treeChangeListenerPublisher);
-        this.dataChangeListenerPublisher = Preconditions.checkNotNull(dataChangeListenerPublisher);
         this.logContext = Preconditions.checkNotNull(logContext);
         this.metadata = ImmutableList.copyOf(metadata);
         tip = dataTree;
@@ -164,10 +160,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
             final YangInstanceIdentifier root,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext,
+            final String logContext,
             final ShardDataTreeMetadata<?>... metadata) {
-        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher,
-            dataChangeListenerPublisher, logContext, metadata);
+        this(shard, schemaContext, createDataTree(treeType, root), treeChangeListenerPublisher, logContext, metadata);
     }
 
     private static DataTree createDataTree(final TreeType treeType, final YangInstanceIdentifier root) {
@@ -182,8 +177,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType) {
         this(shard, schemaContext, treeType, YangInstanceIdentifier.EMPTY,
-                new DefaultShardDataTreeChangeListenerPublisher(""),
-                new DefaultShardDataChangeListenerPublisher(""), "");
+                new DefaultShardDataTreeChangeListenerPublisher(""), "");
     }
 
     final String logContext() {
@@ -564,7 +558,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @VisibleForTesting
     public void notifyListeners(final DataTreeCandidate candidate) {
         treeChangeListenerPublisher.publishChanges(candidate);
-        dataChangeListenerPublisher.publishChanges(candidate);
     }
 
     /**
@@ -617,14 +610,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         replicatePayload(id, PurgeLocalHistoryPayload.create(id), callback);
-    }
-
-    void registerDataChangeListener(final YangInstanceIdentifier path,
-            final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener,
-            final DataChangeScope scope, final Optional<DataTreeCandidate> initialState,
-            final Consumer<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>>
-                    onRegistration) {
-        dataChangeListenerPublisher.registerDataChangeListener(path, listener, scope, initialState, onRegistration);
     }
 
     Optional<DataTreeCandidate> readCurrentData() {
