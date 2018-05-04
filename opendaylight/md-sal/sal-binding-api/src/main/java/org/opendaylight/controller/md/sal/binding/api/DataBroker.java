@@ -8,10 +8,8 @@
 package org.opendaylight.controller.md.sal.binding.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainFactory;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -25,7 +23,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * @see AsyncDataBroker
  * @see TransactionChainFactory
  */
-public interface DataBroker extends  AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>,
+public interface DataBroker extends  AsyncDataBroker<InstanceIdentifier<?>, DataObject>,
         TransactionChainFactory<InstanceIdentifier<?>, DataObject>, TransactionFactory, BindingService,
         DataTreeChangeService {
     @Override
@@ -36,10 +34,6 @@ public interface DataBroker extends  AsyncDataBroker<InstanceIdentifier<?>, Data
 
     @Override
     WriteTransaction newWriteOnlyTransaction();
-
-    @Override
-    ListenerRegistration<DataChangeListener> registerDataChangeListener(LogicalDatastoreType store,
-            InstanceIdentifier<?> path, DataChangeListener listener, DataChangeScope triggeringScope);
 
     @Override
     BindingTransactionChain createTransactionChain(TransactionChainListener listener);
