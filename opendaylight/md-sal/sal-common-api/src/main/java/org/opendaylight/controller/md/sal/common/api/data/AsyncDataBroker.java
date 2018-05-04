@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.Path;
 
 /**
@@ -52,8 +51,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * @param <D>
  *            Type of data (payload), which represents data payload
  */
-public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChangeListener<P, D>> extends //
-        AsyncDataTransactionFactory<P, D> {
+public interface AsyncDataBroker<P extends Path<P>, D> extends AsyncDataTransactionFactory<P, D> {
 
     /**
      * Scope of Data Change
@@ -165,76 +163,4 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
 
     @Override
     AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
-
-    /**
-     * Registers a {@link AsyncDataChangeListener} to receive
-     * notifications when data changes under a given path in the conceptual data
-     * tree.
-     *
-     * <p>
-     * You are able to register for notifications  for any node or subtree
-     * which can be reached via the supplied path.
-     *
-     * <p>
-     * If path type <code>P</code> allows it, you may specify paths up to the leaf nodes
-     * then it is possible to listen on leaf nodes.
-     *
-     * <p>
-     * You are able to register for data change notifications for a subtree even
-     * if it does not exist. You will receive notification once that node is created.
-     *
-     * <p>
-     * If there is any preexisting data in data tree on path for which you are
-     * registering, you will receive initial data change event, which will
-     * contain all preexisting data, marked as created.
-     *
-     * <p>
-     * You are also able to specify the scope of the changes you want to be
-     * notified.
-     *
-     * <p>
-     * Supported scopes are:
-     * <ul>
-     * <li>{@link DataChangeScope#BASE} - notification events will only be
-     * triggered when a node referenced by path is created, removed or replaced.
-     * <li>{@link DataChangeScope#ONE} - notifications events will only be
-     * triggered when a node referenced by path is created, removed or replaced,
-     * or any or any of its immediate children are created, updated or removed.
-     * <li>{@link DataChangeScope#SUBTREE} - notification events will be
-     * triggered when a node referenced by the path is created, removed
-     * or replaced or any of the children in its subtree are created, removed
-     * or replaced.
-     * </ul>
-     * See {@link DataChangeScope} for examples.
-     *
-     * <p>
-     * This method returns a {@link ListenerRegistration} object. To
-     * "unregister" your listener for changes call the "close" method on this
-     * returned object.
-     *
-     * <p>
-     * You MUST call close when you no longer need to receive notifications
-     * (such as during shutdown or for example if your bundle is shutting down).
-     *
-     * @param store
-     *            Logical Data Store - Logical Datastore you want to listen for
-     *            changes in. For example
-     *            {@link LogicalDatastoreType#OPERATIONAL} or
-     *            {@link LogicalDatastoreType#CONFIGURATION}
-     * @param path
-     *            Path (subtree identifier) on which client listener will be
-     *            invoked.
-     * @param listener
-     *            Instance of listener which should be invoked on
-     * @param triggeringScope
-     *            Scope of change which triggers callback.
-     * @return Listener registration object, which may be used to unregister
-     *         your listener using {@link ListenerRegistration#close()} to stop
-     *         delivery of change events.
-     */
-    @Deprecated
-    default ListenerRegistration<L> registerDataChangeListener(LogicalDatastoreType store, P path, L listener,
-            DataChangeScope triggeringScope) {
-        throw new UnsupportedOperationException("Data change listeners are no longer supported.");
-    }
 }

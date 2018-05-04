@@ -14,8 +14,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
  * Interface implemented by classes interested in receiving notifications about
- * data tree changes. This interface differs from {@link DataChangeListener}
- * in that it provides a cursor-based view of the change, which has potentially
+ * data tree changes. This interface provides a cursor-based view of the change, which has potentially
  * lower overhead and allow more flexible consumption of change event.
  *
  * <p>

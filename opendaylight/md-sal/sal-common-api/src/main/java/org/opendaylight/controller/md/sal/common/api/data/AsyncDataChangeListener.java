@@ -13,17 +13,6 @@ import org.opendaylight.yangtools.concepts.Path;
 /**
  * Listener of data change events on particular subtree.
  *
- * <p>
- * User-supplied implementations of this listener interface MUST register via
- * {@link AsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener,
- *     AsyncDataBroker.DataChangeScope)}
- * in order to start receiving data change events, which capture state changes
- * in a subtree.
- *
- * <p>
- * <b>Implementation Note:</b> This interface is intended to be implemented
- * by users of MD-SAL.
- *
  * @param <P>
  *            Type of path (subtree identifier), which represents location in
  *            tree

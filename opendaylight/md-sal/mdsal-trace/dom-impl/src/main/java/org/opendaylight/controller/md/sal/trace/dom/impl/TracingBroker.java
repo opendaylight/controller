@@ -21,7 +21,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListen
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -314,17 +313,6 @@ public class TracingBroker implements TracingDOMDataBroker {
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         return new TracingWriteTransaction(delegate.newWriteOnlyTransaction(), this, writeTransactionsRegistry);
-    }
-
-    @Override
-    public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(
-                                                        LogicalDatastoreType store, YangInstanceIdentifier yiid,
-                                                        DOMDataChangeListener listener, DataChangeScope scope) {
-        if (isRegistrationWatched(yiid, store, scope)) {
-            LOG.warn("Registration (registerDataChangeListener) for {} from {}",
-                    toPathString(yiid), getStackSummary());
-        }
-        return delegate.registerDataChangeListener(store, yiid, listener, scope);
     }
 
     @Override
