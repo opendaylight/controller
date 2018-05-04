@@ -6,39 +6,48 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.md.sal.binding.impl.test;
-import static org.junit.Assert.assertFalse;
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertContains;
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertEmpty;
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertNotContains;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_BAR_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.top;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataChangeListenerTest;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
 /**
  * This testsuite tests explanation for data change scope and data modifications
  * which were described in
  * https://lists.opendaylight.org/pipermail/controller-dev/2014-July/005541.html.
  */
-public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListenerTest {
+public class ListInsertionDataChangeListenerTest extends AbstractDataTreeChangeListenerTest {
 
     private static final InstanceIdentifier<Top> TOP = InstanceIdentifier.create(Top.class);
     private static final InstanceIdentifier<TopLevelList> WILDCARDED = TOP.child(TopLevelList.class);
     private static final InstanceIdentifier<TopLevelList> TOP_FOO = TOP.child(TopLevelList.class, TOP_FOO_KEY);
     private static final InstanceIdentifier<TopLevelList> TOP_BAR = TOP.child(TopLevelList.class, TOP_BAR_KEY);
+
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class));
+    }
 
     @Before
     public void setupWithDataBroker() {
@@ -49,141 +58,116 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
 
     @Test
     public void replaceTopNodeSubtreeListeners() {
-        TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
-        TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
-
-        ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
-        writeTx.put(CONFIGURATION, TOP, top(topLevelList(TOP_BAR_KEY)));
-        assertCommit(writeTx.submit());
-        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> top = topListener.event();
-        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> all = allListener.event();
-        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> foo = fooListener.event();
-        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> bar = barListener.event();
+        final TopLevelList topBar = topLevelList(TOP_BAR_KEY);
+        final Top top = top(topBar);
+        final TopLevelList topFoo = topLevelList(TOP_FOO_KEY);
 
         // Listener for TOP element
-        assertContains(top.getOriginalData(), TOP,TOP_FOO);
-        assertContains(top.getCreatedData(), TOP_BAR);
-        assertContains(top.getUpdatedData(), TOP);
-        assertContains(top.getRemovedPaths(), TOP_FOO);
+        final TestListener<Top> topListener = createListener(CONFIGURATION, TOP,
+                added(TOP, top(topLevelList(TOP_FOO_KEY))), replaced(TOP, top(topFoo), top));
 
-        /*
-         *  Listener for all list items
-         *
-         *  Updated should be empty, since no list item was
-         *  updated, items were only removed and added
-         */
-        assertContains(all.getOriginalData(), TOP_FOO);
-        assertContains(all.getCreatedData(), TOP_BAR);
-        assertEmpty(all.getUpdatedData());
-        assertContains(all.getRemovedPaths(), TOP_FOO);
+        // Listener for all list items. This one should see Foo item deleted and Bar item added.
+        final TestListener<TopLevelList> allListener = createListener(CONFIGURATION, WILDCARDED,
+                added(TOP_FOO, topFoo), added(TOP_BAR, topBar), deleted(TOP_FOO, topFoo));
 
+        // Listener for all Foo item. This one should see only Foo item deleted.
+        final TestListener<TopLevelList> fooListener = createListener(CONFIGURATION, TOP_FOO,
+                added(TOP_FOO, topFoo), deleted(TOP_FOO, topFoo));
 
-        /*
-         *  Listener for all Foo item
-         *
-         *  This one should see only Foo item removed
-         */
-        assertContains(foo.getOriginalData(), TOP_FOO);
-        assertEmpty(foo.getCreatedData());
-        assertEmpty(foo.getUpdatedData());
-        assertContains(foo.getRemovedPaths(), TOP_FOO);
+        // Listener for bar list items.
+        final TestListener<TopLevelList> barListener = createListener(CONFIGURATION, TOP_BAR,
+                added(TOP_BAR, topBar));
 
-        /*
-         *  Listener for bar list items
-         *
-         *  Updated should be empty, since no list item was
-         *  updated, items were only removed and added
-         */
-        assertEmpty(bar.getOriginalData());
-        assertContains(bar.getCreatedData(), TOP_BAR);
-        assertEmpty(bar.getUpdatedData());
-        assertEmpty(bar.getRemovedPaths());
+        ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
+        writeTx.put(CONFIGURATION, TOP, top);
+        assertCommit(writeTx.submit());
+
+        topListener.verify();
+        allListener.verify();
+        fooListener.verify();
+        barListener.verify();
     }
 
     @Test
     public void mergeTopNodeSubtreeListeners() {
-        TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
-        TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
+        final TopLevelList topBar = topLevelList(TOP_BAR_KEY);
+        final TopLevelList topFoo = topLevelList(TOP_FOO_KEY);
+
+        final TestListener<Top> topListener = createListener(CONFIGURATION, TOP,
+                added(TOP, top(topLevelList(TOP_FOO_KEY))), topSubtreeModified(topFoo, topBar));
+        final TestListener<TopLevelList> allListener = createListener(CONFIGURATION, WILDCARDED,
+                added(TOP_FOO, topFoo), added(TOP_BAR, topBar));
+        final TestListener<TopLevelList> fooListener = createListener(CONFIGURATION, TOP_FOO,
+                added(TOP_FOO, topFoo));
+        final TestListener<TopLevelList> barListener = createListener(CONFIGURATION, TOP_BAR,
+                added(TOP_BAR, topBar));
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.merge(CONFIGURATION, TOP, top(topLevelList(TOP_BAR_KEY)));
         assertCommit(writeTx.submit());
 
-        verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
+        topListener.verify();
+        allListener.verify();
+        fooListener.verify();
+        barListener.verify();
     }
 
     @Test
     public void putTopBarNodeSubtreeListeners() {
-        TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
-        TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
+        final TopLevelList topBar = topLevelList(TOP_BAR_KEY);
+        final TopLevelList topFoo = topLevelList(TOP_FOO_KEY);
+
+        final TestListener<Top> topListener = createListener(CONFIGURATION, TOP,
+                added(TOP, top(topLevelList(TOP_FOO_KEY))), topSubtreeModified(topFoo, topBar));
+        final TestListener<TopLevelList> allListener = createListener(CONFIGURATION, WILDCARDED,
+                added(TOP_FOO, topFoo), added(TOP_BAR, topBar));
+        final TestListener<TopLevelList> fooListener = createListener(CONFIGURATION, TOP_FOO,
+                added(TOP_FOO, topFoo));
+        final TestListener<TopLevelList> barListener = createListener(CONFIGURATION, TOP_BAR,
+                added(TOP_BAR, topBar));
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.put(CONFIGURATION, TOP_BAR, topLevelList(TOP_BAR_KEY));
         assertCommit(writeTx.submit());
 
-        verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
+        topListener.verify();
+        allListener.verify();
+        fooListener.verify();
+        barListener.verify();
     }
 
     @Test
     public void mergeTopBarNodeSubtreeListeners() {
-        TestListener topListener = createListener(CONFIGURATION, TOP, DataChangeScope.SUBTREE);
-        TestListener allListener = createListener(CONFIGURATION, WILDCARDED, DataChangeScope.SUBTREE, false);
-        TestListener fooListener = createListener(CONFIGURATION, TOP_FOO, DataChangeScope.SUBTREE);
-        TestListener barListener = createListener(CONFIGURATION, TOP_BAR, DataChangeScope.SUBTREE, false);
+        final TopLevelList topBar = topLevelList(TOP_BAR_KEY);
+        final TopLevelList topFoo = topLevelList(TOP_FOO_KEY);
+
+        final TestListener<Top> topListener = createListener(CONFIGURATION, TOP,
+                added(TOP, top(topLevelList(TOP_FOO_KEY))), topSubtreeModified(topFoo, topBar));
+        final TestListener<TopLevelList> allListener = createListener(CONFIGURATION, WILDCARDED,
+                added(TOP_FOO, topFoo), added(TOP_BAR, topBar));
+        final TestListener<TopLevelList> fooListener = createListener(CONFIGURATION, TOP_FOO,
+                added(TOP_FOO, topFoo));
+        final TestListener<TopLevelList> barListener = createListener(CONFIGURATION, TOP_BAR,
+                added(TOP_BAR, topBar));
 
         ReadWriteTransaction writeTx = getDataBroker().newReadWriteTransaction();
         writeTx.merge(CONFIGURATION, TOP_BAR, topLevelList(TOP_BAR_KEY));
         assertCommit(writeTx.submit());
 
-        verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
+        topListener.verify();
+        allListener.verify();
+        fooListener.verify();
+        barListener.verify();
     }
 
-    private void verifyBarOnlyAdded(final TestListener top, final TestListener all, final TestListener foo,
-            final TestListener bar) {
-
-        assertFalse(foo.hasEvent());
-
-        // Listener for TOP element
-        assertContains(top.event().getOriginalData(), TOP);
-        assertNotContains(top.event().getOriginalData(),TOP_FOO);
-        assertContains(top.event().getCreatedData(), TOP_BAR);
-        assertContains(top.event().getUpdatedData(), TOP);
-        assertEmpty(top.event().getRemovedPaths());
-
-        /*
-         *  Listener for all list items
-         *
-         *  Updated should be empty, since no list item was
-         *  updated, items were only removed and added
-         */
-        assertEmpty(all.event().getOriginalData());
-        assertContains(all.event().getCreatedData(), TOP_BAR);
-        assertEmpty(all.event().getUpdatedData());
-        assertEmpty(all.event().getRemovedPaths());
-
-        /*
-         *  Listener for all Foo item
-         *
-         *  Foo Listener should not have foo event
-         */
-        assertFalse(foo.hasEvent());
-
-        /*
-         *  Listener for bar list items
-         *
-         *  Updated should be empty, since no list item was
-         *  updated, items were only removed and added
-         */
-        assertEmpty(bar.event().getOriginalData());
-        assertContains(bar.event().getCreatedData(), TOP_BAR);
-        assertEmpty(bar.event().getUpdatedData());
-        assertEmpty(bar.event().getRemovedPaths());
+    private Function<DataTreeModification<Top>, Boolean> topSubtreeModified(TopLevelList topFoo, TopLevelList topBar) {
+        return match(ModificationType.SUBTREE_MODIFIED, TOP,
+            (Function<Top, Boolean>) dataBefore -> Objects.equals(top(topFoo), dataBefore),
+            dataAfter -> {
+                Set<TopLevelList> expList = new HashSet<>(top(topBar, topFoo).getTopLevelList());
+                Set<TopLevelList> actualList = dataAfter.getTopLevelList().stream()
+                        .map(list -> new TopLevelListBuilder(list).build()).collect(Collectors.toSet());
+                return expList.equals(actualList);
+            });
     }
-
 }

@@ -36,7 +36,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public abstract class AbstractDataChangeListenerTest {
+public abstract class AbstractDataTreeChangeListenerTest {
 
     protected static final YangInstanceIdentifier TOP_LEVEL = YangInstanceIdentifier
             .of(Top.QNAME);
@@ -59,7 +59,7 @@ public abstract class AbstractDataChangeListenerTest {
 
         this.dclExecutorService = new TestDCLExecutorService(
                 SpecialExecutors.newBlockingBoundedFastThreadPool(1, 10, "DCL",
-                    AbstractDataChangeListenerTest.class));
+                    AbstractDataTreeChangeListenerTest.class));
 
         this.datastore = new InMemoryDOMDataStore("TEST", this.dclExecutorService);
         this.datastore.onGlobalContextUpdated(this.schemaContext);

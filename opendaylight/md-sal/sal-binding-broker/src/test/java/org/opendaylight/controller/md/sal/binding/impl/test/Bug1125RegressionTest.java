@@ -8,17 +8,14 @@
 
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertContains;
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertEmpty;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.path;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataChangeListenerTest;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
@@ -26,14 +23,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
 /**
  * Regression test suite for Bug 1125 - Can't detect switch disconnection
  * https://bugs.opendaylight.org/show_bug.cgi?id=1125.
  */
-public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
+public class Bug1125RegressionTest extends AbstractDataTreeChangeListenerTest {
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier
             .create(Top.class);
@@ -47,7 +45,13 @@ public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
             .child(TopLevelList.class).augmentation(
                     TreeComplexUsesAugment.class);
 
-    private void writeInitialState() {
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
+                BindingReflections.getModuleInfo(TreeComplexUsesAugment.class));
+    }
+
+    private TreeComplexUsesAugment writeInitialState() {
         WriteTransaction initialTx = getDataBroker().newWriteOnlyTransaction();
         initialTx.put(LogicalDatastoreType.OPERATIONAL, TOP_PATH,
                 new TopBuilder().build());
@@ -58,6 +62,7 @@ public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
         initialTx.put(LogicalDatastoreType.OPERATIONAL, path(TOP_FOO_KEY),
                 topLevelList(TOP_FOO_KEY, fooAugment));
         assertCommit(initialTx.submit());
+        return fooAugment;
     }
 
     private void delete(final InstanceIdentifier<?> path) {
@@ -66,40 +71,20 @@ public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
         assertCommit(tx.submit());
     }
 
-    private void verifyRemoved(
-            final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
-        assertEmpty(event.getCreatedData());
-        assertEmpty(event.getUpdatedData());
-        assertContains(event.getRemovedPaths(), FOO_AUGMENT_PATH);
-    }
-
-    private void deleteAndListenAugment(final DataChangeScope scope,
-            final InstanceIdentifier<?> path) {
-        writeInitialState();
-        TestListener listener = createListener(LogicalDatastoreType.OPERATIONAL, WILDCARDED_AUGMENT_PATH, scope, false);
+    private void deleteAndListenAugment(final InstanceIdentifier<?> path) {
+        TreeComplexUsesAugment augment = writeInitialState();
+        TestListener<TreeComplexUsesAugment> listener = createListener(LogicalDatastoreType.OPERATIONAL,
+                WILDCARDED_AUGMENT_PATH, added(FOO_AUGMENT_PATH, augment), deleted(FOO_AUGMENT_PATH, augment));
         delete(path);
-        verifyRemoved(listener.event());
+        listener.verify();
     }
 
     @Test
     public void deleteAndListenAugment() {
+        deleteAndListenAugment(TOP_PATH);
 
-        deleteAndListenAugment(DataChangeScope.ONE, TOP_PATH);
+        deleteAndListenAugment(TOP_FOO_PATH);
 
-        deleteAndListenAugment(DataChangeScope.BASE, TOP_PATH);
-
-        deleteAndListenAugment(DataChangeScope.SUBTREE, TOP_PATH);
-
-        deleteAndListenAugment(DataChangeScope.BASE, TOP_FOO_PATH);
-
-        deleteAndListenAugment(DataChangeScope.ONE, TOP_FOO_PATH);
-
-        deleteAndListenAugment(DataChangeScope.SUBTREE, TOP_FOO_PATH);
-
-        deleteAndListenAugment(DataChangeScope.BASE, FOO_AUGMENT_PATH);
-
-        deleteAndListenAugment(DataChangeScope.ONE, FOO_AUGMENT_PATH);
-
-        deleteAndListenAugment(DataChangeScope.SUBTREE, FOO_AUGMENT_PATH);
+        deleteAndListenAugment(FOO_AUGMENT_PATH);
     }
 }

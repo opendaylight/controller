@@ -41,7 +41,6 @@ import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -50,7 +49,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -431,20 +429,6 @@ public class LegacyDOMDataBrokerAdapterTest {
         assertEquals("DOMDataTreeCommitCohortRegistration", mockReg, reg);
 
         verify(mockConfigStore).registerCommitCohort(treeId, mockCohort);
-    }
-
-    @Test
-    public void testDataChangeListener() {
-        DOMDataChangeListener listener = mock(DOMDataChangeListener.class);
-        ListenerRegistration<DOMDataChangeListener> mockReg = mock(ListenerRegistration.class);
-        doReturn(mockReg).when(mockConfigStore).registerChangeListener(
-                TestModel.TEST_PATH, listener, DataChangeScope.ONE);
-
-        ListenerRegistration<DOMDataChangeListener> reg = adapter.registerDataChangeListener(
-                LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, listener, DataChangeScope.ONE);
-        assertEquals("ListenerRegistration<DOMDataChangeListener>", mockReg, reg);
-
-        verify(mockConfigStore).registerChangeListener(TestModel.TEST_PATH, listener, DataChangeScope.ONE);
     }
 
     @Test

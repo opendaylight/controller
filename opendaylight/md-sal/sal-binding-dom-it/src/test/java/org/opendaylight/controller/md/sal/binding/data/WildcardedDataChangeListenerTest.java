@@ -8,10 +8,10 @@
 package org.opendaylight.controller.md.sal.binding.data;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -19,10 +19,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUses;
@@ -33,13 +30,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
 /**
  * FIXME: THis test should be moved to compat test-suite
  */
-public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
+public class WildcardedDataChangeListenerTest extends AbstractDataTreeChangeListenerTest {
 
     private static final TopLevelListKey TOP_LEVEL_LIST_0_KEY = new TopLevelListKey("test:0");
     private static final TopLevelListKey TOP_LEVEL_LIST_1_KEY = new TopLevelListKey("test:1");
@@ -82,90 +80,78 @@ public class WildcardedDataChangeListenerTest extends AbstractDataServiceTest {
             .setName("john")
             .build();
 
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
+                BindingReflections.getModuleInfo(TreeComplexUsesAugment.class));
+    }
+
     @Test
     public void testSeparateWrites() throws InterruptedException, TimeoutException, ExecutionException {
 
-        DataBroker dataBroker = testContext.getDataBroker();
+        DataBroker dataBroker = getDataBroker();
 
-        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture =
-                SettableFuture.create();
-        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, DEEP_WILDCARDED_PATH,
-            dataChangeEvent -> eventFuture.set(dataChangeEvent), DataChangeScope.SUBTREE);
+        final TestListener<ListViaUses> listener = createListener(OPERATIONAL, DEEP_WILDCARDED_PATH,
+            dataTreeModification -> NODE_0_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()),
+            dataTreeModification -> NODE_1_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()));
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_0_CWU_PATH, CWU, true);
-        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
-        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
+        transaction.put(OPERATIONAL, NODE_0_CWU_PATH, CWU, true);
+        transaction.put(OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
+        transaction.put(OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
         transaction.submit().get(5, TimeUnit.SECONDS);
 
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
-
-        validateEvent(event);
+        listener.verify();
     }
 
     @Test
     public void testWriteByReplace() throws InterruptedException, TimeoutException, ExecutionException {
 
-        DataBroker dataBroker = testContext.getDataBroker();
+        DataBroker dataBroker = getDataBroker();
 
-        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture =
-                SettableFuture.create();
-        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, DEEP_WILDCARDED_PATH,
-            dataChangeEvent -> eventFuture.set(dataChangeEvent), DataChangeScope.SUBTREE);
+        final TestListener<ListViaUses> listener = createListener(OPERATIONAL, DEEP_WILDCARDED_PATH,
+            dataTreeModification -> NODE_0_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()),
+            dataTreeModification -> NODE_1_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()));
 
         final WriteTransaction cwuTx = dataBroker.newWriteOnlyTransaction();
-        cwuTx.put(LogicalDatastoreType.OPERATIONAL, NODE_0_CWU_PATH, CWU, true);
+        cwuTx.put(OPERATIONAL, NODE_0_CWU_PATH, CWU, true);
         cwuTx.submit().get(5, TimeUnit.SECONDS);
 
-        assertFalse(eventFuture.isDone());
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        assertFalse(listener.hasChanges());
 
         final WriteTransaction lvuTx = dataBroker.newWriteOnlyTransaction();
 
         TreeComplexUsesAugment tcua = new TreeComplexUsesAugmentBuilder()
                 .setListViaUses(Collections.singletonList(LVU)).build();
 
-        lvuTx.put(LogicalDatastoreType.OPERATIONAL, NODE_0_TCU_PATH, tcua, true);
-        lvuTx.put(LogicalDatastoreType.OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
+        lvuTx.put(OPERATIONAL, NODE_0_TCU_PATH, tcua, true);
+        lvuTx.put(OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
         lvuTx.submit().get(5, TimeUnit.SECONDS);
 
-        validateEvent(eventFuture.get(1000, TimeUnit.MILLISECONDS));
+        listener.verify();
     }
 
     @Test
-    public void testNoChangeOnReplaceWithSameValue() throws InterruptedException, TimeoutException, ExecutionException {
+    public void testChangeOnReplaceWithSameValue() throws InterruptedException, TimeoutException, ExecutionException {
 
-        DataBroker dataBroker = testContext.getDataBroker();
+        DataBroker dataBroker = getDataBroker();
 
-        // We wrote initial state NODE_0_FLOW
+        // Write initial state NODE_0_FLOW
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.put(LogicalDatastoreType.OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
+        transaction.put(OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
         transaction.submit().get(5, TimeUnit.SECONDS);
 
-        // We registered DataChangeListener
-        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> eventFuture =
-                SettableFuture.create();
-        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, DEEP_WILDCARDED_PATH,
-            dataChangeEvent -> eventFuture.set(dataChangeEvent), DataChangeScope.SUBTREE);
-        assertFalse(eventFuture.isDone());
+        final TestListener<ListViaUses> listener = createListener(OPERATIONAL, DEEP_WILDCARDED_PATH,
+            dataTreeModification -> NODE_1_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()),
+            dataTreeModification -> NODE_0_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()),
+            dataTreeModification -> NODE_1_LVU_PATH.equals(dataTreeModification.getRootPath().getRootIdentifier()));
 
         final WriteTransaction secondTx = dataBroker.newWriteOnlyTransaction();
-        secondTx.put(LogicalDatastoreType.OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
-        secondTx.put(LogicalDatastoreType.OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
+        secondTx.put(OPERATIONAL, NODE_0_LVU_PATH, LVU, true);
+        secondTx.put(OPERATIONAL, NODE_1_LVU_PATH, LVU, true);
         secondTx.submit().get(5, TimeUnit.SECONDS);
 
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = eventFuture.get(1000, TimeUnit.MILLISECONDS);
-        assertNotNull(event);
-        // Data change should contains NODE_1 Flow - which was added
-        assertTrue(event.getCreatedData().containsKey(NODE_1_LVU_PATH));
-        // Data change must not containe NODE_0 Flow which was replaced with same value.
-        assertFalse(event.getUpdatedData().containsKey(NODE_0_LVU_PATH));
+        listener.verify();
     }
-
-    private static void validateEvent(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
-        assertNotNull(event);
-        assertTrue(event.getCreatedData().containsKey(NODE_1_LVU_PATH));
-        assertTrue(event.getCreatedData().containsKey(NODE_0_LVU_PATH));
-        assertFalse(event.getCreatedData().containsKey(NODE_0_CWU_PATH));
-    }
-
 }
