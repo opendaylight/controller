@@ -7,31 +7,36 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertContains;
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertEmpty;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataChangeListenerTest;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.opendaylight.test.bug._3090.rev160101.Root;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.opendaylight.test.bug._3090.rev160101.RootBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.opendaylight.test.bug._3090.rev160101.root.ListInRoot;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.opendaylight.test.bug._3090.rev160101.root.ListInRootBuilder;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
-public class Bug3090MultiKeyList extends AbstractDataChangeListenerTest {
+public class Bug3090MultiKeyList extends AbstractDataTreeChangeListenerTest {
     private static final InstanceIdentifier<Root> ROOT_PATH = InstanceIdentifier.create(Root.class);
 
-    private void write(final LogicalDatastoreType store) {
-        final ReadWriteTransaction readWriteTransaction = getDataBroker().newReadWriteTransaction();
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Root.class));
+    }
 
+    @Test
+    public void listWithMultiKeyTest() {
         final List<ListInRoot> listInRoots = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             listInRoots.add(new ListInRootBuilder()
@@ -41,21 +46,28 @@ public class Bug3090MultiKeyList extends AbstractDataChangeListenerTest {
                 .build()
             );
         }
+
         final Root root = new RootBuilder().setListInRoot(listInRoots).build();
-        readWriteTransaction.put(store, ROOT_PATH, root);
+
+        final TestListener<Root> listener = createListener(LogicalDatastoreType.CONFIGURATION, ROOT_PATH,
+                match(ModificationType.WRITE, ROOT_PATH, dataBefore -> dataBefore == null,
+                        (Function<Root, Boolean>) dataAfter -> checkData(root, dataAfter)));
+
+        final ReadWriteTransaction readWriteTransaction = getDataBroker().newReadWriteTransaction();
+        readWriteTransaction.put(LogicalDatastoreType.CONFIGURATION, ROOT_PATH, root);
         assertCommit(readWriteTransaction.submit());
+
+        listener.verify();
     }
 
-    @Test
-    public void listWithMultiKeyTest() {
-        final AbstractDataChangeListenerTest.TestListener listener = createListener(CONFIGURATION, ROOT_PATH,
-                AsyncDataBroker.DataChangeScope.BASE, false);
+    private boolean checkData(Root expected, Root actual) {
+        if (actual == null) {
+            return false;
+        }
 
-        write(CONFIGURATION);
-        final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
-
-        assertContains(event.getCreatedData(), ROOT_PATH);
-        assertEmpty(event.getUpdatedData());
-        assertEmpty(event.getRemovedPaths());
+        Set<ListInRoot> expListInRoot = new HashSet<>(expected.getListInRoot());
+        Set<ListInRoot> actualListInRoot = actual.getListInRoot().stream()
+                .map(list -> new ListInRootBuilder(list).build()).collect(Collectors.toSet());
+        return expListInRoot.equals(actualListInRoot);
     }
 }

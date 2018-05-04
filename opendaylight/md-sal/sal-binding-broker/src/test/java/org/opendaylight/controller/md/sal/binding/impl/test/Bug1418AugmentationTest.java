@@ -8,31 +8,29 @@
 
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertContains;
-import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertEmpty;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.complexUsesAugment;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.leafOnlyUsesAugment;
+import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.path;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.top;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataChangeListenerTest;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeLeafOnlyUsesAugment;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUses;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUsesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
-public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest {
+public class Bug1418AugmentationTest extends AbstractDataTreeChangeListenerTest {
     private static final InstanceIdentifier<Top> TOP = InstanceIdentifier.create(Top.class);
     private static final InstanceIdentifier<TopLevelList> TOP_FOO = TOP.child(TopLevelList.class, TOP_FOO_KEY);
     private static final InstanceIdentifier<TreeLeafOnlyUsesAugment> SIMPLE_AUGMENT =
@@ -44,94 +42,105 @@ public class Bug1418AugmentationTest extends AbstractDataChangeListenerTest {
     private static final ListViaUsesKey LIST_VIA_USES_KEY_MOD =
             new ListViaUsesKey("list key modified");
 
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
+                BindingReflections.getModuleInfo(TreeComplexUsesAugment.class),
+                BindingReflections.getModuleInfo(TreeLeafOnlyUsesAugment.class));
+    }
+
     @Test
     public void leafOnlyAugmentationCreatedTest() {
-        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
-                AsyncDataBroker.DataChangeScope.SUBTREE, false);
+        TreeLeafOnlyUsesAugment leafOnlyUsesAugment = leafOnlyUsesAugment("test leaf");
+        final TestListener<TreeLeafOnlyUsesAugment> listener = createListener(CONFIGURATION, SIMPLE_AUGMENT,
+                added(path(TOP_FOO_KEY, TreeLeafOnlyUsesAugment.class), leafOnlyUsesAugment));
+
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf"));
+        writeTx.put(CONFIGURATION, TOP, top());
+        writeTx.put(CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
+        writeTx.put(CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment);
         assertCommit(writeTx.submit());
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
-        assertContains(event.getCreatedData(), SIMPLE_AUGMENT);
-        assertEmpty(event.getUpdatedData());
-        assertEmpty(event.getOriginalData());
-        assertEmpty(event.getRemovedPaths());
+
+        listener.verify();
     }
 
     @Test
     public void leafOnlyAugmentationUpdatedTest() {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf"));
+        writeTx.put(CONFIGURATION, TOP, top());
+        writeTx.put(CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
+        TreeLeafOnlyUsesAugment leafOnlyUsesAugmentBefore = leafOnlyUsesAugment("test leaf");
+        writeTx.put(CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugmentBefore);
         assertCommit(writeTx.submit());
-        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
-                AsyncDataBroker.DataChangeScope.SUBTREE);
+
+        TreeLeafOnlyUsesAugment leafOnlyUsesAugmentAfter = leafOnlyUsesAugment("test leaf changed");
+        final TestListener<TreeLeafOnlyUsesAugment> listener = createListener(CONFIGURATION, SIMPLE_AUGMENT,
+                added(path(TOP_FOO_KEY, TreeLeafOnlyUsesAugment.class), leafOnlyUsesAugmentBefore),
+                replaced(path(TOP_FOO_KEY, TreeLeafOnlyUsesAugment.class), leafOnlyUsesAugmentBefore,
+                    leafOnlyUsesAugmentAfter));
+
         writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf changed"));
+        writeTx.put(CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugmentAfter);
         assertCommit(writeTx.submit());
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
-        assertContains(event.getUpdatedData(), SIMPLE_AUGMENT);
-        assertContains(event.getOriginalData(), SIMPLE_AUGMENT);
-        assertEmpty(event.getCreatedData());
-        assertEmpty(event.getRemovedPaths());
+
+        listener.verify();
     }
 
     @Test
     public void leafOnlyAugmentationDeletedTest() {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment("test leaf"));
+        writeTx.put(CONFIGURATION, TOP, top());
+        writeTx.put(CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
+        TreeLeafOnlyUsesAugment leafOnlyUsesAugment = leafOnlyUsesAugment("test leaf");
+        writeTx.put(CONFIGURATION, SIMPLE_AUGMENT, leafOnlyUsesAugment);
         assertCommit(writeTx.submit());
-        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT,
-                AsyncDataBroker.DataChangeScope.SUBTREE);
+
+        final TestListener<TreeLeafOnlyUsesAugment> listener = createListener(CONFIGURATION, SIMPLE_AUGMENT,
+                added(path(TOP_FOO_KEY, TreeLeafOnlyUsesAugment.class), leafOnlyUsesAugment),
+                deleted(path(TOP_FOO_KEY, TreeLeafOnlyUsesAugment.class), leafOnlyUsesAugment));
+
         writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.delete(LogicalDatastoreType.CONFIGURATION, SIMPLE_AUGMENT);
+        writeTx.delete(CONFIGURATION, SIMPLE_AUGMENT);
         assertCommit(writeTx.submit());
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
-        assertContains(event.getRemovedPaths(), SIMPLE_AUGMENT);
-        assertContains(event.getOriginalData(), SIMPLE_AUGMENT);
-        assertEmpty(event.getCreatedData());
-        assertEmpty(event.getUpdatedData());
+
+        listener.verify();
     }
 
     @Test
     public void complexAugmentationCreatedTest() {
-        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT,
-                AsyncDataBroker.DataChangeScope.SUBTREE, false);
+        TreeComplexUsesAugment complexUsesAugment = complexUsesAugment(LIST_VIA_USES_KEY);
+        final TestListener<TreeComplexUsesAugment>  listener = createListener(CONFIGURATION, COMPLEX_AUGMENT,
+                added(path(TOP_FOO_KEY, TreeComplexUsesAugment.class), complexUsesAugment));
+
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugment(LIST_VIA_USES_KEY));
+        writeTx.put(CONFIGURATION, TOP, top());
+        writeTx.put(CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
+        writeTx.put(CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugment);
         assertCommit(writeTx.submit());
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
-        assertContains(event.getCreatedData(), COMPLEX_AUGMENT);
-        assertContains(event.getCreatedData(), COMPLEX_AUGMENT.child(ListViaUses.class, LIST_VIA_USES_KEY));
-        assertEmpty(event.getUpdatedData());
-        assertEmpty(event.getOriginalData());
-        assertEmpty(event.getRemovedPaths());
+
+        listener.verify();
     }
 
     @Test
     public void complexAugmentationUpdatedTest() {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP, top());
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugment(LIST_VIA_USES_KEY));
+        writeTx.put(CONFIGURATION, TOP, top());
+        writeTx.put(CONFIGURATION, TOP_FOO, topLevelList(new TopLevelListKey(TOP_FOO_KEY)));
+        TreeComplexUsesAugment complexUsesAugmentBefore = complexUsesAugment(LIST_VIA_USES_KEY);
+        writeTx.put(CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugmentBefore);
         assertCommit(writeTx.submit());
-        final TestListener listener = createListener(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT,
-                AsyncDataBroker.DataChangeScope.SUBTREE);
+
+        TreeComplexUsesAugment complexUsesAugmentAfter = complexUsesAugment(LIST_VIA_USES_KEY_MOD);
+
+        final TestListener<TreeComplexUsesAugment> listener = createListener(CONFIGURATION, COMPLEX_AUGMENT,
+                added(path(TOP_FOO_KEY, TreeComplexUsesAugment.class), complexUsesAugmentBefore),
+                replaced(path(TOP_FOO_KEY, TreeComplexUsesAugment.class), complexUsesAugmentBefore,
+                        complexUsesAugmentAfter));
+
         writeTx = getDataBroker().newWriteOnlyTransaction();
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugment(LIST_VIA_USES_KEY_MOD));
+        writeTx.put(CONFIGURATION, COMPLEX_AUGMENT, complexUsesAugmentAfter);
         assertCommit(writeTx.submit());
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event = listener.event();
-        assertContains(event.getUpdatedData(), COMPLEX_AUGMENT);
-        assertContains(event.getCreatedData(), COMPLEX_AUGMENT.child(ListViaUses.class, LIST_VIA_USES_KEY_MOD));
-        assertContains(event.getRemovedPaths(), COMPLEX_AUGMENT.child(ListViaUses.class, LIST_VIA_USES_KEY));
-        assertContains(event.getOriginalData(), COMPLEX_AUGMENT);
-        assertContains(event.getOriginalData(), COMPLEX_AUGMENT.child(ListViaUses.class, LIST_VIA_USES_KEY));
+
+        listener.verify();
     }
 }

@@ -7,140 +7,95 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.added;
+import static org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.deleted;
+import static org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.replaced;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class WildcardedScopeBaseTest extends DefaultDataChangeListenerTestSuite {
+public class WildcardedScopeBaseTest extends DefaultDataTreeChangeListenerTestSuite {
 
     private static final YangInstanceIdentifier TOP_LEVEL_LIST_ALL = TOP_LEVEL.node(TopLevelList.QNAME).node(
             TopLevelList.QNAME);
 
     @Override
-    protected void customizeTask(final DatastoreTestTask task) {
-        task.changeListener(TOP_LEVEL_LIST_ALL, DataChangeScope.BASE);
+    protected void putTopLevelOneNestedSetup(final DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)));
     }
 
     @Override
-    public void putTopLevelOneNested(final DatastoreTestTask task) throws Exception {
-
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
-
-        assertNotNull(change);
-
-        /*
-         * Created data must not contain nested-list item, since that is two-level deep.
-         */
-        assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR));
-        assertContains(change.getCreatedData(), path(FOO));
-
-        assertEmpty(change.getUpdatedData());
-        assertEmpty(change.getRemovedPaths());
-
+    protected void putTopLevelOneNestedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
     }
 
     @Override
-    public void replaceTopLevelNestedChanged(final DatastoreTestTask task) throws Exception {
-
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
-        assertNotNull(change);
-        /*
-         * Created data must NOT contain nested-list item since scope is base, and change is two
-         * level deep.
-         */
-        assertNotContains(change.getCreatedData(), path(FOO, BAZ));
-        assertContains(change.getUpdatedData(), path(FOO));
-        assertNotContains(change.getUpdatedData(), TOP_LEVEL);
-        /*
-         * Removed data must NOT contain nested-list item since scope is base, and change is two
-         * level deep.
-         */
-        assertNotContains(change.getRemovedPaths(), path(FOO, BAR));
-
+    protected void replaceTopLevelNestedSetup(DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)), replaced(path(FOO)));
     }
 
     @Override
-    protected void putTopLevelWithTwoNested(final DatastoreTestTask task) throws Exception {
-
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
-        assertNotNull(change);
-        assertFalse(change.getCreatedData().isEmpty());
-
-        // Base event should contain only changed item, no details about child.
-        assertContains(change.getCreatedData(), path(FOO));
-        assertNotContains(change.getCreatedData(), TOP_LEVEL,path(FOO, BAR), path(FOO, BAZ));
-        assertEmpty(change.getUpdatedData());
-        assertEmpty(change.getRemovedPaths());
-
+    protected void replaceTopLevelNestedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
     }
 
     @Override
-    protected void twoNestedExistsOneIsDeleted(final DatastoreTestTask task) throws Exception {
-
-        /*
-         * Base listener should be notified only and only if actual node changed its state,
-         * since deletion of child, did not result in change of node we are listening
-         * for, we should not be getting data change event
-         * and this means settable future containing receivedDataChangeEvent is not done.
-         *
-         */
-        task.verifyNoChangeEvent();
+    protected void putTopLevelWithTwoNestedSetup(final DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)));
     }
 
     @Override
-    public void nestedListExistsRootDeleted(final DatastoreTestTask task) throws Exception {
-
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
-
-        assertEmpty(change.getCreatedData());
-        assertEmpty(change.getUpdatedData());
-
-        assertNotContains(change.getUpdatedData(), TOP_LEVEL);
-        /*
-         *  Scope base listener event should contain top-level-list item and nested list path
-         *  and should not contain baz, bar which are two-level deep
-         */
-        assertContains(change.getRemovedPaths(), path(FOO));
-        assertNotContains(change.getRemovedPaths(),path(FOO, BAZ),path(FOO,BAR));
+    protected void putTopLevelWithTwoNestedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
     }
 
     @Override
-    protected void existingOneNestedWriteAdditionalNested(final DatastoreTestTask task) throws Exception {
-        /*
-         * One listener should be notified only and only if actual node changed its state,
-         * since deletion of nested child (in this case /nested-list/nested-list[foo],
-         * did not result in change of node we are listening
-         * for, we should not be getting data change event
-         * and this means settable future containing receivedDataChangeEvent is not done.
-         *
-         */
-        task.verifyNoChangeEvent();
+    protected void twoNestedExistsOneIsDeletedSetup(DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)));
     }
 
     @Override
-    protected void existingTopWriteTwoNested(final DatastoreTestTask task) throws Exception {
-        /*
-         * One listener should be notified only and only if actual node changed its state,
-         * since deletion of nested child (in this case /nested-list/nested-list[foo],
-         * did not result in change of node we are listening
-         * for, we should not be getting data change event
-         * and this means settable future containing receivedDataChangeEvent is not done.
-         *
-         */
-        task.verifyNoChangeEvent();
+    protected void twoNestedExistsOneIsDeletedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
     }
 
     @Override
-    protected void existingTopWriteSibling(final DatastoreTestTask task) throws Exception {
-        AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change = task.getChangeEvent();
+    protected void nestedListExistsRootDeletedSetup(DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)), deleted(path(FOO)));
+    }
 
-        assertContains(change.getCreatedData(), path(FOO_SIBLING));
-        assertNotContains(change.getUpdatedData(), path(FOO), TOP_LEVEL);
-        assertEmpty(change.getRemovedPaths());
+    @Override
+    protected void nestedListExistsRootDeletedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
+    }
+
+    @Override
+    protected void existingOneNestedWriteAdditionalNestedSetup(DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)));
+    }
+
+    @Override
+    protected void existingOneNestedWriteAdditionalNestedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
+    }
+
+    @Override
+    protected void existingTopWriteTwoNestedSetup(DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)));
+    }
+
+    @Override
+    protected void existingTopWriteTwoNestedVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
+    }
+
+    @Override
+    protected void existingTopWriteSiblingSetup(DatastoreTestTask task) {
+        task.changeListener(TOP_LEVEL_LIST_ALL, added(path(FOO)), added(path(FOO_SIBLING)));
+    }
+
+    @Override
+    protected void existingTopWriteSiblingVerify(final DatastoreTestTask task) {
+        task.verifyChangeEvents();
     }
 }

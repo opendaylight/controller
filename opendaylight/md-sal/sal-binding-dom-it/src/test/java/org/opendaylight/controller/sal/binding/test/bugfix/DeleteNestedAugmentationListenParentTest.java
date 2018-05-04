@@ -8,19 +8,15 @@
 
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
-import static org.junit.Assert.assertFalse;
-
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugmentBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
@@ -32,10 +28,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
-public class DeleteNestedAugmentationListenParentTest extends AbstractDataServiceTest {
+public class DeleteNestedAugmentationListenParentTest extends AbstractDataTreeChangeListenerTest {
 
     private static final TopLevelListKey FOO_KEY = new TopLevelListKey("foo");
 
@@ -53,25 +50,31 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
             .child(List11.class,LIST11_KEY)
             .build();
 
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
+                BindingReflections.getModuleInfo(List11SimpleAugment.class));
+    }
 
     @Test
     public void deleteChildListenParent() throws InterruptedException, ExecutionException, TimeoutException {
-        DataBroker dataBroker = testContext.getDataBroker();
+        DataBroker dataBroker = getDataBroker();
         final WriteTransaction initTx = dataBroker.newWriteOnlyTransaction();
 
-        initTx.put(LogicalDatastoreType.OPERATIONAL, LIST11_PATH, createList11(), true);
+        List11 list11Before = createList11();
+        initTx.put(LogicalDatastoreType.OPERATIONAL, LIST11_PATH, list11Before, true);
         initTx.submit().get(5, TimeUnit.SECONDS);
 
-        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
-        dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, LIST11_PATH,
-            change -> event.set(change), DataChangeScope.SUBTREE);
+        List11 list11After = new List11Builder().setKey(LIST11_KEY).setAttrStr("good").build();
+
+        final TestListener<List11> listener = createListener(LogicalDatastoreType.OPERATIONAL, LIST11_PATH,
+                added(LIST11_PATH, list11Before), subtreeModified(LIST11_PATH, list11Before, list11After));
 
         final WriteTransaction deleteTx = dataBroker.newWriteOnlyTransaction();
         deleteTx.delete(LogicalDatastoreType.OPERATIONAL, LIST11_PATH.augmentation(List11SimpleAugment.class));
         deleteTx.submit().get(5, TimeUnit.SECONDS);
 
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get();
-        assertFalse(receivedEvent.getRemovedPaths().contains(TLL_COMPLEX_AUGMENT_PATH));
+        listener.verify();
     }
 
     private List11 createList11() {
@@ -82,5 +85,4 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
             .setAttrStr("good");
         return builder.build();
     }
-
 }

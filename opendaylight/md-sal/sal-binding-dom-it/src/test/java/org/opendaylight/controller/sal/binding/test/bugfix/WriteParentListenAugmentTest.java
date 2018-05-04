@@ -9,17 +9,14 @@
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUsesBuilder;
@@ -27,11 +24,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
-public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
+public class WriteParentListenAugmentTest extends AbstractDataTreeChangeListenerTest {
 
     private static final String TLL_NAME = "foo";
 
@@ -45,34 +42,37 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
     private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_TLL_PATH = InstanceIdentifier
             .builder(Top.class).child(TopLevelList.class, TLL_KEY).augmentation(TreeComplexUsesAugment.class).build();
 
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
+                BindingReflections.getModuleInfo(TreeComplexUsesAugment.class));
+    }
+
     @Test
     public void writeNodeListenAugment() throws Exception {
 
-        final SettableFuture<AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
-        DataBroker dataBroker = testContext.getDataBroker();
-        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> dclRegistration =
-                dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, AUGMENT_WILDCARDED_PATH,
-                    change -> event.set(change), DataChangeScope.SUBTREE);
+        DataBroker dataBroker = getDataBroker();
+
+        final TreeComplexUsesAugment treeComplexUsesAugment = treeComplexUsesAugment("one");
+
+        final TestListener<TreeComplexUsesAugment> listener = createListener(OPERATIONAL, AUGMENT_WILDCARDED_PATH,
+                added(AUGMENT_TLL_PATH, treeComplexUsesAugment));
 
         final WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
 
-        TopLevelList tll = new TopLevelListBuilder()
-                .setKey(TLL_KEY)
-                .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment("one")).build();
-        transaction.put(LogicalDatastoreType.OPERATIONAL, TLL_INSTANCE_ID_BA, tll, true);
+        TopLevelList tll = new TopLevelListBuilder().setKey(TLL_KEY)
+                .addAugmentation(TreeComplexUsesAugment.class, treeComplexUsesAugment).build();
+        transaction.put(OPERATIONAL, TLL_INSTANCE_ID_BA, tll, true);
         transaction.submit().get(5, TimeUnit.SECONDS);
 
-        AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> receivedEvent = event.get(1000, TimeUnit.MILLISECONDS);
-        assertTrue(receivedEvent.getCreatedData().containsKey(AUGMENT_TLL_PATH));
-
-        dclRegistration.close();
+        listener.verify();
 
         final WriteTransaction transaction2 = dataBroker.newWriteOnlyTransaction();
-        transaction2.put(LogicalDatastoreType.OPERATIONAL, AUGMENT_TLL_PATH, treeComplexUsesAugment("two"));
+        transaction2.put(OPERATIONAL, AUGMENT_TLL_PATH, treeComplexUsesAugment("two"));
         transaction2.submit().get(5, TimeUnit.SECONDS);
 
         TreeComplexUsesAugment readedAug = dataBroker.newReadOnlyTransaction().read(
-                LogicalDatastoreType.OPERATIONAL, AUGMENT_TLL_PATH).get(5, TimeUnit.SECONDS).get();
+                OPERATIONAL, AUGMENT_TLL_PATH).get(5, TimeUnit.SECONDS).get();
         assertEquals("two", readedAug.getContainerWithUses().getLeafFromGrouping());
     }
 
