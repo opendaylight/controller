@@ -31,8 +31,6 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCr
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
@@ -42,7 +40,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
@@ -160,28 +157,6 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    @Deprecated
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-                                              ListenerRegistration<L> registerChangeListener(
-        final YangInstanceIdentifier path, final L listener,
-        final AsyncDataBroker.DataChangeScope scope) {
-
-        Preconditions.checkNotNull(path, "path should not be null");
-        Preconditions.checkNotNull(listener, "listener should not be null");
-
-        LOG.debug("Registering listener: {} for path: {} scope: {}", listener, path, scope);
-
-        String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
-
-        final DataChangeListenerRegistrationProxy listenerRegistrationProxy =
-                new DataChangeListenerRegistrationProxy(shardName, actorContext, listener);
-        listenerRegistrationProxy.init(path, scope);
-
-        return listenerRegistrationProxy;
     }
 
     @Override

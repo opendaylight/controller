@@ -59,7 +59,6 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -68,7 +67,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
@@ -1161,59 +1159,6 @@ public class DistributedDataStoreIntegrationTest {
 
                     txChain.close();
                     broker.close();
-                }
-            }
-        };
-    }
-
-    @Test
-    public void testChangeListenerRegistration() throws Exception {
-        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
-            {
-                try (AbstractDataStore dataStore = setupAbstractDataStore(
-                        testParameter, "testChangeListenerRegistration", "test-1")) {
-
-                    testWriteTransaction(dataStore, TestModel.TEST_PATH,
-                            ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-
-                    final MockDataChangeListener listener = new MockDataChangeListener(1);
-
-                    final ListenerRegistration<MockDataChangeListener> listenerReg = dataStore
-                            .registerChangeListener(TestModel.TEST_PATH, listener, DataChangeScope.SUBTREE);
-
-                    assertNotNull("registerChangeListener returned null", listenerReg);
-
-                    IntegrationTestKit.verifyShardState(dataStore, "test-1",
-                        state -> assertEquals("getDataChangeListenerActors", 1,
-                                state.getDataChangeListenerActors().size()));
-
-                    // Wait for the initial notification
-                    listener.waitForChangeEvents(TestModel.TEST_PATH);
-                    listener.reset(2);
-
-                    // Write 2 updates.
-                    testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
-
-                    YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                            .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
-                    testWriteTransaction(dataStore, listPath,
-                            ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
-
-                    // Wait for the 2 updates.
-                    listener.waitForChangeEvents(TestModel.OUTER_LIST_PATH, listPath);
-                    listenerReg.close();
-
-                    IntegrationTestKit.verifyShardState(dataStore, "test-1",
-                        state -> assertEquals("getDataChangeListenerActors", 0,
-                                state.getDataChangeListenerActors().size()));
-
-                    testWriteTransaction(dataStore,
-                            YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                                    .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2).build(),
-                            ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2));
-
-                    listener.expectNoMoreChanges("Received unexpected change after close");
                 }
             }
         };

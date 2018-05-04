@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.compat;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingObject;
@@ -23,7 +21,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.databroker.AbstractDOMBroker;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.compat.LegacyDOMStoreAdapter;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
@@ -35,7 +32,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -214,17 +210,6 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         });
 
         return legacyChain.get();
-    }
-
-    @Override
-    public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-            final YangInstanceIdentifier path, final DOMDataChangeListener listener,
-            final DataChangeScope triggeringScope) {
-        org.opendaylight.mdsal.dom.spi.store.DOMStore potentialStore = delegate().getTxFactories().get(convert(store));
-        checkState(potentialStore != null, "Requested logical data store is not available.");
-        checkState(potentialStore instanceof DistributedDataStoreInterface,
-                "Requested logical data store does not support DataChangeListener.");
-        return ((DistributedDataStoreInterface)potentialStore).registerChangeListener(path, listener, triggeringScope);
     }
 
     private static org.opendaylight.mdsal.common.api.LogicalDatastoreType convert(LogicalDatastoreType datastoreType) {

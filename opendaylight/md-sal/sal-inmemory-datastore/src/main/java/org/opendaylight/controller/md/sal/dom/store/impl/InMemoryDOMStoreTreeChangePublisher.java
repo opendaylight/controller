@@ -48,6 +48,11 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
         this.notificationManager = notificationManager;
     }
 
+    QueuedNotificationManager<AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate>
+            getNotificationManager() {
+        return notificationManager;
+    }
+
     @Override
     protected void notifyListeners(final Collection<AbstractDOMDataTreeChangeListenerRegistration<?>> registrations,
             final YangInstanceIdentifier path, final DataTreeCandidateNode node) {
