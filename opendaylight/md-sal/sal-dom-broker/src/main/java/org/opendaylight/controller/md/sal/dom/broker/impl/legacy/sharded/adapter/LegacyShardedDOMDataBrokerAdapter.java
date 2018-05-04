@@ -14,19 +14,15 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * DOMDataBroker implementation that forwards calls to
@@ -72,17 +68,6 @@ public class LegacyShardedDOMDataBrokerAdapter implements DOMDataBroker {
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         return new ShardedDOMDataBrokerDelegatingWriteTransaction(newTransactionIdentifier(),
                                                                   delegateDataBroker.newWriteOnlyTransaction());
-    }
-
-    @Override
-    public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-                                                                                  final YangInstanceIdentifier path,
-                                                                                  final DOMDataChangeListener listener,
-                                                                                  final DataChangeScope
-                                                                                              triggeringScope) {
-        throw new UnsupportedOperationException(
-                "Registering data change listeners is not supported in " + "md-sal forwarding data broker");
-
     }
 
     @Override

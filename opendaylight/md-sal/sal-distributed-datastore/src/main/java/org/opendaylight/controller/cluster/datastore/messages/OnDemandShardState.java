@@ -19,15 +19,10 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
  */
 public class OnDemandShardState extends OnDemandRaftState {
     private Collection<ActorSelection> treeChangeListenerActors;
-    private Collection<ActorSelection> dataChangeListenerActors;
     private Collection<ActorRef> commitCohortActors;
 
     public Collection<ActorSelection> getTreeChangeListenerActors() {
         return treeChangeListenerActors;
-    }
-
-    public Collection<ActorSelection> getDataChangeListenerActors() {
-        return dataChangeListenerActors;
     }
 
     public Collection<ActorRef> getCommitCohortActors() {
@@ -48,11 +43,6 @@ public class OnDemandShardState extends OnDemandRaftState {
 
         public Builder treeChangeListenerActors(Collection<ActorSelection> actors) {
             state.treeChangeListenerActors = actors;
-            return self();
-        }
-
-        public Builder dataChangeListenerActors(Collection<ActorSelection> actors) {
-            state.dataChangeListenerActors = actors;
             return self();
         }
 

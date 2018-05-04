@@ -159,8 +159,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * ({@link AsyncConfigurationCommitHandler}) if the transaction changes the data tree.
      *
      * <p>
-     * The effects of a successful commit of data depends on data change listeners
-     * ({@link AsyncDataChangeListener}) and commit participants
+     * The effects of a successful commit of data depends on data tree change listeners and commit participants
      * ({@link AsyncConfigurationCommitHandler}) that are registered with the data broker.
      *
      * <h3>Example usage:</h3>

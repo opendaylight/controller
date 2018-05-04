@@ -15,13 +15,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -148,22 +146,13 @@ public class TracingBroker implements TracingDOMDataBroker {
         }
 
         @SuppressWarnings("checkstyle:hiddenField")
-        public boolean subtreesOverlap(YangInstanceIdentifier iid, LogicalDatastoreType store,
-                                                                AsyncDataBroker.DataChangeScope scope) {
+        public boolean subtreesOverlap(YangInstanceIdentifier iid, LogicalDatastoreType store) {
             if (this.store != null && !this.store.equals(store)) {
                 return false;
             }
 
             String otherIidString = toIidCompString(iid);
-            switch (scope) {
-                case BASE:
-                    return isParent(iidString, otherIidString);
-                case ONE: //for now just treat like SUBTREE, even though it's not
-                case SUBTREE:
-                    return isParent(iidString, otherIidString) || isParent(otherIidString, iidString);
-                default:
-                    return false;
-            }
+            return isParent(iidString, otherIidString) || isParent(otherIidString, iidString);
         }
 
         @SuppressWarnings("checkstyle:hiddenField")
@@ -232,14 +221,13 @@ public class TracingBroker implements TracingDOMDataBroker {
         writeWatches.add(watch);
     }
 
-    private boolean isRegistrationWatched(YangInstanceIdentifier iid,
-                                                            LogicalDatastoreType store, DataChangeScope scope) {
+    private boolean isRegistrationWatched(YangInstanceIdentifier iid, LogicalDatastoreType store) {
         if (registrationWatches.isEmpty()) {
             return true;
         }
 
         for (Watch regInterest : registrationWatches) {
-            if (regInterest.subtreesOverlap(iid, store, scope)) {
+            if (regInterest.subtreesOverlap(iid, store)) {
                 return true;
             }
         }
@@ -317,17 +305,6 @@ public class TracingBroker implements TracingDOMDataBroker {
     }
 
     @Override
-    public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(
-                                                        LogicalDatastoreType store, YangInstanceIdentifier yiid,
-                                                        DOMDataChangeListener listener, DataChangeScope scope) {
-        if (isRegistrationWatched(yiid, store, scope)) {
-            LOG.warn("Registration (registerDataChangeListener) for {} from {}",
-                    toPathString(yiid), getStackSummary());
-        }
-        return delegate.registerDataChangeListener(store, yiid, listener, scope);
-    }
-
-    @Override
     public DOMTransactionChain createTransactionChain(TransactionChainListener transactionChainListener) {
         return new TracingTransactionChain(
                 delegate.createTransactionChain(transactionChainListener), this, transactionChainsRegistry);
@@ -355,7 +332,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
                     @Nonnull DOMDataTreeIdentifier domDataTreeIdentifier, @Nonnull L listener) {
                 if (isRegistrationWatched(domDataTreeIdentifier.getRootIdentifier(),
-                        domDataTreeIdentifier.getDatastoreType(), DataChangeScope.SUBTREE)) {
+                        domDataTreeIdentifier.getDatastoreType())) {
                     LOG.warn("{} registration (registerDataTreeChangeListener) for {} from {}.",
                             listener instanceof ClusteredDOMDataTreeChangeListener ? "Clustered" : "Non-clustered",
                             toPathString(domDataTreeIdentifier.getRootIdentifier()), getStackSummary());
