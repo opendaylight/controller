@@ -14,8 +14,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -24,7 +22,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -66,12 +63,6 @@ public class LegacyDOMStoreAdapter extends ForwardingObject implements DOMStore,
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         return new DOMStoreTransactionAdapter(delegate().newReadWriteTransaction());
-    }
-
-    @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L>
-            registerChangeListener(YangInstanceIdentifier path, L listener, DataChangeScope scope) {
-        return delegate().registerChangeListener(path, listener, scope);
     }
 
     @Override

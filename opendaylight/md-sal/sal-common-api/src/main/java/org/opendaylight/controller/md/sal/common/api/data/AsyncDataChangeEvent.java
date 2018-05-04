@@ -15,36 +15,13 @@ import org.opendaylight.yangtools.concepts.Path;
 /**
  * An event which contains a capture of changes in a data subtree.
  *
- * <p>
- * Represents a notification indicating that some data at or under a particular
- * path has changed. The notification contains a capture of the changes in the data
- * subtree. This event is triggered by successful application of modifications
- * from a transaction on the global data tree. Use the
- * {@link AsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener,
- *     AsyncDataBroker.DataChangeScope)}
- * method to register a listener for data change events.
- *
- * <p>
- * A listener will only receive notifications for changes to data under the path
- * they register for. See
- * {@link AsyncDataBroker#registerDataChangeListener(LogicalDatastoreType, Path, AsyncDataChangeListener,
- *     AsyncDataBroker.DataChangeScope)}
- * to learn more about registration scopes.
- *
- * <p>
- * The entire subtree under the path will be provided via instance methods of Data
- * Change Event even if just a leaf node changes.
- *
- * <p>
- * <b>Implementation Note:</b> This interface is not intended to be implemented
- * by users of MD-SAL, but only to be consumed by them.
- *
  * @param <P>
  *            Type of path (subtree identifier), which represents location in
  *            tree
  * @param <D>
  *            Type of data (payload), which represents data payload
  */
+@Deprecated
 public interface AsyncDataChangeEvent<P extends Path<P>, D> extends Immutable {
     /**
      * Returns a map of paths and newly created objects, which were introduced by
