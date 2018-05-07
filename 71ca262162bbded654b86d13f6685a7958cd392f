@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5fe94c2f_2eddfc25",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-07T12:16:11Z",
+      "side": 1,
+      "message": "we HAVE switched to the to archetypes project, and this is about to be removed in c/71043, which this conflicts with - woud you therefore be willing to Abandon this?",
+      "revId": "71ca262162bbded654b86d13f6685a7958cd392f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
