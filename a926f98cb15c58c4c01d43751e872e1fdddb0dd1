@@ -16,6 +16,24 @@
       "revId": "a926f98cb15c58c4c01d43751e872e1fdddb0dd1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03029411_59f330ed",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/README.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-08T08:04:54Z",
+      "side": 1,
+      "message": "Done (removed)",
+      "parentUuid": "694437fb_154402eb",
+      "revId": "a926f98cb15c58c4c01d43751e872e1fdddb0dd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
