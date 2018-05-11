@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec2b3e86_af42b404",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/compat/LegacyDOMDataBrokerAdapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-05-11T16:11:12Z",
+      "side": 1,
+      "message": "SettableFuture is already a FluentFuture, this is not needed.",
+      "range": {
+        "startLine": 323,
+        "startChar": 19,
+        "endLine": 323,
+        "endChar": 51
+      },
+      "revId": "992524fea1b7b9e3c24dd0d33a84db5be70ad3b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
