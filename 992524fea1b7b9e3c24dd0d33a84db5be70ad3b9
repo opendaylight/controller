@@ -22,6 +22,30 @@
       "revId": "992524fea1b7b9e3c24dd0d33a84db5be70ad3b9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "974c547f_14a64c04",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/compat/LegacyDOMDataBrokerAdapter.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-05-15T16:58:10Z",
+      "side": 1,
+      "message": "ahh right - duh - my first experience with FluentFuture.",
+      "parentUuid": "ec2b3e86_af42b404",
+      "range": {
+        "startLine": 323,
+        "startChar": 19,
+        "endLine": 323,
+        "endChar": 51
+      },
+      "revId": "992524fea1b7b9e3c24dd0d33a84db5be70ad3b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
