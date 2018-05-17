@@ -52,4 +52,10 @@ module opendaylight-mdsal-list-test {
             uses two-level-list;
         }
     }
+
+    rpc get-top {
+        output {
+            uses two-level-list;
+        }
+    }
 }
