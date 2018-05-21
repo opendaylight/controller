@@ -737,7 +737,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             } catch (ConflictingModificationAppliedException e) {
                 LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.getIdentifier(),
                     e.getPath());
-                cause = new OptimisticLockFailedException("Optimistic lock failed.", e);
+                cause = new OptimisticLockFailedException("Conflicting modification for path " + e.getPath(), e);
             } catch (DataValidationFailedException e) {
                 LOG.warn("{}: Store Tx {}: Data validation failed for path {}.", logContext, cohort.getIdentifier(),
                     e.getPath(), e);
@@ -746,7 +746,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 // precondition log, it should allow us to understand what went on.
                 LOG.debug("{}: Store Tx {}: modifications: {} tree: {}", cohort.getIdentifier(), modification,
                         dataTree);
-                cause = new TransactionCommitFailedException("Data did not pass validation.", e);
+                cause = new TransactionCommitFailedException("Data validation failed for path " + e.getPath(), e);
             } catch (Exception e) {
                 LOG.warn("{}: Unexpected failure in validation phase", logContext, e);
                 cause = e;
