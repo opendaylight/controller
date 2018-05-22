@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -459,7 +458,7 @@ public class ConcurrentDOMDataBrokerTest {
 
             domDataReadWriteTransaction.delete(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
 
-            domDataReadWriteTransaction.submit();
+            domDataReadWriteTransaction.commit();
 
             assertTrue(latch.await(10, TimeUnit.SECONDS));
 
@@ -509,7 +508,7 @@ public class ConcurrentDOMDataBrokerTest {
             domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY,
                     mock(NormalizedNode.class));
 
-            domDataReadWriteTransaction.submit();
+            domDataReadWriteTransaction.commit();
 
             assertTrue(latch.await(10, TimeUnit.SECONDS));
 
@@ -563,15 +562,13 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
                 futureExecutor)) {
 
-            CheckedFuture<Void, TransactionCommitFailedException> submit1 =
-                    dataBroker.newWriteOnlyTransaction().submit();
+            FluentFuture<? extends CommitInfo> submit1 = dataBroker.newWriteOnlyTransaction().commit();
 
             assertNotNull(submit1);
 
             submit1.get();
 
-            CheckedFuture<Void, TransactionCommitFailedException> submit2 =
-                    dataBroker.newReadWriteTransaction().submit();
+            FluentFuture<? extends CommitInfo> submit2 = dataBroker.newReadWriteTransaction().commit();
 
             assertNotNull(submit2);
 
