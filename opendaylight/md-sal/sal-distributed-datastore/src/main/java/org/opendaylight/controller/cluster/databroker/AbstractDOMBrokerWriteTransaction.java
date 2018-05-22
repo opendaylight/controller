@@ -10,10 +10,8 @@ package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +20,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -126,12 +122,6 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         while (future == null);
 
         return future.cancel(false);
-    }
-
-    @Override
-    public CheckedFuture<Void, TransactionCommitFailedException> submit() {
-        return MappingCheckedFuture.create(commit().transform(ignored -> null,
-                MoreExecutors.directExecutor()), TransactionCommitFailedExceptionMapper.COMMIT_ERROR_MAPPER);
     }
 
     @Override
