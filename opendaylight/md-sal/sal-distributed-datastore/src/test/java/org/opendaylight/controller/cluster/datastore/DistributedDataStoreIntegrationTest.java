@@ -71,7 +71,6 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
 import org.opendaylight.mdsal.common.api.TransactionChainListener;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
@@ -931,12 +930,12 @@ public class DistributedDataStoreIntegrationTest {
                     final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
                     DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-                    final List<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
+                    final List<ListenableFuture<?>> futures = new ArrayList<>();
 
                     final DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
                     writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, CarsModel.emptyContainer());
                     writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-                    futures.add(writeTx.submit());
+                    futures.add(writeTx.commit());
 
                     int numCars = 100;
                     for (int i = 0; i < numCars; i++) {
@@ -945,11 +944,11 @@ public class DistributedDataStoreIntegrationTest {
                         rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.newCarPath("car" + i),
                                 CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
 
-                        futures.add(rwTx.submit());
+                        futures.add(rwTx.commit());
                     }
 
-                    for (final CheckedFuture<Void, TransactionCommitFailedException> f : futures) {
-                        f.checkedGet();
+                    for (final ListenableFuture<?> f : futures) {
+                        f.get(5, TimeUnit.SECONDS);
                     }
 
                     final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
@@ -1102,9 +1101,9 @@ public class DistributedDataStoreIntegrationTest {
                     writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
                     try {
-                        writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+                        writeTx.commit().get(5, TimeUnit.SECONDS);
                         fail("Expected TransactionCommitFailedException");
-                    } catch (final TransactionCommitFailedException e) {
+                    } catch (final ExecutionException e) {
                         // Expected
                     }
 
@@ -1148,9 +1147,9 @@ public class DistributedDataStoreIntegrationTest {
                     // succeeds b/c deep validation is not
                     // done for put for performance reasons.
                     try {
-                        writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+                        writeTx.commit().get(5, TimeUnit.SECONDS);
                         fail("Expected TransactionCommitFailedException");
-                    } catch (final TransactionCommitFailedException e) {
+                    } catch (final ExecutionException e) {
                         // Expected
                     }
 
