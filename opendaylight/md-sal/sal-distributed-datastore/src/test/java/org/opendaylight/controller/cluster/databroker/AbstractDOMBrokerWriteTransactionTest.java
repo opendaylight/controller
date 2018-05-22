@@ -10,14 +10,16 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
@@ -54,37 +56,37 @@ public class AbstractDOMBrokerWriteTransactionTest {
     }
 
     @Test
-    public void readyRuntimeExceptionAndCancel() {
+    public void readyRuntimeExceptionAndCancel() throws InterruptedException {
         RuntimeException thrown = new RuntimeException();
         doThrow(thrown).when(domStoreWriteTransaction).ready();
         AbstractDOMBrokerWriteTransactionTestImpl abstractDOMBrokerWriteTransactionTestImpl =
                 new AbstractDOMBrokerWriteTransactionTestImpl();
 
-        CheckedFuture<Void, TransactionCommitFailedException> submitFuture =
-                abstractDOMBrokerWriteTransactionTestImpl.submit();
+        FluentFuture<? extends CommitInfo> submitFuture = abstractDOMBrokerWriteTransactionTestImpl.commit();
         try {
-            submitFuture.checkedGet();
+            submitFuture.get();
             Assert.fail("TransactionCommitFailedException expected");
-        } catch (TransactionCommitFailedException e) {
-            assertTrue(e.getCause() == thrown);
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof TransactionCommitFailedException);
+            assertTrue(e.getCause().getCause() == thrown);
             abstractDOMBrokerWriteTransactionTestImpl.cancel();
         }
     }
 
     @Test
-    public void submitRuntimeExceptionAndCancel() {
+    public void submitRuntimeExceptionAndCancel() throws InterruptedException {
         RuntimeException thrown = new RuntimeException();
         doThrow(thrown).when(abstractDOMTransactionFactory).commit(any(), any());
         AbstractDOMBrokerWriteTransactionTestImpl abstractDOMBrokerWriteTransactionTestImpl
                 = new AbstractDOMBrokerWriteTransactionTestImpl();
 
-        CheckedFuture<Void, TransactionCommitFailedException> submitFuture =
-                abstractDOMBrokerWriteTransactionTestImpl.submit();
+        FluentFuture<? extends CommitInfo> submitFuture = abstractDOMBrokerWriteTransactionTestImpl.commit();
         try {
-            submitFuture.checkedGet();
+            submitFuture.get();
             Assert.fail("TransactionCommitFailedException expected");
-        } catch (TransactionCommitFailedException e) {
-            assertTrue(e.getCause() == thrown);
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof TransactionCommitFailedException);
+            assertTrue(e.getCause().getCause() == thrown);
             abstractDOMBrokerWriteTransactionTestImpl.cancel();
         }
     }

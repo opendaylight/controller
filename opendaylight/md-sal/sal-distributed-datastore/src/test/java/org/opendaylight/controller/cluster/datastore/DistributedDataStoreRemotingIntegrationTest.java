@@ -82,7 +82,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionChainListener;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
@@ -525,9 +524,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
         try {
-            writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+            writeTx.commit().get(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final ExecutionException e) {
             // Expected
         }
 
@@ -562,9 +561,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
         try {
-            writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+            writeTx.commit().get(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final ExecutionException e) {
             // Expected
         }
 
