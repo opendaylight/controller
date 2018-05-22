@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "861fce47_61f24561",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-22T08:10:46Z",
+      "side": 1,
+      "message": "+3 for the e.getPath() but -0.5 reluctance to change the message - aren\u0027t people used to the wording here by now?  Hell there may even be scripts looking for this?  What about keeping it:\n\n    \"Optimistic lock failed for path: \" + e.getPath()",
+      "revId": "8f3ab11fdd541c571315b2199ebe55aabacb6776",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5665924f_64765c65",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-22T08:10:46Z",
+      "side": 1,
+      "message": "how about keeping the message as is, and just:\n\n    \"Data did not pass validation on patch: \" + e.getPath()",
+      "revId": "8f3ab11fdd541c571315b2199ebe55aabacb6776",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
