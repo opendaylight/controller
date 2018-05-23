@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "680a76ef_d32aa749",
+        "filename": "benchmark/dsbenchmark/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-05-23T13:33:43Z",
+      "side": 1,
+      "message": "We only need to set this once, don\u0027t we?",
+      "revId": "956e4d389e287c4ed63bc672a13a5f5b795261bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
