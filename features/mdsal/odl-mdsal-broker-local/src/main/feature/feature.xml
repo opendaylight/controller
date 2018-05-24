@@ -9,7 +9,7 @@
 <features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-mdsal-broker-local" version="${project.version}">
         <feature version="[3.1.0,4)">odl-lmax-3</feature>
-        <feature version="[2.0.3,3)">odl-yangtools-codec</feature>
+        <feature version="[2.0.5,3)">odl-yangtools-codec</feature>
         <bundle start-level="70">mvn:org.opendaylight.controller/sal-schema-service/${project.version}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${blueprint.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}" override="true">
