@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70bc977c_434deea2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-05-24T03:14:59Z",
+      "side": 1,
+      "message": "scratch that - ovsdb is no longer using it so it\u0027s removed",
+      "revId": "f71b560c7a9315881142007053cdeb7e82896a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
