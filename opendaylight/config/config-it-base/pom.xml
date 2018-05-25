@@ -20,7 +20,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>bundle</packaging>
 
   <properties>
-    <opendaylight.karaf.version>3.1.0</opendaylight.karaf.version>
+    <!-- This is used in abstractconfigtestbase.properties; we need the odlparent version -->
+    <opendaylight.karaf.version>${parent.parent.parent.version}</opendaylight.karaf.version>
   </properties>
 
   <dependencyManagement>
