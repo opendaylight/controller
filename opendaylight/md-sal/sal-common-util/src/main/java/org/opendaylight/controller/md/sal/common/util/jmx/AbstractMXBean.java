@@ -102,7 +102,7 @@ public abstract class AbstractMXBean {
                 try {
                     unregisterMBean(mbeanName);
                 } catch (MBeanRegistrationException | InstanceNotFoundException e) {
-                    LOG.warn("unregister mbean {} resulted in exception {} ", mbeanName, e);
+                    LOG.warn("unregister mbean {} resulted in exception", mbeanName, e);
                 }
             }
             server.registerMBean(this, mbeanName);
