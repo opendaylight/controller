@@ -410,7 +410,11 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     private <T extends CloseTracked<T>> void printRegistryOpenTransactions(
             CloseTrackedRegistry<T> registry, PrintStream ps, String indent) {
-        Set<CloseTrackedRegistryReportEntry<T>> entries = registry.getAllUnique();
+        Set<CloseTrackedRegistryReportEntry<T>> unsorted = registry.getAllUnique();
+
+        List<CloseTrackedRegistryReportEntry<T>> entries = new ArrayList<>(unsorted);
+        entries.sort((o1, o2) -> Long.compare(o2.getNumberAddedNotRemoved(), o1.getNumberAddedNotRemoved()));
+
         if (!entries.isEmpty()) {
             ps.println(indent + registry.getAnchor() + " : " + registry.getCreateDescription());
         }
