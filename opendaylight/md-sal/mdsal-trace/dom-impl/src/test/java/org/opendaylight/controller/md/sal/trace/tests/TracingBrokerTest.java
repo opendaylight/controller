@@ -38,7 +38,11 @@ public class TracingBrokerTest {
         BindingNormalizedNodeSerializer codec = mock(BindingNormalizedNodeSerializer.class);
         TracingBroker tracingBroker = new TracingBroker(domDataBroker, config, codec);
 
-        DOMDataReadWriteTransaction tx = tracingBroker.newReadWriteTransaction();
+        for (int i = 0; i < 3; i++) {
+            DOMDataReadWriteTransaction tx = tracingBroker.newReadWriteTransaction();
+        }
+        DOMDataReadWriteTransaction anotherTx = tracingBroker.newReadWriteTransaction();
+
         DOMTransactionChain txChain = tracingBroker.createTransactionChain(null);
         DOMDataReadWriteTransaction txFromChain = txChain.newReadWriteTransaction();
 
@@ -48,7 +52,7 @@ public class TracingBrokerTest {
         String output = new String(baos.toByteArray(), UTF_8);
 
         assertThat(printReturnValue).isTrue();
-        // Assert expections about stack trace
+        // Assert expectations about stack trace
         assertThat(output).contains("testPrintOpenTransactions(TracingBrokerTest.java");
         assertThat(output).doesNotContain(TracingBroker.class.getName());
 
@@ -59,6 +63,9 @@ public class TracingBrokerTest {
             }
             previousLine = line;
         }
+
+        // assert that the sorting works - the x3 is shown before the x1
+        assertThat(output).contains("  DataBroker : newReadWriteTransaction()\n    3x");
 
         // We don't do any verify/times on the mocks,
         // because the main point of the test is just to verify that
