@@ -6,7 +6,7 @@
  terms of the Eclipse Public License v1.0 which accompanies this distribution,
  and is available at http://www.eclipse.org/legal/epl-v10.html
  -->
-<features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-mdsal-${project.version}">
     <feature name="odl-mdsal-broker-local" version="${project.version}">
         <feature version="[3.1.0,4)">odl-lmax-3</feature>
         <feature version="[2.0.3,3)">odl-yangtools-codec</feature>
