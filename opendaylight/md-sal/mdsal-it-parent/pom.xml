@@ -13,7 +13,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>bundle-parent</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.2</version>
     <relativePath/>
   </parent>
 
@@ -26,7 +26,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <mdsal.version>1.8.0-SNAPSHOT</mdsal.version>
     <karaf.distro.groupId>org.opendaylight.odlparent</karaf.distro.groupId>
     <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
-    <karaf.distro.version>3.1.0</karaf.distro.version>
+    <karaf.distro.version>3.1.2</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
     <karaf.keep.unpack>false</karaf.keep.unpack>
   </properties>

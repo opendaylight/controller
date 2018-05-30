@@ -6,7 +6,7 @@
   ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
   ~ and is available at http://www.eclipse.org/legal/epl-v10.html
   -->
-<features name="odl-controller-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
     <feature name="odl-config-netty-config-api" version="${project.version}">
         <feature version="[3.1.0,4)">odl-netty-4</feature>
     </feature>
