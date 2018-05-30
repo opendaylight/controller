@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorTest.INTROSPECTOR_FACTORY;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -24,9 +26,8 @@ public class DatastoreContextContextPropertiesUpdaterTest {
     public void updateOnConstructionTest() throws Exception {
         final Map<String, Object> properties = new HashMap<>();
         properties.put("shardTransactionIdleTimeoutInMinutes", 10);
-        final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
 
-        final DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
+        final DatastoreContextIntrospector introspector = INTROSPECTOR_FACTORY.newInstance(CONFIGURATION);
 
         final DatastoreContextPropertiesUpdater updater = new DatastoreContextPropertiesUpdater(introspector,
                 properties);
@@ -42,9 +43,8 @@ public class DatastoreContextContextPropertiesUpdaterTest {
     public void onUpdateTest() throws Exception {
         final Map<String, Object> properties = new HashMap<>();
         properties.put("shardTransactionIdleTimeoutInMinutes", 10);
-        final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
-        assertNotNull(datastoreContext);
-        final DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
+
+        final DatastoreContextIntrospector introspector = INTROSPECTOR_FACTORY.newInstance(CONFIGURATION);
         assertNotNull(introspector);
         final DatastoreContextPropertiesUpdater updater = new DatastoreContextPropertiesUpdater(introspector,
                 properties);
@@ -66,8 +66,7 @@ public class DatastoreContextContextPropertiesUpdaterTest {
         final Map<String, Object> properties = new HashMap<>();
         properties.put("shardTransactionIdleTimeoutInMinutes", 10);
 
-        final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
-        final DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
+        final DatastoreContextIntrospector introspector = INTROSPECTOR_FACTORY.newInstance(CONFIGURATION);
         final DatastoreContextPropertiesUpdater updater = new DatastoreContextPropertiesUpdater(introspector,
                 properties);
         final DummyListenerImpl dummyListener = new DummyListenerImpl();

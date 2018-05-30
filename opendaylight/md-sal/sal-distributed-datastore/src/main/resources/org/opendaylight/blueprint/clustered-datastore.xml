@@ -12,6 +12,8 @@
 
   <odl:static-reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
 
+  <reference id="classLoadingStrategy" interface="org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy" />
+
   <!-- ActorSystemProvider -->
 
   <bean id="bundleClassLoader" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.osgi.BundleClassLoaderFactory"
@@ -48,11 +50,13 @@
     <argument value="./clustered-datastore-restore"/>
   </bean>
 
-  <bean id="configDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedConfigDataStoreProviderModule"
-          factory-method="newDatastoreContext" />
+  <bean id="introspectorFactory" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospectorFactory">
+    <argument ref="schemaService"/>
+    <argument ref="classLoadingStrategy"/>
+  </bean>
 
-  <bean id="introspectorConfig" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospector">
-    <argument ref="configDatastoreContext"/>
+  <bean id="introspectorConfig" factory-ref="introspectorFactory" factory-method="newInstance">
+    <argument type="org.opendaylight.mdsal.common.api.LogicalDatastoreType" value="CONFIGURATION"/>
   </bean>
 
   <bean id="updaterConfig" class="org.opendaylight.controller.cluster.datastore.DatastoreContextPropertiesUpdater">
@@ -64,7 +68,9 @@
   <bean id="configDatastore" class="org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory"
           factory-method="createInstance" destroy-method="close">
     <argument ref="schemaService"/>
-    <argument ref="configDatastoreContext"/>
+    <argument>
+      <bean factory-ref="introspectorConfig" factory-method="getContext" />
+    </argument>
     <argument ref="datastoreSnapshotRestore"/>
     <argument ref="actorSystemProvider"/>
     <argument ref="introspectorConfig"/>
@@ -87,11 +93,8 @@
     <argument ref="fileModuleShardConfigProvider"/>
   </bean>
 
-  <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
-          factory-method="newDatastoreContext" />
-
-  <bean id="introspectorOper" class="org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospector">
-    <argument ref="operDatastoreContext"/>
+  <bean id="introspectorOper" factory-ref="introspectorFactory" factory-method="newInstance">
+    <argument type="org.opendaylight.mdsal.common.api.LogicalDatastoreType" value="OPERATIONAL"/>
   </bean>
 
   <bean id="updaterOper" class="org.opendaylight.controller.cluster.datastore.DatastoreContextPropertiesUpdater">
@@ -103,7 +106,9 @@
   <bean id="operDatastore" class="org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory"
           factory-method="createInstance" destroy-method="close">
     <argument ref="schemaService"/>
-    <argument ref="operDatastoreContext"/>
+    <argument>
+      <bean factory-ref="introspectorOper" factory-method="getContext" />
+    </argument>
     <argument ref="datastoreSnapshotRestore"/>
     <argument ref="actorSystemProvider"/>
     <argument ref="introspectorOper"/>
