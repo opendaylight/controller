@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +31,6 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
     }
 
     @Override
-    @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
-            justification = "Unrecognised NullableDecl")
     public String newOwner(@Nullable String currentOwner, Collection<String> viableCandidates) {
         Preconditions.checkArgument(viableCandidates.size() > 0);
         String leastLoadedCandidate = null;
