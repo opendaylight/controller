@@ -2,22 +2,15 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0">
 
-  <!-- Runtime binding/normalized mapping service -->
-
-  <reference id="classLoadingStrategy" interface="org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy"/>
+  <reference id="classLoadingStrategy" interface="org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy" />
   <reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
 
-  <bean id="mappingCodec" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
-         factory-method="newInstance">
+  <bean id="wiring" class="org.opendaylight.controller.md.sal.binding.impl.BindingBrokerWiring">
     <argument ref="classLoadingStrategy"/>
-  </bean>
-
-  <!-- Register the BindingToNormalizedNodeCodec with the SchemaService as a SchemaContextListener -->
-  <bean id="mappingCodecListenerReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
-         factory-method="registerInstance" destroy-method="close">
-    <argument ref="mappingCodec"/>
     <argument ref="schemaService"/>
   </bean>
+
+  <!-- Runtime binding/normalized mapping service -->
 
   <service ref="mappingCodec" odl:type="default">
     <interfaces>
