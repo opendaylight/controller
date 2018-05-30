@@ -20,18 +20,26 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.concurrent.GuardedBy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStoreProperties;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev140612.DataStorePropertiesContainer;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class DatastoreContextIntrospector {
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContextIntrospector.class);
 
-    private static final Map<String, Class<?>> DATA_STORE_PROP_TYPES = new HashMap<>();
+    private static final Map<String, Entry<Class<?>, Method>> DATA_STORE_PROP_INFO = new HashMap<>();
 
     private static final Map<Class<?>, Constructor<?>> CONSTRUCTORS = new HashMap<>();
 
@@ -105,7 +113,7 @@ public class DatastoreContextIntrospector {
     private static void introspectDataStoreProperties() throws IntrospectionException {
         final BeanInfo beanInfo = Introspector.getBeanInfo(DataStoreProperties.class);
         for (final PropertyDescriptor desc: beanInfo.getPropertyDescriptors()) {
-            processDataStoreProperty(desc.getName(), desc.getPropertyType());
+            processDataStoreProperty(desc.getName(), desc.getPropertyType(), desc.getReadMethod());
         }
 
         // Getter methods that return Boolean and start with "is" instead of "get" aren't recognized as
@@ -116,7 +124,7 @@ public class DatastoreContextIntrospector {
             final String methodName = desc.getName();
             if (Boolean.class.equals(desc.getMethod().getReturnType()) && methodName.startsWith("is")) {
                 final String propertyName = WordUtils.uncapitalize(methodName.substring(2));
-                processDataStoreProperty(propertyName, Boolean.class);
+                processDataStoreProperty(propertyName, Boolean.class, desc.getMethod());
             }
         }
     }
@@ -125,13 +133,13 @@ public class DatastoreContextIntrospector {
      * Processes a property defined on the DataStoreProperties interface.
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static void processDataStoreProperty(final String name, final Class<?> propertyType) {
+    private static void processDataStoreProperty(final String name, final Class<?> propertyType, Method readMethod) {
         Preconditions.checkArgument(BUILDER_SETTERS.containsKey(name), String.format(
                 "DataStoreProperties property \"%s\" does not have corresponding setter in DatastoreContext.Builder",
                 name));
         try {
             processPropertyType(propertyType);
-            DATA_STORE_PROP_TYPES.put(name, propertyType);
+            DATA_STORE_PROP_INFO.put(name, new SimpleImmutableEntry<>(propertyType, readMethod));
         } catch (final Exception e) {
             LOG.error("Error finding constructor for type {}", propertyType, e);
         }
@@ -191,8 +199,30 @@ public class DatastoreContextIntrospector {
     @GuardedBy(value = "this")
     private Map<String, Object> currentProperties;
 
-    public DatastoreContextIntrospector(final DatastoreContext context) {
-        this.context = context;
+    public DatastoreContextIntrospector(final DatastoreContext context,
+            final BindingNormalizedNodeSerializer bindingSerializer) {
+        final QName qname = BindingReflections.findQName(DataStorePropertiesContainer.class);
+        final DataStorePropertiesContainer defaultPropsContainer = (DataStorePropertiesContainer)
+                bindingSerializer.fromNormalizedNode(bindingSerializer.toYangInstanceIdentifier(
+                        InstanceIdentifier.builder(DataStorePropertiesContainer.class).build()),
+                ImmutableNodes.containerNode(qname)).getValue();
+
+        final Builder builder = DatastoreContext.newBuilderFrom(context);
+        for (Entry<String, Entry<Class<?>, Method>> entry: DATA_STORE_PROP_INFO.entrySet()) {
+            Object value;
+            try {
+                value = entry.getValue().getValue().invoke(defaultPropsContainer);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                LOG.error("Error obtaining default value for property {}", entry.getKey(), e);
+                value = null;
+            }
+
+            if (value != null) {
+                convertValueAndInvokeSetter(entry.getKey(), value, builder);
+            }
+        }
+
+        this.context = builder.build();
     }
 
     public synchronized DatastoreContext getContext() {
@@ -222,7 +252,7 @@ public class DatastoreContextIntrospector {
 
             if (key.startsWith(shardNamePrefix)) {
                 key = key.replaceFirst(shardNamePrefix, "");
-                convertValueAndInvokeSetter(key, value, builder);
+                convertValueAndInvokeSetter(key, value.toString(), builder);
             }
         }
 
@@ -262,7 +292,7 @@ public class DatastoreContextIntrospector {
                 key = key.replaceFirst(dataStoreTypePrefix, "");
             }
 
-            if (convertValueAndInvokeSetter(key, value, builder)) {
+            if (convertValueAndInvokeSetter(key, value.toString(), builder)) {
                 updated = true;
             }
         }
@@ -327,11 +357,13 @@ public class DatastoreContextIntrospector {
 
     private Object convertValue(final String name, final Object from)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        final Class<?> propertyType = DATA_STORE_PROP_TYPES.get(name);
-        if (propertyType == null) {
+        final Entry<Class<?>, Method> propertyInfo = DATA_STORE_PROP_INFO.get(name);
+        if (propertyInfo == null) {
             LOG.debug("Property not found for {}", name);
             return null;
         }
+
+        final Class<?> propertyType = propertyInfo.getKey();
 
         LOG.debug("Type for property {}: {}, converting value {} ({})",
                 name, propertyType.getSimpleName(), from, from.getClass().getSimpleName());
@@ -339,7 +371,7 @@ public class DatastoreContextIntrospector {
         // Recurse the chain of constructors depth-first to get the resulting value. Eg, if the
         // property type is the yang-generated NonZeroUint32Type, it's constructor takes a Long so
         // we have to first construct a Long instance from the input value.
-        Object converted = constructorValueRecursively(propertyType, from.toString());
+        Object converted = constructorValueRecursively(propertyType, from);
 
         // If the converted type is a yang-generated type, call the getter to obtain the actual value.
         final Method getter = YANG_TYPE_GETTERS.get(converted.getClass());
@@ -355,6 +387,10 @@ public class DatastoreContextIntrospector {
         LOG.trace("convertValueRecursively - toType: {}, fromValue {} ({})",
                 toType.getSimpleName(), fromValue, fromValue.getClass().getSimpleName());
 
+        if (toType.equals(fromValue.getClass())) {
+            return fromValue;
+        }
+
         final Constructor<?> ctor = CONSTRUCTORS.get(toType);
 
         LOG.trace("Found {}", ctor);
@@ -365,9 +401,8 @@ public class DatastoreContextIntrospector {
 
         Object value = fromValue;
 
-        // Since the original input type is a String, once we find a constructor that takes a String
-        // argument, we're done recursing.
-        if (!ctor.getParameterTypes()[0].equals(String.class)) {
+        // Once we find a constructor that takes the original type as an argument, we're done recursing.
+        if (!ctor.getParameterTypes()[0].equals(fromValue.getClass())) {
             value = constructorValueRecursively(ctor.getParameterTypes()[0], fromValue);
         }
 

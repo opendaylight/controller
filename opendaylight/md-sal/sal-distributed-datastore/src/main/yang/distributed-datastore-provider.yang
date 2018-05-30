@@ -286,6 +286,10 @@ module distributed-datastore-provider {
         }
     }
 
+    container data-store-properties-container {
+        uses data-store-properties;
+    }
+
     // Augments the 'configuration' choice node under modules/module.
     augment "/config:modules/config:module/config:configuration" {
         case distributed-config-datastore-provider {
