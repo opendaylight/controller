@@ -8,13 +8,11 @@
 
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
-import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.compat.LegacyDOMStoreAdapter;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.osgi.framework.BundleContext;
 
 @Deprecated
@@ -56,60 +54,6 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
                 tracker.close();
             }
         };
-    }
-
-    public static DatastoreContext newDatastoreContext() {
-        return newDatastoreContext(null);
-    }
-
-    private static DatastoreContext newDatastoreContext(final ConfigProperties inProps) {
-        ConfigProperties props = inProps;
-        if (props == null) {
-            props = new ConfigProperties();
-        }
-
-        return DatastoreContext.newBuilder()
-                .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
-                .tempFileDirectory("./data")
-                .fileBackedStreamingThresholdInMegabytes(props.getFileBackedStreamingThresholdInMegabytes()
-                        .getValue().intValue())
-                .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
-                .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize()
-                        .getValue().intValue())
-                .maxShardDataChangeListenerQueueSize(props.getMaxShardDataChangeListenerQueueSize()
-                        .getValue().intValue())
-                .maxShardDataStoreExecutorQueueSize(props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue())
-                .shardTransactionIdleTimeoutInMinutes(props.getShardTransactionIdleTimeoutInMinutes().getValue())
-                .operationTimeoutInSeconds(props.getOperationTimeoutInSeconds().getValue())
-                .shardJournalRecoveryLogBatchSize(props.getShardJournalRecoveryLogBatchSize()
-                        .getValue().intValue())
-                .shardSnapshotBatchCount(props.getShardSnapshotBatchCount().getValue().intValue())
-                .shardSnapshotDataThresholdPercentage(props.getShardSnapshotDataThresholdPercentage()
-                        .getValue().intValue())
-                .shardHeartbeatIntervalInMillis(props.getShardHeartbeatIntervalInMillis().getValue())
-                .shardInitializationTimeoutInSeconds(props.getShardInitializationTimeoutInSeconds().getValue())
-                .shardLeaderElectionTimeoutInSeconds(props.getShardLeaderElectionTimeoutInSeconds().getValue())
-                .shardTransactionCommitTimeoutInSeconds(
-                        props.getShardTransactionCommitTimeoutInSeconds().getValue().intValue())
-                .shardTransactionCommitQueueCapacity(
-                        props.getShardTransactionCommitQueueCapacity().getValue().intValue())
-                .persistent(props.getPersistent().booleanValue())
-                .shardIsolatedLeaderCheckIntervalInMillis(
-                    props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
-                .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
-                .transactionCreationInitialRateLimit(props.getTransactionCreationInitialRateLimit().getValue())
-                .shardBatchedModificationCount(props.getShardBatchedModificationCount().getValue().intValue())
-                .shardCommitQueueExpiryTimeoutInSeconds(
-                        props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
-                .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
-                .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
-                .maximumMessageSliceSize(props.getMaximumMessageSliceSize().getValue().intValue())
-                .useTellBasedProtocol(props.getUseTellBasedProtocol())
-                .syncIndexThreshold(props.getSyncIndexThreshold().getValue())
-                .backendAlivenessTimerIntervalInSeconds(props.getBackendAlivenessTimerIntervalInSeconds().getValue())
-                .frontendRequestTimeoutInSeconds(props.getFrontendRequestTimeoutInSeconds().getValue())
-                .frontendNoProgressTimeoutInSeconds(props.getFrontendNoProgressTimeoutInSeconds().getValue())
-                .build();
     }
 
     public void setBundleContext(final BundleContext bundleContext) {
