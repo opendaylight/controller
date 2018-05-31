@@ -54,6 +54,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                       org.opendaylight.controller.md.sal.binding.api,
                       org.opendaylight.controller.md.sal.binding.impl,
                       org.opendaylight.controller.sal.core.api.model,
+                      org.opendaylight.mdsal.binding.dom.codec.api,
                       *
                     </Import-Package>
                 </instructions>
