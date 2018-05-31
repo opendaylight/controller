@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a168e7e9_2e78a981",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/src/main/resources/org/opendaylight/blueprint/impl-blueprint.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-05-31T20:47:00Z",
+      "side": 1,
+      "message": "You should get the service by its interface org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer.  It is only advertised as BindingToNormalizedNodeCodec for backwards compatibility for CSS with will be going away.",
+      "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
