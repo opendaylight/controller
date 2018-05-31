@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeService;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -31,16 +32,16 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeService {
 
-    private final BindingToNormalizedNodeCodec codec;
+    private final BindingNormalizedNodeSerializer codec;
     private final DOMDataTreeChangeService dataTreeChangeService;
 
-    private BindingDOMDataTreeChangeServiceAdapter(final BindingToNormalizedNodeCodec codec,
+    private BindingDOMDataTreeChangeServiceAdapter(final BindingNormalizedNodeSerializer codec,
             final DOMDataTreeChangeService dataTreeChangeService) {
         this.codec = Preconditions.checkNotNull(codec);
         this.dataTreeChangeService = Preconditions.checkNotNull(dataTreeChangeService);
     }
 
-    static DataTreeChangeService create(final BindingToNormalizedNodeCodec codec,
+    static DataTreeChangeService create(final BindingNormalizedNodeSerializer codec,
             final DOMDataTreeChangeService dataTreeChangeService) {
         return new BindingDOMDataTreeChangeServiceAdapter(codec, dataTreeChangeService);
     }

@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
@@ -21,7 +22,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  */
 final class BindingClusteredDOMDataTreeChangeListenerAdapter<T extends DataObject>
         extends BindingDOMDataTreeChangeListenerAdapter<T> implements ClusteredDOMDataTreeChangeListener {
-    BindingClusteredDOMDataTreeChangeListenerAdapter(BindingToNormalizedNodeCodec codec,
+    BindingClusteredDOMDataTreeChangeListenerAdapter(BindingNormalizedNodeSerializer codec,
             ClusteredDataTreeChangeListener<T> listener, LogicalDatastoreType store) {
         super(codec, listener, store);
     }

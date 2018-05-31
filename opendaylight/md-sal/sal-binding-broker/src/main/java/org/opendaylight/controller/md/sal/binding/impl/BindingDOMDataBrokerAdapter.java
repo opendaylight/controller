@@ -23,6 +23,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListen
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
@@ -40,7 +41,7 @@ public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker
     static final Factory<DataBroker> BUILDER_FACTORY = Builder::new;
     private final DataTreeChangeService treeChangeService;
 
-    public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
+    public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingNormalizedNodeSerializer codec) {
         super(domDataBroker, codec);
         final DOMDataTreeChangeService domTreeChange = (DOMDataTreeChangeService) domDataBroker
                 .getSupportedExtensions().get(DOMDataTreeChangeService.class);

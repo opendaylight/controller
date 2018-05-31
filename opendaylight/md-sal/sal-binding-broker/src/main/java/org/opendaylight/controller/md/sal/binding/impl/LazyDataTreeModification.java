@@ -16,6 +16,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeNode;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -50,14 +51,14 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T extends DataObject> DataTreeModification<T> create(final BindingToNormalizedNodeCodec codec,
+    static <T extends DataObject> DataTreeModification<T> create(final BindingNormalizedNodeSerializer codec,
             final DataTreeCandidate domChange, final LogicalDatastoreType datastoreType) {
         final Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> codecCtx =
                 codec.getSubtreeCodec(domChange.getRootPath());
         return new LazyDataTreeModification(datastoreType, codecCtx.getKey(), codecCtx.getValue(), domChange);
     }
 
-    static <T extends DataObject> Collection<DataTreeModification<T>> from(final BindingToNormalizedNodeCodec codec,
+    static <T extends DataObject> Collection<DataTreeModification<T>> from(final BindingNormalizedNodeSerializer codec,
             final Collection<DataTreeCandidate> domChanges, final LogicalDatastoreType datastoreType) {
         final List<DataTreeModification<T>> result = new ArrayList<>(domChanges.size());
         for (final DataTreeCandidate domChange : domChanges) {

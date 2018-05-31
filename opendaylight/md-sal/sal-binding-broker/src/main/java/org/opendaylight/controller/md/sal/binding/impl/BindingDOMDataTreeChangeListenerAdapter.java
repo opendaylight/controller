@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
@@ -24,11 +25,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  */
 class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implements DOMDataTreeChangeListener {
 
-    private final BindingToNormalizedNodeCodec codec;
+    private final BindingNormalizedNodeSerializer codec;
     private final DataTreeChangeListener<T> listener;
     private final LogicalDatastoreType store;
 
-    BindingDOMDataTreeChangeListenerAdapter(final BindingToNormalizedNodeCodec codec,
+    BindingDOMDataTreeChangeListenerAdapter(final BindingNormalizedNodeSerializer codec,
             final DataTreeChangeListener<T> listener, final LogicalDatastoreType store) {
         this.codec = Preconditions.checkNotNull(codec);
         this.listener = Preconditions.checkNotNull(listener);

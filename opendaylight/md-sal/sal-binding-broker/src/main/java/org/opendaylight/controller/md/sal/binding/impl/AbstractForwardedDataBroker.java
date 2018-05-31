@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -30,20 +31,21 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     // The Broker to whom we do all forwarding
     private final DOMDataBroker domDataBroker;
 
-    private final BindingToNormalizedNodeCodec codec;
+    private final BindingNormalizedNodeSerializer codec;
 
-    protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec,
-            final DOMSchemaService schemaService) {
+    protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker,
+            final BindingNormalizedNodeSerializer codec, final DOMSchemaService schemaService) {
         this.domDataBroker = domDataBroker;
         this.codec = codec;
     }
 
-    protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
+    protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker,
+            final BindingNormalizedNodeSerializer codec) {
         this.domDataBroker = domDataBroker;
         this.codec = codec;
     }
 
-    protected BindingToNormalizedNodeCodec getCodec() {
+    protected BindingNormalizedNodeSerializer getCodec() {
         return codec;
     }
 
