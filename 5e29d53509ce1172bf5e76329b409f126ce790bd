@@ -16,6 +16,24 @@
       "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0c20e788_0914d368",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/src/main/resources/org/opendaylight/blueprint/impl-blueprint.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-31T21:15:17Z",
+      "side": 1,
+      "message": "hang on, perhaps I\u0027m missing something, but the BindingDOMDataBrokerAdapter constructor (line 24) expect a BindingToNormalizedNodeCodec not a BindingNormalizedNodeSerializer ... doesn\u0027t matter?  Look it up by its interface and because it runtime it\u0027s that class it\u0027s still fine?",
+      "parentUuid": "a168e7e9_2e78a981",
+      "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
