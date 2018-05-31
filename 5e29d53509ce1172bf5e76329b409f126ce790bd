@@ -34,6 +34,24 @@
       "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1d45211_9e1ef9f3",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/src/main/resources/org/opendaylight/blueprint/impl-blueprint.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-05-31T21:28:21Z",
+      "side": 1,
+      "message": "I didn\u0027t see that it creates a BindingDOMDataBrokerAdapter. BindingDOMDataBrokerAdapter should be able to take the interface. I\u0027d rather not advertise an implementation.",
+      "parentUuid": "0c20e788_0914d368",
+      "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
