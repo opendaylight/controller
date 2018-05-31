@@ -8,6 +8,7 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
   xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
   odl:use-default-for-reference-types="true">
 
@@ -18,16 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <reference id="classLoadingStrategy" interface="org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy"/>
   <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
 
-  <bean id="mappingCodec"
-        class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory" factory-method="newInstance">
-    <argument ref="classLoadingStrategy"/>
-  </bean>
-
-  <bean id="mappingCodecListenerReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
-           factory-method="registerInstance" destroy-method="close">
-    <argument ref="mappingCodec"/>
-    <argument ref="schemaService"/>
-  </bean>
+  <reference id="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec" ext:proxy-method="classes" />
 
   <bean id="tracingBindingDataBroker" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter">
     <argument ref="tracingDefaultDOMBroker"/>
