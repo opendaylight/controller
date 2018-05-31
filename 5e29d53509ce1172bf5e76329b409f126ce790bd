@@ -52,6 +52,42 @@
       "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b8e0e9f_b018fc86",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/src/main/resources/org/opendaylight/blueprint/impl-blueprint.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-31T21:33:37Z",
+      "side": 1,
+      "message": "OK perhaps let me try to do that first in a separate change...",
+      "parentUuid": "b1d45211_9e1ef9f3",
+      "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3f3f65f1_2a28b683",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/src/main/resources/org/opendaylight/blueprint/impl-blueprint.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-05-31T21:33:37Z",
+      "side": 1,
+      "message": "So I\u0027ve just tried this out:\n\nInitially it gave me a \"Caused by: java.lang.ClassNotFoundException: org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer cannot be found by org.opendaylight.controller.mdsal-trace-binding-impl_1.8.0.SNAPSHOT\" but adding org.opendaylight.mdsal.binding.dom.codec.api to Import-Package did the trick to get past that.\n\nBut then it still failed like this, as I suspected, I don\u0027t think BP is smart enough for this to just work as you epxected:\n\n1. NOK org.opendaylight.controller.mdsal-trace-binding-impl:1.8.0.SNAPSHOT: OSGi state \u003d Active, Karaf bundleState \u003d Failure, due to: Blueprint\n31/5/18 11:24 PM\nException: \norg.osgi.service.blueprint.container.ComponentDefinitionException: Unable to find a matching constructor on class org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter for arguments [org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper@3be77953 (class org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper), org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper@333e9ff0 (class org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper)] when instanciating bean tracingBindingDataBroker\norg.osgi.service.blueprint.container.ComponentDefinitionException: org.osgi.service.blueprint.container.ComponentDefinitionException: Unable to find a matching constructor on class org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter for arguments [org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper@3be77953 (class org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper), org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper@333e9ff0 (class org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper)] when instanciating bean tracingBindingDataBroker\n\n(...)\n\nCaused by: org.osgi.service.blueprint.container.ComponentDefinitionException: Unable to find a matching constructor on class org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter for arguments [org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper@3be77953 (class org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper), org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper@333e9ff0 (class org.apache.aries.blueprint.container.ReferenceRecipe$ServiceProxyWrapper)] when instanciating bean tracingBindingDataBroker\n\nPS, not really required to progress here, just FYI: https://issues.apache.org/jira/browse/ARIES-1808",
+      "parentUuid": "0c20e788_0914d368",
+      "revId": "5e29d53509ce1172bf5e76329b409f126ce790bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
