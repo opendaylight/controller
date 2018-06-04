@@ -17,7 +17,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       odl:type="default" />
 
   <reference id="classLoadingStrategy" interface="org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy"/>
-  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
 
   <reference id="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec" ext:proxy-method="classes" />
 
