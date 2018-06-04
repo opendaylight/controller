@@ -12,8 +12,5 @@
         <feature version="[2.0.3,3)">odl-yangtools-codec</feature>
         <bundle start-level="70">mvn:org.opendaylight.controller/sal-schema-service/${project.version}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${blueprint.version}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}" override="true">
-            mvn:org.opendaylight.controller/md-sal-config/${project.version}/xml/config
-        </configfile>
     </feature>
 </features>

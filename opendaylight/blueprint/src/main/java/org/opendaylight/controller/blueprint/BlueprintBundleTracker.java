@@ -22,7 +22,6 @@ import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
-import org.opendaylight.controller.config.api.ConfigSystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -270,12 +269,6 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
         restartService.close();
 
-        // Close all CSS modules first.
-        ConfigSystemService configSystem = getOSGiService(ConfigSystemService.class);
-        if (configSystem != null) {
-            configSystem.closeAllConfigModules();
-        }
-
         LOG.info("Shutting down all blueprint containers...");
 
         Collection<Bundle> containerBundles = new HashSet<>(Arrays.asList(bundleContext.getBundles()));
@@ -370,29 +363,5 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     private static int getServiceUsage(final ServiceReference<?> ref) {
         Bundle[] usingBundles = ref.getUsingBundles();
         return usingBundles != null ? usingBundles.length : 0;
-    }
-
-    private <T> T getOSGiService(final Class<T> serviceInterface) {
-        try {
-            ServiceReference<T> serviceReference = bundleContext.getServiceReference(serviceInterface);
-            if (serviceReference == null) {
-                LOG.warn("{} service reference not found", serviceInterface.getSimpleName());
-                return null;
-            }
-
-            T service = bundleContext.getService(serviceReference);
-            if (service == null) {
-                // This could happen on shutdown if the service was already unregistered so we log as debug.
-                LOG.debug("{} service instance was not found", serviceInterface.getSimpleName());
-            }
-
-            return service;
-        } catch (final IllegalStateException e) {
-            // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
-            // log as debug.
-            LOG.debug("Error obtaining OSGi service {}", serviceInterface.getSimpleName(), e);
-        }
-
-        return null;
     }
 }

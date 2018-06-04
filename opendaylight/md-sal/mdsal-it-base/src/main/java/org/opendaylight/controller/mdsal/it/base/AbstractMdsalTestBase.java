@@ -20,9 +20,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRunti
 import java.io.File;
 import javax.inject.Inject;
 import org.junit.Before;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
@@ -34,7 +31,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractMdsalTestBase implements BindingAwareProvider {
+public abstract class AbstractMdsalTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMdsalTestBase.class);
     private static final String MAVEN_REPO_LOCAL = "maven.repo.local";
@@ -46,7 +43,6 @@ public abstract class AbstractMdsalTestBase implements BindingAwareProvider {
     private static final String KARAF_DEBUG_PORT = "5005";
     private static final String KARAF_DEBUG_PROP = "karaf.debug";
     private static final String KEEP_UNPACK_DIRECTORY_PROP = "karaf.keep.unpack";
-    private static final int REGISTRATION_TIMEOUT = 70000;
 
     /*
      * Default values for karaf distro type, groupId, and artifactId
@@ -59,7 +55,6 @@ public abstract class AbstractMdsalTestBase implements BindingAwareProvider {
      * Property names to override defaults for karaf distro artifactId, groupId,
      * version, and type
      */
-    private static final String KARAF_DISTRO_VERSION_PROP = "karaf.distro.version";
     private static final String KARAF_DISTRO_TYPE_PROP = "karaf.distro.type";
     private static final String KARAF_DISTRO_ARTIFACTID_PROP = "karaf.distro.artifactId";
     private static final String KARAF_DISTRO_GROUPID_PROP = "karaf.distro.groupId";
@@ -68,40 +63,13 @@ public abstract class AbstractMdsalTestBase implements BindingAwareProvider {
 
     @Inject @Filter(timeout = 60000)
     private BundleContext context;
-    @Inject @Filter(timeout = 60000)
-    private BindingAwareBroker broker;
-    private ProviderContext session = null;
-
-    public ProviderContext getSession() {
-        return session;
-    }
 
     public abstract MavenUrlReference getFeatureRepo();
 
     public abstract String getFeatureName();
 
-    @Override
-    public void onSessionInitiated(ProviderContext session) {
-        LOG.info("Session Initiated: {}",session);
-        this.session = session;
-    }
-
     @Before
     public void setup() throws Exception {
-        long start = System.nanoTime();
-        broker.registerProvider(this);
-        for (int i = 0; i < REGISTRATION_TIMEOUT; i++) {
-            if (session != null) {
-                long stop = System.nanoTime();
-                LOG.info("Registered session {} with the MD-SAL after {} ns",
-                        session,
-                        stop - start);
-                return;
-            } else {
-                Thread.sleep(1);
-            }
-        }
-        throw new RuntimeException("Session not initiated after " + REGISTRATION_TIMEOUT + " ms");
     }
 
     public Option getLoggingOption() {
