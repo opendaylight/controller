@@ -23,11 +23,6 @@
 
     <name>OpenDaylight :: Config-Netty</name>
 
-    <properties>
-        <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-        <config.netty.configfile>00-netty.xml</config.netty.configfile>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -42,8 +37,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-config-netty-config-api</artifactId>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>odl-netty-4</artifactId>
+            <version>3.1.0</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -66,20 +62,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>threadpool-config-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>odl-config-startup</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/${config.netty.configfile}" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>config-netty-config</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
         </dependency>
     </dependencies>
 

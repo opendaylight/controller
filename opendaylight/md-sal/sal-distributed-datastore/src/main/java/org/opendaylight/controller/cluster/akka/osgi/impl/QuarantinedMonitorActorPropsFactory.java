@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.osgi;
+package org.opendaylight.controller.cluster.akka.osgi.impl;
 
 import akka.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
