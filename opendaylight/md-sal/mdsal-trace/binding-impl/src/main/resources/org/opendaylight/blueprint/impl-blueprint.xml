@@ -29,11 +29,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
             odl:type="default" ranking="10"/>
 
-  <reference id="domPingPongDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
-                                                                                            odl:type="pingpong"/>
+  <reference id="tracingPingPongDOMDataBroker"
+      interface="org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker"
+      odl:type="pingpong"/>
 
   <bean id="bindingTracingPingPongDataBroker" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter">
-    <argument ref="domPingPongDataBroker"/>
+    <argument ref="tracingPingPongDOMDataBroker"/>
     <argument ref="mappingCodec"/>
   </bean>
 

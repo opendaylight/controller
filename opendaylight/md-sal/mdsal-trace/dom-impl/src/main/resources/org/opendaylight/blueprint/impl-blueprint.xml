@@ -19,11 +19,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"
         odl:type="default" />
 
+  <!-- Tracing Binding DataBroker -->
+
   <reference id="realDefaultDOMBroker"
       interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
       odl:type="default" />
 
   <bean id="tracingDefaultDOMBroker" class="org.opendaylight.controller.md.sal.trace.dom.impl.TracingBroker">
+      <argument value="default" />
       <argument ref="realDefaultDOMBroker" />
       <argument ref="mdsalConfig" />
       <argument ref="codec" />
@@ -36,12 +39,23 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </interfaces>
   </service>
 
+  <!-- Tracing Binding PingPong DataBroker -->
 
-  <bean id="tracingPingPongDOMBroker" class="org.opendaylight.controller.md.sal.dom.broker.impl.PingPongDataBroker">
-    <argument ref="tracingDefaultDOMBroker" />
+  <reference id="realPingPongDOMDataBroker"
+      interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
+      odl:type="pingpong"/>
+
+  <bean id="tracingPingPongDOMBroker" class="org.opendaylight.controller.md.sal.trace.dom.impl.TracingBroker">
+      <argument value="pingpong" />
+      <argument ref="realPingPongDOMDataBroker" />
+      <argument ref="mdsalConfig" />
+      <argument ref="codec" />
   </bean>
 
-  <service id="tracingPingPongDOMBrokerSvc" ref="tracingPingPongDOMBroker"
-             interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
-             ranking="10" odl:type="pingpong" />
+  <service id="tracingPingPongDOMBrokerSvc" ref="tracingPingPongDOMBroker" ranking="10" odl:type="pingpong">
+    <interfaces>
+      <value>org.opendaylight.controller.md.sal.dom.api.DOMDataBroker</value>
+      <value>org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker</value>
+    </interfaces>
+  </service>
 </blueprint>
