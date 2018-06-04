@@ -20,9 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <artifactId>mdsal-it-base</artifactId>
   <version>1.8.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <properties>
-    <config.version>0.9.0-SNAPSHOT</config.version>
-  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -34,12 +32,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-it-base</artifactId>
-      <version>${config.version}</version>
-      <scope>compile</scope>
+      <groupId>org.opendaylight.odlparent</groupId>
+      <artifactId>opendaylight-karaf-empty</artifactId>
+      <type>zip</type>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -69,7 +67,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
         <groupId>javax.inject</groupId>
         <artifactId>javax.inject</artifactId>
-        <version>1</version>
         <scope>compile</scope>
     </dependency>
     <dependency>
