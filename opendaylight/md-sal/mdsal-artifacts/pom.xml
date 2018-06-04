@@ -160,6 +160,14 @@
               <type>xml</type>
               <scope>runtime</scope>
             </dependency>
+            <dependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>features-mdsal-trace</artifactId>
+              <version>${project.version}</version>
+              <classifier>features</classifier>
+              <type>xml</type>
+              <scope>runtime</scope>
+            </dependency>
 
             <!-- Base model augmentations -->
             <dependency>
