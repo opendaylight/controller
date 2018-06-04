@@ -1,0 +1,7 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Mon, 04 Jun 2018 14:29:39 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/72657
+Project: controller
+Branch: refs/heads/stable/oxygen
