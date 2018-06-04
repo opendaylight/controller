@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.md.sal.trace.dom.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -104,6 +105,7 @@ public class TracingBroker implements TracingDOMDataBroker {
 
     private static final int STACK_TRACE_FIRST_RELEVANT_FRAME = 2;
 
+    private final String type; // "default" VS "pingpong"
     private final BindingNormalizedNodeSerializer codec;
     private final DOMDataBroker delegate;
     private final List<Watch> registrationWatches = new ArrayList<>();
@@ -165,9 +167,10 @@ public class TracingBroker implements TracingDOMDataBroker {
         }
     }
 
-    public TracingBroker(DOMDataBroker delegate, Config config, BindingNormalizedNodeSerializer codec) {
-        this.delegate = Objects.requireNonNull(delegate);
-        this.codec = Objects.requireNonNull(codec);
+    public TracingBroker(String type, DOMDataBroker delegate, Config config, BindingNormalizedNodeSerializer codec) {
+        this.type = requireNonNull(type, "type");
+        this.delegate = requireNonNull(delegate, "delegate");
+        this.codec = requireNonNull(codec, "codec");
         configure(config);
 
         if (config.isTransactionDebugContextEnabled() != null) {
@@ -351,10 +354,12 @@ public class TracingBroker implements TracingDOMDataBroker {
             && writeTransactionsRegistry.getAllUnique().isEmpty()
             && readWriteTransactionsRegistry.getAllUnique().isEmpty()) {
 
+            ps.println(type + ": No open transactions, great!");
             return false;
         }
 
-        ps.println(getClass().getSimpleName() + " found some not yet (or never..) closed transaction[chain]s!");
+        ps.println(type + ": " + getClass().getSimpleName()
+                 + " found some not yet (or never..) closed transaction[chain]s!");
         ps.println("[NB: If no stack traces are shown below, then "
                  + "enable transaction-debug-context-enabled in mdsaltrace_config.xml]");
         ps.println();

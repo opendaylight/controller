@@ -36,7 +36,7 @@ public class TracingBrokerTest {
         DOMDataBroker domDataBroker = mock(DOMDataBroker.class, RETURNS_DEEP_STUBS);
         Config config = new ConfigBuilder().setTransactionDebugContextEnabled(true).build();
         BindingNormalizedNodeSerializer codec = mock(BindingNormalizedNodeSerializer.class);
-        TracingBroker tracingBroker = new TracingBroker(domDataBroker, config, codec);
+        TracingBroker tracingBroker = new TracingBroker("mock", domDataBroker, config, codec);
 
         for (int i = 0; i < 3; i++) {
             DOMDataReadWriteTransaction tx = tracingBroker.newReadWriteTransaction();
