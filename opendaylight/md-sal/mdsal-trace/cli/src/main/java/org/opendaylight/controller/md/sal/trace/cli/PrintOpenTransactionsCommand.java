@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.trace.cli;
 
+import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -25,7 +26,7 @@ import org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker;
 public class PrintOpenTransactionsCommand implements Action {
 
     @Reference
-    private TracingDOMDataBroker tracingDOMDataBroker;
+    private List<TracingDOMDataBroker> tracingDOMDataBrokers;
 
     // NB: Do NOT have a non-default constructor for injection of @Reference
     // Karaf needs a default constructor to create the command - and it works as is.
@@ -33,8 +34,8 @@ public class PrintOpenTransactionsCommand implements Action {
     @Override
     @SuppressWarnings("checkstyle:RegexpSingleLineJava")
     public Object execute() throws Exception {
-        if (!tracingDOMDataBroker.printOpenTransactions(System.out)) {
-            System.out.println("No open transactions, great!");
+        for (TracingDOMDataBroker tracingDOMDataBroker : tracingDOMDataBrokers) {
+            tracingDOMDataBroker.printOpenTransactions(System.out);
         }
         return null;
     }
