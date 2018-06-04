@@ -16,23 +16,23 @@
 
   <!-- ActorSystemProvider -->
 
-  <bean id="bundleClassLoader" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.osgi.BundleClassLoaderFactory"
+  <bean id="bundleClassLoader" class="org.opendaylight.controller.cluster.akka.osgi.impl.BundleClassLoaderFactory"
           factory-method="createClassLoader">
     <argument ref="blueprintBundleContext" />
   </bean>
 
-  <bean id="actorSystemProps" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.osgi.QuarantinedMonitorActorPropsFactory"
+  <bean id="actorSystemProps" class="org.opendaylight.controller.cluster.akka.osgi.impl.QuarantinedMonitorActorPropsFactory"
           factory-method="createProps">
     <argument ref="blueprintBundleContext" />
   </bean>
 
   <bean id="akkaReader" class="org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader"/>
-  <bean id="akkaConfig" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory.AkkaConfigFactory"
+  <bean id="akkaConfig" class="org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory"
           factory-method="createAkkaConfig">
     <argument ref="akkaReader" />
   </bean>
 
-  <bean id="actorSystemProvider" class="org.opendaylight.controller.config.yang.config.actor_system_provider.impl.ActorSystemProviderImpl"
+  <bean id="actorSystemProvider" class="org.opendaylight.controller.cluster.akka.impl.ActorSystemProviderImpl"
           destroy-method="close">
     <argument ref="bundleClassLoader" />
     <argument ref="actorSystemProps"/>
