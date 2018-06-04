@@ -22,7 +22,6 @@ import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
-import org.opendaylight.controller.config.api.ConfigSystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -269,12 +268,6 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         shuttingDown = true;
 
         restartService.close();
-
-        // Close all CSS modules first.
-        ConfigSystemService configSystem = getOSGiService(ConfigSystemService.class);
-        if (configSystem != null) {
-            configSystem.closeAllConfigModules();
-        }
 
         LOG.info("Shutting down all blueprint containers...");
 

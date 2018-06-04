@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.config.yang.config.actor_system_provider.impl.factory;
+package org.opendaylight.controller.cluster.akka.impl;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
