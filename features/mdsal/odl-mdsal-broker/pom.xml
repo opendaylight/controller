@@ -21,11 +21,6 @@
     <version>1.8.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
-    <properties>
-        <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-        <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -40,14 +35,6 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>sal-clustering-config</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
         </dependency>
         <dependency>
             <!-- finalname="configuration/initial/akka.conf" -->
