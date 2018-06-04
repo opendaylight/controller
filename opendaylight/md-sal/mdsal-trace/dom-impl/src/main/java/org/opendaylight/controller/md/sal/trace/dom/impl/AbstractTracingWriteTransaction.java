@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
@@ -28,6 +29,7 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
     AbstractTracingWriteTransaction(DOMDataWriteTransaction delegate, TracingBroker tracingBroker) {
         this.delegate = Objects.requireNonNull(delegate);
         this.tracingBroker = Objects.requireNonNull(tracingBroker);
+        recordOp(null, null, "instantiate", null);
     }
 
     private void recordOp(LogicalDatastoreType store, YangInstanceIdentifier yiid, String method,
@@ -44,14 +46,22 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
             }
         } else {
             StringBuilder sb = new StringBuilder();
-            sb.append("Method \"").append(method);
-            sb.append("\" to ").append(store);
-            sb.append(" at ").append(tracingBroker.toPathString(yiid)).append('.');
-            sb.append(" Data: ");
-            if (node != null) {
-                sb.append(node.getValue());
-            } else {
-                sb.append("null");
+            sb.append("Method \"").append(method).append('"');
+            if (store != null) {
+                sb.append(" to ").append(store);
+            }
+            if (yiid != null) {
+                sb.append(" at ").append(tracingBroker.toPathString(yiid));
+            }
+            sb.append('.');
+            if (yiid != null) {
+                // If we don’t have an id, we don’t expect data either
+                sb.append(" Data: ");
+                if (node != null) {
+                    sb.append(node.getValue());
+                } else {
+                    sb.append("null");
+                }
             }
             sb.append(" Stack:").append(tracingBroker.getStackSummary());
             synchronized (this) {
@@ -62,7 +72,10 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
 
     private synchronized void logOps() {
         synchronized (this) {
-            logs.forEach(log -> TracingBroker.LOG.warn(log));
+            if (TracingBroker.LOG.isWarnEnabled()) {
+                TracingBroker.LOG.warn("Transaction {} contains the following operations:", getIdentifier());
+                logs.forEach(TracingBroker.LOG::warn);
+            }
             logs.clear();
         }
     }
@@ -84,8 +97,7 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
         synchronized (this) {
             logs.clear();
         }
-        boolean result = delegate.cancel();
-        return result;
+        return delegate.cancel();
     }
 
     @Override
@@ -96,11 +108,13 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
 
     @Override
     public FluentFuture<? extends CommitInfo> commit() {
+        recordOp(null, null, "commit", null);
         logOps();
         return delegate.commit();
     }
 
     @Override
+    @Nonnull
     public Object getIdentifier() {
         return delegate.getIdentifier();
     }
