@@ -18,14 +18,14 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>odl-config-api</artifactId>
-    <version>0.8.2-SNAPSHOT</version>
+    <version>0.8.2</version>
     <packaging>feature</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-binding-base</artifactId>
-            <version>2.4.2-SNAPSHOT</version>
+            <version>2.4.2</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.12.2-SNAPSHOT</version>
+    <version>0.12.2</version>
     <relativePath />
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
-  <version>0.8.2-SNAPSHOT</version>
+  <version>0.8.2</version>
   <artifactId>config-api</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
