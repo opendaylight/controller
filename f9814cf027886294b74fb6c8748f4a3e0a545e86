@@ -46,6 +46,30 @@
       "revId": "f9814cf027886294b74fb6c8748f4a3e0a545e86",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3cbbf68e_accbf60b",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodecFactory.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-06T12:03:53Z",
+      "side": 0,
+      "message": "This class was only added to facilitate the BP wiring so it seems we can just incorporate it into BindingBrokerWiring.",
+      "parentUuid": "cfad62fa_e1fb2b1c",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 56
+      },
+      "revId": "f9814cf027886294b74fb6c8748f4a3e0a545e86",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
