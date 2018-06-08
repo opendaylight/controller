@@ -237,6 +237,8 @@
                 org.opendaylight.controller.cluster.datastore.messages;
                 org.opendaylight.controller.cluster.datastore.persisted;
                 org.opendaylight.controller.cluster.datastore.utils;
+                org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
+                org.opendaylight.controller.cluster.datastore.shardmanager;
                 org.opendaylight.controller.cluster.sharding;
                 org.opendaylight.controller.cluster.databroker.actors.dds;
             </Export-Package>
