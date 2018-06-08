@@ -22,15 +22,15 @@ public class FollowerInfo {
     private final String timeSinceLastActivity;
     private final boolean isVoting;
 
-    @ConstructorProperties({"id","nextIndex", "matchIndex", "isActive", "timeSinceLastActivity", "isVoting"})
-    public FollowerInfo(String id, long nextIndex, long matchIndex, boolean isActive, String timeSinceLastActivity,
-            boolean isVoting) {
+    @ConstructorProperties({"id","nextIndex", "matchIndex", "active", "timeSinceLastActivity", "voting"})
+    public FollowerInfo(String id, long nextIndex, long matchIndex, boolean active, String timeSinceLastActivity,
+            boolean voting) {
         this.id = id;
         this.nextIndex = nextIndex;
         this.matchIndex = matchIndex;
-        this.isActive = isActive;
+        this.isActive = active;
         this.timeSinceLastActivity = timeSinceLastActivity;
-        this.isVoting = isVoting;
+        this.isVoting = voting;
     }
 
     public String getId() {
