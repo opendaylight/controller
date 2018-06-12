@@ -60,6 +60,10 @@ public final class TestModel {
         return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);
     }
 
+    public static DataContainerChild<?, ?> outerMapNode() {
+        return ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME).build();
+    }
+
     public static DataContainerChild<?, ?> outerNode(final int... ids) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
         for (int id: ids) {
@@ -114,5 +118,9 @@ public final class TestModel {
 
     public static YangInstanceIdentifier innerEntryPath(final int id, final String name) {
         return OUTER_LIST_PATH.node(outerEntryKey(id)).node(INNER_LIST_QNAME).node(innerEntryKey(name));
+    }
+
+    public static YangInstanceIdentifier innerMapPath(final int id) {
+        return OUTER_LIST_PATH.node(outerEntryKey(id)).node(INNER_LIST_QNAME);
     }
 }

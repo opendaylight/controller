@@ -48,7 +48,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
                 readyLocal.getRemoteVersion());
         batched.setDoCommitOnReady(readyLocal.isDoCommitOnReady());
         batched.setTotalMessagesSent(1);
-        batched.setReady(true);
+        batched.setReady(readyLocal.getParticipatingShardNames());
 
         readyLocal.getModification().applyToCursor(new BatchedCursor(batched));
 

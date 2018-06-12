@@ -244,7 +244,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 assertEquals("getNumBatched", 1, reply.getNumBatched());
 
                 batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady();
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
@@ -272,7 +272,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 BatchedModifications batched = new BatchedModifications(nextTransactionId(),
                         DataStoreVersions.CURRENT_VERSION);
                 batched.addModification(new WriteModification(writePath, writeData));
-                batched.setReady(true);
+                batched.setReady();
                 batched.setDoCommitOnReady(true);
                 batched.setTotalMessagesSent(1);
 
@@ -311,7 +311,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
                 batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady();
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
@@ -339,7 +339,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 BatchedModifications batched = new BatchedModifications(nextTransactionId(),
                         DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady();
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
