@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
+import java.util.Optional;
+import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -23,15 +26,17 @@ public final class ReadyLocalTransaction {
     private final DataTreeModification modification;
     private final TransactionIdentifier transactionId;
     private final boolean doCommitOnReady;
+    private final Optional<SortedSet<String>> participatingShardNames;
 
     // The version of the remote system used only when needing to convert to BatchedModifications.
     private short remoteVersion = DataStoreVersions.CURRENT_VERSION;
 
     public ReadyLocalTransaction(final TransactionIdentifier transactionId, final DataTreeModification modification,
-            final boolean doCommitOnReady) {
-        this.transactionId = Preconditions.checkNotNull(transactionId);
-        this.modification = Preconditions.checkNotNull(modification);
+            final boolean doCommitOnReady, Optional<SortedSet<String>> participatingShardNames) {
+        this.transactionId = requireNonNull(transactionId);
+        this.modification = requireNonNull(modification);
         this.doCommitOnReady = doCommitOnReady;
+        this.participatingShardNames = requireNonNull(participatingShardNames);
     }
 
     public TransactionIdentifier getTransactionId() {
@@ -52,5 +57,9 @@ public final class ReadyLocalTransaction {
 
     public void setRemoteVersion(short remoteVersion) {
         this.remoteVersion = remoteVersion;
+    }
+
+    public Optional<SortedSet<String>> getParticipatingShardNames() {
+        return participatingShardNames;
     }
 }

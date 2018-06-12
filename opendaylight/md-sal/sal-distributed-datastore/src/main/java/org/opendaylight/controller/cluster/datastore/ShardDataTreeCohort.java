@@ -12,6 +12,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.util.Optional;
+import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -42,6 +44,8 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
     abstract DataTreeCandidateTip getCandidate();
 
     abstract DataTreeModification getDataTreeModification();
+
+    abstract Optional<SortedSet<String>> getParticipatingShardNames();
 
     // FIXME: Should return rebased DataTreeCandidateTip
     @VisibleForTesting

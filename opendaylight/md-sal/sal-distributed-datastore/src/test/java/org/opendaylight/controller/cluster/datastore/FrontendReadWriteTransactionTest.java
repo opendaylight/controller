@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
@@ -59,7 +61,7 @@ public class FrontendReadWriteTransactionTest {
         shardTransaction = new ReadWriteShardDataTreeTransaction(mockParent, TX_ID, mockModification);
         openTx = FrontendReadWriteTransaction.createOpen(mockHistory, shardTransaction);
 
-        when(mockParent.finishTransaction(same(shardTransaction))).thenReturn(mockCohort);
+        when(mockParent.finishTransaction(same(shardTransaction), eq(Optional.empty()))).thenReturn(mockCohort);
     }
 
     private TransactionSuccess<?> handleRequest(final TransactionRequest<?> request) throws RequestException {
@@ -87,7 +89,7 @@ public class FrontendReadWriteTransactionTest {
         final TransactionRequest<?> readyReq = b.build();
 
         assertNotNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction));
+        verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
         assertNotNull(handleRequest(readyReq));
         verifyNoMoreInteractions(mockParent);
@@ -101,7 +103,7 @@ public class FrontendReadWriteTransactionTest {
         final TransactionRequest<?> readyReq = b.build();
 
         assertNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction));
+        verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
         assertNull(handleRequest(readyReq));
         verifyNoMoreInteractions(mockParent);
@@ -115,7 +117,7 @@ public class FrontendReadWriteTransactionTest {
         final TransactionRequest<?> readyReq = b.build();
 
         assertNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction));
+        verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
         assertNull(handleRequest(readyReq));
         verifyNoMoreInteractions(mockParent);
@@ -129,7 +131,7 @@ public class FrontendReadWriteTransactionTest {
         final TransactionRequest<?> readyReq = b.build();
 
         assertNotNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction));
+        verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
         handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.EMPTY, true));
     }
@@ -142,7 +144,7 @@ public class FrontendReadWriteTransactionTest {
         final TransactionRequest<?> readyReq = b.build();
 
         assertNotNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction));
+        verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
         b.setSequence(1);
         b.addModification(mock(TransactionModification.class));
