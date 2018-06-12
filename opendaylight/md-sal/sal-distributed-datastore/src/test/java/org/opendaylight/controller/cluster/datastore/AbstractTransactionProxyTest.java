@@ -98,10 +98,10 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
     private final Configuration configuration = new MockConfiguration() {
         Map<String, ShardStrategy> strategyMap = ImmutableMap.<String, ShardStrategy>builder().put(
-                "junk", new ShardStrategy() {
+                TestModel.JUNK_QNAME.getLocalName(), new ShardStrategy() {
                     @Override
                     public String findShard(final YangInstanceIdentifier path) {
-                        return "junk";
+                        return TestModel.JUNK_QNAME.getLocalName();
                     }
 
                     @Override
@@ -109,10 +109,10 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                         return YangInstanceIdentifier.EMPTY;
                     }
                 }).put(
-                "cars", new ShardStrategy() {
+                CarsModel.BASE_QNAME.getLocalName(), new ShardStrategy() {
                     @Override
                     public String findShard(final YangInstanceIdentifier path) {
-                        return "cars";
+                        return CarsModel.BASE_QNAME.getLocalName();
                     }
 
                     @Override
@@ -129,9 +129,9 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         @Override
         public String getModuleNameFromNameSpace(final String nameSpace) {
             if (TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
-                return "junk";
+                return TestModel.JUNK_QNAME.getLocalName();
             } else if (CarsModel.BASE_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
-                return "cars";
+                return CarsModel.BASE_QNAME.getLocalName();
             }
             return null;
         }

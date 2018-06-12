@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collection;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
@@ -41,7 +43,8 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction(final Boolean havePermit) {
+    public Future<ActorSelection> readyTransaction(final Boolean havePermit,
+            final Optional<Collection<String>> participatingShardNamess) {
         LOG.debug("Tx {} readyTransaction called, failure: {}", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }

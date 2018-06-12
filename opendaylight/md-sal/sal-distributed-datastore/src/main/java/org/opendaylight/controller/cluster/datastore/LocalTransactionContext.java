@@ -13,6 +13,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collection;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
@@ -78,9 +80,10 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction(final Boolean havePermit) {
+    public Future<ActorSelection> readyTransaction(final Boolean havePermit,
+            final Optional<Collection<String>> participatingShardNames) {
         final LocalThreePhaseCommitCohort cohort = ready();
-        return cohort.initiateCoordinatedCommit();
+        return cohort.initiateCoordinatedCommit(participatingShardNames);
     }
 
     @Override
