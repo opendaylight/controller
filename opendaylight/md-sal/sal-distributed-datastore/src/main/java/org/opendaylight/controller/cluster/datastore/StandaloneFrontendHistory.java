@@ -12,8 +12,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -79,7 +81,8 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
-    ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
-        return tree.createReadyCohort(id, mod);
+    ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
+            final Optional<Collection<String>> participatingShardNames) {
+        return tree.createReadyCohort(id, mod, participatingShardNames);
     }
 }

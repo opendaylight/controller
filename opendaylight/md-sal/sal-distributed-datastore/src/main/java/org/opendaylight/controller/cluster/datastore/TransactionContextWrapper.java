@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -194,18 +195,18 @@ class TransactionContextWrapper {
         }
     }
 
-    Future<ActorSelection> readyTransaction() {
+    Future<ActorSelection> readyTransaction(Optional<Collection<String>> participatingShardNames) {
         // avoid the creation of a promise and a TransactionOperation
         final TransactionContext localContext = transactionContext;
         if (localContext != null) {
-            return localContext.readyTransaction(null);
+            return localContext.readyTransaction(null, participatingShardNames);
         }
 
         final Promise<ActorSelection> promise = Futures.promise();
         enqueueTransactionOperation(new TransactionOperation() {
             @Override
             public void invoke(final TransactionContext newTransactionContext, final Boolean havePermit) {
-                promise.completeWith(newTransactionContext.readyTransaction(havePermit));
+                promise.completeWith(newTransactionContext.readyTransaction(havePermit, participatingShardNames));
             }
         });
 
