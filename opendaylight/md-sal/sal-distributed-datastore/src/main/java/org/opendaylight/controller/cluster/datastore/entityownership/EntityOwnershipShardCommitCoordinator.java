@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -237,7 +238,9 @@ class EntityOwnershipShardCommitCoordinator {
         BatchedModifications prunedModifications = new BatchedModifications(toPrune.getTransactionId(),
                 toPrune.getVersion());
         prunedModifications.setDoCommitOnReady(toPrune.isDoCommitOnReady());
-        prunedModifications.setReady(toPrune.isReady());
+        if (toPrune.isReady()) {
+            prunedModifications.setReady(toPrune.getParticipatingShardNames());
+        }
         prunedModifications.setTotalMessagesSent(toPrune.getTotalMessagesSent());
         for (Modification mod: toPrune.getModifications()) {
             if (canForwardModificationToNewLeader(mod)) {
@@ -275,7 +278,7 @@ class EntityOwnershipShardCommitCoordinator {
         BatchedModifications modifications = new BatchedModifications(
             new TransactionIdentifier(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
         modifications.setDoCommitOnReady(true);
-        modifications.setReady(true);
+        modifications.setReady(Optional.empty());
         modifications.setTotalMessagesSent(1);
         return modifications;
     }
