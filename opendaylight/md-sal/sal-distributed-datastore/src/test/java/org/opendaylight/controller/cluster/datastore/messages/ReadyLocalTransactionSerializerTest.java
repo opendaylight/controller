@@ -12,8 +12,11 @@ import static org.junit.Assert.assertNotNull;
 
 import akka.actor.ExtendedActorSystem;
 import akka.testkit.JavaTestKit;
+import com.google.common.collect.ImmutableSortedSet;
 import java.io.NotSerializableException;
 import java.util.List;
+import java.util.Optional;
+import java.util.SortedSet;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
@@ -48,8 +51,10 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
+        final SortedSet<String> shardNames = ImmutableSortedSet.of("one", "two");
         TransactionIdentifier txId = nextTransactionId();
-        ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
+        ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true,
+                Optional.of(shardNames));
 
         final ExtendedActorSystem system = (ExtendedActorSystem) ExtendedActorSystem.create("test");
         final Object deserialized;
@@ -66,6 +71,10 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         BatchedModifications batched = (BatchedModifications)deserialized;
         assertEquals("getTransactionID", txId, batched.getTransactionId());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, batched.getVersion());
+        assertEquals("isReady", true, batched.isReady());
+        assertEquals("isDoCommitOnReady", true, batched.isDoCommitOnReady());
+        assertEquals("participatingShardNames present", true, batched.getParticipatingShardNames().isPresent());
+        assertEquals("participatingShardNames", shardNames, batched.getParticipatingShardNames().get());
 
         List<Modification> batchedMods = batched.getModifications();
         assertEquals("getModifications size", 2, batchedMods.size());

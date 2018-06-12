@@ -162,6 +162,8 @@ public class Shard extends RaftActor {
     /// The name of this shard
     private final String name;
 
+    private final String shardName;
+
     private final ShardStats shardMBean;
 
     private final ShardDataTreeListenerInfoMXBeanImpl listenerInfoMXBean;
@@ -204,6 +206,7 @@ public class Shard extends RaftActor {
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
         this.name = builder.getId().toString();
+        this.shardName = builder.getId().getShardName();
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
         this.frontendMetadata = new FrontendMetadata(name);
@@ -594,6 +597,10 @@ public class Shard extends RaftActor {
         return roleChangeNotifier;
     }
 
+    String getShardName() {
+        return shardName;
+    }
+
     @Override
     protected LeaderStateChanged newLeaderStateChanged(final String memberId, final String leaderId,
             final short leaderPayloadVersion) {
@@ -762,7 +769,8 @@ public class Shard extends RaftActor {
                 LOG.debug("{}: Forwarding ForwardedReadyTransaction to leader {}", persistenceId(), leader);
 
                 ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(forwardedReady.getTransactionId(),
-                        forwardedReady.getTransaction().getSnapshot(), forwardedReady.isDoImmediateCommit());
+                        forwardedReady.getTransaction().getSnapshot(), forwardedReady.isDoImmediateCommit(),
+                        forwardedReady.getParticipatingShardNames());
                 readyLocal.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
                 leader.forward(readyLocal, getContext());
             }
@@ -932,6 +940,8 @@ public class Shard extends RaftActor {
                             messagesToForward.size(), leader);
 
                     for (Object message : messagesToForward) {
+                        LOG.debug("{}: Forwarding pending transaction message {}", persistenceId(), message);
+
                         leader.tell(message, self());
                     }
                 }

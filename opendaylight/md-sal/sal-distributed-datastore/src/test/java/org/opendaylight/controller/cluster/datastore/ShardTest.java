@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -802,7 +803,7 @@ public class ShardTest extends AbstractShardTest {
                 final TransactionIdentifier transactionID = nextTransactionId();
                 final BatchedModifications batched = new BatchedModifications(transactionID,
                         DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady();
                 batched.setTotalMessagesSent(2);
 
                 shard.tell(batched, getRef());
@@ -845,7 +846,7 @@ public class ShardTest extends AbstractShardTest {
                 final Throwable cause = failure.cause();
 
                 batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady();
                 batched.setTotalMessagesSent(2);
 
                 shard.tell(batched, getRef());
@@ -976,7 +977,8 @@ public class ShardTest extends AbstractShardTest {
                 failure = expectMsgClass(Failure.class);
                 assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
 
-                shard.tell(new ReadyLocalTransaction(txId, mock(DataTreeModification.class), true), getRef());
+                shard.tell(new ReadyLocalTransaction(txId, mock(DataTreeModification.class), true, Optional.empty()),
+                        getRef());
                 failure = expectMsgClass(Failure.class);
                 assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
             }
@@ -1041,7 +1043,8 @@ public class ShardTest extends AbstractShardTest {
 
                 final TransactionIdentifier txId = nextTransactionId();
                 modification.ready();
-                final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
+                final ReadyLocalTransaction readyMessage =
+                        new ReadyLocalTransaction(txId, modification, true, Optional.empty());
 
                 shard.tell(readyMessage, getRef());
 
@@ -1074,7 +1077,8 @@ public class ShardTest extends AbstractShardTest {
 
                 final TransactionIdentifier txId = nextTransactionId();
                 modification.ready();
-                final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, false);
+                final ReadyLocalTransaction readyMessage =
+                        new ReadyLocalTransaction(txId, modification, false, Optional.empty());
 
                 shard.tell(readyMessage, getRef());
 
@@ -1702,7 +1706,7 @@ public class ShardTest extends AbstractShardTest {
                         .apply(modification3);
                 modification3.ready();
                 final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(transactionID3, modification3,
-                        true);
+                        true, Optional.empty());
                 shard.tell(readyMessage, getRef());
 
                 // Commit the first Tx. After completing, the second should

@@ -113,7 +113,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -482,7 +482,7 @@ public class ShardDataTreeTest extends AbstractTest {
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        return shardDataTree.finishTransaction(transaction);
+        return shardDataTree.finishTransaction(transaction, Optional.empty());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -541,7 +541,7 @@ public class ShardDataTreeTest extends AbstractTest {
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -559,7 +559,7 @@ public class ShardDataTreeTest extends AbstractTest {
         for (final DataTreeCandidate candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);

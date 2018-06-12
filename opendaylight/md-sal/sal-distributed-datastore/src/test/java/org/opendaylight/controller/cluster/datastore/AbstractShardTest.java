@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -265,7 +266,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
                                                              final boolean doCommitOnReady) {
         final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
         batchedModifications.addModification(modification);
-        batchedModifications.setReady(true);
+        batchedModifications.setReady();
         batchedModifications.setDoCommitOnReady(doCommitOnReady);
         batchedModifications.setTotalMessagesSent(1);
         return batchedModifications;
@@ -284,7 +285,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore()
                 .newReadWriteTransaction(transactionID);
         rwTx.getSnapshot().write(path, data);
-        return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady);
+        return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady, Optional.empty());
     }
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard,
@@ -330,7 +331,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             final NormalizedNode<?,?> node) throws DataValidationFailedException {
         final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
         batched.addModification(new MergeModification(id, node));
-        batched.setReady(true);
+        batched.setReady();
         batched.setDoCommitOnReady(true);
         batched.setTotalMessagesSent(1);
 
@@ -366,9 +367,21 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             final boolean doCommitOnReady, final int messagesSent) {
         final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new WriteModification(path, data));
-        batched.setReady(ready);
+        if (ready) {
+            batched.setReady();
+        }
         batched.setDoCommitOnReady(doCommitOnReady);
         batched.setTotalMessagesSent(messagesSent);
+        return batched;
+    }
+
+    static BatchedModifications newReadyBatchedModifications(final TransactionIdentifier transactionID,
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final SortedSet<String> participatingShardNames) {
+        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
+        batched.addModification(new WriteModification(path, data));
+        batched.setReady(Optional.of(participatingShardNames));
+        batched.setTotalMessagesSent(1);
         return batched;
     }
 
@@ -518,6 +531,11 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         @Override
         public State getState() {
             return delegate.getState();
+        }
+
+        @Override
+        Optional<SortedSet<String>> getParticipatingShardNames() {
+            return delegate.getParticipatingShardNames();
         }
     }
 }
