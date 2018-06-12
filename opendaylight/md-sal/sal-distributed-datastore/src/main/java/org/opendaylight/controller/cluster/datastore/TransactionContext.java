@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.List;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import scala.concurrent.Future;
@@ -20,7 +22,7 @@ import scala.concurrent.Future;
 interface TransactionContext {
     void closeTransaction();
 
-    Future<ActorSelection> readyTransaction(Boolean havePermit);
+    Future<ActorSelection> readyTransaction(Boolean havePermit, Optional<List<String>> participatingShardNames);
 
     void executeModification(AbstractModification modification, Boolean havePermit);
 

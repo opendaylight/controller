@@ -18,5 +18,6 @@ public interface DataStoreVersions {
     short HELIUM_2_VERSION = 2;
     short LITHIUM_VERSION = 3;
     short BORON_VERSION = 5;
-    short CURRENT_VERSION = BORON_VERSION;
+    short FLUORINE_VERSION = 9;
+    short CURRENT_VERSION = FLUORINE_VERSION;
 }

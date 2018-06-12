@@ -31,11 +31,13 @@ import akka.dispatch.Futures;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -44,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -57,6 +60,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
@@ -524,22 +528,59 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadyWithMultipleShardWrites() throws Exception {
         ActorRef actorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, "junk");
+        ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY,
+                TestModel.JUNK_QNAME.getLocalName());
 
         expectBatchedModificationsReady(actorRef1);
         expectBatchedModificationsReady(actorRef2);
+
+        ActorRef actorRef3 = getSystem().actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(getSystem().actorSelection(actorRef3.path())).when(mockActorContext)
+                .actorSelection(actorRef3.path().toString());
+
+        doReturn(Futures.successful(newPrimaryShardInfo(actorRef3, createDataTree()))).when(mockActorContext)
+                .findPrimaryShardAsync(eq(CarsModel.BASE_QNAME.getLocalName()));
+
+        expectReadyLocalTransaction(actorRef3, false);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
         transactionProxy.write(TestModel.JUNK_PATH, ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
         transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        transactionProxy.write(CarsModel.BASE_PATH, ImmutableNodes.containerNode(CarsModel.BASE_QNAME));
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
         assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
 
         verifyCohortFutures((ThreePhaseCommitCohortProxy)ready, actorSelection(actorRef1),
-                actorSelection(actorRef2));
+                actorSelection(actorRef2), actorSelection(actorRef3));
+
+        Collection<String> expShardNames =
+                new ArrayList<>(ImmutableSortedSet.of(DefaultShardStrategy.DEFAULT_SHARD,
+                        TestModel.JUNK_QNAME.getLocalName(), CarsModel.BASE_QNAME.getLocalName()));
+
+        ArgumentCaptor<BatchedModifications> batchedMods = ArgumentCaptor.forClass(BatchedModifications.class);
+        verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef1)), batchedMods.capture(), any(Timeout.class));
+        assertEquals("Participating shards present", true,
+                batchedMods.getValue().getParticipatingShardNames().isPresent());
+        assertEquals("Participating shards", expShardNames, batchedMods.getValue().getParticipatingShardNames().get());
+
+        batchedMods = ArgumentCaptor.forClass(BatchedModifications.class);
+        verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef2)), batchedMods.capture(), any(Timeout.class));
+        assertEquals("Participating shards present", true,
+                batchedMods.getValue().getParticipatingShardNames().isPresent());
+        assertEquals("Participating shards", expShardNames, batchedMods.getValue().getParticipatingShardNames().get());
+
+        ArgumentCaptor<ReadyLocalTransaction> readyLocalTx = ArgumentCaptor.forClass(ReadyLocalTransaction.class);
+        verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef3)), readyLocalTx.capture(), any(Timeout.class));
+        assertEquals("Participating shards present", true,
+                readyLocalTx.getValue().getParticipatingShardNames().isPresent());
+        assertEquals("Participating shards", expShardNames, readyLocalTx.getValue().getParticipatingShardNames().get());
     }
 
     @Test
@@ -657,6 +698,12 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
         assertTrue(ready instanceof SingleCommitCohortProxy);
         verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
+
+        ArgumentCaptor<ReadyLocalTransaction> readyLocalTx = ArgumentCaptor.forClass(ReadyLocalTransaction.class);
+        verify(mockActorContext).executeOperationAsync(
+                eq(actorSelection(shardActorRef)), readyLocalTx.capture(), any(Timeout.class));
+        assertEquals("Participating shards present", false,
+                readyLocalTx.getValue().getParticipatingShardNames().isPresent());
     }
 
     @Test
@@ -725,7 +772,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
         ActorRef actorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, "junk");
+        ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY,
+                TestModel.JUNK_QNAME.getLocalName());
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef1)), isA(BatchedModifications.class), any(Timeout.class));

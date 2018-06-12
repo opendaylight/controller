@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.util.List;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
@@ -86,5 +88,10 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     @Override
     public State getState() {
         return delegate.getState();
+    }
+
+    @Override
+    Optional<List<String>> getParticipatingShardNames() {
+        return delegate.getParticipatingShardNames();
     }
 }
