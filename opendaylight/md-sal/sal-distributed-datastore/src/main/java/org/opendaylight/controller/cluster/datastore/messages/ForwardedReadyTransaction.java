@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
+import java.util.Collection;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ReadWriteShardDataTreeTransaction;
 
@@ -21,13 +24,16 @@ public class ForwardedReadyTransaction {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final boolean doImmediateCommit;
     private final short txnClientVersion;
+    private final Optional<Collection<String>> participatingShardNames;
 
     public ForwardedReadyTransaction(TransactionIdentifier transactionId, short txnClientVersion,
-            ReadWriteShardDataTreeTransaction transaction, boolean doImmediateCommit) {
-        this.transactionId = Preconditions.checkNotNull(transactionId);
-        this.transaction = Preconditions.checkNotNull(transaction);
+            ReadWriteShardDataTreeTransaction transaction, boolean doImmediateCommit,
+            Optional<Collection<String>> participatingShardNames) {
+        this.transactionId = requireNonNull(transactionId);
+        this.transaction = requireNonNull(transaction);
         this.txnClientVersion = txnClientVersion;
         this.doImmediateCommit = doImmediateCommit;
+        this.participatingShardNames = requireNonNull(participatingShardNames);
     }
 
     public TransactionIdentifier getTransactionId() {
@@ -46,9 +52,14 @@ public class ForwardedReadyTransaction {
         return doImmediateCommit;
     }
 
+    public Optional<Collection<String>> getParticipatingShardNames() {
+        return participatingShardNames;
+    }
+
     @Override
     public String toString() {
-        return "ForwardedReadyTransaction [transactionId=" + transactionId + ", doImmediateCommit=" + doImmediateCommit
+        return "ForwardedReadyTransaction [transactionId=" + transactionId + ", transaction=" + transaction
+                + ", doImmediateCommit=" + doImmediateCommit + ", participatingShardNames=" + participatingShardNames
                 + ", txnClientVersion=" + txnClientVersion + "]";
     }
 }

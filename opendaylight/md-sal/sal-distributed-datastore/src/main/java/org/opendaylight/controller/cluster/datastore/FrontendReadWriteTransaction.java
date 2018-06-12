@@ -513,7 +513,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         if (optFailure.isPresent()) {
             state = new Ready(history().createFailedCohort(getIdentifier(), sealedModification, optFailure.get()));
         } else {
-            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification));
+            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification,
+                    java.util.Optional.empty()));
         }
 
         if (request.isCoordinated()) {
@@ -611,7 +612,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
 
         applyModifications(modifications);
-        state = new Ready(checkOpen().ready());
+        state = new Ready(checkOpen().ready(java.util.Optional.empty()));
         LOG.debug("{}: transitioned {} to ready", persistenceId(), getIdentifier());
     }
 

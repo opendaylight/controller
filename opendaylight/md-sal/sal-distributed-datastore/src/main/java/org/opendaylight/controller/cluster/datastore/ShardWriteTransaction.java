@@ -77,7 +77,7 @@ public class ShardWriteTransaction extends ShardTransaction {
                             totalBatchedModificationsReceived, batched.getTotalMessagesSent()));
                 }
 
-                readyTransaction(false, batched.isDoCommitOnReady(), batched.getVersion());
+                readyTransaction(batched);
             } else {
                 getSender().tell(new BatchedModificationsReply(batched.getModifications().size()), getSelf());
             }
@@ -109,13 +109,13 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(boolean returnSerialized, boolean doImmediateCommit, short clientTxVersion) {
+    private void readyTransaction(BatchedModifications batched) {
         TransactionIdentifier transactionID = getTransactionId();
 
         LOG.debug("readyTransaction : {}", transactionID);
 
-        getShardActor().forward(new ForwardedReadyTransaction(transactionID, clientTxVersion,
-                transaction, doImmediateCommit), getContext());
+        getShardActor().forward(new ForwardedReadyTransaction(transactionID, batched.getVersion(),
+                transaction, batched.isDoCommitOnReady(), batched.getParticipatingShardNames()), getContext());
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.
         getSelf().tell(PoisonPill.getInstance(), getSelf());

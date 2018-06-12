@@ -12,6 +12,8 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Collection;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
@@ -59,18 +61,19 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         this.modification = null;
     }
 
-    private Future<Object> initiateCommit(final boolean immediate) {
+    private Future<Object> initiateCommit(final boolean immediate,
+            final Optional<Collection<String>> participatingShardNames) {
         if (operationError != null) {
             return Futures.failed(operationError);
         }
 
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier(),
-                modification, immediate);
+                modification, immediate, participatingShardNames);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
-    Future<ActorSelection> initiateCoordinatedCommit() {
-        final Future<Object> messageFuture = initiateCommit(false);
+    Future<ActorSelection> initiateCoordinatedCommit(Optional<Collection<String>> participatingShardNames) {
+        final Future<Object> messageFuture = initiateCommit(false, participatingShardNames);
         final Future<ActorSelection> ret = TransactionReadyReplyMapper.transform(messageFuture, actorContext,
                 transaction.getIdentifier());
         ret.onComplete(new OnComplete<ActorSelection>() {
@@ -90,7 +93,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     }
 
     Future<Object> initiateDirectCommit() {
-        final Future<Object> messageFuture = initiateCommit(true);
+        final Future<Object> messageFuture = initiateCommit(true, Optional.empty());
         messageFuture.onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object message) throws Throwable {

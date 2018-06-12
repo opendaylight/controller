@@ -11,6 +11,8 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.util.Collection;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -109,15 +111,19 @@ final class CohortEntry {
         cohort.abort(callback);
     }
 
-    void ready(final CohortDecorator cohortDecorator) {
+    void ready(final Optional<Collection<String>> participatingShardNames, final CohortDecorator cohortDecorator) {
         Preconditions.checkState(cohort == null, "cohort was already set");
 
-        cohort = transaction.ready();
+        cohort = transaction.ready(participatingShardNames);
 
         if (cohortDecorator != null) {
             // Call the hook for unit tests.
             cohort = cohortDecorator.decorate(transactionId, cohort);
         }
+    }
+
+    Optional<Collection<String>> getParticipatingShardNames() {
+        return cohort != null ? cohort.getParticipatingShardNames() : Optional.empty();
     }
 
     boolean isDoImmediateCommit() {
