@@ -7,11 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 
 /**
@@ -26,21 +33,33 @@ public class BatchedModifications extends MutableCompositeModification {
     private boolean doCommitOnReady;
     private int totalMessagesSent;
     private TransactionIdentifier transactionId;
+    @Nullable
+    private SortedSet<String> participatingShardNames;
 
     public BatchedModifications() {
     }
 
     public BatchedModifications(TransactionIdentifier transactionId, short version) {
         super(version);
-        this.transactionId = Preconditions.checkNotNull(transactionId, "transactionID can't be null");
+        this.transactionId = requireNonNull(transactionId, "transactionID can't be null");
     }
 
     public boolean isReady() {
         return ready;
     }
 
-    public void setReady(boolean ready) {
-        this.ready = ready;
+    public void setReady(Optional<SortedSet<String>> possibleParticipatingShardNames) {
+        this.ready = true;
+        this.participatingShardNames = requireNonNull(possibleParticipatingShardNames).orElse(null);
+        Preconditions.checkArgument(this.participatingShardNames == null || this.participatingShardNames.size() > 1);
+    }
+
+    public void setReady() {
+        setReady(Optional.empty());
+    }
+
+    public Optional<SortedSet<String>> getParticipatingShardNames() {
+        return Optional.ofNullable(participatingShardNames);
     }
 
     public boolean isDoCommitOnReady() {
@@ -63,7 +82,6 @@ public class BatchedModifications extends MutableCompositeModification {
         return transactionId;
     }
 
-
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -71,6 +89,18 @@ public class BatchedModifications extends MutableCompositeModification {
         ready = in.readBoolean();
         totalMessagesSent = in.readInt();
         doCommitOnReady = in.readBoolean();
+
+        if (getVersion() >= DataStoreVersions.FLUORINE_VERSION) {
+            final int count = in.readInt();
+            if (count != 0) {
+                SortedSet<String> shardNames = new TreeSet<>();
+                for (int i = 0; i < count; i++) {
+                    shardNames.add((String) in.readObject());
+                }
+
+                participatingShardNames = shardNames;
+            }
+        }
     }
 
     @Override
@@ -80,12 +110,24 @@ public class BatchedModifications extends MutableCompositeModification {
         out.writeBoolean(ready);
         out.writeInt(totalMessagesSent);
         out.writeBoolean(doCommitOnReady);
+
+        if (getVersion() >= DataStoreVersions.FLUORINE_VERSION) {
+            if (participatingShardNames != null) {
+                out.writeInt(participatingShardNames.size());
+                for (String shardName: participatingShardNames) {
+                    out.writeObject(shardName);
+                }
+            } else {
+                out.writeInt(0);
+            }
+        }
     }
 
     @Override
     public String toString() {
         return "BatchedModifications [transactionId=" + transactionId
-                + ", ready=" + ready
+                + ", ready=" + isReady()
+                + ", participatingShardNames=" + participatingShardNames
                 + ", totalMessagesSent=" + totalMessagesSent
                 + ", modifications size=" + getModifications().size() + "]";
     }

@@ -216,7 +216,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         for (CohortInfo cohort : cohorts) {
             Object message = messageSupplier.newMessage(transactionId, cohort.getActorVersion());
 
-            LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message , cohort);
+            LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message , cohort.getResolvedActor());
 
             futureList.add(actorContext.executeOperationAsync(cohort.getResolvedActor(), message,
                     actorContext.getTransactionCommitOperationTimeout()));
