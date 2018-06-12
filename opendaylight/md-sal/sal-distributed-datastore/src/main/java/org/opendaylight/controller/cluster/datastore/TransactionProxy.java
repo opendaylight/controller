@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -60,28 +62,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
-
-    // Global lock used for transactions spanning multiple shards - synchronizes sending of the ready messages
-    // for atomicity to avoid potential deadlock with concurrent transactions spanning the same shards as outlined
-    // in the following scenario:
-    //
-    //  - Tx1 sends ready message to shard A
-    //  - Tx2 sends ready message to shard A
-    //  - Tx2 sends ready message to shard B
-    //  - Tx1 sends ready message to shard B
-    //
-    // This scenario results in deadlock: after Tx1 canCommits to shard A, it can't proceed with shard B until Tx2
-    // completes as Tx2 was readied first on shard B. However Tx2 cannot make progress because it's waiting to canCommit
-    // on shard A which is blocked by Tx1.
-    //
-    // The global lock avoids this as it forces the ready messages to be sent in a predictable order:
-    //
-    //  - Tx1 sends ready message to shard A
-    //  - Tx1 sends ready message to shard B
-    //  - Tx2 sends ready message to shard A
-    //  - Tx2 sends ready message to shard B
-    //
-    private static final Object GLOBAL_TX_READY_LOCK = new Object();
 
     private final Map<String, TransactionContextWrapper> txContextWrappers = new TreeMap<>();
     private final AbstractTransactionContextFactory<?> txContextFactory;
@@ -251,7 +231,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 ret = createSingleCommitCohort(e.getKey(), e.getValue());
                 break;
             default:
-                ret = createMultiCommitCohort(txContextWrappers.entrySet());
+                ret = createMultiCommitCohort();
         }
 
         txContextFactory.onTransactionReady(getIdentifier(), ret.getCohortFutures());
@@ -299,24 +279,23 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return transactionContext.directCommit(havePermit);
     }
 
-    private AbstractThreePhaseCommitCohort<ActorSelection> createMultiCommitCohort(
-            final Set<Entry<String, TransactionContextWrapper>> txContextWrapperEntries) {
+    private AbstractThreePhaseCommitCohort<ActorSelection> createMultiCommitCohort() {
 
-        final List<ThreePhaseCommitCohortProxy.CohortInfo> cohorts = new ArrayList<>(txContextWrapperEntries.size());
+        final List<ThreePhaseCommitCohortProxy.CohortInfo> cohorts = new ArrayList<>(txContextWrappers.size());
+        final java.util.Optional<SortedSet<String>> shardNames =
+                java.util.Optional.of(new TreeSet<>(txContextWrappers.keySet()));
+        for (Entry<String, TransactionContextWrapper> e : txContextWrappers.entrySet()) {
+            LOG.debug("Tx {} Readying transaction for shard {}", getIdentifier(), e.getKey());
 
-        synchronized (GLOBAL_TX_READY_LOCK) {
-            for (Entry<String, TransactionContextWrapper> e : txContextWrapperEntries) {
-                LOG.debug("Tx {} Readying transaction for shard {}", getIdentifier(), e.getKey());
+            final TransactionContextWrapper wrapper = e.getValue();
 
-                final TransactionContextWrapper wrapper = e.getValue();
+            // The remote tx version is obtained the via TransactionContext which may not be available yet so
+            // we pass a Supplier to dynamically obtain it. Once the ready Future is resolved the
+            // TransactionContext is available.
+            Supplier<Short> txVersionSupplier = () -> wrapper.getTransactionContext().getTransactionVersion();
 
-                // The remote tx version is obtained the via TransactionContext which may not be available yet so
-                // we pass a Supplier to dynamically obtain it. Once the ready Future is resolved the
-                // TransactionContext is available.
-                Supplier<Short> txVersionSupplier = () -> wrapper.getTransactionContext().getTransactionVersion();
-
-                cohorts.add(new ThreePhaseCommitCohortProxy.CohortInfo(wrapper.readyTransaction(), txVersionSupplier));
-            }
+            cohorts.add(new ThreePhaseCommitCohortProxy.CohortInfo(wrapper.readyTransaction(shardNames),
+                    txVersionSupplier));
         }
 
         return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts, getIdentifier());

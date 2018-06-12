@@ -22,6 +22,7 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -244,7 +245,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 assertEquals("getNumBatched", 1, reply.getNumBatched());
 
                 batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady(Optional.empty());
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
@@ -272,7 +273,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 BatchedModifications batched = new BatchedModifications(nextTransactionId(),
                         DataStoreVersions.CURRENT_VERSION);
                 batched.addModification(new WriteModification(writePath, writeData));
-                batched.setReady(true);
+                batched.setReady(Optional.empty());
                 batched.setDoCommitOnReady(true);
                 batched.setTotalMessagesSent(1);
 
@@ -311,7 +312,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
                 batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady(Optional.empty());
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
@@ -339,7 +340,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 BatchedModifications batched = new BatchedModifications(nextTransactionId(),
                         DataStoreVersions.CURRENT_VERSION);
-                batched.setReady(true);
+                batched.setReady(Optional.empty());
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
