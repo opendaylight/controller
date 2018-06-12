@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import java.util.List;
+import java.util.Optional;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -88,13 +90,14 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
+            final Optional<List<String>> participatingShardNames) {
         Preconditions.checkState(openTransaction != null,
                 "Attempted to finish transaction %s while none is outstanding", transaction);
 
         // dataTree is finalizing ready the transaction, we just record it for the next
         // transaction in chain
-        final ShardDataTreeCohort delegate = dataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort delegate = dataTree.finishTransaction(transaction, participatingShardNames);
         openTransaction = null;
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
@@ -125,7 +128,8 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
-        return dataTree.createReadyCohort(txId, mod);
+    ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
+            final Optional<List<String>> participatingShardNames) {
+        return dataTree.createReadyCohort(txId, mod, participatingShardNames);
     }
 }

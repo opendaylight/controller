@@ -14,6 +14,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -208,7 +209,8 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     abstract ShardDataTreeCohort createFailedCohort(TransactionIdentifier id, DataTreeModification mod,
             Exception failure);
 
-    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
+    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod,
+            Optional<List<String>> participatingShardNames);
 
     @Override
     public String toString() {

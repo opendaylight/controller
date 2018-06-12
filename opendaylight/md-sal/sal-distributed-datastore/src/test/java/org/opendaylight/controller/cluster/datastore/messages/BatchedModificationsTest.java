@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -49,7 +52,9 @@ public class BatchedModificationsTest extends AbstractTest {
         batched.addModification(new WriteModification(writePath, writeData));
         batched.addModification(new MergeModification(mergePath, mergeData));
         batched.addModification(new DeleteModification(deletePath));
-        batched.setReady(true);
+        assertEquals("isReady", false, batched.isReady());
+        batched.setReady(Optional.empty());
+        assertEquals("isReady", true, batched.isReady());
         batched.setTotalMessagesSent(5);
 
         BatchedModifications clone = (BatchedModifications) SerializationUtils.clone(
@@ -58,6 +63,8 @@ public class BatchedModificationsTest extends AbstractTest {
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", tx1, clone.getTransactionId());
         assertEquals("isReady", true, clone.isReady());
+        assertEquals("isDoCommitOnReady", false, clone.isDoCommitOnReady());
+        assertEquals("participatingShardNames present", false, clone.getParticipatingShardNames().isPresent());
         assertEquals("getTotalMessagesSent", 5, clone.getTotalMessagesSent());
 
         assertEquals("getModifications size", 3, clone.getModifications().size());
@@ -76,18 +83,49 @@ public class BatchedModificationsTest extends AbstractTest {
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, delete.getVersion());
         assertEquals("getPath", deletePath, delete.getPath());
 
-        // Test with different params.
+        // Test with participating shard names.
+
         final TransactionIdentifier tx2 = nextTransactionId();
         batched = new BatchedModifications(tx2, (short)10000);
+        final List<String> shardNames = Arrays.asList("one", "two");
+        batched.setReady(Optional.of(shardNames));
+        batched.setDoCommitOnReady(true);
+        assertEquals("isReady", true, batched.isReady());
+
+        clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
+
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
+        assertEquals("getTransactionID", tx2, clone.getTransactionId());
+        assertEquals("isReady", true, clone.isReady());
+        assertEquals("isDoCommitOnReady", true, clone.isDoCommitOnReady());
+        assertEquals("participatingShardNames present", true, clone.getParticipatingShardNames().isPresent());
+        assertEquals("participatingShardNames", shardNames, clone.getParticipatingShardNames().get());
+        assertEquals("getModifications size", 0, clone.getModifications().size());
+
+        // Test not ready.
+
+        batched = new BatchedModifications(tx2, DataStoreVersions.CURRENT_VERSION);
 
         clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", tx2, clone.getTransactionId());
         assertEquals("isReady", false, clone.isReady());
-
         assertEquals("getModifications size", 0, clone.getModifications().size());
 
+        // Test pre-Flourine
+
+        batched = new BatchedModifications(tx2, DataStoreVersions.BORON_VERSION);
+        batched.addModification(new WriteModification(writePath, writeData));
+        batched.setReady(Optional.of(Arrays.asList("one")));
+
+        clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
+
+        assertEquals("getVersion", DataStoreVersions.BORON_VERSION, clone.getVersion());
+        assertEquals("getTransactionID", tx2, clone.getTransactionId());
+        assertEquals("isReady", true, clone.isReady());
+        assertEquals("participatingShardNames present", false, clone.getParticipatingShardNames().isPresent());
+        assertEquals("getModifications size", 1, clone.getModifications().size());
     }
 
     @Test

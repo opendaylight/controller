@@ -13,6 +13,8 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.List;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -80,11 +82,12 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
 
         // Send the remaining batched modifications, if any, with the ready flag set.
         bumpPermits(havePermit);
-        return sendBatchedModifications(true, true);
+        return sendBatchedModifications(true, true, Optional.empty());
     }
 
     @Override
-    public Future<ActorSelection> readyTransaction(final Boolean havePermit) {
+    public Future<ActorSelection> readyTransaction(final Boolean havePermit,
+            final Optional<List<String>> participatingShardNames) {
         logModificationCount();
 
         LOG.debug("Tx {} readyTransaction called", getIdentifier());
@@ -92,7 +95,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         // Send the remaining batched modifications, if any, with the ready flag set.
 
         bumpPermits(havePermit);
-        Future<Object> lastModificationsFuture = sendBatchedModifications(true, false);
+        Future<Object> lastModificationsFuture = sendBatchedModifications(true, false, participatingShardNames);
 
         return transformReadyReply(lastModificationsFuture);
     }
@@ -133,10 +136,11 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     protected Future<Object> sendBatchedModifications() {
-        return sendBatchedModifications(false, false);
+        return sendBatchedModifications(false, false, Optional.empty());
     }
 
-    protected Future<Object> sendBatchedModifications(final boolean ready, final boolean doCommitOnReady) {
+    protected Future<Object> sendBatchedModifications(final boolean ready, final boolean doCommitOnReady,
+            final Optional<List<String>> participatingShardNames) {
         Future<Object> sent = null;
         if (ready || batchedModifications != null && !batchedModifications.getModifications().isEmpty()) {
             if (batchedModifications == null) {
@@ -146,7 +150,6 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             LOG.debug("Tx {} sending {} batched modifications, ready: {}", getIdentifier(),
                     batchedModifications.getModifications().size(), ready);
 
-            batchedModifications.setReady(ready);
             batchedModifications.setDoCommitOnReady(doCommitOnReady);
             batchedModifications.setTotalMessagesSent(++totalBatchedModificationsSent);
 
@@ -155,6 +158,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             batchPermits = 0;
 
             if (ready) {
+                batchedModifications.setReady(participatingShardNames);
+                batchedModifications.setDoCommitOnReady(doCommitOnReady);
                 batchedModifications = null;
             } else {
                 batchedModifications = newBatchedModifications();

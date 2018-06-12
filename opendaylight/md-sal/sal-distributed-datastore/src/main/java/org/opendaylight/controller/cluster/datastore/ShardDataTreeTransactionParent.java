@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import java.util.List;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -16,9 +18,11 @@ abstract class ShardDataTreeTransactionParent {
 
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
-    abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
+    abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,
+            Optional<List<String>> participatingShardNames);
 
-    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod);
+    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod,
+            Optional<List<String>> participatingShardNames);
 
     abstract ShardDataTreeCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
             Exception failure);

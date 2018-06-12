@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import java.util.List;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -18,8 +20,8 @@ public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTr
         super(parent, id, modification);
     }
 
-    ShardDataTreeCohort ready() {
+    ShardDataTreeCohort ready(Optional<List<String>> participatingShardNames) {
         Preconditions.checkState(close(), "Transaction is already closed");
-        return getParent().finishTransaction(this);
+        return getParent().finishTransaction(this, participatingShardNames);
     }
 }
