@@ -105,6 +105,24 @@
       "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f88c9f34_e04055b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-06-13T14:50:15Z",
+      "side": 1,
+      "message": "\u003e I can change to List. This is passed via various paths originating\n \u003e from the TransactionProxy FE where the collection actually comes\n \u003e from the keySet of a TreeMap but I make a copy of it in an\n \u003e ArrayList anyway.\n\nThat would be cool, thanks.\n\n \u003e \u003e If the collections are always non-null (which I think they are,\n \u003e \u003e aren’t they?), I’d rather not have Optional, yes :-).\n \u003e \n \u003e The participating shard names isn\u0027t relevant/used for a direct\n \u003e commit (ie single-shard) which could be communicated via empty\n \u003e collection/list, null, or Optional. I chose Optional b/c it\u0027s\n \u003e clearer and self-documenting. Otherwise I\u0027d go with an empty list\n \u003e which would need manual documentation via @Nonnull all over the\n \u003e place to make it clear.\n\nOK, so there are two different cases to handle. Might as well leave it as-is then, using Optional...",
+      "parentUuid": "1467d1a2_294ec08d",
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
