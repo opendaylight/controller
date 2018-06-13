@@ -69,6 +69,24 @@
       "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f70835d5_f9ed25d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-06-13T12:49:18Z",
+      "side": 1,
+      "message": "\u003e The list is sorted by the FE to effect deterministic behavior\n \u003e across shards  to avoid ABBA. This code really has no dependency on\n \u003e that, ie it doesn\u0027t rely on any specific ordering.  Plus what type\n \u003e would one use to connote a sorted list? Also that type would have\n \u003e to be propagated across ser/der.\n\nRight. What bothers me is that, in this method, iteration order is significant, but the signature doesn’t indicate that: I can provide a unstable Set, and the results will be different on each call. I don’t really have an answer apart from that List is typically used when the order of a collection is important.\n\nI don’t want to hold up this fix though ;-).\n\n \u003e There really is no semantic difference between the two. If it\u0027s a\n \u003e multi-shard tx then the collection wouldn\u0027t be empty. I used\n \u003e Optional to resolve null collection vs empty collection to avoid\n \u003e @Nullable vs @Nonnull semantics everywhere. I\u0027m fine either way tho\n \u003e if you\u0027d rather remove Optional.\n\nIf the collections are always non-null (which I think they are, aren’t they?), I’d rather not have Optional, yes :-).",
+      "parentUuid": "301044b4_8684add0",
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
