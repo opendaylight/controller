@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "431a1dbc_244c1a01",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataStoreVersions.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-06-13T08:37:11Z",
+      "side": 1,
+      "message": "FLUORINE ;-).",
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "573d3b66_ddd667e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-06-13T08:37:11Z",
+      "side": 1,
+      "message": "This means that the order of the participating shard names is significant, which doesn’t appear in the type and perhaps should (List instead of Collection? or is a Queue used somewhere?).\n\nWhile I’m at it, is there a semantic difference here between an empty Optional and an empty Collection? If not, could we use the Collection directly and do without Optional everywhere?",
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
