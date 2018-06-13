@@ -87,6 +87,24 @@
       "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1467d1a2_294ec08d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-13T13:07:49Z",
+      "side": 1,
+      "message": "\u003e \u003e The list is sorted by the FE to effect deterministic behavior\n \u003e \u003e across shards  to avoid ABBA. This code really has no dependency\n \u003e on\n \u003e \u003e that, ie it doesn\u0027t rely on any specific ordering.  Plus what\n \u003e type\n \u003e \u003e would one use to connote a sorted list? Also that type would have\n \u003e \u003e to be propagated across ser/der.\n \u003e \n \u003e Right. What bothers me is that, in this method, iteration order is\n \u003e significant, but the signature doesn’t indicate that: I can provide\n \u003e a unstable Set, and the results will be different on each call. I\n \u003e don’t really have an answer apart from that List is typically used\n \u003e when the order of a collection is important.\n \u003e \n \u003e I don’t want to hold up this fix though ;-).\n\nI can change to List. This is passed via various paths originating from the TransactionProxy FE where the collection actually comes from the keySet of a TreeMap but I make a copy of it in an ArrayList anyway.\n\n \u003e \n \u003e \u003e There really is no semantic difference between the two. If it\u0027s a\n \u003e \u003e multi-shard tx then the collection wouldn\u0027t be empty. I used\n \u003e \u003e Optional to resolve null collection vs empty collection to avoid\n \u003e \u003e @Nullable vs @Nonnull semantics everywhere. I\u0027m fine either way\n \u003e tho\n \u003e \u003e if you\u0027d rather remove Optional.\n \u003e \n \u003e If the collections are always non-null (which I think they are,\n \u003e aren’t they?), I’d rather not have Optional, yes :-).\n\nThe participating shard names isn\u0027t relevant/used for a direct commit (ie single-shard) which could be communicated via empty collection/list, null, or Optional. I chose Optional b/c it\u0027s clearer and self-documenting. Otherwise I\u0027d go with an empty list which would need manual documentation via @Nonnull all over the place to make it clear.",
+      "parentUuid": "f70835d5_f9ed25d9",
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
