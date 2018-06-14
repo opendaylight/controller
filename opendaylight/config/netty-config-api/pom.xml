@@ -4,9 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-plugin-parent</artifactId>
+    <artifactId>config-subsystem</artifactId>
     <version>0.9.0-SNAPSHOT</version>
-    <relativePath>../config-plugin-parent</relativePath>
+    <relativePath>../</relativePath>
   </parent>
   <artifactId>netty-config-api</artifactId>
   <packaging>bundle</packaging>
@@ -14,34 +14,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-transport</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Export-Package>org.opendaylight.controller.config.yang.netty,
-                      org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.netty.rev131119.*,</Export-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>
