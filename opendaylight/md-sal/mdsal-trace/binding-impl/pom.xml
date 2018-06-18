@@ -49,10 +49,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 <instructions>
                     <Import-Package>
                       org.opendaylight.controller.md.sal.trace.api,
-                      org.opendaylight.mdsal.binding.generator.api,
                       org.opendaylight.controller.md.sal.dom.api,
                       org.opendaylight.controller.md.sal.binding.api,
-                      org.opendaylight.controller.md.sal.binding.impl,
+                      org.opendaylight.controller.md.sal.binding.spi,
                       org.opendaylight.controller.sal.core.api.model,
                       *
                     </Import-Package>
