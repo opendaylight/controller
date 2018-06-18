@@ -146,6 +146,30 @@
       "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2250197_998511e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-18T10:48:13Z",
+      "side": 1,
+      "message": "The entire method then can become:\n\nparticipatingShardNames.map(set -\u003e set.headSet(shard.getShardName()).orElse(ImmutableSortedSet.of());",
+      "parentUuid": "28a48e35_826ecb88",
+      "range": {
+        "startLine": 836,
+        "startChar": 0,
+        "endLine": 844,
+        "endChar": 40
+      },
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
