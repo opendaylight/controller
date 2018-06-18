@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>bundle-parent</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.1</version>
     <relativePath/>
   </parent>
 
@@ -41,8 +41,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.apache.karaf.shell</groupId>
       <artifactId>org.apache.karaf.shell.core</artifactId>
-      <!-- TODO remove <version> once https://git.opendaylight.org/gerrit/#/c/62397/ is merged-->
-      <version>4.0.9</version>
       <exclusions>
         <exclusion>
           <groupId>*</groupId>
