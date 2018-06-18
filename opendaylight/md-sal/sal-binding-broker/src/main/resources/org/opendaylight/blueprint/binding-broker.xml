@@ -26,7 +26,19 @@
     </interfaces>
   </service>
 
+  <!-- TODO: remove this service as it is referring to a class. To do that we need to migrate everyone over to 'factory' -->
   <service id="codec" ref="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec"/>
+
+  <!-- Adapter service -->
+  <bean id="adapterFactory" class="org.opendaylight.controller.md.sal.binding.impl.BindingToDOMAdapterFactory">
+    <argument ref="mappingCodec"/>
+  </bean>
+
+  <service id="factory" ref="adapterFactory">
+    <interfaces>
+      <value>org.opendaylight.controller.md.sal.binding.spi.AdapterFactory</value>
+    </interfaces>
+  </service>
 
   <!-- Binding RPC Registry Service -->
 
@@ -108,9 +120,8 @@
   <reference id="domDefaultDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
           odl:type="default"/>
 
-  <bean id="bindingDataBroker" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter">
+  <bean id="bindingDataBroker" factory-ref="factory" factory-method="createDataBroker">
     <argument ref="domDefaultDataBroker"/>
-    <argument ref="mappingCodec"/>
   </bean>
 
   <service ref="bindingDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
@@ -121,9 +132,8 @@
   <reference id="domPingPongDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
           odl:type="pingpong"/>
 
-  <bean id="bindingPingPongDataBroker" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter">
+  <bean id="bindingPingPongDataBroker" factory-ref="factory" factory-method="createDataBroker">
     <argument ref="domPingPongDataBroker"/>
-    <argument ref="mappingCodec"/>
   </bean>
 
   <service ref="bindingPingPongDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
