@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6915699d_8cc334d2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractFrontendHistory.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-18T10:39:30Z",
+      "side": 1,
+      "message": "as noted in the other comment. This List actually actually has a guarantee it is sorted lexicographically and does not contain duplicates. SortedSet expresses that property.",
+      "range": {
+        "startLine": 213,
+        "startChar": 21,
+        "endLine": 213,
+        "endChar": 33
+      },
+      "revId": "face0e7513a3bb591d17cd087742b0baaf8bd0d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
