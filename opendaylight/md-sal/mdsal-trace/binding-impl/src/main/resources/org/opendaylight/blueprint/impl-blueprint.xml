@@ -16,11 +16,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       interface="org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker"
       odl:type="default" />
 
-  <odl:static-reference id="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec"/>
+  <reference id="adapterFactory" interface="org.opendaylight.controller.md.sal.binding.spi.AdapterFactory"/>
 
-  <bean id="tracingBindingDataBroker" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter">
+  <bean id="tracingBindingDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
     <argument ref="tracingDefaultDOMBroker"/>
-    <argument ref="mappingCodec"/>
   </bean>
 
   <service id="tracingBindingDataBrokerSvc" ref="tracingBindingDataBroker"
@@ -31,9 +30,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       interface="org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker"
       odl:type="pingpong"/>
 
-  <bean id="bindingTracingPingPongDataBroker" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter">
+  <bean id="bindingTracingPingPongDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
     <argument ref="tracingPingPongDOMDataBroker"/>
-    <argument ref="mappingCodec"/>
   </bean>
 
   <service ref="bindingTracingPingPongDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
