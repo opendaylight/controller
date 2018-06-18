@@ -123,6 +123,29 @@
       "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28a48e35_826ecb88",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-18T10:37:25Z",
+      "side": 1,
+      "message": "Ugh, this piece of code deserves an explanation, because it is filtering with side-effects and it is not immediately obvious what is happening.\n\nThe problem here is that we are losing information about Collection semantics along the forwarding path. This really is not a plain collection of strings, but rather a Set of strings and moreover it is guaranteed to be ordered by String\u0027s natural ordering.\n\nTherefore we should not be juggling Collection and List, but rather use SortedSet. That gives us SortedSet.headSet(), which we can use like this:\n\nparticipatingShardNames.get().headSet(shard.getShardName());\n\na clear, concise and fast equivalent of this piece of code.",
+      "range": {
+        "startLine": 836,
+        "startChar": 0,
+        "endLine": 844,
+        "endChar": 40
+      },
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
