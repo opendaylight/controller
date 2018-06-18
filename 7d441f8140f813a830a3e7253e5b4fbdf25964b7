@@ -170,6 +170,54 @@
       "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a58a7254_f2e89232",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-18T22:24:36Z",
+      "side": 1,
+      "message": "yeah SortedSet conveys the intended semantics. I just have to change a 100 signatures again :)",
+      "parentUuid": "28a48e35_826ecb88",
+      "range": {
+        "startLine": 836,
+        "startChar": 0,
+        "endLine": 844,
+        "endChar": 40
+      },
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f3ff90c_40d498bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-18T22:24:36Z",
+      "side": 1,
+      "message": "yup",
+      "parentUuid": "a2250197_998511e5",
+      "range": {
+        "startLine": 836,
+        "startChar": 0,
+        "endLine": 844,
+        "endChar": 40
+      },
+      "revId": "7d441f8140f813a830a3e7253e5b4fbdf25964b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
