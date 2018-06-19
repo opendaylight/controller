@@ -48,13 +48,12 @@ import org.slf4j.LoggerFactory;
  * classes such as {@link SnapshotBackedWriteTransaction}.
  * {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedReadTransaction} and
  * to implement {@link DOMStore} contract.
- *
  */
 public class InMemoryDOMDataStore extends TransactionReadyPrototype<String>
         implements DOMStore, Identifiable<String>, SchemaContextListener, AutoCloseable, DOMStoreTreeChangePublisher {
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataStore.class);
 
-    private final DataTree dataTree;
+    protected final DataTree dataTree;
     private final AtomicLong txCounter = new AtomicLong(0);
 
     private final InMemoryDOMStoreTreeChangePublisher changePublisher;
@@ -181,15 +180,15 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String>
         return name + "-" + txCounter.getAndIncrement();
     }
 
-    void validate(final DataTreeModification modification) throws DataValidationFailedException {
+    protected void validate(final DataTreeModification modification) throws DataValidationFailedException {
         dataTree.validate(modification);
     }
 
-    DataTreeCandidate prepare(final DataTreeModification modification) {
+    protected DataTreeCandidate prepare(final DataTreeModification modification) {
         return dataTree.prepare(modification);
     }
 
-    synchronized void commit(final DataTreeCandidate candidate) {
+    protected synchronized void commit(final DataTreeCandidate candidate) {
         dataTree.commit(candidate);
         changePublisher.publishChange(candidate);
     }
