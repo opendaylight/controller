@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "f35d5458_755d92b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-20T02:22:19Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "41bc903e_6367e36a",
+      "range": {
+        "startLine": 882,
+        "startChar": 8,
+        "endLine": 891,
+        "endChar": 9
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c95ccf60_ea01fe58",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-20T02:22:19Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "47abeb7a_0859841e",
+      "range": {
+        "startLine": 889,
+        "startChar": 8,
+        "endLine": 891,
+        "endChar": 9
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f3b657d4_630ce665",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
         "patchSetId": 9
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fab49bfa_ad6d0d2f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-20T02:22:19Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "f3b657d4_630ce665",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 5
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6d4f941_5933b6a0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
         "patchSetId": 9
@@ -82,6 +154,30 @@
       "writtenOn": "2018-06-20T01:32:01Z",
       "side": 1,
       "message": "final int count \u003d in.readInt();\nif (count !\u003d 0) {\n\nWill save us a byte in serialization stream. The field needs to contain at least 2 shards anyway",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 41
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0451cb6_22e6108f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-20T02:22:19Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "f6d4f941_5933b6a0",
       "range": {
         "startLine": 88,
         "startChar": 0,
@@ -151,6 +247,30 @@
       "writtenOn": "2018-06-20T01:32:01Z",
       "side": 1,
       "message": "should we perhaps provide BatchedModifications.ready() which calls ready(Optional.empty())?",
+      "range": {
+        "startLine": 334,
+        "startChar": 8,
+        "endLine": 334,
+        "endChar": 24
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "559422ec_5e8c4bd9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-20T02:22:19Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "ec0547b5_11311759",
       "range": {
         "startLine": 334,
         "startChar": 8,
