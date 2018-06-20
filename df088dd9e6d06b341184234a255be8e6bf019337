@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "47abeb7a_0859841e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T02:03:22Z",
+      "side": 1,
+      "message": "also, the while loop is faster using:\n\ntempStack.forEach(queue::addFirst);\n\nsince we end up just iterating (and not modifying) tempStack -- there\u0027s no point as we are throwing it away.",
+      "range": {
+        "startLine": 889,
+        "startChar": 8,
+        "endLine": 891,
+        "endChar": 9
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f3b657d4_630ce665",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
         "patchSetId": 9
