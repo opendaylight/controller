@@ -14,8 +14,6 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>config</module>
-    <module>config-persister</module>
     <module>config-netty</module>
     <module>mdsal</module>
     <module>extras</module>
