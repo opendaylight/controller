@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41bc903e_6367e36a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T01:32:01Z",
+      "side": 1,
+      "message": "This is O(atIndex), which hopefully be always low, but can we perhaps LOG.trace() the index we are inserting to?",
+      "range": {
+        "startLine": 882,
+        "startChar": 8,
+        "endLine": 891,
+        "endChar": 9
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f3b657d4_630ce665",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T01:32:01Z",
+      "side": 1,
+      "message": "I think we should checkArgument(possibleParticipatingShardNames.size \u003e 2), as we really do not want to transfer this if not needed.",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 5
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6d4f941_5933b6a0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T01:32:01Z",
+      "side": 1,
+      "message": "final int count \u003d in.readInt();\nif (count !\u003d 0) {\n\nWill save us a byte in serialization stream. The field needs to contain at least 2 shards anyway",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 41
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bf9ec17_00291ef0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T01:32:01Z",
+      "side": 1,
+      "message": "For the above, delete this and ...",
+      "range": {
+        "startLine": 109,
+        "startChar": 12,
+        "endLine": 109,
+        "endChar": 62
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7a14f87_fc1f4638",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T01:32:01Z",
+      "side": 1,
+      "message": "} else {\n    out.writeInt(0);\n}",
+      "range": {
+        "startLine": 115,
+        "startChar": 12,
+        "endLine": 115,
+        "endChar": 13
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec0547b5_11311759",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-06-20T01:32:01Z",
+      "side": 1,
+      "message": "should we perhaps provide BatchedModifications.ready() which calls ready(Optional.empty())?",
+      "range": {
+        "startLine": 334,
+        "startChar": 8,
+        "endLine": 334,
+        "endChar": 24
+      },
+      "revId": "df088dd9e6d06b341184234a255be8e6bf019337",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
