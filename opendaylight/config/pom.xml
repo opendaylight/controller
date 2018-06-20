@@ -16,33 +16,13 @@
   <name>${project.artifactId}</name>
 
   <modules>
-    <module>config-api</module>
-    <module>config-manager</module>
-    <module>config-plugin-parent</module>
-    <module>config-util</module>
-    <module>config-persister-api</module>
-    <module>config-persister-file-xml-adapter</module>
-    <module>config-persister-feature-adapter</module>
-    <module>config-manager-facade-xml</module>
-    <module>yang-jmx-generator</module>
-    <module>yang-jmx-generator-plugin</module>
-    <module>yang-test</module>
     <module>threadpool-config-api</module>
     <module>netty-config-api</module>
     <module>threadpool-config-impl</module>
     <module>netty-threadgroup-config</module>
     <module>netty-event-executor-config</module>
     <module>netty-timer-config</module>
-    <module>config-persister-directory-xml-adapter</module>
-    <module>yang-test-plugin</module>
-    <module>shutdown-api</module>
-    <module>shutdown-impl</module>
-    <module>config-netty-config</module>
     <module>config-artifacts</module>
-    <module>config-parent</module>
-    <module>config-filtering-parent</module>
-    <module>config-persister-impl</module>
-    <module>config-it-base</module>
   </modules>
 
   <dependencyManagement>
@@ -56,16 +36,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <profiles>
-    <profile>
-      <id>integrationtests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>yang-jmx-generator-it</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
