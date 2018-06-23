@@ -14,12 +14,12 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener;
+import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -30,7 +30,7 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
     private final String interfaceName;
 
     private ListenerRegistration<DOMRpcAvailabilityListener> rpcListenerReg;
-    private RpcProviderRegistry rpcRegistry;
+    private RpcConsumerRegistry rpcRegistry;
     private Class<RpcService> rpcInterface;
     private Set<SchemaPath> rpcSchemaPaths;
 
@@ -67,12 +67,12 @@ abstract class AbstractInvokableServiceMetadata extends AbstractDependentCompone
     @Override
     protected final void startTracking() {
         // Request RpcProviderRegistry first ...
-        retrieveService("RpcProviderRegistry", RpcProviderRegistry.class, this::onRpcRegistry);
+        retrieveService("RpcConsumerRegistry", RpcConsumerRegistry.class, this::onRpcRegistry);
     }
 
     private void onRpcRegistry(final Object service) {
         log.debug("{}: Retrieved RpcProviderRegistry {}", logName(), service);
-        rpcRegistry = (RpcProviderRegistry)service;
+        rpcRegistry = (RpcConsumerRegistry)service;
 
         // Now acquire SchemaService...
         retrieveService("SchemaService", DOMSchemaService.class, this::onSchemaService);
