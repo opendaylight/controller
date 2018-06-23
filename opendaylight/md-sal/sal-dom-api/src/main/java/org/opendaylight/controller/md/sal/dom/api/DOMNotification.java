@@ -7,25 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
-import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * A single YANG notification.
  */
-public interface DOMNotification {
-    /**
-     * Return the type of this notification.
-     *
-     * @return Notification type.
-     */
-    @Nonnull SchemaPath getType();
-
-    /**
-     * Return the body of this notification.
-     *
-     * @return Notification body.
-     */
-    @Nonnull ContainerNode getBody();
+@SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
+public interface DOMNotification extends org.opendaylight.mdsal.dom.api.DOMNotification {
 }

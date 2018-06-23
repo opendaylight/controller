@@ -7,28 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableMultimap.Builder;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.lmax.disruptor.EventHandler;
-import com.lmax.disruptor.InsufficientCapacityException;
-import com.lmax.disruptor.PhasedBackoffWaitStrategy;
-import com.lmax.disruptor.WaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
-import com.lmax.disruptor.dsl.ProducerType;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.md.sal.dom.api.DOMEvent;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
@@ -37,10 +23,8 @@ import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionLis
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.util.ListenerRegistry;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Joint implementation of {@link DOMNotificationPublishService} and {@link DOMNotificationService}. Provides
@@ -54,9 +38,8 @@ import org.slf4j.LoggerFactory;
  * on this instance, notifications do not take any locks here.
  *
  * <p>
- * The fully-blocking {@link #publish(long, DOMNotification, Collection)} and non-blocking
- * {@link #offerNotification(DOMNotification)}
- * are realized using the Disruptor's native operations. The bounded-blocking
+ * The fully-blocking {@link #offerNotification(DOMNotification)}
+ * is realized using the Disruptor's native operations. The bounded-blocking
  * {@link #offerNotification(DOMNotification, long, TimeUnit)}
  * is realized by arming a background wakeup interrupt.
  */
@@ -64,190 +47,134 @@ import org.slf4j.LoggerFactory;
 public final class DOMNotificationRouter implements AutoCloseable, DOMNotificationPublishService,
         DOMNotificationService, DOMNotificationSubscriptionListenerRegistry {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DOMNotificationRouter.class);
-    private static final ListenableFuture<Void> NO_LISTENERS = Futures.immediateFuture(null);
-    private static final WaitStrategy DEFAULT_STRATEGY = PhasedBackoffWaitStrategy
-            .withLock(1L, 30L, TimeUnit.MILLISECONDS);
-    private static final EventHandler<DOMNotificationRouterEvent> DISPATCH_NOTIFICATIONS
-            = (event, sequence, endOfBatch) -> event.deliverNotification();
-    private static final EventHandler<DOMNotificationRouterEvent> NOTIFY_FUTURE = (event, sequence, endOfBatch) -> event
-            .setFuture();
+    private final org.opendaylight.mdsal.dom.api.DOMNotificationService delegateNotificationService;
+    private final org.opendaylight.mdsal.dom.api.DOMNotificationPublishService delegateNotificationPublishService;
+    private final org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry delegateListenerRegistry;
 
-    private final Disruptor<DOMNotificationRouterEvent> disruptor;
-    private final ExecutorService executor;
-    private volatile Multimap<SchemaPath, ListenerRegistration<? extends DOMNotificationListener>> listeners
-            = ImmutableMultimap.of();
-    private final ListenerRegistry<DOMNotificationSubscriptionListener> subscriptionListeners = ListenerRegistry
-            .create();
-
-    @SuppressWarnings("unchecked")
-    private DOMNotificationRouter(final ExecutorService executor, final int queueDepth, final WaitStrategy strategy) {
-        this.executor = Preconditions.checkNotNull(executor);
-
-        disruptor = new Disruptor<>(DOMNotificationRouterEvent.FACTORY, queueDepth, executor, ProducerType.MULTI,
-                                    strategy);
-        disruptor.handleEventsWith(DISPATCH_NOTIFICATIONS);
-        disruptor.after(DISPATCH_NOTIFICATIONS).handleEventsWith(NOTIFY_FUTURE);
-        disruptor.start();
+    private DOMNotificationRouter(
+            org.opendaylight.mdsal.dom.api.DOMNotificationService delegateNotificationService,
+            org.opendaylight.mdsal.dom.api.DOMNotificationPublishService delegateNotificationPublishService,
+            org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry delegateListenerRegistry) {
+        this.delegateNotificationService = delegateNotificationService;
+        this.delegateNotificationPublishService = delegateNotificationPublishService;
+        this.delegateListenerRegistry = delegateListenerRegistry;
     }
 
     public static DOMNotificationRouter create(final int queueDepth) {
-        final ExecutorService executor = Executors.newCachedThreadPool();
-
-        return new DOMNotificationRouter(executor, queueDepth, DEFAULT_STRATEGY);
+        final org.opendaylight.mdsal.dom.broker.DOMNotificationRouter delegate =
+                org.opendaylight.mdsal.dom.broker.DOMNotificationRouter.create(queueDepth);
+        return create(delegate, delegate, delegate);
     }
 
     public static DOMNotificationRouter create(final int queueDepth, final long spinTime, final long parkTime,
                                                final TimeUnit unit) {
-        Preconditions.checkArgument(Long.lowestOneBit(queueDepth) == Long.highestOneBit(queueDepth),
-                                    "Queue depth %s is not power-of-two", queueDepth);
-        final ExecutorService executor = Executors.newCachedThreadPool();
-        final WaitStrategy strategy = PhasedBackoffWaitStrategy.withLock(spinTime, parkTime, unit);
+        final org.opendaylight.mdsal.dom.broker.DOMNotificationRouter delegate =
+                org.opendaylight.mdsal.dom.broker.DOMNotificationRouter.create(queueDepth, spinTime, parkTime, unit);
+        return create(delegate, delegate, delegate);
+    }
 
-        return new DOMNotificationRouter(executor, queueDepth, strategy);
+    public static DOMNotificationRouter create(
+            final org.opendaylight.mdsal.dom.api.DOMNotificationService delegateNotificationService,
+            final org.opendaylight.mdsal.dom.api.DOMNotificationPublishService delegateNotificationPublishService,
+            final org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry delegateListenerRegistry) {
+        return new DOMNotificationRouter(delegateNotificationService, delegateNotificationPublishService,
+                delegateListenerRegistry);
     }
 
     @Override
     public synchronized <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(
             final T listener, final Collection<SchemaPath> types) {
-        final ListenerRegistration<T> reg = new AbstractListenerRegistration<T>(listener) {
-            @Override
-            protected void removeRegistration() {
-                final ListenerRegistration<T> me = this;
-
-                synchronized (DOMNotificationRouter.this) {
-                    replaceListeners(ImmutableMultimap.copyOf(Multimaps.filterValues(listeners, input -> input != me)));
-                }
+        org.opendaylight.mdsal.dom.api.DOMNotificationListener delegateListener = notification -> {
+            if (notification instanceof DOMNotification) {
+                listener.onNotification((DOMNotification)notification);
+                return;
             }
+
+            if (notification instanceof org.opendaylight.mdsal.dom.api.DOMEvent) {
+                listener.onNotification(new DefaultDOMEvent(notification,
+                        (org.opendaylight.mdsal.dom.api.DOMEvent)notification));
+                return;
+            }
+
+            listener.onNotification(new DefaultDOMNotification(notification));
         };
 
-        if (!types.isEmpty()) {
-            final Builder<SchemaPath, ListenerRegistration<? extends DOMNotificationListener>> b = ImmutableMultimap
-                    .builder();
-            b.putAll(listeners);
+        final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMNotificationListener> reg =
+                delegateNotificationService.registerNotificationListener(delegateListener, types);
 
-            for (final SchemaPath t : types) {
-                b.put(t, reg);
+        return new AbstractListenerRegistration<T>(listener) {
+            @Override
+            protected void removeRegistration() {
+                reg.close();
             }
-
-            replaceListeners(b.build());
-        }
-
-        return reg;
+        };
     }
 
     @Override
     public <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener,
-                                                                                                    final
-                                                                                                    SchemaPath...
-                                                                                                            types) {
+            final SchemaPath... types) {
         return registerNotificationListener(listener, Arrays.asList(types));
-    }
-
-    /**
-     * Swaps registered listeners and triggers notification update.
-     *
-     * @param newListeners listeners
-     */
-    private void replaceListeners(
-            final Multimap<SchemaPath, ListenerRegistration<? extends DOMNotificationListener>> newListeners) {
-        listeners = newListeners;
-        notifyListenerTypesChanged(newListeners.keySet());
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private void notifyListenerTypesChanged(final Set<SchemaPath> typesAfter) {
-        final List<ListenerRegistration<DOMNotificationSubscriptionListener>> listenersAfter = ImmutableList
-                .copyOf(subscriptionListeners.getListeners());
-        executor.execute(() -> {
-            for (final ListenerRegistration<DOMNotificationSubscriptionListener> subListener : listenersAfter) {
-                try {
-                    subListener.getInstance().onSubscriptionChanged(typesAfter);
-                } catch (final Exception e) {
-                    LOG.warn("Uncaught exception during invoking listener {}", subListener.getInstance(), e);
-                }
-            }
-        });
     }
 
     @Override
     public <L extends DOMNotificationSubscriptionListener> ListenerRegistration<L> registerSubscriptionListener(
             final L listener) {
-        final Set<SchemaPath> initialTypes = listeners.keySet();
-        executor.execute(() -> listener.onSubscriptionChanged(initialTypes));
-        return subscriptionListeners.registerWithType(listener);
-    }
-
-    private ListenableFuture<Void> publish(final long seq, final DOMNotification notification,
-                                           final Collection<ListenerRegistration<? extends DOMNotificationListener>>
-                                                   subscribers) {
-        final DOMNotificationRouterEvent event = disruptor.get(seq);
-        final ListenableFuture<Void> future = event.initialize(notification, subscribers);
-        disruptor.getRingBuffer().publish(seq);
-        return future;
+        return delegateListenerRegistry.registerSubscriptionListener(listener);
     }
 
     @Override
     public ListenableFuture<?> putNotification(final DOMNotification notification) throws InterruptedException {
-        final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers = listeners
-                .get(notification.getType());
-        if (subscribers.isEmpty()) {
-            return NO_LISTENERS;
-        }
-
-        final long seq = disruptor.getRingBuffer().next();
-        return publish(seq, notification, subscribers);
-    }
-
-    private ListenableFuture<?> tryPublish(final DOMNotification notification,
-                                           final Collection<ListenerRegistration<? extends DOMNotificationListener>>
-                                                   subscribers) {
-        final long seq;
-        try {
-            seq = disruptor.getRingBuffer().tryNext();
-        } catch (final InsufficientCapacityException e) {
-            return DOMNotificationPublishService.REJECTED;
-        }
-
-        return publish(seq, notification, subscribers);
+        return delegateNotificationPublishService.putNotification(notification);
     }
 
     @Override
     public ListenableFuture<?> offerNotification(final DOMNotification notification) {
-        final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers = listeners
-                .get(notification.getType());
-        if (subscribers.isEmpty()) {
-            return NO_LISTENERS;
-        }
-
-        return tryPublish(notification, subscribers);
+        return delegateNotificationPublishService.offerNotification(notification);
     }
 
     @Override
     public ListenableFuture<?> offerNotification(final DOMNotification notification, final long timeout,
                                                  final TimeUnit unit) throws InterruptedException {
-        final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers = listeners
-                .get(notification.getType());
-        if (subscribers.isEmpty()) {
-            return NO_LISTENERS;
-        }
-
-        // Attempt to perform a non-blocking publish first
-        final ListenableFuture<?> noBlock = tryPublish(notification, subscribers);
-        if (!DOMNotificationPublishService.REJECTED.equals(noBlock)) {
-            return noBlock;
-        }
-
-        /*
-         * FIXME: we need a background thread, which will watch out for blocking too long. Here
-         *        we will arm a tasklet for it and synchronize delivery of interrupt properly.
-         */
-        throw new UnsupportedOperationException("Not implemented yet");
+        return delegateNotificationPublishService.offerNotification(notification, timeout, unit);
     }
 
     @Override
     public void close() {
-        disruptor.shutdown();
-        executor.shutdown();
+    }
+
+    private static class DefaultDOMNotification implements DOMNotification {
+        private final SchemaPath schemaPath;
+        private final ContainerNode body;
+
+        DefaultDOMNotification(org.opendaylight.mdsal.dom.api.DOMNotification from) {
+            this.schemaPath = from.getType();
+            this.body = from.getBody();
+        }
+
+        @Override
+        public SchemaPath getType() {
+            return schemaPath;
+        }
+
+        @Override
+        public ContainerNode getBody() {
+            return body;
+        }
+    }
+
+    private static class DefaultDOMEvent extends DefaultDOMNotification implements DOMEvent {
+        private final Date eventTime;
+
+        DefaultDOMEvent(org.opendaylight.mdsal.dom.api.DOMNotification fromNotification,
+                org.opendaylight.mdsal.dom.api.DOMEvent fromEvent) {
+            super(fromNotification);
+            final Instant eventInstant = fromEvent.getEventInstant();
+            this.eventTime = eventInstant != null ? Date.from(eventInstant) : null;
+        }
+
+        @Override
+        public Date getEventTime() {
+            return eventTime;
+        }
     }
 }

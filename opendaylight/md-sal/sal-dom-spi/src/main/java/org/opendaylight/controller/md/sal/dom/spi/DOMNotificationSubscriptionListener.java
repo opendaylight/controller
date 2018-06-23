@@ -8,9 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.annotations.Beta;
-import java.util.EventListener;
-import java.util.Set;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Listener which is notified when subscriptions changes and
@@ -19,12 +17,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  *
  */
 @Beta
-public interface DOMNotificationSubscriptionListener extends EventListener {
-
-    /**
-     * Invoked when notification subscription changed.
-     *
-     * @param currentTypes Set of notification types for which listeners are registered.
-     */
-    void onSubscriptionChanged(Set<SchemaPath> currentTypes);
+@SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
+public interface DOMNotificationSubscriptionListener
+        extends org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListener {
 }
