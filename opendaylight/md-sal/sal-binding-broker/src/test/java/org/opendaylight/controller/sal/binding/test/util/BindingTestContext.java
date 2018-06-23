@@ -208,8 +208,9 @@ public class BindingTestContext implements AutoCloseable {
     private void startDomBroker() {
         checkState(this.executor != null);
 
-        this.domRouter = new DOMRpcRouter();
-        this.mockSchemaService.registerSchemaContextListener(this.domRouter);
+        org.opendaylight.mdsal.dom.broker.DOMRpcRouter delegate =
+                org.opendaylight.mdsal.dom.broker.DOMRpcRouter.newInstance(mockSchemaService);
+        this.domRouter = new DOMRpcRouter(delegate, delegate);
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
         services.put(DOMRpcService.class, this.domRouter);

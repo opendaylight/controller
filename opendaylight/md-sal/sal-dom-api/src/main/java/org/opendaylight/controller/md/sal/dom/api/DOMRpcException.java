@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Base class for failures that can occur during RPC invocation. This covers
  * transport and protocol-level failures.
  */
-public abstract class DOMRpcException extends Exception {
+@SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_SUPERCLASS", justification = "Migration")
+public abstract class DOMRpcException extends org.opendaylight.mdsal.dom.api.DOMRpcException {
     private static final long serialVersionUID = 1L;
 
     /**
