@@ -18,12 +18,18 @@
 
   <!-- DOM Notification Service -->
 
+  <reference id="domNotificationService" interface="org.opendaylight.mdsal.dom.api.DOMNotificationService"
+      odl:type="default"/>
+  <reference id="domNotificationPublishService" interface="org.opendaylight.mdsal.dom.api.DOMNotificationPublishService"
+      odl:type="default"/>
+  <reference id="domNotificationSubscriptionListenerRegistry" interface="org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry"
+      odl:type="default"/>
+
   <bean id="domNotificationRouter" class="org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter"
           factory-method="create">
-    <argument value="${notification-queue-depth}"/>
-    <argument value="${notification-queue-spin}"/>
-    <argument value="${notification-queue-park}"/>
-    <argument value="MILLISECONDS"/>
+    <argument ref="domNotificationService"/>
+    <argument ref="domNotificationPublishService"/>
+    <argument ref="domNotificationSubscriptionListenerRegistry"/>
   </bean>
 
   <service ref="domNotificationRouter" odl:type="default">

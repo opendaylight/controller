@@ -8,12 +8,19 @@
 
 package org.opendaylight.controller.md.sal.dom.api;
 
+import java.time.Instant;
 import java.util.Date;
 
 /**
  * Generic event interface.
  */
-public interface DOMEvent {
+public interface DOMEvent extends org.opendaylight.mdsal.dom.api.DOMEvent {
+
+    @Override
+    default Instant getEventInstant() {
+        final Date eventTime = getEventTime();
+        return eventTime != null ? eventTime.toInstant() : null;
+    }
 
     /**
      * Get the time of the event occurrence.
