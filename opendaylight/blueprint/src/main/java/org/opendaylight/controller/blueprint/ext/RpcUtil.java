@@ -10,7 +10,7 @@ package org.opendaylight.controller.blueprint.ext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Predicate;
-import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
+import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QNameModule;

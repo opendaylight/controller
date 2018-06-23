@@ -11,8 +11,8 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
@@ -29,14 +29,14 @@ public class RpcImplementationBean {
     private static final Logger LOG = LoggerFactory.getLogger(RpcImplementationBean.class);
     static final String RPC_IMPLEMENTATION = "rpc-implementation";
 
-    private RpcProviderRegistry rpcRegistry;
+    private RpcProviderService rpcProvider;
     private Bundle bundle;
     private String interfaceName;
     private RpcService implementation;
-    private final List<RpcRegistration<RpcService>> rpcRegistrations = new ArrayList<>();
+    private final List<ObjectRegistration<RpcService>> rpcRegistrations = new ArrayList<>();
 
-    public void setRpcRegistry(final RpcProviderRegistry rpcRegistry) {
-        this.rpcRegistry = rpcRegistry;
+    public void setRpcProvider(final RpcProviderService rpcProvider) {
+        this.rpcProvider = rpcProvider;
     }
 
     public void setBundle(final Bundle bundle) {
@@ -61,7 +61,7 @@ public class RpcImplementationBean {
                     implementation, rpcInterfaces);
 
             for (Class<RpcService> rpcInterface : rpcInterfaces) {
-                rpcRegistrations.add(rpcRegistry.addRpcImplementation(rpcInterface, implementation));
+                rpcRegistrations.add(rpcProvider.registerRpcImplementation(rpcInterface, implementation));
             }
         } catch (final ComponentDefinitionException e) {
             throw e;
@@ -72,7 +72,7 @@ public class RpcImplementationBean {
     }
 
     public void destroy() {
-        for (RpcRegistration<RpcService> reg: rpcRegistrations) {
+        for (ObjectRegistration<RpcService> reg: rpcRegistrations) {
             reg.close();
         }
     }
