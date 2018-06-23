@@ -36,9 +36,14 @@
 
   <!-- DOM RPC Service -->
 
-  <bean id="domRpcRouter" class="org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter"
-          factory-method="newInstance">
-    <argument ref="schemaService"/>
+  <reference id="domRpcService" interface="org.opendaylight.mdsal.dom.api.DOMRpcService"
+      odl:type="default"/>
+  <reference id="domRpcProviderService" interface="org.opendaylight.mdsal.dom.api.DOMRpcProviderService"
+      odl:type="default"/>
+
+  <bean id="domRpcRouter" class="org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter">
+    <argument ref="domRpcService"/>
+    <argument ref="domRpcProviderService"/>
   </bean>
 
   <service ref="domRpcRouter" odl:type="default">

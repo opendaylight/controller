@@ -24,4 +24,8 @@ public class DOMRpcImplementationNotAvailableException extends DOMRpcException {
             final Object... args) {
         super(String.format(format, args), Preconditions.checkNotNull(cause));
     }
+
+    public DOMRpcImplementationNotAvailableException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }
