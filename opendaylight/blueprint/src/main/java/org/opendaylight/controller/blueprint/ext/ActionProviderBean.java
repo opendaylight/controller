@@ -12,12 +12,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import java.util.Collection;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -43,8 +44,8 @@ public class ActionProviderBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(ActionProviderBean.class);
 
-    private DOMRpcProviderService rpcProviderService;
-    private RpcProviderRegistry rpcRegistry;
+    private DOMRpcProviderService domRpcProvider;
+    private RpcProviderService bindingRpcProvider;
     private DOMSchemaService schemaService;
     private RpcService implementation;
     private String interfaceName;
@@ -63,12 +64,12 @@ public class ActionProviderBean {
         this.implementation = implementation;
     }
 
-    public void setRpcProviderService(final DOMRpcProviderService rpcProviderService) {
-        this.rpcProviderService = rpcProviderService;
+    public void setDomRpcProvider(final DOMRpcProviderService rpcProviderService) {
+        this.domRpcProvider = rpcProviderService;
     }
 
-    public void setRpcRegistry(final RpcProviderRegistry rpcRegistry) {
-        this.rpcRegistry = rpcRegistry;
+    public void setBindingRpcProvider(final RpcProviderService rpcProvider) {
+        this.bindingRpcProvider = rpcProvider;
     }
 
     public void setSchemaService(final DOMSchemaService schemaService) {
@@ -129,7 +130,7 @@ public class ActionProviderBean {
         }
 
         final Set<DOMRpcIdentifier> rpcs = ImmutableSet.copyOf(Collections2.transform(paths, DOMRpcIdentifier::create));
-        reg = rpcProviderService.registerRpcImplementation((rpc, input) -> {
+        reg = domRpcProvider.registerRpcImplementation((rpc, input) -> {
             return Futures.immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException(
                 "Action %s has no instance matching %s", rpc, input));
         }, rpcs);
@@ -143,7 +144,7 @@ public class ActionProviderBean {
                 interfaceName, ACTION_PROVIDER, implementation.getClass()));
         }
 
-        reg = rpcRegistry.addRpcImplementation(interfaceClass, implementation);
+        reg = bindingRpcProvider.registerRpcImplementation(interfaceClass, implementation);
         LOG.debug("Registered implementation {} for {}", implementation, interfaceName);
     }
 }

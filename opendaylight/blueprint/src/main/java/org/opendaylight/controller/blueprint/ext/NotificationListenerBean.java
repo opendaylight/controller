@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.osgi.framework.Bundle;

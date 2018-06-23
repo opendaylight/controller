@@ -8,7 +8,7 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import java.util.function.Predicate;
-import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
+import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 
 /**
  * Factory metadata corresponding to the "rpc-service" element that gets an RPC service implementation from
