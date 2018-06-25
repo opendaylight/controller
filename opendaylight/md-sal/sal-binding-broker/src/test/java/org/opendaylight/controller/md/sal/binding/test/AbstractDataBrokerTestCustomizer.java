@@ -102,7 +102,7 @@ public abstract class AbstractDataBrokerTestCustomizer {
         return this.schemaService;
     }
 
-    private DOMDataBroker getDOMDataBroker() {
+    public DOMDataBroker getDOMDataBroker() {
         if (this.domDataBroker == null) {
             this.domDataBroker = createDOMDataBroker();
         }

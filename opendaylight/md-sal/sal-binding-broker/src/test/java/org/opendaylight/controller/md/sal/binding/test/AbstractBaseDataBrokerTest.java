@@ -36,7 +36,7 @@ public abstract class AbstractBaseDataBrokerTest extends AbstractSchemaAwareTest
     protected void setupWithSchema(final SchemaContext context) {
         testCustomizer = createDataBrokerTestCustomizer();
         dataBroker = testCustomizer.createDataBroker();
-        domBroker = testCustomizer.createDOMDataBroker();
+        domBroker = testCustomizer.getDOMDataBroker();
         testCustomizer.updateSchema(context);
     }
 
