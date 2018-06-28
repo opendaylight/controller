@@ -119,6 +119,22 @@ public class NormalizedNodeStreamReaderWriterTest {
     }
 
     @Test
+    public void testPathArgumentStreaming() throws IOException  {
+        PathArgument pathArgument = new NodeIdentifier(TestModel.TEST_QNAME);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos));
+
+        nnout.writePathArgument(pathArgument);
+
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInputWithoutValidation(ByteStreams.newDataInput(
+                bos.toByteArray()));
+
+        PathArgument newPathArgument = nnin.readPathArgument();
+        Assert.assertEquals(pathArgument, newPathArgument);
+    }
+
+    @Test
     public void testNormalizedNodeAndYangInstanceIdentifierStreaming() throws IOException {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

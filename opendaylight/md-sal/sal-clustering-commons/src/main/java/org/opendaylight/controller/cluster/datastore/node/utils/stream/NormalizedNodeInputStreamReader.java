@@ -399,6 +399,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         // read Type
         int type = input.readByte();
 
+        readSignatureMarkerAndVersionIfNeeded();
+
         switch (type) {
 
             case PathArgumentTypes.AUGMENTATION_IDENTIFIER :
