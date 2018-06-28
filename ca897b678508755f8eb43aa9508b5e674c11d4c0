@@ -22,6 +22,30 @@
       "revId": "ca897b678508755f8eb43aa9508b5e674c11d4c0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c23b98a9_37c7d3ef",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-06-28T18:29:17Z",
+      "side": 1,
+      "message": "yeah this should be above line 400. But what is the use case here for just writing a single path are to a stream? Or is it the first item in the stream. Also what about AbstractNormalizedNodeDataOutput#writePathArgument - shouldn\u0027t that call ensureHeaderWritten()?",
+      "parentUuid": "51353a54_f22d13af",
+      "range": {
+        "startLine": 402,
+        "startChar": 8,
+        "endLine": 402,
+        "endChar": 48
+      },
+      "revId": "ca897b678508755f8eb43aa9508b5e674c11d4c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
