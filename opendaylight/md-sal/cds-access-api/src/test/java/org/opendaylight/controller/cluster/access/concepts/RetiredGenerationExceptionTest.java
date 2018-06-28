@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 public class RetiredGenerationExceptionTest extends RequestExceptionTest<RetiredGenerationException> {
 
-    private static final RequestException OBJECT = new RetiredGenerationException(100);
+    private static final RequestException OBJECT = new RetiredGenerationException(99, 100);
 
     @Override
     protected void isRetriable() {
@@ -23,7 +23,7 @@ public class RetiredGenerationExceptionTest extends RequestExceptionTest<Retired
     @Override
     protected void checkMessage() {
         final String message = OBJECT.getMessage();
-        assertTrue("Originating generation was superseded by 100".equals(message));
+        assertTrue("Originating generation 99 was superseded by 100".equals(message));
         assertNull(OBJECT.getCause());
     }
 }
