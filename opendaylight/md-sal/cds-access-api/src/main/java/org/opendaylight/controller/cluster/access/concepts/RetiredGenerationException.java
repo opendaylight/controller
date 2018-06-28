@@ -19,8 +19,9 @@ import com.google.common.annotations.Beta;
 public final class RetiredGenerationException extends RequestException {
     private static final long serialVersionUID = 1L;
 
-    public RetiredGenerationException(final long newGeneration) {
-        super("Originating generation was superseded by " + Long.toUnsignedString(newGeneration));
+    public RetiredGenerationException(final long originatingGeneration, final long newGeneration) {
+        super("Originating generation " + Long.toUnsignedString(originatingGeneration) + " was superseded by "
+            + Long.toUnsignedString(newGeneration));
     }
 
     @Override

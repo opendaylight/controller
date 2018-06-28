@@ -482,7 +482,8 @@ public class Shard extends RaftActor {
             }
             if (cmp > 0) {
                 LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
-                throw new RetiredGenerationException(existing.getIdentifier().getGeneration());
+                throw new RetiredGenerationException(clientId.getGeneration(),
+                    existing.getIdentifier().getGeneration());
             }
 
             LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
