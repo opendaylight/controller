@@ -70,6 +70,30 @@
       "revId": "ca897b678508755f8eb43aa9508b5e674c11d4c0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4acd646_20afdccf",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-07-02T12:06:17Z",
+      "side": 1,
+      "message": "yeah - this code was not designed to just write a single path arg. I\u0027m sure we could make it work if there\u0027s a valid use case.",
+      "parentUuid": "0b373f4b_58d969eb",
+      "range": {
+        "startLine": 402,
+        "startChar": 8,
+        "endLine": 402,
+        "endChar": 48
+      },
+      "revId": "ca897b678508755f8eb43aa9508b5e674c11d4c0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
