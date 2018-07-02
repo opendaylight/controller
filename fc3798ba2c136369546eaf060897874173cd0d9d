@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba66294f_9a434dfe",
+        "filename": "opendaylight/model/model-inventory/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-07-02T15:19:03Z",
+      "side": 1,
+      "message": "It does, at least if you use vim like me :) It overrides otherwise-default settings for this file.",
+      "parentUuid": "dd43299e_4620e051",
+      "range": {
+        "startLine": 2,
+        "startChar": 5,
+        "endLine": 2,
+        "endChar": 7
+      },
+      "revId": "fc3798ba2c136369546eaf060897874173cd0d9d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75047e28_2106df48",
         "filename": "opendaylight/model/model-inventory/pom.xml",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-07-02T15:04:30Z",
       "side": 1,
       "message": "related to above question, but this tab is 8 spaces instead of four as directed earlier. likely this shouldn\u0027t be a tab, but four spaces.",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 1
+      },
+      "revId": "fc3798ba2c136369546eaf060897874173cd0d9d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0528526a_d2523413",
+        "filename": "opendaylight/model/model-inventory/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-07-02T15:19:03Z",
+      "side": 1,
+      "message": "Fixed in next revision, where the above was in effect :)",
+      "parentUuid": "75047e28_2106df48",
       "range": {
         "startLine": 25,
         "startChar": 0,
