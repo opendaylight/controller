@@ -17,14 +17,17 @@ public final class QuarantinedMonitorActorPropsFactory {
     private static final Logger LOG = LoggerFactory.getLogger(QuarantinedMonitorActorPropsFactory.class);
 
     private QuarantinedMonitorActorPropsFactory() {
-
     }
 
+    @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     public static Props createProps(final BundleContext bundleContext) {
         return QuarantinedMonitorActor.props(() -> {
             // restart the entire karaf container
-            LOG.warn("Restarting karaf container");
+            LOG.warn("Restarting karaf container (LOG)");
+            System.err.println("Restarting karaf container (STDERR)");
+            System.out.println("Restarting karaf container (STDOUT)");
             System.setProperty("karaf.restart.jvm", "true");
+            Thread.sleep(3000);
             bundleContext.getBundle(0).stop();
         });
     }
