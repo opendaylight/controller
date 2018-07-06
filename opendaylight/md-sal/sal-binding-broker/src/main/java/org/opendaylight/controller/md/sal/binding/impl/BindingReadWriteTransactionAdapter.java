@@ -12,21 +12,21 @@ import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-class BindingDOMReadWriteTransactionAdapter extends
-        BindingDOMWriteTransactionAdapter<DOMDataReadWriteTransaction> implements ReadWriteTransaction {
+class BindingReadWriteTransactionAdapter
+        extends BindingWriteTransactionAdapter<org.opendaylight.mdsal.binding.api.ReadWriteTransaction>
+        implements ReadWriteTransaction {
 
-    protected BindingDOMReadWriteTransactionAdapter(final DOMDataReadWriteTransaction delegate,
-            final BindingToNormalizedNodeCodec codec) {
-        super(delegate, codec);
+    BindingReadWriteTransactionAdapter(
+            org.opendaylight.mdsal.binding.api.ReadWriteTransaction delegate) {
+        super(delegate);
     }
 
     @Override
     public <T extends DataObject> CheckedFuture<Optional<T>,ReadFailedException> read(
             final LogicalDatastoreType store, final InstanceIdentifier<T> path) {
-        return doRead(getDelegate(), store, path);
+        return read(getDelegate(), store, path);
     }
 }

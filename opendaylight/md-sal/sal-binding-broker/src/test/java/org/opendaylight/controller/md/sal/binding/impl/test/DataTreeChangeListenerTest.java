@@ -38,7 +38,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
@@ -68,7 +67,7 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
 
     private static final Top TOP_INITIAL_DATA = top(FOO_DATA);
 
-    private BindingDOMDataBrokerAdapter dataBrokerImpl;
+    private DataBroker dataBrokerImpl;
 
     private static final class EventCapturingListener<T extends DataObject> implements DataTreeChangeListener<T> {
 
@@ -97,7 +96,7 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
 
     @Before
     public void setupWithDataBroker() {
-        dataBrokerImpl = (BindingDOMDataBrokerAdapter) getDataBroker();
+        dataBrokerImpl = getDataBroker();
     }
 
     @Test

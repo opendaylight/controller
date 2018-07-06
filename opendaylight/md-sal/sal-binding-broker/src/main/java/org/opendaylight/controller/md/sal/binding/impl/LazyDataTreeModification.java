@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * which are directly accessed by user of data object modification.
  *
  */
-class LazyDataTreeModification<T extends DataObject> implements DataTreeModification<T> {
+public class LazyDataTreeModification<T extends DataObject> implements DataTreeModification<T> {
 
     private final DataTreeIdentifier<T> path;
     private final DataObjectModification<T> rootNode;
@@ -57,8 +57,9 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
         return new LazyDataTreeModification(datastoreType, codecCtx.getKey(), codecCtx.getValue(), domChange);
     }
 
-    static <T extends DataObject> Collection<DataTreeModification<T>> from(final BindingToNormalizedNodeCodec codec,
-            final Collection<DataTreeCandidate> domChanges, final LogicalDatastoreType datastoreType) {
+    public static <T extends DataObject> Collection<DataTreeModification<T>> from(
+            final BindingToNormalizedNodeCodec codec, final Collection<DataTreeCandidate> domChanges,
+            final LogicalDatastoreType datastoreType) {
         final List<DataTreeModification<T>> result = new ArrayList<>(domChanges.size());
         for (final DataTreeCandidate domChange : domChanges) {
             result.add(LazyDataTreeModification.<T>create(codec, domChange, datastoreType));
