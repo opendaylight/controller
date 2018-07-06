@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -15,71 +17,56 @@ import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class BindingDOMTransactionChainAdapter implements BindingTransactionChain, Delegator<DOMTransactionChain> {
+final class BindingTransactionChainAdapter implements BindingTransactionChain,
+        Delegator<org.opendaylight.mdsal.binding.api.BindingTransactionChain> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BindingDOMTransactionChainAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BindingTransactionChainAdapter.class);
 
-    private final DOMTransactionChain delegate;
-    private final BindingToNormalizedNodeCodec codec;
-    private final DelegateChainListener domListener;
+    private final org.opendaylight.mdsal.binding.api.BindingTransactionChain delegate;
+    private final DelegateChainListener delegateListener;
     private final TransactionChainListener bindingListener;
 
-    BindingDOMTransactionChainAdapter(final DOMDataBroker chainFactory,
-            final BindingToNormalizedNodeCodec codec, final TransactionChainListener listener) {
-        Preconditions.checkNotNull(chainFactory, "DOM Transaction chain factory must not be null");
-        this.domListener = new DelegateChainListener();
+    BindingTransactionChainAdapter(final org.opendaylight.mdsal.binding.api.DataBroker delegateDataBroker,
+            final TransactionChainListener listener) {
+        this.delegateListener = new DelegateChainListener();
         this.bindingListener = listener;
-        this.delegate = chainFactory.createTransactionChain(domListener);
-        this.codec = codec;
+        this.delegate = requireNonNull(delegateDataBroker).createTransactionChain(delegateListener);
     }
 
     @Override
-    public DOMTransactionChain getDelegate() {
+    public org.opendaylight.mdsal.binding.api.BindingTransactionChain getDelegate() {
         return delegate;
     }
 
     @Override
     public ReadOnlyTransaction newReadOnlyTransaction() {
-        final DOMDataReadOnlyTransaction delegateTx = delegate.newReadOnlyTransaction();
-        return new BindingDOMReadTransactionAdapter(delegateTx, codec);
+        return new BindingReadTransactionAdapter(delegate.newReadOnlyTransaction());
     }
 
     @Override
     public ReadWriteTransaction newReadWriteTransaction() {
-        final DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
-        return new BindingDOMReadWriteTransactionAdapter(delegateTx, codec) {
-
+        return new BindingReadWriteTransactionAdapter(delegate.newReadWriteTransaction()) {
             @Override
             public FluentFuture<? extends CommitInfo> commit() {
                 return listenForFailure(this, super.commit());
             }
-
         };
     }
 
     @Override
     public WriteTransaction newWriteOnlyTransaction() {
-        final DOMDataWriteTransaction delegateTx = delegate.newWriteOnlyTransaction();
-        return new BindingDOMWriteTransactionAdapter<DOMDataWriteTransaction>(delegateTx, codec) {
-
+        return new BindingWriteTransactionAdapter<org.opendaylight.mdsal.binding.api.WriteTransaction>(
+                delegate.newWriteOnlyTransaction()) {
             @Override
             public FluentFuture<? extends CommitInfo> commit() {
                 return listenForFailure(this, super.commit());
             }
-
         };
     }
 
@@ -93,7 +80,7 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
 
             @Override
             public void onSuccess(final CommitInfo result) {
-                // Intentionally NOOP
+                // Intentional NOOP
             }
         }, MoreExecutors.directExecutor());
 
@@ -102,10 +89,8 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
 
     private void failTransactionChain(final WriteTransaction tx, final Throwable ex) {
         /*
-         *  We asume correct state change for underlaying transaction
-         *
-         * chain, so we are not changing any of our internal state
-         * to mark that we failed.
+         *  We assume correct state change for underlying transaction chain, so we are not changing any of our
+         *  internal state to mark that we failed.
          */
         this.bindingListener.onTransactionChainFailed(this, tx, ex);
     }
@@ -115,31 +100,26 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
         delegate.close();
     }
 
-    private final class DelegateChainListener implements TransactionChainListener {
+    private final class DelegateChainListener implements org.opendaylight.mdsal.common.api.TransactionChainListener {
 
         @Override
-        public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-                final AsyncTransaction<?, ?> transaction, final Throwable cause) {
+        public void onTransactionChainFailed(org.opendaylight.mdsal.common.api.TransactionChain<?, ?> chain,
+                org.opendaylight.mdsal.common.api.AsyncTransaction<?, ?> transaction, Throwable cause) {
             Preconditions.checkState(delegate.equals(chain),
                     "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
             /*
-             * Intentionally NOOP, callback for failure, since we
-             * are also listening on each transaction future for failure,
-             * in order to have reference to Binding Transaction (which was seen by client
-             * of this transaction chain), instead of DOM transaction
-             * which is known only to this chain, binding transaction implementation
-             * and underlying transaction chain.
-             *
+             * Intentional NOOP since we are also listening on each transaction future for failure,
+             * in order to have a reference to the binding transaction instance seen by the client of this chain),
+             * instead of the delegate transaction which is known only internally to this chain.
              */
-            LOG.debug("Transaction chain {} failed. Failed DOM Transaction {}",this,transaction,cause);
+            LOG.debug("Transaction chain {} failed. Failed delegate Transaction {}", this, transaction, cause);
         }
 
         @Override
-        public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+        public void onTransactionChainSuccessful(org.opendaylight.mdsal.common.api.TransactionChain<?, ?> chain) {
             Preconditions.checkState(delegate.equals(chain),
                     "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
-            bindingListener.onTransactionChainSuccessful(BindingDOMTransactionChainAdapter.this);
+            bindingListener.onTransactionChainSuccessful(BindingTransactionChainAdapter.this);
         }
     }
-
 }

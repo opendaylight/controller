@@ -10,17 +10,17 @@ package org.opendaylight.controller.md.sal.binding.spi;
 import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 @Beta
 @NonNullByDefault
 public interface AdapterFactory {
     /**
-     * Return a {@link DataBroker} implementation backed by the specified {@link DOMDataBroker}.
+     * Return a {@link DataBroker} implementation backed by the specified
+     * {@link org.opendaylight.mdsal.binding.api.DataBroker}.
      *
-     * @param domBroker Backing DOMDataBroker
+     * @param delegateBroker Backing org.opendaylight.mdsal.binding.api.DataBroker
      * @return A DataBroker instance.
-     * @throws NullPointerException if {@code domBroker} is null.
+     * @throws NullPointerException if {@code delegateBroker} is null.
      */
-    DataBroker createDataBroker(DOMDataBroker domBroker);
+    DataBroker createDataBroker(org.opendaylight.mdsal.binding.api.DataBroker delegateBroker);
 }

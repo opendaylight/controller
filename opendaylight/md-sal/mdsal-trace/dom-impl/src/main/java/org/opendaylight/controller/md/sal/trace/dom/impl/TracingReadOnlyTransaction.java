@@ -9,21 +9,21 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.AbstractCloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 class TracingReadOnlyTransaction
         extends AbstractCloseTracked<TracingReadOnlyTransaction>
-        implements DOMDataReadOnlyTransaction {
+        implements DOMDataTreeReadTransaction {
 
-    private final DOMDataReadOnlyTransaction delegate;
+    private final DOMDataTreeReadTransaction delegate;
 
-    TracingReadOnlyTransaction(DOMDataReadOnlyTransaction delegate,
+    TracingReadOnlyTransaction(DOMDataTreeReadTransaction delegate,
             CloseTrackedRegistry<TracingReadOnlyTransaction> readOnlyTransactionsRegistry) {
         super(readOnlyTransactionsRegistry);
         this.delegate = delegate;

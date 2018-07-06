@@ -15,11 +15,11 @@ import static org.mockito.Mockito.mock;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.trace.dom.impl.TracingBroker;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltrace.rev160908.Config;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltrace.rev160908.ConfigBuilder;
 
@@ -39,12 +39,12 @@ public class TracingBrokerTest {
         TracingBroker tracingBroker = new TracingBroker("mock", domDataBroker, config, codec);
 
         for (int i = 0; i < 3; i++) {
-            DOMDataReadWriteTransaction tx = tracingBroker.newReadWriteTransaction();
+            DOMDataTreeReadWriteTransaction tx = tracingBroker.newReadWriteTransaction();
         }
-        DOMDataReadWriteTransaction anotherTx = tracingBroker.newReadWriteTransaction();
+        DOMDataTreeReadWriteTransaction anotherTx = tracingBroker.newReadWriteTransaction();
 
         DOMTransactionChain txChain = tracingBroker.createTransactionChain(null);
-        DOMDataReadWriteTransaction txFromChain = txChain.newReadWriteTransaction();
+        DOMDataTreeReadWriteTransaction txFromChain = txChain.newReadWriteTransaction();
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);

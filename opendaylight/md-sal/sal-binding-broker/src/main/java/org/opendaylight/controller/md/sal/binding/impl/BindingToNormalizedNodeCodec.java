@@ -44,7 +44,7 @@ public class BindingToNormalizedNodeCodec
         super(classLoadingStrategy, codecRegistry, waitForSchema);
     }
 
-    DataNormalizer getDataNormalizer() {
+    public DataNormalizer getDataNormalizer() {
         return this.legacyToNormalized;
     }
 

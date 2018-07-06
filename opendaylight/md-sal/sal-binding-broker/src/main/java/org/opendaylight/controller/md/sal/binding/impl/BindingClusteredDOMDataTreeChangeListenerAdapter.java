@@ -8,21 +8,18 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
- * Adapter wrapping Binding {@link ClusteredDataTreeChangeListener} and exposing
- * it as {@link ClusteredDOMDataTreeChangeListener} and translated DOM events
- * to their Binding equivalent.
+ * Adapter for translating between {@link ClusteredDataTreeChangeListener} and
+ * {@link org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener}.
  *
  * @author Thomas Pantelis
  */
 final class BindingClusteredDOMDataTreeChangeListenerAdapter<T extends DataObject>
-        extends BindingDOMDataTreeChangeListenerAdapter<T> implements ClusteredDOMDataTreeChangeListener {
-    BindingClusteredDOMDataTreeChangeListenerAdapter(BindingToNormalizedNodeCodec codec,
-            ClusteredDataTreeChangeListener<T> listener, LogicalDatastoreType store) {
-        super(codec, listener, store);
+        extends BindingDataTreeChangeListenerAdapter<T>
+        implements org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener<T> {
+    BindingClusteredDOMDataTreeChangeListenerAdapter(ClusteredDataTreeChangeListener<T> listener) {
+        super(listener);
     }
 }

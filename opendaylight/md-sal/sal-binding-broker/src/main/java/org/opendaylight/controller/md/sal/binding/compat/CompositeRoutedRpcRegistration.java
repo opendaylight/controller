@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.binding.compat;
 import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.Map;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingRpcProviderServiceAdapter;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
@@ -21,11 +21,11 @@ final class CompositeRoutedRpcRegistration<T extends RpcService> implements Rout
 
     private final Class<T> type;
     private final T instance;
-    private final BindingDOMRpcProviderServiceAdapter adapter;
+    private final BindingRpcProviderServiceAdapter adapter;
     private final Map<InstanceIdentifier<?>, ObjectRegistration<T>> registrations = new HashMap<>(2);
 
     CompositeRoutedRpcRegistration(final Class<T> type, final T impl,
-            final BindingDOMRpcProviderServiceAdapter providerAdapter) {
+            final BindingRpcProviderServiceAdapter providerAdapter) {
         this.type = type;
         this.instance = impl;
         this.adapter = providerAdapter;
