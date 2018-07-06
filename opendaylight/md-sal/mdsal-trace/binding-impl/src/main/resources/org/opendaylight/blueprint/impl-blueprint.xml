@@ -12,28 +12,50 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
   odl:use-default-for-reference-types="true">
 
+  <reference id="adapterFactory" interface="org.opendaylight.mdsal.binding.dom.adapter.AdapterFactory"/>
+  <reference id="legacyAdapterFactory" interface="org.opendaylight.controller.md.sal.binding.spi.AdapterFactory"/>
+
+  <!-- Default DataBroker  -->
+
   <reference id="tracingDefaultDOMBroker"
       interface="org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker"
       odl:type="default" />
 
-  <reference id="adapterFactory" interface="org.opendaylight.controller.md.sal.binding.spi.AdapterFactory"/>
-
-  <bean id="tracingBindingDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
+  <bean id="tracingDefaultDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
     <argument ref="tracingDefaultDOMBroker"/>
   </bean>
 
-  <service id="tracingBindingDataBrokerSvc" ref="tracingBindingDataBroker"
-            interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
-            odl:type="default" ranking="10"/>
+  <service ref="tracingDefaultDataBroker"
+      interface="org.opendaylight.mdsal.binding.api.DataBroker"
+      odl:type="default" ranking="10"/>
+
+  <bean id="legacyTracingDefaultDataBroker" factory-ref="legacyAdapterFactory" factory-method="createDataBroker">
+    <argument ref="tracingDefaultDataBroker"/>
+  </bean>
+
+  <service ref="legacyTracingDefaultDataBroker"
+      interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+      odl:type="default" ranking="10"/>
+
+  <!-- PingPong DataBroker  -->
 
   <reference id="tracingPingPongDOMDataBroker"
       interface="org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker"
       odl:type="pingpong"/>
 
-  <bean id="bindingTracingPingPongDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
+  <bean id="tracingPingPongDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
     <argument ref="tracingPingPongDOMDataBroker"/>
   </bean>
 
-  <service ref="bindingTracingPingPongDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
-                                                                                    odl:type="pingpong" ranking="10"/>
+  <service ref="tracingPingPongDataBroker"
+      interface="org.opendaylight.mdsal.binding.api.DataBroker"
+      odl:type="pingpong" ranking="10"/>
+
+  <bean id="legacyTracingPingPongDataBroker" factory-ref="legacyAdapterFactory" factory-method="createDataBroker">
+    <argument ref="tracingPingPongDataBroker"/>
+  </bean>
+
+  <service ref="legacyTracingPingPongDataBroker"
+      interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+      odl:type="default" ranking="10"/>
 </blueprint>

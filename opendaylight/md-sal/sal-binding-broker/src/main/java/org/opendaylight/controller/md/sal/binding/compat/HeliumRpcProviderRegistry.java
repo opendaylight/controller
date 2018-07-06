@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingRpcProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
@@ -22,10 +22,10 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 public class HeliumRpcProviderRegistry implements RpcProviderRegistry {
 
     private final RpcConsumerRegistry consumerRegistry;
-    private final BindingDOMRpcProviderServiceAdapter providerAdapter;
+    private final BindingRpcProviderServiceAdapter providerAdapter;
 
     public HeliumRpcProviderRegistry(final RpcConsumerRegistry consumerRegistry,
-            final BindingDOMRpcProviderServiceAdapter providerAdapter) {
+            final BindingRpcProviderServiceAdapter providerAdapter) {
         this.consumerRegistry = consumerRegistry;
         this.providerAdapter = providerAdapter;
     }

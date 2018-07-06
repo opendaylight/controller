@@ -13,19 +13,12 @@ import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.spi.AdapterFactory;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
 @Beta
 @NonNullByDefault
-public final class BindingToDOMAdapterFactory implements AdapterFactory {
-    private final BindingToNormalizedNodeCodec codec;
-
-    public BindingToDOMAdapterFactory(final BindingToNormalizedNodeCodec codec) {
-        this.codec = requireNonNull(codec);
-    }
-
+public final class BindingAdapterFactory implements AdapterFactory {
     @Override
-    public DataBroker createDataBroker(final DOMDataBroker domBroker) {
-        return new BindingDOMDataBrokerAdapter(requireNonNull(domBroker), codec);
+    public DataBroker createDataBroker(final org.opendaylight.mdsal.binding.api.DataBroker delegateBroker) {
+        return new BindingDataBrokerAdapter(requireNonNull(delegateBroker));
     }
 }

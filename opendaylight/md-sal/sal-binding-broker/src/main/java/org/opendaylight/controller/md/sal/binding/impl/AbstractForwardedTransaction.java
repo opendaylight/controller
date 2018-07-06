@@ -23,13 +23,14 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+public abstract class AbstractForwardedTransaction<T
+        extends AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>>>
         implements Delegator<T>, Identifiable<Object> {
 
     private final T delegate;
     private final BindingToNormalizedNodeCodec codec;
 
-    AbstractForwardedTransaction(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
+    protected AbstractForwardedTransaction(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
         this.delegate = Preconditions.checkNotNull(delegateTx, "Delegate must not be null");
         this.codec = Preconditions.checkNotNull(codec, "Codec must not be null");
     }

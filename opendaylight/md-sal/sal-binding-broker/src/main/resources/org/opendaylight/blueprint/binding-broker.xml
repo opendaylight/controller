@@ -19,41 +19,25 @@
     <argument ref="schemaService"/>
   </bean>
 
-  <service ref="mappingCodec" odl:type="default">
-    <interfaces>
-      <value>org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer</value>
-      <value>org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory</value>
-    </interfaces>
-  </service>
-
-  <!-- TODO: remove this service as it is referring to a class. To do that we need to migrate everyone over to 'factory' -->
-  <service id="codec" ref="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec"/>
-
   <!-- Adapter service -->
-  <bean id="adapterFactory" class="org.opendaylight.controller.md.sal.binding.impl.BindingToDOMAdapterFactory">
-    <argument ref="mappingCodec"/>
-  </bean>
+  <bean id="adapterFactory" class="org.opendaylight.controller.md.sal.binding.impl.BindingAdapterFactory"/>
 
-  <service id="factory" ref="adapterFactory">
-    <interfaces>
-      <value>org.opendaylight.controller.md.sal.binding.spi.AdapterFactory</value>
-    </interfaces>
-  </service>
+  <service id="factory" ref="adapterFactory" interface="org.opendaylight.controller.md.sal.binding.spi.AdapterFactory"/>
 
   <!-- Binding RPC Registry Service -->
 
-  <reference id="domRpcService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcService"/>
+  <reference id="delegateRpcConsumerRegistry" interface="org.opendaylight.mdsal.binding.api.RpcConsumerRegistry"
+          odl:type="default"/>
 
-  <bean id="bindingRpcServiceAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter" >
-    <argument ref="domRpcService"/>
-    <argument ref="mappingCodec"/>
+  <bean id="bindingRpcServiceAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingRpcServiceAdapter" >
+    <argument ref="delegateRpcConsumerRegistry"/>
   </bean>
 
-  <reference id="domRpcRegistry" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
+  <reference id="delegateRpcProviderService" interface="org.opendaylight.mdsal.binding.api.RpcProviderService"
+          odl:type="default"/>
 
-  <bean id="bindingRpcProviderAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter" >
-    <argument ref="domRpcRegistry"/>
-    <argument ref="mappingCodec"/>
+  <bean id="bindingRpcProviderAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingRpcProviderServiceAdapter" >
+    <argument ref="delegateRpcProviderService"/>
   </bean>
 
   <bean id="bindingRpcRegistry" class="org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry" >
@@ -66,11 +50,11 @@
 
   <!-- Binding MountPoint Service -->
 
-  <reference id="domMountPointService" interface="org.opendaylight.controller.md.sal.dom.api.DOMMountPointService"/>
+  <reference id="delegateMountPointService" interface="org.opendaylight.mdsal.binding.api.MountPointService"
+          odl:type="default"/>
 
-  <bean id="bindingMountPointService" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter" >
-    <argument ref="domMountPointService"/>
-    <argument ref="mappingCodec"/>
+  <bean id="bindingMountPointService" class="org.opendaylight.controller.md.sal.binding.impl.BindingMountPointServiceAdapter" >
+    <argument ref="delegateMountPointService"/>
   </bean>
 
   <service ref="bindingMountPointService" interface="org.opendaylight.controller.md.sal.binding.api.MountPointService"
@@ -78,34 +62,35 @@
 
   <!-- Binding Notification Service -->
 
-  <reference id="domNotificationService" interface="org.opendaylight.controller.md.sal.dom.api.DOMNotificationService"/>
+  <reference id="delegateNotificationService" interface="org.opendaylight.mdsal.binding.api.NotificationService"
+          odl:type="default"/>
 
-  <bean id="bindingNotificationServiceAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter">
-    <argument>
-      <bean factory-ref="mappingCodec" factory-method="getCodecRegistry"/>
-    </argument>
-    <argument ref="domNotificationService"/>
+  <bean id="bindingNotificationServiceAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingNotificationServiceAdapter">
+    <argument ref="delegateNotificationService"/>
   </bean>
 
   <service ref="bindingNotificationServiceAdapter" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService"
           odl:type="default"/>
 
-  <reference id="domNotificationPublishService" interface="org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService"/>
+  <reference id="delegateNotificationPublishService" interface="org.opendaylight.mdsal.binding.api.NotificationPublishService"
+          odl:type="default"/>
 
-  <bean id="bindingNotificationPublishAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter">
-    <argument ref="mappingCodec"/>
-    <argument ref="domNotificationPublishService"/>
+  <bean id="bindingNotificationPublishAdapter" class="org.opendaylight.controller.md.sal.binding.impl.BindingNotificationPublishServiceAdapter">
+    <argument ref="delegateNotificationPublishService"/>
   </bean>
 
   <service ref="bindingNotificationPublishAdapter" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService"
           odl:type="default"/>
 
   <reference id="domNotificationListenerRegistry" interface="org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry"/>
+  <reference id="domNotificationService" interface="org.opendaylight.controller.md.sal.dom.api.DOMNotificationService"/>
 
   <bean id="bindingNotificationProviderService" class="org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceWithInterestListeners">
     <argument ref="bindingNotificationPublishAdapter"/>
     <argument ref="bindingNotificationServiceAdapter"/>
     <argument ref="domNotificationListenerRegistry"/>
+    <argument ref="domNotificationService"/>
+    <argument ref="mappingCodec"/>
   </bean>
 
   <service ref="bindingNotificationProviderService" odl:type="default">
@@ -117,11 +102,11 @@
 
   <!-- Binding DataBroker -->
 
-  <reference id="domDefaultDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
+  <reference id="delegateDefaultDataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"
           odl:type="default"/>
 
   <bean id="bindingDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
-    <argument ref="domDefaultDataBroker"/>
+    <argument ref="delegateDefaultDataBroker"/>
   </bean>
 
   <service ref="bindingDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
@@ -129,11 +114,11 @@
 
   <!-- Binding PingPong DataBroker -->
 
-  <reference id="domPingPongDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
+  <reference id="delegatePingPongDataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"
           odl:type="pingpong"/>
 
   <bean id="bindingPingPongDataBroker" factory-ref="adapterFactory" factory-method="createDataBroker">
-    <argument ref="domPingPongDataBroker"/>
+    <argument ref="delegatePingPongDataBroker"/>
   </bean>
 
   <service ref="bindingPingPongDataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"

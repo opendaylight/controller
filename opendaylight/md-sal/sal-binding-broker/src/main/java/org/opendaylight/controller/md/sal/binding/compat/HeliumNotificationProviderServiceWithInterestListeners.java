@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListener;
@@ -38,13 +40,15 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
     private final BindingToNormalizedNodeCodec codec;
 
     public HeliumNotificationProviderServiceWithInterestListeners(
-            final BindingDOMNotificationPublishServiceAdapter publishService,
-            final BindingDOMNotificationServiceAdapter listenService,
-            final DOMNotificationSubscriptionListenerRegistry registry) {
+            final NotificationPublishService publishService,
+            final NotificationService listenService,
+            final DOMNotificationSubscriptionListenerRegistry registry,
+            final DOMNotificationService domService,
+            final BindingToNormalizedNodeCodec codec) {
         super(publishService, listenService);
-        this.codec = publishService.getCodecRegistry();
+        this.codec = requireNonNull(codec);
         this.domListener = registry.registerSubscriptionListener(new Listener());
-        this.domService = listenService.getDomService();
+        this.domService = requireNonNull(domService);
     }
 
     @Override

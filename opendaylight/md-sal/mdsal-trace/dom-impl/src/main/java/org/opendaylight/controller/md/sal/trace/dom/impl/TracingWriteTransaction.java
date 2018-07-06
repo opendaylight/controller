@@ -8,18 +8,18 @@
 package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import com.google.common.util.concurrent.FluentFuture;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedTrait;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 
 class TracingWriteTransaction extends AbstractTracingWriteTransaction
         implements CloseTracked<TracingWriteTransaction> {
 
     private final CloseTrackedTrait<TracingWriteTransaction> closeTracker;
 
-    TracingWriteTransaction(DOMDataWriteTransaction delegate, TracingBroker tracingBroker,
+    TracingWriteTransaction(DOMDataTreeWriteTransaction delegate, TracingBroker tracingBroker,
             CloseTrackedRegistry<TracingWriteTransaction> writeTransactionsRegistry) {
         super(delegate, tracingBroker);
         this.closeTracker = new CloseTrackedTrait<>(writeTransactionsRegistry, this);
