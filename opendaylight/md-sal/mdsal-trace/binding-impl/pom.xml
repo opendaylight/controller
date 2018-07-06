@@ -53,6 +53,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                       org.opendaylight.controller.md.sal.dom.api,
                       org.opendaylight.controller.md.sal.binding.api,
                       org.opendaylight.controller.md.sal.binding.spi,
+                      org.opendaylight.mdsal.binding.dom.adapter.spi,
+                      org.opendaylight.mdsal.binding.api,
                       *
                     </Import-Package>
                 </instructions>

@@ -8,12 +8,12 @@
 package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import java.util.Objects;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.AbstractCloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
 
 class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionChain> implements DOMTransactionChain {
 
@@ -38,21 +38,20 @@ class TracingTransactionChain extends AbstractCloseTracked<TracingTransactionCha
 
     @Override
     @SuppressWarnings("resource")
-    public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        final DOMDataReadOnlyTransaction tx = delegate.newReadOnlyTransaction();
-        return new TracingReadOnlyTransaction(tx, readOnlyTransactionsRegistry);
+    public DOMDataTreeReadTransaction newReadOnlyTransaction() {
+        return new TracingReadOnlyTransaction(delegate.newReadOnlyTransaction(), readOnlyTransactionsRegistry);
     }
 
     @Override
-    public DOMDataReadWriteTransaction newReadWriteTransaction() {
+    public DOMDataTreeReadWriteTransaction newReadWriteTransaction() {
         return new TracingReadWriteTransaction(delegate.newReadWriteTransaction(), tracingBroker,
                 readWriteTransactionsRegistry);
     }
 
     @Override
-    public DOMDataWriteTransaction newWriteOnlyTransaction() {
-        final DOMDataWriteTransaction tx = delegate.newWriteOnlyTransaction();
-        return new TracingWriteTransaction(tx, tracingBroker, writeTransactionsRegistry);
+    public DOMDataTreeWriteTransaction newWriteOnlyTransaction() {
+        return new TracingWriteTransaction(delegate.newWriteOnlyTransaction(), tracingBroker,
+                writeTransactionsRegistry);
     }
 
     @Override

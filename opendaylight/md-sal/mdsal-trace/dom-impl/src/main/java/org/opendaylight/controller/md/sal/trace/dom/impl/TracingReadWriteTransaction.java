@@ -11,24 +11,24 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Objects;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTracked;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedRegistry;
 import org.opendaylight.controller.md.sal.trace.closetracker.impl.CloseTrackedTrait;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 class TracingReadWriteTransaction
     extends AbstractTracingWriteTransaction
-        implements DOMDataReadWriteTransaction, CloseTracked<TracingReadWriteTransaction> {
+        implements DOMDataTreeReadWriteTransaction, CloseTracked<TracingReadWriteTransaction> {
 
     private final CloseTrackedTrait<TracingReadWriteTransaction> closeTracker;
-    private final DOMDataReadWriteTransaction delegate;
+    private final DOMDataTreeReadWriteTransaction delegate;
 
-    TracingReadWriteTransaction(DOMDataReadWriteTransaction delegate, TracingBroker tracingBroker,
+    TracingReadWriteTransaction(DOMDataTreeReadWriteTransaction delegate, TracingBroker tracingBroker,
             CloseTrackedRegistry<TracingReadWriteTransaction> readWriteTransactionsRegistry) {
         super(delegate, tracingBroker);
         this.closeTracker = new CloseTrackedTrait<>(readWriteTransactionsRegistry, this);
@@ -36,8 +36,8 @@ class TracingReadWriteTransaction
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
-                                                            LogicalDatastoreType store, YangInstanceIdentifier yiid) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(LogicalDatastoreType store,
+            YangInstanceIdentifier yiid) {
         return delegate.read(store, yiid);
     }
 
@@ -66,5 +66,10 @@ class TracingReadWriteTransaction
     @Override
     public CloseTracked<TracingReadWriteTransaction> getRealCloseTracked() {
         return this;
+    }
+
+    @Override
+    public void close() {
+        delegate.close();
     }
 }

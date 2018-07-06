@@ -14,19 +14,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransaction {
+abstract class AbstractTracingWriteTransaction implements DOMDataTreeWriteTransaction {
 
-    private final DOMDataWriteTransaction delegate;
+    private final DOMDataTreeWriteTransaction delegate;
     private final TracingBroker tracingBroker;
     private final List<String> logs = new ArrayList<>();
 
-    AbstractTracingWriteTransaction(DOMDataWriteTransaction delegate, TracingBroker tracingBroker) {
+    AbstractTracingWriteTransaction(DOMDataTreeWriteTransaction delegate, TracingBroker tracingBroker) {
         this.delegate = Objects.requireNonNull(delegate);
         this.tracingBroker = Objects.requireNonNull(tracingBroker);
         recordOp(null, null, "instantiate", null);

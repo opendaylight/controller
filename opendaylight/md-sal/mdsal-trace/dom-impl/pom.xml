@@ -66,6 +66,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 <instructions>
                     <Import-Package>
                       org.opendaylight.controller.md.sal.dom.broker.impl,
+                      org.opendaylight.controller.sal.core.compat,
+                      org.opendaylight.controller.md.sal.dom.api,
                       *
                     </Import-Package>
                     <Export-Package>org.opendaylight.controller.md.sal.trace.dom.impl</Export-Package>

@@ -12,29 +12,27 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import org.opendaylight.controller.md.sal.binding.api.BindingService;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
-import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
-import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class BindingMountPointAdapter implements MountPoint {
 
-    private final InstanceIdentifier<?> identifier;
+    private org.opendaylight.mdsal.binding.api.MountPoint delegate;
     private LoadingCache<Class<? extends BindingService>, Optional<BindingService>> services;
 
-    public BindingMountPointAdapter(final BindingToNormalizedNodeCodec codec, final DOMMountPoint domMountPoint) {
-        identifier = codec.getCodecRegistry().fromYangInstanceIdentifier(domMountPoint.getIdentifier());
-        services = CacheBuilder.newBuilder().build(new BindingDOMAdapterLoader(codec) {
-
+    public BindingMountPointAdapter(final org.opendaylight.mdsal.binding.api.MountPoint delegate) {
+        this.delegate = delegate;
+        services = CacheBuilder.newBuilder().build(new BindingAdapterLoader() {
             @Override
-            protected DOMService getDelegate(Class<? extends DOMService> reqDeleg) {
-                return domMountPoint.getService(reqDeleg).orNull();
+            protected org.opendaylight.mdsal.binding.api.BindingService getDelegate(
+                    Class<? extends org.opendaylight.mdsal.binding.api.BindingService> reqDeleg) {
+                return delegate.getService(reqDeleg).orNull();
             }
         });
     }
 
     @Override
     public InstanceIdentifier<?> getIdentifier() {
-        return identifier;
+        return delegate.getIdentifier();
     }
 
     @Override

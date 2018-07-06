@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.trace.api;
 
 import java.io.PrintStream;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 
 /**
  * Interface so that the tracing broker service can be more explicitly imported.
