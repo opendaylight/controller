@@ -11,6 +11,9 @@ package org.opendaylight.controller.md.sal.dom.broker.spi.mount;
 import com.google.common.base.Optional;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -47,5 +50,28 @@ public final class SimpleDOMMountPoint implements DOMMountPoint {
     @Override
     public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
         return Optional.fromNullable(services.getInstance(cls));
+    }
+
+    public Collection<Map.Entry<Class<? extends DOMService>, ? extends DOMService>> getAllServices() {
+        return ImmutableList.copyOf(services.entrySet());
+    }
+
+    @Override
+    public int hashCode() {
+        return identifier.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof DOMMountPoint)) {
+            return false;
+        }
+
+        DOMMountPoint other = (DOMMountPoint) obj;
+        return identifier.equals(other.getIdentifier());
     }
 }
