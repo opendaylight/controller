@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Preconditions;
@@ -23,6 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
+import org.opendaylight.mdsal.binding.dom.adapter.BindingRpcFutureAware;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -66,8 +66,8 @@ class RpcServiceAdapter implements InvocationHandler {
 
     ListenableFuture<RpcResult<?>> invoke0(final SchemaPath schemaPath, final NormalizedNode<?, ?> input) {
         final CheckedFuture<DOMRpcResult, DOMRpcException> result = delegate.invokeRpc(schemaPath, input);
-        if (result instanceof LazyDOMRpcResultFuture) {
-            return ((LazyDOMRpcResultFuture) result).getBindingFuture();
+        if (result instanceof BindingRpcFutureAware) {
+            return ((BindingRpcFutureAware) result).getBindingFuture();
         }
 
         return transformFuture(schemaPath, result, codec.getCodecFactory());

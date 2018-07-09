@@ -11,6 +11,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import org.opendaylight.mdsal.binding.dom.adapter.BindingDataAware;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -23,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
  // FIXME: Should be this moved to binding-data-codec?
-class LazySerializedContainerNode implements ContainerNode {
+class LazySerializedContainerNode implements ContainerNode, BindingDataAware {
 
     private final NodeIdentifier identifier;
     private final DataObject bindingData;
@@ -87,7 +88,8 @@ class LazySerializedContainerNode implements ContainerNode {
         return delegate().getAttributeValue(name);
     }
 
-    final DataObject bindingData() {
+    @Override
+    public final DataObject bindingData() {
         return bindingData;
     }
 
