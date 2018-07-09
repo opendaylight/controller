@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.mdsal.binding.dom.adapter.BindingDataAware;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
@@ -74,8 +75,8 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     }
 
     private DataObject deserialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
-        if (input instanceof LazySerializedContainerNode) {
-            return ((LazySerializedContainerNode) input).bindingData();
+        if (input instanceof BindingDataAware) {
+            return ((BindingDataAware) input).bindingData();
         }
         final SchemaPath inputSchemaPath = rpcPath.createChild(inputQname);
         return codec.fromNormalizedNodeRpcData(inputSchemaPath, (ContainerNode) input);
