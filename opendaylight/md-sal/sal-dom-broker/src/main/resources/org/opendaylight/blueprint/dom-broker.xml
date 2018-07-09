@@ -61,7 +61,12 @@
 
   <!-- DOM MountPoint Service -->
 
-  <bean id="domMountPointService" class="org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl"/>
+  <reference id="delegateDomMountPointService" interface="org.opendaylight.mdsal.dom.api.DOMMountPointService"
+      odl:type="default"/>
+
+  <bean id="domMountPointService" class="org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl">
+    <argument ref="delegateDomMountPointService"/>
+  </bean>
 
   <service ref="domMountPointService" interface="org.opendaylight.controller.md.sal.dom.api.DOMMountPointService"
         odl:type="default"/>

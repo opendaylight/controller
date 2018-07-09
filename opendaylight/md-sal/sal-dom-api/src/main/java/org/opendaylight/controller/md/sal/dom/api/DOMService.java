@@ -8,12 +8,14 @@
 
 package org.opendaylight.controller.md.sal.dom.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 
 /**
  * Marker interface for services which can be obtained from a {@link DOMMountPoint}
  * instance. No further semantics are implied.
  */
-public interface DOMService extends BrokerService {
+@SuppressFBWarnings(value = "NM_SAME_SIMPLE_NAME_AS_INTERFACE", justification = "Migration")
+public interface DOMService extends BrokerService, org.opendaylight.mdsal.dom.api.DOMService {
 
 }
