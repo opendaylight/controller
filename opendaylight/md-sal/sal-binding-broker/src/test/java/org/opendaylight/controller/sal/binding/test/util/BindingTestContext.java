@@ -47,7 +47,6 @@ import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.DataObjectSerializerGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.impl.BindingNormalizedNodeCodecRegistry;
@@ -66,8 +65,6 @@ public class BindingTestContext implements AutoCloseable {
 
     private HeliumNotificationProviderServiceAdapter baNotifyImpl;
 
-
-    private BrokerImpl biBrokerImpl;
 
     private final ListeningExecutorService executor;
     private final ClassPool classPool;
@@ -214,9 +211,6 @@ public class BindingTestContext implements AutoCloseable {
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
         services.put(DOMRpcService.class, this.domRouter);
-
-        this.biBrokerImpl = new BrokerImpl(this.domRouter,services);
-
     }
 
     public void startBindingNotificationBroker() {

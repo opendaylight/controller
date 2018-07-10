@@ -8,25 +8,8 @@
 package org.opendaylight.controller.sal.core.api;
 
 /**
- * Session-specific instance of the broker functionality.
- *
- * <p>
- * BrokerService is marker interface for infrastructure services provided by the
- * SAL. These services are session-specific, each {@link Provider} and
- * {@link Consumer} usually has own instance of the service with it's own
- * context.
- *
- * <p>
- * The consumer's (or provider's) instance of specific service could be obtained
- * by invoking {@link org.opendaylight.controller.sal.core.api.Broker.ConsumerSession#getService(Class)}
- * method on session assigned to the consumer.
- *
- * <p>
- * {@link BrokerService} and {@link Provider} may seem similar, but provider
- * provides YANG model-based functionality and {@link BrokerService} exposes the
- * necessary supporting functionality to implement specific functionality of
- * YANG and to reuse it in the development of {@link Consumer}s and
- * {@link Provider}s.
+ * Session-specific instance of the broker functionality. BrokerService is marker interface for infrastructure services
+ * provided by the SAL.
  *
  * @deprecated Use blueprint instead for code wiring.
  */
