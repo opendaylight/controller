@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import com.google.common.base.Optional;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
+import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -20,7 +21,10 @@ public interface DOMMountPointService extends DOMService {
 
     DOMMountPointBuilder createMountPoint(YangInstanceIdentifier path);
 
+    @Deprecated
     ListenerRegistration<MountProvisionListener> registerProvisionListener(MountProvisionListener listener);
+
+    ListenerRegistration<DOMMountPointListener> registerProvisionListener(DOMMountPointListener listener);
 
     interface DOMMountPointBuilder {
 

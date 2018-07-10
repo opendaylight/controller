@@ -5,8 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.sal.core.api.mount;
 
-public interface MountProvisionListener extends org.opendaylight.mdsal.dom.api.DOMMountPointListener {
+import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
+
+/**
+ * Listener for mountpoint events.
+ *
+ * @deprecated Use {@link DOMMountPointListener} instead.
+ */
+@Deprecated
+public interface MountProvisionListener extends DOMMountPointListener {
+
 }
