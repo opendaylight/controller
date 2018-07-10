@@ -11,7 +11,7 @@
   <reference id="domRpcProviderService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
   <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
-  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
+  <reference id="schemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService"/>
   <reference id="normalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
   <reference id="notificationPublishService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService" />
   <reference id="notificationListenerService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService" />

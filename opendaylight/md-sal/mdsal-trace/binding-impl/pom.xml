@@ -39,7 +39,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <scope>test</scope>
     </dependency>
   </dependencies>
-    <build>
+
+  <build>
     <plugins>
         <plugin>
             <groupId>org.apache.felix</groupId>
@@ -52,12 +53,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                       org.opendaylight.controller.md.sal.dom.api,
                       org.opendaylight.controller.md.sal.binding.api,
                       org.opendaylight.controller.md.sal.binding.spi,
-                      org.opendaylight.controller.sal.core.api.model,
                       *
                     </Import-Package>
                 </instructions>
             </configuration>
         </plugin>
     </plugins>
-    </build>
+  </build>
 </project>
