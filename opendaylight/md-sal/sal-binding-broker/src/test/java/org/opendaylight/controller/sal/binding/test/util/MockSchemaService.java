@@ -7,24 +7,18 @@
  */
 package org.opendaylight.controller.sal.binding.test.util;
 
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.ListenerRegistry;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
-public final class MockSchemaService implements SchemaService, SchemaContextProvider {
+public final class MockSchemaService implements DOMSchemaService, SchemaContextProvider {
 
     private SchemaContext schemaContext;
 
     ListenerRegistry<SchemaContextListener> listeners = ListenerRegistry.create();
-
-    @Override
-    public void addModule(final Module module) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public synchronized SchemaContext getGlobalContext() {
@@ -40,11 +34,6 @@ public final class MockSchemaService implements SchemaService, SchemaContextProv
     public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(
             final SchemaContextListener listener) {
         return listeners.register(listener);
-    }
-
-    @Override
-    public void removeModule(final Module module) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

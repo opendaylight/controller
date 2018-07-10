@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.dom.broker.impl;
 
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
@@ -18,18 +18,18 @@ public final class SchemaContextProviders {
         throw new UnsupportedOperationException("Utility class.");
     }
 
-    public static SchemaContextProvider fromSchemaService(final SchemaService schemaService) {
+    public static SchemaContextProvider fromSchemaService(final DOMSchemaService schemaService) {
         if (schemaService instanceof SchemaContextProvider) {
             return (SchemaContextProvider) schemaService;
         }
         return new SchemaServiceAdapter(schemaService);
     }
 
-    private static final class SchemaServiceAdapter implements SchemaContextProvider, Delegator<SchemaService> {
+    private static final class SchemaServiceAdapter implements SchemaContextProvider, Delegator<DOMSchemaService> {
 
-        private final SchemaService service;
+        private final DOMSchemaService service;
 
-        SchemaServiceAdapter(final SchemaService service) {
+        SchemaServiceAdapter(final DOMSchemaService service) {
             this.service = service;
         }
 
@@ -39,7 +39,7 @@ public final class SchemaContextProviders {
         }
 
         @Override
-        public SchemaService getDelegate() {
+        public DOMSchemaService getDelegate() {
             return service;
         }
 

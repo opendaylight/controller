@@ -21,7 +21,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter;
 
 /**
@@ -40,12 +40,12 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataBrokerAdapter;
 public class LegacyShardedDOMDataBrokerAdapter implements DOMDataBroker {
 
     private final org.opendaylight.mdsal.dom.api.DOMDataBroker delegateDataBroker;
-    private final SchemaService schemaService;
+    private final DOMSchemaService schemaService;
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
 
     public LegacyShardedDOMDataBrokerAdapter(final ShardedDOMDataBrokerAdapter delegateDataBroker,
-                                             final SchemaService schemaService) {
+                                             final DOMSchemaService schemaService) {
         this.delegateDataBroker = checkNotNull(delegateDataBroker);
         this.schemaService = checkNotNull(schemaService);
     }
