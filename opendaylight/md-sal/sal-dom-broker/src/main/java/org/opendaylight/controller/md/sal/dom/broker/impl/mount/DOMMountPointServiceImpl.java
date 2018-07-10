@@ -34,7 +34,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         this(new org.opendaylight.mdsal.dom.broker.DOMMountPointServiceImpl());
     }
 
-    public DOMMountPointServiceImpl(org.opendaylight.mdsal.dom.api.DOMMountPointService delegate) {
+    public DOMMountPointServiceImpl(final org.opendaylight.mdsal.dom.api.DOMMountPointService delegate) {
         this.delegate = delegate;
     }
 
@@ -44,7 +44,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         return delegateMountPoint.isPresent() ? Optional.of(convert(delegateMountPoint.get())) : Optional.absent();
     }
 
-    private DOMMountPoint convert(final org.opendaylight.mdsal.dom.api.DOMMountPoint from) {
+    private static DOMMountPoint convert(final org.opendaylight.mdsal.dom.api.DOMMountPoint from) {
         return new DOMMountPoint() {
             @Override
             public YangInstanceIdentifier getIdentifier() {
@@ -52,7 +52,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
             }
 
             @Override
-            public <T extends DOMService> Optional<T> getService(Class<T> cls) {
+            public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
                 return from.getService(cls);
             }
 
@@ -67,7 +67,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
             }
 
             @Override
-            public boolean equals(Object obj) {
+            public boolean equals(final Object obj) {
                 if (this == obj) {
                     return true;
                 }
@@ -97,6 +97,11 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
                 delegateReg.close();
             }
         };
+    }
+
+    @Override
+    public ListenerRegistration<DOMMountPointListener> registerProvisionListener(final DOMMountPointListener listener) {
+        return delegate.registerProvisionListener(listener);
     }
 
     /**
