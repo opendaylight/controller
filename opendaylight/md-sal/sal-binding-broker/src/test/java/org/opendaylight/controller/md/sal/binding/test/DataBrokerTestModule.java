@@ -11,7 +11,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 
 public class DataBrokerTestModule {
@@ -56,7 +56,7 @@ public class DataBrokerTestModule {
         return dataBrokerTest.getDataBrokerTestCustomizer().getDomNotificationRouter();
     }
 
-    public SchemaService getSchemaService() {
+    public DOMSchemaService getSchemaService() {
         return dataBrokerTest.getDataBrokerTestCustomizer().getSchemaService();
     }
 
