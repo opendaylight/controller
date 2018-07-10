@@ -17,9 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.mount.SimpleDOMMountPoint;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
-import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -85,18 +83,6 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
     @Override
     public DOMMountPointBuilder createMountPoint(final YangInstanceIdentifier path) {
         return new DOMMountPointBuilderImpl(path);
-    }
-
-    @Override
-    public ListenerRegistration<MountProvisionListener> registerProvisionListener(
-            final MountProvisionListener listener) {
-        final ListenerRegistration<DOMMountPointListener> delegateReg = delegate.registerProvisionListener(listener);
-        return new AbstractListenerRegistration<MountProvisionListener>(listener) {
-            @Override
-            protected void removeRegistration() {
-                delegateReg.close();
-            }
-        };
     }
 
     @Override
