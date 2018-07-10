@@ -140,11 +140,6 @@
             <artifactId>sal-core-spi</artifactId>
         </dependency>
         <dependency>
-            <!-- TODO start-level="70" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>sal-schema-service</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-broker-impl</artifactId>
         </dependency>
