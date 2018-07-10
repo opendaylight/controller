@@ -18,7 +18,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.mount.SimpleDOMMountPoint;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
+import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.util.ListenerRegistry;
@@ -29,7 +30,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
     private final Map<YangInstanceIdentifier, DOMMountPoint> mountPoints = new HashMap<>();
 
-    private final ListenerRegistry<MountProvisionListener> listeners = ListenerRegistry.create();
+    private final ListenerRegistry<DOMMountPointListener> listeners = ListenerRegistry.create();
 
     @Override
     public Optional<DOMMountPoint> getMountPoint(final YangInstanceIdentifier path) {
@@ -43,23 +44,27 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
     }
 
     public void notifyMountCreated(final YangInstanceIdentifier identifier) {
-        for (final ListenerRegistration<MountProvisionListener> listener : listeners
-                .getListeners()) {
+        for (final ListenerRegistration<DOMMountPointListener> listener : listeners.getListeners()) {
             listener.getInstance().onMountPointCreated(identifier);
         }
     }
 
     public void notifyMountRemoved(final YangInstanceIdentifier identifier) {
-        for (final ListenerRegistration<MountProvisionListener> listener : listeners
-                .getListeners()) {
+        for (final ListenerRegistration<DOMMountPointListener> listener : listeners.getListeners()) {
             listener.getInstance().onMountPointRemoved(identifier);
         }
     }
 
     @Override
-    public ListenerRegistration<MountProvisionListener> registerProvisionListener(
-            final MountProvisionListener listener) {
-        return listeners.register(listener);
+    public <T extends DOMMountPointListener> ListenerRegistration<T> registerProvisionListener(final T listener) {
+        final ListenerRegistration<DOMMountPointListener> reg = listeners.register(listener);
+
+        return new AbstractListenerRegistration<T>(listener) {
+            @Override
+            protected void removeRegistration() {
+                reg.close();
+            }
+        };
     }
 
     public ObjectRegistration<DOMMountPoint> registerMountPoint(final DOMMountPoint mountPoint) {

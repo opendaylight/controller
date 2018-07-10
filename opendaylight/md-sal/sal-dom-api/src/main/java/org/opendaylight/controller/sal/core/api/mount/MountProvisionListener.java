@@ -5,16 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.sal.core.api.mount;
 
-import java.util.EventListener;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
 
-public interface MountProvisionListener extends EventListener {
-
-    void onMountPointCreated(YangInstanceIdentifier path);
-
-    void onMountPointRemoved(YangInstanceIdentifier path);
+/**
+ * Listener for mountpoint events.
+ *
+ * @deprecated Use {@link DOMMountPointListener} instead.
+ */
+@Deprecated
+public interface MountProvisionListener extends DOMMountPointListener {
 
 }
