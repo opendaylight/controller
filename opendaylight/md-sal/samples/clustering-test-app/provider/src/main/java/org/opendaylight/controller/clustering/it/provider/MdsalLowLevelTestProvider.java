@@ -18,7 +18,6 @@ import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -52,7 +51,6 @@ import org.opendaylight.controller.clustering.it.provider.impl.WriteTransactions
 import org.opendaylight.controller.clustering.it.provider.impl.YnlListener;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -550,7 +548,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         final DOMDataReadOnlyTransaction rTx = domDataBroker.newReadOnlyTransaction();
         try {
             final Optional<NormalizedNode<?, ?>> readResult =
-                    rTx.read(CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID).checkedGet();
+                    rTx.read(CONTROLLER_CONFIG, WriteTransactionsHandler.ID_INT_YID).get();
 
             if (!readResult.isPresent()) {
                 final RpcError error = RpcResultBuilder.newError(
@@ -563,7 +561,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                     RpcResultBuilder.success(new UnsubscribeDtclOutputBuilder()
                             .setCopyMatches(idIntsListener.checkEqual(readResult.get()))).build());
 
-        } catch (final ReadFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.APPLICATION, "Read failed.", "Final read from id-ints failed.");
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
@@ -796,14 +794,13 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         final ClientLocalHistory localHistory = distributedDataStoreClient.createLocalHistory();
         final ClientTransaction tx = localHistory.createTransaction();
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>,
-                org.opendaylight.mdsal.common.api.ReadFailedException> read =
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
                 tx.read(YangInstanceIdentifier.of(ProduceTransactionsHandler.ID_INT));
 
         tx.abort();
         localHistory.close();
         try {
-            final Optional<NormalizedNode<?, ?>> optional = read.checkedGet();
+            final Optional<NormalizedNode<?, ?>> optional = read.get();
             if (!optional.isPresent()) {
                 LOG.warn("Final read from client is empty.");
                 final RpcError error = RpcResultBuilder.newError(
@@ -816,7 +813,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                     RpcResultBuilder.success(new UnsubscribeDdtlOutputBuilder()
                             .setCopyMatches(idIntsDdtl.checkEqual(optional.get()))).build());
 
-        } catch (org.opendaylight.mdsal.common.api.ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unable to read data to verify ddtl data.", e);
             final RpcError error = RpcResultBuilder.newError(
                     ErrorType.APPLICATION, "Read failed.", "Final read from id-ints failed.");
