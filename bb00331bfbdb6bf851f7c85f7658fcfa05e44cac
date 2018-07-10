@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b8017939_672ba4fc",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/broker/spi/mount/SimpleDOMMountPoint.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-07-10T13:32:43Z",
+      "side": 1,
+      "message": "yeah you\u0027re right - missed that.",
+      "parentUuid": "86092521_fb87fe01",
+      "revId": "bb00331bfbdb6bf851f7c85f7658fcfa05e44cac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "61108a44_84477265",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/broker/spi/mount/SimpleDOMMountPoint.java",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2018-07-10T09:09:40Z",
       "side": 1,
       "message": "return this \u003d\u003d obj || obj instanceof DOMMountPoint \u0026\u0026",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 14
+      },
+      "revId": "bb00331bfbdb6bf851f7c85f7658fcfa05e44cac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "efa0dbee_d9596e12",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/broker/spi/mount/SimpleDOMMountPoint.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-07-10T13:32:43Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "61108a44_84477265",
       "range": {
         "startLine": 66,
         "startChar": 8,
