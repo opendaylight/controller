@@ -95,7 +95,6 @@
                             <!--  Legacy code -->
                             org.opendaylight.controller.sal.dom.broker,
                             org.opendaylight.controller.sal.dom.broker.impl,
-                            org.opendaylight.controller.sal.dom.broker.osgi,
                             org.opendaylight.controller.sal.dom.broker.util,
                             org.opendaylight.controller.sal.dom.broker.spi,
                             <!--sal.broker.impl is exported for sal-netconf-connector to use SchemaAwareRpcRegistry.-->

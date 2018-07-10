@@ -9,7 +9,6 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import java.util.Collection;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
@@ -17,7 +16,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * A {@link DOMService} which allows its users to subscribe to receive
  * {@link DOMNotification}s.
  */
-public interface DOMNotificationService extends DOMService, BrokerService {
+public interface DOMNotificationService extends DOMService {
     /**
      * Register a {@link DOMNotificationListener} to receive a set of notifications. As with
      * other ListenerRegistration-based interfaces, registering an instance multiple times

@@ -10,10 +10,8 @@ package org.opendaylight.controller.sal.binding.test.util;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import javassist.ClassPool;
@@ -45,7 +43,6 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
-import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.DataObjectSerializerGenerator;
 import org.opendaylight.mdsal.binding.dom.codec.gen.impl.StreamWriterGenerator;
@@ -208,9 +205,6 @@ public class BindingTestContext implements AutoCloseable {
         org.opendaylight.mdsal.dom.broker.DOMRpcRouter delegate =
                 org.opendaylight.mdsal.dom.broker.DOMRpcRouter.newInstance(mockSchemaService);
         this.domRouter = new DOMRpcRouter(delegate, delegate);
-
-        final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
-        services.put(DOMRpcService.class, this.domRouter);
     }
 
     public void startBindingNotificationBroker() {

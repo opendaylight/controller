@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.api;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainFactory;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -22,11 +20,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * <p>
  * This interface is type capture of generic interfaces and returns type captures
  * of results for client-code convenience.
- *
  */
 public interface DOMDataBroker extends
         AsyncDataBroker<YangInstanceIdentifier, NormalizedNode<?, ?>>,
-        TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>, BrokerService,
+        TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>,
             DOMExtensibleService<DOMDataBroker, DOMDataBrokerExtension> {
 
     @Override

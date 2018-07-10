@@ -12,7 +12,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.sal.core.api.BrokerService;
 
 /**
  * A {@link DOMService} which allows its user to send {@link DOMNotification}s. It
@@ -24,7 +23,7 @@ import org.opendaylight.controller.sal.core.api.BrokerService;
  *   the caller to specify that it should never wait, or put an upper bound on how
  *   long it is going to wait.
  */
-public interface DOMNotificationPublishService extends DOMService, BrokerService {
+public interface DOMNotificationPublishService extends DOMService {
     /**
      * Well-known value indicating that the implementation is currently not
      * able to accept a notification.
