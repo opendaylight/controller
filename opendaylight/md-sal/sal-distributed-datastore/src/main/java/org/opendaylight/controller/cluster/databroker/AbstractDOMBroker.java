@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.databroker;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,13 +40,14 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
 
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
-    private final Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> extensions;
+    private final ClassToInstanceMap<DOMDataBrokerExtension> extensions;
+
     private volatile AutoCloseable closeable;
 
     protected AbstractDOMBroker(final Map<LogicalDatastoreType, DOMStore> datastores) {
         super(datastores);
 
-        Builder<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> extBuilder = ImmutableMap.builder();
+        Builder<DOMDataBrokerExtension> extBuilder = ImmutableClassToInstanceMap.builder();
         if (isSupported(datastores, DOMStoreTreeChangePublisher.class)) {
             extBuilder.put(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
                 @Override

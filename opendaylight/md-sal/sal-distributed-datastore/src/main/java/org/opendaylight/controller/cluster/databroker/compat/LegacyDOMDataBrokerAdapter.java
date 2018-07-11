@@ -9,9 +9,10 @@ package org.opendaylight.controller.cluster.databroker.compat;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ForwardingObject;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -78,7 +79,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     };
 
     private final AbstractDOMBroker delegate;
-    private final Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> extensions;
+    private final ClassToInstanceMap<DOMDataBrokerExtension> extensions;
 
     public LegacyDOMDataBrokerAdapter(AbstractDOMBroker delegate) {
         this.delegate = delegate;
@@ -87,7 +88,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
             org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension> delegateExtensions =
                 delegate.getSupportedExtensions();
 
-        Builder<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> extBuilder = ImmutableMap.builder();
+        Builder<DOMDataBrokerExtension> extBuilder = ImmutableClassToInstanceMap.builder();
         final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService delegateTreeChangeService =
                 (org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService) delegateExtensions.get(
                         org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService.class);
