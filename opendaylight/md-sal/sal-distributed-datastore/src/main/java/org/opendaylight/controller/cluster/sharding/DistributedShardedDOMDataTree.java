@@ -21,6 +21,7 @@ import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.FutureCallback;
@@ -288,7 +289,13 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     @Override
+    @Deprecated
     public Map<Class<? extends DOMDataTreeServiceExtension>, DOMDataTreeServiceExtension> getSupportedExtensions() {
+        return ImmutableClassToInstanceMap.of();
+    }
+
+    @Override
+    public ClassToInstanceMap<DOMDataTreeServiceExtension> getExtensions() {
         return ImmutableClassToInstanceMap.of();
     }
 

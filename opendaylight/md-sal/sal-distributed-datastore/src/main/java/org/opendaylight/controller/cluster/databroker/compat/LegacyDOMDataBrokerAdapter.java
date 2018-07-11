@@ -84,9 +84,8 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     public LegacyDOMDataBrokerAdapter(AbstractDOMBroker delegate) {
         this.delegate = delegate;
 
-        Map<Class<? extends org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension>,
-            org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension> delegateExtensions =
-                delegate.getSupportedExtensions();
+        ClassToInstanceMap<org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension> delegateExtensions =
+                delegate.getExtensions();
 
         Builder<DOMDataBrokerExtension> extBuilder = ImmutableClassToInstanceMap.builder();
         final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService delegateTreeChangeService =

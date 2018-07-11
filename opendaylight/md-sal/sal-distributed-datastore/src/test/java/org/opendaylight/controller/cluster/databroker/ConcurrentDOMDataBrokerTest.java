@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -33,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -584,12 +584,11 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, mockOperStore,
                 LogicalDatastoreType.CONFIGURATION, mockConfigStore), futureExecutor)) {
 
-            Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> supportedExtensions =
-                    dataBroker.getSupportedExtensions();
-            assertNotNull(supportedExtensions.get(DOMDataTreeChangeService.class));
+            ClassToInstanceMap<DOMDataBrokerExtension> supportedExtensions = dataBroker.getExtensions();
+            assertNotNull(supportedExtensions.getInstance(DOMDataTreeChangeService.class));
 
-            DOMDataTreeCommitCohortRegistry cohortRegistry =
-                    (DOMDataTreeCommitCohortRegistry) supportedExtensions.get(DOMDataTreeCommitCohortRegistry.class);
+            DOMDataTreeCommitCohortRegistry cohortRegistry = supportedExtensions.getInstance(
+                DOMDataTreeCommitCohortRegistry.class);
             assertNotNull(cohortRegistry);
 
             DOMDataTreeCommitCohort mockCohort = mock(DOMDataTreeCommitCohort.class);

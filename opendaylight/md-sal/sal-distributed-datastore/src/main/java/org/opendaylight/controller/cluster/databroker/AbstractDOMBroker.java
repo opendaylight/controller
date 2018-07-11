@@ -103,7 +103,13 @@ public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DO
     }
 
     @Override
+    @Deprecated
     public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
+        return extensions;
+    }
+
+    @Override
+    public ClassToInstanceMap<DOMDataBrokerExtension> getExtensions() {
         return extensions;
     }
 
