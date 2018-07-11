@@ -84,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "331707db_2e7831e4",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/broker/spi/mount/SimpleDOMMountPoint.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-07-11T10:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8017939_672ba4fc",
+      "revId": "bb00331bfbdb6bf851f7c85f7658fcfa05e44cac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "61108a44_84477265",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/broker/spi/mount/SimpleDOMMountPoint.java",
         "patchSetId": 1
@@ -143,6 +161,30 @@
       "side": 1,
       "message": "BTW - equals/hashCode was only added b/c of a UT in netconf that does assertEquals. Previously \"expected\" and \"actual\" were the same instance but now they\u0027re not due to the proxying.",
       "parentUuid": "efa0dbee_d9596e12",
+      "range": {
+        "startLine": 66,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 14
+      },
+      "revId": "bb00331bfbdb6bf851f7c85f7658fcfa05e44cac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44206418_9d9ad0b7",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/md/sal/dom/broker/spi/mount/SimpleDOMMountPoint.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-07-11T10:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eadde72b_ee428763",
       "range": {
         "startLine": 66,
         "startChar": 8,
