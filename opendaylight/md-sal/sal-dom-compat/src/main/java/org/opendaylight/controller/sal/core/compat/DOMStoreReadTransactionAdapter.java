@@ -14,22 +14,11 @@ import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
-import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class DOMStoreReadTransactionAdapter<T extends org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction>
         extends ForwardingObject implements DOMStoreReadTransaction {
-    public static final ExceptionMapper<ReadFailedException> READ_EX_MAPPER =
-            new ExceptionMapper<ReadFailedException>("read", ReadFailedException.class) {
-        @Override
-        protected ReadFailedException newWithCause(final String message, final Throwable cause) {
-            return cause instanceof org.opendaylight.mdsal.common.api.ReadFailedException
-                    ? new ReadFailedException(cause.getMessage(), cause.getCause())
-                            : new ReadFailedException(message, cause);
-        }
-    };
-
     private final T delegate;
 
     public DOMStoreReadTransactionAdapter(final T delegate) {
@@ -54,11 +43,11 @@ public class DOMStoreReadTransactionAdapter<T extends org.opendaylight.mdsal.dom
     @Override
     public CheckedFuture<com.google.common.base.Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final YangInstanceIdentifier path) {
-        return MappingCheckedFuture.create(delegate.read(path), READ_EX_MAPPER);
+        return MappingCheckedFuture.create(delegate.read(path), ReadFailedExceptionAdapter.INSTANCE);
     }
 
     @Override
     public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
-        return MappingCheckedFuture.create(delegate.exists(path), READ_EX_MAPPER);
+        return MappingCheckedFuture.create(delegate.exists(path), ReadFailedExceptionAdapter.INSTANCE);
     }
 }

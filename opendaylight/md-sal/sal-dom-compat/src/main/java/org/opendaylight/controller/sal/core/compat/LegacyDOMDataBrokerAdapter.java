@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.databroker.compat;
+package org.opendaylight.controller.sal.core.compat;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -21,8 +21,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.databroker.AbstractDOMBroker;
-import org.opendaylight.controller.cluster.datastore.compat.LegacyDOMStoreAdapter;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -78,10 +76,10 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         }
     };
 
-    private final AbstractDOMBroker delegate;
+    private final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate;
     private final ClassToInstanceMap<DOMDataBrokerExtension> extensions;
 
-    public LegacyDOMDataBrokerAdapter(AbstractDOMBroker delegate) {
+    public LegacyDOMDataBrokerAdapter(org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
         this.delegate = delegate;
 
         ClassToInstanceMap<org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension> delegateExtensions =
@@ -141,7 +139,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     }
 
     @Override
-    protected AbstractDOMBroker delegate() {
+    protected org.opendaylight.mdsal.dom.api.DOMDataBroker delegate() {
         return delegate;
     }
 
@@ -256,14 +254,14 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(LogicalDatastoreType store,
                 YangInstanceIdentifier path) {
             return MappingCheckedFuture.create(readDelegate().read(convert(store), path),
-                    LegacyDOMStoreAdapter.READ_EX_MAPPER);
+                    ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
         public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
                 YangInstanceIdentifier path) {
             return MappingCheckedFuture.create(readDelegate().exists(convert(store), path),
-                    LegacyDOMStoreAdapter.READ_EX_MAPPER);
+                    ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
