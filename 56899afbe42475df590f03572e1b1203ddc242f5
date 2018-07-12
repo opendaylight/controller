@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c91bd6d1_6a1131e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/akka/osgi/impl/QuarantinedMonitorActorPropsFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-07-12T10:46:45Z",
+      "side": 1,
+      "message": "This should be taken care of by the logger, i.e. code should never access System.out/System.err -- that\u0027s why we checkstyle that.",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 70
+      },
+      "revId": "56899afbe42475df590f03572e1b1203ddc242f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7568b20_c77a5bf0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/akka/osgi/impl/QuarantinedMonitorActorPropsFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-07-12T10:46:45Z",
+      "side": 1,
+      "message": "An explanation of why this is needed needs to go here. Also the magic constant should be a proper constant.",
+      "range": {
+        "startLine": 30,
+        "startChar": 12,
+        "endLine": 30,
+        "endChar": 31
+      },
+      "revId": "56899afbe42475df590f03572e1b1203ddc242f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
