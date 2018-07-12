@@ -46,12 +46,6 @@ public final class MockSchemaService implements DOMSchemaService, SchemaContextP
     }
 
     @Override
-    @Deprecated
-    public Map<Class<? extends DOMSchemaServiceExtension>, DOMSchemaServiceExtension> getSupportedExtensions() {
-        return ImmutableClassToInstanceMap.of();
-    }
-
-    @Override
     public ClassToInstanceMap<DOMSchemaServiceExtension> getExtensions() {
         return ImmutableClassToInstanceMap.of();
     }

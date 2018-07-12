@@ -289,12 +289,6 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     @Override
-    @Deprecated
-    public Map<Class<? extends DOMDataTreeServiceExtension>, DOMDataTreeServiceExtension> getSupportedExtensions() {
-        return ImmutableClassToInstanceMap.of();
-    }
-
-    @Override
     public ClassToInstanceMap<DOMDataTreeServiceExtension> getExtensions() {
         return ImmutableClassToInstanceMap.of();
     }
