@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.sal.core.compat.ReadFailedExceptionAdapter;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -22,7 +23,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
-import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -32,18 +32,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public class LegacyDOMStoreAdapter extends ForwardingObject implements DOMStore, AutoCloseable {
-    public static final ExceptionMapper<ReadFailedException> READ_EX_MAPPER =
-            new ExceptionMapper<ReadFailedException>("read", ReadFailedException.class) {
-        @Override
-        protected ReadFailedException newWithCause(String message, Throwable cause) {
-            if (cause instanceof org.opendaylight.mdsal.common.api.ReadFailedException) {
-                return new ReadFailedException(cause.getMessage(), cause.getCause());
-            }
-
-            return new ReadFailedException(message, cause);
-        }
-    };
-
     private final DistributedDataStoreInterface delegate;
 
     public LegacyDOMStoreAdapter(DistributedDataStoreInterface delegate) {
@@ -183,12 +171,12 @@ public class LegacyDOMStoreAdapter extends ForwardingObject implements DOMStore,
 
         @Override
         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(YangInstanceIdentifier path) {
-            return MappingCheckedFuture.create(readDelegate.read(path), READ_EX_MAPPER);
+            return MappingCheckedFuture.create(readDelegate.read(path), ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
         public CheckedFuture<Boolean, ReadFailedException> exists(YangInstanceIdentifier path) {
-            return MappingCheckedFuture.create(readDelegate.exists(path), READ_EX_MAPPER);
+            return MappingCheckedFuture.create(readDelegate.exists(path), ReadFailedExceptionAdapter.INSTANCE);
         }
     }
 }

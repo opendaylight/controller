@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.databroker.compat;
+package org.opendaylight.controller.sal.core.compat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,6 +22,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -37,10 +39,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
-import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -53,12 +51,15 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
+import org.opendaylight.mdsal.dom.broker.SerializedDOMDataBroker;
+import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -66,6 +67,8 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -78,6 +81,9 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  * @author Thomas Pantelis
  */
 public class LegacyDOMDataBrokerAdapterTest {
+    public static final QName TEST_QNAME = QName.create("test", "2018-07-11", "test");
+    private static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
+
     @Mock
     private TestDOMStore mockOperStore;
 
@@ -85,16 +91,31 @@ public class LegacyDOMDataBrokerAdapterTest {
     private TestDOMStore mockConfigStore;
 
     @Mock
-    private DOMStoreReadTransaction mockReadTx;
+    private DOMStoreReadTransaction mockConfigReadTx;
 
     @Mock
-    private DOMStoreWriteTransaction mockWriteTx;
+    private DOMStoreWriteTransaction mockConfigWriteTx;
 
     @Mock
-    private DOMStoreReadWriteTransaction mockReadWriteTx;
+    private DOMStoreReadWriteTransaction mockConfigReadWriteTx;
 
     @Mock
-    private DOMStoreThreePhaseCommitCohort mockCommitCohort;
+    private DOMStoreThreePhaseCommitCohort mockConfigCommitCohort;
+
+    @Mock
+    private DOMStoreReadTransaction mockOperReadTx;
+
+    @Mock
+    private DOMStoreWriteTransaction mockOperWriteTx;
+
+    @Mock
+    private DOMStoreReadWriteTransaction mockOperReadWriteTx;
+
+    @Mock
+    private DOMStoreThreePhaseCommitCohort mockOperCommitCohort;
+
+    @Mock
+    private DOMDataTreeCommitCohortRegistry mockCommitCohortRegistry;
 
     private LegacyDOMDataBrokerAdapter adapter;
     private NormalizedNode<?,?> dataNode;
@@ -103,43 +124,68 @@ public class LegacyDOMDataBrokerAdapterTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        ConcurrentDOMDataBroker backendBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
+        SerializedDOMDataBroker backendBroker = new SerializedDOMDataBroker(ImmutableMap.of(
                 org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL, mockOperStore,
                 org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION, mockConfigStore),
-                MoreExecutors.newDirectExecutorService());
+                MoreExecutors.newDirectExecutorService()) {
+            @Override
+            public ClassToInstanceMap<DOMDataBrokerExtension> getExtensions() {
+                return ImmutableClassToInstanceMap.<DOMDataBrokerExtension>builder().putAll(super.getExtensions())
+                        .put(DOMDataTreeCommitCohortRegistry.class, mockCommitCohortRegistry).build();
+            }
+        };
 
         adapter = new LegacyDOMDataBrokerAdapter(backendBroker);
 
-        doReturn(Futures.immediateFuture(Boolean.TRUE)).when(mockCommitCohort).canCommit();
-        doReturn(Futures.immediateFuture(null)).when(mockCommitCohort).preCommit();
-        doReturn(Futures.immediateFuture(null)).when(mockCommitCohort).commit();
-        doReturn(Futures.immediateFuture(null)).when(mockCommitCohort).abort();
+        doReturn(Futures.immediateFuture(Boolean.TRUE)).when(mockConfigCommitCohort).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockConfigCommitCohort).preCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockConfigCommitCohort).commit();
+        doReturn(Futures.immediateFuture(null)).when(mockConfigCommitCohort).abort();
 
-        dataNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        dataNode = ImmutableNodes.containerNode(TEST_QNAME);
 
-        doReturn(mockWriteTx).when(mockConfigStore).newWriteOnlyTransaction();
-        doNothing().when(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
-        doNothing().when(mockWriteTx).merge(TestModel.TEST_PATH, dataNode);
-        doNothing().when(mockWriteTx).delete(TestModel.TEST_PATH);
-        doNothing().when(mockWriteTx).close();
-        doReturn(mockCommitCohort).when(mockWriteTx).ready();
+        doReturn(mockConfigWriteTx).when(mockConfigStore).newWriteOnlyTransaction();
+        doNothing().when(mockConfigWriteTx).write(TEST_PATH, dataNode);
+        doNothing().when(mockConfigWriteTx).merge(TEST_PATH, dataNode);
+        doNothing().when(mockConfigWriteTx).delete(TEST_PATH);
+        doNothing().when(mockConfigWriteTx).close();
+        doReturn(mockConfigCommitCohort).when(mockConfigWriteTx).ready();
 
-        doReturn(mockReadTx).when(mockConfigStore).newReadOnlyTransaction();
-        doReturn(Futures.immediateCheckedFuture(Optional.of(dataNode))).when(mockReadTx).read(TestModel.TEST_PATH);
-        doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(mockReadTx).exists(TestModel.TEST_PATH);
+        doReturn(mockConfigReadTx).when(mockConfigStore).newReadOnlyTransaction();
+        doReturn(Futures.immediateCheckedFuture(Optional.of(dataNode))).when(mockConfigReadTx).read(TEST_PATH);
+        doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(mockConfigReadTx).exists(TEST_PATH);
 
-        doReturn(mockReadWriteTx).when(mockConfigStore).newReadWriteTransaction();
-        doNothing().when(mockReadWriteTx).write(TestModel.TEST_PATH, dataNode);
-        doReturn(mockCommitCohort).when(mockReadWriteTx).ready();
-        doReturn(Futures.immediateCheckedFuture(Optional.of(dataNode))).when(mockReadWriteTx).read(TestModel.TEST_PATH);
+        doReturn(mockConfigReadWriteTx).when(mockConfigStore).newReadWriteTransaction();
+        doNothing().when(mockConfigReadWriteTx).write(TEST_PATH, dataNode);
+        doReturn(mockConfigCommitCohort).when(mockConfigReadWriteTx).ready();
+        doReturn(Futures.immediateCheckedFuture(Optional.of(dataNode))).when(mockConfigReadWriteTx).read(TEST_PATH);
 
         DOMStoreTransactionChain mockTxChain = mock(DOMStoreTransactionChain.class);
-        doReturn(mockReadTx).when(mockTxChain).newReadOnlyTransaction();
-        doReturn(mockWriteTx).when(mockTxChain).newWriteOnlyTransaction();
-        doReturn(mockReadWriteTx).when(mockTxChain).newReadWriteTransaction();
+        doReturn(mockConfigReadTx).when(mockTxChain).newReadOnlyTransaction();
+        doReturn(mockConfigWriteTx).when(mockTxChain).newWriteOnlyTransaction();
+        doReturn(mockConfigReadWriteTx).when(mockTxChain).newReadWriteTransaction();
         doReturn(mockTxChain).when(mockConfigStore).createTransactionChain();
 
         doReturn(mock(DOMStoreTransactionChain.class)).when(mockOperStore).createTransactionChain();
+
+        doReturn(Futures.immediateFuture(Boolean.TRUE)).when(mockOperCommitCohort).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockOperCommitCohort).preCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockOperCommitCohort).commit();
+        doReturn(Futures.immediateFuture(null)).when(mockOperCommitCohort).abort();
+
+        doReturn(mockOperReadTx).when(mockOperStore).newReadOnlyTransaction();
+
+        doReturn(mockOperWriteTx).when(mockOperStore).newWriteOnlyTransaction();
+        doReturn(mockOperCommitCohort).when(mockOperWriteTx).ready();
+
+        doReturn(mockOperReadWriteTx).when(mockOperStore).newReadWriteTransaction();
+        doReturn(mockOperCommitCohort).when(mockOperReadWriteTx).ready();
+
+        DOMStoreTransactionChain mockOperTxChain = mock(DOMStoreTransactionChain.class);
+        doReturn(mockOperReadTx).when(mockOperTxChain).newReadOnlyTransaction();
+        doReturn(mockOperWriteTx).when(mockOperTxChain).newWriteOnlyTransaction();
+        doReturn(mockOperReadWriteTx).when(mockOperTxChain).newReadWriteTransaction();
+        doReturn(mockOperTxChain).when(mockOperStore).createTransactionChain();
     }
 
     @Test
@@ -149,7 +195,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         // Test successful read
 
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
-                tx.read(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+                tx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
         Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
@@ -157,7 +203,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         // Test successful exists
 
         CheckedFuture<Boolean, ReadFailedException> existsFuture =
-                tx.exists(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+                tx.exists(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
         assertEquals("exists", Boolean.TRUE, existsFuture.get());
 
         // Test failed read
@@ -165,10 +211,10 @@ public class LegacyDOMDataBrokerAdapterTest {
         String errorMsg = "mock read error";
         Throwable cause = new RuntimeException();
         doReturn(Futures.immediateFailedCheckedFuture(new org.opendaylight.mdsal.common.api.ReadFailedException(
-                errorMsg, cause))).when(mockReadTx).read(TestModel.TEST_PATH);
+                errorMsg, cause))).when(mockConfigReadTx).read(TEST_PATH);
 
         try {
-            tx.read(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH).checkedGet();
+            tx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH).checkedGet();
             fail("Expected ReadFailedException");
         } catch (ReadFailedException e) {
             assertEquals("getMessage", errorMsg, e.getMessage());
@@ -177,7 +223,7 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         // Test close
         tx.close();
-        verify(mockReadTx).close();
+        verify(mockConfigReadTx).close();
     }
 
     @Test
@@ -186,39 +232,39 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         DOMDataWriteTransaction tx = adapter.newWriteOnlyTransaction();
 
-        tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-        verify(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
+        tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
+        verify(mockConfigWriteTx).write(TEST_PATH, dataNode);
 
-        tx.merge(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-        verify(mockWriteTx).merge(TestModel.TEST_PATH, dataNode);
+        tx.merge(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
+        verify(mockConfigWriteTx).merge(TEST_PATH, dataNode);
 
-        tx.delete(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
-        verify(mockWriteTx).delete(TestModel.TEST_PATH);
+        tx.delete(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
+        verify(mockConfigWriteTx).delete(TEST_PATH);
 
         tx.commit().get(5, TimeUnit.SECONDS);
 
-        InOrder inOrder = inOrder(mockCommitCohort);
-        inOrder.verify(mockCommitCohort).canCommit();
-        inOrder.verify(mockCommitCohort).preCommit();
-        inOrder.verify(mockCommitCohort).commit();
+        InOrder inOrder = inOrder(mockConfigCommitCohort);
+        inOrder.verify(mockConfigCommitCohort).canCommit();
+        inOrder.verify(mockConfigCommitCohort).preCommit();
+        inOrder.verify(mockConfigCommitCohort).commit();
 
         // Test cancel
 
         tx = adapter.newWriteOnlyTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+        tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
         tx.cancel();
-        verify(mockWriteTx).close();
+        verify(mockConfigWriteTx).close();
 
         // Test submit with OptimisticLockFailedException
 
         String errorMsg = "mock OptimisticLockFailedException";
-        Throwable cause = new ConflictingModificationAppliedException(TestModel.TEST_PATH, "mock");
+        Throwable cause = new ConflictingModificationAppliedException(TEST_PATH, "mock");
         doReturn(Futures.immediateFailedFuture(new org.opendaylight.mdsal.common.api.OptimisticLockFailedException(
-                errorMsg, cause))).when(mockCommitCohort).canCommit();
+                errorMsg, cause))).when(mockConfigCommitCohort).canCommit();
 
         try {
             tx = adapter.newWriteOnlyTransaction();
-            tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
             commit(tx);
             fail("Expected OptimisticLockFailedException");
         } catch (OptimisticLockFailedException e) {
@@ -229,13 +275,13 @@ public class LegacyDOMDataBrokerAdapterTest {
         // Test submit with TransactionCommitFailedException
 
         errorMsg = "mock TransactionCommitFailedException";
-        cause = new DataValidationFailedException(TestModel.TEST_PATH, "mock");
+        cause = new DataValidationFailedException(TEST_PATH, "mock");
         doReturn(Futures.immediateFailedFuture(new org.opendaylight.mdsal.common.api.TransactionCommitFailedException(
-                errorMsg, cause))).when(mockCommitCohort).canCommit();
+                errorMsg, cause))).when(mockConfigCommitCohort).canCommit();
 
         try {
             tx = adapter.newWriteOnlyTransaction();
-            tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
             commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
@@ -246,28 +292,27 @@ public class LegacyDOMDataBrokerAdapterTest {
         // Test submit with DataStoreUnavailableException
 
         errorMsg = "mock NoShardLeaderException";
-        cause = new NoShardLeaderException("mock");
-        doReturn(Futures.immediateFailedFuture(cause)).when(mockCommitCohort).canCommit();
+        cause = new DataStoreUnavailableException("mock", new RuntimeException());
+        doReturn(Futures.immediateFailedFuture(cause)).when(mockConfigCommitCohort).canCommit();
 
         try {
             tx = adapter.newWriteOnlyTransaction();
-            tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
             commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
             assertEquals("getCause type", DataStoreUnavailableException.class, e.getCause().getClass());
-            assertEquals("Root cause", cause, e.getCause().getCause());
         }
 
         // Test submit with RuntimeException
 
         errorMsg = "mock RuntimeException";
         cause = new RuntimeException(errorMsg);
-        doReturn(Futures.immediateFailedFuture(cause)).when(mockCommitCohort).canCommit();
+        doReturn(Futures.immediateFailedFuture(cause)).when(mockConfigCommitCohort).canCommit();
 
         try {
             tx = adapter.newWriteOnlyTransaction();
-            tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
             commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
@@ -280,20 +325,20 @@ public class LegacyDOMDataBrokerAdapterTest {
         DOMDataReadWriteTransaction tx = adapter.newReadWriteTransaction();
 
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
-                tx.read(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+                tx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
         Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
 
-        tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-        verify(mockReadWriteTx).write(TestModel.TEST_PATH, dataNode);
+        tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
+        verify(mockConfigReadWriteTx).write(TEST_PATH, dataNode);
 
         tx.commit().get(5, TimeUnit.SECONDS);
 
-        InOrder inOrder = inOrder(mockCommitCohort);
-        inOrder.verify(mockCommitCohort).canCommit();
-        inOrder.verify(mockCommitCohort).preCommit();
-        inOrder.verify(mockCommitCohort).commit();
+        InOrder inOrder = inOrder(mockConfigCommitCohort);
+        inOrder.verify(mockConfigCommitCohort).canCommit();
+        inOrder.verify(mockConfigCommitCohort).preCommit();
+        inOrder.verify(mockConfigCommitCohort).commit();
     }
 
     @SuppressWarnings("rawtypes")
@@ -310,7 +355,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         DOMDataReadOnlyTransaction readTx = chain.newReadOnlyTransaction();
 
         CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
-                readTx.read(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+                readTx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
         Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
@@ -319,20 +364,20 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         DOMDataWriteTransaction writeTx = chain.newWriteOnlyTransaction();
 
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-        verify(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
+        writeTx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
+        verify(mockConfigWriteTx).write(TEST_PATH, dataNode);
         writeTx.commit().get(5, TimeUnit.SECONDS);
 
-        InOrder inOrder = inOrder(mockCommitCohort);
-        inOrder.verify(mockCommitCohort).canCommit();
-        inOrder.verify(mockCommitCohort).preCommit();
-        inOrder.verify(mockCommitCohort).commit();
+        InOrder inOrder = inOrder(mockConfigCommitCohort);
+        inOrder.verify(mockConfigCommitCohort).canCommit();
+        inOrder.verify(mockConfigCommitCohort).preCommit();
+        inOrder.verify(mockConfigCommitCohort).commit();
 
         // Test read-write tx
 
         DOMDataReadWriteTransaction readWriteTx = chain.newReadWriteTransaction();
 
-        readFuture = readWriteTx.read(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+        readFuture = readWriteTx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
         readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
@@ -343,14 +388,14 @@ public class LegacyDOMDataBrokerAdapterTest {
         // Test failed chain
 
         doReturn(Futures.immediateFailedFuture(new org.opendaylight.mdsal.common.api.TransactionCommitFailedException(
-                "mock", (Throwable)null))).when(mockCommitCohort).canCommit();
+                "mock", (Throwable)null))).when(mockConfigCommitCohort).canCommit();
 
         chain = adapter.createTransactionChain(mockListener);
 
         writeTx = chain.newWriteOnlyTransaction();
 
         try {
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            writeTx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
             commit(writeTx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
@@ -375,12 +420,12 @@ public class LegacyDOMDataBrokerAdapterTest {
                 mock(ListenerRegistration.class);
         doNothing().when(mockReg).close();
         doAnswer(invocation -> storeDTCL.getValue()).when(mockReg).getInstance();
-        doReturn(mockReg).when(mockConfigStore).registerTreeChangeListener(eq(TestModel.TEST_PATH),
+        doReturn(mockReg).when(mockConfigStore).registerTreeChangeListener(eq(TEST_PATH),
                 storeDTCL.capture());
 
         DOMDataTreeChangeListener brokerDTCL = mock(DOMDataTreeChangeListener.class);
         ListenerRegistration<DOMDataTreeChangeListener> reg = domDTCLService.registerDataTreeChangeListener(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH), brokerDTCL);
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TEST_PATH), brokerDTCL);
         assertEquals("getInstance", brokerDTCL, reg.getInstance());
 
         Collection<DataTreeCandidate> changes = Arrays.asList(mock(DataTreeCandidate.class));
@@ -395,12 +440,12 @@ public class LegacyDOMDataBrokerAdapterTest {
         ArgumentCaptor<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener> storeClusteredDTCL =
                 ArgumentCaptor.forClass(org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener.class);
         mockReg = mock(ListenerRegistration.class);
-        doReturn(mockReg).when(mockConfigStore).registerTreeChangeListener(eq(TestModel.TEST_PATH),
+        doReturn(mockReg).when(mockConfigStore).registerTreeChangeListener(eq(TEST_PATH),
                 storeClusteredDTCL.capture());
 
         final ClusteredDOMDataTreeChangeListener brokerClusteredDTCL = mock(ClusteredDOMDataTreeChangeListener.class);
         domDTCLService.registerDataTreeChangeListener(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
-                TestModel.TEST_PATH), brokerClusteredDTCL);
+                TEST_PATH), brokerClusteredDTCL);
 
         assertTrue("Expected ClusteredDOMDataTreeChangeListener: " + storeClusteredDTCL.getValue(),
                 storeClusteredDTCL.getValue()
@@ -412,23 +457,25 @@ public class LegacyDOMDataBrokerAdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testDataTreeCommitCohortRegistry() {
-        DOMDataTreeCommitCohortRegistry domCohortRegistry = (DOMDataTreeCommitCohortRegistry)
-                adapter.getSupportedExtensions().get(DOMDataTreeCommitCohortRegistry.class);
+        org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry domCohortRegistry =
+            (org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry)
+                adapter.getSupportedExtensions().get(
+                    org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry.class);
         assertNotNull("DOMDataTreeCommitCohortRegistry not found", domCohortRegistry);
 
         DOMDataTreeCommitCohort mockCohort = mock(DOMDataTreeCommitCohort.class);
         org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier treeId =
                 new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(
-                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION, TEST_PATH);
         DOMDataTreeCommitCohortRegistration<DOMDataTreeCommitCohort> mockReg =
                 mock(DOMDataTreeCommitCohortRegistration.class);
-        doReturn(mockReg).when(mockConfigStore).registerCommitCohort(treeId, mockCohort);
+        doReturn(mockReg).when(mockCommitCohortRegistry).registerCommitCohort(treeId, mockCohort);
 
         DOMDataTreeCommitCohortRegistration<DOMDataTreeCommitCohort> reg = domCohortRegistry.registerCommitCohort(
                 treeId, mockCohort);
         assertEquals("DOMDataTreeCommitCohortRegistration", mockReg, reg);
 
-        verify(mockConfigStore).registerCommitCohort(treeId, mockCohort);
+        verify(mockCommitCohortRegistry).registerCommitCohort(treeId, mockCohort);
     }
 
     @Test
@@ -436,24 +483,24 @@ public class LegacyDOMDataBrokerAdapterTest {
     public void testSubmit() throws Exception {
         DOMDataWriteTransaction tx = adapter.newWriteOnlyTransaction();
 
-        tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
-        verify(mockWriteTx).write(TestModel.TEST_PATH, dataNode);
+        tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
+        verify(mockConfigWriteTx).write(TEST_PATH, dataNode);
 
         tx.submit().get(5, TimeUnit.SECONDS);
 
-        InOrder inOrder = inOrder(mockCommitCohort);
-        inOrder.verify(mockCommitCohort).canCommit();
-        inOrder.verify(mockCommitCohort).preCommit();
-        inOrder.verify(mockCommitCohort).commit();
+        InOrder inOrder = inOrder(mockConfigCommitCohort);
+        inOrder.verify(mockConfigCommitCohort).canCommit();
+        inOrder.verify(mockConfigCommitCohort).preCommit();
+        inOrder.verify(mockConfigCommitCohort).commit();
 
         String errorMsg = "mock OptimisticLockFailedException";
-        Throwable cause = new ConflictingModificationAppliedException(TestModel.TEST_PATH, "mock");
+        Throwable cause = new ConflictingModificationAppliedException(TEST_PATH, "mock");
         doReturn(Futures.immediateFailedFuture(new org.opendaylight.mdsal.common.api.TransactionCommitFailedException(
-                errorMsg, cause))).when(mockCommitCohort).canCommit();
+                errorMsg, cause))).when(mockConfigCommitCohort).canCommit();
 
         try {
             tx = adapter.newWriteOnlyTransaction();
-            tx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, dataNode);
+            tx.put(LogicalDatastoreType.CONFIGURATION, TEST_PATH, dataNode);
             commit(tx);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
@@ -474,7 +521,7 @@ public class LegacyDOMDataBrokerAdapterTest {
         }
     }
 
-    private interface TestDOMStore extends DistributedDataStoreInterface, DOMStoreTreeChangePublisher,
+    private interface TestDOMStore extends DOMStore, DOMStoreTreeChangePublisher,
             org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry {
     }
 }
