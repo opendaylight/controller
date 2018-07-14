@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Utility class implementing {@link DefaultDOMRpcResult}.
  */
 @Beta
-public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Serializable {
+public class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Serializable {
     private static final long serialVersionUID = 1L;
 
     // Flagged as "Non-transient non-serializable instance field" - the Collection is Serializable but the RpcError
