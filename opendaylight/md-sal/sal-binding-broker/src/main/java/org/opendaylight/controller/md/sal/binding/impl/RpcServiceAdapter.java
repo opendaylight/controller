@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
+import org.opendaylight.controller.sal.core.compat.LegacyDOMRpcResultFutureAdapter;
 import org.opendaylight.mdsal.binding.dom.adapter.BindingRpcFutureAware;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
@@ -68,6 +69,12 @@ class RpcServiceAdapter implements InvocationHandler {
         final CheckedFuture<DOMRpcResult, DOMRpcException> result = delegate.invokeRpc(schemaPath, input);
         if (result instanceof BindingRpcFutureAware) {
             return ((BindingRpcFutureAware) result).getBindingFuture();
+        } else if (result instanceof LegacyDOMRpcResultFutureAdapter) {
+            CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult, org.opendaylight.mdsal.dom.api.DOMRpcException>
+                    delegateFuture = ((LegacyDOMRpcResultFutureAdapter)result).delegate();
+            if (delegateFuture instanceof BindingRpcFutureAware) {
+                return ((BindingRpcFutureAware) delegateFuture).getBindingFuture();
+            }
         }
 
         return transformFuture(schemaPath, result, codec.getCodecFactory());

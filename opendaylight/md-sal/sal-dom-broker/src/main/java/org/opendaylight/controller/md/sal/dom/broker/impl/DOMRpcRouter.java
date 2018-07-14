@@ -10,9 +10,6 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -23,46 +20,21 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.md.sal.dom.api.DefaultDOMRpcException;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMRpcImplementationRegistration;
-import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
+import org.opendaylight.controller.sal.core.compat.LegacyDOMRpcResultFutureAdapter;
+import org.opendaylight.controller.sal.core.compat.MdsalDOMRpcResultFutureAdapter;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcProviderService, SchemaContextListener {
-    private static final ExceptionMapper<org.opendaylight.mdsal.dom.api.DOMRpcException> MDSAL_DOM_RPC_EX_MAPPER =
-            new ExceptionMapper<org.opendaylight.mdsal.dom.api.DOMRpcException>(
-                    "rpc", org.opendaylight.mdsal.dom.api.DOMRpcException.class) {
-        @Override
-        protected org.opendaylight.mdsal.dom.api.DOMRpcException newWithCause(String message, Throwable cause) {
-            return cause instanceof org.opendaylight.mdsal.dom.api.DOMRpcException
-                    ? (org.opendaylight.mdsal.dom.api.DOMRpcException)cause
-                            : new org.opendaylight.mdsal.dom.api.DefaultDOMRpcException("RPC failed", cause);
-        }
-    };
-
-    private static final ExceptionMapper<DOMRpcException> LEGACY_DOM_RPC_EX_MAPPER =
-            new ExceptionMapper<DOMRpcException>("rpc", DOMRpcException.class) {
-        @Override
-        protected DOMRpcException newWithCause(String message, Throwable cause) {
-            return cause instanceof DOMRpcException ? (DOMRpcException)cause
-                : cause instanceof org.opendaylight.mdsal.dom.api.DOMRpcImplementationNotAvailableException
-                    ? new DOMRpcImplementationNotAvailableException(cause.getMessage(), cause.getCause())
-                        : new DefaultDOMRpcException("RPC failed", cause);
-        }
-    };
-
     // This mapping is used to translate mdsal DOMRpcImplementations to their corresponding legacy
     // DOMRpcImplementations registered thru this interface when invoking a DOMRpcAvailabilityListener.
     private final Map<org.opendaylight.mdsal.dom.api.DOMRpcImplementation, DOMRpcImplementation> implMapping =
@@ -90,7 +62,6 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         return registerRpcImplementation(implementation, ImmutableSet.copyOf(rpcs));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public synchronized <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
             final T implementation, final Set<DOMRpcIdentifier> rpcs) {
@@ -100,8 +71,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
                 public CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult,
                         org.opendaylight.mdsal.dom.api.DOMRpcException> invokeRpc(
                         org.opendaylight.mdsal.dom.api.DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
-                    final ListenableFuture future = implementation.invokeRpc(convert(rpc), input);
-                    return MappingCheckedFuture.create(future, MDSAL_DOM_RPC_EX_MAPPER);
+                    return new MdsalDOMRpcResultFutureAdapter(implementation.invokeRpc(convert(rpc), input));
                 }
 
                 @Override
@@ -134,12 +104,6 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         return DOMRpcIdentifier.create(from.getType(), from.getContextReference());
     }
 
-    private static ListenableFuture<DOMRpcResult> convert(org.opendaylight.mdsal.dom.api.DOMRpcResult from) {
-        return from == null ? Futures.immediateFuture(null)
-                : from instanceof DOMRpcResult ? Futures.immediateFuture((DOMRpcResult)from)
-                        : Futures.immediateFuture(new DefaultDOMRpcResult(from.getResult(), from.getErrors()));
-    }
-
     private static Collection<DOMRpcIdentifier> convert(
             Collection<org.opendaylight.mdsal.dom.api.DOMRpcIdentifier> from) {
         return from.stream().map(DOMRpcRouter::convert).collect(Collectors.toList());
@@ -148,9 +112,10 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type,
                                                                   final NormalizedNode<?, ?> input) {
-        final ListenableFuture<DOMRpcResult> future = Futures.transformAsync(delegateRpcService.invokeRpc(type, input),
-                DOMRpcRouter::convert, MoreExecutors.directExecutor());
-        return MappingCheckedFuture.create(future, LEGACY_DOM_RPC_EX_MAPPER);
+        final CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult, org.opendaylight.mdsal.dom.api.DOMRpcException>
+            future = delegateRpcService.invokeRpc(type, input);
+        return future instanceof MdsalDOMRpcResultFutureAdapter ? ((MdsalDOMRpcResultFutureAdapter)future).delegate()
+                : new LegacyDOMRpcResultFutureAdapter(future);
     }
 
     @Override
