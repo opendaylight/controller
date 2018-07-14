@@ -10,12 +10,19 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +34,7 @@ import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
+import org.opendaylight.mdsal.binding.dom.adapter.BindingDOMRpcProviderServiceAdapter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.KnockKnockOutput;
@@ -38,6 +46,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.rpc.routing.rev140701.TestContext;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -70,12 +79,13 @@ public class CrossBrokerRpcTest {
 
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
         testFactory.setExecutor(MoreExecutors.newDirectExecutorService());
-        testFactory.setStartWithParsedSchema(true);
         testContext = testFactory.getTestContext();
 
+        testContext.setSchemaModuleInfos(ImmutableSet.of(
+                BindingReflections.getModuleInfo(OpendaylightOfMigrationTestModelService.class)));
         testContext.start();
         providerRegistry = testContext.getBindingRpcRegistry();
         provisionRegistry = testContext.getDomRpcRegistry();
@@ -85,6 +95,58 @@ public class CrossBrokerRpcTest {
 
         knockService = MessageCapturingFlowService.create(providerRegistry);
 
+    }
+
+    @After
+    public void teardown() throws Exception {
+        testContext.close();
+    }
+
+    @Test
+    public void testBindingRpcShortcutRegisteredViaLegacyAPI()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        final ListenableFuture<RpcResult<KnockKnockOutput>> knockResult = knockResult(true, "open");
+        knockService.registerPath(TestContext.class, BA_NODE_A_ID).setKnockKnockResult(knockResult);
+
+        OpendaylightOfMigrationTestModelService baKnockInvoker =
+                providerRegistry.getRpcService(OpendaylightOfMigrationTestModelService.class);
+
+        final KnockKnockInput knockInput = knockKnock(BA_NODE_A_ID).setQuestion("Who's there?").build();
+        ListenableFuture<RpcResult<KnockKnockOutput>> future = baKnockInvoker.knockKnock(knockInput);
+
+        final RpcResult<KnockKnockOutput> rpcResult = future.get(5, TimeUnit.SECONDS);
+
+        assertEquals(knockResult.get().getResult().getClass(), rpcResult.getResult().getClass());
+        assertSame(knockResult.get().getResult(), rpcResult.getResult());
+        assertSame(knockInput, knockService.getReceivedKnocks().get(BA_NODE_A_ID).iterator().next());
+    }
+
+    @Test
+    public void testBindingRpcShortcutRegisteredViaMdsalAPI()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        final ListenableFuture<RpcResult<KnockKnockOutput>> knockResult = knockResult(true, "open");
+
+        BindingDOMRpcProviderServiceAdapter mdsalServiceRegistry = new BindingDOMRpcProviderServiceAdapter(
+                testContext.getDelegateDomRouter(), testContext.getCodec());
+
+        final Multimap<InstanceIdentifier<?>, KnockKnockInput> receivedKnocks = HashMultimap.create();
+        mdsalServiceRegistry.registerRpcImplementation(OpendaylightOfMigrationTestModelService.class,
+            (OpendaylightOfMigrationTestModelService) input -> {
+                receivedKnocks.put(input.getKnockerId(), input);
+                return knockResult;
+            }, ImmutableSet.of(BA_NODE_A_ID));
+
+        OpendaylightOfMigrationTestModelService baKnockInvoker =
+                providerRegistry.getRpcService(OpendaylightOfMigrationTestModelService.class);
+
+        final KnockKnockInput knockInput = knockKnock(BA_NODE_A_ID).setQuestion("Who's there?").build();
+        Future<RpcResult<KnockKnockOutput>> future = baKnockInvoker.knockKnock(knockInput);
+
+        final RpcResult<KnockKnockOutput> rpcResult = future.get(5, TimeUnit.SECONDS);
+
+        assertEquals(knockResult.get().getResult().getClass(), rpcResult.getResult().getClass());
+        assertSame(knockResult.get().getResult(), rpcResult.getResult());
+        assertSame(knockInput, receivedKnocks.get(BA_NODE_A_ID).iterator().next());
     }
 
     @Test
@@ -132,11 +194,6 @@ public class CrossBrokerRpcTest {
 
     private ContainerNode toDomRpcInput(final DataObject addFlowA) {
         return testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(addFlowA);
-    }
-
-    @After
-    public void teardown() throws Exception {
-        testContext.close();
     }
 
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(
