@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
-            <artifactId>odl-mdsal-models</artifactId>
+            <artifactId>odl-mdsal-model-draft-clemm-netmod-yang-network-topo-01</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
