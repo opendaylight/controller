@@ -24,8 +24,8 @@
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
-            <artifactId>odl-mdsal-models</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
+            <artifactId>odl-mdsal-model-rfc6991</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
