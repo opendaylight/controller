@@ -9,9 +9,8 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -36,12 +35,11 @@ public class ClientSnapshot extends AbstractClientHandle<AbstractProxyTransactio
         return ensureProxy(path, this::createProxy);
     }
 
-    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+    public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).exists(path);
     }
 
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
-            final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
         return ensureSnapshotProxy(path).read(path);
     }
 }

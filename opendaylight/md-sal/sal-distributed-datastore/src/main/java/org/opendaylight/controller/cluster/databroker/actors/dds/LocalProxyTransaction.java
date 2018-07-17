@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -79,13 +78,13 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             @Nullable Consumer<Response<?, ?>> callback, long enqueuedTicks);
 
     @Override
-    final CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path) {
-        return Futures.immediateCheckedFuture(readOnlyView().readNode(path).isPresent());
+    final FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
+        return FluentFuture.from(Futures.immediateFuture(readOnlyView().readNode(path).isPresent()));
     }
 
     @Override
-    final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path) {
-        return Futures.immediateCheckedFuture(Optional.fromJavaUtil(readOnlyView().readNode(path)));
+    final FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(final YangInstanceIdentifier path) {
+        return FluentFuture.from(Futures.immediateFuture(Optional.fromJavaUtil(readOnlyView().readNode(path))));
     }
 
     @Override

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -40,7 +41,6 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -65,6 +65,8 @@ import org.slf4j.LoggerFactory;
  */
 final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteProxyTransaction.class);
+
+    private static final Function<Exception, Exception> NOOP_EXCEPTION_MAPPER = ex -> ex;
 
     // FIXME: make this tuneable
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
@@ -110,29 +112,30 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         appendModification(new TransactionWrite(path, data), Optional.absent());
     }
 
-    private <T> CheckedFuture<T, ReadFailedException> sendReadRequest(final AbstractReadTransactionRequest<?> request,
+    private <T> FluentFuture<T> sendReadRequest(final AbstractReadTransactionRequest<?> request,
             final Consumer<Response<?, ?>> completer, final ListenableFuture<T> future) {
         // Check if a previous operation failed. If it has, do not bother sending anything and report a failure
         final Exception local = operationFailure;
         if (local != null) {
-            return Futures.immediateFailedCheckedFuture(new ReadFailedException("Previous operation failed", local));
+            return FluentFuture.from(Futures.immediateFailedFuture(
+                    new ReadFailedException("Previous operation failed", local)));
         }
 
         // Make sure we send any modifications before issuing a read
         ensureFlushedBuider();
         sendRequest(request, completer);
-        return MappingCheckedFuture.create(future, ReadFailedException.MAPPER);
+        return FluentFuture.from(future);
     }
 
     @Override
-    CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path) {
+    FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
         final SettableFuture<Boolean> future = SettableFuture.create();
         return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
             isSnapshotOnly()), t -> completeExists(future, t), future);
     }
 
     @Override
-    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path) {
+    FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(final YangInstanceIdentifier path) {
         final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
         return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
             isSnapshotOnly()), t -> completeRead(future, t), future);
@@ -194,11 +197,12 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             // Happy path
             recordSuccessfulRequest(request);
         } else {
-            recordFailedResponse(response);
+            recordFailedResponse(response, NOOP_EXCEPTION_MAPPER);
         }
     }
 
-    private Exception recordFailedResponse(final Response<?, ?> response) {
+    private <X extends Exception> X recordFailedResponse(final Response<?, ?> response,
+            final Function<Exception, X> exMapper) {
         final Exception failure;
         if (response instanceof RequestFailure) {
             failure = ((RequestFailure<?, ?>) response).getCause();
@@ -211,11 +215,11 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             LOG.debug("Transaction {} failed", getIdentifier(), failure);
             operationFailure = failure;
         }
-        return failure;
+        return exMapper.apply(failure);
     }
 
-    private void failFuture(final SettableFuture<?> future, final Response<?, ?> response) {
-        future.setException(recordFailedResponse(response));
+    private void failReadFuture(final SettableFuture<?> future, final Response<?, ?> response) {
+        future.setException(recordFailedResponse(response, ReadFailedException.MAPPER));
     }
 
     private void completeExists(final SettableFuture<Boolean> future, final Response<?, ?> response) {
@@ -224,7 +228,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         if (response instanceof ExistsTransactionSuccess) {
             future.set(((ExistsTransactionSuccess) response).getExists());
         } else {
-            failFuture(future, response);
+            failReadFuture(future, response);
         }
 
         recordFinishedRequest(response);
@@ -237,7 +241,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         if (response instanceof ReadTransactionSuccess) {
             future.set(((ReadTransactionSuccess) response).getData());
         } else {
-            failFuture(future, response);
+            failReadFuture(future, response);
         }
 
         recordFinishedRequest(response);

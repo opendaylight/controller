@@ -1009,7 +1009,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Do an initial read to get the primary shard info cached.
 
         final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
-        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+        readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
 
         // Shutdown the leader and try to create a new tx.
 
@@ -1044,7 +1044,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Do an initial read to get the primary shard info cached.
 
         final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
-        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+        readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
 
         // Shutdown the leader and try to create a new tx.
 
@@ -1095,7 +1095,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             // Do an initial read to get the primary shard info cached.
 
             final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
-            readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+            readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
 
             // Shutdown the leader and try to create a new tx.
 
@@ -1142,7 +1142,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars(testName);
 
         final Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
-                CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+                CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("Node", carsNode, readOptional.get());
 

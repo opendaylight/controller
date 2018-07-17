@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -29,7 +30,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -386,23 +388,15 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                 shardName);
     }
 
-    @SuppressWarnings("checkstyle:avoidHidingCauseException")
-    protected void propagateReadFailedExceptionCause(final CheckedFuture<?, ReadFailedException> future)
-            throws Exception {
+    @SuppressWarnings({"checkstyle:avoidHidingCauseException", "checkstyle:IllegalThrows"})
+    protected void propagateReadFailedExceptionCause(final FluentFuture<?> future) throws Throwable {
         try {
-            future.checkedGet(5, TimeUnit.SECONDS);
+            future.get(5, TimeUnit.SECONDS);
             fail("Expected ReadFailedException");
-        } catch (ReadFailedException e) {
-            assertNotNull("Expected a cause", e.getCause());
-            Throwable cause;
-            if (e.getCause().getCause() != null) {
-                cause = e.getCause().getCause();
-            } else {
-                cause = e.getCause();
-            }
-
-            Throwables.propagateIfPossible(cause, Exception.class);
-            throw new RuntimeException(cause);
+        } catch (ExecutionException e) {
+            final Throwable cause = e.getCause();
+            assertTrue("Unexpected cause: " + cause.getClass(), cause instanceof ReadFailedException);
+            throw Throwables.getRootCause(cause);
         }
     }
 
