@@ -191,7 +191,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    boolean sealAndSend(final com.google.common.base.Optional<Long> enqueuedTicks) {
+    boolean sealAndSend(final Optional<Long> enqueuedTicks) {
         sealModification();
         return super.sealAndSend(enqueuedTicks);
     }

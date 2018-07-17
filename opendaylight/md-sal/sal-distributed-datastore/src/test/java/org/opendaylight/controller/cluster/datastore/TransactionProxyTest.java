@@ -29,16 +29,16 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -82,7 +82,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Promise;
 
-@SuppressWarnings("resource")
+@SuppressWarnings({"resource", "checkstyle:IllegalThrows", "checkstyle:AvoidHidingCauseException"})
 public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @SuppressWarnings("serial")
@@ -90,7 +90,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     interface Invoker {
-        CheckedFuture<?, ReadFailedException> invoke(TransactionProxy proxy) throws Exception;
+        FluentFuture<?> invoke(TransactionProxy proxy) throws Exception;
     }
 
     @Test
@@ -120,7 +120,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test(expected = ReadFailedException.class)
-    public void testReadWithInvalidReplyMessageType() throws Exception {
+    public void testReadWithInvalidReplyMessageType() throws Throwable {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext)
@@ -128,11 +128,15 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
-        transactionProxy.read(TestModel.TEST_PATH).checkedGet(5, TimeUnit.SECONDS);
+        try {
+            transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
     }
 
     @Test(expected = TestException.class)
-    public void testReadWithAsyncRemoteOperatonFailure() throws Exception {
+    public void testReadWithAsyncRemoteOperatonFailure() throws Throwable {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext)
@@ -144,7 +148,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     private void testExceptionOnInitialCreateTransaction(final Exception exToThrow, final Invoker invoker)
-            throws Exception {
+            throws Throwable {
         ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         if (exToThrow instanceof PrimaryNotFoundException) {
@@ -162,23 +166,23 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         propagateReadFailedExceptionCause(invoker.invoke(transactionProxy));
     }
 
-    private void testReadWithExceptionOnInitialCreateTransaction(final Exception exToThrow) throws Exception {
+    private void testReadWithExceptionOnInitialCreateTransaction(final Exception exToThrow) throws Throwable {
         testExceptionOnInitialCreateTransaction(exToThrow, proxy -> proxy.read(TestModel.TEST_PATH));
     }
 
     @Test(expected = PrimaryNotFoundException.class)
-    public void testReadWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
+    public void testReadWhenAPrimaryNotFoundExceptionIsThrown() throws Throwable {
         testReadWithExceptionOnInitialCreateTransaction(new PrimaryNotFoundException("test"));
     }
 
-    @Test(expected = TimeoutException.class)
-    public void testReadWhenATimeoutExceptionIsThrown() throws Exception {
+    @Test(expected = TestException.class)
+    public void testReadWhenATimeoutExceptionIsThrown() throws Throwable {
         testReadWithExceptionOnInitialCreateTransaction(new TimeoutException("test",
-                new Exception("reason")));
+                new TestException()));
     }
 
     @Test(expected = TestException.class)
-    public void testReadWhenAnyOtherExceptionIsThrown() throws Exception {
+    public void testReadWhenAnyOtherExceptionIsThrown() throws Throwable {
         testReadWithExceptionOnInitialCreateTransaction(new TestException());
     }
 
@@ -218,7 +222,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testInvalidCreateTransactionReply() throws Exception {
+    public void testInvalidCreateTransactionReply() throws Throwable {
         ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         doReturn(getSystem().actorSelection(actorRef.path())).when(mockActorContext)
@@ -245,26 +249,26 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(dataExistsReply(false)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
 
-        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
+        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).get();
 
         assertEquals("Exists response", false, exists);
 
         doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
 
-        exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
+        exists = transactionProxy.exists(TestModel.TEST_PATH).get();
 
         assertEquals("Exists response", true, exists);
     }
 
     @Test(expected = PrimaryNotFoundException.class)
-    public void testExistsWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
+    public void testExistsWhenAPrimaryNotFoundExceptionIsThrown() throws Throwable {
         testExceptionOnInitialCreateTransaction(new PrimaryNotFoundException("test"),
             proxy -> proxy.exists(TestModel.TEST_PATH));
     }
 
     @Test(expected = ReadFailedException.class)
-    public void testExistsWithInvalidReplyMessageType() throws Exception {
+    public void testExistsWithInvalidReplyMessageType() throws Throwable {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext)
@@ -272,11 +276,15 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
-        transactionProxy.exists(TestModel.TEST_PATH).checkedGet(5, TimeUnit.SECONDS);
+        try {
+            transactionProxy.exists(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        }
     }
 
     @Test(expected = TestException.class)
-    public void testExistsWithAsyncRemoteOperatonFailure() throws Exception {
+    public void testExistsWithAsyncRemoteOperatonFailure() throws Throwable {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext)
@@ -302,7 +310,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
+        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).get();
 
         assertEquals("Exists response", true, exists);
 
@@ -1415,7 +1423,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         transactionProxy.delete(deletePath);
 
-        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
+        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).get();
         assertEquals("Exists response", true, exists);
 
         assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());

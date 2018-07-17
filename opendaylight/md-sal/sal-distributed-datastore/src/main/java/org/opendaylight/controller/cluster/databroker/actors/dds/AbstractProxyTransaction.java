@@ -9,16 +9,16 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -45,7 +45,6 @@ import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -305,12 +304,12 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         doWrite(path, data);
     }
 
-    final CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+    final FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
         checkNotSealed();
         return doExists(path);
     }
 
-    final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
+    final FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
         checkNotSealed();
         return doRead(path);
     }
@@ -335,7 +334,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         final boolean success = markSealed();
         Preconditions.checkState(success, "Proxy %s was already sealed", getIdentifier());
 
-        if (!sealAndSend(Optional.absent())) {
+        if (!sealAndSend(Optional.empty())) {
             sealSuccessor();
         }
     }
@@ -359,7 +358,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     private void predecessorSealed() {
-        if (markSealed() && !sealAndSend(Optional.absent())) {
+        if (markSealed() && !sealAndSend(Optional.empty())) {
             sealSuccessor();
         }
     }
@@ -797,9 +796,9 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract void doWrite(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
-    abstract CheckedFuture<Boolean, ReadFailedException> doExists(YangInstanceIdentifier path);
+    abstract FluentFuture<Boolean> doExists(YangInstanceIdentifier path);
 
-    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(YangInstanceIdentifier path);
+    abstract FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(YangInstanceIdentifier path);
 
     @GuardedBy("this")
     abstract java.util.Optional<ModifyTransactionRequest> flushState();
