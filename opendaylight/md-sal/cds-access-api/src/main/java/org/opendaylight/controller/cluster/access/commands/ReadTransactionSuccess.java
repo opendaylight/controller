@@ -8,8 +8,9 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -22,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Robert Varga
  */
 @Beta
+@SuppressFBWarnings("SE_BAD_FIELD")
 public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransactionSuccess>
         implements SliceableMessage {
     private static final long serialVersionUID = 1L;

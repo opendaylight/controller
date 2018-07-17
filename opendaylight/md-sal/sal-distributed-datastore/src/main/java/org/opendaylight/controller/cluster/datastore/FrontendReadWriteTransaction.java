@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -526,16 +526,14 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request)
             throws RequestException {
-        final Optional<NormalizedNode<?, ?>> data = Optional.fromJavaUtil(checkOpen().getSnapshot().readNode(
-            request.getPath()));
+        final Optional<NormalizedNode<?, ?>> data = checkOpen().getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ExistsTransactionSuccess(getIdentifier(), request.getSequence(),
             data.isPresent()));
     }
 
     private ReadTransactionSuccess handleReadTransaction(final ReadTransactionRequest request)
             throws RequestException {
-        final Optional<NormalizedNode<?, ?>> data = Optional.fromJavaUtil(checkOpen().getSnapshot().readNode(
-            request.getPath()));
+        final Optional<NormalizedNode<?, ?>> data = checkOpen().getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ReadTransactionSuccess(getIdentifier(), request.getSequence(),
             data));
     }
