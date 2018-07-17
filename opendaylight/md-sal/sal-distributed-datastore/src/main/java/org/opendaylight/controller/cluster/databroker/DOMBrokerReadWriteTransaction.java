@@ -9,10 +9,9 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Map;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
@@ -35,15 +34,13 @@ public class DOMBrokerReadWriteTransaction extends AbstractDOMBrokerWriteTransac
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> read(
-            final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode<?,?>>> read(final LogicalDatastoreType store,
+            final YangInstanceIdentifier path) {
         return getSubtransaction(store).read(path);
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(
-            final LogicalDatastoreType store,
-            final YangInstanceIdentifier path) {
+    public FluentFuture<Boolean> exists(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
         return getSubtransaction(store).exists(path);
     }
 

@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -75,7 +75,7 @@ public class NormalizedNodeAggregatorTest {
     }
 
     public static NormalizedNode<?, ?> getRootNode(NormalizedNode<?, ?> moduleNode, SchemaContext schemaContext)
-            throws ReadFailedException, ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException {
         try (InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
             store.onGlobalContextUpdated(schemaContext);
 
@@ -91,10 +91,9 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
-            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read = readTransaction
-                    .read(YangInstanceIdentifier.EMPTY);
+            FluentFuture<Optional<NormalizedNode<?, ?>>> read = readTransaction.read(YangInstanceIdentifier.EMPTY);
 
-            Optional<NormalizedNode<?, ?>> nodeOptional = read.checkedGet();
+            Optional<NormalizedNode<?, ?>> nodeOptional = read.get();
 
             return nodeOptional.get();
         }

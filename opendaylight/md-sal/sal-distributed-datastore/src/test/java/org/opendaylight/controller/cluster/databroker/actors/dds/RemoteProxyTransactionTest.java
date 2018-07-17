@@ -14,7 +14,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 
 import akka.testkit.TestProbe;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import org.junit.Assert;
@@ -37,7 +37,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitR
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -54,7 +53,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Test
     public void testExists() throws Exception {
         final TransactionTester<RemoteProxyTransaction> tester = getTester();
-        final CheckedFuture<Boolean, ReadFailedException> exists = transaction.exists(PATH_1);
+        final FluentFuture<Boolean> exists = transaction.exists(PATH_1);
         final ExistsTransactionRequest req = tester.expectTransactionRequest(ExistsTransactionRequest.class);
         final boolean existsResult = true;
         tester.replySuccess(new ExistsTransactionSuccess(TRANSACTION_ID, req.getSequence(), existsResult));
@@ -65,7 +64,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Test
     public void testRead() throws Exception {
         final TransactionTester<RemoteProxyTransaction> tester = getTester();
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read = transaction.read(PATH_2);
+        final FluentFuture<Optional<NormalizedNode<?, ?>>> read = transaction.read(PATH_2);
         final ReadTransactionRequest req = tester.expectTransactionRequest(ReadTransactionRequest.class);
         final Optional<NormalizedNode<?, ?>> result = Optional.of(DATA_1);
         tester.replySuccess(new ReadTransactionSuccess(TRANSACTION_ID, req.getSequence(), result));

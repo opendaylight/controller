@@ -32,6 +32,7 @@ import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -269,11 +270,9 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
         final ClientLocalHistory localHistory = distributedDataStoreClient.createLocalHistory();
         final ClientTransaction tx2 = localHistory.createTransaction();
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>,
-                org.opendaylight.mdsal.common.api.ReadFailedException> read =
-                tx2.read(YangInstanceIdentifier.EMPTY);
+        final FluentFuture<Optional<NormalizedNode<?, ?>>> read = tx2.read(YangInstanceIdentifier.EMPTY);
 
-        final Optional<NormalizedNode<?, ?>> optional = read.checkedGet();
+        final Optional<NormalizedNode<?, ?>> optional = read.get();
         tx2.abort();
         localHistory.close();
 

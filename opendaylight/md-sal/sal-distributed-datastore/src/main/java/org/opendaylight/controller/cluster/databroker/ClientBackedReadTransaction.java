@@ -8,12 +8,10 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -40,13 +38,13 @@ final class ClientBackedReadTransaction extends ClientBackedTransaction<ClientSn
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
-        return Futures.makeChecked(delegate().read(path), ReadFailedException.MAPPER);
+    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
+        return delegate().read(path);
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
-        return Futures.makeChecked(delegate().exists(path), ReadFailedException.MAPPER);
+    public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
+        return delegate().exists(path);
     }
 
     @Override

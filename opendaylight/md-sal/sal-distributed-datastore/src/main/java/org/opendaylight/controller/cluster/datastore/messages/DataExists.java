@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -26,7 +26,7 @@ public class DataExists extends AbstractRead<Boolean> {
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> apply(DOMStoreReadTransaction readDelegate) {
+    public FluentFuture<Boolean> apply(DOMStoreReadTransaction readDelegate) {
         return readDelegate.exists(getPath());
     }
 

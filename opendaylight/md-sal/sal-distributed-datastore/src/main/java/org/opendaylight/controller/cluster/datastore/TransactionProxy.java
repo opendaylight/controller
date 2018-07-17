@@ -14,7 +14,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -38,8 +38,6 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -79,12 +77,11 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     @Override
-    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+    public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
         return executeRead(shardNameFromIdentifier(path), new DataExists(path, DataStoreVersions.CURRENT_VERSION));
     }
 
-    private <T> CheckedFuture<T, ReadFailedException> executeRead(final String shardName,
-            final AbstractRead<T> readCmd) {
+    private <T> FluentFuture<T> executeRead(final String shardName, final AbstractRead<T> readCmd) {
         Preconditions.checkState(type != TransactionType.WRITE_ONLY,
                 "Reads from write-only transactions are not allowed");
 
@@ -99,11 +96,11 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             }
         });
 
-        return MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
+        return FluentFuture.from(proxyFuture);
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
         Preconditions.checkState(type != TransactionType.WRITE_ONLY,
                 "Reads from write-only transactions are not allowed");
         Preconditions.checkNotNull(path, "path should not be null");
@@ -112,15 +109,14 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return path.isEmpty() ? readAllData() :  singleShardRead(shardNameFromIdentifier(path), path);
     }
 
-    private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> singleShardRead(
+    private FluentFuture<Optional<NormalizedNode<?, ?>>> singleShardRead(
             final String shardName, final YangInstanceIdentifier path) {
         return executeRead(shardName, new ReadData(path, DataStoreVersions.CURRENT_VERSION));
     }
 
-    private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readAllData() {
+    private FluentFuture<Optional<NormalizedNode<?, ?>>> readAllData() {
         final Set<String> allShardNames = txContextFactory.getActorContext().getConfiguration().getAllShardNames();
-        final Collection<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>> futures =
-                new ArrayList<>(allShardNames.size());
+        final Collection<FluentFuture<Optional<NormalizedNode<?, ?>>>> futures = new ArrayList<>(allShardNames.size());
 
         for (String shardName : allShardNames) {
             futures.add(singleShardRead(shardName, YangInstanceIdentifier.EMPTY));
@@ -140,7 +136,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 }
             }, MoreExecutors.directExecutor());
 
-        return MappingCheckedFuture.create(aggregateFuture, ReadFailedException.MAPPER);
+        return FluentFuture.from(aggregateFuture);
     }
 
     @Override
