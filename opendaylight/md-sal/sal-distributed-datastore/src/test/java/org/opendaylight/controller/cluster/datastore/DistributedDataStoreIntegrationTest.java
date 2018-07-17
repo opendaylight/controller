@@ -22,10 +22,9 @@ import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -37,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -212,7 +212,7 @@ public class DistributedDataStoreIntegrationTest {
                     readWriteTx.write(nodePath, nodeToWrite);
 
                     // 3. Read the data from Tx
-                    final Boolean exists = readWriteTx.exists(nodePath).checkedGet(5, TimeUnit.SECONDS);
+                    final Boolean exists = readWriteTx.exists(nodePath).get(5, TimeUnit.SECONDS);
                     assertEquals("exists", true, exists);
 
                     Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
@@ -268,7 +268,7 @@ public class DistributedDataStoreIntegrationTest {
                     final YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
                     readWriteTx.write(personPath, person);
 
-                    final Boolean exists = readWriteTx.exists(carPath).checkedGet(5, TimeUnit.SECONDS);
+                    final Boolean exists = readWriteTx.exists(carPath).get(5, TimeUnit.SECONDS);
                     assertEquals("exists", true, exists);
 
                     Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
@@ -445,9 +445,8 @@ public class DistributedDataStoreIntegrationTest {
                     assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
                     // Do some reads on the Tx on a separate thread.
-                    final AtomicReference<CheckedFuture<Boolean, ReadFailedException>> txExistsFuture =
-                            new AtomicReference<>();
-                    final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
+                    final AtomicReference<FluentFuture<Boolean>> txExistsFuture = new AtomicReference<>();
+                    final AtomicReference<FluentFuture<Optional<NormalizedNode<?, ?>>>>
                             txReadFuture = new AtomicReference<>();
                     final AtomicReference<Exception> caughtEx = new AtomicReference<>();
                     final CountDownLatch txReadsDone = new CountDownLatch(1);
@@ -482,8 +481,8 @@ public class DistributedDataStoreIntegrationTest {
                     blockRecoveryLatch.countDown();
 
                     // Wait for the reads to complete and verify.
-                    assertEquals("exists", true, txExistsFuture.get().checkedGet(5, TimeUnit.SECONDS));
-                    assertEquals("read", true, txReadFuture.get().checkedGet(5, TimeUnit.SECONDS).isPresent());
+                    assertEquals("exists", true, txExistsFuture.get().get(5, TimeUnit.SECONDS));
+                    assertEquals("read", true, txReadFuture.get().get(5, TimeUnit.SECONDS).isPresent());
 
                     readWriteTx.close();
                 }
@@ -588,7 +587,7 @@ public class DistributedDataStoreIntegrationTest {
                     assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
                     // Do a read on the Tx on a separate thread.
-                    final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
+                    final AtomicReference<FluentFuture<Optional<NormalizedNode<?, ?>>>>
                             txReadFuture = new AtomicReference<>();
                     final AtomicReference<Exception> caughtEx = new AtomicReference<>();
                     final CountDownLatch txReadDone = new CountDownLatch(1);
@@ -621,9 +620,10 @@ public class DistributedDataStoreIntegrationTest {
                     // initialized, the Tx should
                     // have timed out and throw an appropriate exception cause.
                     try {
-                        txReadFuture.get().checkedGet(5, TimeUnit.SECONDS);
-                        fail("Expected NotInitializedException");
-                    } catch (final ReadFailedException e) {
+                        txReadFuture.get().get(5, TimeUnit.SECONDS);
+                    } catch (ExecutionException e) {
+                        assertTrue("Expected ReadFailedException cause: " + e.getCause(),
+                                e.getCause() instanceof ReadFailedException);
                         final Throwable root = Throwables.getRootCause(e);
                         Throwables.throwIfUnchecked(root);
                         throw new RuntimeException(root);
@@ -1045,10 +1045,10 @@ public class DistributedDataStoreIntegrationTest {
                     final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
                     // Create read-only tx's and issue a read.
-                    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture1 = txChain
+                    FluentFuture<Optional<NormalizedNode<?, ?>>> readFuture1 = txChain
                             .newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
-                    CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture2 = txChain
+                    FluentFuture<Optional<NormalizedNode<?, ?>>> readFuture2 = txChain
                             .newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
                     // Create another write tx and issue the write.
@@ -1058,8 +1058,8 @@ public class DistributedDataStoreIntegrationTest {
 
                     // Ensure the reads succeed.
 
-                    assertEquals("isPresent", true, readFuture1.checkedGet(5, TimeUnit.SECONDS).isPresent());
-                    assertEquals("isPresent", true, readFuture2.checkedGet(5, TimeUnit.SECONDS).isPresent());
+                    assertEquals("isPresent", true, readFuture1.get(5, TimeUnit.SECONDS).isPresent());
+                    assertEquals("isPresent", true, readFuture2.get(5, TimeUnit.SECONDS).isPresent());
 
                     // Ensure the writes succeed.
                     DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
@@ -1068,7 +1068,7 @@ public class DistributedDataStoreIntegrationTest {
                     doCommit(cohort2);
 
                     assertEquals("isPresent", true, txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH)
-                            .checkedGet(5, TimeUnit.SECONDS).isPresent());
+                            .get(5, TimeUnit.SECONDS).isPresent());
                 }
             }
         };

@@ -18,6 +18,7 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
@@ -69,7 +70,8 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
 
             @Override
             public void onFailure(final Throwable failure) {
-                proxyFuture.setException(failure);
+                proxyFuture.setException(failure instanceof Exception
+                        ? ReadFailedException.MAPPER.apply((Exception) failure) : failure);
             }
         }, MoreExecutors.directExecutor());
     }

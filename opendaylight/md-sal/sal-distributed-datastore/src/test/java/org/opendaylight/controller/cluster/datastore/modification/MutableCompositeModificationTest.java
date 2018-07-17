@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;

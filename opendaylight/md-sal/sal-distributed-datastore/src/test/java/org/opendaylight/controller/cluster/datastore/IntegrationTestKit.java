@@ -17,12 +17,12 @@ import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.lang.reflect.Constructor;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -250,7 +250,7 @@ public class IntegrationTestKit extends ShardTestKit {
         ActorRef shard = null;
         for (int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            com.google.common.base.Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
             if (shardReply.isPresent()) {
                 shard = shardReply.get();
             }
@@ -262,7 +262,7 @@ public class IntegrationTestKit extends ShardTestKit {
         for (int i = 0; i < 20 * 5 ; i++) {
             LOG.debug("Waiting for shard down {}", shardName);
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            com.google.common.base.Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
             if (!shardReply.isPresent()) {
                 return;
             }
