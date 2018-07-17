@@ -11,7 +11,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -171,7 +173,9 @@ public class LegacyDOMStoreAdapter extends ForwardingObject implements DOMStore,
 
         @Override
         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(YangInstanceIdentifier path) {
-            return MappingCheckedFuture.create(readDelegate.read(path), ReadFailedExceptionAdapter.INSTANCE);
+            return MappingCheckedFuture.create(readDelegate.read(path).transformAsync(optional ->
+                Futures.immediateFuture(Optional.fromJavaUtil(optional)), MoreExecutors.directExecutor()),
+                ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override

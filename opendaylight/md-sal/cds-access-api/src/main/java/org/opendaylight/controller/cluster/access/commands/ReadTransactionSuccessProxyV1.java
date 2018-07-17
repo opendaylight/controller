@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.base.Optional;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
@@ -59,7 +59,7 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
         if (in.readBoolean()) {
             data = Optional.of(NormalizedNodeInputOutput.newDataInput(in).readNormalizedNode());
         } else {
-            data = Optional.absent();
+            data = Optional.empty();
         }
     }
 

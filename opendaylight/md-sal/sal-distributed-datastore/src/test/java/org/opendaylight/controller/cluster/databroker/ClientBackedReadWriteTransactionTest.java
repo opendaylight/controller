@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -55,8 +54,7 @@ public class ClientBackedReadWriteTransactionTest
 
     @Test
     public void testRead() throws Exception {
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> result = object().read(
-                YangInstanceIdentifier.EMPTY);
+        final FluentFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.EMPTY);
         final Optional<NormalizedNode<?, ?>> resultData = result.get();
         Assert.assertTrue(resultData.isPresent());
         Assert.assertEquals(data, resultData.get());

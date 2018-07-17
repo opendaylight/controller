@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Optional;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -28,8 +28,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> apply(
-            DOMStoreReadTransaction readDelegate) {
+    public FluentFuture<Optional<NormalizedNode<?, ?>>> apply(DOMStoreReadTransaction readDelegate) {
         return readDelegate.read(getPath());
     }
 
@@ -37,7 +36,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     public void processResponse(Object readResponse, SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
         if (ReadDataReply.isSerializedType(readResponse)) {
             ReadDataReply reply = ReadDataReply.fromSerializable(readResponse);
-            returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
+            returnFuture.set(Optional.<NormalizedNode<?, ?>>ofNullable(reply.getNormalizedNode()));
         } else {
             returnFuture.setException(new ReadFailedException("Invalid response reading data for path " + getPath()));
         }

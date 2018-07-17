@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.Optional;
 import org.junit.Before;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;

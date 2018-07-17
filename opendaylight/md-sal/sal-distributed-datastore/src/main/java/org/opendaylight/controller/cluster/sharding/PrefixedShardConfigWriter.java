@@ -20,7 +20,6 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -115,8 +114,8 @@ class PrefixedShardConfigWriter {
 
         final ClientSnapshot snapshot = history.takeSnapshot();
         try {
-            return snapshot.exists(defaultId).checkedGet();
-        } catch (final ReadFailedException e) {
+            return snapshot.exists(defaultId).get();
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Presence check of default shard in configuration failed.", e);
             return false;
         } finally {
