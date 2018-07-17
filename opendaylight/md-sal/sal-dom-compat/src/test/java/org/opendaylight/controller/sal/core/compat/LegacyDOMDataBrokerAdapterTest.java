@@ -21,7 +21,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
@@ -30,6 +29,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -67,6 +67,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -152,13 +153,14 @@ public class LegacyDOMDataBrokerAdapterTest {
         doReturn(mockConfigCommitCohort).when(mockConfigWriteTx).ready();
 
         doReturn(mockConfigReadTx).when(mockConfigStore).newReadOnlyTransaction();
-        doReturn(Futures.immediateCheckedFuture(Optional.of(dataNode))).when(mockConfigReadTx).read(TEST_PATH);
-        doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(mockConfigReadTx).exists(TEST_PATH);
+        doReturn(FluentFutures.immediateFluentFuture(Optional.of(dataNode))).when(mockConfigReadTx).read(TEST_PATH);
+        doReturn(FluentFutures.immediateFluentFuture(Boolean.TRUE)).when(mockConfigReadTx).exists(TEST_PATH);
 
         doReturn(mockConfigReadWriteTx).when(mockConfigStore).newReadWriteTransaction();
         doNothing().when(mockConfigReadWriteTx).write(TEST_PATH, dataNode);
         doReturn(mockConfigCommitCohort).when(mockConfigReadWriteTx).ready();
-        doReturn(Futures.immediateCheckedFuture(Optional.of(dataNode))).when(mockConfigReadWriteTx).read(TEST_PATH);
+        doReturn(FluentFutures.immediateFluentFuture(Optional.of(dataNode)))
+                .when(mockConfigReadWriteTx).read(TEST_PATH);
 
         DOMStoreTransactionChain mockTxChain = mock(DOMStoreTransactionChain.class);
         doReturn(mockConfigReadTx).when(mockTxChain).newReadOnlyTransaction();
@@ -194,9 +196,9 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         // Test successful read
 
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
+        CheckedFuture<com.google.common.base.Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
                 tx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
-        Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
+        com.google.common.base.Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
 
@@ -324,9 +326,9 @@ public class LegacyDOMDataBrokerAdapterTest {
     public void testReadWriteTransaction() throws Exception {
         DOMDataReadWriteTransaction tx = adapter.newReadWriteTransaction();
 
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
+        CheckedFuture<com.google.common.base.Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
                 tx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
-        Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
+        com.google.common.base.Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
 
@@ -354,9 +356,9 @@ public class LegacyDOMDataBrokerAdapterTest {
 
         DOMDataReadOnlyTransaction readTx = chain.newReadOnlyTransaction();
 
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
+        CheckedFuture<com.google.common.base.Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
                 readTx.read(LogicalDatastoreType.CONFIGURATION, TEST_PATH);
-        Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
+        com.google.common.base.Optional<NormalizedNode<?, ?>> readOptional = readFuture.get();
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("NormalizedNode", dataNode, readOptional.get());
 

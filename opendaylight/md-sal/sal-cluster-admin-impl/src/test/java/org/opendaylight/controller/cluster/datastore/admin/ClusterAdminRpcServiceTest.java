@@ -454,7 +454,7 @@ public class ClusterAdminRpcServiceTest {
 
     private static void readCarsNodeAndVerify(final AbstractDataStore readFromStore,
             final NormalizedNode<?, ?> expCarsNode) throws Exception {
-        Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction()
+        java.util.Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction()
                 .read(CarsModel.BASE_PATH).get(15, TimeUnit.SECONDS);
         assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());

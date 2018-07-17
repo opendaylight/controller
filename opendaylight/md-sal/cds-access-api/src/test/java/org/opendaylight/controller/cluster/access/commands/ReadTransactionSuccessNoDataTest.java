@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(
-            TRANSACTION_IDENTIFIER, 0, Optional.absent());
+            TRANSACTION_IDENTIFIER, 0, Optional.empty());
 
     @Override
     protected ReadTransactionSuccess object() {
