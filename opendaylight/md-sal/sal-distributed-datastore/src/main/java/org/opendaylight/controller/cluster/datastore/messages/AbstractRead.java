@@ -8,13 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -57,7 +56,7 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
         return version == getVersion() ? this : newInstance(version);
     }
 
-    public abstract CheckedFuture<T, ReadFailedException> apply(DOMStoreReadTransaction readDelegate);
+    public abstract FluentFuture<T> apply(DOMStoreReadTransaction readDelegate);
 
     public abstract void processResponse(Object reponse, SettableFuture<T> promise);
 

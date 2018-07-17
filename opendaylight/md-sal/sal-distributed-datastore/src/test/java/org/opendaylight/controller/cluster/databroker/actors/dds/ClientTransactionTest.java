@@ -14,16 +14,15 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -78,14 +77,14 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
 
     @Test
     public void testExists() throws Exception {
-        final CheckedFuture<Boolean, ReadFailedException> exists = getHandle().exists(PATH);
+        final FluentFuture<Boolean> exists = getHandle().exists(PATH);
         verify(modification).readNode(PATH);
         Assert.assertTrue(getWithTimeout(exists));
     }
 
     @Test
     public void testRead() throws Exception {
-        final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> resultFuture = getHandle().read(PATH);
+        final FluentFuture<Optional<NormalizedNode<?, ?>>> resultFuture = getHandle().read(PATH);
         verify(modification).readNode(PATH);
         final Optional<NormalizedNode<?, ?>> result = getWithTimeout(resultFuture);
         Assert.assertTrue(result.isPresent());

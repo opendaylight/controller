@@ -25,7 +25,6 @@ import akka.cluster.Cluster;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.testkit.javadsl.TestKit;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
@@ -40,6 +39,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -636,8 +636,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars("testReadyLocalTransactionForwardedToLeader");
         followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
 
-        final Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext()
-                .findLocalShard("cars");
+        final com.google.common.base.Optional<ActorRef> carsFollowerShard =
+                followerDistributedDataStore.getActorContext().findLocalShard("cars");
         assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
 
         final DataTree dataTree = new InMemoryDataTreeFactory().create(
@@ -704,8 +704,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars("testForwardedReadyTransactionForwardedToLeader");
         followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
 
-        final Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext()
-                .findLocalShard("cars");
+        final com.google.common.base.Optional<ActorRef> carsFollowerShard =
+                followerDistributedDataStore.getActorContext().findLocalShard("cars");
         assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
 
         carsFollowerShard.get().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
@@ -1009,7 +1009,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Do an initial read to get the primary shard info cached.
 
         final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
-        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+        readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
 
         // Shutdown the leader and try to create a new tx.
 
@@ -1044,7 +1044,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Do an initial read to get the primary shard info cached.
 
         final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
-        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+        readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
 
         // Shutdown the leader and try to create a new tx.
 
@@ -1095,7 +1095,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             // Do an initial read to get the primary shard info cached.
 
             final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
-            readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+            readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
 
             // Shutdown the leader and try to create a new tx.
 
@@ -1142,7 +1142,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars(testName);
 
         final Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
-                CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+                CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("Node", carsNode, readOptional.get());
 

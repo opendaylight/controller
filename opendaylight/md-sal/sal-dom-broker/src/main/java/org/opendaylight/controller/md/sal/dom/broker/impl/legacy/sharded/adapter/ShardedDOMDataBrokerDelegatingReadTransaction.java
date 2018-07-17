@@ -9,10 +9,12 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter.LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
@@ -43,9 +45,9 @@ class ShardedDOMDataBrokerDelegatingReadTransaction implements DOMDataReadOnlyTr
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
                                                                                    final YangInstanceIdentifier path) {
-        return Futures.makeChecked(
-                delegateTx.read(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path),
-                ReadFailedException.MAPPER);
+        return Futures.makeChecked(Futures.transformAsync(delegateTx.read(translateDataStoreType(store), path),
+            optional -> Futures.immediateFuture(Optional.fromJavaUtil(optional)), MoreExecutors.directExecutor()),
+            ReadFailedException.MAPPER);
     }
 
     @Override

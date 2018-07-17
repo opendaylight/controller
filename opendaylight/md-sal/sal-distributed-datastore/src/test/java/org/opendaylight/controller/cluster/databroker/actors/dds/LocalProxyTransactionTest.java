@@ -15,6 +15,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 
 import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -50,8 +51,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     @Override
     @Test
     public void testRead() throws Exception {
-        assertFutureEquals(com.google.common.base.Optional.of(DATA_1), transaction.read(PATH_1));
-        assertFutureEquals(com.google.common.base.Optional.absent(), transaction.read(PATH_3));
+        assertFutureEquals(Optional.of(DATA_1), transaction.read(PATH_1));
+        assertFutureEquals(Optional.empty(), transaction.read(PATH_3));
     }
 
     @Test

@@ -793,13 +793,13 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         final ClientLocalHistory localHistory = distributedDataStoreClient.createLocalHistory();
         final ClientTransaction tx = localHistory.createTransaction();
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> read =
+        final ListenableFuture<java.util.Optional<NormalizedNode<?, ?>>> read =
                 tx.read(YangInstanceIdentifier.of(ProduceTransactionsHandler.ID_INT));
 
         tx.abort();
         localHistory.close();
         try {
-            final Optional<NormalizedNode<?, ?>> optional = read.get();
+            final java.util.Optional<NormalizedNode<?, ?>> optional = read.get();
             if (!optional.isPresent()) {
                 LOG.warn("Final read from client is empty.");
                 final RpcError error = RpcResultBuilder.newError(

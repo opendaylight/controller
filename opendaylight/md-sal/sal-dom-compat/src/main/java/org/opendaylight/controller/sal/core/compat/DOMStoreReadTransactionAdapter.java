@@ -9,8 +9,11 @@ package org.opendaylight.controller.sal.core.compat;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
@@ -43,7 +46,9 @@ public class DOMStoreReadTransactionAdapter<T extends org.opendaylight.mdsal.dom
     @Override
     public CheckedFuture<com.google.common.base.Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
             final YangInstanceIdentifier path) {
-        return MappingCheckedFuture.create(delegate.read(path), ReadFailedExceptionAdapter.INSTANCE);
+        return MappingCheckedFuture.create(Futures.transformAsync(delegate.read(path),
+            optional -> Futures.immediateFuture(Optional.fromJavaUtil(optional)), MoreExecutors.directExecutor()),
+            ReadFailedExceptionAdapter.INSTANCE);
     }
 
     @Override

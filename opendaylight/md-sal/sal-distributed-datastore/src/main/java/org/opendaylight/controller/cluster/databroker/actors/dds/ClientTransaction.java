@@ -8,14 +8,13 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -75,12 +74,11 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
         return cursor;
     }
 
-    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+    public FluentFuture<Boolean> exists(final YangInstanceIdentifier path) {
         return ensureTransactionProxy(path).exists(path);
     }
 
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
-            final YangInstanceIdentifier path) {
+    public FluentFuture<Optional<NormalizedNode<?, ?>>> read(final YangInstanceIdentifier path) {
         return ensureTransactionProxy(path).read(path);
     }
 

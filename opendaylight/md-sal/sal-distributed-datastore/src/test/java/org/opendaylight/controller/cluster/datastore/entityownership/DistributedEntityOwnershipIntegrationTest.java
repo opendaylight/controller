@@ -29,7 +29,6 @@ import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -39,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
@@ -540,10 +540,11 @@ public class DistributedEntityOwnershipIntegrationTest {
         boolean passed = false;
         for (int i = 0; i < 100; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            final Optional<EntityOwnershipState> leaderState = leaderEntityOwnershipService.getOwnershipState(ENTITY1);
-            final Optional<EntityOwnershipState> follower1State =
+            final com.google.common.base.Optional<EntityOwnershipState> leaderState =
+                    leaderEntityOwnershipService.getOwnershipState(ENTITY1);
+            final com.google.common.base.Optional<EntityOwnershipState> follower1State =
                     follower1EntityOwnershipService.getOwnershipState(ENTITY1);
-            final Optional<EntityOwnershipState> follower2State =
+            final com.google.common.base.Optional<EntityOwnershipState> follower2State =
                     follower2EntityOwnershipService.getOwnershipState(ENTITY1);
             final Optional<DOMEntityOwnershipChange> leaderChange = getValueSafely(leaderChangeCaptor);
             final Optional<DOMEntityOwnershipChange> follower1Change = getValueSafely(follower1ChangeCaptor);
@@ -564,10 +565,10 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     private static Optional<DOMEntityOwnershipChange> getValueSafely(ArgumentCaptor<DOMEntityOwnershipChange> captor) {
         try {
-            return Optional.fromNullable(captor.getValue());
+            return Optional.ofNullable(captor.getValue());
         } catch (MockitoException e) {
             // No value was captured
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -837,7 +838,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,
             final EntityOwnershipState expState) {
-        Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
+        com.google.common.base.Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
         assertEquals("EntityOwnershipState", expState, state.get());
     }

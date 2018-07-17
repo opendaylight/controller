@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
@@ -253,8 +254,9 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         @Override
         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(LogicalDatastoreType store,
                 YangInstanceIdentifier path) {
-            return MappingCheckedFuture.create(readDelegate().read(convert(store), path),
-                    ReadFailedExceptionAdapter.INSTANCE);
+            return MappingCheckedFuture.create(Futures.transformAsync(readDelegate().read(convert(store), path),
+                optional -> Futures.immediateFuture(Optional.fromJavaUtil(optional)), MoreExecutors.directExecutor()),
+                ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
