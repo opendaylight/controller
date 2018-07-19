@@ -46,8 +46,8 @@
        via the cfg file. In this manner the toaster can be configured to use the default clustered DataBroker
        or the specialized "pingpong" DataBroker (or any other DataBroker implementation).
    -->
-  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" odl:type="${databroker-type}" />
-  <reference id="notificationService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService"/>
+  <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker" odl:type="${databroker-type}" />
+  <reference id="notificationService" interface="org.opendaylight.mdsal.binding.api.NotificationPublishService"/>
 
   <!-- Create the OpendaylightToaster instance and inject its dependencies -->
   <bean id="toaster" class="org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster"

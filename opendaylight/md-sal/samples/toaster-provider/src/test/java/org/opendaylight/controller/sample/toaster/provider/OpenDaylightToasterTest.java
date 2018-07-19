@@ -14,16 +14,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
@@ -53,7 +53,7 @@ public class OpenDaylightToasterTest extends AbstractConcurrentDataBrokerTest {
     public void testToasterInitOnStartUp() throws Exception {
         DataBroker broker = getDataBroker();
 
-        ReadOnlyTransaction readTx = broker.newReadOnlyTransaction();
+        ReadTransaction readTx = broker.newReadOnlyTransaction();
         Optional<Toaster> optional = readTx.read(LogicalDatastoreType.OPERATIONAL, TOASTER_IID).get();
         assertNotNull(optional);
         assertTrue("Operational toaster not present", optional.isPresent());
