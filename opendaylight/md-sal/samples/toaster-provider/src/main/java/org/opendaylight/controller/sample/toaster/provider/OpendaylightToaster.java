@@ -7,38 +7,40 @@
  */
 package org.opendaylight.controller.sample.toaster.provider;
 
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.DELETE;
-import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.WRITE;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.DELETE;
+import static org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType.WRITE;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
 import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICATION;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
+import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastOutput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.CancelToastOutputBuilder;
@@ -120,7 +122,7 @@ public class OpendaylightToaster extends AbstractMXBean
 
         Preconditions.checkNotNull(dataBroker, "dataBroker must be set");
         dataTreeChangeListenerRegistration = dataBroker.registerDataTreeChangeListener(
-                new DataTreeIdentifier<>(CONFIGURATION, TOASTER_IID), this);
+                DataTreeIdentifier.create(CONFIGURATION, TOASTER_IID), this);
         setToasterStatusUp(null);
 
         // Register our MXBean.
@@ -147,9 +149,9 @@ public class OpendaylightToaster extends AbstractMXBean
         if (dataBroker != null) {
             WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
             tx.delete(OPERATIONAL,TOASTER_IID);
-            Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+            Futures.addCallback(tx.commit(), new FutureCallback<CommitInfo>() {
                 @Override
-                public void onSuccess(final Void result) {
+                public void onSuccess(final CommitInfo result) {
                     LOG.debug("Successfully deleted the operational Toaster");
                 }
 
@@ -237,9 +239,9 @@ public class OpendaylightToaster extends AbstractMXBean
         // If that succeeds, then we essentially have an exclusive lock and can proceed
         // to make toast.
         final ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        ListenableFuture<Optional<Toaster>> readFuture = tx.read(OPERATIONAL, TOASTER_IID);
+        FluentFuture<Optional<Toaster>> readFuture = tx.read(OPERATIONAL, TOASTER_IID);
 
-        final ListenableFuture<Void> commitFuture =
+        final ListenableFuture<? extends CommitInfo> commitFuture =
             Futures.transformAsync(readFuture, toasterData -> {
                 ToasterStatus toasterStatus = ToasterStatus.Up;
                 if (toasterData.isPresent()) {
@@ -252,7 +254,8 @@ public class OpendaylightToaster extends AbstractMXBean
 
                     if (outOfBread()) {
                         LOG.debug("Toaster is out of bread");
-                        return Futures.immediateFailedCheckedFuture(
+                        tx.cancel();
+                        return Futures.immediateFailedFuture(
                                 new TransactionCommitFailedException("", makeToasterOutOfBreadError()));
                     }
 
@@ -262,7 +265,7 @@ public class OpendaylightToaster extends AbstractMXBean
                     // to indicate we're going to make toast. This acts as a lock to prevent
                     // concurrent toasting.
                     tx.put(OPERATIONAL, TOASTER_IID, buildToaster(ToasterStatus.Down));
-                    return tx.submit();
+                    return tx.commit();
                 }
 
                 LOG.debug("Oops - already making toast!");
@@ -270,13 +273,14 @@ public class OpendaylightToaster extends AbstractMXBean
                 // Return an error since we are already making toast. This will get
                 // propagated to the commitFuture below which will interpret the null
                 // TransactionStatus in the RpcResult as an error condition.
-                return Futures.immediateFailedCheckedFuture(
+                tx.cancel();
+                return Futures.immediateFailedFuture(
                         new TransactionCommitFailedException("", makeToasterInUseError()));
             }, MoreExecutors.directExecutor());
 
-        Futures.addCallback(commitFuture, new FutureCallback<Void>() {
+        Futures.addCallback(commitFuture, new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 // OK to make toast
                 currentMakeToastTask.set(executor.submit(new MakeToastTask(input, futureResult)));
             }
@@ -352,9 +356,9 @@ public class OpendaylightToaster extends AbstractMXBean
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
         tx.put(OPERATIONAL,TOASTER_IID, buildToaster(ToasterStatus.Up));
 
-        Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+        Futures.addCallback(tx.commit(), new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 LOG.info("Successfully set ToasterStatus to Up");
                 notifyCallback(true);
             }
