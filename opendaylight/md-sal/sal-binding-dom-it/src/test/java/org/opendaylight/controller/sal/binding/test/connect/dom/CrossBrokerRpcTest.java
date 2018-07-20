@@ -127,7 +127,7 @@ public class CrossBrokerRpcTest {
         final ListenableFuture<RpcResult<KnockKnockOutput>> knockResult = knockResult(true, "open");
 
         BindingDOMRpcProviderServiceAdapter mdsalServiceRegistry = new BindingDOMRpcProviderServiceAdapter(
-                testContext.getDelegateDomRouter(), testContext.getCodec());
+                testContext.getDelegateDomRouter().getRpcProviderService(), testContext.getCodec());
 
         final Multimap<InstanceIdentifier<?>, KnockKnockInput> receivedKnocks = HashMultimap.create();
         mdsalServiceRegistry.registerRpcImplementation(OpendaylightOfMigrationTestModelService.class,

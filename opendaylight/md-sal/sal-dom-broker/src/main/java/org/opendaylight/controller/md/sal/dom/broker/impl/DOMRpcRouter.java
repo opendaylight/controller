@@ -46,8 +46,8 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     @VisibleForTesting
     public DOMRpcRouter() {
         org.opendaylight.mdsal.dom.broker.DOMRpcRouter delegate = new org.opendaylight.mdsal.dom.broker.DOMRpcRouter();
-        this.delegateRpcService = delegate;
-        this.delegateRpcProviderService = delegate;
+        this.delegateRpcService = delegate.getRpcService();
+        this.delegateRpcProviderService = delegate.getRpcProviderService();
     }
 
     public DOMRpcRouter(final org.opendaylight.mdsal.dom.api.DOMRpcService delegateRpcService,

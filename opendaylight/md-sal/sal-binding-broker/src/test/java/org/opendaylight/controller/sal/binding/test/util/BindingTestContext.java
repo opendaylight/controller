@@ -174,7 +174,7 @@ public class BindingTestContext implements AutoCloseable {
         this.mockSchemaService.changeSchema(getContext(moduleInfos));
     }
 
-    private SchemaContext getContext(final Set<YangModuleInfo> moduleInfos) {
+    private static SchemaContext getContext(final Set<YangModuleInfo> moduleInfos) {
         final ModuleInfoBackedContext ctx = ModuleInfoBackedContext.create();
         ctx.addModuleInfos(moduleInfos);
         return ctx.tryToCreateSchemaContext().get();
@@ -207,7 +207,7 @@ public class BindingTestContext implements AutoCloseable {
         checkState(this.executor != null);
 
         delegateDomRouter = org.opendaylight.mdsal.dom.broker.DOMRpcRouter.newInstance(mockSchemaService);
-        this.domRouter = new DOMRpcRouter(delegateDomRouter, delegateDomRouter);
+        this.domRouter = new DOMRpcRouter(delegateDomRouter.getRpcService(), delegateDomRouter.getRpcProviderService());
     }
 
     public void startBindingNotificationBroker() {
