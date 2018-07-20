@@ -78,7 +78,7 @@ public class DOMRpcRouterTest {
         mdsalRpcRouter = new org.opendaylight.mdsal.dom.broker.DOMRpcRouter();
         final SchemaContext schemaContext = TestModel.createTestContext();
         mdsalRpcRouter.onGlobalContextUpdated(schemaContext);
-        legacyRpcRouter = new DOMRpcRouter(mdsalRpcRouter, mdsalRpcRouter);
+        legacyRpcRouter = new DOMRpcRouter(mdsalRpcRouter.getRpcService(), mdsalRpcRouter.getRpcProviderService());
 
         legacyTestRpcIdentifier = DOMRpcIdentifier.create(findRpc(schemaContext, "test-rpc"));
         legacyTestRpcNoInputIdentifier = DOMRpcIdentifier.create(findRpc(schemaContext, "test-rpc-no-input"));
@@ -149,7 +149,7 @@ public class DOMRpcRouterTest {
         testLegacyRpcImpl.init(Futures.immediateCheckedFuture(result));
 
         ListenableFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> future =
-                mdsalRpcRouter.invokeRpc(mdsalTestRpcIdentifier.getType(), RPC_INPUT);
+                mdsalRpcRouter.getRpcService().invokeRpc(mdsalTestRpcIdentifier.getType(), RPC_INPUT);
 
         assertEquals(RPC_OUTPUT, future.get().getResult());
         assertEquals(1, future.get().getErrors().size());
@@ -164,7 +164,7 @@ public class DOMRpcRouterTest {
         testLegacyRpcImpl.init(Futures.immediateFailedCheckedFuture(rpcEx));
 
         try {
-            mdsalRpcRouter.invokeRpc(mdsalTestRpcIdentifier.getType(), RPC_INPUT).get();
+            mdsalRpcRouter.getRpcService().invokeRpc(mdsalTestRpcIdentifier.getType(), RPC_INPUT).get();
             fail("Expected exception");
         } catch (ExecutionException e) {
             assertEquals(rpcEx, e.getCause());
@@ -174,7 +174,7 @@ public class DOMRpcRouterTest {
 
         testLegacyRpcImpl.init(Futures.immediateCheckedFuture(null));
 
-        future = mdsalRpcRouter.invokeRpc(mdsalTestRpcNoInputIdentifier.getType(), null);
+        future = mdsalRpcRouter.getRpcService().invokeRpc(mdsalTestRpcNoInputIdentifier.getType(), null);
 
         assertNull(future.get());
         testLegacyRpcImpl.verifyInput(legacyTestRpcNoInputIdentifier, null);
@@ -182,7 +182,7 @@ public class DOMRpcRouterTest {
 
     @Test
     public void testMdsalRegistrationAndLegacyInvocation() throws InterruptedException, ExecutionException {
-        mdsalRpcRouter.registerRpcImplementation(testMdsalRpcImpl, mdsalTestRpcIdentifier,
+        mdsalRpcRouter.getRpcProviderService().registerRpcImplementation(testMdsalRpcImpl, mdsalTestRpcIdentifier,
                 mdsalTestRpcNoInputIdentifier);
 
         // Test success
