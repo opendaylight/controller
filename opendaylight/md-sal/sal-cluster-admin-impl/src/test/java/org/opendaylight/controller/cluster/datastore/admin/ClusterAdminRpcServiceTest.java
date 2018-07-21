@@ -931,8 +931,8 @@ public class ClusterAdminRpcServiceTest {
 
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
         final MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
-                .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
-                        DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
+                .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(DatastoreContext.newBuilder()
+                        .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(10))
                 .build();
 
         final MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
@@ -969,13 +969,13 @@ public class ClusterAdminRpcServiceTest {
         // Leadership should have transferred to member 3 since it is the only remaining voting member.
         verifyRaftState(leaderNode1.configDataStore(), "cars", raftState -> {
             assertNotNull("Expected non-null leader Id", raftState.getLeader());
-            assertTrue("Expected leader member-1. Actual: " + raftState.getLeader(),
+            assertTrue("Expected leader member-3. Actual: " + raftState.getLeader(),
                     raftState.getLeader().contains("member-3"));
         });
 
         verifyRaftState(leaderNode1.operDataStore(), "cars", raftState -> {
             assertNotNull("Expected non-null leader Id", raftState.getLeader());
-            assertTrue("Expected leader member-1. Actual: " + raftState.getLeader(),
+            assertTrue("Expected leader member-3. Actual: " + raftState.getLeader(),
                     raftState.getLeader().contains("member-3"));
         });
 
