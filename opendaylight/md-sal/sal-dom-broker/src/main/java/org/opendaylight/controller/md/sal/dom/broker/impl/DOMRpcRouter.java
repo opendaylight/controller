@@ -43,17 +43,24 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     private final org.opendaylight.mdsal.dom.api.DOMRpcService delegateRpcService;
     private final org.opendaylight.mdsal.dom.api.DOMRpcProviderService delegateRpcProviderService;
 
+    // Note - this is only used for backward compatibility for UTs that use the empty constructor which creates
+    // a local mdsal DOMRpcRouter that needs to be updated with the SchemaContext. In production, the mdsal API
+    // services are passed via the constructor and are set up externally with the SchemaContext.
+    private final SchemaContextListener delegateSchemaContextListener;
+
     @VisibleForTesting
     public DOMRpcRouter() {
         org.opendaylight.mdsal.dom.broker.DOMRpcRouter delegate = new org.opendaylight.mdsal.dom.broker.DOMRpcRouter();
         this.delegateRpcService = delegate.getRpcService();
         this.delegateRpcProviderService = delegate.getRpcProviderService();
+        this.delegateSchemaContextListener = delegate;
     }
 
     public DOMRpcRouter(final org.opendaylight.mdsal.dom.api.DOMRpcService delegateRpcService,
             final org.opendaylight.mdsal.dom.api.DOMRpcProviderService delegateRpcProviderService) {
         this.delegateRpcService = delegateRpcService;
         this.delegateRpcProviderService = delegateRpcProviderService;
+        this.delegateSchemaContextListener = null;
     }
 
     @Override
@@ -159,8 +166,8 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     @Override
     @VisibleForTesting
     public void onGlobalContextUpdated(final SchemaContext context) {
-        if (delegateRpcService instanceof SchemaContextListener) {
-            ((SchemaContextListener)delegateRpcService).onGlobalContextUpdated(context);
+        if (delegateSchemaContextListener != null) {
+            delegateSchemaContextListener.onGlobalContextUpdated(context);
         }
     }
 }
