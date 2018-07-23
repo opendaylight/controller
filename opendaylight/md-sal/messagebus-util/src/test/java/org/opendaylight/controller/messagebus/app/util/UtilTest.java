@@ -45,7 +45,7 @@ public class UtilTest {
     }
 
     @Test
-    public void testExpandQname() throws Exception {
+    public void testExpandQname() {
         // match no path because the list of the allowed paths is empty
         {
             final List<SchemaPath> paths = new ArrayList<>();

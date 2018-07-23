@@ -19,7 +19,7 @@ public final class ForwardingActor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(final Object obj) throws Exception {
+    public void onReceive(final Object obj) {
         target.forward(obj, context());
     }
 

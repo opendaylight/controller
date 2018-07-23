@@ -30,7 +30,7 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
             .build(new CacheLoader<Class<? extends RpcService>, RpcServiceAdapter>() {
 
                 @Override
-                public RpcServiceAdapter load(final Class<? extends RpcService> key) throws Exception {
+                public RpcServiceAdapter load(final Class<? extends RpcService> key) {
                     return createProxy(key);
                 }
 

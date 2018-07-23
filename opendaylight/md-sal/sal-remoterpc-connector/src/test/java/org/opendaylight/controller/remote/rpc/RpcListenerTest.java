@@ -12,7 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -34,7 +33,7 @@ public class RpcListenerTest {
 
 
     @BeforeClass
-    public static void setup() throws InterruptedException {
+    public static void setup() {
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
     }
 
@@ -45,7 +44,7 @@ public class RpcListenerTest {
     }
 
     @Test
-    public void testRouteAdd() throws URISyntaxException, InterruptedException {
+    public void testRouteAdd() {
         new TestKit(system) {
             {
                 // Test announcements
@@ -60,7 +59,7 @@ public class RpcListenerTest {
     }
 
     @Test
-    public void testRouteRemove() throws URISyntaxException, InterruptedException {
+    public void testRouteRemove() {
         new TestKit(system) {
             {
                 // Test announcements

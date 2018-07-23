@@ -76,7 +76,7 @@ public class DistributedShardFrontendTest {
     private DOMStoreThreePhaseCommitCohort commitCohort;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         shardedDOMDataTree = new ShardedDOMDataTree();
         client = mock(DataStoreClient.class);

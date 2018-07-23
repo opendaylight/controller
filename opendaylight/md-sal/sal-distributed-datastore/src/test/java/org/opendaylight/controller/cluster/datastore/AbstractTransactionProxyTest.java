@@ -33,7 +33,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -156,7 +155,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
             .operationTimeoutInSeconds(operationTimeoutInSeconds);
 
     @BeforeClass
-    public static void setUpClass() throws IOException {
+    public static void setUpClass() {
 
         Config config = ConfigFactory.parseMap(ImmutableMap.<String, Object>builder()
                 .put("akka.actor.default-dispatcher.type",
@@ -166,7 +165,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     @AfterClass
-    public static void tearDownClass() throws IOException {
+    public static void tearDownClass() {
         TestKit.shutdownActorSystem(system);
         system = null;
     }

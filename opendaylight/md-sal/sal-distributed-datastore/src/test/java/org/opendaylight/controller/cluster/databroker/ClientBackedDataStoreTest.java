@@ -60,7 +60,7 @@ public class ClientBackedDataStoreTest {
     private ClientSnapshot clientSnapshot;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         final SchemaContext schemaContext = TestModel.createTestContext();
@@ -77,7 +77,7 @@ public class ClientBackedDataStoreTest {
     }
 
     @Test
-    public void testCreateTransactionChain() throws Exception {
+    public void testCreateTransactionChain() {
         try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreTransactionChain txChain = clientBackedDataStore.createTransactionChain();
@@ -87,7 +87,7 @@ public class ClientBackedDataStoreTest {
     }
 
     @Test
-    public void testNewReadOnlyTransaction() throws Exception {
+    public void testNewReadOnlyTransaction() {
         try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadTransaction tx = clientBackedDataStore.newReadOnlyTransaction();
@@ -97,7 +97,7 @@ public class ClientBackedDataStoreTest {
     }
 
     @Test
-    public void testNewWriteOnlyTransaction() throws Exception {
+    public void testNewWriteOnlyTransaction() {
         try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreWriteTransaction tx = clientBackedDataStore.newWriteOnlyTransaction();
@@ -107,7 +107,7 @@ public class ClientBackedDataStoreTest {
     }
 
     @Test
-    public void testNewReadWriteTransaction() throws Exception {
+    public void testNewReadWriteTransaction() {
         try (ClientBackedDataStore clientBackedDataStore = new ClientBackedDataStore(
                 actorContext, UNKNOWN_ID, clientActor)) {
             final DOMStoreReadWriteTransaction tx = clientBackedDataStore.newReadWriteTransaction();

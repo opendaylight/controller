@@ -25,10 +25,10 @@ public abstract class ClientBackedTransactionTest<T extends ClientBackedTransact
     private static LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0);
     protected static final TransactionIdentifier TRANSACTION_ID = new TransactionIdentifier(HISTORY_ID, 0);
 
-    abstract T object() throws Exception;
+    abstract T object();
 
     @Test
-    public void testClose() throws Exception {
+    public void testClose() {
         final AbstractClientHandle<?> delegate = object().delegate();
         object().close();
         Mockito.verify(delegate).abort();

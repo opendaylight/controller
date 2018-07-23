@@ -32,12 +32,12 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
     private ClientSnapshot delegate;
 
     @Override
-    ClientBackedReadTransaction object() throws Exception {
+    ClientBackedReadTransaction object() {
         return object;
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         Mockito.doReturn(CLIENT_ID).when(clientContext).getIdentifier();

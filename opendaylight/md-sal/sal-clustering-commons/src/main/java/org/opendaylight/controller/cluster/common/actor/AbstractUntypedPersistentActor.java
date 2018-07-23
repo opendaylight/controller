@@ -63,7 +63,7 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
         LOG.debug("Unhandled message {} ", message);
     }
 
-    protected void unknownMessage(final Object message) throws Exception {
+    protected void unknownMessage(final Object message) {
         LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }

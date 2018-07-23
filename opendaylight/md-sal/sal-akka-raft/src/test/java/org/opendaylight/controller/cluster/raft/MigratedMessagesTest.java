@@ -52,7 +52,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         factory.close();
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();

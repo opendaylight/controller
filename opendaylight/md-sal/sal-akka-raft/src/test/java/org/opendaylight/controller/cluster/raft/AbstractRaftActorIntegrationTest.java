@@ -290,8 +290,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected void verifySnapshot(final String prefix, final Snapshot snapshot, final long lastAppliedTerm,
-            final long lastAppliedIndex, final long lastTerm, final long lastIndex)
-                    throws Exception {
+            final long lastAppliedIndex, final long lastTerm, final long lastIndex) {
         assertEquals(prefix + " Snapshot getLastAppliedTerm", lastAppliedTerm, snapshot.getLastAppliedTerm());
         assertEquals(prefix + " Snapshot getLastAppliedIndex", lastAppliedIndex, snapshot.getLastAppliedIndex());
         assertEquals(prefix + " Snapshot getLastTerm", lastTerm, snapshot.getLastTerm());

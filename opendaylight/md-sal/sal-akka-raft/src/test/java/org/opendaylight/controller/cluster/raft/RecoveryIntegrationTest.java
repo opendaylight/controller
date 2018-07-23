@@ -140,7 +140,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testFollowerRecoveryAfterInstallSnapshot() throws Exception {
+    public void testFollowerRecoveryAfterInstallSnapshot() {
 
         send2InitialPayloads();
 

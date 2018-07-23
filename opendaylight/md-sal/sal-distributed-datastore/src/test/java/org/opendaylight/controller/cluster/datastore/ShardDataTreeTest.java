@@ -42,7 +42,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,17 +82,16 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void testWrite() throws ExecutionException, InterruptedException {
+    public void testWrite() {
         modify(false, true, true);
     }
 
     @Test
-    public void testMerge() throws ExecutionException, InterruptedException {
+    public void testMerge() {
         modify(true, true, true);
     }
 
-    private void modify(final boolean merge, final boolean expectedCarsPresent, final boolean expectedPeoplePresent)
-            throws ExecutionException, InterruptedException {
+    private void modify(final boolean merge, final boolean expectedCarsPresent, final boolean expectedPeoplePresent) {
         immediatePayloadReplication(shardDataTree, mockShard);
 
         assertEquals(fullSchema, shardDataTree.getSchemaContext());
@@ -134,7 +132,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
+    public void bug4359AddRemoveCarOnce() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
         final List<DataTreeCandidate> candidates = new ArrayList<>();
@@ -151,7 +149,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
+    public void bug4359AddRemoveCarTwice() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
         final List<DataTreeCandidate> candidates = new ArrayList<>();
@@ -352,7 +350,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void testPipelinedTransactionsWithImmediateReplication() throws Exception {
+    public void testPipelinedTransactionsWithImmediateReplication() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
@@ -439,7 +437,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testAbortWithFailedRebase() throws Exception {
+    public void testAbortWithFailedRebase() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
@@ -511,13 +509,11 @@ public class ShardDataTreeTest extends AbstractTest {
         return optional.get();
     }
 
-    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree)
-            throws ExecutionException, InterruptedException {
+    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree) {
         return addCar(shardDataTree, "altima");
     }
 
-    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree, final String name)
-            throws ExecutionException, InterruptedException {
+    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree, final String name) {
         return doTransaction(shardDataTree, snapshot -> {
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
             snapshot.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
@@ -525,8 +521,7 @@ public class ShardDataTreeTest extends AbstractTest {
         });
     }
 
-    private static DataTreeCandidate removeCar(final ShardDataTree shardDataTree)
-            throws ExecutionException, InterruptedException {
+    private static DataTreeCandidate removeCar(final ShardDataTree shardDataTree) {
         return doTransaction(shardDataTree, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
     }
 
@@ -536,7 +531,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private static DataTreeCandidate doTransaction(final ShardDataTree shardDataTree,
-            final DataTreeOperation operation) throws ExecutionException, InterruptedException {
+            final DataTreeOperation operation) {
         final ReadWriteShardDataTreeTransaction transaction =
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();
@@ -552,7 +547,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private static DataTreeCandidate applyCandidates(final ShardDataTree shardDataTree,
-            final List<DataTreeCandidate> candidates) throws ExecutionException, InterruptedException {
+            final List<DataTreeCandidate> candidates) {
         final ReadWriteShardDataTreeTransaction transaction =
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();

@@ -38,7 +38,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
     private DefaultConfigParamsImpl followerConfigParams;
 
     @Test
-    public void testUnComittedEntryOnLeaderChange() throws Exception {
+    public void testUnComittedEntryOnLeaderChange() {
         testLog.info("testUnComittedEntryOnLeaderChange starting");
 
         createRaftActors();

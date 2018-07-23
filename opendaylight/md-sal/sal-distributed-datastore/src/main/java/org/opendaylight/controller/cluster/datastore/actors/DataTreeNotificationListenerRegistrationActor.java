@@ -34,7 +34,7 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
     private Cancellable killSchedule;
 
     @Override
-    protected void handleReceive(Object message) throws Exception {
+    protected void handleReceive(Object message) {
         if (message instanceof CloseDataTreeNotificationListenerRegistration) {
             closeListenerRegistration();
             if (isValidSender(getSender())) {

@@ -33,7 +33,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
      * sends a heartbeat first when connectivity is re-established.
      */
     @Test
-    public void runTest1() throws Exception {
+    public void runTest1() {
         testLog.info("PartitionedLeadersElectionScenarioTest 1 starting");
 
         setupInitialMemberBehaviors();
@@ -54,7 +54,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
      * sends a heartbeat first when connectivity is re-established.
      */
     @Test
-    public void runTest2() throws Exception {
+    public void runTest2() {
         testLog.info("PartitionedLeadersElectionScenarioTest 2 starting");
 
         setupInitialMemberBehaviors();
@@ -238,7 +238,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("sendInitialElectionTimeoutToFollowerMember3 ending");
     }
 
-    private void sendInitialElectionTimeoutToFollowerMember2() throws Exception {
+    private void sendInitialElectionTimeoutToFollowerMember2() {
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 starting");
 
         // Send ElectionTimeout to member 2 to simulate no heartbeat from the Leader (member 1).
@@ -275,7 +275,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 ending");
     }
 
-    private void setupInitialMemberBehaviors() throws Exception {
+    private void setupInitialMemberBehaviors() {
         testLog.info("setupInitialMemberBehaviors starting");
 
         // Create member 2's behavior initially as Follower

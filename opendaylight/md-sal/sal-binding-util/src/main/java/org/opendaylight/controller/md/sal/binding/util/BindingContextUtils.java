@@ -103,7 +103,7 @@ public final class BindingContextUtils {
         }
 
         @Override
-        public final void close() throws Exception {
+        public final void close() {
             alreadyRetrievedServices = null;
             serviceProvider = null;
         }

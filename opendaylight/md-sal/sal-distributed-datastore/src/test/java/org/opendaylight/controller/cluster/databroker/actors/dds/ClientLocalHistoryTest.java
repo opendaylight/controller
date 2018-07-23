@@ -36,7 +36,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     private ClientTransaction transaction;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         system = ActorSystem.apply();
@@ -52,7 +52,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
@@ -67,28 +67,28 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     }
 
     @Test
-    public void testClose() throws Exception {
+    public void testClose() {
         object().close();
         Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Override
     @Test
-    public void testDoCreateTransaction() throws Exception {
+    public void testDoCreateTransaction() {
         final ClientTransaction clientTransaction = object().doCreateTransaction();
         Assert.assertEquals(object().getIdentifier(), clientTransaction.getIdentifier().getHistoryId());
     }
 
     @Override
     @Test
-    public void testOnTransactionAbort() throws Exception {
+    public void testOnTransactionAbort() {
         final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
         Assert.assertTrue(clientSnapshot.abort());
     }
 
     @Override
     @Test
-    public void testCreateHistoryProxy() throws Exception {
+    public void testCreateHistoryProxy() {
         final AbstractClientConnection<ShardBackendInfo> clientConnection = behavior.getConnection(0L);
         final ProxyHistory historyProxy = object().createHistoryProxy(HISTORY_ID, clientConnection);
         Assert.assertEquals(object().getIdentifier(), historyProxy.getIdentifier());
@@ -96,7 +96,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
 
     @Override
     @Test
-    public void testDoCreateSnapshot() throws Exception {
+    public void testDoCreateSnapshot() {
         final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
         Assert.assertEquals(new TransactionIdentifier(object().getIdentifier(), object().nextTx()).getHistoryId(),
                 clientSnapshot.getIdentifier().getHistoryId());
@@ -104,7 +104,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
 
     @Override
     @Test
-    public void testOnTransactionComplete() throws Exception {
+    public void testOnTransactionComplete() {
         final ClientTransaction tx = object().createTransaction();
 
         // make transaction ready
@@ -120,7 +120,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
 
     @Override
     @Test
-    public void testOnTransactionReady() throws Exception {
+    public void testOnTransactionReady() {
         final AbstractTransactionCommitCohort result = object().onTransactionReady(
                 object().createTransaction(), cohort);
         Assert.assertEquals(result, cohort);
@@ -128,14 +128,14 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
 
     @Override
     @Test(expected = IllegalStateException.class)
-    public void testOnTransactionReadyDuplicate() throws Exception {
+    public void testOnTransactionReadyDuplicate() {
         final ClientTransaction tx = object().createTransaction();
         object().onTransactionReady(tx, cohort);
         object().onTransactionReady(tx, cohort);
     }
 
     @Test
-    public void testOnTransactionReadyAndComplete() throws Exception {
+    public void testOnTransactionReadyAndComplete() {
         object().updateState(AbstractClientHistory.State.IDLE, AbstractClientHistory.State.TX_OPEN);
         final AbstractTransactionCommitCohort transactionCommitCohort =
                 object().onTransactionReady(transaction, cohort);
@@ -143,7 +143,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     }
 
     @Test
-    public void testOnTransactionReadyAndCompleteStateClosed() throws Exception {
+    public void testOnTransactionReadyAndCompleteStateClosed() {
         object().updateState(AbstractClientHistory.State.IDLE, AbstractClientHistory.State.CLOSED);
         final AbstractTransactionCommitCohort transactionCommitCohort =
                 object().onTransactionReady(transaction, cohort);
@@ -151,7 +151,7 @@ public class ClientLocalHistoryTest extends AbstractClientHistoryTest<ClientLoca
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testOnTransactionReadyAndCompleteIdleFail() throws Exception {
+    public void testOnTransactionReadyAndCompleteIdleFail() {
         object().onTransactionReady(transaction, cohort);
     }
 }

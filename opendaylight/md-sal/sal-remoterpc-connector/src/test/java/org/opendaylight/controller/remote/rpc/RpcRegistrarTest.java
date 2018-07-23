@@ -48,7 +48,7 @@ public class RpcRegistrarTest {
     private RpcRegistrar rpcRegistrar;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.create("test");
 
@@ -77,7 +77,7 @@ public class RpcRegistrarTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system, true);
     }
 
@@ -95,7 +95,7 @@ public class RpcRegistrarTest {
     }
 
     @Test
-    public void testHandleReceiveAddEndpoint() throws Exception {
+    public void testHandleReceiveAddEndpoint() {
         final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = ImmutableMap.of(
                 endpointAddress, Optional.of(firstEndpoint));
         testActorRef.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
@@ -106,7 +106,7 @@ public class RpcRegistrarTest {
     }
 
     @Test
-    public void testHandleReceiveRemoveEndpoint() throws Exception {
+    public void testHandleReceiveRemoveEndpoint() {
         final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = ImmutableMap.of(
                 endpointAddress, Optional.empty());
         testActorRef.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
@@ -114,7 +114,7 @@ public class RpcRegistrarTest {
     }
 
     @Test
-    public void testHandleReceiveUpdateEndpoint() throws Exception {
+    public void testHandleReceiveUpdateEndpoint() {
         final InOrder inOrder = Mockito.inOrder(service, oldReg, newReg);
 
         testActorRef.tell(new UpdateRemoteEndpoints(ImmutableMap.of(endpointAddress, Optional.of(firstEndpoint))),

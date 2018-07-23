@@ -55,13 +55,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
             }
 
             final String[] strategyClassAndDelay = ((String) properties.get(key)).split(",");
-            final Class<? extends EntityOwnerSelectionStrategy> aClass;
-            try {
-                aClass = loadClass(strategyClassAndDelay[0]);
-            } catch (final ClassNotFoundException e) {
-                LOG.error("Failed to load class {}, ignoring it", strategyClassAndDelay[0], e);
-                continue;
-            }
+            final Class<? extends EntityOwnerSelectionStrategy> aClass = loadClass(strategyClassAndDelay[0]);
 
             final long delay;
             if (strategyClassAndDelay.length > 1) {
@@ -79,8 +73,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
     }
 
     @SuppressWarnings("unchecked")
-    private static Class<? extends EntityOwnerSelectionStrategy> loadClass(final String strategyClassAndDelay)
-            throws ClassNotFoundException {
+    private static Class<? extends EntityOwnerSelectionStrategy> loadClass(final String strategyClassAndDelay) {
         final Class<?> clazz;
         try {
             clazz = EntityOwnerSelectionStrategyConfigReader.class.getClassLoader().loadClass(strategyClassAndDelay);

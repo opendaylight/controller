@@ -140,7 +140,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         }
 
         @Override
-        public ShardTransaction create() throws Exception {
+        public ShardTransaction create() {
             final ShardTransaction tx;
             switch (type) {
                 case READ_ONLY:

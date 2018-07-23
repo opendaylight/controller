@@ -29,7 +29,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,7 +110,7 @@ public class DistributedDataStoreIntegrationTest {
             .shardHeartbeatIntervalInMillis(100);
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
@@ -120,7 +119,7 @@ public class DistributedDataStoreIntegrationTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system, Boolean.TRUE);
         system = null;
     }

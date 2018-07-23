@@ -106,7 +106,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         factory.close();
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
@@ -125,7 +125,7 @@ public class RaftActorTest extends AbstractActorTest {
 
 
     @Test
-    public void testRaftActorRecoveryWithPersistenceEnabled() throws Exception {
+    public void testRaftActorRecoveryWithPersistenceEnabled() {
         TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled starting");
 
         TestKit kit = new TestKit(getSystem());
@@ -212,7 +212,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorRecoveryWithPersistenceDisabled() throws Exception {
+    public void testRaftActorRecoveryWithPersistenceDisabled() {
         String persistenceId = factory.generateActorId("follower-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -233,7 +233,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testUpdateElectionTermPersistedWithPersistenceDisabled() throws Exception {
+    public void testUpdateElectionTermPersistedWithPersistenceDisabled() {
         final TestKit kit = new TestKit(getSystem());
         String persistenceId = factory.generateActorId("follower-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -393,7 +393,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testApplyState() throws Exception {
+    public void testApplyState() {
         String persistenceId = factory.generateActorId("leader-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -958,7 +958,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testUpdateConfigParam() throws Exception {
+    public void testUpdateConfigParam() {
         DefaultConfigParamsImpl emptyConfig = new DefaultConfigParamsImpl();
         String persistenceId = factory.generateActorId("follower-");
         ImmutableMap<String, String> peerAddresses =
@@ -1006,7 +1006,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testGetSnapshot() throws Exception {
+    public void testGetSnapshot() {
         TEST_LOG.info("testGetSnapshot starting");
 
         final TestKit kit = new TestKit(getSystem());
@@ -1095,7 +1095,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRestoreFromSnapshot() throws Exception {
+    public void testRestoreFromSnapshot() {
         TEST_LOG.info("testRestoreFromSnapshot starting");
 
         String persistenceId = factory.generateActorId("test-actor-");
@@ -1208,7 +1208,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testNonVotingOnRecovery() throws Exception {
+    public void testNonVotingOnRecovery() {
         TEST_LOG.info("testNonVotingOnRecovery starting");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -1234,7 +1234,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testLeaderTransitioning() throws Exception {
+    public void testLeaderTransitioning() {
         TEST_LOG.info("testLeaderTransitioning starting");
 
         ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());

@@ -34,7 +34,7 @@ public class ConnectedClientConnectionTest
         extends AbstractClientConnectionTest<ConnectedClientConnection<BackendInfo>, BackendInfo> {
 
     @Test
-    public void testCheckTimeoutConnectionTimedout() throws Exception {
+    public void testCheckTimeoutConnectionTimedout() {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
         final long now = context.ticker().read() + ConnectedClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS;
@@ -51,7 +51,7 @@ public class ConnectedClientConnectionTest
 
     @Override
     @Test
-    public void testReconnectConnection() throws Exception {
+    public void testReconnectConnection() {
         final ClientActorBehavior<BackendInfo> behavior = mock(ClientActorBehavior.class);
         connection.lockedReconnect(behavior, mock(RequestException.class));
         verify(behavior).reconnectConnection(same(connection), any(ReconnectingClientConnection.class));

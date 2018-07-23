@@ -28,13 +28,13 @@ public class MeteredBoundedMailboxTest {
     private final ReentrantLock lock = new ReentrantLock();
 
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() {
         config = new CommonConfig.Builder<>("testsystem").withConfigReader(ConfigFactory::load).build();
         actorSystem = ActorSystem.create("testsystem", config.get());
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
         if (actorSystem != null) {
             actorSystem.terminate();
             actorSystem = null;
@@ -42,7 +42,7 @@ public class MeteredBoundedMailboxTest {
     }
 
     @Test
-    public void shouldSendMsgToDeadLetterWhenQueueIsFull() throws InterruptedException {
+    public void shouldSendMsgToDeadLetterWhenQueueIsFull() {
         final TestKit mockReceiver = new TestKit(actorSystem);
         actorSystem.eventStream().subscribe(mockReceiver.testActor(), DeadLetter.class);
 
@@ -86,7 +86,7 @@ public class MeteredBoundedMailboxTest {
         }
 
         @Override
-        public void onReceive(final Object message) throws Exception {
+        public void onReceive(final Object message) {
             lock.lock();
             try {
                 if ("ping".equals(message)) {

@@ -39,14 +39,14 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     }
 
     @Test
-    public void getPersistenceProtocolTest() throws Exception {
+    public void getPersistenceProtocolTest() {
         final Optional<PersistenceProtocol> result = OBJECT.getPersistenceProtocol();
         Assert.assertTrue(result.isPresent());
         Assert.assertEquals(PROTOCOL, result.get());
     }
 
     @Test
-    public void getModificationsTest() throws Exception {
+    public void getModificationsTest() {
         final List<TransactionModification> result = OBJECT.getModifications();
         Assert.assertNotNull(result);
         Assert.assertEquals(MODIFICATIONS, result);
@@ -60,7 +60,7 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ModifyTransactionRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

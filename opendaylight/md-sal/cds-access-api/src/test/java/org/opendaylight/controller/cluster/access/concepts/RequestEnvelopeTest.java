@@ -57,7 +57,7 @@ public class RequestEnvelopeTest extends AbstractEnvelopeTest<RequestEnvelope> {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         system.terminate();
     }
 }

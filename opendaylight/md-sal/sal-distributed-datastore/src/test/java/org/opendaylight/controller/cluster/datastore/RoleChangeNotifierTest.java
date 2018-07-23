@@ -28,7 +28,7 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 public class RoleChangeNotifierTest extends AbstractActorTest {
 
     @Test
-    public void testHandleRegisterRoleChangeListener() throws Exception {
+    public void testHandleRegisterRoleChangeListener() {
         new TestKit(getSystem()) {
             {
                 String memberId = "testHandleRegisterRoleChangeListener";
@@ -51,7 +51,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
     }
 
     @Test
-    public void testHandleRaftRoleChanged() throws Exception {
+    public void testHandleRaftRoleChanged() {
         new TestKit(getSystem()) {
             {
                 String memberId = "testHandleRegisterRoleChangeListenerWithNotificationSet";
@@ -88,7 +88,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
     }
 
     @Test
-    public void testHandleLeaderStateChanged() throws Exception {
+    public void testHandleLeaderStateChanged() {
         new TestKit(getSystem()) {
             {
                 String actorId = "testHandleLeaderStateChanged";

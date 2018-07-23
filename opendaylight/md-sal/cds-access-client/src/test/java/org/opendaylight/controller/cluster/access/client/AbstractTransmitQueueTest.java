@@ -55,25 +55,25 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     protected abstract T createQueue();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         system = ActorSystem.apply();
         probe = new TestProbe(system);
         queue = createQueue();
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public abstract void testCanTransmitCount() throws Exception;
+    public abstract void testCanTransmitCount();
 
     @Test(expected = UnsupportedOperationException.class)
-    public abstract void testTransmit() throws Exception;
+    public abstract void testTransmit();
 
     @Test
-    public void testAsIterable() throws Exception {
+    public void testAsIterable() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
@@ -87,13 +87,13 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testTicksStalling() throws Exception {
+    public void testTicksStalling() {
         final long now = Ticker.systemTicker().read();
         Assert.assertEquals(0, queue.ticksStalling(now));
     }
 
     @Test
-    public void testCompleteReponseNotMatchingRequest() throws Exception {
+    public void testCompleteReponseNotMatchingRequest() {
         final long requestSequence = 0L;
         final long txSequence = 0L;
         final long sessionId = 0L;
@@ -131,7 +131,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testIsEmpty() throws Exception {
+    public void testIsEmpty() {
         Assert.assertTrue(queue.isEmpty());
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
@@ -141,7 +141,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testPeek() throws Exception {
+    public void testPeek() {
         final Request<?, ?> request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Request<?, ?> request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
@@ -154,7 +154,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testPoison() throws Exception {
+    public void testPoison() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();

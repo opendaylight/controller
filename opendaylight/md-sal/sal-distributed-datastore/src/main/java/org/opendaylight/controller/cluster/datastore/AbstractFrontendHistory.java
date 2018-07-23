@@ -180,8 +180,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         tree.removeTransactionChain(getIdentifier());
     }
 
-    private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id)
-            throws RequestException {
+    private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id) {
         if (request instanceof CommitLocalTransactionRequest) {
             LOG.debug("{}: allocating new ready transaction {}", persistenceId(), id);
             tree.getStats().incrementReadWriteTransactionCount();
@@ -199,12 +198,12 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         return createOpenTransaction(id);
     }
 
-    abstract FrontendTransaction createOpenSnapshot(TransactionIdentifier id) throws RequestException;
+    abstract FrontendTransaction createOpenSnapshot(TransactionIdentifier id);
 
-    abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id) throws RequestException;
+    abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id);
 
     abstract FrontendTransaction createReadyTransaction(TransactionIdentifier id, DataTreeModification mod)
-        throws RequestException;
+        ;
 
     abstract ShardDataTreeCohort createFailedCohort(TransactionIdentifier id, DataTreeModification mod,
             Exception failure);

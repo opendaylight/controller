@@ -76,7 +76,7 @@ public class RpcRegistryTest {
     private int routeIdCounter = 1;
 
     @BeforeClass
-    public static void staticSetup() throws InterruptedException {
+    public static void staticSetup() {
         AkkaConfigurationReader reader = ConfigFactory::load;
 
         RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").gossipTickInterval("200ms")
@@ -173,7 +173,7 @@ public class RpcRegistryTest {
      * deleted
      */
     @Test
-    public void testAddRemoveRpcOnSameNode() throws Exception {
+    public void testAddRemoveRpcOnSameNode() {
         LOG.info("testAddRemoveRpcOnSameNode starting");
 
         Address nodeAddress = node1.provider().getDefaultAddress();
@@ -210,7 +210,7 @@ public class RpcRegistryTest {
      * 1 node, ensure 2nd node gets updated
      */
     @Test
-    public void testRpcAddRemoveInCluster() throws Exception {
+    public void testRpcAddRemoveInCluster() {
 
         LOG.info("testRpcAddRemoveInCluster starting");
 
@@ -262,7 +262,7 @@ public class RpcRegistryTest {
      * Three node cluster. Register rpc on 2 nodes. Ensure 3rd gets updated.
      */
     @Test
-    public void testRpcAddedOnMultiNodes() throws Exception {
+    public void testRpcAddedOnMultiNodes() {
         final TestKit testKit = new TestKit(node3);
 
         // Add rpc on node 1

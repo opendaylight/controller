@@ -22,7 +22,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
@@ -38,8 +37,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class NormalizedNodeAggregatorTest {
 
     @Test
-    public void testAggregate() throws InterruptedException, ExecutionException, ReadFailedException,
-            DataValidationFailedException {
+    public void testAggregate() throws InterruptedException, ExecutionException,
+        DataValidationFailedException {
         SchemaContext schemaContext = SchemaContextHelper.full();
         NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);

@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -59,18 +58,17 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
-    FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) throws RequestException {
+    FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) {
         return FrontendReadOnlyTransaction.create(this, tree.newReadOnlyTransaction(id));
     }
 
     @Override
-    FrontendTransaction createOpenTransaction(final TransactionIdentifier id) throws RequestException {
+    FrontendTransaction createOpenTransaction(final TransactionIdentifier id) {
         return FrontendReadWriteTransaction.createOpen(this, tree.newReadWriteTransaction(id));
     }
 
     @Override
-    FrontendTransaction createReadyTransaction(final TransactionIdentifier id, final DataTreeModification mod)
-            throws RequestException {
+    FrontendTransaction createReadyTransaction(final TransactionIdentifier id, final DataTreeModification mod) {
         return FrontendReadWriteTransaction.createReady(this, id, mod);
     }
 

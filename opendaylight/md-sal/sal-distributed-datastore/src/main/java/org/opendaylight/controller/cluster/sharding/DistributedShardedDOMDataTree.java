@@ -238,17 +238,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
 
         //create shard registration for DEFAULT_SHARD
-        try {
-            initDefaultShard(LogicalDatastoreType.CONFIGURATION);
-        } catch (final InterruptedException | ExecutionException e) {
-            throw new IllegalStateException("Unable to create default shard frontend for config shard", e);
-        }
-
-        try {
-            initDefaultShard(LogicalDatastoreType.OPERATIONAL);
-        } catch (final InterruptedException | ExecutionException e) {
-            throw new IllegalStateException("Unable to create default shard frontend for operational shard", e);
-        }
+        initDefaultShard(LogicalDatastoreType.CONFIGURATION);
+        initDefaultShard(LogicalDatastoreType.OPERATIONAL);
     }
 
     private ListenableFuture<List<Void>> handleConfigShardLookup() {
@@ -267,7 +258,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         ask.onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(final Throwable throwable, final Object result) throws Throwable {
+            public void onComplete(final Throwable throwable, final Object result) {
                 if (throwable != null) {
                     future.setException(throwable);
                 } else {
@@ -510,8 +501,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void initDefaultShard(final LogicalDatastoreType logicalDatastoreType)
-            throws ExecutionException, InterruptedException {
+    private void initDefaultShard(final LogicalDatastoreType logicalDatastoreType) {
 
         final PrefixedShardConfigWriter writer = writerMap.get(logicalDatastoreType);
 

@@ -74,7 +74,7 @@ final class LazyDOMRpcResultFuture implements CheckedFuture<DOMRpcResult, DOMRpc
     }
 
     @Override
-    public DOMRpcResult checkedGet() throws DOMRpcException {
+    public DOMRpcResult checkedGet() {
         try {
             return get();
         } catch (InterruptedException | ExecutionException e) {
@@ -84,7 +84,7 @@ final class LazyDOMRpcResultFuture implements CheckedFuture<DOMRpcResult, DOMRpc
     }
 
     @Override
-    public DOMRpcResult checkedGet(final long timeout, final TimeUnit unit) throws TimeoutException, DOMRpcException {
+    public DOMRpcResult checkedGet(final long timeout, final TimeUnit unit) throws TimeoutException {
         try {
             return get(timeout, unit);
         } catch (InterruptedException | ExecutionException e) {

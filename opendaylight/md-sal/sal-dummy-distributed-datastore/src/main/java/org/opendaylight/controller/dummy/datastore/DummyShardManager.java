@@ -14,12 +14,12 @@ import akka.actor.UntypedActor;
 
 public class DummyShardManager extends UntypedActor {
     public DummyShardManager(Configuration configuration, String memberName, String[] shardNames,
-            String type) throws Exception {
+            String type) {
         new DummyShardsCreator(configuration, context(), memberName, shardNames, type).create();
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(Object message) {
 
     }
 

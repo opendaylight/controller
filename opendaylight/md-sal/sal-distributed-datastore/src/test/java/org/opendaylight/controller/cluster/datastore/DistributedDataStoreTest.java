@@ -46,7 +46,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     private Timeout shardElectionTimeout;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         schemaContext = TestModel.createTestContext();

@@ -48,11 +48,11 @@ public class EventSourceTopicTest {
     EventSourceTopology eventSourceTopologyMock;
 
     @BeforeClass
-    public static void initTestClass() throws IllegalAccessException, InstantiationException {
+    public static void initTestClass() {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         final NotificationPattern notificationPattern = new NotificationPattern("value1");
         eventSourceServiceMock = mock(EventSourceService.class);
         doReturn(RpcResultBuilder.success(new JoinTopicOutputBuilder().setStatus(JoinTopicStatus.Up).build())

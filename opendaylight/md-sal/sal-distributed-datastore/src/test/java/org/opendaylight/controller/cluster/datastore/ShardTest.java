@@ -34,7 +34,6 @@ import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -103,7 +102,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -166,7 +164,7 @@ public class ShardTest extends AbstractShardTest {
             boolean firstElectionTimeout = true;
 
             @Override
-            public Shard create() throws Exception {
+            public Shard create() {
                 return new Shard(newShardBuilder()) {
                     @Override
                     public void handleCommand(final Object message) {
@@ -267,7 +265,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testPeerAddressResolved() throws Exception {
+    public void testPeerAddressResolved() {
         new ShardTestKit(getSystem()) {
             {
                 final ShardIdentifier peerID = ShardIdentifier.create("inventory", MemberName.forName("member-2"),
@@ -433,7 +431,7 @@ public class ShardTest extends AbstractShardTest {
                 }
             }
 
-            void onSuccess(final Object resp) throws Exception {
+            void onSuccess(final Object resp) {
             }
         }
 
@@ -458,7 +456,7 @@ public class ShardTest extends AbstractShardTest {
             }
 
             @Override
-            void onSuccess(final Object resp) throws Exception {
+            void onSuccess(final Object resp) {
                 final CanCommitTransactionReply canCommitReply =
                         CanCommitTransactionReply.fromSerializable(resp);
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
@@ -566,7 +564,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testBatchedModificationsWithNoCommitOnReady() throws Exception {
+    public void testBatchedModificationsWithNoCommitOnReady() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -619,7 +617,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testBatchedModificationsWithCommitOnReady() throws Exception {
+    public void testBatchedModificationsWithCommitOnReady() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -688,7 +686,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testBatchedModificationsWithOperationFailure() throws Exception {
+    public void testBatchedModificationsWithOperationFailure() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -727,7 +725,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testBatchedModificationsOnTransactionChain() throws Exception {
+    public void testBatchedModificationsOnTransactionChain() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -790,7 +788,7 @@ public class ShardTest extends AbstractShardTest {
                     private static final long serialVersionUID = 1L;
 
                     @Override
-                    public Shard create() throws Exception {
+                    public Shard create() {
                         return new Shard(newShardBuilder()) {
                             @Override
                             protected boolean isLeader() {
@@ -855,16 +853,16 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadyWithReadWriteImmediateCommit() throws Exception {
+    public void testReadyWithReadWriteImmediateCommit() {
         testReadyWithImmediateCommit(true);
     }
 
     @Test
-    public void testReadyWithWriteOnlyImmediateCommit() throws Exception {
+    public void testReadyWithWriteOnlyImmediateCommit() {
         testReadyWithImmediateCommit(false);
     }
 
-    private void testReadyWithImmediateCommit(final boolean readWrite) throws Exception {
+    private void testReadyWithImmediateCommit(final boolean readWrite) {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -892,7 +890,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadyLocalTransactionWithImmediateCommit() throws Exception {
+    public void testReadyLocalTransactionWithImmediateCommit() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -926,7 +924,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadyLocalTransactionWithThreePhaseCommit() throws Exception {
+    public void testReadyLocalTransactionWithThreePhaseCommit() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -972,7 +970,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadWriteCommitWithPersistenceDisabled() throws Exception {
+    public void testReadWriteCommitWithPersistenceDisabled() {
         dataStoreContextBuilder.persistent(false);
         new ShardTestKit(getSystem()) {
             {
@@ -1314,7 +1312,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testAbortWithCommitPending() throws Exception {
+    public void testAbortWithCommitPending() {
         new ShardTestKit(getSystem()) {
             {
                 final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
@@ -1497,7 +1495,7 @@ public class ShardTest extends AbstractShardTest {
 //    }
 
     @Test
-    public void testTransactionCommitWithPriorExpiredCohortEntries() throws Exception {
+    public void testTransactionCommitWithPriorExpiredCohortEntries() {
         dataStoreContextBuilder.shardTransactionCommitTimeoutInSeconds(1);
         new ShardTestKit(getSystem()) {
             {
@@ -1536,7 +1534,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testTransactionCommitWithSubsequentExpiredCohortEntry() throws Exception {
+    public void testTransactionCommitWithSubsequentExpiredCohortEntry() {
         dataStoreContextBuilder.shardTransactionCommitTimeoutInSeconds(1);
         new ShardTestKit(getSystem()) {
             {
@@ -1596,7 +1594,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCanCommitBeforeReadyFailure() throws Exception {
+    public void testCanCommitBeforeReadyFailure() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -1663,7 +1661,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testAbortAfterReady() throws Exception {
+    public void testAbortAfterReady() {
         dataStoreContextBuilder.shardTransactionCommitTimeoutInSeconds(1);
         new ShardTestKit(getSystem()) {
             {
@@ -1708,7 +1706,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testAbortQueuedTransaction() throws Exception {
+    public void testAbortQueuedTransaction() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -1835,7 +1833,7 @@ public class ShardTest extends AbstractShardTest {
             }
 
             private void awaitAndValidateSnapshot(final NormalizedNode<?, ?> expectedRoot)
-                    throws InterruptedException, IOException {
+                    throws InterruptedException {
                 assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
                 assertTrue("Invalid saved snapshot " + savedSnapshot.get(), savedSnapshot.get() instanceof Snapshot);
@@ -1846,8 +1844,7 @@ public class ShardTest extends AbstractShardTest {
                 savedSnapshot.set(null);
             }
 
-            private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?, ?> expectedRoot)
-                    throws IOException {
+            private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?, ?> expectedRoot) {
                 final NormalizedNode<?, ?> actual = ((ShardSnapshotState)snapshot.getState()).getSnapshot()
                         .getRootNode().get();
                 assertEquals("Root node", expectedRoot, actual);
@@ -1859,7 +1856,7 @@ public class ShardTest extends AbstractShardTest {
      * This test simply verifies that the applySnapShot logic will work.
      */
     @Test
-    public void testInMemoryDataTreeRestore() throws ReadFailedException, DataValidationFailedException {
+    public void testInMemoryDataTreeRestore() throws DataValidationFailedException {
         final DataTree store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SCHEMA_CONTEXT);
 
@@ -1939,7 +1936,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testRegisterRoleChangeListener() throws Exception {
+    public void testRegisterRoleChangeListener() {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -1976,7 +1973,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testFollowerInitialSyncStatus() throws Exception {
+    public void testFollowerInitialSyncStatus() {
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
                 newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testFollowerInitialSyncStatus");
@@ -2110,7 +2107,7 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testServerRemoved() throws Exception {
+    public void testServerRemoved() {
         final TestActorRef<MessageCollectorActor> parent = actorFactory.createTestActor(MessageCollectorActor.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 

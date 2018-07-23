@@ -32,7 +32,7 @@ public class ClosedTransactionExceptionTest extends RequestExceptionTest<ClosedT
     }
 
     @Test
-    public void testIsSuccessful() throws Exception {
+    public void testIsSuccessful() {
         Assert.assertEquals(true, OBJECT.isSuccessful());
     }
 

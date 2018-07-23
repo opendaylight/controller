@@ -366,8 +366,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void assertExceptionOnCall(final Callable<Void> callable, final Class<? extends Exception> expType)
-            throws Exception {
+    void assertExceptionOnCall(final Callable<Void> callable, final Class<? extends Exception> expType) {
         try {
             callable.call();
             fail("Expected " + expType.getSimpleName());
@@ -377,7 +376,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
-            final Class<? extends Exception> expType) throws Exception {
+            final Class<? extends Exception> expType) {
         assertExceptionOnCall(() -> {
             txChain.newWriteOnlyTransaction();
             return null;

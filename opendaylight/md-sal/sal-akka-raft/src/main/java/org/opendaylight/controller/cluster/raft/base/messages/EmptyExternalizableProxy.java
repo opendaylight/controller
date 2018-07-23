@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 
 import com.google.common.base.Preconditions;
 import java.io.Externalizable;
-import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
@@ -29,11 +28,11 @@ public abstract class EmptyExternalizableProxy implements Externalizable {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) {
     }
 
     protected Object readResolve() {

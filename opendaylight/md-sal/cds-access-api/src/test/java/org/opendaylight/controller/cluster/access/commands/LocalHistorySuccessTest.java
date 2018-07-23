@@ -22,7 +22,7 @@ public class LocalHistorySuccessTest extends AbstractRequestSuccessTest<LocalHis
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final LocalHistorySuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());
         Assert.assertEquals(OBJECT.getTarget(), clone.getTarget());

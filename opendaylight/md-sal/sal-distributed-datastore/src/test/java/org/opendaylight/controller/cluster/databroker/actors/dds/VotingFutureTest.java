@@ -29,14 +29,14 @@ public class VotingFutureTest {
     private VotingFuture<Object> future;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         result = new Object();
         future = new VotingFuture<>(result, 3);
         executor = Executors.newScheduledThreadPool(1);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         executor.shutdownNow();
     }
 

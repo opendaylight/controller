@@ -191,7 +191,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     @Override
-    protected final void handleRecover(final Object message) throws Exception {
+    protected final void handleRecover(final Object message) {
         if (message instanceof RecoveryCompleted) {
             if (incarnation != null) {
                 incarnation = incarnation + 1;

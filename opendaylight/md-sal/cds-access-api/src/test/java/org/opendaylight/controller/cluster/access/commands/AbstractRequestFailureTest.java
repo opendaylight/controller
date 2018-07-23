@@ -33,12 +33,12 @@ public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>>
     abstract T object();
 
     @Test
-    public void getCauseTest() throws Exception {
+    public void getCauseTest() {
         Assert.assertEquals(CAUSE, object().getCause());
     }
 
     @Test
-    public void isHardFailureTest() throws Exception {
+    public void isHardFailureTest() {
         Assert.assertTrue(object().isHardFailure());
     }
 
