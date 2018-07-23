@@ -16,7 +16,6 @@ import com.google.common.cache.RemovalNotification;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -55,7 +54,7 @@ public class MessageSlicer implements AutoCloseable {
         this.logContext = builder.logContext + "_slicer-id-" + id;
 
         CacheBuilder<Identifier, SlicedMessageState<ActorRef>> cacheBuilder =
-                CacheBuilder.newBuilder().removalListener(notification -> stateRemoved(notification));
+                CacheBuilder.newBuilder().removalListener(this::stateRemoved);
         if (builder.expireStateAfterInactivityDuration > 0) {
             cacheBuilder = cacheBuilder.expireAfterAccess(builder.expireStateAfterInactivityDuration,
                     builder.expireStateAfterInactivityUnit);
@@ -206,12 +205,8 @@ public class MessageSlicer implements AutoCloseable {
      * @param filter filters by Identifier
      */
     public void cancelSlicing(@Nonnull final Predicate<Identifier> filter) {
-        final Iterator<MessageSliceIdentifier> iter = stateCache.asMap().keySet().iterator();
-        while (iter.hasNext()) {
-            if (filter.test(iter.next().getClientIdentifier())) {
-                iter.remove();
-            }
-        }
+        stateCache.asMap().keySet().removeIf(
+            messageSliceIdentifier -> filter.test(messageSliceIdentifier.getClientIdentifier()));
     }
 
     private static MessageSlice getNextSliceMessage(final SlicedMessageState<ActorRef> state) throws IOException {

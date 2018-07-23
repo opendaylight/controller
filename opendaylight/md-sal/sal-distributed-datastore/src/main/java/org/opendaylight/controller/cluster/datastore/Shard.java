@@ -395,9 +395,7 @@ public class Shard extends RaftActor {
                         responseMessageSlicer.slice(SliceOptions.builder().identifier(success.getTarget())
                             .message(envelope.newSuccessEnvelope(success, executionTimeNanos))
                             .sendTo(envelope.getMessage().getReplyTo()).replyTo(self())
-                            .onFailureCallback(t -> {
-                                LOG.warn("Error slicing response {}", success, t);
-                            }).build()));
+                            .onFailureCallback(t -> LOG.warn("Error slicing response {}", success, t)).build()));
                 } else {
                     envelope.sendSuccess(success, executionTimeNanos);
                 }

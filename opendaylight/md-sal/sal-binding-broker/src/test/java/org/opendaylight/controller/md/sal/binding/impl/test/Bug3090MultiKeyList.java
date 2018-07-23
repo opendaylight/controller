@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class Bug3090MultiKeyList extends AbstractDataTreeChangeListenerTest {
         final Root root = new RootBuilder().setListInRoot(listInRoots).build();
 
         final TestListener<Root> listener = createListener(LogicalDatastoreType.CONFIGURATION, ROOT_PATH,
-                match(ModificationType.WRITE, ROOT_PATH, dataBefore -> dataBefore == null,
+                match(ModificationType.WRITE, ROOT_PATH, Objects::isNull,
                         (Function<Root, Boolean>) dataAfter -> checkData(root, dataAfter)));
 
         final ReadWriteTransaction readWriteTransaction = getDataBroker().newReadWriteTransaction();

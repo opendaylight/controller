@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
@@ -49,8 +48,7 @@ public final  class MessageAssembler implements AutoCloseable {
 
         stateCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(builder.expireStateAfterInactivityDuration, builder.expireStateAfterInactivityUnit)
-                .removalListener((RemovalListener<Identifier, AssembledMessageState>) notification ->
-                    stateRemoved(notification)).build();
+                .removalListener(this::stateRemoved).build();
     }
 
     /**

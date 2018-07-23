@@ -13,6 +13,7 @@ import static java.util.Collections.emptyList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,8 +33,8 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
     private final Object anchor;
     private final String createDescription;
 
-    private final Set<CloseTracked<T>> tracked = new ConcurrentSkipListSet<>(
-        (o1, o2) -> Integer.compare(System.identityHashCode(o1), System.identityHashCode(o2)));
+    private final Set<CloseTracked<T>> tracked =
+        new ConcurrentSkipListSet<>(Comparator.comparingInt(System::identityHashCode));
 
     private final boolean isDebugContextEnabled;
 
@@ -101,16 +102,13 @@ public class CloseTrackedRegistry<T extends CloseTracked<T>> {
         }
 
         Set<CloseTrackedRegistryReportEntry<T>> report = new HashSet<>();
-        map.forEach((stackTraceElements, number) -> {
-            copyOfTracked.stream().filter(closeTracked -> {
-                StackTraceElement[] closeTrackedStackTraceArray = closeTracked.getAllocationContextStackTrace();
-                List<StackTraceElement> closeTrackedStackTraceElements =
-                        closeTrackedStackTraceArray != null ? asList(closeTrackedStackTraceArray) : emptyList();
-                return closeTrackedStackTraceElements.equals(stackTraceElements);
-            }).findAny().ifPresent(exampleCloseTracked -> {
-                report.add(new CloseTrackedRegistryReportEntry<>(exampleCloseTracked, number, stackTraceElements));
-            });
-        });
+        map.forEach((stackTraceElements, number) -> copyOfTracked.stream().filter(closeTracked -> {
+            StackTraceElement[] closeTrackedStackTraceArray = closeTracked.getAllocationContextStackTrace();
+            List<StackTraceElement> closeTrackedStackTraceElements =
+                closeTrackedStackTraceArray != null ? asList(closeTrackedStackTraceArray) : emptyList();
+            return closeTrackedStackTraceElements.equals(stackTraceElements);
+        }).findAny().ifPresent(exampleCloseTracked -> report.add(
+            new CloseTrackedRegistryReportEntry<>(exampleCloseTracked, number, stackTraceElements))));
         return report;
     }
 

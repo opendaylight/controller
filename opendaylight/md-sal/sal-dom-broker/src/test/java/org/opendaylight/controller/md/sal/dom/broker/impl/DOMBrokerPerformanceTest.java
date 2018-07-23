@@ -213,7 +213,7 @@ public class DOMBrokerPerformanceTest {
         });
 
         measure("Txs:1 Submit, Finish", (Callable<Void>) () -> {
-            measure("Txs:1 Submit", (Callable<ListenableFuture<?>>) () -> writeTx.submit()).get();
+            measure("Txs:1 Submit", (Callable<ListenableFuture<?>>) writeTx::submit).get();
             return null;
         });
     }
