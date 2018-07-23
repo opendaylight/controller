@@ -93,11 +93,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
     }
 
     private Collection<String> addToCurrentCandidates(YangInstanceIdentifier entityId, String newCandidate) {
-        Collection<String> candidates = currentCandidates.get(entityId);
-        if (candidates == null) {
-            candidates = new LinkedHashSet<>();
-            currentCandidates.put(entityId, candidates);
-        }
+        Collection<String> candidates = currentCandidates.computeIfAbsent(entityId, k -> new LinkedHashSet<>());
 
         candidates.add(newCandidate);
         return candidates;

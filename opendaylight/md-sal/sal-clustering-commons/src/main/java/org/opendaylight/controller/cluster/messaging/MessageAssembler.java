@@ -49,8 +49,7 @@ public final  class MessageAssembler implements AutoCloseable {
 
         stateCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(builder.expireStateAfterInactivityDuration, builder.expireStateAfterInactivityUnit)
-                .removalListener((RemovalListener<Identifier, AssembledMessageState>) notification ->
-                    stateRemoved(notification)).build();
+                .removalListener(this::stateRemoved).build();
     }
 
     /**

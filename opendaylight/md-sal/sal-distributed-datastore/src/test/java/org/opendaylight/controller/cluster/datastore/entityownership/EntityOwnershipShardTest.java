@@ -636,9 +636,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
             leaderLastApplied.set(rs.getLastApplied());
         });
 
-        verifyRaftState(peer2, rs -> {
-            assertEquals("LastApplied", leaderLastApplied.get(), rs.getLastIndex());
-        });
+        verifyRaftState(peer2, rs -> assertEquals("LastApplied", leaderLastApplied.get(), rs.getLastIndex()));
 
         // Kill the local leader and elect peer2 the leader. This should cause a new owner to be selected for
         // the entities (1 and 3) previously owned by the local leader member.

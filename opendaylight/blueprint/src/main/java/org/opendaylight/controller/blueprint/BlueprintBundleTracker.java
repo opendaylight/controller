@@ -308,7 +308,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         }
 
         if (!bundlesToDestroy.isEmpty()) {
-            Collections.sort(bundlesToDestroy, (b1, b2) -> (int) (b2.getLastModified() - b1.getLastModified()));
+            bundlesToDestroy.sort((b1, b2) -> (int) (b2.getLastModified() - b1.getLastModified()));
 
             LOG.debug("Selected bundles {} for destroy (no services in use)", bundlesToDestroy);
         } else {

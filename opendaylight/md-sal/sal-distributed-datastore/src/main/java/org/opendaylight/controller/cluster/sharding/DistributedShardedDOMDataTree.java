@@ -34,6 +34,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -374,16 +375,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         LOG.debug("{}: Resolving additions : {}", memberName, additions);
         final ArrayList<DOMDataTreeIdentifier> list = new ArrayList<>(additions);
         // we need to register the shards from top to bottom, so we need to atleast make sure the ordering reflects that
-        Collections.sort(list, (o1, o2) -> {
-            if (o1.getRootIdentifier().getPathArguments().size() < o2.getRootIdentifier().getPathArguments().size()) {
-                return -1;
-            } else if (o1.getRootIdentifier().getPathArguments().size()
-                    == o2.getRootIdentifier().getPathArguments().size()) {
-                return 0;
-            } else {
-                return 1;
-            }
-        });
+        list.sort(Comparator.comparingInt(o -> o.getRootIdentifier().getPathArguments().size()));
         list.forEach(this::createShardFrontend);
     }
 

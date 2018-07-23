@@ -398,13 +398,7 @@ final class ShardCommitCoordinator {
     }
 
     void checkForExpiredTransactions(final long timeout, final Shard shard) {
-        Iterator<CohortEntry> iter = cohortCache.values().iterator();
-        while (iter.hasNext()) {
-            CohortEntry cohortEntry = iter.next();
-            if (cohortEntry.isFailed()) {
-                iter.remove();
-            }
-        }
+        cohortCache.values().removeIf(CohortEntry::isFailed);
     }
 
     void abortPendingTransactions(final String reason, final Shard shard) {

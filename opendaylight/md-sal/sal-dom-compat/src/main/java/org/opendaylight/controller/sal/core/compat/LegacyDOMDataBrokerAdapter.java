@@ -98,9 +98,9 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
                     final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegateListener;
                     if (listener instanceof ClusteredDOMDataTreeChangeListener) {
                         delegateListener = (org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener)
-                            changes -> listener.onDataTreeChanged(changes);
+                            listener::onDataTreeChanged;
                     } else {
-                        delegateListener = changes -> listener.onDataTreeChanged(changes);
+                        delegateListener = listener::onDataTreeChanged;
                     }
 
                     final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener> reg =
@@ -127,13 +127,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
                 (org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry) delegateExtensions.get(
                         org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry.class);
         if (delegateCohortRegistry != null) {
-            extBuilder.put(DOMDataTreeCommitCohortRegistry.class, new DOMDataTreeCommitCohortRegistry() {
-                @Override
-                public <T extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<T> registerCommitCohort(
-                        org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier path, T cohort) {
-                    return delegateCohortRegistry.registerCommitCohort(path, cohort);
-                }
-            });
+            extBuilder.put(DOMDataTreeCommitCohortRegistry.class, delegateCohortRegistry::registerCommitCohort);
         }
 
         extensions = extBuilder.build();

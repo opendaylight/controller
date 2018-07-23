@@ -1435,7 +1435,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         Function<ShardSnapshot, String> shardNameTransformer = ShardSnapshot::getName;
 
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2"), Sets.newHashSet(
-                Lists.transform(datastoreSnapshot.getShardSnapshots(), shardNameTransformer)));
+            datastoreSnapshot.getShardSnapshots().stream().map(shardNameTransformer).collect(Collectors.toSet())));
 
         // Add a new replica
 

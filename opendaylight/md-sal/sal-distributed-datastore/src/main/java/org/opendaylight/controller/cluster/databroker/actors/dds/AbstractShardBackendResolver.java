@@ -136,9 +136,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         LOG.debug("Shard {} resolved to {}, attempting to connect", shardName, info);
 
         FutureConverters.toJava(ExplicitAsk.ask(info.getPrimaryShardActor(), connectFunction, CONNECT_TIMEOUT))
-            .whenComplete((response, failure) -> {
-                onConnectResponse(shardName, cookie, future, response, failure);
-            });
+            .whenComplete((response, failure) -> onConnectResponse(shardName, cookie, future, response, failure));
     }
 
     private void onConnectResponse(final String shardName, final long cookie,

@@ -232,13 +232,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
         Map<Long, Object> journal = JOURNALS.get(persistenceId);
         if (journal != null) {
             synchronized (journal) {
-                Iterator<Long> iter = journal.keySet().iterator();
-                while (iter.hasNext()) {
-                    Long num = iter.next();
-                    if (num <= toSequenceNr) {
-                        iter.remove();
-                    }
-                }
+                journal.keySet().removeIf(num -> num <= toSequenceNr);
             }
         }
 

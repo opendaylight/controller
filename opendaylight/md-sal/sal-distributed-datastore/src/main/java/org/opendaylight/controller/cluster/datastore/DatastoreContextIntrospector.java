@@ -311,8 +311,8 @@ public class DatastoreContextIntrospector {
         // Sort the property keys by putting the names prefixed with the data store type last. This
         // is done so data store specific settings are applied after global settings.
         final ArrayList<String> keys = new ArrayList<>(inKeys);
-        Collections.sort(keys, (key1, key2) -> key1.startsWith(dataStoreTypePrefix) ? 1 :
-                   key2.startsWith(dataStoreTypePrefix) ? -1 : key1.compareTo(key2));
+        keys.sort((key1, key2) -> key1.startsWith(dataStoreTypePrefix) ? 1 :
+            key2.startsWith(dataStoreTypePrefix) ? -1 : key1.compareTo(key2));
         return keys;
     }
 
