@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -51,17 +50,16 @@ public class DeleteModification extends AbstractModification {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) {
         setPath(SerializationUtils.deserializePath(in));
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) {
         SerializationUtils.serializePath(getPath(), out);
     }
 
-    public static DeleteModification fromStream(ObjectInput in, short version)
-            throws ClassNotFoundException, IOException {
+    public static DeleteModification fromStream(ObjectInput in, short version) {
         DeleteModification mod = new DeleteModification(version);
         mod.readExternal(in);
         return mod;

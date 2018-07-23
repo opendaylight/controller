@@ -120,7 +120,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void testCaptureToInstall() throws Exception {
+    public void testCaptureToInstall() {
 
         // Force capturing toInstall = true
         snapshotManager.captureToInstall(new SimpleReplicatedLogEntry(0, 1,
@@ -150,7 +150,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testCapture() throws Exception {
+    public void testCapture() {
         boolean capture = snapshotManager.capture(new SimpleReplicatedLogEntry(9, 1,
                 new MockRaftActorContext.MockPayload()), 9);
 
@@ -181,7 +181,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void testCaptureWithNullLastLogEntry() throws Exception {
+    public void testCaptureWithNullLastLogEntry() {
         boolean capture = snapshotManager.capture(null, 1);
 
         assertTrue(capture);
@@ -209,7 +209,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCaptureWithCreateProcedureError() throws Exception {
+    public void testCaptureWithCreateProcedureError() {
         doThrow(new RuntimeException("mock")).when(mockProcedure).accept(anyObject());
 
         boolean capture = snapshotManager.capture(new SimpleReplicatedLogEntry(9, 1,
@@ -224,7 +224,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testIllegalCapture() throws Exception {
+    public void testIllegalCapture() {
         boolean capture = snapshotManager.capture(new SimpleReplicatedLogEntry(9, 1,
                 new MockRaftActorContext.MockPayload()), 9);
 
@@ -244,7 +244,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedToAllIndexMinusOne() throws Exception {
+    public void testPersistWhenReplicatedToAllIndexMinusOne() {
         doReturn(7L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(1L).when(mockReplicatedLog).getSnapshotTerm();
 
@@ -284,7 +284,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedToAllIndexNotMinus() throws Exception {
+    public void testPersistWhenReplicatedToAllIndexNotMinus() {
         doReturn(45L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(6L).when(mockReplicatedLog).getSnapshotTerm();
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);

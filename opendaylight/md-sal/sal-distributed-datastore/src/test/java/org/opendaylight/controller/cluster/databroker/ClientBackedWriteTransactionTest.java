@@ -31,7 +31,7 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
     private DOMStoreThreePhaseCommitCohort readyCohort;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         Mockito.doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
@@ -41,30 +41,30 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
     }
 
     @Override
-    ClientBackedWriteTransaction object() throws Exception {
+    ClientBackedWriteTransaction object() {
         return object;
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         object().write(path, data);
         Mockito.verify(delegate).write(path, data);
     }
 
     @Test
-    public void testMerge() throws Exception {
+    public void testMerge() {
         object().merge(path, data);
         Mockito.verify(delegate).merge(path, data);
     }
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         object().delete(path);
         Mockito.verify(delegate).delete(path);
     }
 
     @Test
-    public void testReady() throws Exception {
+    public void testReady() {
         final DOMStoreThreePhaseCommitCohort result = object().ready();
         Assert.assertNotNull(result);
         Mockito.verify(delegate).ready();

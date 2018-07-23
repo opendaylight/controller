@@ -27,7 +27,7 @@ public class RoleChangeNotifierTest {
     private ActorRef notifier;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         system = ActorSystem.apply();
         notifier = system.actorOf(RoleChangeNotifier.getProps(MEMBER_ID));
         listeners = new ArrayList<>(LISTENER_COUNT);
@@ -37,12 +37,12 @@ public class RoleChangeNotifierTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testHandleReceiveRoleChange() throws Exception {
+    public void testHandleReceiveRoleChange() {
         registerListeners();
         final RoleChanged msg = new RoleChanged(MEMBER_ID, "old", "new");
         notifier.tell(msg, ActorRef.noSender());
@@ -50,7 +50,7 @@ public class RoleChangeNotifierTest {
     }
 
     @Test
-    public void testHandleReceiveLeaderStateChanged() throws Exception {
+    public void testHandleReceiveLeaderStateChanged() {
         registerListeners();
         final LeaderStateChanged msg = new LeaderStateChanged(MEMBER_ID, "leader", (short) 0);
         notifier.tell(msg, ActorRef.noSender());
@@ -58,7 +58,7 @@ public class RoleChangeNotifierTest {
     }
 
     @Test
-    public void testHandleReceiveRegistrationAfterRoleChange() throws Exception {
+    public void testHandleReceiveRegistrationAfterRoleChange() {
         final RoleChanged roleChanged1 = new RoleChanged(MEMBER_ID, "old1", "new1");
         final RoleChanged lastRoleChanged = new RoleChanged(MEMBER_ID, "old2", "new2");
         notifier.tell(roleChanged1, ActorRef.noSender());
@@ -68,7 +68,7 @@ public class RoleChangeNotifierTest {
     }
 
     @Test
-    public void testHandleReceiveRegistrationAfterLeaderStateChange() throws Exception {
+    public void testHandleReceiveRegistrationAfterLeaderStateChange() {
         final LeaderStateChanged leaderStateChanged1 = new LeaderStateChanged(MEMBER_ID, "leader1", (short) 0);
         final LeaderStateChanged lastLeaderStateChanged = new LeaderStateChanged(MEMBER_ID, "leader2", (short) 1);
         notifier.tell(leaderStateChanged1, ActorRef.noSender());

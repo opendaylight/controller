@@ -51,7 +51,7 @@ final class RpcRegistrar extends AbstractUntypedActor {
     }
 
     @Override
-    protected void handleReceive(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         if (message instanceof UpdateRemoteEndpoints) {
             updateRemoteEndpoints(((UpdateRemoteEndpoints) message).getEndpoints());
         } else {

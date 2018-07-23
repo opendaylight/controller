@@ -29,13 +29,13 @@ public class HaltedTransmitQueueTest extends AbstractTransmitQueueTest<TransmitQ
 
     @Test
     @Override
-    public void testCanTransmitCount() throws Exception {
+    public void testCanTransmitCount() {
         Assert.assertFalse(queue.canTransmitCount(0) > 0);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     @Override
-    public void testTransmit() throws Exception {
+    public void testTransmit() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();

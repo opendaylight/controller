@@ -56,7 +56,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     @Test
-    public void testAbort() throws Exception {
+    public void testAbort() {
         transaction.abort();
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
@@ -70,7 +70,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     @Test
-    public void testHandleForwardedRemoteReadRequest() throws Exception {
+    public void testHandleForwardedRemoteReadRequest() {
         final TestProbe probe = createProbe();
         final ReadTransactionRequest request =
                 new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
@@ -88,7 +88,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     @Test
-    public void testHandleForwardedRemoteExistsRequest() throws Exception {
+    public void testHandleForwardedRemoteExistsRequest() {
         final TestProbe probe = createProbe();
         final ExistsTransactionRequest request =
                 new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, true);
@@ -105,7 +105,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     @Test
-    public void testHandleForwardedRemotePurgeRequest() throws Exception {
+    public void testHandleForwardedRemotePurgeRequest() {
         final TestProbe probe = createProbe();
         final TransactionPurgeRequest request =
                 new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
@@ -114,7 +114,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
 
     @Override
     @Test
-    public void testForwardToRemoteAbort() throws Exception {
+    public void testForwardToRemoteAbort() {
         final TestProbe probe = createProbe();
         final AbortLocalTransactionRequest request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
         final ModifyTransactionRequest modifyRequest = testForwardToRemote(request, ModifyTransactionRequest.class);
@@ -124,7 +124,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
 
     @Override
     @Test
-    public void testForwardToRemoteCommit() throws Exception {
+    public void testForwardToRemoteCommit() {
         final TestProbe probe = createProbe();
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
         final CommitLocalTransactionRequest request =
@@ -138,14 +138,14 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     }
 
     @Test
-    public void testForwardToLocalAbort() throws Exception {
+    public void testForwardToLocalAbort() {
         final TestProbe probe = createProbe();
         final AbortLocalTransactionRequest request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
         testForwardToLocal(request, AbortLocalTransactionRequest.class);
     }
 
     @Test
-    public void testForwardToLocalPurge() throws Exception {
+    public void testForwardToLocalPurge() {
         final TestProbe probe = createProbe();
         final TransactionPurgeRequest request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
         testForwardToLocal(request, TransactionPurgeRequest.class);

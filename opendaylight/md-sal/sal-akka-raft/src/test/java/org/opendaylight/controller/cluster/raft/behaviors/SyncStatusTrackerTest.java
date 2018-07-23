@@ -35,7 +35,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testUpdate() throws Exception {
+    public void testUpdate() {
         SyncStatusTracker tracker = new SyncStatusTracker(listener, "commit-tracker", 10);
 
         // When leader-1 sends the first update message the listener should receive a syncStatus notification

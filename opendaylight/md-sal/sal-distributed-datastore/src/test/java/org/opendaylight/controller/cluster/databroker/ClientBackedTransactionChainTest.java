@@ -34,7 +34,7 @@ public class ClientBackedTransactionChainTest {
     private ClientTransaction transaction;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         final FrontendIdentifier frontendId = FrontendIdentifier.create(
@@ -53,25 +53,25 @@ public class ClientBackedTransactionChainTest {
     }
 
     @Test
-    public void testNewReadOnlyTransaction() throws Exception {
+    public void testNewReadOnlyTransaction() {
         Assert.assertNotNull(chain.newReadOnlyTransaction());
         Mockito.verify(history).takeSnapshot();
     }
 
     @Test
-    public void testNewReadWriteTransaction() throws Exception {
+    public void testNewReadWriteTransaction() {
         Assert.assertNotNull(chain.newReadWriteTransaction());
         Mockito.verify(history).createTransaction();
     }
 
     @Test
-    public void testNewWriteOnlyTransaction() throws Exception {
+    public void testNewWriteOnlyTransaction() {
         Assert.assertNotNull(chain.newWriteOnlyTransaction());
         Mockito.verify(history).createTransaction();
     }
 
     @Test
-    public void testClose() throws Exception {
+    public void testClose() {
         chain.newReadOnlyTransaction();
         chain.close();
         Mockito.verify(snapshot).abort();
@@ -79,7 +79,7 @@ public class ClientBackedTransactionChainTest {
     }
 
     @Test
-    public void testSnapshotClosed() throws Exception {
+    public void testSnapshotClosed() {
         chain.snapshotClosed(snapshot);
         // snap is removed, so cannot be aborted
         chain.close();

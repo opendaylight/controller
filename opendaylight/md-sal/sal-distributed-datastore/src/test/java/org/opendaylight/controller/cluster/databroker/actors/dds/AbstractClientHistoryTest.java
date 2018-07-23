@@ -48,82 +48,82 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
     protected abstract ClientActorContext clientActorContext();
 
     @Test
-    public abstract void testDoCreateSnapshot() throws Exception;
+    public abstract void testDoCreateSnapshot();
 
     @Test
-    public abstract void testDoCreateTransaction() throws Exception;
+    public abstract void testDoCreateTransaction();
 
     @Test
-    public abstract void testCreateHistoryProxy() throws Exception;
+    public abstract void testCreateHistoryProxy();
 
     @Test
-    public abstract void testOnTransactionComplete() throws Exception;
+    public abstract void testOnTransactionComplete();
 
     @Test
-    public abstract void testOnTransactionAbort() throws Exception;
+    public abstract void testOnTransactionAbort();
 
     @Test
-    public abstract void testOnTransactionReady() throws Exception;
+    public abstract void testOnTransactionReady();
 
     @Test
-    public abstract void testOnTransactionReadyDuplicate() throws Exception;
+    public abstract void testOnTransactionReadyDuplicate();
 
     @Test
-    public void testCreateSnapshotProxy() throws Exception {
+    public void testCreateSnapshotProxy() {
         final AbstractProxyTransaction snapshotProxy = object().createSnapshotProxy(TRANSACTION_ID, 0L);
         Assert.assertNotNull(snapshotProxy);
         Assert.assertNotEquals(TRANSACTION_ID, snapshotProxy.getIdentifier());
     }
 
     @Test
-    public void testCreateTransactionProxy() throws Exception {
+    public void testCreateTransactionProxy() {
         AbstractProxyTransaction transactionProxy = object().createTransactionProxy(TRANSACTION_ID, 0L);
         Assert.assertNotNull(transactionProxy);
         Assert.assertNotEquals(TRANSACTION_ID, transactionProxy.getIdentifier());
     }
 
     @Test
-    public void testState() throws Exception {
+    public void testState() {
         Assert.assertEquals(AbstractClientHistory.State.IDLE, object().state());
     }
 
     @Test
-    public void testUpdateState() throws Exception {
+    public void testUpdateState() {
         object().updateState(AbstractClientHistory.State.IDLE, AbstractClientHistory.State.CLOSED);
         Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Test
-    public void testDoClose() throws Exception {
+    public void testDoClose() {
         object().createTransactionProxy(TRANSACTION_ID, 0L);
         object().doClose();
         Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Test
-    public void testGetIdentifier() throws Exception {
+    public void testGetIdentifier() {
         Assert.assertEquals(HISTORY_ID, object().getIdentifier());
     }
 
     @Test
-    public void testNextTx() throws Exception {
+    public void testNextTx() {
         Assert.assertTrue(object().nextTx() + 1 == object().nextTx());
     }
 
     @Test
-    public void testResolveShardForPath() throws Exception {
+    public void testResolveShardForPath() {
         final Long shardForPath = object().resolveShardForPath(YangInstanceIdentifier.EMPTY);
         Assert.assertEquals(0L, shardForPath.longValue());
     }
 
     @Test
-    public void testLocalAbort() throws Exception {
+    public void testLocalAbort() {
         object().localAbort(new Throwable());
         Assert.assertEquals(AbstractClientHistory.State.CLOSED, object().state());
     }
 
     @Test
-    public void testOnProxyDestroyed() throws Exception {
+    public void testOnProxyDestroyed() {
         final ProxyHistory proxyHistory = Mockito.mock(ProxyHistory.class);
         when(proxyHistory.getIdentifier()).thenReturn(HISTORY_ID);
 
@@ -132,19 +132,19 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
     }
 
     @Test
-    public void testCreateTransaction() throws Exception {
+    public void testCreateTransaction() {
         final ClientTransaction transaction = object().createTransaction();
         Assert.assertNotNull(transaction);
     }
 
     @Test
-    public void testTakeSnapshot() throws Exception {
+    public void testTakeSnapshot() {
         final ClientSnapshot clientSnapshot = object().takeSnapshot();
         Assert.assertEquals(object().getIdentifier(), clientSnapshot.getIdentifier().getHistoryId());
     }
 
     @Test
-    public void testStartReconnect() throws Exception {
+    public void testStartReconnect() {
         // cookie and shard are the same
         final Long cookie = 0L;
         final Long shard = cookie;
@@ -160,7 +160,7 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
     }
 
     @Test
-    public void testStartReconnectMissingOldProxy() throws Exception {
+    public void testStartReconnectMissingOldProxy() {
         // cookie and shard are different
         final Long cookie = 1L;
         final Long shard = 0L;

@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 public final class CloseDataTreeNotificationListenerRegistrationReply implements Serializable {
@@ -23,7 +22,7 @@ public final class CloseDataTreeNotificationListenerRegistrationReply implements
         return INSTANCE;
     }
 
-    private Object readResolve() throws ObjectStreamException {
+    private Object readResolve() {
         return INSTANCE;
     }
 }

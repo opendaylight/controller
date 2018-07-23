@@ -53,7 +53,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     private SimpleShardDataTreeCohort cohort;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
 
         doReturn(Optional.empty()).when(mockUserCohorts).commit();
@@ -64,7 +64,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testCanCommitSuccess() throws Exception {
+    public void testCanCommitSuccess() {
         canCommitSuccess();
     }
 
@@ -82,7 +82,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         verifyNoMoreInteractions(callback);
     }
 
-    private void testValidatationPropagates(final Exception cause) throws DataValidationFailedException {
+    private void testValidatationPropagates(final Exception cause) {
         doAnswer(invocation -> {
             invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).failedCanCommit(cause);
             return null;
@@ -97,17 +97,17 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testCanCommitWithConflictingModEx() throws DataValidationFailedException {
+    public void testCanCommitWithConflictingModEx() {
         testValidatationPropagates(new ConflictingModificationAppliedException(YangInstanceIdentifier.EMPTY, "mock"));
     }
 
     @Test
-    public void testCanCommitWithDataValidationEx() throws DataValidationFailedException {
+    public void testCanCommitWithDataValidationEx() {
         testValidatationPropagates(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock"));
     }
 
     @Test
-    public void testCanCommitWithIllegalArgumentEx() throws DataValidationFailedException {
+    public void testCanCommitWithIllegalArgumentEx() {
         testValidatationPropagates(new IllegalArgumentException("mock"));
     }
 
@@ -131,7 +131,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testPreCommitAndCommitSuccess() throws Exception {
+    public void testPreCommitAndCommitSuccess() {
         canCommitSuccess();
         final DataTreeCandidateTip candidate = preCommitSuccess();
 
@@ -152,7 +152,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testPreCommitWithIllegalArgumentEx() throws Exception {
+    public void testPreCommitWithIllegalArgumentEx() {
         canCommitSuccess();
 
         final Exception cause = new IllegalArgumentException("mock");
@@ -172,7 +172,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testPreCommitWithReportedFailure() throws Exception {
+    public void testPreCommitWithReportedFailure() {
         canCommitSuccess();
 
         final Exception cause = new IllegalArgumentException("mock");

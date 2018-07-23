@@ -107,12 +107,12 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     protected abstract void doHandleOperation(T handle);
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testGetIdentifier() throws Exception {
+    public void testGetIdentifier() {
         Assert.assertEquals(TRANSACTION_ID, handle.getIdentifier());
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     }
 
     @Test
-    public void testEnsureClosed() throws Exception {
+    public void testEnsureClosed() {
         doHandleOperation(handle);
         final Collection<AbstractProxyTransaction> transactions = handle.ensureClosed();
         Assert.assertNotNull(transactions);
@@ -145,7 +145,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     }
 
     @Test
-    public void testEnsureProxy() throws Exception {
+    public void testEnsureProxy() {
         final Function<Long, AbstractProxyTransaction> function = mock(Function.class);
         final AbstractProxyTransaction expected = mock(AbstractProxyTransaction.class);
         when(function.apply(0L)).thenReturn(expected);
@@ -155,7 +155,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     }
 
     @Test
-    public void testParent() throws Exception {
+    public void testParent() {
         Assert.assertEquals(parent, handle.parent());
     }
 

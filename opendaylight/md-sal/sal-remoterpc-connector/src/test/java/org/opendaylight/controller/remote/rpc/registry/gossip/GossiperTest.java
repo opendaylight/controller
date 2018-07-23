@@ -41,7 +41,7 @@ public class GossiperTest {
     private Gossiper mockGossiper;
 
     @BeforeClass
-    public static void setup() throws InterruptedException {
+    public static void setup() {
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
 

@@ -25,7 +25,7 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         stop();
     }
 

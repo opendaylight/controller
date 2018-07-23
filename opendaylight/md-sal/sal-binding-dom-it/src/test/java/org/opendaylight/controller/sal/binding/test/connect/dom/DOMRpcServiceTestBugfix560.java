@@ -156,7 +156,7 @@ public class DOMRpcServiceTestBugfix560 {
      * @throws java.lang.Exception
      */
     @After
-    public void teardown() throws Exception {
+    public void teardown() {
         testContext.close();
     }
 }

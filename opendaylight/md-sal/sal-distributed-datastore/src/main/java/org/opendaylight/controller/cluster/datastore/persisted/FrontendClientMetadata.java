@@ -67,7 +67,7 @@ public final class FrontendClientMetadata implements Identifiable<ClientIdentifi
         }
     }
 
-    public static FrontendClientMetadata readFrom(final DataInput in) throws IOException, ClassNotFoundException {
+    public static FrontendClientMetadata readFrom(final DataInput in) throws IOException {
         final ClientIdentifier id = ClientIdentifier.readFrom(in);
 
         final int purgedSize = in.readInt();

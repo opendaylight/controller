@@ -49,25 +49,25 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
 
     @Override
     @Test(expected = UnsupportedOperationException.class)
-    public void testDirectCommit() throws Exception {
+    public void testDirectCommit() {
         transaction.directCommit();
     }
 
     @Override
     @Test(expected = UnsupportedOperationException.class)
-    public void testCanCommit() throws Exception {
+    public void testCanCommit() {
         transaction.canCommit(new VotingFuture<>(new Object(), 1));
     }
 
     @Override
     @Test(expected = UnsupportedOperationException.class)
-    public void testPreCommit() throws Exception {
+    public void testPreCommit() {
         transaction.preCommit(new VotingFuture<>(new Object(), 1));
     }
 
     @Override
     @Test(expected = UnsupportedOperationException.class)
-    public void testDoCommit() throws Exception {
+    public void testDoCommit() {
         transaction.doCommit(new VotingFuture<>(new Object(), 1));
     }
 
@@ -110,7 +110,7 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
     }
 
     @Test
-    public void testApplyModifyTransactionRequest() throws Exception {
+    public void testApplyModifyTransactionRequest() {
         final TestProbe probe = createProbe();
         final ModifyTransactionRequestBuilder builder =
                 new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());

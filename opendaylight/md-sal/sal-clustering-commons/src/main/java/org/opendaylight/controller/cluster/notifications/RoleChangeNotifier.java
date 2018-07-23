@@ -99,7 +99,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         registeredListeners.clear();
     }
 }

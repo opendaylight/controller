@@ -27,7 +27,7 @@ public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
     }
 
     @Test
-    public void testProxySerializationDeserialization() throws Exception {
+    public void testProxySerializationDeserialization() {
         final byte[] serializedBytes = SerializationUtils.serialize(envelope);
         final Object deserialize = SerializationUtils.deserialize(serializedBytes);
         checkDeserialized((E) deserialize);

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.URISyntaxException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
@@ -31,7 +30,7 @@ public class SampleNormalizedNodeSerializable implements Serializable {
     }
 
     private void readObject(final ObjectInputStream stream)
-            throws IOException, ClassNotFoundException, URISyntaxException {
+            throws IOException {
         NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(stream);
         this.input = reader.readNormalizedNode();
     }

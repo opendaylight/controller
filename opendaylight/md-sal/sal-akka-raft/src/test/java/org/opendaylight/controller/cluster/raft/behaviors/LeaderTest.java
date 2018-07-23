@@ -104,7 +104,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHandleMessageForUnknownMessage() throws Exception {
+    public void testHandleMessageForUnknownMessage() {
         logStart("testHandleMessageForUnknownMessage");
 
         leader = new Leader(createActorContext());
@@ -114,7 +114,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testThatLeaderSendsAHeartbeatMessageToAllFollowers() throws Exception {
+    public void testThatLeaderSendsAHeartbeatMessageToAllFollowers() {
         logStart("testThatLeaderSendsAHeartbeatMessageToAllFollowers");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -174,7 +174,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHandleReplicateMessageSendAppendEntriesToFollower() throws Exception {
+    public void testHandleReplicateMessageSendAppendEntriesToFollower() {
         logStart("testHandleReplicateMessageSendAppendEntriesToFollower");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -211,7 +211,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHandleReplicateMessageWithHigherTermThanPreviousEntry() throws Exception {
+    public void testHandleReplicateMessageWithHigherTermThanPreviousEntry() {
         logStart("testHandleReplicateMessageWithHigherTermThanPreviousEntry");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -266,7 +266,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHandleReplicateMessageCommitIndexIncrementedBeforeConsensus() throws Exception {
+    public void testHandleReplicateMessageCommitIndexIncrementedBeforeConsensus() {
         logStart("testHandleReplicateMessageCommitIndexIncrementedBeforeConsensus");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -304,7 +304,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testMultipleReplicateShouldNotCauseDuplicateAppendEntriesToBeSent() throws Exception {
+    public void testMultipleReplicateShouldNotCauseDuplicateAppendEntriesToBeSent() {
         logStart("testHandleReplicateMessageSendAppendEntriesToFollower");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -344,7 +344,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testMultipleReplicateWithReplyShouldResultInAppendEntries() throws Exception {
+    public void testMultipleReplicateWithReplyShouldResultInAppendEntries() {
         logStart("testMultipleReplicateWithReplyShouldResultInAppendEntries");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -394,7 +394,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testDuplicateAppendEntriesWillBeSentOnHeartBeat() throws Exception {
+    public void testDuplicateAppendEntriesWillBeSentOnHeartBeat() {
         logStart("testDuplicateAppendEntriesWillBeSentOnHeartBeat");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -439,7 +439,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHeartbeatsAreAlwaysSentIfTheHeartbeatIntervalHasElapsed() throws Exception {
+    public void testHeartbeatsAreAlwaysSentIfTheHeartbeatIntervalHasElapsed() {
         logStart("testHeartbeatsAreAlwaysSentIfTheHeartbeatIntervalHasElapsed");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -476,7 +476,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testSendingReplicateImmediatelyAfterHeartbeatDoesReplicate() throws Exception {
+    public void testSendingReplicateImmediatelyAfterHeartbeatDoesReplicate() {
         logStart("testSendingReplicateImmediatelyAfterHeartbeatDoesReplicate");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -516,7 +516,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
 
     @Test
-    public void testHandleReplicateMessageWhenThereAreNoFollowers() throws Exception {
+    public void testHandleReplicateMessageWhenThereAreNoFollowers() {
         logStart("testHandleReplicateMessageWhenThereAreNoFollowers");
 
         MockRaftActorContext actorContext = createActorContext();
@@ -624,7 +624,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testSendAppendEntriesSnapshotScenario() throws Exception {
+    public void testSendAppendEntriesSnapshotScenario() {
         logStart("testSendAppendEntriesSnapshotScenario");
 
         final MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -673,7 +673,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testInitiateInstallSnapshot() throws Exception {
+    public void testInitiateInstallSnapshot() {
         logStart("testInitiateInstallSnapshot");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -813,7 +813,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
 
     @Test
-    public void testInstallSnapshot() throws Exception {
+    public void testInstallSnapshot() {
         logStart("testInstallSnapshot");
 
         final MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -868,7 +868,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testForceInstallSnapshot() throws Exception {
+    public void testForceInstallSnapshot() {
         logStart("testForceInstallSnapshot");
 
         final MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -983,7 +983,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testSendSnapshotfromInstallSnapshotReply() throws Exception {
+    public void testSendSnapshotfromInstallSnapshotReply() {
         logStart("testSendSnapshotfromInstallSnapshotReply");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -1061,7 +1061,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
 
     @Test
-    public void testHandleInstallSnapshotReplyWithInvalidChunkIndex() throws Exception {
+    public void testHandleInstallSnapshotReplyWithInvalidChunkIndex() {
         logStart("testHandleInstallSnapshotReplyWithInvalidChunkIndex");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -1126,7 +1126,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHandleSnapshotSendsPreviousChunksHashCodeWhenSendingNextChunk() throws Exception {
+    public void testHandleSnapshotSendsPreviousChunksHashCodeWhenSendingNextChunk() {
         logStart("testHandleSnapshotSendsPreviousChunksHashCodeWhenSendingNextChunk");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
@@ -1271,7 +1271,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testLeaderCreatedWithCommitIndexLessThanLastIndex() throws Exception {
+    public void testLeaderCreatedWithCommitIndexLessThanLastIndex() {
         logStart("testLeaderCreatedWithCommitIndexLessThanLastIndex");
 
         final MockRaftActorContext leaderActorContext = createActorContextWithFollower();
@@ -1326,7 +1326,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testLeaderCreatedWithCommitIndexLessThanFollowersCommitIndex() throws Exception {
+    public void testLeaderCreatedWithCommitIndexLessThanFollowersCommitIndex() {
         logStart("testLeaderCreatedWithCommitIndexLessThanFollowersCommitIndex");
 
         final MockRaftActorContext leaderActorContext = createActorContext();
@@ -1696,7 +1696,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testHandleAppendEntriesReplySuccess() throws Exception {
+    public void testHandleAppendEntriesReplySuccess() {
         logStart("testHandleAppendEntriesReplySuccess");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
@@ -1940,7 +1940,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testIsolatedLeaderCheckTwoFollowers() throws Exception {
+    public void testIsolatedLeaderCheckTwoFollowers() {
         logStart("testIsolatedLeaderCheckTwoFollowers");
 
         RaftActorBehavior newBehavior = setupIsolatedLeaderCheckTestWithTwoFollowers(DefaultRaftPolicy.INSTANCE);
@@ -1950,7 +1950,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled() throws Exception {
+    public void testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled() {
         logStart("testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled");
 
         RaftActorBehavior newBehavior = setupIsolatedLeaderCheckTestWithTwoFollowers(createRaftPolicy(false, true));
@@ -1960,7 +1960,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testLaggingFollowerStarvation() throws Exception {
+    public void testLaggingFollowerStarvation() {
         logStart("testLaggingFollowerStarvation");
 
         String leaderActorId = actorFactory.generateActorId("leader");

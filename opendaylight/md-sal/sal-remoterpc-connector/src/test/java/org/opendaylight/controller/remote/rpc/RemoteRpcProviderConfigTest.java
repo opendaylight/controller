@@ -87,7 +87,7 @@ public class RemoteRpcProviderConfigTest {
         }
 
         @Override
-        public void onReceive(Object message) throws Exception {
+        public void onReceive(Object message) {
         }
 
         /**

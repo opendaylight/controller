@@ -319,7 +319,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() throws Exception {
+    public void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() {
         testLog.info("testRequestLeadershipTransferToFollower2WithOtherFollowersDown starting");
 
         createRaftActors();

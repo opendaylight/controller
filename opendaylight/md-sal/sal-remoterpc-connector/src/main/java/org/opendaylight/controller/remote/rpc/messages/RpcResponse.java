@@ -9,7 +9,6 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
-import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
@@ -54,12 +53,12 @@ public class RpcResponse implements Serializable {
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(ObjectOutput out) {
             SerializationUtils.serializeNormalizedNode(rpcResponse.getResultNormalizedNode(), out);
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(ObjectInput in) {
             rpcResponse = new RpcResponse(SerializationUtils.deserializeNormalizedNode(in));
         }
 

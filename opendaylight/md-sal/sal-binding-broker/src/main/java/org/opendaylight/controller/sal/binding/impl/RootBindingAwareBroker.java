@@ -162,7 +162,7 @@ public class RootBindingAwareBroker implements Mutable, Identifiable<String>, Bi
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         // FIXME: Close all sessions
     }
 

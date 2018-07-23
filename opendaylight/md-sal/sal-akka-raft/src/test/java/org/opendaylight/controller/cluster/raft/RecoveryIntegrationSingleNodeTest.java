@@ -39,7 +39,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
 
     @Test
-    public void testJournalReplayAfterSnapshotWithSingleNode() throws Exception {
+    public void testJournalReplayAfterSnapshotWithSingleNode() {
 
         String persistenceId = factory.generateActorId("singleNode");
         TestActorRef<AbstractRaftActorIntegrationTest.TestRaftActor> singleNodeActorRef =

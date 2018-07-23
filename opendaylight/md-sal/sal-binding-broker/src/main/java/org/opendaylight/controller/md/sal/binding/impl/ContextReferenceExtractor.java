@@ -34,7 +34,7 @@ abstract class ContextReferenceExtractor {
             .weakKeys().build(new CacheLoader<Class<?>, ContextReferenceExtractor>() {
 
                 @Override
-                public ContextReferenceExtractor load(final Class<?> key) throws Exception {
+                public ContextReferenceExtractor load(final Class<?> key) {
                     return create(key);
                 }
             });

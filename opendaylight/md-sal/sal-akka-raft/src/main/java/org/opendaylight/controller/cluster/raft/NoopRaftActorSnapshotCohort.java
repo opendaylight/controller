@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
 import com.google.common.io.ByteSource;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
@@ -35,7 +34,7 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public State deserializeSnapshot(ByteSource snapshotBytes) throws IOException {
+    public State deserializeSnapshot(ByteSource snapshotBytes) {
         return EmptyState.INSTANCE;
     }
 }

@@ -100,7 +100,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * caught up via AppendEntries.
      */
     @Test
-    public void testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries() throws Exception {
+    public void testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries() {
         testLog.info("testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries starting: sending 2 new payloads");
 
         setup();
@@ -171,7 +171,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * sent by the leader.
      */
     @Test
-    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries() throws Exception {
+    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries() {
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries starting");
 
         setup();
@@ -290,7 +290,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * installed by the leader.
      */
     @Test
-    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot() throws Exception {
+    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot() {
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot starting");
 
         setup();
@@ -390,7 +390,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * by the leader.
      */
     @Test
-    public void testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower() throws Exception {
+    public void testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower() {
         testLog.info("testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower starting");
 
         snapshotBatchCount = 5;
@@ -486,7 +486,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * Send another payload to verify another snapshot is not done since the last snapshot trimmed the
      * first log entry so the memory threshold should not be exceeded.
      */
-    private void verifyNoSubsequentSnapshotAfterMemoryThresholdExceededSnapshot() throws Exception {
+    private void verifyNoSubsequentSnapshotAfterMemoryThresholdExceededSnapshot() {
         ApplyState applyState;
         CaptureSnapshot captureSnapshot;
 
@@ -530,7 +530,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * Resume the lagging follower 2 and verify it receives an install snapshot from the leader.
      */
     private void verifyInstallSnapshotToLaggingFollower(long lastAppliedIndex,
-            @Nullable ServerConfigurationPayload expServerConfig) throws Exception {
+            @Nullable ServerConfigurationPayload expServerConfig) {
         testLog.info("verifyInstallSnapshotToLaggingFollower starting");
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -624,7 +624,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * Do another round of payloads and snapshot to verify replicatedToAllIndex gets back on track and
      * snapshots works as expected after doing a follower snapshot. In this step we don't lag a follower.
      */
-    private long verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot() throws Exception {
+    private long verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot() {
         testLog.info(
                 "verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot starting: replicatedToAllIndex: {}",
                 leader.getReplicatedToAllIndex());
