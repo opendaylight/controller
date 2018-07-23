@@ -222,13 +222,7 @@ class EntityOwnershipShardCommitCoordinator {
             }
 
             // Prune the subsequent pending modifications.
-            Iterator<Modification> iter = pendingModifications.iterator();
-            while (iter.hasNext()) {
-                Modification mod = iter.next();
-                if (!canForwardModificationToNewLeader(mod)) {
-                    iter.remove();
-                }
-            }
+            pendingModifications.removeIf(mod -> !canForwardModificationToNewLeader(mod));
         }
     }
 

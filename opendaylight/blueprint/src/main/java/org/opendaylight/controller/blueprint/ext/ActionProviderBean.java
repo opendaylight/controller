@@ -129,10 +129,9 @@ public class ActionProviderBean {
         }
 
         final Set<DOMRpcIdentifier> rpcs = ImmutableSet.copyOf(Collections2.transform(paths, DOMRpcIdentifier::create));
-        reg = domRpcProvider.registerRpcImplementation((rpc, input) -> {
-            return Futures.immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException(
-                "Action %s has no instance matching %s", rpc, input));
-        }, rpcs);
+        reg = domRpcProvider.registerRpcImplementation(
+            (rpc, input) -> Futures.immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException(
+                "Action %s has no instance matching %s", rpc, input)), rpcs);
         LOG.debug("Registered provider for {}", interfaceName);
     }
 

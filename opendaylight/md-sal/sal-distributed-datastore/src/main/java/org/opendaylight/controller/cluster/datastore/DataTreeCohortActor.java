@@ -194,7 +194,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             TransactionIdentifier txId = message.getTxId();
             ListenableFuture<S> future = process(handledMessageType.cast(message));
             Executor callbackExecutor = future.isDone() ? MoreExecutors.directExecutor()
-                    : runnable -> executeInSelf(runnable);
+                    : DataTreeCohortActor.this::executeInSelf;
             Futures.addCallback(future, new FutureCallback<S>() {
                 @Override
                 public void onSuccess(S nextStep) {

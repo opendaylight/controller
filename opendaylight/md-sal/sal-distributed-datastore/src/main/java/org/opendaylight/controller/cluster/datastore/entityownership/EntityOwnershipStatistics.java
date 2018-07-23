@@ -79,12 +79,7 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
             map.put(candidateName, count);
             statistics.put(entityType, map);
         } else {
-            Long candidateOwnedEntities = map.get(candidateName);
-            if (candidateOwnedEntities == null) {
-                map.put(candidateName, count);
-            } else {
-                map.put(candidateName, candidateOwnedEntities + count);
-            }
+            map.merge(candidateName, count, (ownedEntities, addedEntities) -> ownedEntities + addedEntities);
         }
     }
 }
