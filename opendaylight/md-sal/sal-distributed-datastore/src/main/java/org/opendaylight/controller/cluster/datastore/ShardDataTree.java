@@ -1057,7 +1057,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final java.util.Optional<SortedSet<String>> participatingShardNames) {
         SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(this, mod, txId,
-                cohortRegistry.createCohort(schemaContext, txId, runnable -> shard.executeInSelf(runnable),
+                cohortRegistry.createCohort(schemaContext, txId, shard::executeInSelf,
                         COMMIT_STEP_TIMEOUT), participatingShardNames);
         pendingTransactions.add(new CommitEntry(cohort, readTime()));
         return cohort;

@@ -16,7 +16,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,13 +231,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
         Map<Long, Object> journal = JOURNALS.get(persistenceId);
         if (journal != null) {
             synchronized (journal) {
-                Iterator<Long> iter = journal.keySet().iterator();
-                while (iter.hasNext()) {
-                    Long num = iter.next();
-                    if (num <= toSequenceNr) {
-                        iter.remove();
-                    }
-                }
+                journal.keySet().removeIf(num -> num <= toSequenceNr);
             }
         }
 
