@@ -289,7 +289,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard,
-            final YangInstanceIdentifier id) throws ExecutionException, InterruptedException {
+            final YangInstanceIdentifier id) {
         return shard.underlyingActor().getDataStore().readNode(id).orNull();
     }
 
@@ -386,7 +386,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("unchecked")
-    static void verifyOuterListEntry(final TestActorRef<Shard> shard, final Object expIDValue) throws Exception {
+    static void verifyOuterListEntry(final TestActorRef<Shard> shard, final Object expIDValue) {
         final NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertNotNull(TestModel.OUTER_LIST_QNAME.getLocalName() + " not found", outerList);
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " value is not Iterable",

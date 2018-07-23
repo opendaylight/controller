@@ -21,7 +21,7 @@ public class TransactionAbortSuccessTest extends AbstractTransactionSuccessTest<
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final TransactionAbortSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

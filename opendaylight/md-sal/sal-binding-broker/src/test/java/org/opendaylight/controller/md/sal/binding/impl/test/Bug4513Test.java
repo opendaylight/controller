@@ -38,7 +38,7 @@ public class Bug4513Test extends AbstractDataBrokerTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testDataTreeChangeListener() throws Exception {
+    public void testDataTreeChangeListener() {
         DataBroker dataBroker = getDataBroker();
 
         DataTreeChangeListener<ListItem> listener = mock(DataTreeChangeListener.class);

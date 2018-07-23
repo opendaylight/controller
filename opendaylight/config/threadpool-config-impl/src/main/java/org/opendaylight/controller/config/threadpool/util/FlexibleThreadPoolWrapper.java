@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.threadpool.util;
 
 import com.google.common.base.Optional;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -97,7 +96,7 @@ public class FlexibleThreadPoolWrapper implements ThreadPool, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         executor.shutdown();
     }
 

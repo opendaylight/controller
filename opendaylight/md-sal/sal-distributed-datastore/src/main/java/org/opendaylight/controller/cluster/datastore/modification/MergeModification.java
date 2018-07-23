@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
-import java.io.IOException;
 import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
@@ -49,8 +48,7 @@ public class MergeModification extends WriteModification {
         return MERGE;
     }
 
-    public static MergeModification fromStream(ObjectInput in, short version)
-            throws ClassNotFoundException, IOException {
+    public static MergeModification fromStream(ObjectInput in, short version) {
         MergeModification mod = new MergeModification(version);
         mod.readExternal(in);
         return mod;

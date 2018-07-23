@@ -123,7 +123,7 @@ public class LocalSnapshotStoreTest {
     }
 
     @Test
-    public void testDoLoadAsyncWithNoSnapshots() throws IOException {
+    public void testDoLoadAsyncWithNoSnapshots() {
         TestKit probe = new TestKit(system);
         snapshotStore.tell(new LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());

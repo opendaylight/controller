@@ -44,20 +44,20 @@ public class ModifyTransactionRequestBuilderTest {
             new ModifyTransactionRequestBuilder(transactionIdentifier, actorRef);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         modifyTransactionRequestBuilder.setSequence(0L);
         modifyTransactionRequestBuilder.addModification(transactionModification);
         assertEquals(1, modifyTransactionRequestBuilder.size());
     }
 
     @Test
-    public void testGetIdentifier() throws Exception {
+    public void testGetIdentifier() {
         final TransactionIdentifier identifier = modifyTransactionRequestBuilder.getIdentifier();
         Assert.assertEquals(transactionIdentifier, identifier);
     }
 
     @Test
-    public void testBuildReady() throws Exception {
+    public void testBuildReady() {
         modifyTransactionRequestBuilder.setReady();
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         Assert.assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().get());
@@ -65,7 +65,7 @@ public class ModifyTransactionRequestBuilderTest {
     }
 
     @Test
-    public void testBuildAbort() throws Exception {
+    public void testBuildAbort() {
         modifyTransactionRequestBuilder.setAbort();
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         Assert.assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().get());
@@ -73,14 +73,14 @@ public class ModifyTransactionRequestBuilderTest {
     }
 
     @Test
-    public void testBuildCommitTrue() throws Exception {
+    public void testBuildCommitTrue() {
         modifyTransactionRequestBuilder.setCommit(true);
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         Assert.assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().get());
     }
 
     @Test
-    public void testBuildCommitFalse() throws Exception {
+    public void testBuildCommitFalse() {
         modifyTransactionRequestBuilder.setCommit(false);
         final ModifyTransactionRequest modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         Assert.assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().get());

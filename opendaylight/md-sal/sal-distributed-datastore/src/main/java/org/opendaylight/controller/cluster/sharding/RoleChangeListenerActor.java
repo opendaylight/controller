@@ -41,7 +41,7 @@ public final class RoleChangeListenerActor extends AbstractUntypedActor {
     }
 
     @Override
-    protected void handleReceive(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         if (message instanceof RoleChangeNotification) {
             ignoreMessage(message);
         } else if (message instanceof LeaderStateChanged) {

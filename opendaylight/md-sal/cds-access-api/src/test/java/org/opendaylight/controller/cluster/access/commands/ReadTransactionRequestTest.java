@@ -21,7 +21,7 @@ public class ReadTransactionRequestTest extends AbstractReadTransactionRequestTe
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ABIVersion cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
         final ReadTransactionRequest clone = OBJECT.cloneAsVersion(cloneVersion);
         Assert.assertEquals(cloneVersion, clone.getVersion());

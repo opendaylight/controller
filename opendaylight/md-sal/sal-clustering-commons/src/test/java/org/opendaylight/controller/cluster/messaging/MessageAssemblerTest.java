@@ -138,7 +138,7 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
     }
 
     @Test
-    public void testAssembledMessageStateExpiration() throws IOException {
+    public void testAssembledMessageStateExpiration() {
         final int expiryDuration = 200;
         try (MessageAssembler assembler = newMessageAssemblerBuilder("testAssembledMessageStateExpiration")
                 .expireStateAfterInactivity(expiryDuration, TimeUnit.MILLISECONDS).build()) {

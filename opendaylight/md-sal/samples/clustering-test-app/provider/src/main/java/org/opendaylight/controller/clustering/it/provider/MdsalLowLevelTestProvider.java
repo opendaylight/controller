@@ -681,7 +681,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         context.findLocalShardAsync(shardName).onComplete(new OnComplete<ActorRef>() {
             @Override
-            public void onComplete(final Throwable throwable, final ActorRef actorRef) throws Throwable {
+            public void onComplete(final Throwable throwable, final ActorRef actorRef) {
                 if (throwable != null) {
                     shutdownShardAsk.failure(throwable);
                 } else {
@@ -692,7 +692,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         shutdownShardAsk.future().onComplete(new OnComplete<Boolean>() {
             @Override
-            public void onComplete(final Throwable throwable, final Boolean gracefulStopResult) throws Throwable {
+            public void onComplete(final Throwable throwable, final Boolean gracefulStopResult) {
                 if (throwable != null) {
                     final RpcResult<T> failedResult = RpcResultBuilder.<T>failed()
                             .withError(ErrorType.APPLICATION, "Failed to gracefully shutdown shard", throwable).build();

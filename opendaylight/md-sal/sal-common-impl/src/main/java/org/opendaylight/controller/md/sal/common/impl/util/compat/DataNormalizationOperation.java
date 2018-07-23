@@ -345,7 +345,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema,
-                final QName child) throws DataNormalizationException {
+                final QName child) {
             final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
             if (!potential.isPresent()) {
                 return null;
@@ -497,12 +497,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild(final PathArgument child) throws DataNormalizationException {
+        public DataNormalizationOperation<?> getChild(final PathArgument child) {
             return null;
         }
 
         @Override
-        public DataNormalizationOperation<?> getChild(final QName child) throws DataNormalizationException {
+        public DataNormalizationOperation<?> getChild(final QName child) {
             return null;
         }
 

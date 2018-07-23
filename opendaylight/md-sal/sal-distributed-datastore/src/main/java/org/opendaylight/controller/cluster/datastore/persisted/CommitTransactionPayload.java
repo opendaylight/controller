@@ -53,7 +53,7 @@ public final class CommitTransactionPayload extends Payload implements Serializa
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException {
             final int length = in.readInt();
             serialized = new byte[length];
             in.readFully(serialized);

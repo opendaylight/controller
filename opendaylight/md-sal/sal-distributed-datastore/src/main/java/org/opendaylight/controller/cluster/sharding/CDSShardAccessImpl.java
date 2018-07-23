@@ -116,7 +116,7 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
         final scala.concurrent.Promise<Object> makeLeaderLocalAsk = Futures.promise();
         localShardReply.onComplete(new OnComplete<ActorRef>() {
             @Override
-            public void onComplete(final Throwable failure, final ActorRef actorRef) throws Throwable {
+            public void onComplete(final Throwable failure, final ActorRef actorRef) {
                 if (failure instanceof LocalShardNotFoundException) {
                     LOG.debug("No local shard found for {} - Cannot request leadership transfer to local shard.",
                             getShardIdentifier(), failure);

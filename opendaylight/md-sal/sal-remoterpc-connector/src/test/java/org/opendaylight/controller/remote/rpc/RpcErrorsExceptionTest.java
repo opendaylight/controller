@@ -22,7 +22,7 @@ public class RpcErrorsExceptionTest {
     private RpcErrorsException exception;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         final RpcError rpcError = RpcResultBuilder.newError(
                 RpcError.ErrorType.RPC, "error", "error message");
         final RpcError rpcWarning = RpcResultBuilder.newWarning(
@@ -41,7 +41,7 @@ public class RpcErrorsExceptionTest {
     }
 
     @Test
-    public void testGetRpcErrors() throws Exception {
+    public void testGetRpcErrors() {
         final List<RpcError> actualErrors = (List<RpcError>) exception.getRpcErrors();
         Assert.assertEquals(rpcErrors.size(), actualErrors.size());
 

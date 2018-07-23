@@ -98,7 +98,7 @@ public class CrossBrokerRpcTest {
     }
 
     @After
-    public void teardown() throws Exception {
+    public void teardown() {
         testContext.close();
     }
 

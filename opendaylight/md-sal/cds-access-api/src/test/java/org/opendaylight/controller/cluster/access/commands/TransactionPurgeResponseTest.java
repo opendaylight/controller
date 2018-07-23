@@ -21,7 +21,7 @@ public class TransactionPurgeResponseTest extends AbstractTransactionSuccessTest
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final TransactionPurgeResponse clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

@@ -35,7 +35,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
     }
 
     @Test
-    public void testOnReceiveCloseListenerRegistrationAfterSetRegistration() throws Exception {
+    public void testOnReceiveCloseListenerRegistrationAfterSetRegistration() {
         new TestKit(getSystem()) {
             {
                 final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
@@ -57,7 +57,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
     }
 
     @Test
-    public void testOnReceiveCloseListenerRegistrationBeforeSetRegistration() throws Exception {
+    public void testOnReceiveCloseListenerRegistrationBeforeSetRegistration() {
         new TestKit(getSystem()) {
             {
                 final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
@@ -79,7 +79,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
     }
 
     @Test
-    public void testOnReceiveSetRegistrationAfterPriorClose() throws Exception {
+    public void testOnReceiveSetRegistrationAfterPriorClose() {
         new TestKit(getSystem()) {
             {
                 DataTreeNotificationListenerRegistrationActor.killDelay = 1000;

@@ -19,7 +19,7 @@ public class NioEventLoopGroupCloseable extends NioEventLoopGroup implements Aut
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         shutdownGracefully(0, 1, TimeUnit.SECONDS);
     }
 

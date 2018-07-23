@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ import org.mockito.MockitoAnnotations;
 public class EntityOwnerSelectionStrategyConfigReaderTest {
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
     }
 

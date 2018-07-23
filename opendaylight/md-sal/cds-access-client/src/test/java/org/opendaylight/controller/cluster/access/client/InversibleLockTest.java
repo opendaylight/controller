@@ -22,18 +22,18 @@ public class InversibleLockTest {
     private ScheduledExecutorService executor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         lock = new InversibleLock();
         executor = Executors.newScheduledThreadPool(1);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         executor.shutdownNow();
     }
 
     @Test(timeout = 2000)
-    public void testWriteLockUnlock() throws Exception {
+    public void testWriteLockUnlock() {
         final long stamp = lock.writeLock();
         Assert.assertTrue(lock.validate(stamp));
         executor.schedule(() -> lock.unlockWrite(stamp), 500, TimeUnit.MILLISECONDS);
@@ -45,7 +45,7 @@ public class InversibleLockTest {
     }
 
     @Test
-    public void testLockAfterRead() throws Exception {
+    public void testLockAfterRead() {
         final long readStamp = lock.optimisticRead();
         lock.writeLock();
         Assert.assertFalse(lock.validate(readStamp));

@@ -26,7 +26,7 @@ public class EmptyTransactionCommitCohortTest {
     private EmptyTransactionCommitCohort cohort;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         cohort = new EmptyTransactionCommitCohort(history, TRANSACTION_ID);
     }

@@ -36,31 +36,31 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     }
 
     @Test
-    public void getMinVersionTest() throws Exception {
+    public void getMinVersionTest() {
         Assert.assertEquals(MIN_VERSION, OBJECT.getMinVersion());
     }
 
     @Test
-    public void getMaxVersionTest() throws Exception {
+    public void getMaxVersionTest() {
         Assert.assertEquals(MAX_VERSION, OBJECT.getMaxVersion());
     }
 
     @Test
-    public void toRequestFailureTest() throws Exception {
+    public void toRequestFailureTest() {
         final RequestException exception = new DeadTransactionException(ImmutableRangeSet.of());
         final ConnectClientFailure failure = OBJECT.toRequestFailure(exception);
         Assert.assertNotNull(failure);
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ConnectClientRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertNotNull(clone);
         Assert.assertEquals(ABIVersion.BORON, clone.getVersion());
     }
 
     @Test
-    public void addToStringAttributesTest() throws Exception {
+    public void addToStringAttributesTest() {
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
         Assert.assertTrue(result.toString().contains("minVersion=" + MIN_VERSION));
         Assert.assertTrue(result.toString().contains("maxVersion=" + MAX_VERSION));

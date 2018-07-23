@@ -24,19 +24,19 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
     }
 
     @Test
-    public void getExistsTest() throws Exception {
+    public void getExistsTest() {
         final boolean result = OBJECT.getExists();
         Assert.assertEquals(EXISTS, result);
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ExistsTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }
 
     @Test
-    public void addToStringAttributesTest() throws Exception {
+    public void addToStringAttributesTest() {
         final MoreObjects.ToStringHelper result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT));
         Assert.assertTrue(result.toString().contains("exists=" + EXISTS));
     }

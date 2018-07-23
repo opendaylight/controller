@@ -68,7 +68,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
      * even though it isn't at the head of the queues.
      */
     @Test
-    public void testTwoTransactionsWithSameTwoParticipatingShards() throws Exception {
+    public void testTwoTransactionsWithSameTwoParticipatingShards() {
         final String testName = "testTwoTransactionsWithSameTwoParticipatingShards";
         LOG.info("{} starting", testName);
 
@@ -180,7 +180,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
      * CanCommit is requested.
      */
     @Test
-    public void testMultipleTransactionsWithMixedParticipatingShards() throws Exception {
+    public void testMultipleTransactionsWithMixedParticipatingShards() {
         final String testName = "testMultipleTransactionsWithMixedParticipatingShards";
         LOG.info("{} starting", testName);
 
@@ -345,7 +345,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
      * When the tx's re committed verify the ready order is preserved.
      */
     @Test
-    public void testTwoTransactionsWithOneCommonParticipatingShard1() throws Exception {
+    public void testTwoTransactionsWithOneCommonParticipatingShard1() {
         final String testName = "testTwoTransactionsWithOneCommonParticipatingShard1";
         LOG.info("{} starting", testName);
 
@@ -458,7 +458,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
      * When the tx's re committed verify the ready order is preserved.
      */
     @Test
-    public void testTwoTransactionsWithOneCommonParticipatingShard2() throws Exception {
+    public void testTwoTransactionsWithOneCommonParticipatingShard2() {
         final String testName = "testTwoTransactionsWithOneCommonParticipatingShard2";
         LOG.info("{} starting", testName);
 
@@ -554,8 +554,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         LOG.info("{} ending", testName);
     }
 
-    static void verifyInnerListEntry(TestActorRef<Shard> shard, int outerID, String innerID)
-            throws Exception {
+    static void verifyInnerListEntry(TestActorRef<Shard> shard, int outerID, String innerID) {
         final YangInstanceIdentifier path = innerEntryPath(outerID, innerID);
         final NormalizedNode<?, ?> innerListEntry = readStore(shard, path);
         assertNotNull(path + " not found", innerListEntry);

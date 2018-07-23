@@ -46,7 +46,7 @@ public class ShardSnapshotState implements Snapshot.State {
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException {
             snapshotState = new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
         }
 

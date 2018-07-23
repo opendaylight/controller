@@ -62,20 +62,20 @@ public class ClientActorContextTest {
     }
 
     @Test
-    public void testExecuteInActor() throws Exception {
+    public void testExecuteInActor() {
         ctx.executeInActor(command);
         probe.expectMsg(command);
     }
 
     @Test
-    public void testExecuteInActorScheduled() throws Exception {
+    public void testExecuteInActorScheduled() {
         final FiniteDuration delay = Duration.apply(1, TimeUnit.SECONDS);
         ctx.executeInActor(command, delay);
         probe.expectMsg(command);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 }

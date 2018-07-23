@@ -85,7 +85,7 @@ public class ActorContextTest extends AbstractActorTest {
             this.actorRef = actorRef;
         }
 
-        @Override public void onReceive(final Object message) throws Exception {
+        @Override public void onReceive(final Object message) {
             if (message instanceof FindPrimary) {
                 FindPrimary fp = (FindPrimary)message;
                 Object resp = findPrimaryResponses.get(fp.getShardName());
@@ -133,7 +133,7 @@ public class ActorContextTest extends AbstractActorTest {
             }
 
             @Override
-            public MockShardManager create() throws Exception {
+            public MockShardManager create() {
                 return new MockShardManager(found, actorRef);
             }
         }
@@ -427,17 +427,17 @@ public class ActorContextTest extends AbstractActorTest {
     }
 
     @Test
-    public void testFindPrimaryShardAsyncPrimaryNotFound() throws Exception {
+    public void testFindPrimaryShardAsyncPrimaryNotFound() {
         testFindPrimaryExceptions(new PrimaryNotFoundException("not found"));
     }
 
     @Test
-    public void testFindPrimaryShardAsyncActorNotInitialized() throws Exception {
+    public void testFindPrimaryShardAsyncActorNotInitialized() {
         testFindPrimaryExceptions(new NotInitializedException("not initialized"));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static void testFindPrimaryExceptions(final Object expectedException) throws Exception {
+    private static void testFindPrimaryExceptions(final Object expectedException) {
         ActorRef shardManager = getSystem().actorOf(MessageCollectorActor.props());
 
         DatastoreContext dataStoreContext = DatastoreContext.newBuilder()

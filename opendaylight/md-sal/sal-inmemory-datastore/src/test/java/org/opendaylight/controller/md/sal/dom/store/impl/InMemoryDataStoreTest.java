@@ -303,7 +303,7 @@ public class InMemoryDataStoreTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testWriteWithTransactionReady() throws Exception {
+    public void testWriteWithTransactionReady() {
 
         DOMStoreWriteTransaction writeTx = domStore.newWriteOnlyTransaction();
 
@@ -314,7 +314,7 @@ public class InMemoryDataStoreTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testReadyWithTransactionAlreadyReady() throws Exception {
+    public void testReadyWithTransactionAlreadyReady() {
 
         DOMStoreWriteTransaction writeTx = domStore.newWriteOnlyTransaction();
 

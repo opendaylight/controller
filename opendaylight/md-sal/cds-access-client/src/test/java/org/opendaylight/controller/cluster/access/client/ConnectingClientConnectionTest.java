@@ -221,14 +221,14 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutEmpty() throws NoProgressException {
+    public void testRunTimeoutEmpty() {
         Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertFalse(ret.isPresent());
     }
 
     @Test
-    public void testRunTimeoutWithoutShift() throws NoProgressException {
+    public void testRunTimeoutWithoutShift() {
         queue.sendRequest(mockRequest, mockCallback);
         Optional<Long> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
@@ -236,7 +236,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithTimeoutLess() throws NoProgressException {
+    public void testRunTimeoutWithTimeoutLess() {
         queue.sendRequest(mockRequest, mockCallback);
 
         ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS - 1);
@@ -247,7 +247,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithTimeoutExact() throws NoProgressException {
+    public void testRunTimeoutWithTimeoutExact() {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -259,7 +259,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithTimeoutMore() throws NoProgressException {
+    public void testRunTimeoutWithTimeoutMore() {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -271,7 +271,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testRunTimeoutWithoutProgressExact() throws NoProgressException {
+    public void testRunTimeoutWithoutProgressExact() {
         queue.sendRequest(mockRequest, mockCallback);
 
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS);
@@ -282,7 +282,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testRunTimeoutWithoutProgressMore() throws NoProgressException {
+    public void testRunTimeoutWithoutProgressMore() {
         queue.sendRequest(mockRequest, mockCallback);
 
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS + 1);
@@ -293,7 +293,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutEmptyWithoutProgressExact() throws NoProgressException {
+    public void testRunTimeoutEmptyWithoutProgressExact() {
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS);
 
         // No problem
@@ -303,7 +303,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutEmptyWithoutProgressMore() throws NoProgressException {
+    public void testRunTimeoutEmptyWithoutProgressMore() {
         ticker.advance(AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS + 1);
 
         // No problem
@@ -344,7 +344,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testProgressRecord() throws NoProgressException {
+    public void testProgressRecord() {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);

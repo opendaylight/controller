@@ -59,18 +59,18 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testIsSnapshotOnly() throws Exception {
+    public void testIsSnapshotOnly() {
         Assert.assertFalse(transaction.isSnapshotOnly());
     }
 
     @Test
-    public void testReadOnlyView() throws Exception {
+    public void testReadOnlyView() {
         Assert.assertEquals(modification, transaction.readOnlyView());
     }
 
     @Test
     @Override
-    public void testDelete() throws Exception {
+    public void testDelete() {
         transaction.delete(PATH_1);
         verify(modification).delete(PATH_1);
     }
@@ -88,40 +88,40 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     @Test
     @Override
-    public void testCanCommit() throws Exception {
+    public void testCanCommit() {
         testRequestResponse(transaction::canCommit, CommitLocalTransactionRequest.class,
                 TransactionCanCommitSuccess::new);
     }
 
     @Test
     @Override
-    public void testPreCommit() throws Exception {
+    public void testPreCommit() {
         testRequestResponse(transaction::preCommit, TransactionPreCommitRequest.class,
                 TransactionPreCommitSuccess::new);
     }
 
     @Test
     @Override
-    public void testDoCommit() throws Exception {
+    public void testDoCommit() {
         testRequestResponse(transaction::doCommit, TransactionDoCommitRequest.class, TransactionCommitSuccess::new);
     }
 
     @Test
     @Override
-    public void testMerge() throws Exception {
+    public void testMerge() {
         transaction.merge(PATH_1, DATA_1);
         verify(modification).merge(PATH_1, DATA_1);
     }
 
     @Test
     @Override
-    public void testWrite() throws Exception {
+    public void testWrite() {
         transaction.write(PATH_1, DATA_1);
         verify(modification).write(PATH_1, DATA_1);
     }
 
     @Test
-    public void testCommitRequest() throws Exception {
+    public void testCommitRequest() {
         transaction.doWrite(PATH_1, DATA_1);
         final boolean coordinated = true;
         final CommitLocalTransactionRequest request = transaction.commitRequest(coordinated);
@@ -145,7 +145,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testFlushState() throws Exception {
+    public void testFlushState() {
         final TransactionTester<RemoteProxyTransaction> transactionTester = createRemoteProxyTransactionTester();
         final RemoteProxyTransaction successor = transactionTester.getTransaction();
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
@@ -161,17 +161,17 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testApplyModifyTransactionRequestCoordinated() throws Exception {
+    public void testApplyModifyTransactionRequestCoordinated() {
         applyModifyTransactionRequest(true);
     }
 
     @Test
-    public void testApplyModifyTransactionRequestSimple() throws Exception {
+    public void testApplyModifyTransactionRequestSimple() {
         applyModifyTransactionRequest(false);
     }
 
     @Test
-    public void testApplyModifyTransactionRequestAbort() throws Exception {
+    public void testApplyModifyTransactionRequestAbort() {
         final TestProbe probe = createProbe();
         final ModifyTransactionRequestBuilder builder =
                 new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
@@ -184,7 +184,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testHandleForwardedRemotePreCommitRequest() throws Exception {
+    public void testHandleForwardedRemotePreCommitRequest() {
         final TestProbe probe = createProbe();
         final TransactionPreCommitRequest request =
                 new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref());
@@ -192,7 +192,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testHandleForwardedRemoteDoCommitRequest() throws Exception {
+    public void testHandleForwardedRemoteDoCommitRequest() {
         final TestProbe probe = createProbe();
         final TransactionDoCommitRequest request =
                 new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref());
@@ -200,7 +200,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testHandleForwardedRemoteAbortRequest() throws Exception {
+    public void testHandleForwardedRemoteAbortRequest() {
         final TestProbe probe = createProbe();
         final TransactionAbortRequest request =
                 new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref());
@@ -208,7 +208,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     }
 
     @Test
-    public void testForwardToLocalCommit() throws Exception {
+    public void testForwardToLocalCommit() {
         final TestProbe probe = createProbe();
         final DataTreeModification mod = mock(DataTreeModification.class);
         final TransactionRequest<?> request =

@@ -157,8 +157,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     }
 
     private LocalHistorySuccess handleDestroyHistory(final DestroyLocalHistoryRequest request,
-            final RequestEnvelope envelope, final long now)
-            throws RequestException {
+            final RequestEnvelope envelope, final long now) {
         final LocalHistoryIdentifier id = request.getTarget();
         final LocalFrontendHistory existing = localHistories.get(id);
         if (existing == null) {
@@ -172,7 +171,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     }
 
     private LocalHistorySuccess handlePurgeHistory(final PurgeLocalHistoryRequest request,
-            final RequestEnvelope envelope, final long now) throws RequestException {
+            final RequestEnvelope envelope, final long now) {
         final LocalHistoryIdentifier id = request.getTarget();
         final LocalFrontendHistory existing = localHistories.remove(id);
         if (existing == null) {

@@ -60,7 +60,7 @@ public class ModuleShardBackendResolverTest {
     private DataTree dataTree;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         contextProbe = new TestProbe(system, "context");
@@ -73,19 +73,19 @@ public class ModuleShardBackendResolverTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testResolveShardForPathNonNullCookie() throws Exception {
+    public void testResolveShardForPathNonNullCookie() {
         when(shardStrategy.findShard(YangInstanceIdentifier.EMPTY)).thenReturn("default");
         final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.EMPTY);
         Assert.assertEquals(0L, cookie.longValue());
     }
 
     @Test
-    public void testResolveShardForPathNullCookie() throws Exception {
+    public void testResolveShardForPathNullCookie() {
         when(shardStrategy.findShard(YangInstanceIdentifier.EMPTY)).thenReturn("foo");
         final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.EMPTY);
         Assert.assertEquals(1L, cookie.longValue());

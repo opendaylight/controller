@@ -43,7 +43,7 @@ public class FrontendTypeTest extends AbstractIdentifierTest<FrontendType> {
     }
 
     @Test
-    public void testCompareTo() throws Exception {
+    public void testCompareTo() {
         Assert.assertTrue(object().compareTo(equalObject()) == 0);
         Assert.assertTrue(object().compareTo(differentObject()) < 0);
     }
