@@ -47,7 +47,7 @@ public class SerializationUtilsTest {
     private static final QName CONTAINER_Q_NAME = QName.create("ns-1", "2017-03-17", "container1");
 
     @Test
-    public void testSerializeDeserializeNodes() throws Exception {
+    public void testSerializeDeserializeNodes() {
         final NormalizedNode<?, ?> normalizedNode = createNormalizedNode();
         final byte[] bytes = SerializationUtils.serializeNormalizedNode(normalizedNode);
         Assert.assertEquals(normalizedNode, SerializationUtils.deserializeNormalizedNode(bytes));
@@ -72,7 +72,7 @@ public class SerializationUtilsTest {
     }
 
     @Test
-    public void testSerializeDeserializePath() throws Exception {
+    public void testSerializeDeserializePath() {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput out = new DataOutputStream(bos);
         final YangInstanceIdentifier path = YangInstanceIdentifier.builder()
@@ -88,7 +88,7 @@ public class SerializationUtilsTest {
     }
 
     @Test
-    public void testSerializeDeserializePathAndNode() throws Exception {
+    public void testSerializeDeserializePathAndNode() {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput out = new DataOutputStream(bos);
         final NormalizedNode<?, ?> node = createNormalizedNode();

@@ -62,7 +62,7 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException {
             clientId = ClientIdentifier.readFrom(in);
 
             final byte header = WritableObjects.readLongHeader(in);

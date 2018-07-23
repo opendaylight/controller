@@ -33,7 +33,7 @@ public class PrintOpenTransactionsCommand implements Action {
 
     @Override
     @SuppressWarnings("checkstyle:RegexpSingleLineJava")
-    public Object execute() throws Exception {
+    public Object execute() {
         for (TracingDOMDataBroker tracingDOMDataBroker : tracingDOMDataBrokers) {
             tracingDOMDataBroker.printOpenTransactions(System.out);
         }

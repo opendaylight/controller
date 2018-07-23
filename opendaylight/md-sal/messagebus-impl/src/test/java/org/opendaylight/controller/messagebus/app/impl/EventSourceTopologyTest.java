@@ -61,7 +61,7 @@ public class EventSourceTopologyTest {
     RpcRegistration<EventAggregatorService> aggregatorRpcReg;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dataBrokerMock = mock(DataBroker.class);
         rpcProviderRegistryMock = mock(RpcProviderRegistry.class);
     }

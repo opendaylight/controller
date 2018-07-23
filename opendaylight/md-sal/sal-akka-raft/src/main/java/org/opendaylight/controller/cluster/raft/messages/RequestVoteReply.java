@@ -59,7 +59,7 @@ public final class RequestVoteReply extends AbstractRaftRPC {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(ObjectInput in) throws IOException {
             long term = in.readLong();
             boolean voteGranted = in.readBoolean();
 

@@ -21,7 +21,7 @@ public class TransactionPreCommitRequestTest extends AbstractTransactionRequestT
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final TransactionPreCommitRequest clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

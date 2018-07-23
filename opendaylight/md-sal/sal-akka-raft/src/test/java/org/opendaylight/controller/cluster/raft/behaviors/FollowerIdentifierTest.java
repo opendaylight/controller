@@ -9,8 +9,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 
@@ -22,7 +20,7 @@ import org.junit.Test;
 public class FollowerIdentifierTest {
 
     @Test
-    public void testSerialization() throws FileNotFoundException, IOException {
+    public void testSerialization() {
         FollowerIdentifier expected = new FollowerIdentifier("follower1");
         FollowerIdentifier cloned = (FollowerIdentifier) SerializationUtils.clone(expected);
         assertEquals("cloned", expected, cloned);

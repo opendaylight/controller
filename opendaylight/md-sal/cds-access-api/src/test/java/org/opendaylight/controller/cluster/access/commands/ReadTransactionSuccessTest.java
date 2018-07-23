@@ -29,14 +29,14 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
     }
 
     @Test
-    public void getDataTest() throws Exception {
+    public void getDataTest() {
         final Optional<NormalizedNode<?, ?>> result = OBJECT.getData();
         Assert.assertTrue(result.isPresent());
         Assert.assertEquals(NODE.getValue(), result.get().getValue());
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ReadTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

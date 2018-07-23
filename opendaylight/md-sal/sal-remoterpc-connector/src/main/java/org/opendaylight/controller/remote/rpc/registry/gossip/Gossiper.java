@@ -140,7 +140,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     }
 
     @Override
-    protected void handleReceive(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         //Usually sent by self via gossip task defined above. But its not enforced.
         //These ticks can be sent by another actor as well which is esp. useful while testing
         if (GOSSIP_TICK.equals(message)) {

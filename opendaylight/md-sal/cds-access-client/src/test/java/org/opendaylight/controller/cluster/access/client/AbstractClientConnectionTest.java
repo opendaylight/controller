@@ -60,7 +60,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     protected TestProbe replyToProbe;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         backendProbe = new TestProbe(system);
@@ -74,15 +74,15 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     protected abstract T createConnection();
 
     @Test
-    public void testLocalActor() throws Exception {
+    public void testLocalActor() {
         Assert.assertEquals(contextProbe.ref(), connection.localActor());
     }
 
     @Test
-    public abstract void testReconnectConnection() throws Exception;
+    public abstract void testReconnectConnection();
 
     @Test
-    public void testPoison() throws Exception {
+    public void testPoison() {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         final Request<?, ?> request = createRequest(replyToProbe.ref());
         final ConnectionEntry entry = new ConnectionEntry(request, callback, 0L);
@@ -92,7 +92,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     }
 
     @Test
-    public void testSendRequestReceiveResponse() throws Exception {
+    public void testSendRequestReceiveResponse() {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         final Request<?, ?> request = createRequest(replyToProbe.ref());
         connection.sendRequest(request, callback);
@@ -106,19 +106,19 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     }
 
     @Test
-    public void testRun() throws Exception {
+    public void testRun() {
         final ClientActorBehavior<U> behavior = mock(ClientActorBehavior.class);
         Assert.assertSame(behavior, connection.runTimer(behavior));
     }
 
     @Test
-    public void testCheckTimeoutEmptyQueue() throws Exception {
+    public void testCheckTimeoutEmptyQueue() {
         final Optional<Long> timeout = connection.checkTimeout(context.ticker().read());
         Assert.assertFalse(timeout.isPresent());
     }
 
     @Test
-    public void testCheckTimeout() throws Exception {
+    public void testCheckTimeout() {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         connection.sendRequest(createRequest(replyToProbe.ref()), callback);
         final long now = context.ticker().read();
@@ -127,7 +127,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     }
 
     @Test
-    public void testReplay() throws Exception {
+    public void testReplay() {
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         final Request<?, ?> request1 = createRequest(replyToProbe.ref());
         final Request<?, ?> request2 = createRequest(replyToProbe.ref());
@@ -142,7 +142,7 @@ public abstract class AbstractClientConnectionTest<T extends AbstractClientConne
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 

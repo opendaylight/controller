@@ -84,6 +84,6 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
     }
 }

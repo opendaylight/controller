@@ -135,12 +135,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         actorFactory.close();
     }
 
     @Test
-    public void testAddServerWithExistingFollower() throws Exception {
+    public void testAddServerWithExistingFollower() {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
         RaftActorContextImpl followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
@@ -225,7 +225,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithNoExistingFollower() throws Exception {
+    public void testAddServerWithNoExistingFollower() {
         LOG.info("testAddServerWithNoExistingFollower starting");
 
         setupNewFollower();
@@ -281,7 +281,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServersAsNonVoting() throws Exception {
+    public void testAddServersAsNonVoting() {
         LOG.info("testAddServersAsNonVoting starting");
 
         setupNewFollower();
@@ -351,7 +351,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithOperationInProgress() throws Exception {
+    public void testAddServerWithOperationInProgress() {
         LOG.info("testAddServerWithOperationInProgress starting");
 
         setupNewFollower();
@@ -414,7 +414,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithPriorSnapshotInProgress() throws Exception {
+    public void testAddServerWithPriorSnapshotInProgress() {
         LOG.info("testAddServerWithPriorSnapshotInProgress starting");
 
         setupNewFollower();
@@ -461,7 +461,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithPriorSnapshotCompleteTimeout() throws Exception {
+    public void testAddServerWithPriorSnapshotCompleteTimeout() {
         LOG.info("testAddServerWithPriorSnapshotCompleteTimeout starting");
 
         setupNewFollower();
@@ -493,7 +493,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithLeaderChangeBeforePriorSnapshotComplete() throws Exception {
+    public void testAddServerWithLeaderChangeBeforePriorSnapshotComplete() {
         LOG.info("testAddServerWithLeaderChangeBeforePriorSnapshotComplete starting");
 
         setupNewFollower();
@@ -542,7 +542,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithLeaderChangeDuringInstallSnapshot() throws Exception {
+    public void testAddServerWithLeaderChangeDuringInstallSnapshot() {
         LOG.info("testAddServerWithLeaderChangeDuringInstallSnapshot starting");
 
         setupNewFollower();
@@ -587,7 +587,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithInstallSnapshotTimeout() throws Exception {
+    public void testAddServerWithInstallSnapshotTimeout() {
         LOG.info("testAddServerWithInstallSnapshotTimeout starting");
 
         setupNewFollower();
@@ -846,7 +846,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServer() throws Exception {
+    public void testRemoveServer() {
         LOG.info("testRemoveServer starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();

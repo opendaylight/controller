@@ -23,13 +23,13 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
     }
 
     @Test
-    public void getDataTest() throws Exception {
+    public void getDataTest() {
         final Optional<NormalizedNode<?, ?>> result = OBJECT.getData();
         Assert.assertFalse(result.isPresent());
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ReadTransactionSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

@@ -38,7 +38,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
@@ -81,7 +80,7 @@ public class AbstractRpcTest {
     protected DOMRpcService domRpcService2;
 
     @BeforeClass
-    public static void setup() throws InterruptedException {
+    public static void setup() {
         config1 = new RemoteRpcProviderConfig.Builder("memberA").build();
         config2 = new RemoteRpcProviderConfig.Builder("memberB").build();
         node1 = ActorSystem.create("opendaylight-rpc", config1.get());
@@ -97,7 +96,7 @@ public class AbstractRpcTest {
     }
 
     @Before
-    public void setUp() throws ReactorException {
+    public void setUp() {
         schemaContext = YangParserTestUtils.parseYangResources(AbstractRpcTest.class, "/test-rpc.yang");
 
         MockitoAnnotations.initMocks(this);

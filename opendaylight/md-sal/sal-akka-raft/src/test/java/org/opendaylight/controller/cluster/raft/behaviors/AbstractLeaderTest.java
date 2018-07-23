@@ -33,7 +33,7 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
      * that regardless of whether followers respond or not we schedule heartbeats.
      */
     @Test
-    public void testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries() throws Exception {
+    public void testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries() {
         logStart("testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries");
 
         String leaderActorId = actorFactory.generateActorId("leader");

@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +50,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     @SuppressWarnings("unchecked")
     @Override
     public void leafNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object value)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
 
         checkNotSealed();
 
@@ -73,7 +72,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startLeafSet(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.leafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -81,7 +80,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startOrderedLeafSet(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int str)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -89,7 +88,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public void leafSetEntryNode(QName name, Object value) throws IOException, IllegalArgumentException {
+    public void leafSetEntryNode(QName name, Object value) throws IllegalArgumentException {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper parent = stack.peek();
@@ -113,7 +112,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startContainerNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.containerBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -121,13 +120,13 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startYangModeledAnyXmlNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void startUnkeyedList(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.unkeyedListBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -135,7 +134,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startUnkeyedListItem(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalStateException {
+            throws IllegalStateException {
         checkNotSealed();
 
         addBuilder(Builders.unkeyedListEntryBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -143,7 +142,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startMapNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.mapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -151,7 +150,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startMapEntryNode(YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifierWithPredicates,
-            int count)  throws IOException, IllegalArgumentException {
+            int count)  throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.mapEntryBuilder().withNodeIdentifier(nodeIdentifierWithPredicates),
@@ -160,7 +159,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startOrderedMapNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.orderedMapBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -168,7 +167,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startChoiceNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int count)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         addBuilder(Builders.choiceBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
@@ -176,7 +175,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @Override
     public void startAugmentationNode(YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
 
         checkNotSealed();
 
@@ -186,7 +185,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     @SuppressWarnings("unchecked")
     @Override
     public void anyxmlNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object value)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper parent = stack.peek();
@@ -208,7 +207,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void endNode() throws IOException, IllegalStateException {
+    public void endNode() throws IllegalStateException {
         checkNotSealed();
 
         NormalizedNodeBuilderWrapper child = stack.pop();
@@ -232,12 +231,12 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         sealed = true;
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
 
     }
 

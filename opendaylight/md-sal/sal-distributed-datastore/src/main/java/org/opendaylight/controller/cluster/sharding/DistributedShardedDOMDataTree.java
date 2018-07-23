@@ -267,7 +267,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         ask.onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(final Throwable throwable, final Object result) throws Throwable {
+            public void onComplete(final Throwable throwable, final Object result) {
                 if (throwable != null) {
                     future.setException(throwable);
                 } else {
@@ -510,8 +510,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void initDefaultShard(final LogicalDatastoreType logicalDatastoreType)
-            throws ExecutionException, InterruptedException {
+    private void initDefaultShard(final LogicalDatastoreType logicalDatastoreType) {
 
         final PrefixedShardConfigWriter writer = writerMap.get(logicalDatastoreType);
 

@@ -34,7 +34,7 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     private AbstractTransactionCommitCohort cohort;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         system = ActorSystem.apply();
@@ -50,7 +50,7 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
@@ -66,14 +66,14 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
 
     @Override
     @Test
-    public void testDoCreateTransaction() throws Exception {
+    public void testDoCreateTransaction() {
         final ClientTransaction clientTransaction = object().doCreateTransaction();
         Assert.assertEquals(object().getIdentifier(), clientTransaction.getIdentifier().getHistoryId());
     }
 
     @Override
     @Test
-    public void testCreateHistoryProxy() throws Exception {
+    public void testCreateHistoryProxy() {
         final AbstractClientConnection<ShardBackendInfo> clientConnection = behavior.getConnection(0L);
         final ProxyHistory historyProxy = object().createHistoryProxy(HISTORY_ID, clientConnection);
         Assert.assertEquals(object().getIdentifier(), historyProxy.getIdentifier());
@@ -81,7 +81,7 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
 
     @Override
     @Test
-    public void testDoCreateSnapshot() throws Exception {
+    public void testDoCreateSnapshot() {
         final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
         Assert.assertEquals(new TransactionIdentifier(object().getIdentifier(), object().nextTx()).getHistoryId(),
                 clientSnapshot.getIdentifier().getHistoryId());
@@ -89,7 +89,7 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
 
     @Override
     @Test
-    public void testOnTransactionComplete() throws Exception {
+    public void testOnTransactionComplete() {
         final ClientTransaction transaction = object().createTransaction();
         // make transaction ready
         object().onTransactionReady(transaction, cohort);
@@ -102,14 +102,14 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
 
     @Override
     @Test
-    public void testOnTransactionAbort() throws Exception {
+    public void testOnTransactionAbort() {
         final ClientSnapshot clientSnapshot = object().doCreateSnapshot();
         Assert.assertTrue(clientSnapshot.abort());
     }
 
     @Override
     @Test
-    public void testOnTransactionReady() throws Exception {
+    public void testOnTransactionReady() {
         final AbstractTransactionCommitCohort result = object().onTransactionReady(
                 object().createTransaction(), cohort);
         Assert.assertEquals(result, cohort);
@@ -117,7 +117,7 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
 
     @Override
     @Test(expected = IllegalStateException.class)
-    public void testOnTransactionReadyDuplicate() throws Exception {
+    public void testOnTransactionReadyDuplicate() {
         final ClientTransaction transaction = object().createTransaction();
         object().onTransactionReady(transaction, cohort);
         object().onTransactionReady(transaction, cohort);

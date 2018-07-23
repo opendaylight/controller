@@ -50,7 +50,7 @@ public class AbstractMessagingTest {
     protected InputStream mockInputStream;
 
     @BeforeClass
-    public static void setupClass() throws IOException {
+    public static void setupClass() {
         ACTOR_SYSTEM = ActorSystem.create("test");
     }
 

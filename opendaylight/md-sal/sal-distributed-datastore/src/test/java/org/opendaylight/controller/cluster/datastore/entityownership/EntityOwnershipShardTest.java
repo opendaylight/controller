@@ -102,7 +102,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testOnRegisterCandidateLocal() throws Exception {
+    public void testOnRegisterCandidateLocal() {
         testLog.info("testOnRegisterCandidateLocal starting");
 
         ShardTestKit kit = new ShardTestKit(getSystem());
@@ -124,7 +124,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testOnRegisterCandidateLocalWithNoInitialLeader() throws Exception {
+    public void testOnRegisterCandidateLocalWithNoInitialLeader() {
         testLog.info("testOnRegisterCandidateLocalWithNoInitialLeader starting");
 
         final ShardTestKit kit = new ShardTestKit(getSystem());
@@ -159,7 +159,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testOnRegisterCandidateLocalWithNoInitialConsensus() throws Exception {
+    public void testOnRegisterCandidateLocalWithNoInitialConsensus() {
         testLog.info("testOnRegisterCandidateLocalWithNoInitialConsensus starting");
 
         final ShardTestKit kit = new ShardTestKit(getSystem());
@@ -244,7 +244,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testOnRegisterCandidateLocalWithRemoteLeader() throws Exception {
+    public void testOnRegisterCandidateLocalWithRemoteLeader() {
         testLog.info("testOnRegisterCandidateLocalWithRemoteLeader starting");
 
         ShardTestKit kit = new ShardTestKit(getSystem());
@@ -300,7 +300,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testOnUnregisterCandidateLocal() throws Exception {
+    public void testOnUnregisterCandidateLocal() {
         testLog.info("testOnUnregisterCandidateLocal starting");
 
         ShardTestKit kit = new ShardTestKit(getSystem());
@@ -336,7 +336,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testOwnershipChanges() throws Exception {
+    public void testOwnershipChanges() {
         testLog.info("testOwnershipChanges starting");
 
         final ShardTestKit kit = new ShardTestKit(getSystem());
@@ -1044,7 +1044,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testListenerRegistration() throws Exception {
+    public void testListenerRegistration() {
         testLog.info("testListenerRegistration starting");
 
         ShardTestKit kit = new ShardTestKit(getSystem());
@@ -1137,7 +1137,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testDelayedEntityOwnerSelectionWhenMaxPeerRequestsReceived() throws Exception {
+    public void testDelayedEntityOwnerSelectionWhenMaxPeerRequestsReceived() {
         testLog.info("testDelayedEntityOwnerSelectionWhenMaxPeerRequestsReceived starting");
 
         ShardTestKit kit = new ShardTestKit(getSystem());
@@ -1179,7 +1179,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     @Test
-    public void testDelayedEntityOwnerSelection() throws Exception {
+    public void testDelayedEntityOwnerSelection() {
         testLog.info("testDelayedEntityOwnerSelection starting");
 
         final ShardTestKit kit = new ShardTestKit(getSystem());

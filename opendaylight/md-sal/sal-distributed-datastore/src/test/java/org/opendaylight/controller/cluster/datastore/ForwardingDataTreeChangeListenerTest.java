@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
 
     @Test
-    public void testOnDataChanged() throws Exception {
+    public void testOnDataChanged() {
         final ActorRef actorRef = getSystem().actorOf(MessageCollectorActor.props());
 
         ForwardingDataTreeChangeListener forwardingListener = new ForwardingDataTreeChangeListener(

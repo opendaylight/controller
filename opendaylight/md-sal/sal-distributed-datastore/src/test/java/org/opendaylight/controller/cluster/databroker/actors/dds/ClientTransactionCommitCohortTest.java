@@ -60,7 +60,7 @@ public class ClientTransactionCommitCohortTest {
     private ClientTransactionCommitCohort cohort;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
@@ -78,7 +78,7 @@ public class ClientTransactionCommitCohortTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 

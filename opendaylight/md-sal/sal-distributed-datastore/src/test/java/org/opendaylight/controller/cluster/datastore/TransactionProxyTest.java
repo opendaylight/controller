@@ -90,7 +90,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     interface Invoker {
-        FluentFuture<?> invoke(TransactionProxy proxy) throws Exception;
+        FluentFuture<?> invoke(TransactionProxy proxy);
     }
 
     @Test
@@ -329,7 +329,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         dataStoreContextBuilder.shardBatchedModificationCount(1);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
@@ -418,7 +418,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testMerge() throws Exception {
+    public void testMerge() {
         dataStoreContextBuilder.shardBatchedModificationCount(1);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
@@ -434,7 +434,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         dataStoreContextBuilder.shardBatchedModificationCount(1);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
@@ -448,7 +448,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadWrite() throws Exception {
+    public void testReadWrite() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
@@ -476,7 +476,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithReadWrite() throws Exception {
+    public void testReadyWithReadWrite() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
@@ -508,7 +508,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithNoModifications() throws Exception {
+    public void testReadyWithNoModifications() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
@@ -533,7 +533,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithMultipleShardWrites() throws Exception {
+    public void testReadyWithMultipleShardWrites() {
         ActorRef actorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY,
@@ -592,7 +592,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithWriteOnlyAndLastBatchPending() throws Exception {
+    public void testReadyWithWriteOnlyAndLastBatchPending() {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
 
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
@@ -619,7 +619,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithWriteOnlyAndLastBatchEmpty() throws Exception {
+    public void testReadyWithWriteOnlyAndLastBatchEmpty() {
         dataStoreContextBuilder.shardBatchedModificationCount(1).writeOnlyTransactionOptimizationsEnabled(true);
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
@@ -647,7 +647,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithReplyFailure() throws Exception {
+    public void testReadyWithReplyFailure() {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
 
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
@@ -668,7 +668,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithDebugContextEnabled() throws Exception {
+    public void testReadyWithDebugContextEnabled() {
         dataStoreContextBuilder.transactionDebugContextEnabled(true);
 
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
@@ -687,7 +687,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithLocalTransaction() throws Exception {
+    public void testReadyWithLocalTransaction() {
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         doReturn(getSystem().actorSelection(shardActorRef.path())).when(mockActorContext)
@@ -715,7 +715,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadyWithLocalTransactionWithFailure() throws Exception {
+    public void testReadyWithLocalTransactionWithFailure() {
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         doReturn(getSystem().actorSelection(shardActorRef.path())).when(mockActorContext)
@@ -740,7 +740,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyCohortFutures((SingleCommitCohortProxy)ready, RuntimeException.class);
     }
 
-    private void testWriteOnlyTxWithFindPrimaryShardFailure(final Exception toThrow) throws Exception {
+    private void testWriteOnlyTxWithFindPrimaryShardFailure(final Exception toThrow) {
         doReturn(Futures.failed(toThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
@@ -761,22 +761,22 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testWriteOnlyTxWithPrimaryNotFoundException() throws Exception {
+    public void testWriteOnlyTxWithPrimaryNotFoundException() {
         testWriteOnlyTxWithFindPrimaryShardFailure(new PrimaryNotFoundException("mock"));
     }
 
     @Test
-    public void testWriteOnlyTxWithNotInitializedException() throws Exception {
+    public void testWriteOnlyTxWithNotInitializedException() {
         testWriteOnlyTxWithFindPrimaryShardFailure(new NotInitializedException("mock"));
     }
 
     @Test
-    public void testWriteOnlyTxWithNoShardLeaderException() throws Exception {
+    public void testWriteOnlyTxWithNoShardLeaderException() {
         testWriteOnlyTxWithFindPrimaryShardFailure(new NoShardLeaderException("mock"));
     }
 
     @Test
-    public void testReadyWithInvalidReplyMessageType() throws Exception {
+    public void testReadyWithInvalidReplyMessageType() {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
         ActorRef actorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
@@ -812,7 +812,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testClose() throws Exception {
+    public void testClose() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
@@ -1299,7 +1299,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 .getOperationTimeoutInMillis()) * 2);
     }
 
-    private void testModificationOperationBatching(final TransactionType type) throws Exception {
+    private void testModificationOperationBatching(final TransactionType type) {
         int shardBatchedModificationCount = 3;
         dataStoreContextBuilder.shardBatchedModificationCount(shardBatchedModificationCount);
 
@@ -1358,17 +1358,17 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadWriteModificationOperationBatching() throws Exception {
+    public void testReadWriteModificationOperationBatching() {
         testModificationOperationBatching(READ_WRITE);
     }
 
     @Test
-    public void testWriteOnlyModificationOperationBatching() throws Exception {
+    public void testWriteOnlyModificationOperationBatching() {
         testModificationOperationBatching(WRITE_ONLY);
     }
 
     @Test
-    public void testOptimizedWriteOnlyModificationOperationBatching() throws Exception {
+    public void testOptimizedWriteOnlyModificationOperationBatching() {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
         testModificationOperationBatching(WRITE_ONLY);
     }
@@ -1461,7 +1461,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadRoot() throws ReadFailedException, InterruptedException, ExecutionException,
+    public void testReadRoot() throws InterruptedException, ExecutionException,
             java.util.concurrent.TimeoutException {
         SchemaContext schemaContext = SchemaContextHelper.full();
         Configuration configuration = mock(Configuration.class);

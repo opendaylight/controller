@@ -316,7 +316,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
-            public void onComplete(final Throwable failure, final Iterable<Object> responses) throws Throwable {
+            public void onComplete(final Throwable failure, final Iterable<Object> responses) {
                 Throwable exceptionToPropagate = failure;
                 if (exceptionToPropagate == null) {
                     for (Object response: responses) {

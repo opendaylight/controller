@@ -30,7 +30,7 @@ public class RemoteRpcProviderTest {
     static RemoteRpcProviderConfig moduleConfig;
 
     @BeforeClass
-    public static void setup() throws InterruptedException {
+    public static void setup() {
         moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc")
                 .withConfigReader(ConfigFactory::load).build();
         final Config config = moduleConfig.get();

@@ -79,8 +79,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
     }
 
     @SuppressWarnings("unchecked")
-    private static Class<? extends EntityOwnerSelectionStrategy> loadClass(final String strategyClassAndDelay)
-            throws ClassNotFoundException {
+    private static Class<? extends EntityOwnerSelectionStrategy> loadClass(final String strategyClassAndDelay) {
         final Class<?> clazz;
         try {
             clazz = EntityOwnerSelectionStrategyConfigReader.class.getClassLoader().loadClass(strategyClassAndDelay);

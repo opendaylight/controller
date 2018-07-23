@@ -48,7 +48,7 @@ public class NtfbenchmarkProvider implements AutoCloseable, NtfbenchmarkService 
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         LOG.info("NtfbenchmarkProvider closed");
     }
 

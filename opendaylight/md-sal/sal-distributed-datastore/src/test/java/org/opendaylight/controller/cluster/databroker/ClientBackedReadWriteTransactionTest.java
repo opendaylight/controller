@@ -33,12 +33,12 @@ public class ClientBackedReadWriteTransactionTest
     private DOMStoreThreePhaseCommitCohort readyCohort;
 
     @Override
-    ClientBackedReadWriteTransaction object() throws Exception {
+    ClientBackedReadWriteTransaction object() {
         return object;
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         Mockito.doReturn(TRANSACTION_ID).when(delegate).getIdentifier();

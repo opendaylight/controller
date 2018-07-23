@@ -23,11 +23,11 @@ public class EventSourceRegistrationImplTest {
     EventSourceTopology eventSourceTopologyMock;
 
     @BeforeClass
-    public static void initTestClass() throws IllegalAccessException, InstantiationException {
+    public static void initTestClass() {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         EventSource eventSourceMock = mock(EventSource.class);
         eventSourceTopologyMock = mock(EventSourceTopology.class);
         eventSourceRegistrationImplLocal = new EventSourceRegistrationImplLocal(eventSourceMock,

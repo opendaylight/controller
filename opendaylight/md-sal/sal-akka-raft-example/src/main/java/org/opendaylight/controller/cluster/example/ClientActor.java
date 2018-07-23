@@ -29,7 +29,7 @@ public class ClientActor extends UntypedActor {
         return Props.create(ClientActor.class, target);
     }
 
-    @Override public void onReceive(Object message) throws Exception {
+    @Override public void onReceive(Object message) {
         if (message instanceof KeyValue) {
             target.tell(message, getSelf());
         } else if (message instanceof KeyValueSaved) {

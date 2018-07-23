@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.io.Externalizable;
-import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
@@ -20,10 +19,10 @@ import java.io.ObjectOutput;
 public class EmptyExternalizable implements Externalizable {
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) {
     }
 }

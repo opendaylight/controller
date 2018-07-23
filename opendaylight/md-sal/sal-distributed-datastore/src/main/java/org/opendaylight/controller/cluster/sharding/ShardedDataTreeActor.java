@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
-import static akka.actor.ActorRef.noSender;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -119,12 +117,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    protected void handleRecover(final Object message) throws Exception {
+    protected void handleRecover(final Object message) {
         LOG.debug("Received a recover message {}", message);
     }
 
     @Override
-    protected void handleCommand(final Object message) throws Exception {
+    protected void handleCommand(final Object message) {
         LOG.debug("{} : Received {}", clusterWrapper.getCurrentMemberName(), message);
         if (message instanceof ClusterEvent.MemberUp) {
             memberUp((ClusterEvent.MemberUp) message);
@@ -439,7 +437,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             localShardFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
-                public void onComplete(Throwable throwable, ActorRef actorRef) throws Throwable {
+                public void onComplete(Throwable throwable, ActorRef actorRef) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {
@@ -503,7 +501,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             ask.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(final Throwable throwable, final Object findLeaderReply) throws Throwable {
+                public void onComplete(final Throwable throwable, final Object findLeaderReply) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {
@@ -627,7 +625,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             localShardFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
-                public void onComplete(Throwable throwable, ActorRef actorRef) throws Throwable {
+                public void onComplete(Throwable throwable, ActorRef actorRef) {
                     if (throwable != null) {
                         //TODO Shouldn't we check why findLocalShard failed?
                         LOG.debug("Backend shard[{}] removal lookup successful notifying the registration future",
@@ -729,7 +727,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             ask.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(final Throwable throwable, final Object findLeaderReply) throws Throwable {
+                public void onComplete(final Throwable throwable, final Object findLeaderReply) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {

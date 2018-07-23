@@ -127,7 +127,7 @@ public class DOMTransactionChainTest {
 
     @Test
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void testTransactionChainNotSealed() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testTransactionChainNotSealed() throws InterruptedException, ExecutionException {
         BlockingTransactionChainListener listener = new BlockingTransactionChainListener();
         DOMTransactionChain txChain = domBroker.createTransactionChain(listener);
         assertNotNull(txChain);

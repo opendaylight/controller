@@ -82,7 +82,7 @@ final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult>
     private final class FutureUpdater extends OnComplete<Object> {
 
         @Override
-        public void onComplete(final Throwable error, final Object reply) throws Throwable {
+        public void onComplete(final Throwable error, final Object reply) {
             if (error != null) {
                 RemoteDOMRpcFuture.this.failNow(error);
             } else if (reply instanceof RpcResponse) {

@@ -26,11 +26,11 @@ public class TopicDOMNotificationTest {
     TopicDOMNotification topicDOMNotification;
 
     @BeforeClass
-    public static void initTestClass() throws IllegalAccessException, InstantiationException {
+    public static void initTestClass() {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         containerNodeBodyMock = mock(ContainerNode.class);
         doReturn(CONTAINER_NODE_BODY_MOCK_TO_STRING).when(containerNodeBodyMock).toString();
         topicDOMNotification = new TopicDOMNotification(containerNodeBodyMock);

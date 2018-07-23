@@ -41,7 +41,7 @@ public class DeleteEntries implements Serializable {
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException {
             deleteEntries = new DeleteEntries(in.readLong());
         }
 

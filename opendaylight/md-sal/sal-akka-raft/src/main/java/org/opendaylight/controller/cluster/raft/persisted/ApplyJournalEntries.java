@@ -45,7 +45,7 @@ public class ApplyJournalEntries implements Serializable, ControlMessage {
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException {
             applyEntries = new ApplyJournalEntries(in.readLong());
         }
 

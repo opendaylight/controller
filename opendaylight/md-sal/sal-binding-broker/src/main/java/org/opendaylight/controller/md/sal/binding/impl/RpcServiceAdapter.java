@@ -93,7 +93,7 @@ class RpcServiceAdapter implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(final Object proxyObj, final Method method, final Object[] args) throws Throwable {
+    public Object invoke(final Object proxyObj, final Method method, final Object[] args) {
 
         final RpcInvocationStrategy rpc = rpcNames.get(method);
         if (rpc != null) {

@@ -21,7 +21,7 @@ public class TerminationMonitor extends UntypedActor {
         LOG.debug("Created TerminationMonitor");
     }
 
-    @Override public void onReceive(Object message) throws Exception {
+    @Override public void onReceive(Object message) {
         if (message instanceof Terminated) {
             Terminated terminated = (Terminated) message;
             LOG.debug("Actor terminated : {}", terminated.actor());

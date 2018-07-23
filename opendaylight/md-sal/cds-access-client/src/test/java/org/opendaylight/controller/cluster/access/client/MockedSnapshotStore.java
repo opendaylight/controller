@@ -76,7 +76,7 @@ class MockedSnapshotStore extends SnapshotStore {
         final Promise<T> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
         future.onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(final Throwable failure, final Object success) throws Throwable {
+            public void onComplete(final Throwable failure, final Object success) {
                 if (success instanceof Throwable) {
                     promise.failure((Throwable) success);
                     return;

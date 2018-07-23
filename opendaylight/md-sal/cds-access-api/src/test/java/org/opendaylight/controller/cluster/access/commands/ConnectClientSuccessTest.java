@@ -73,7 +73,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ConnectClientSuccess clone = OBJECT.cloneAsVersion(ABIVersion.BORON);
         Assert.assertEquals(OBJECT, clone);
     }

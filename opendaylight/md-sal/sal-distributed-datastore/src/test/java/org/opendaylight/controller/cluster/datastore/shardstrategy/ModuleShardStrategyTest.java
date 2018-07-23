@@ -33,7 +33,7 @@ public class ModuleShardStrategyTest {
 
 
     @Test
-    public void testFindShard() throws Exception {
+    public void testFindShard() {
         ModuleShardStrategy moduleShardStrategy =
             new ModuleShardStrategy("cars", configuration);
 

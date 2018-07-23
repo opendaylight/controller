@@ -73,21 +73,21 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
 
     @Override
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         final YangInstanceIdentifier path = PATH_1;
         testModification(() -> transaction.write(path, DATA_1), TransactionWrite.class, path);
     }
 
     @Override
     @Test
-    public void testMerge() throws Exception {
+    public void testMerge() {
         final YangInstanceIdentifier path = PATH_2;
         testModification(() -> transaction.merge(path, DATA_2), TransactionMerge.class, path);
     }
 
     @Override
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         final YangInstanceIdentifier path = PATH_3;
         testModification(() -> transaction.delete(path), TransactionDelete.class, path);
     }
@@ -107,27 +107,27 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
 
     @Override
     @Test
-    public void testCanCommit() throws Exception {
+    public void testCanCommit() {
         testRequestResponse(transaction::canCommit, ModifyTransactionRequest.class,
                 TransactionCanCommitSuccess::new);
     }
 
     @Override
     @Test
-    public void testPreCommit() throws Exception {
+    public void testPreCommit() {
         testRequestResponse(transaction::preCommit, TransactionPreCommitRequest.class,
                 TransactionPreCommitSuccess::new);
     }
 
     @Override
     @Test
-    public void testDoCommit() throws Exception {
+    public void testDoCommit() {
         testRequestResponse(transaction::doCommit, TransactionDoCommitRequest.class, TransactionCommitSuccess::new);
     }
 
     @Override
     @Test
-    public void testForwardToRemoteAbort() throws Exception {
+    public void testForwardToRemoteAbort() {
         final TestProbe probe = createProbe();
         final TransactionAbortRequest request = new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref());
         testForwardToRemote(request, TransactionAbortRequest.class);
@@ -135,14 +135,14 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Override
-    public void testForwardToRemoteCommit() throws Exception {
+    public void testForwardToRemoteCommit() {
         final TestProbe probe = createProbe();
         final TransactionAbortRequest request = new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref());
         testForwardToRemote(request, TransactionAbortRequest.class);
     }
 
     @Test
-    public void testForwardToRemoteModifyCommitSimple() throws Exception {
+    public void testForwardToRemoteModifyCommitSimple() {
         final TestProbe probe = createProbe();
         final ModifyTransactionRequestBuilder builder =
                 new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
@@ -156,7 +156,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Test
-    public void testForwardToRemoteModifyCommit3Phase() throws Exception {
+    public void testForwardToRemoteModifyCommit3Phase() {
         final TestProbe probe = createProbe();
         final ModifyTransactionRequestBuilder builder =
                 new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
@@ -170,7 +170,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Test
-    public void testForwardToRemoteModifyAbort() throws Exception {
+    public void testForwardToRemoteModifyAbort() {
         final TestProbe probe = createProbe();
         final ModifyTransactionRequestBuilder builder =
                 new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
@@ -184,7 +184,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Test
-    public void testForwardToRemoteModifyRead() throws Exception {
+    public void testForwardToRemoteModifyRead() {
         final TestProbe probe = createProbe();
         final ReadTransactionRequest request =
                 new ReadTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, false);
@@ -194,7 +194,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Test
-    public void testForwardToRemoteModifyExists() throws Exception {
+    public void testForwardToRemoteModifyExists() {
         final TestProbe probe = createProbe();
         final ExistsTransactionRequest request =
                 new ExistsTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), PATH_1, false);
@@ -204,7 +204,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Test
-    public void testForwardToRemoteModifyPreCommit() throws Exception {
+    public void testForwardToRemoteModifyPreCommit() {
         final TestProbe probe = createProbe();
         final TransactionPreCommitRequest request =
                 new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref());
@@ -213,7 +213,7 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     }
 
     @Test
-    public void testForwardToRemoteModifyDoCommit() throws Exception {
+    public void testForwardToRemoteModifyDoCommit() {
         final TestProbe probe = createProbe();
         final TransactionDoCommitRequest request =
                 new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref());

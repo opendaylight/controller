@@ -48,7 +48,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier>
         }
 
         @Override
-        public final void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public final void readExternal(final ObjectInput in) throws IOException {
             final int length = in.readInt();
             serialized = new byte[length];
             in.readFully(serialized);

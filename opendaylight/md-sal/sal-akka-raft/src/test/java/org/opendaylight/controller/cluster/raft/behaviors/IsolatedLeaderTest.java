@@ -61,7 +61,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Test
-    public void testHandleMessageWithThreeMembers() throws Exception {
+    public void testHandleMessageWithThreeMembers() {
         String followerAddress1 = "akka://test/user/$a";
         String followerAddress2 = "akka://test/user/$b";
 
@@ -93,7 +93,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Test
-    public void testHandleMessageWithFiveMembers() throws Exception {
+    public void testHandleMessageWithFiveMembers() {
         String followerAddress1 = "akka://test/user/$a";
         String followerAddress2 = "akka://test/user/$b";
         String followerAddress3 = "akka://test/user/$c";
@@ -135,7 +135,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Test
-    public void testHandleMessageFromAnotherLeader() throws Exception {
+    public void testHandleMessageFromAnotherLeader() {
         String followerAddress1 = "akka://test/user/$a";
         String followerAddress2 = "akka://test/user/$b";
 

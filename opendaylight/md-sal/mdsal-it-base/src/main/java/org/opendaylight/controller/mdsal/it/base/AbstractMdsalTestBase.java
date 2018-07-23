@@ -69,7 +69,7 @@ public abstract class AbstractMdsalTestBase {
     public abstract String getFeatureName();
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
     }
 
     public Option getLoggingOption() {

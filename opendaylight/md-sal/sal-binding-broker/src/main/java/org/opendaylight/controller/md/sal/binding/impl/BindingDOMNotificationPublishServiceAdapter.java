@@ -68,7 +68,7 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 

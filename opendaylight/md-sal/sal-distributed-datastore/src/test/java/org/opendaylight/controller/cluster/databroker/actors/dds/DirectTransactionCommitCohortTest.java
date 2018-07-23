@@ -45,7 +45,7 @@ public class DirectTransactionCommitCohortTest {
     private DirectTransactionCommitCohort cohort;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         final TestProbe clientContextProbe = new TestProbe(system, "clientContext");
@@ -58,7 +58,7 @@ public class DirectTransactionCommitCohortTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
