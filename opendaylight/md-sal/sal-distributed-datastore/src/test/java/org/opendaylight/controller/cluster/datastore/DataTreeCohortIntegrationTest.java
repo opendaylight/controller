@@ -29,7 +29,6 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -76,14 +75,14 @@ public class DataTreeCohortIntegrationTest {
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100);
 
     @BeforeClass
-    public static void setUpClass() throws IOException {
+    public static void setUpClass() {
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         final Address member1Address = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
         Cluster.get(system).join(member1Address);
     }
 
     @AfterClass
-    public static void tearDownClass() throws IOException {
+    public static void tearDownClass() {
         TestKit.shutdownActorSystem(system);
         system = null;
     }

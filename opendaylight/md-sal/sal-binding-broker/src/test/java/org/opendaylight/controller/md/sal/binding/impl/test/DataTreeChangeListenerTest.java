@@ -151,7 +151,7 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testWildcardNotificationOfPreexistingData() throws Exception {
+    public void testWildcardNotificationOfPreexistingData() {
         InstanceIdentifier<Top> id = InstanceIdentifier.builder(Top.class).build();
         ArrayList<TopLevelList> list = new ArrayList<>();
         list.add(new TopLevelListBuilder().setName("name").build());

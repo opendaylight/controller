@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -20,12 +19,12 @@ public class AbstractClusterRefEntityOwnershipTest extends AbstractEntityOwnersh
     private static ActorSystem system;
 
     @BeforeClass
-    public static void setUpClass() throws IOException {
+    public static void setUpClass() {
         system = ActorSystem.create("test", ConfigFactory.load().getConfig("test-config"));
     }
 
     @AfterClass
-    public static void tearDownClass() throws IOException {
+    public static void tearDownClass() {
         TestKit.shutdownActorSystem(system);
         system = null;
     }

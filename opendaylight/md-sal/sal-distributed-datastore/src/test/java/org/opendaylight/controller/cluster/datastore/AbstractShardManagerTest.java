@@ -59,7 +59,7 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
 
         InMemoryJournal.clear();

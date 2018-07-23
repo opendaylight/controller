@@ -45,7 +45,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
     private MockPayload payload7;
 
     @Test
-    public void runTest() throws Exception {
+    public void runTest() {
         testLog.info("testReplicationAndSnapshots starting");
 
         // Setup the persistent journal for the leader. We'll start up with 3 journal log entries (one less
@@ -163,7 +163,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
      * scenario, the follower consensus and application of state is delayed until after the snapshot
      * completes.
      */
-    private void testFirstSnapshot() throws Exception {
+    private void testFirstSnapshot() {
         testLog.info("testFirstSnapshot starting");
 
         expSnapshotState.add(recoveredPayload0);
@@ -306,7 +306,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
      * Send one more payload to trigger another snapshot. In this scenario, we delay the snapshot until
      * consensus occurs and the leader applies the state.
      */
-    private void testSecondSnapshot() throws Exception {
+    private void testSecondSnapshot() {
         testLog.info("testSecondSnapshot starting");
 
         expSnapshotState.add(payload3);

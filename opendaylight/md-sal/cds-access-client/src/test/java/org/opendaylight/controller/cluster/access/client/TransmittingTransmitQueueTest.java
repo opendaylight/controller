@@ -69,7 +69,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testComplete() throws Exception {
+    public void testComplete() {
         final long sequence1 = 0L;
         final long sequence2 = 1L;
         final Request<?, ?> request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, sequence1, probe.ref());
@@ -102,7 +102,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testEnqueueCanTransmit() throws Exception {
+    public void testEnqueueCanTransmit() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = now();
@@ -112,7 +112,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testEnqueueBackendFull() throws Exception {
+    public void testEnqueueBackendFull() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = now();
@@ -131,14 +131,14 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
 
     @Test
     @Override
-    public void testCanTransmitCount() throws Exception {
+    public void testCanTransmitCount() {
         assertTrue(queue.canTransmitCount(getMaxInFlightMessages() - 1) > 0);
         assertFalse(queue.canTransmitCount(getMaxInFlightMessages()) > 0);
     }
 
     @Test
     @Override
-    public void testTransmit() throws Exception {
+    public void testTransmit() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = now();
@@ -158,7 +158,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testSetForwarder() throws Exception {
+    public void testSetForwarder() {
         final FakeTicker ticker = new FakeTicker();
         ticker.setAutoIncrementStep(1, TimeUnit.MICROSECONDS);
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
@@ -222,7 +222,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testRequestSlicingOnTransmit() throws Exception {
+    public void testRequestSlicingOnTransmit() {
         doReturn(true).when(mockMessageSlicer).slice(any());
 
         ModifyTransactionRequestBuilder reqBuilder = new ModifyTransactionRequestBuilder(
@@ -248,7 +248,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testSlicingFailureOnTransmit() throws Exception {
+    public void testSlicingFailureOnTransmit() {
         doAnswer(invocation -> {
             invocation.getArgumentAt(0, SliceOptions.class).getOnFailureCallback().accept(new Exception("mock"));
             return Boolean.FALSE;
@@ -269,7 +269,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testSlicedRequestOnComplete() throws Exception {
+    public void testSlicedRequestOnComplete() {
         doReturn(true).when(mockMessageSlicer).slice(any());
 
         ModifyTransactionRequestBuilder reqBuilder = new ModifyTransactionRequestBuilder(

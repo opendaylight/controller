@@ -48,7 +48,7 @@ public class MessageCapturingFlowService implements OpendaylightOfMigrationTestM
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         registration.close();
     }
 

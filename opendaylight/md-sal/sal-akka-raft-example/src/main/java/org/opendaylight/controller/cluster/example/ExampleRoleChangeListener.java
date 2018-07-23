@@ -57,7 +57,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     @Override
-    protected void handleReceive(Object message) throws Exception {
+    protected void handleReceive(Object message) {
         if (message instanceof RegisterListener) {
             // called by the scheduler at intervals to register any unregistered notifiers
             sendRegistrationRequests();
@@ -141,7 +141,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
 
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         registrationSchedule.cancel();
     }
 }

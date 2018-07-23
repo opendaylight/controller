@@ -62,7 +62,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     }
 
     @Test
-    public void testOpenCloseCursor() throws Exception {
+    public void testOpenCloseCursor() {
         final DOMDataTreeWriteCursor cursor = getHandle().openCursor();
         getHandle().closeCursor(cursor);
         getHandle().openCursor().delete(PATH.getLastPathArgument());
@@ -92,19 +92,19 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     }
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         getHandle().delete(PATH);
         verify(modification).delete(PATH);
     }
 
     @Test
-    public void testMerge() throws Exception {
+    public void testMerge() {
         getHandle().merge(PATH, DATA);
         verify(modification).merge(PATH, DATA);
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         getHandle().write(PATH, DATA);
         verify(modification).write(PATH, DATA);
     }

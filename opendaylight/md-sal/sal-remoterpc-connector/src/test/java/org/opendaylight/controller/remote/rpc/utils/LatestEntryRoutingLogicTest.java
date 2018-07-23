@@ -26,7 +26,7 @@ public class LatestEntryRoutingLogicTest {
     static ActorSystem system;
 
     @BeforeClass
-    public static void setup() throws InterruptedException {
+    public static void setup() {
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
     }
 

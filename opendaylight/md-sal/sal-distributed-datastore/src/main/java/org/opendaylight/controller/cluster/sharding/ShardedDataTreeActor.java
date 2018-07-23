@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
-import static akka.actor.ActorRef.noSender;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -119,12 +117,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    protected void handleRecover(final Object message) throws Exception {
+    protected void handleRecover(final Object message) {
         LOG.debug("Received a recover message {}", message);
     }
 
     @Override
-    protected void handleCommand(final Object message) throws Exception {
+    protected void handleCommand(final Object message) {
         LOG.debug("{} : Received {}", clusterWrapper.getCurrentMemberName(), message);
         if (message instanceof ClusterEvent.MemberUp) {
             memberUp((ClusterEvent.MemberUp) message);
@@ -219,7 +217,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         // fastpath if we have no peers
         if (resolver.getShardingServicePeerActorAddresses().isEmpty()) {
-            getSender().tell(new Status.Success(null), noSender());
+            getSender().tell(new Status.Success(null), ActorRef.noSender());
         }
 
         final ActorRef sender = getSender();
@@ -240,7 +238,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 futures.toArray(new CompletableFuture[futures.size()]));
 
         combinedFuture
-                .thenRun(() -> sender.tell(new Success(null), noSender()))
+                .thenRun(() -> sender.tell(new Success(null), ActorRef.noSender()))
                 .exceptionally(throwable -> {
                     sender.tell(new Status.Failure(throwable), self());
                     return null;
@@ -295,16 +293,16 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         final ActorProducerRegistration registration = idToProducer.remove(message.getSubtrees().iterator().next());
         if (registration == null) {
             LOG.warn("The notification contained a path on which no producer is registered, throwing away");
-            getSender().tell(new Status.Success(null), noSender());
+            getSender().tell(new Status.Success(null), ActorRef.noSender());
             return;
         }
 
         try {
             registration.close();
-            getSender().tell(new Status.Success(null), noSender());
+            getSender().tell(new Status.Success(null), ActorRef.noSender());
         } catch (final DOMDataTreeProducerException e) {
             LOG.error("Unable to close producer", e);
-            getSender().tell(new Status.Failure(e), noSender());
+            getSender().tell(new Status.Failure(e), ActorRef.noSender());
         }
     }
 
@@ -439,7 +437,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             localShardFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
-                public void onComplete(Throwable throwable, ActorRef actorRef) throws Throwable {
+                public void onComplete(Throwable throwable, ActorRef actorRef) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {
@@ -503,7 +501,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             ask.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(final Throwable throwable, final Object findLeaderReply) throws Throwable {
+                public void onComplete(final Throwable throwable, final Object findLeaderReply) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {
@@ -566,7 +564,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                     shardingService.lookupShardFrontend(toLookup);
 
             if (entry != null && tableEntryIdCheck(entry, toLookup) && entry.getValue() != null) {
-                replyTo.tell(new Success(null), noSender());
+                replyTo.tell(new Success(null), ActorRef.noSender());
             } else {
                 tryReschedule(null);
             }
@@ -627,12 +625,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             localShardFuture.onComplete(new OnComplete<ActorRef>() {
                 @Override
-                public void onComplete(Throwable throwable, ActorRef actorRef) throws Throwable {
+                public void onComplete(Throwable throwable, ActorRef actorRef) {
                     if (throwable != null) {
                         //TODO Shouldn't we check why findLocalShard failed?
                         LOG.debug("Backend shard[{}] removal lookup successful notifying the registration future",
                                 toLookup);
-                        replyTo.tell(new Success(null), noSender());
+                        replyTo.tell(new Success(null), ActorRef.noSender());
                     } else {
                         tryReschedule(null);
                     }
@@ -685,7 +683,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 tryReschedule(null);
             } else {
                 LOG.debug("Local backend for prefix configuration shard lookup successful");
-                replyTo.tell(new Status.Success(null), noSender());
+                replyTo.tell(new Status.Success(null), ActorRef.noSender());
             }
         }
     }
@@ -729,7 +727,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
             ask.onComplete(new OnComplete<Object>() {
                 @Override
-                public void onComplete(final Throwable throwable, final Object findLeaderReply) throws Throwable {
+                public void onComplete(final Throwable throwable, final Object findLeaderReply) {
                     if (throwable != null) {
                         tryReschedule(throwable);
                     } else {
@@ -739,7 +737,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                             // leader is found, backend seems ready, check if the frontend is ready
                             LOG.debug("{} - Leader for config shard is ready. Ending lookup.",
                                     clusterWrapper.getCurrentMemberName());
-                            replyTo.tell(new Status.Success(null), noSender());
+                            replyTo.tell(new Status.Success(null), ActorRef.noSender());
                         } else {
                             tryReschedule(null);
                         }

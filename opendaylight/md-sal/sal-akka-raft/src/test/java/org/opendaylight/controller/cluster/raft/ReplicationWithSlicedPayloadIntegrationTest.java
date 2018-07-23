@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftActorIntegrationTest {
 
     @Test
-    public void runTest() throws Exception {
+    public void runTest() {
         testLog.info("ReplicationWithSlicedPayloadIntegrationTest starting");
 
         // Create the leader and 2 follower actors.

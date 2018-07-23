@@ -31,13 +31,13 @@ public class ClientTransactionCursorTest {
     private ClientTransactionCursor cursor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         cursor = new ClientTransactionCursor(transaction);
     }
 
     @Test
-    public void testEnterOneNode() throws Exception {
+    public void testEnterOneNode() {
         cursor.enter(YangInstanceIdentifier.NodeIdentifier.create(NODE_1));
         cursor.delete(YangInstanceIdentifier.NodeIdentifier.create(NODE_2));
         final YangInstanceIdentifier expected = createId(NODE_1, NODE_2);
@@ -45,7 +45,7 @@ public class ClientTransactionCursorTest {
     }
 
     @Test
-    public void testEnterNodeIterables() throws Exception {
+    public void testEnterNodeIterables() {
         final Iterable<YangInstanceIdentifier.PathArgument> collect = toPathArg(NODE_1, NODE_2);
         cursor.enter(collect);
         cursor.delete(YangInstanceIdentifier.NodeIdentifier.create(NODE_3));
@@ -54,7 +54,7 @@ public class ClientTransactionCursorTest {
     }
 
     @Test
-    public void testEnterNodeVarargs() throws Exception {
+    public void testEnterNodeVarargs() {
         cursor.enter(YangInstanceIdentifier.NodeIdentifier.create(NODE_1),
                 YangInstanceIdentifier.NodeIdentifier.create(NODE_2));
         cursor.delete(YangInstanceIdentifier.NodeIdentifier.create(NODE_3));
@@ -63,7 +63,7 @@ public class ClientTransactionCursorTest {
     }
 
     @Test
-    public void testExitOneLevel() throws Exception {
+    public void testExitOneLevel() {
         cursor.enter(toPathArg(NODE_1, NODE_2));
         cursor.exit();
         cursor.delete(YangInstanceIdentifier.NodeIdentifier.create(NODE_2));
@@ -72,7 +72,7 @@ public class ClientTransactionCursorTest {
     }
 
     @Test
-    public void testExitTwoLevels() throws Exception {
+    public void testExitTwoLevels() {
         cursor.enter(toPathArg(NODE_1, NODE_2, NODE_3));
         cursor.exit(2);
         cursor.delete(YangInstanceIdentifier.NodeIdentifier.create(NODE_2));
@@ -81,20 +81,20 @@ public class ClientTransactionCursorTest {
     }
 
     @Test
-    public void testClose() throws Exception {
+    public void testClose() {
         cursor.close();
         verify(transaction).closeCursor(cursor);
     }
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         cursor.delete(YangInstanceIdentifier.NodeIdentifier.create(NODE_1));
         final YangInstanceIdentifier expected = createId(NODE_1);
         verify(transaction).delete(expected);
     }
 
     @Test
-    public void testMerge() throws Exception {
+    public void testMerge() {
         final YangInstanceIdentifier.NodeIdentifier path = YangInstanceIdentifier.NodeIdentifier.create(NODE_1);
         final ContainerNode data = createData(path.getNodeType());
         cursor.merge(path, data);
@@ -103,7 +103,7 @@ public class ClientTransactionCursorTest {
     }
 
     @Test
-    public void testWrite() throws Exception {
+    public void testWrite() {
         final YangInstanceIdentifier.NodeIdentifier path = YangInstanceIdentifier.NodeIdentifier.create(NODE_1);
         final ContainerNode data = createData(path.getNodeType());
         cursor.write(path, data);

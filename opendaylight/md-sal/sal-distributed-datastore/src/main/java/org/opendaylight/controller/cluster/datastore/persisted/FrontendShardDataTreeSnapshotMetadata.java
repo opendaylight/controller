@@ -46,7 +46,7 @@ public final class FrontendShardDataTreeSnapshotMetadata extends
         }
 
         @Override
-        public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(final ObjectInput in) throws IOException {
             final int size = in.readInt();
             final List<FrontendClientMetadata> readedClients = new ArrayList<>(size);
             for (int i = 0; i < size ; ++i) {

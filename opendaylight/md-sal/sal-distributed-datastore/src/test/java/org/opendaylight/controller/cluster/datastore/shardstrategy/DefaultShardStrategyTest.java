@@ -14,7 +14,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 
 public class DefaultShardStrategyTest {
     @Test
-    public void testFindShard() throws Exception {
+    public void testFindShard() {
         String shard = DefaultShardStrategy.getInstance().findShard(TestModel.TEST_PATH);
         Assert.assertEquals(DefaultShardStrategy.DEFAULT_SHARD, shard);
     }

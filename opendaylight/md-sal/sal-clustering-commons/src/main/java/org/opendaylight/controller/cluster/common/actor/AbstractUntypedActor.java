@@ -31,7 +31,7 @@ public abstract class AbstractUntypedActor extends UntypedActor implements Execu
     }
 
     @Override
-    public final void onReceive(final Object message) throws Exception {
+    public final void onReceive(final Object message) {
         if (message instanceof ExecuteInSelfMessage) {
             ((ExecuteInSelfMessage) message).run();
         } else {
@@ -44,9 +44,8 @@ public abstract class AbstractUntypedActor extends UntypedActor implements Execu
      * it should call {@link #ignoreMessage(Object)} or {@link #unknownMessage(Object)}.
      *
      * @param message the incoming message
-     * @throws Exception on message failure
      */
-    protected abstract void handleReceive(Object message) throws Exception;
+    protected abstract void handleReceive(Object message);
 
     protected final void ignoreMessage(final Object message) {
         LOG.debug("Ignoring unhandled message {}", message);

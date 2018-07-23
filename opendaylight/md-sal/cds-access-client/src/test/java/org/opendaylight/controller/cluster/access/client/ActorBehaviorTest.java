@@ -62,12 +62,12 @@ public class ActorBehaviorTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testInitialBehavior() throws Exception {
+    public void testInitialBehavior() {
         final InternalCommand<BackendInfo> cmd = mock(InternalCommand.class);
         when(cmd.execute(any())).thenReturn(initialBehavior);
         mockedActor.tell(cmd, ActorRef.noSender());
@@ -75,7 +75,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testCommandStashing() throws Exception {
+    public void testCommandStashing() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         final InternalCommand<BackendInfo> cmd = mock(InternalCommand.class);
@@ -90,7 +90,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestart() throws Exception {
+    public void testRecoveryAfterRestart() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         final MockedSnapshotStore.SaveRequest newSaveRequest =
@@ -99,7 +99,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestartFrontendIdMismatch() throws Exception {
+    public void testRecoveryAfterRestartFrontendIdMismatch() {
         system.stop(mockedActor);
         //start actor again
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
@@ -116,7 +116,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestartSaveSnapshotFail() throws Exception {
+    public void testRecoveryAfterRestartSaveSnapshotFail() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         probe.watch(mockedActor);
@@ -129,7 +129,7 @@ public class ActorBehaviorTest {
     }
 
     @Test
-    public void testRecoveryAfterRestartDeleteSnapshotsFail() throws Exception {
+    public void testRecoveryAfterRestartDeleteSnapshotsFail() {
         system.stop(mockedActor);
         mockedActor = system.actorOf(MockedActor.props(id, initialBehavior));
         probe.watch(mockedActor);

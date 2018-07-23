@@ -30,7 +30,7 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
             .weakKeys().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
 
                 @Override
-                public BindingMountPointAdapter load(DOMMountPoint key) throws Exception {
+                public BindingMountPointAdapter load(DOMMountPoint key) {
                     return new BindingMountPointAdapter(codec,key);
                 }
             });

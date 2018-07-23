@@ -38,14 +38,14 @@ public class QuarantinedMonitorActorTest {
     private ActorRef actor;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         actor = system.actorOf(QuarantinedMonitorActor.props(callback));
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 

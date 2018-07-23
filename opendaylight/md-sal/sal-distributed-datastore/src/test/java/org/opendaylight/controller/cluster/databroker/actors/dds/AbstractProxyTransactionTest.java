@@ -97,7 +97,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     protected T transaction;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         system = ActorSystem.apply();
         clientContextProbe = new TestProbe(system, "clientContext");
@@ -117,7 +117,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     protected abstract T createTransaction(ProxyHistory parent, TransactionIdentifier id, DataTreeSnapshot snapshot);
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
@@ -128,46 +128,46 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     public abstract void testRead() throws Exception;
 
     @Test
-    public abstract void testWrite() throws Exception;
+    public abstract void testWrite();
 
     @Test
-    public abstract void testMerge() throws Exception;
+    public abstract void testMerge();
 
     @Test
-    public abstract void testDelete() throws Exception;
+    public abstract void testDelete();
 
     @Test
     public abstract void testDirectCommit() throws Exception;
 
     @Test
-    public abstract void testCanCommit() throws Exception;
+    public abstract void testCanCommit();
 
     @Test
-    public abstract void testPreCommit() throws Exception;
+    public abstract void testPreCommit();
 
     @Test
-    public abstract void testDoCommit() throws Exception;
+    public abstract void testDoCommit();
 
     @Test
-    public abstract void testForwardToRemoteAbort() throws Exception;
+    public abstract void testForwardToRemoteAbort();
 
     @Test
-    public abstract void testForwardToRemoteCommit() throws Exception;
+    public abstract void testForwardToRemoteCommit();
 
     @Test
-    public void testAbortVotingFuture() throws Exception {
+    public void testAbortVotingFuture() {
         testRequestResponse(f -> transaction.abort(f), TransactionAbortRequest.class, TransactionAbortSuccess::new);
     }
 
     @Test
-    public void testForwardToRemotePurge() throws Exception {
+    public void testForwardToRemotePurge() {
         final TestProbe probe = new TestProbe(system);
         final TransactionPurgeRequest request = new TransactionPurgeRequest(TRANSACTION_ID, 0L, probe.ref());
         testForwardToRemote(request, TransactionPurgeRequest.class);
     }
 
     @Test
-    public void testReplayMessages() throws Exception {
+    public void testReplayMessages() {
         final TestProbe probe = new TestProbe(system);
         final List<ConnectionEntry> entries = new ArrayList<>();
         final Consumer<Response<?, ?>> callback = createCallbackMock();
@@ -230,7 +230,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
     @SuppressWarnings("checkstyle:hiddenField")
     protected <R extends TransactionRequest<R>> void testRequestResponse(final Consumer<VotingFuture<Void>> consumer,
             final Class<R> expectedRequest,
-            final BiFunction<TransactionIdentifier, Long, TransactionSuccess<?>> replySupplier) throws Exception {
+            final BiFunction<TransactionIdentifier, Long, TransactionSuccess<?>> replySupplier) {
         final TransactionTester<T> tester = getTester();
         final VotingFuture<Void> future = mock(VotingFuture.class);
         transaction.seal();
@@ -240,7 +240,7 @@ public abstract class AbstractProxyTransactionTest<T extends AbstractProxyTransa
         verify(future).voteYes();
     }
 
-    protected <R extends TransactionRequest<R>> R testHandleForwardedRemoteRequest(final R request) throws Exception {
+    protected <R extends TransactionRequest<R>> R testHandleForwardedRemoteRequest(final R request) {
         transaction.handleReplayedRemoteRequest(request, createCallbackMock(), Ticker.systemTicker().read());
         final RequestEnvelope envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
         final R received = (R) envelope.getMessage();

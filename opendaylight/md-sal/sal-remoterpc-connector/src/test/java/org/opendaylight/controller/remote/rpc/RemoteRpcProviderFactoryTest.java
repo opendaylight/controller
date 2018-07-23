@@ -29,33 +29,33 @@ public class RemoteRpcProviderFactoryTest {
     private RemoteRpcProviderConfig providerConfig;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 
     @Test
-    public void testCreateInstance() throws Exception {
+    public void testCreateInstance() {
         Assert.assertNotNull(RemoteRpcProviderFactory
                 .createInstance(providerService, rpcService, actorSystem, providerConfig));
     }
 
     @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingProvideService() throws Exception {
+    public void testCreateInstanceMissingProvideService() {
         RemoteRpcProviderFactory.createInstance(null, rpcService, actorSystem, providerConfig);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingRpcService() throws Exception {
+    public void testCreateInstanceMissingRpcService() {
         RemoteRpcProviderFactory.createInstance(providerService, null, actorSystem, providerConfig);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingActorSystem() throws Exception {
+    public void testCreateInstanceMissingActorSystem() {
         RemoteRpcProviderFactory.createInstance(providerService, rpcService, null, providerConfig);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingProviderConfig() throws Exception {
+    public void testCreateInstanceMissingProviderConfig() {
         RemoteRpcProviderFactory.createInstance(providerService, rpcService, actorSystem, null);
     }
 }

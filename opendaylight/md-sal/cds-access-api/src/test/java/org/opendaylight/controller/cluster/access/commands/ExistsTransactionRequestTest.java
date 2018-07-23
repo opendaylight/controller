@@ -21,7 +21,7 @@ public class ExistsTransactionRequestTest extends AbstractReadTransactionRequest
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ABIVersion cloneVersion = ABIVersion.TEST_FUTURE_VERSION;
         final ExistsTransactionRequest clone = OBJECT.cloneAsVersion(cloneVersion);
         Assert.assertEquals(cloneVersion, clone.getVersion());

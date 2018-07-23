@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -19,13 +18,13 @@ public abstract class AbstractClusterRefActorTest extends AbstractTest {
     private static ActorSystem system;
 
     @BeforeClass
-    public static void setUpClass() throws IOException {
+    public static void setUpClass() {
         System.setProperty("shard.persistent", "false");
         system = ActorSystem.create("test", ConfigFactory.load().getConfig("test-config"));
     }
 
     @AfterClass
-    public static void tearDownClass() throws IOException {
+    public static void tearDownClass() {
         TestKit.shutdownActorSystem(system, Boolean.TRUE);
         system = null;
     }

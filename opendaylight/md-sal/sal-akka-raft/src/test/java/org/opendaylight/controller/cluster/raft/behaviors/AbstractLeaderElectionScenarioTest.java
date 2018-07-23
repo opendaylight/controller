@@ -226,7 +226,7 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 

@@ -20,7 +20,7 @@ public class ConnectClientFailureTest extends AbstractRequestFailureTest<Connect
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final ConnectClientFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
         Assert.assertEquals(OBJECT.getTarget(), clone.getTarget());
         Assert.assertEquals(OBJECT.getSequence(), clone.getSequence());

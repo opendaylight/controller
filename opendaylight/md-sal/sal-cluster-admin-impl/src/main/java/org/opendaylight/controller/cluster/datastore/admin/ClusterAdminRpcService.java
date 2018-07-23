@@ -225,7 +225,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         final scala.concurrent.Promise<Object> makeLeaderLocalAsk = akka.dispatch.Futures.promise();
         localShardReply.onComplete(new OnComplete<ActorRef>() {
             @Override
-            public void onComplete(final Throwable failure, final ActorRef actorRef) throws Throwable {
+            public void onComplete(final Throwable failure, final ActorRef actorRef) {
                 if (failure != null) {
                     LOG.warn("No local shard found for {} datastoreType {} - Cannot request leadership transfer to"
                                     + " local shard.", shardName, failure);
@@ -241,7 +241,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         final SettableFuture<RpcResult<MakeLeaderLocalOutput>> future = SettableFuture.create();
         makeLeaderLocalAsk.future().onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(final Throwable failure, final Object success) throws Throwable {
+            public void onComplete(final Throwable failure, final Object success) {
                 if (failure != null) {
                     LOG.error("Leadership transfer failed for shard {}.", shardName, failure);
                     future.set(RpcResultBuilder.<MakeLeaderLocalOutput>failed().withError(ErrorType.APPLICATION,

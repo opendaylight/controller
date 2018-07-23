@@ -20,7 +20,7 @@ public class LocalHistoryFailureTest extends AbstractRequestFailureTest<LocalHis
     }
 
     @Test
-    public void cloneAsVersionTest() throws Exception {
+    public void cloneAsVersionTest() {
         final LocalHistoryFailure clone = OBJECT.cloneAsVersion(ABIVersion.current());
         Assert.assertEquals(OBJECT, clone);
     }

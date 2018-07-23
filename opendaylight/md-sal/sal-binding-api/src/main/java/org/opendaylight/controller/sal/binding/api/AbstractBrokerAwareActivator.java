@@ -48,7 +48,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
 
     @Override
-    public final void start(BundleContext bundleContext) throws Exception {
+    public final void start(BundleContext bundleContext) {
         this.context = bundleContext;
         startImpl(bundleContext);
         tracker = new ServiceTracker<>(bundleContext, BindingAwareBroker.class, customizer);
@@ -59,7 +59,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
 
     @Override
-    public final  void stop(BundleContext bundleContext) throws Exception {
+    public final  void stop(BundleContext bundleContext) {
         if (tracker != null) {
             tracker.close();
         }

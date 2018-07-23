@@ -50,7 +50,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     private AbstractDataStoreClientBehavior behavior;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         system = ActorSystem.apply();
         clientActorProbe = new TestProbe(system, "client");
         actorContextProbe = new TestProbe(system, "actor-context");
@@ -65,22 +65,22 @@ public abstract class AbstractDataStoreClientBehaviorTest {
                                                                       ActorContext context);
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testResolveShardForPath() throws Exception {
+    public void testResolveShardForPath() {
         Assert.assertEquals(0L, behavior.resolveShardForPath(YangInstanceIdentifier.EMPTY).longValue());
     }
 
     @Test
-    public void testHaltClient() throws Exception {
+    public void testHaltClient() {
         behavior.haltClient(new RuntimeException());
     }
 
     @Test
-    public void testOnCommand() throws Exception {
+    public void testOnCommand() {
         final TestProbe probe = new TestProbe(system);
         final GetClientRequest request = new GetClientRequest(probe.ref());
         final AbstractDataStoreClientBehavior nextBehavior = behavior.onCommand(request);
@@ -90,31 +90,31 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     }
 
     @Test
-    public void testOnCommandUnhandled() throws Exception {
+    public void testOnCommandUnhandled() {
         final AbstractDataStoreClientBehavior nextBehavior = behavior.onCommand("unhandled");
         Assert.assertSame(behavior, nextBehavior);
     }
 
     @Test
-    public void testCreateLocalHistory() throws Exception {
+    public void testCreateLocalHistory() {
         final ClientLocalHistory history = behavior.createLocalHistory();
         Assert.assertEquals(behavior.getIdentifier(), history.getIdentifier().getClientId());
     }
 
     @Test
-    public void testCreateTransaction() throws Exception {
+    public void testCreateTransaction() {
         final ClientTransaction transaction = behavior.createTransaction();
         Assert.assertEquals(behavior.getIdentifier(), transaction.getIdentifier().getHistoryId().getClientId());
     }
 
     @Test
-    public void testCreateSnapshot() throws Exception {
+    public void testCreateSnapshot() {
         final ClientSnapshot snapshot = behavior.createSnapshot();
         Assert.assertEquals(behavior.getIdentifier(), snapshot.getIdentifier().getHistoryId().getClientId());
     }
 
     @Test
-    public void testClose() throws Exception {
+    public void testClose() {
         behavior.close();
         final InternalCommand<ShardBackendInfo> internalCommand =
                 clientActorProbe.expectMsgClass(InternalCommand.class);
@@ -128,12 +128,12 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     }
 
     @Test
-    public void testGetIdentifier() throws Exception {
+    public void testGetIdentifier() {
         Assert.assertEquals(CLIENT_ID, behavior.getIdentifier());
     }
 
     @Test
-    public void testGetConnection() throws Exception {
+    public void testGetConnection() {
         //set up data tree mock
         final CursorAwareDataTreeModification modification = mock(CursorAwareDataTreeModification.class);
         when(modification.readNode(YangInstanceIdentifier.EMPTY)).thenReturn(Optional.empty());

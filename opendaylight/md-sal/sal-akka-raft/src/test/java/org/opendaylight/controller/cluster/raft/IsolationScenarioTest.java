@@ -48,7 +48,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
      * appropriately.
      */
     @Test
-    public void testLeaderIsolationWithAllPriorEntriesCommitted() throws Exception {
+    public void testLeaderIsolationWithAllPriorEntriesCommitted() {
         testLog.info("testLeaderIsolationWithAllPriorEntriesCommitted starting");
 
         createRaftActors();
@@ -133,7 +133,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
      * sides should reconcile their logs appropriately.
      */
     @Test
-    public void testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry() throws Exception {
+    public void testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry() {
         testLog.info("testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry starting");
 
         createRaftActors();
@@ -254,7 +254,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
      * and both sides should reconcile their logs appropriately.
      */
     @Test
-    public void testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries() throws Exception {
+    public void testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries() {
         testLog.info("testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries starting");
 
         createRaftActors();
