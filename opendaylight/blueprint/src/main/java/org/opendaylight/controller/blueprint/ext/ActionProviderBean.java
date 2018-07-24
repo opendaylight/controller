@@ -9,7 +9,6 @@ package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
 import java.util.Collection;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
@@ -19,6 +18,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.dom.spi.RpcRoutingStrategy;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.osgi.framework.Bundle;
@@ -130,7 +130,7 @@ public class ActionProviderBean {
 
         final Set<DOMRpcIdentifier> rpcs = ImmutableSet.copyOf(Collections2.transform(paths, DOMRpcIdentifier::create));
         reg = domRpcProvider.registerRpcImplementation((rpc, input) -> {
-            return Futures.immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException(
+            return FluentFutures.immediateFailedFluentFuture(new DOMRpcImplementationNotAvailableException(
                 "Action %s has no instance matching %s", rpc, input));
         }, rpcs);
         LOG.debug("Registered provider for {}", interfaceName);

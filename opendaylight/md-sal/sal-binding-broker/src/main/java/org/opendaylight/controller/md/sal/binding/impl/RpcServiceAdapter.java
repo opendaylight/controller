@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -70,8 +71,8 @@ class RpcServiceAdapter implements InvocationHandler {
         if (result instanceof BindingRpcFutureAware) {
             return ((BindingRpcFutureAware) result).getBindingFuture();
         } else if (result instanceof LegacyDOMRpcResultFutureAdapter) {
-            CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult, org.opendaylight.mdsal.dom.api.DOMRpcException>
-                    delegateFuture = ((LegacyDOMRpcResultFutureAdapter)result).delegate();
+            Future<org.opendaylight.mdsal.dom.api.DOMRpcResult> delegateFuture =
+                    ((LegacyDOMRpcResultFutureAdapter)result).delegate();
             if (delegateFuture instanceof BindingRpcFutureAware) {
                 return ((BindingRpcFutureAware) delegateFuture).getBindingFuture();
             }
