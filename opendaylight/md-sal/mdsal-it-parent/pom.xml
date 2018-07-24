@@ -131,7 +131,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <plugins>
       <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven.surefire.version}</version>
           <configuration>
               <systemPropertyVariables>
                 <!-- CONTROLLER-1799: Use the same repository for Pax Exam as is used for Maven -->
