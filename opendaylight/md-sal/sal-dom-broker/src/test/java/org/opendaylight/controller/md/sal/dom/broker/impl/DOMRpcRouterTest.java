@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.AbstractMap.SimpleEntry;
@@ -43,6 +44,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.store.impl.TestModel;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -190,7 +192,7 @@ public class DOMRpcRouterTest {
         org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult result =
             new org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult(RPC_OUTPUT,
                 Collections.singleton(RpcResultBuilder.newError(ErrorType.RPC, "tag", "message")));
-        testMdsalRpcImpl.init(Futures.immediateCheckedFuture(result));
+        testMdsalRpcImpl.init(FluentFutures.immediateFluentFuture(result));
 
         ListenableFuture<DOMRpcResult> future = legacyRpcRouter.invokeRpc(legacyTestRpcIdentifier.getType(), RPC_INPUT);
 
@@ -204,7 +206,7 @@ public class DOMRpcRouterTest {
         // Test exception returned
 
         TestMdsalDOMRpcException rpcEx = new TestMdsalDOMRpcException();
-        testMdsalRpcImpl.init(Futures.immediateFailedCheckedFuture(rpcEx));
+        testMdsalRpcImpl.init(FluentFutures.immediateFailedFluentFuture(rpcEx));
 
         try {
             legacyRpcRouter.invokeRpc(legacyTestRpcIdentifier.getType(), RPC_INPUT).get();
@@ -216,7 +218,7 @@ public class DOMRpcRouterTest {
 
         // Test no input or output
 
-        testMdsalRpcImpl.init(Futures.immediateCheckedFuture(null));
+        testMdsalRpcImpl.init(FluentFutures.immediateNullFluentFuture());
 
         future = legacyRpcRouter.invokeRpc(legacyTestRpcNoInputIdentifier.getType(), null);
 
@@ -318,19 +320,16 @@ public class DOMRpcRouterTest {
     private static class TestMdsalDOMRpcImplementation
             extends AbstractDOMRpcImplementation<org.opendaylight.mdsal.dom.api.DOMRpcIdentifier>
             implements org.opendaylight.mdsal.dom.api.DOMRpcImplementation {
-        CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult,
-                org.opendaylight.mdsal.dom.api.DOMRpcException> returnFuture;
+        FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> returnFuture;
 
         @Override
-        public CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult,
-                org.opendaylight.mdsal.dom.api.DOMRpcException> invokeRpc(
+        public FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> invokeRpc(
                     final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
             rpcInput = new SimpleEntry<>(rpc, input);
             return returnFuture;
         }
 
-        void init(CheckedFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult,
-                org.opendaylight.mdsal.dom.api.DOMRpcException> retFuture) {
+        void init(FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> retFuture) {
             this.returnFuture = retFuture;
             rpcInput = null;
         }
