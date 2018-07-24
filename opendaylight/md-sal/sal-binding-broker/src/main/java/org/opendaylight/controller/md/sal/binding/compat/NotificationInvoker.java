@@ -15,9 +15,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.dom.adapter.invoke.NotificationListenerInvoker;
+import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
-import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 
 final class NotificationInvoker

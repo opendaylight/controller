@@ -18,8 +18,8 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.RpcService;
-import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
 public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
 
