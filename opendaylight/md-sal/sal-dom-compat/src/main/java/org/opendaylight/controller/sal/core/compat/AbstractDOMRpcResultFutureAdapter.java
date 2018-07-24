@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.core.compat;
 
-import com.google.common.util.concurrent.CheckedFuture;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -24,20 +24,20 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  * @author Thomas Pantelis
  */
 @SuppressWarnings("checkstyle:ClassTypeParameterName")
-public abstract class AbstractDOMRpcResultFutureAdapter<T extends DOMRpcResult, TE extends DOMRpcException,
-        F extends DOMRpcResult, FE extends DOMRpcException> implements CheckedFuture<T, TE> {
-    private final CheckedFuture<F, FE> delegate;
-    private final ExceptionMapper<TE> exMapper;
+public abstract class AbstractDOMRpcResultFutureAdapter<T extends DOMRpcResult, F extends DOMRpcResult,
+        D extends ListenableFuture<F>, E extends DOMRpcException> extends AbstractFuture<T> {
+    private final D delegate;
+    private final ExceptionMapper<E> exMapper;
     private volatile Optional<T> result;
 
-    AbstractDOMRpcResultFutureAdapter(CheckedFuture<F, FE> delegate, ExceptionMapper<TE> exMapper) {
+    AbstractDOMRpcResultFutureAdapter(D delegate, ExceptionMapper<E> exMapper) {
         this.delegate = delegate;
         this.exMapper = exMapper;
     }
 
     protected abstract T transform(F fromResult);
 
-    public CheckedFuture<F, FE> delegate() {
+    public D delegate() {
         return delegate;
     }
 
@@ -85,26 +85,6 @@ public abstract class AbstractDOMRpcResultFutureAdapter<T extends DOMRpcResult, 
             return transformIfNecessary(delegate.get(timeout, unit));
         } catch (ExecutionException e) {
             throw new ExecutionException(e.getMessage(), exMapper.apply(e));
-        }
-    }
-
-    @Override
-    @SuppressFBWarnings("BC_UNCONFIRMED_CAST_OF_RETURN_VALUE")
-    public T checkedGet() throws TE {
-        try {
-            return get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw exMapper.apply(e);
-        }
-    }
-
-    @Override
-    @SuppressFBWarnings("BC_UNCONFIRMED_CAST_OF_RETURN_VALUE")
-    public T checkedGet(final long timeout, final TimeUnit unit) throws TimeoutException, TE {
-        try {
-            return get(timeout, unit);
-        } catch (InterruptedException | ExecutionException e) {
-            throw exMapper.apply(e);
         }
     }
 

@@ -21,8 +21,9 @@ import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
  * @author Thomas Pantelis
  */
 public class MdsalDOMRpcResultFutureAdapter extends AbstractDOMRpcResultFutureAdapter<
-        DOMRpcResult, DOMRpcException, org.opendaylight.controller.md.sal.dom.api.DOMRpcResult,
-            org.opendaylight.controller.md.sal.dom.api.DOMRpcException> {
+        DOMRpcResult, org.opendaylight.controller.md.sal.dom.api.DOMRpcResult,
+        CheckedFuture<org.opendaylight.controller.md.sal.dom.api.DOMRpcResult,
+            org.opendaylight.controller.md.sal.dom.api.DOMRpcException>, DOMRpcException> {
     private static final ExceptionMapper<DOMRpcException> MDSAL_DOM_RPC_EX_MAPPER =
             new ExceptionMapper<DOMRpcException>("rpc", DOMRpcException.class) {
         @Override
