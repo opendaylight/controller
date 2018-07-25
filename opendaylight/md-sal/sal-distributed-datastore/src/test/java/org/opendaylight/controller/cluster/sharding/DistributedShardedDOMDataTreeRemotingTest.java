@@ -285,7 +285,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         cursor.close();
         LOG.warn("Got to pre submit");
 
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         shardRegistration.close().toCompletableFuture().get();
 

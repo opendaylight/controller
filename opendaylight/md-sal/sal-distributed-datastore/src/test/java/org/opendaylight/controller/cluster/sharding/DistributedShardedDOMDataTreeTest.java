@@ -30,8 +30,8 @@ import akka.actor.Props;
 import akka.cluster.Cluster;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,7 +72,6 @@ import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.Dist
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeListener;
@@ -205,7 +204,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         cursor.write(test.getIdentifier(), test);
         cursor.close();
 
-        tx.submit().checkedGet();
+        tx.commit().get();
     }
 
     @Test
@@ -235,7 +234,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         cursor.close();
         LOG.debug("Got to pre submit");
 
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         final DOMDataTreeListener mockedDataTreeListener = mock(DOMDataTreeListener.class);
         doNothing().when(mockedDataTreeListener).onDataTreeChanged(anyCollection(), anyMap());
@@ -322,9 +321,9 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
         cursor.write(new NodeIdentifier(TestModel.INNER_LIST_QNAME), innerList);
         cursor.close();
-        tx.submit().checkedGet();
+        tx.commit().get();
 
-        final ArrayList<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
+        final ArrayList<ListenableFuture<?>> futures = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             final Collection<MapEntryNode> innerListMapEntries = createInnerListMapEntries(1000, "run-" + i);
             for (final MapEntryNode innerListMapEntry : innerListMapEntries) {
@@ -334,11 +333,11 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                                 oid1.node(new NodeIdentifier(TestModel.INNER_LIST_QNAME))));
                 cursor1.write(innerListMapEntry.getIdentifier(), innerListMapEntry);
                 cursor1.close();
-                futures.add(tx1.submit());
+                futures.add(tx1.commit());
             }
         }
 
-        futures.get(futures.size() - 1).checkedGet();
+        futures.get(futures.size() - 1).get();
 
         final DOMDataTreeListener mockedDataTreeListener = mock(DOMDataTreeListener.class);
         doNothing().when(mockedDataTreeListener).onDataTreeChanged(anyCollection(), anyMap());
@@ -407,7 +406,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         cursor.write(testNode.getIdentifier(), testNode);
 
         cursor.close();
-        transaction.submit().checkedGet();
+        transaction.commit().get();
 
         final DOMDataTreeListener mockedDataTreeListener = mock(DOMDataTreeListener.class);
         doNothing().when(mockedDataTreeListener).onDataTreeChanged(anyCollection(), anyMap());
@@ -422,7 +421,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         cursor.write(wholeList.getIdentifier(), wholeList);
         cursor.close();
 
-        transaction.submit().checkedGet();
+        transaction.commit().get();
 
         leaderShardFactory.registerListener(mockedDataTreeListener, Collections.singletonList(TEST_ID),
                 true, Collections.emptyList());

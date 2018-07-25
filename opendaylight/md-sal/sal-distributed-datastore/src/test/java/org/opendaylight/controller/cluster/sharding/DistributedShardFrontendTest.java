@@ -172,7 +172,7 @@ public class DistributedShardFrontendTest {
         assertEquals(createInnerMapNode(1), actualInnerListNode);
 
         txCursor.close();
-        tx.submit().checkedGet();
+        tx.commit().get();
 
         verify(commitCohort, times(2)).canCommit();
         verify(commitCohort, times(2)).preCommit();

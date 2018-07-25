@@ -9,6 +9,7 @@
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -19,6 +20,8 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -78,7 +81,7 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
         cursor.close();
 
         try {
-            tx.submit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            tx.commit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Unable to fill the initial item list.", e);
             closeProducer(itemProducer);
@@ -104,7 +107,7 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
     }
 
     @Override
-    ListenableFuture<Void> execWrite(final long txId) {
+    FluentFuture<? extends @NonNull CommitInfo> execWrite(final long txId) {
         final int i = random.nextInt(MAX_ITEM + 1);
         final DOMDataTreeCursorAwareTransaction tx = itemProducer.createTransaction(false);
         final DOMDataTreeWriteCursor cursor = tx.createCursor(idListItem);
@@ -128,7 +131,7 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
 
         cursor.close();
 
-        return tx.submit();
+        return tx.commit();
     }
 
     @Override
