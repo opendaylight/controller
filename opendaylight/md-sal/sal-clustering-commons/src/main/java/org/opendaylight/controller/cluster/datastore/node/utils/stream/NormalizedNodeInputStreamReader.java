@@ -214,12 +214,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
             case NodeTypes.ORDERED_LEAF_SET:
                 LOG.trace("Read ordered leaf set node {}", identifier);
-                ListNodeBuilder<Object, LeafSetEntryNode<Object>> orderedLeafSetBuilder =
-                        Builders.orderedLeafSetBuilder().withNodeIdentifier(identifier);
-                orderedLeafSetBuilder = addLeafSetChildren(identifier.getNodeType(), orderedLeafSetBuilder);
-                return orderedLeafSetBuilder.build();
+                return addLeafSetChildren(identifier.getNodeType(),
+                        Builders.orderedLeafSetBuilder().withNodeIdentifier(identifier)).build();
 
-            default :
+            default:
                 return null;
         }
     }
