@@ -94,10 +94,10 @@ public class PrefixShardHandler {
                 LOG.debug("Shard[{}] created successfully.", identifier);
                 registrations.put(identifier, registration);
 
-                final ListenableFuture<Void> ensureFuture = ensureListExists();
-                Futures.addCallback(ensureFuture, new FutureCallback<Void>() {
+                final ListenableFuture<?> ensureFuture = ensureListExists();
+                Futures.addCallback(ensureFuture, new FutureCallback<Object>() {
                     @Override
-                    public void onSuccess(@Nullable final Void result) {
+                    public void onSuccess(@Nullable final Object result) {
                         LOG.debug("Initial list write successful.");
                         future.set(RpcResultBuilder.success(new CreatePrefixShardOutputBuilder().build()).build());
                     }
@@ -160,7 +160,7 @@ public class PrefixShardHandler {
         return future;
     }
 
-    private ListenableFuture<Void> ensureListExists() {
+    private ListenableFuture<?> ensureListExists() {
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> mapBuilder = ImmutableNodes.mapNodeBuilder(ID_INT);
 
@@ -190,10 +190,10 @@ public class PrefixShardHandler {
         cursor.merge(containerNode.getIdentifier(), containerNode);
         cursor.close();
 
-        final ListenableFuture<Void> future = tx.submit();
-        Futures.addCallback(future, new FutureCallback<Void>() {
+        final ListenableFuture<?> future = tx.commit();
+        Futures.addCallback(future, new FutureCallback<Object>() {
             @Override
-            public void onSuccess(@Nullable final Void result) {
+            public void onSuccess(@Nullable final Object result) {
                 try {
                     LOG.debug("Closing producer for initial list.");
                     producer.close();
