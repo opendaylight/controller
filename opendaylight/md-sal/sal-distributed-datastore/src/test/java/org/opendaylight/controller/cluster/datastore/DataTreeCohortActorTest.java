@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -43,6 +43,7 @@ import org.opendaylight.mdsal.common.api.PostPreCommitStep;
 import org.opendaylight.mdsal.common.api.ThreePhaseCommitStep;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -77,7 +78,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
         TransactionIdentifier txId = nextTransactionId();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
 
         askAndAwait(cohortActor, new PreCommit(txId));
         verify(mockPostCanCommit).preCommit();
@@ -87,7 +88,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
         resetMockCohort();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
     }
 
     @Test
@@ -112,9 +113,8 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
     public void testAsyncCohort() throws Exception {
         ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
 
-        doReturn(Futures.makeChecked(executeWithDelay(executor, mockPostCanCommit),
-            ex -> new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock")))
-                .when(mockCohort).canCommit(any(Object.class), any(Collection.class), any(SchemaContext.class));
+        doReturn(executeWithDelay(executor, mockPostCanCommit))
+                .when(mockCohort).canCommit(any(Object.class), any(SchemaContext.class), any(Collection.class));
 
         doReturn(executor.submit(() -> mockPostPreCommit)).when(mockPostCanCommit).preCommit();
 
@@ -124,7 +124,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
         TransactionIdentifier txId = nextTransactionId();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
 
         askAndAwait(cohortActor, new PreCommit(txId));
         verify(mockPostCanCommit).preCommit();
@@ -139,8 +139,8 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
     @Test
     public void testFailureOnCanCommit() throws Exception {
         DataValidationFailedException failure = new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock");
-        doReturn(Futures.immediateFailedCheckedFuture(failure)).when(mockCohort).canCommit(any(Object.class),
-                any(Collection.class), any(SchemaContext.class));
+        doReturn(FluentFutures.immediateFailedFluentFuture(failure)).when(mockCohort).canCommit(any(Object.class),
+                any(SchemaContext.class), any(Collection.class));
 
         ActorRef cohortActor = newCohortActor("testFailureOnCanCommit");
 
@@ -153,7 +153,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
         resetMockCohort();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
     }
 
     @Test
@@ -162,14 +162,14 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
         TransactionIdentifier txId = nextTransactionId();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
 
         askAndAwait(cohortActor, new Abort(txId));
         verify(mockPostCanCommit).abort();
 
         resetMockCohort();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
     }
 
     @Test
@@ -178,7 +178,7 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
         TransactionIdentifier txId = nextTransactionId();
         askAndAwait(cohortActor, new CanCommit(txId, CANDIDATES, MOCK_SCHEMA, cohortActor));
-        verify(mockCohort).canCommit(txId, CANDIDATES, MOCK_SCHEMA);
+        verify(mockCohort).canCommit(txId, MOCK_SCHEMA, CANDIDATES);
 
         askAndAwait(cohortActor, new PreCommit(txId));
         verify(mockPostCanCommit).preCommit();
@@ -187,11 +187,11 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         verify(mockPostPreCommit).abort();
     }
 
-    private static <T> ListenableFuture<T> executeWithDelay(final ListeningExecutorService executor, final T result) {
-        return executor.submit(() -> {
+    private static <T> FluentFuture<T> executeWithDelay(final ListeningExecutorService executor, final T result) {
+        return FluentFuture.from(executor.submit(() -> {
             Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
             return result;
-        });
+        }));
     }
 
     private ActorRef newCohortActor(final String name) {
@@ -203,8 +203,8 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         reset(mockCohort);
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(mockPostCanCommit).abort();
         doReturn(Futures.immediateFuture(mockPostPreCommit)).when(mockPostCanCommit).preCommit();
-        doReturn(Futures.immediateCheckedFuture(mockPostCanCommit)).when(mockCohort).canCommit(any(Object.class),
-                any(Collection.class), any(SchemaContext.class));
+        doReturn(FluentFutures.immediateFluentFuture(mockPostCanCommit)).when(mockCohort).canCommit(any(Object.class),
+                any(SchemaContext.class), any(Collection.class));
 
         doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(mockPostPreCommit).abort();
         doReturn(Futures.immediateFuture(null)).when(mockPostPreCommit).commit();

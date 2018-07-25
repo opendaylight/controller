@@ -256,7 +256,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
         @Override
         ListenableFuture<PostCanCommitStep> process(CanCommit message) {
-            return cohort.canCommit(message.getTxId(), message.getCandidates(), message.getSchema());
+            return cohort.canCommit(message.getTxId(), message.getSchema(), message.getCandidates());
         }
 
         @Override
