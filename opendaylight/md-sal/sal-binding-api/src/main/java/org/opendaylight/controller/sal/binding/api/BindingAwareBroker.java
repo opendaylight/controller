@@ -52,9 +52,6 @@ import org.osgi.framework.BundleContext;
  * and {@link ProviderContext}
  */
 public interface BindingAwareBroker {
-    /*
-     * @deprecated Use registerConsumer(BindingAwareConsumer cons) instead (BundleContext is no longer used)
-     */
     @Deprecated
     ConsumerContext registerConsumer(BindingAwareConsumer consumer, BundleContext ctx);
 
@@ -79,6 +76,7 @@ public interface BindingAwareBroker {
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
+    @Deprecated
     ConsumerContext registerConsumer(BindingAwareConsumer consumer);
 
     /*
@@ -115,6 +113,7 @@ public interface BindingAwareBroker {
      * @throws IllegalStateException
      *             If the consumer is already registered.
      */
+    @Deprecated
     ProviderContext registerProvider(BindingAwareProvider provider);
 
     /**
@@ -130,6 +129,7 @@ public interface BindingAwareBroker {
      * infrastructure services and other functionality provided by
      * {@link BindingAwareProvider}s.
      */
+    @Deprecated
     interface ConsumerContext extends RpcConsumerRegistry {
 
         /**
@@ -158,6 +158,7 @@ public interface BindingAwareBroker {
      * functionality provided by other {@link BindingAwareConsumer}s.
      *
      */
+    @Deprecated
     interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
 
     }

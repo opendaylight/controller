@@ -73,6 +73,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerCo
  * }
  * }
 */
+@Deprecated
 public interface BindingAwareConsumer {
 
     /**

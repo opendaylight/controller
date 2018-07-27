@@ -253,7 +253,10 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * on failure rather than purposely throwing unchecked exceptions if at all possible.
  * While unchecked exceptions will fail the returned {@link java.util.concurrent.Future Future},
  * using the intended RpcResult to convey the error information is more user-friendly.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.RpcProviderService} instead
  */
+@Deprecated
 public interface RpcProviderRegistry extends //
         RpcConsumerRegistry, //
         RouteChangePublisher<RpcContextIdentifier, InstanceIdentifier<?>> {

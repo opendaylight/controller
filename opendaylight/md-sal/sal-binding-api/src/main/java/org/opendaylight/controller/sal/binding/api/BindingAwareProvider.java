@@ -103,6 +103,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * }
  * }
  */
+@Deprecated
 public interface BindingAwareProvider {
 
     /**

@@ -27,7 +27,10 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * The actual delivery to listeners is asynchronous and implementation-specific.
  * Users of this interface should not make any assumptions as to whether the
  * notification has or has not been seen.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.NotificationPublishService} instead
  */
+@Deprecated
 public interface NotificationPublishService extends BindingService {
 
     /**

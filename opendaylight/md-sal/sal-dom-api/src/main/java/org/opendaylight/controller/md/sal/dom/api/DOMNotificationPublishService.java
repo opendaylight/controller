@@ -22,7 +22,10 @@ import javax.annotation.Nonnull;
  * - an offer-style method, which attempts to enqueue the notification, but allows
  *   the caller to specify that it should never wait, or put an upper bound on how
  *   long it is going to wait.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMNotificationPublishService} instead
  */
+@Deprecated
 public interface DOMNotificationPublishService extends DOMService {
     /**
      * Well-known value indicating that the implementation is currently not

@@ -12,6 +12,12 @@ import java.util.EventListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+/**
+ * Deprecated.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.MountPointService} instead
+ */
+@Deprecated
 public interface MountPointService extends BindingService {
 
     Optional<MountPoint> getMountPoint(InstanceIdentifier<?> mountPoint);

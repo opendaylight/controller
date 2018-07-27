@@ -28,7 +28,10 @@ import javax.annotation.Nonnull;
  *
  * <p>
  * All implementations are required to perform these steps as specified above.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcProviderService} instead
  */
+@Deprecated
 public interface DOMRpcProviderService extends DOMService {
     /**
      * Register an {@link DOMRpcImplementation} object with this service.
