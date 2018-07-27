@@ -17,7 +17,9 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * <p>
  * RPC implementations are registered using the {@link RpcProviderRegistry}.
  *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.RpcConsumerRegistry} instead
  */
+@Deprecated
 public interface RpcConsumerRegistry extends BindingAwareService, BindingService {
     /**
      * Returns an implementation of a requested RPC service.

@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * modeled notifications. This interface is a combination of the {@link NotificationService} and
  * {@link NotificationPublishService} interfaces.
  *
- * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.NotificationPublishService}.
+ * @deprecated Please use {@link org.opendaylight.mdsal.binding.api.NotificationPublishService}.
  */
 @Deprecated
 public interface NotificationProviderService extends NotificationService, NotificationPublishService<Notification> {

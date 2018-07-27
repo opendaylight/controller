@@ -19,7 +19,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * service is that of a dynamic router, where the set of available RPC services can change
  * dynamically. The service allows users to add a listener to track the process of
  * RPCs becoming available.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMRpcService} instead
  */
+@Deprecated
 public interface DOMRpcService extends DOMService {
     /**
      * Initiate invocation of an RPC. This method is guaranteed to not block on any external

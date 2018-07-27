@@ -22,7 +22,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  *
  * @see AsyncDataBroker
  * @see TransactionChainFactory
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.binding.api.DataBroker} instead
  */
+@Deprecated
 public interface DataBroker extends  AsyncDataBroker<InstanceIdentifier<?>, DataObject>,
         TransactionChainFactory<InstanceIdentifier<?>, DataObject>, TransactionFactory, BindingService,
         DataTreeChangeService {

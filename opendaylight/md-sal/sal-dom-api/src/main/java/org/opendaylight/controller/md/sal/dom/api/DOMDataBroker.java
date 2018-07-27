@@ -20,7 +20,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * <p>
  * This interface is type capture of generic interfaces and returns type captures
  * of results for client-code convenience.
+ *
+ * @deprecated Use {@link org.opendaylight.mdsal.dom.api.DOMDataBroker} instead
  */
+@Deprecated
 public interface DOMDataBroker extends
         AsyncDataBroker<YangInstanceIdentifier, NormalizedNode<?, ?>>,
         TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>,
