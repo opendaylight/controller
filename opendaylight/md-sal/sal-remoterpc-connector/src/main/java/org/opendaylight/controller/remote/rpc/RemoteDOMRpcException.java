@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.mdsal.dom.api.DOMRpcException;
 
 class RemoteDOMRpcException extends DOMRpcException {
 

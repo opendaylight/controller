@@ -17,10 +17,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 
 /**
  * Actor handling registration of RPCs available on remote nodes with the local {@link DOMRpcProviderService}.

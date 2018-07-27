@@ -12,12 +12,11 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
+import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;
+import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -38,7 +37,7 @@ final class RemoteRpcImplementation implements DOMRpcImplementation {
     }
 
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc,
+    public FluentFuture<DOMRpcResult> invokeRpc(final DOMRpcIdentifier rpc,
             final NormalizedNode<?, ?> input) {
         final RemoteDOMRpcFuture ret = RemoteDOMRpcFuture.create(rpc.getType().getLastComponent());
         ret.completeWith(Patterns.ask(remoteInvoker, ExecuteRpc.from(rpc, input), askDuration));

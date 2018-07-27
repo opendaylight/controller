@@ -9,8 +9,8 @@
 package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorSystem;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
+import org.opendaylight.mdsal.dom.api.DOMRpcService;
 
 public final class RemoteRpcProviderFactory {
     private RemoteRpcProviderFactory() {

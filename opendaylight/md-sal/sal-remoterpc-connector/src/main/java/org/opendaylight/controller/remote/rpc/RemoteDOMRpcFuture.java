@@ -10,14 +10,14 @@ package org.opendaylight.controller.remote.rpc;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
-import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
+import org.opendaylight.mdsal.dom.api.DOMRpcException;
+import org.opendaylight.mdsal.dom.api.DOMRpcResult;
+import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -25,8 +25,7 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
-final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult>
-        implements CheckedFuture<DOMRpcResult, DOMRpcException> {
+final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteDOMRpcFuture.class);
 
@@ -50,33 +49,31 @@ final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult>
     }
 
     @Override
-    public DOMRpcResult checkedGet() throws DOMRpcException {
+    public DOMRpcResult get() throws InterruptedException, ExecutionException {
         try {
-            return get();
-        } catch (final ExecutionException e) {
+            return super.get();
+        } catch (ExecutionException e) {
             throw mapException(e);
-        } catch (final InterruptedException e) {
-            throw new RemoteDOMRpcException("Interruped while invoking RPC", e);
         }
     }
 
     @Override
-    public DOMRpcResult checkedGet(final long timeout, final TimeUnit unit) throws TimeoutException, DOMRpcException {
+    public DOMRpcResult get(final long timeout, @Nonnull final TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
         try {
-            return get(timeout, unit);
+            return super.get(timeout, unit);
         } catch (final ExecutionException e) {
             throw mapException(e);
-        } catch (final InterruptedException e) {
-            throw new RemoteDOMRpcException("Interruped while invoking RPC", e);
         }
     }
 
-    private static DOMRpcException mapException(final ExecutionException ex) {
+    private static ExecutionException mapException(final ExecutionException ex) {
         final Throwable cause = ex.getCause();
         if (cause instanceof DOMRpcException) {
-            return (DOMRpcException) cause;
+            return ex;
         }
-        return new RemoteDOMRpcException("Exception during invoking RPC", ex);
+        return new ExecutionException(ex.getMessage(),
+                new RemoteDOMRpcException("Exception during invoking RPC", ex.getCause()));
     }
 
     private final class FutureUpdater extends OnComplete<Object> {
@@ -100,5 +97,4 @@ final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult>
             }
         }
     }
-
 }

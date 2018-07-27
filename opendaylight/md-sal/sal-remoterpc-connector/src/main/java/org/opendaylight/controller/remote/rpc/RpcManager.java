@@ -14,9 +14,9 @@ import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
+import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
+import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import scala.concurrent.duration.Duration;
 

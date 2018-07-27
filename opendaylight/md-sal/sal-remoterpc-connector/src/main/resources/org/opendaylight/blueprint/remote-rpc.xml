@@ -12,8 +12,8 @@
   </cm:property-placeholder>
 
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider" />
-  <reference id="domRpcService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcService"/>
-  <reference id="domRpcRegistry" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
+  <reference id="domRpcService" interface="org.opendaylight.mdsal.dom.api.DOMRpcService"/>
+  <reference id="domRpcRegistry" interface="org.opendaylight.mdsal.dom.api.DOMRpcProviderService"/>
 
   <bean id="actorSystem" factory-ref="actorSystemProvider" factory-method="getActorSystem"/>
 

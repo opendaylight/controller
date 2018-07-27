@@ -27,8 +27,8 @@ import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
+import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 
 public final class RoutingTable implements BucketData<RoutingTable>, Serializable {
     private static final class Proxy implements Externalizable {
