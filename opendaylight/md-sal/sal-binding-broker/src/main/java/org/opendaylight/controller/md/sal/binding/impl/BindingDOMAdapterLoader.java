@@ -10,6 +10,8 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import org.opendaylight.controller.md.sal.binding.api.ActionProviderService;
+import org.opendaylight.controller.md.sal.binding.api.ActionService;
 import org.opendaylight.controller.md.sal.binding.api.BindingService;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -21,12 +23,14 @@ import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 
 public abstract class BindingDOMAdapterLoader extends AdapterLoader<BindingService, DOMService> {
-    private static final Map<Class<?>,BindingDOMAdapterBuilder.Factory<?>> FACTORIES =
-        ImmutableMap.<Class<?>,BindingDOMAdapterBuilder.Factory<?>>builder()
-            .put(NotificationService.class,BindingDOMNotificationServiceAdapter.BUILDER_FACTORY)
-            .put(NotificationPublishService.class,BindingDOMNotificationPublishServiceAdapter.BUILDER_FACTORY)
-            .put(DataBroker.class,BindingDOMDataBrokerAdapter.BUILDER_FACTORY)
-            .put(RpcConsumerRegistry.class,BindingDOMRpcServiceAdapter.BUILDER_FACTORY)
+    private static final Map<Class<?>, BindingDOMAdapterBuilder.Factory<?>> FACTORIES =
+        ImmutableMap.<Class<?>, BindingDOMAdapterBuilder.Factory<?>>builder()
+            .put(NotificationService.class, BindingDOMNotificationServiceAdapter.BUILDER_FACTORY)
+            .put(NotificationPublishService.class, BindingDOMNotificationPublishServiceAdapter.BUILDER_FACTORY)
+            .put(DataBroker.class, BindingDOMDataBrokerAdapter.BUILDER_FACTORY)
+            .put(RpcConsumerRegistry.class, BindingDOMRpcServiceAdapter.BUILDER_FACTORY)
+            .put(ActionProviderService.class, null)
+            .put(ActionService.class, null)
             .build();
 
     private final BindingToNormalizedNodeCodec codec;
