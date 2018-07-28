@@ -49,7 +49,7 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
             final DataObjectModification<TestExec> rootNode = change.getRootNode();
             final ModificationType modType = rootNode.getModificationType();
             final PathArgument changeId = rootNode.getIdentifier();
-            final Collection<DataObjectModification<? extends DataObject>> modifications =
+            final Collection<? extends DataObjectModification<? extends DataObject>> modifications =
                     rootNode.getModifiedChildren();
 
             LOG.debug("    changeId {}, modType {}, mods: {}", changeId, modType, modifications.size());
