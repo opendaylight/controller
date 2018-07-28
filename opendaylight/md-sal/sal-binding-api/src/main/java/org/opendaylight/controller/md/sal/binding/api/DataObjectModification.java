@@ -8,14 +8,18 @@
 
 package org.opendaylight.controller.md.sal.binding.api;
 
+import com.google.common.collect.Collections2;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.ChoiceIn;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 /**
@@ -82,7 +86,44 @@ public interface DataObjectModification<T extends DataObject>
      *
      * @return unmodifiable collection of modified direct children.
      */
-    @Nonnull Collection<DataObjectModification<? extends DataObject>> getModifiedChildren();
+    @Nonnull Collection<? extends DataObjectModification<? extends DataObject>> getModifiedChildren();
+
+    /**
+     * Returns child list item modification if {@code child} was modified by this modification. This method should be
+     * used if the child is defined in a grouping brought into a case inside this object.
+     *
+     * @param caseType Case type class
+     * @param childType Type of list item - must be list item with key
+     * @return Modification of {@code child} if {@code child} was modified, null otherwise.
+     * @throws IllegalArgumentException If supplied {@code childType} class is not valid child according
+     *         to generated model.
+     */
+    default <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>>
+        Collection<DataObjectModification<C>> getModifiedChildren(@Nonnull final Class<H> caseType,
+                @Nonnull final Class<C> childType) {
+        final Item<C> item = Item.of(caseType, childType);
+        return (Collection<DataObjectModification<C>>) Collections2.filter(getModifiedChildren(),
+            mod -> item.equals(mod.getIdentifier()));
+    }
+
+    /**
+     * Returns container child modification if {@code child} was modified by this modification. This method should be
+     * used if the child is defined in a grouping brought into a case inside this object.
+     *
+     * <p>
+     * For accessing all modified list items consider iterating over {@link #getModifiedChildren()}.
+     *
+     * @param caseType Case type class
+     * @param child Type of child - must be only container
+     * @return Modification of {@code child} if {@code child} was modified, null otherwise.
+     * @throws IllegalArgumentException If supplied {@code child} class is not valid child according
+     *         to generated model.
+     */
+    default @Nullable <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>>
+            DataObjectModification<C> getModifiedChildContainer(@Nonnull final Class<H> caseType,
+                    @Nonnull final Class<C> child) {
+        return (DataObjectModification<C>) getModifiedChild(Item.of(caseType, child));
+    }
 
     /**
      * Returns container child modification if {@code child} was modified by this modification.
@@ -112,7 +153,6 @@ public interface DataObjectModification<T extends DataObject>
     @Nullable <C extends Augmentation<T> & DataObject> DataObjectModification<C> getModifiedAugmentation(
             @Nonnull Class<C> augmentation);
 
-
     /**
      * Returns child list item modification if {@code child} was modified by this modification.
      *
@@ -122,8 +162,24 @@ public interface DataObjectModification<T extends DataObject>
      * @throws IllegalArgumentException If supplied {@code listItem} class is not valid child according
      *         to generated model.
      */
-    <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C>
-            getModifiedChildListItem(@Nonnull Class<C> listItem,@Nonnull  K listKey);
+    <N extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<N>> DataObjectModification<N>
+            getModifiedChildListItem(@Nonnull Class<N> listItem, @Nonnull K listKey);
+
+    /**
+     * Returns child list item modification if {@code child} was modified by this modification.
+     *
+     * @param caseType Case type class
+     * @param listItem Type of list item - must be list item with key
+     * @param listKey List item key
+     * @return Modification of {@code child} if {@code child} was modified, null otherwise.
+     * @throws IllegalArgumentException If supplied {@code listItem} class is not valid child according
+     *         to generated model.
+     */
+    default <H extends ChoiceIn<? super T> & DataObject, C extends Identifiable<K> & ChildOf<? super H>,
+            K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+                    @Nonnull final Class<H> caseType, @Nonnull final Class<C> listItem, @Nonnull final K listKey) {
+        return (DataObjectModification<C>) getModifiedChild(IdentifiableItem.of(caseType, listItem, listKey));
+    }
 
     /**
      * Returns a child modification if a node identified by {@code childArgument} was modified by
