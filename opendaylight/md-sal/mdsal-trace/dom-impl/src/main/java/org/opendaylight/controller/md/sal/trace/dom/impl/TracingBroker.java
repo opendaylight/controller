@@ -147,7 +147,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             return child.startsWith(parent.substring(parentOffset), childOffset);
         }
 
-        @SuppressWarnings("checkstyle:hiddenField")
+        @SuppressWarnings({ "checkstyle:hiddenField", "hiding" })
         public boolean subtreesOverlap(YangInstanceIdentifier iid, LogicalDatastoreType store) {
             if (this.store != null && !this.store.equals(store)) {
                 return false;
@@ -157,7 +157,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             return isParent(iidString, otherIidString) || isParent(otherIidString, iidString);
         }
 
-        @SuppressWarnings("checkstyle:hiddenField")
+        @SuppressWarnings({ "checkstyle:hiddenField", "hiding" })
         public boolean eventIsOfInterest(YangInstanceIdentifier iid, LogicalDatastoreType store) {
             if (this.store != null && !this.store.equals(store)) {
                 return false;
@@ -348,7 +348,7 @@ public class TracingBroker implements TracingDOMDataBroker {
     }
 
     @Override
-    public boolean printOpenTransactions(PrintStream ps) {
+    public boolean printOpenTransactions(PrintStream ps, int minOpenTXs) {
         if (transactionChainsRegistry.getAllUnique().isEmpty()
             && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
             && writeTransactionsRegistry.getAllUnique().isEmpty()
@@ -363,9 +363,10 @@ public class TracingBroker implements TracingDOMDataBroker {
         ps.println("[NB: If no stack traces are shown below, then "
                  + "enable transaction-debug-context-enabled in mdsaltrace_config.xml]");
         ps.println();
-        printRegistryOpenTransactions(readOnlyTransactionsRegistry, ps, "  ");
-        printRegistryOpenTransactions(writeTransactionsRegistry, ps, "  ");
-        printRegistryOpenTransactions(readWriteTransactionsRegistry, ps, "  ");
+        // Flag to track if we really found any real leaks with more (or equal) to minOpenTXs
+        boolean hasFound = print(readOnlyTransactionsRegistry, ps, "  ", minOpenTXs);
+        hasFound |= print(writeTransactionsRegistry, ps, "  ", minOpenTXs);
+        hasFound |= print(readWriteTransactionsRegistry, ps, "  ", minOpenTXs);
 
         // Now print details for each non-closed TransactionChain
         // incl. in turn each ones own read/Write[Only]TransactionsRegistry
@@ -375,24 +376,27 @@ public class TracingBroker implements TracingDOMDataBroker {
             ps.println("  " + transactionChainsRegistry.getAnchor() + " : "
                     + transactionChainsRegistry.getCreateDescription());
         }
-        entries.forEach(entry -> {
+        for (CloseTrackedRegistryReportEntry<TracingTransactionChain> entry : entries) {
             ps.println("    " + entry.getNumberAddedNotRemoved() + "x TransactionChains opened but not closed here:");
             printStackTraceElements(ps, "      ", entry.getStackTraceElements());
             @SuppressWarnings("resource")
             TracingTransactionChain txChain = (TracingTransactionChain) entry
                 .getExampleCloseTracked().getRealCloseTracked();
-            printRegistryOpenTransactions(txChain.getReadOnlyTransactionsRegistry(), ps, "        ");
-            printRegistryOpenTransactions(txChain.getWriteTransactionsRegistry(), ps, "        ");
-            printRegistryOpenTransactions(txChain.getReadWriteTransactionsRegistry(), ps, "        ");
-        });
+            hasFound |= print(txChain.getReadOnlyTransactionsRegistry(), ps, "        ", minOpenTXs);
+            hasFound |= print(txChain.getWriteTransactionsRegistry(), ps, "        ", minOpenTXs);
+            hasFound |= print(txChain.getReadWriteTransactionsRegistry(), ps, "        ", minOpenTXs);
+        }
         ps.println();
 
-        return true;
+        return hasFound;
     }
 
-    private <T extends CloseTracked<T>> void printRegistryOpenTransactions(
-            CloseTrackedRegistry<T> registry, PrintStream ps, String indent) {
+    private <T extends CloseTracked<T>> boolean print(
+            CloseTrackedRegistry<T> registry, PrintStream ps, String indent, int minOpenTransactions) {
         Set<CloseTrackedRegistryReportEntry<T>> unsorted = registry.getAllUnique();
+        if (unsorted.size() < minOpenTransactions) {
+            return false;
+        }
 
         List<CloseTrackedRegistryReportEntry<T>> entries = new ArrayList<>(unsorted);
         entries.sort((o1, o2) -> Long.compare(o2.getNumberAddedNotRemoved(), o1.getNumberAddedNotRemoved()));
@@ -408,6 +412,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         if (!entries.isEmpty()) {
             ps.println();
         }
+        return true;
     }
 
     private void printStackTraceElements(PrintStream ps, String indent, List<StackTraceElement> stackTraceElements) {

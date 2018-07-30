@@ -18,8 +18,9 @@ public interface TracingDOMDataBroker extends DOMDataBroker {
     /**
      * Prints a human-readable "report" of all opened but not closed transactions,
      * including transactions chains and transactions opened by them, onto the printStream.
+     * @param minOpenTransactions minimum open number of transactions (leaks with fewer are not printed)
      * @return true if there were any open transactions, false if none
      */
-    boolean printOpenTransactions(PrintStream printStream);
+    boolean printOpenTransactions(PrintStream printStream, int minOpenTransactions);
 
 }
