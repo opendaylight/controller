@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f568c06f_a0da289c",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/src/main/java/org/opendaylight/controller/md/sal/trace/api/TracingDOMDataBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-07-30T15:21:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "13985eb9_17b1512c",
+      "revId": "22170da7cb942870b21eaafd2c04e052f2adb389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b928898_e0d7c22e",
         "filename": "opendaylight/md-sal/mdsal-trace/cli/pom.xml",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "28f831f7_9a79ce2a",
+        "filename": "opendaylight/md-sal/mdsal-trace/cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-07-30T15:21:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b928898_e0d7c22e",
+      "revId": "22170da7cb942870b21eaafd2c04e052f2adb389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9fd78b9f_b5d46bef",
         "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/TracingBroker.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2018-07-30T13:54:17Z",
       "side": 1,
       "message": "How about this instead:\n\n        // Flag to track if we really found any real leaks with more (or equal) to minOpenTXs\n        boolean hasFound \u003d print(readOnlyTransactionsRegistry, ps, \"  \", minOpenTXs);\n        hasFound |\u003d print(writeTransactionsRegistry, ps, \"  \", minOpenTXs);\n        hasFound |\u003d print(readWriteTransactionsRegistry, ps, \"  \", minOpenTXs);\n\n        // Now print details for each non-closed TransactionChain\n        // incl. in turn each ones own read/Write[Only]TransactionsRegistry\n        Set\u003cCloseTrackedRegistryReportEntry\u003cTracingTransactionChain\u003e\u003e\n            entries \u003d transactionChainsRegistry.getAllUnique();\n        if (!entries.isEmpty()) {\n            ps.println(\"  \" + transactionChainsRegistry.getAnchor() + \" : \"\n                    + transactionChainsRegistry.getCreateDescription());\n        }\n        for (CloseTrackedRegistryReportEntry\u003cTracingTransactionChain\u003e entry : entries) {\n            ps.println(\"    \" + entry.getNumberAddedNotRemoved() + \"x TransactionChains opened but not closed here:\");\n            printStackTraceElements(ps, \"      \", entry.getStackTraceElements());\n            @SuppressWarnings(\"resource\")\n            TracingTransactionChain txChain \u003d (TracingTransactionChain) entry\n                .getExampleCloseTracked().getRealCloseTracked();\n            hasFound |\u003d print(txChain.getReadOnlyTransactionsRegistry(), ps, \"        \", minOpenTXs);\n            hasFound |\u003d print(txChain.getWriteTransactionsRegistry(), ps, \"        \", minOpenTXs);\n            hasFound |\u003d print(txChain.getReadWriteTransactionsRegistry(), ps, \"        \", minOpenTXs);\n        }\n        ps.println();\n\n        return hasFound;",
+      "revId": "22170da7cb942870b21eaafd2c04e052f2adb389",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db49b681_1d37e31d",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/src/main/java/org/opendaylight/controller/md/sal/trace/dom/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-07-30T15:21:28Z",
+      "side": 1,
+      "message": "Done.  For some reason it didn\u0027t even occur to me to just ditch forEach() in favour of a simple for() when I ran into the \"final for lambda\" issue.. ;-) yours is nice and simple - thanks!",
+      "parentUuid": "9fd78b9f_b5d46bef",
       "revId": "22170da7cb942870b21eaafd2c04e052f2adb389",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
