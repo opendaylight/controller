@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
@@ -147,7 +149,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             return child.startsWith(parent.substring(parentOffset), childOffset);
         }
 
-        @SuppressWarnings("checkstyle:hiddenField")
+        @SuppressWarnings({ "checkstyle:hiddenField", "hiding" })
         public boolean subtreesOverlap(YangInstanceIdentifier iid, LogicalDatastoreType store) {
             if (this.store != null && !this.store.equals(store)) {
                 return false;
@@ -157,7 +159,7 @@ public class TracingBroker implements TracingDOMDataBroker {
             return isParent(iidString, otherIidString) || isParent(otherIidString, iidString);
         }
 
-        @SuppressWarnings("checkstyle:hiddenField")
+        @SuppressWarnings({ "checkstyle:hiddenField", "hiding" })
         public boolean eventIsOfInterest(YangInstanceIdentifier iid, LogicalDatastoreType store) {
             if (this.store != null && !this.store.equals(store)) {
                 return false;
@@ -348,7 +350,7 @@ public class TracingBroker implements TracingDOMDataBroker {
     }
 
     @Override
-    public boolean printOpenTransactions(PrintStream ps) {
+    public boolean printOpenTransactions(PrintStream ps, int minOpenTXs) {
         if (transactionChainsRegistry.getAllUnique().isEmpty()
             && readOnlyTransactionsRegistry.getAllUnique().isEmpty()
             && writeTransactionsRegistry.getAllUnique().isEmpty()
@@ -363,9 +365,11 @@ public class TracingBroker implements TracingDOMDataBroker {
         ps.println("[NB: If no stack traces are shown below, then "
                  + "enable transaction-debug-context-enabled in mdsaltrace_config.xml]");
         ps.println();
-        printRegistryOpenTransactions(readOnlyTransactionsRegistry, ps, "  ");
-        printRegistryOpenTransactions(writeTransactionsRegistry, ps, "  ");
-        printRegistryOpenTransactions(readWriteTransactionsRegistry, ps, "  ");
+        // Flag to track if we really found any real leaks with more (or equal) to minOpenTXs
+        AtomicBoolean hasFound = new AtomicBoolean(false);
+        hasFound(hasFound, () -> print(readOnlyTransactionsRegistry, ps, "  ", minOpenTXs));
+        hasFound(hasFound, () -> print(writeTransactionsRegistry, ps, "  ", minOpenTXs));
+        hasFound(hasFound, () -> print(readWriteTransactionsRegistry, ps, "  ", minOpenTXs));
 
         // Now print details for each non-closed TransactionChain
         // incl. in turn each ones own read/Write[Only]TransactionsRegistry
@@ -381,18 +385,28 @@ public class TracingBroker implements TracingDOMDataBroker {
             @SuppressWarnings("resource")
             TracingTransactionChain txChain = (TracingTransactionChain) entry
                 .getExampleCloseTracked().getRealCloseTracked();
-            printRegistryOpenTransactions(txChain.getReadOnlyTransactionsRegistry(), ps, "        ");
-            printRegistryOpenTransactions(txChain.getWriteTransactionsRegistry(), ps, "        ");
-            printRegistryOpenTransactions(txChain.getReadWriteTransactionsRegistry(), ps, "        ");
+            hasFound(hasFound, () -> print(txChain.getReadOnlyTransactionsRegistry(), ps, "        ", minOpenTXs));
+            hasFound(hasFound, () -> print(txChain.getWriteTransactionsRegistry(), ps, "        ", minOpenTXs));
+            hasFound(hasFound, () -> print(txChain.getReadWriteTransactionsRegistry(), ps, "        ", minOpenTXs));
         });
         ps.println();
 
-        return true;
+        return hasFound.get();
     }
 
-    private <T extends CloseTracked<T>> void printRegistryOpenTransactions(
-            CloseTrackedRegistry<T> registry, PrintStream ps, String indent) {
+    // This is basically this: hasFound |= supplier.apply.
+    // This is not atomic / thread safe, but is not meant to be; the use of
+    // AtomicBoolean is only so that it can used inside the forEach() lambda above.
+    private void hasFound(AtomicBoolean hasFound, BooleanSupplier supplier) {
+        hasFound.set(hasFound.get() || supplier.getAsBoolean());
+    }
+
+    private <T extends CloseTracked<T>> boolean print(
+            CloseTrackedRegistry<T> registry, PrintStream ps, String indent, int minOpenTransactions) {
         Set<CloseTrackedRegistryReportEntry<T>> unsorted = registry.getAllUnique();
+        if (unsorted.size() < minOpenTransactions) {
+            return false;
+        }
 
         List<CloseTrackedRegistryReportEntry<T>> entries = new ArrayList<>(unsorted);
         entries.sort((o1, o2) -> Long.compare(o2.getNumberAddedNotRemoved(), o1.getNumberAddedNotRemoved()));
@@ -408,6 +422,7 @@ public class TracingBroker implements TracingDOMDataBroker {
         if (!entries.isEmpty()) {
             ps.println();
         }
+        return true;
     }
 
     private void printStackTraceElements(PrintStream ps, String indent, List<StackTraceElement> stackTraceElements) {

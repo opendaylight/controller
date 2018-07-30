@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.trace.cli;
 
 import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -25,6 +26,10 @@ import org.opendaylight.controller.md.sal.trace.api.TracingDOMDataBroker;
     + "if transaction-debug-context-enabled is true in mdsaltrace_config.xml")
 public class PrintOpenTransactionsCommand implements Action {
 
+    @Argument(index = 0, name = "minOpenTransactions", required = false, multiValued = false,
+            description = "Minimum open number of transactions (leaks with less are suppressed)")
+    Integer minOpenTransactions = 1;
+
     @Reference
     private List<TracingDOMDataBroker> tracingDOMDataBrokers;
 
@@ -34,10 +39,18 @@ public class PrintOpenTransactionsCommand implements Action {
     @Override
     @SuppressWarnings("checkstyle:RegexpSingleLineJava")
     public Object execute() {
+        boolean hasFound = false;
         for (TracingDOMDataBroker tracingDOMDataBroker : tracingDOMDataBrokers) {
-            tracingDOMDataBroker.printOpenTransactions(System.out);
+            hasFound |= tracingDOMDataBroker.printOpenTransactions(System.out, minOpenTransactions);
         }
-        return null;
+        if (hasFound) {
+            System.out.println(
+                    "Actually did find real leaks with more than " + minOpenTransactions + " open transactions");
+        } else {
+            System.out.println(
+                    "Did not find any real leaks with more than " + minOpenTransactions + " open transactions");
+        }
+        return hasFound;
     }
 
 }
