@@ -48,7 +48,7 @@ public class TracingBrokerTest {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(baos);
-        boolean printReturnValue = tracingBroker.printOpenTransactions(ps);
+        boolean printReturnValue = tracingBroker.printOpenTransactions(ps, 1);
         String output = new String(baos.toByteArray(), UTF_8);
 
         assertThat(printReturnValue).isTrue();
