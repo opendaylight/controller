@@ -80,7 +80,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
             @Override
             public void onComplete(final Throwable failure, final ActorSelection success) throws Throwable {
                 if (failure != null) {
-                    LOG.info("Failed to prepare transaction {} on backend", transaction.getIdentifier(), failure);
+                    LOG.warn("Failed to prepare transaction {} on backend", transaction.getIdentifier(), failure);
                     transactionAborted(transaction);
                     return;
                 }
@@ -98,7 +98,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
             @Override
             public void onComplete(final Throwable failure, final Object message) throws Throwable {
                 if (failure != null) {
-                    LOG.error("Failed to prepare transaction {} on backend", transaction.getIdentifier(), failure);
+                    LOG.warn("Failed to prepare transaction {} on backend", transaction.getIdentifier(), failure);
                     transactionAborted(transaction);
                 } else if (CommitTransactionReply.isSerializedType(message)) {
                     LOG.debug("Transaction {} committed successfully", transaction.getIdentifier());
