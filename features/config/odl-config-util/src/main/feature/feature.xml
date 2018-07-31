@@ -6,8 +6,8 @@
   ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
   ~ and is available at http://www.eclipse.org/legal/epl-v10.html
   -->
-<features name="odl-controller-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
     <feature name="odl-config-util" version="${project.version}">
-        <feature version="[2.0.5,3)">odl-yangtools-data-api</feature>
+        <feature version="[2.0.6.1,3)">odl-yangtools-data-api</feature>
     </feature>
 </features>
