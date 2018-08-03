@@ -10,11 +10,11 @@ package org.opendaylight.dsbenchmark;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.dsbenchmark.listener.DsbenchmarkListenerProvider;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaDelete;
@@ -175,8 +175,8 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         tx.put(LogicalDatastoreType.OPERATIONAL, TEST_STATUS_IID, status);
 
         try {
-            tx.submit().checkedGet();
-        } catch (final TransactionCommitFailedException e) {
+            tx.commit().get();
+        } catch (final InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
 
@@ -191,9 +191,9 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         WriteTransaction tx = simpleTxDataBroker.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID, data);
         try {
-            tx.submit().checkedGet();
+            tx.commit().get();
             LOG.debug("DataStore config test data cleaned up");
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.info("Failed to cleanup DataStore configtest data");
             throw new IllegalStateException(e);
         }
@@ -201,9 +201,9 @@ public class DsbenchmarkProvider implements DsbenchmarkService, AutoCloseable {
         tx = simpleTxDataBroker.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID, data);
         try {
-            tx.submit().checkedGet();
+            tx.commit().get();
             LOG.debug("DataStore operational test data cleaned up");
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.info("Failed to cleanup DataStore operational test data");
             throw new IllegalStateException(e);
         }

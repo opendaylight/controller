@@ -9,7 +9,8 @@
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -17,8 +18,8 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -73,9 +74,9 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
 
             if (writeCnt == writesPerTx) {
                 txSubmitted++;
-                Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+                tx.commit().addCallback(new FutureCallback<CommitInfo>() {
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final CommitInfo result) {
                         txOk++;
                     }
 
@@ -84,7 +85,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
                         LOG.error("Transaction failed, {}", t);
                         txError++;
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 tx = chain.newWriteOnlyTransaction();
                 writeCnt = 0;
             }
@@ -96,8 +97,8 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
             if (writeCnt > 0) {
                 txSubmitted++;
             }
-            tx.submit().checkedGet();
-        } catch (final TransactionCommitFailedException e) {
+            tx.commit().get();
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.error("Transaction failed", e);
         }
         try {
@@ -105,7 +106,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
         } catch (final IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
-        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, txOk + txError);
     }
 
     @Override

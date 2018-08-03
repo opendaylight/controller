@@ -9,18 +9,19 @@
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -74,9 +75,9 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
             // Start performing the operation; submit the transaction at every n-th operation
             if (writeCnt == writesPerTx) {
                 txSubmitted++;
-                Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+                tx.commit().addCallback(new FutureCallback<CommitInfo>() {
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final CommitInfo result) {
                         txOk++;
                     }
 
@@ -85,7 +86,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
                         LOG.error("Transaction failed, {}", t);
                         txError++;
                     }
-                });
+                }, MoreExecutors.directExecutor());
                 tx = chain.newWriteOnlyTransaction();
                 writeCnt = 0;
             }
@@ -97,9 +98,9 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
 
         try {
             txSubmitted++;
-            tx.submit().checkedGet();
+            tx.commit().get();
             txOk++;
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.error("Transaction failed", e);
             txError++;
         }
@@ -109,7 +110,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
             LOG.error("Transaction close failed,", e);
         }
 
-        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
+        LOG.debug("Transactions: submitted {}, completed {}", txSubmitted, txOk + txError);
     }
 
     @Override

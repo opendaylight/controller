@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
@@ -133,7 +133,7 @@ public class DOMDataTreeListenerTest {
 
         final DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
-        writeTx.submit();
+        writeTx.commit();
 
         latch.await(5, TimeUnit.SECONDS);
 
@@ -149,7 +149,7 @@ public class DOMDataTreeListenerTest {
     }
 
     @Test
-    public void replaceContainerContainerInTreeTest() throws InterruptedException, TransactionCommitFailedException {
+    public void replaceContainerContainerInTreeTest() throws InterruptedException, ExecutionException {
         final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
@@ -157,14 +157,14 @@ public class DOMDataTreeListenerTest {
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
         final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
                 .registerDataTreeChangeListener(ROOT_DATA_TREE_ID, listener);
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER_2);
-        writeTx.submit();
+        writeTx.commit();
 
         latch.await(5, TimeUnit.SECONDS);
 
@@ -188,7 +188,7 @@ public class DOMDataTreeListenerTest {
     }
 
     @Test
-    public void deleteContainerContainerInTreeTest() throws InterruptedException, TransactionCommitFailedException {
+    public void deleteContainerContainerInTreeTest() throws InterruptedException, ExecutionException {
         final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
@@ -196,7 +196,7 @@ public class DOMDataTreeListenerTest {
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
         final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
@@ -204,7 +204,7 @@ public class DOMDataTreeListenerTest {
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.delete(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
-        writeTx.submit();
+        writeTx.commit();
 
         latch.await(5, TimeUnit.SECONDS);
 
@@ -228,7 +228,7 @@ public class DOMDataTreeListenerTest {
     }
 
     @Test
-    public void replaceChildListContainerInTreeTest() throws InterruptedException, TransactionCommitFailedException {
+    public void replaceChildListContainerInTreeTest() throws InterruptedException, ExecutionException {
         final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
@@ -236,7 +236,7 @@ public class DOMDataTreeListenerTest {
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
         final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
@@ -244,7 +244,7 @@ public class DOMDataTreeListenerTest {
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH, OUTER_LIST_2);
-        writeTx.submit();
+        writeTx.commit();
 
         latch.await(5, TimeUnit.SECONDS);
 
@@ -272,7 +272,7 @@ public class DOMDataTreeListenerTest {
     }
 
     @Test
-    public void rootModificationChildListenerTest() throws InterruptedException, TransactionCommitFailedException {
+    public void rootModificationChildListenerTest() throws InterruptedException, ExecutionException {
         final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
@@ -280,7 +280,7 @@ public class DOMDataTreeListenerTest {
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
         final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
@@ -288,7 +288,7 @@ public class DOMDataTreeListenerTest {
 
         writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER_2);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get();
 
         latch.await(1, TimeUnit.SECONDS);
 
@@ -312,7 +312,7 @@ public class DOMDataTreeListenerTest {
     }
 
     @Test
-    public void listEntryChangeNonRootRegistrationTest() throws InterruptedException, TransactionCommitFailedException {
+    public void listEntryChangeNonRootRegistrationTest() throws InterruptedException, ExecutionException {
         final CountDownLatch latch = new CountDownLatch(2);
 
         DOMDataTreeChangeService dataTreeChangeService = getDOMDataTreeChangeService();
@@ -320,7 +320,7 @@ public class DOMDataTreeListenerTest {
 
         DOMDataWriteTransaction writeTx = domBroker.newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH, TEST_CONTAINER);
-        writeTx.submit().checkedGet();
+        writeTx.commit().get();
 
         final TestDataTreeListener listener = new TestDataTreeListener(latch);
         final ListenerRegistration<TestDataTreeListener> listenerReg = dataTreeChangeService
@@ -349,7 +349,7 @@ public class DOMDataTreeListenerTest {
                     outerListEntry2);
         writeTx.put(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH.node(outerListEntryId3),
                     outerListEntry3);
-        writeTx.submit();
+        writeTx.commit();
 
         latch.await(5, TimeUnit.SECONDS);
 

@@ -148,7 +148,7 @@ public class DOMBrokerPerformanceTest {
             List<ListenableFuture<?>> allFutures = measure(txNum + " Submits", () -> {
                 List<ListenableFuture<?>> builder = new ArrayList<>(txNum);
                 for (DOMDataReadWriteTransaction tx : transactions) {
-                    builder.add(tx.submit());
+                    builder.add(tx.commit());
                 }
                 return builder;
             });
@@ -213,7 +213,7 @@ public class DOMBrokerPerformanceTest {
         });
 
         measure("Txs:1 Submit, Finish", (Callable<Void>) () -> {
-            measure("Txs:1 Submit", (Callable<ListenableFuture<?>>) writeTx::submit).get();
+            measure("Txs:1 Submit", (Callable<ListenableFuture<?>>) writeTx::commit).get();
             return null;
         });
     }

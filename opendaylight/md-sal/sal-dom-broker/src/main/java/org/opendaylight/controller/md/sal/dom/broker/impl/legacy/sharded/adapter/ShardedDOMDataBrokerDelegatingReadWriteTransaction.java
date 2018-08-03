@@ -11,7 +11,6 @@ package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapte
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -144,10 +143,8 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
                                                               final YangInstanceIdentifier path) {
         checkState(root != null,
                    "A modify operation (put, merge or delete) must be performed prior to an exists operation");
-        return Futures.makeChecked(Futures.transform(read(store, path),
-                                                     (Function<Optional<NormalizedNode<?, ?>>, Boolean>)
-                                                             Optional::isPresent),
-                                   ReadFailedException.MAPPER);
+        return Futures.makeChecked(Futures.transform(read(store, path), Optional::isPresent,
+            MoreExecutors.directExecutor()), ReadFailedException.MAPPER);
     }
 
     @Override
