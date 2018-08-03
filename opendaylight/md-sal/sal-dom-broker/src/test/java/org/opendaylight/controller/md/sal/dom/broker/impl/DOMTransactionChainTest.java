@@ -73,7 +73,7 @@ public class DOMTransactionChainTest {
          * First transaction is marked as ready, we are able to allocate chained
          * transactions.
          */
-        ListenableFuture<Void> firstWriteTxFuture = firstTx.submit();
+        ListenableFuture<?> firstWriteTxFuture = firstTx.commit();
 
         /**
          * We alocate chained transaction - read transaction.
@@ -114,7 +114,7 @@ public class DOMTransactionChainTest {
         /**
          * third transaction is sealed and commited.
          */
-        ListenableFuture<Void> thirdDeleteTxFuture = thirdDeleteTx.submit();
+        ListenableFuture<?> thirdDeleteTxFuture = thirdDeleteTx.commit();
         assertCommitSuccessful(thirdDeleteTxFuture);
 
         /**
@@ -168,27 +168,27 @@ public class DOMTransactionChainTest {
         return tx;
     }
 
-    private static DOMDataReadWriteTransaction allocateAndWrite(
-            final DOMTransactionChain txChain) throws InterruptedException, ExecutionException {
+    private static DOMDataReadWriteTransaction allocateAndWrite(final DOMTransactionChain txChain)
+            throws InterruptedException, ExecutionException {
         DOMDataReadWriteTransaction tx = txChain.newReadWriteTransaction();
         assertTestContainerWrite(tx);
         return tx;
     }
 
-    private static void assertCommitSuccessful(
-            final ListenableFuture<Void> future) throws InterruptedException, ExecutionException {
+    private static void assertCommitSuccessful(final ListenableFuture<?> future)
+            throws InterruptedException, ExecutionException {
         future.get();
     }
 
-    private static void assertTestContainerExists(
-            final DOMDataReadTransaction readTx) throws InterruptedException, ExecutionException {
+    private static void assertTestContainerExists(final DOMDataReadTransaction readTx)
+            throws InterruptedException, ExecutionException {
         ListenableFuture<Optional<NormalizedNode<?, ?>>> readFuture = readTx.read(OPERATIONAL, TestModel.TEST_PATH);
         Optional<NormalizedNode<?, ?>> readedData = readFuture.get();
         assertTrue(readedData.isPresent());
     }
 
-    private static void assertTestContainerWrite(
-            final DOMDataReadWriteTransaction tx) throws InterruptedException, ExecutionException {
+    private static void assertTestContainerWrite(final DOMDataReadWriteTransaction tx)
+            throws InterruptedException, ExecutionException {
         tx.put(OPERATIONAL, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
         assertTestContainerExists(tx);
     }

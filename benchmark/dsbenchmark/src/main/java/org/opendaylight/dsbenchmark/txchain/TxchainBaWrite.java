@@ -9,9 +9,9 @@
 package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -19,9 +19,9 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.Operation;
@@ -71,9 +71,9 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
             if (writeCnt == writesPerTx) {
                 txSubmitted++;
-                Futures.addCallback(tx.submit(), new FutureCallback<Void>() {
+                tx.commit().addCallback(new FutureCallback<CommitInfo>() {
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final CommitInfo result) {
                         txOk++;
                     }
 
@@ -93,9 +93,9 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
         // We need to empty the transaction chain before closing it
         try {
             txSubmitted++;
-            tx.submit().checkedGet();
+            tx.commit().get();
             txOk++;
-        } catch (final TransactionCommitFailedException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.error("Transaction failed", e);
             txError++;
         }
