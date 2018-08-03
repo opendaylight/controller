@@ -5,19 +5,18 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.txchain;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import com.google.common.util.concurrent.FluentFuture;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.AsyncTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.TransactionChain;
+import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -59,16 +58,15 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
     public void executeList() {
         final LogicalDatastoreType dsType = getDataStoreType();
 
-        try (ReadOnlyTransaction tx = bindingDataBroker.newReadOnlyTransaction()) {
+        try (ReadTransaction tx = bindingDataBroker.newReadOnlyTransaction()) {
             for (long l = 0; l < outerListElem; l++) {
 
                 InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                         .child(OuterList.class, new OuterListKey((int) l));
-                CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
-                        tx.read(dsType, iid);
+                FluentFuture<Optional<OuterList>> submitFuture = tx.read(dsType, iid);
 
                 try {
-                    Optional<OuterList> optionalDataObject = submitFuture.checkedGet();
+                    Optional<OuterList> optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         OuterList outerList = optionalDataObject.get();
 
@@ -91,7 +89,7 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
                     } else {
                         txError++;
                     }
-                } catch (final ReadFailedException e) {
+                } catch (final InterruptedException | ExecutionException e) {
                     LOG.warn("failed to ....", e);
                     txError++;
                 }
