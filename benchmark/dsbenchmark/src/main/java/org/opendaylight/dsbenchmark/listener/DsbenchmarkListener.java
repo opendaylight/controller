@@ -5,16 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.listener;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
@@ -23,8 +21,8 @@ import org.slf4j.LoggerFactory;
 
 public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkListener.class);
-    private AtomicInteger numEvents = new AtomicInteger(0);
-    private AtomicInteger numDataChanges = new AtomicInteger(0);
+    private final AtomicInteger numEvents = new AtomicInteger(0);
+    private final AtomicInteger numDataChanges = new AtomicInteger(0);
 
     @Override
     public void onDataTreeChanged(
@@ -49,7 +47,7 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
             final DataObjectModification<TestExec> rootNode = change.getRootNode();
             final ModificationType modType = rootNode.getModificationType();
             final PathArgument changeId = rootNode.getIdentifier();
-            final Collection<DataObjectModification<? extends DataObject>> modifications =
+            final Collection<? extends DataObjectModification<? extends DataObject>> modifications =
                     rootNode.getModifiedChildren();
 
             LOG.debug("    changeId {}, modType {}, mods: {}", changeId, modType, modifications.size());

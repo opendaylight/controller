@@ -5,15 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.dsbenchmark.listener;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -37,9 +35,9 @@ public class DsbenchmarkListenerProvider {
         for (int i = 0; i < numListeners; i++) {
             DsbenchmarkListener listener = new DsbenchmarkListener();
             listeners.add(dataBroker.registerDataTreeChangeListener(
-                    new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
+                    DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
             listeners.add(dataBroker.registerDataTreeChangeListener(
-                    new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
+                    DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
 
         }
         LOG.debug("DsbenchmarkListenerProvider created {} listeneres", numListeners);
