@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,9 +44,8 @@ class ShardedDOMDataBrokerDelegatingReadTransaction implements DOMDataReadOnlyTr
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
                                                                                    final YangInstanceIdentifier path) {
-        return Futures.makeChecked(delegateTx.read(translateDataStoreType(store), path).transformAsync(
-            optional -> Futures.immediateFuture(Optional.fromJavaUtil(optional)), MoreExecutors.directExecutor()),
-            ReadFailedException.MAPPER);
+        return Futures.makeChecked(delegateTx.read(translateDataStoreType(store), path).transform(
+            Optional::fromJavaUtil, MoreExecutors.directExecutor()), ReadFailedException.MAPPER);
     }
 
     @Override
