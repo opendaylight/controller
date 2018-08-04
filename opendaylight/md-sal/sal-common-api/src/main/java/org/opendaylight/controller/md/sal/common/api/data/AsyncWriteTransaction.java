@@ -13,8 +13,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import javax.annotation.CheckReturnValue;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.md.sal.common.api.MappingCheckedFuture;
 import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.MappingCheckedFuture;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 
@@ -384,7 +384,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
     ExceptionMapper<TransactionCommitFailedException> SUBMIT_EXCEPTION_MAPPER =
         new ExceptionMapper<TransactionCommitFailedException>("submit", TransactionCommitFailedException.class) {
             @Override
-            protected TransactionCommitFailedException newWithCause(String message, Throwable cause) {
+            protected TransactionCommitFailedException newWithCause(final String message, final Throwable cause) {
                 return new TransactionCommitFailedException(message, cause);
             }
         };
