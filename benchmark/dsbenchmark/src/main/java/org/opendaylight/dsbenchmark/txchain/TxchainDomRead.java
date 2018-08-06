@@ -11,12 +11,12 @@ import com.google.common.util.concurrent.FluentFuture;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
-import org.opendaylight.mdsal.common.api.AsyncTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionChain;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainDomRead extends DatastoreAbstractWriter implements TransactionChainListener {
+public class TxchainDomRead extends DatastoreAbstractWriter implements DOMTransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomRead.class);
     private final DOMDataBroker domDataBroker;
 
@@ -45,12 +45,8 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
-        TxchainDomWrite dd = new TxchainDomWrite(domDataBroker,
-                                                 StartTestInput.Operation.PUT,
-                                                     outerListElem,
-                                                     innerListElem,
-                                                     outerListElem,
-                                                     dataStore);
+        TxchainDomWrite dd = new TxchainDomWrite(domDataBroker, StartTestInput.Operation.PUT, outerListElem,
+            innerListElem, outerListElem, dataStore);
         dd.createList();
         dd.executeList();
     }
@@ -81,14 +77,14 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-                                         final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}, cause {}",
-                chain, transaction.getIdentifier(), cause);
+    public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
+            final Throwable cause) {
+        LOG.error("Broken chain {} in TxchainDomDelete, transaction {}, cause {}", chain, transaction.getIdentifier(),
+            cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
         LOG.debug("TxchainDomDelete closed successfully, chain {}", chain);
     }
 }
