@@ -39,6 +39,11 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
         return this.timer.stop();
     }
 
+    public static HashedWheelTimerCloseable newInstance(@Nullable final Long duration,
+            @Nullable final Integer ticksPerWheel) {
+        return newInstance(null, duration, ticksPerWheel);
+    }
+
     public static HashedWheelTimerCloseable newInstance(@Nullable final ThreadFactory threadFactory,
             @Nullable final Long duration, @Nullable final Integer ticksPerWheel) {
         TimeUnit unit = TimeUnit.MILLISECONDS;
