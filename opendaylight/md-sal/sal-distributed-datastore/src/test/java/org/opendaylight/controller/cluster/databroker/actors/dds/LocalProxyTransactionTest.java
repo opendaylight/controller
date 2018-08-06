@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -64,7 +64,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     @SuppressWarnings("unchecked")
     private void setupExecuteInActor() {
         doAnswer(inv -> {
-            inv.getArgumentAt(0, InternalCommand.class).execute(mock(ClientActorBehavior.class));
+            inv.<InternalCommand<?>>getArgument(0).execute(mock(ClientActorBehavior.class));
             return null;
         }).when(context).executeInActor(any(InternalCommand.class));
     }
@@ -78,7 +78,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         setupExecuteInActor();
 
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
-        final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
+        final ArgumentCaptor<Response<?, ?>> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
         final Response<?, ?> value = captor.getValue();
         Assert.assertTrue(value instanceof ReadTransactionSuccess);
@@ -96,7 +96,7 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
         setupExecuteInActor();
 
         transaction.handleReplayedRemoteRequest(request, callback, Ticker.systemTicker().read());
-        final ArgumentCaptor<Response> captor = ArgumentCaptor.forClass(Response.class);
+        final ArgumentCaptor<Response<?, ?>> captor = ArgumentCaptor.forClass(Response.class);
         verify(callback).accept(captor.capture());
         final Response<?, ?> value = captor.getValue();
         Assert.assertTrue(value instanceof ExistsTransactionSuccess);
@@ -168,12 +168,10 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
      * @return void - always null
      */
     protected static final <T> Answer<T> applyToCursorAnswer(final InvocationOnMock invocation) {
-        final DataTreeModificationCursor cursor =
-                invocation.getArgumentAt(0, DataTreeModificationCursor.class);
+        final DataTreeModificationCursor cursor = invocation.getArgument(0);
         cursor.write(PATH_1.getLastPathArgument(), DATA_1);
         cursor.merge(PATH_2.getLastPathArgument(), DATA_2);
         cursor.delete(PATH_3.getLastPathArgument());
         return null;
     }
-
 }
