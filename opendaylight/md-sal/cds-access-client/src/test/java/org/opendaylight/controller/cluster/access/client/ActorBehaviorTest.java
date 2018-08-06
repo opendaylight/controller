@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -51,7 +51,7 @@ public class ActorBehaviorTest {
     public void setUp() throws Exception {
         initialBehavior = createInitialBehaviorMock();
         system = ActorSystem.apply("system1");
-        final ActorRef storeRef = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null);
+        final ActorRef storeRef = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null, null);
         probe = new TestProbe(system);
         storeRef.tell(probe.ref(), ActorRef.noSender());
         final MemberName name = MemberName.forName("member-1");
