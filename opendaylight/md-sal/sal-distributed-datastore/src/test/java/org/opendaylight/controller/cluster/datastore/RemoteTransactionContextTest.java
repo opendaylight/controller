@@ -76,7 +76,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         txContext.executeModification(DELETE, null);
         assertEquals(2, limiter.availablePermits());
 
-        Future<Object> future = txContext.sendBatchedModifications();
+        final Future<Object> future = txContext.sendBatchedModifications();
         assertEquals(2, limiter.availablePermits());
 
         BatchedModifications msg = kit.expectMsgClass(BatchedModifications.class);
@@ -140,7 +140,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         // Last acquire should have failed ...
         assertEquals(0, limiter.availablePermits());
 
-        Future<Object> future = txContext.sendBatchedModifications();
+        final Future<Object> future = txContext.sendBatchedModifications();
         assertEquals(0, limiter.availablePermits());
 
         BatchedModifications msg = kit.expectMsgClass(BatchedModifications.class);
