@@ -77,6 +77,20 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
     }
 
     /**
+     * Creates a new bean if the backing executor is a ThreadPoolExecutor and registers it.
+     *
+     * @param executor the backing {@link Executor}
+     * @param beanName Used as the <code>name</code> property in the bean's ObjectName.
+     * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
+     * @return a registered ThreadExecutorStatsMXBeanImpl instance if the backing executor
+     *         is a ThreadPoolExecutor, otherwise null.
+     */
+    public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String beanName,
+            final String beanType) {
+        return create(executor, beanName, beanType, null);
+    }
+
+    /**
      * Creates a new bean if the backing executor is a ThreadPoolExecutor.
      *
      * @param executor the backing {@link Executor}
