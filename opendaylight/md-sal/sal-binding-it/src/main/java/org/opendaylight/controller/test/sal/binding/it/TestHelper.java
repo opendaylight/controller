@@ -12,6 +12,7 @@ import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.PathUtils;
@@ -37,7 +38,7 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "object-cache-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "object-cache-guava").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS, "triemap").versionAsInProject(), // //
+                mavenBundle("tech.pantheon", "triemap").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), // //
 
@@ -161,7 +162,7 @@ public class TestHelper {
 
     public static Option baseModelBundles() {
         return new DefaultCompositeOption( //
-                mavenBundle(MDSAL+".model", "yang-ext").versionAsInProject(),
+                mavenBundle(MDSAL + ".model", "yang-ext").versionAsInProject(),
                 mavenBundle(MDSAL_MODELS, "ietf-type-util").versionAsInProject(),
                 mavenBundle(MDSAL_MODELS, "ietf-inet-types").versionAsInProject(),
                 mavenBundle(MDSAL_MODELS, "ietf-yang-types").versionAsInProject(),
@@ -173,8 +174,9 @@ public class TestHelper {
         return new DefaultCompositeOption(
         // Repository required to load harmcrest (OSGi-fied version).
         // Mockito
-                mavenBundle("org.mockito", "mockito-core", "1.10.19"),
-                mavenBundle("org.objenesis", "objenesis", "2.2"),
+                mavenBundle("org.mockito", "mockito-core").versionAsInProject(),
+                mavenBundle("net.bytebuddy", "byte-buddy").versionAsInProject(),
+                mavenBundle("org.objenesis", "objenesis").versionAsInProject(),
                 junitBundles(),
 
                 /*

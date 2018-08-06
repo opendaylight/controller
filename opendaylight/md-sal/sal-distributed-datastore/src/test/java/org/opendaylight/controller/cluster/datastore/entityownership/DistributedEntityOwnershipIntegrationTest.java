@@ -540,11 +540,10 @@ public class DistributedEntityOwnershipIntegrationTest {
         boolean passed = false;
         for (int i = 0; i < 100; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            final com.google.common.base.Optional<EntityOwnershipState> leaderState =
-                    leaderEntityOwnershipService.getOwnershipState(ENTITY1);
-            final com.google.common.base.Optional<EntityOwnershipState> follower1State =
+            final Optional<EntityOwnershipState> leaderState = leaderEntityOwnershipService.getOwnershipState(ENTITY1);
+            final Optional<EntityOwnershipState> follower1State =
                     follower1EntityOwnershipService.getOwnershipState(ENTITY1);
-            final com.google.common.base.Optional<EntityOwnershipState> follower2State =
+            final Optional<EntityOwnershipState> follower2State =
                     follower2EntityOwnershipService.getOwnershipState(ENTITY1);
             final Optional<DOMEntityOwnershipChange> leaderChange = getValueSafely(leaderChangeCaptor);
             final Optional<DOMEntityOwnershipChange> follower1Change = getValueSafely(follower1ChangeCaptor);
@@ -839,8 +838,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,
             final EntityOwnershipState expState) {
-        com.google.common.base.Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
-        assertEquals("getOwnershipState present", true, state.isPresent());
+        Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
+        assertTrue("getOwnershipState present", state.isPresent());
         assertEquals("EntityOwnershipState", expState, state.get());
     }
 
