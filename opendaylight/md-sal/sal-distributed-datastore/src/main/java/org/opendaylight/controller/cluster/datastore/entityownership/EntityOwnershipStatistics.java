@@ -16,11 +16,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.triemap.TrieMap;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
+import tech.pantheon.triemap.TrieMap;
 
 /**
  * EntityOwnershipStatistics is a utility class that keeps track of ownership statistics for the candidates and
