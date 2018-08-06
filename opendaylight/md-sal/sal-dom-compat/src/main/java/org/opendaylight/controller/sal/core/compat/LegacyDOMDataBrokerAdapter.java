@@ -45,7 +45,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainClosedException;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -60,7 +63,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     private static final ExceptionMapper<TransactionCommitFailedException> COMMIT_EX_MAPPER =
             new ExceptionMapper<TransactionCommitFailedException>("commit", TransactionCommitFailedException.class) {
         @Override
-        protected TransactionCommitFailedException newWithCause(String message, Throwable cause) {
+        protected TransactionCommitFailedException newWithCause(final String message, final Throwable cause) {
             if (cause instanceof org.opendaylight.mdsal.common.api.OptimisticLockFailedException) {
                 return new OptimisticLockFailedException(cause.getMessage(), cause.getCause());
             } else if (cause instanceof org.opendaylight.mdsal.common.api.TransactionCommitFailedException) {
@@ -79,7 +82,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     private final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate;
     private final ClassToInstanceMap<DOMDataBrokerExtension> extensions;
 
-    public LegacyDOMDataBrokerAdapter(org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
+    public LegacyDOMDataBrokerAdapter(final org.opendaylight.mdsal.dom.api.DOMDataBroker delegate) {
         this.delegate = delegate;
 
         ClassToInstanceMap<org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension> delegateExtensions =
@@ -93,7 +96,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
             extBuilder.put(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
                 @Override
                 public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
-                        DOMDataTreeIdentifier treeId, final L listener) {
+                        final DOMDataTreeIdentifier treeId, final L listener) {
                     final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegateListener;
                     if (listener instanceof ClusteredDOMDataTreeChangeListener) {
                         delegateListener = (org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener)
@@ -160,19 +163,19 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
         AtomicReference<DOMTransactionChain> legacyChain = new AtomicReference<>();
-        org.opendaylight.mdsal.common.api.TransactionChainListener delegateListener =
-                new org.opendaylight.mdsal.common.api.TransactionChainListener() {
-            @SuppressWarnings("rawtypes")
+        DOMTransactionChainListener delegateListener =
+                new DOMTransactionChainListener() {
             @Override
-            public void onTransactionChainFailed(final org.opendaylight.mdsal.common.api.TransactionChain<?, ?> chain,
-                    final org.opendaylight.mdsal.common.api.AsyncTransaction<?, ?> transaction, final Throwable cause) {
+            @SuppressWarnings("rawtypes")
+            public void onTransactionChainFailed(final org.opendaylight.mdsal.dom.api.DOMTransactionChain chain,
+                    final DOMDataTreeTransaction transaction, final Throwable cause) {
                 listener.onTransactionChainFailed(legacyChain.get(),
-                        (AsyncTransaction) () -> transaction.getIdentifier(),
-                            cause instanceof Exception ? COMMIT_EX_MAPPER.apply((Exception)cause) : cause);
+                    (AsyncTransaction) () -> transaction.getIdentifier(),
+                        cause instanceof Exception ? COMMIT_EX_MAPPER.apply((Exception)cause) : cause);
             }
 
             @Override
-            public void onTransactionChainSuccessful(org.opendaylight.mdsal.common.api.TransactionChain<?, ?> chain) {
+            public void onTransactionChainSuccessful(final org.opendaylight.mdsal.dom.api.DOMTransactionChain chain) {
                 listener.onTransactionChainSuccessful(legacyChain.get());
             }
         };
@@ -207,7 +210,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     static <T> T wrapException(final Supplier<T> supplier) {
         try {
             return supplier.get();
-        } catch (org.opendaylight.mdsal.common.api.TransactionChainClosedException e) {
+        } catch (DOMTransactionChainClosedException e) {
             throw new TransactionChainClosedException("Transaction chain already closed", e);
         }
     }
@@ -217,19 +220,19 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         private final DOMDataTreeWriteTransaction writeDelegate;
         private final Object identifier;
 
-        DOMDataTransactionAdapter(@Nonnull DOMDataTreeReadTransaction readDelegate) {
+        DOMDataTransactionAdapter(@Nonnull final DOMDataTreeReadTransaction readDelegate) {
             this.readDelegate = Preconditions.checkNotNull(readDelegate);
             this.identifier = readDelegate.getIdentifier();
             this.writeDelegate = null;
         }
 
-        DOMDataTransactionAdapter(@Nonnull DOMDataTreeWriteTransaction writeDelegate) {
+        DOMDataTransactionAdapter(@Nonnull final DOMDataTreeWriteTransaction writeDelegate) {
             this.writeDelegate = Preconditions.checkNotNull(writeDelegate);
             this.identifier = writeDelegate.getIdentifier();
             this.readDelegate = null;
         }
 
-        DOMDataTransactionAdapter(@Nonnull DOMDataTreeReadWriteTransaction rwDelegate) {
+        DOMDataTransactionAdapter(@Nonnull final DOMDataTreeReadWriteTransaction rwDelegate) {
             this.readDelegate = Preconditions.checkNotNull(rwDelegate);
             this.writeDelegate = rwDelegate;
             this.identifier = readDelegate.getIdentifier();
@@ -287,12 +290,12 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
             final SettableFuture<CommitInfo> resultFuture = SettableFuture.create();
             writeDelegate().commit().addCallback(new FutureCallback<CommitInfo>() {
                 @Override
-                public void onSuccess(CommitInfo result) {
+                public void onSuccess(final CommitInfo result) {
                     resultFuture.set(result);
                 }
 
                 @Override
-                public void onFailure(Throwable ex) {
+                public void onFailure(final Throwable ex) {
                     if (ex instanceof Exception) {
                         resultFuture.setException(COMMIT_EX_MAPPER.apply((Exception)ex));
                     } else {
@@ -308,19 +311,19 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
     private static class DOMDataReadOnlyTransactionAdapter implements DOMDataReadOnlyTransaction {
         private final DOMDataTransactionAdapter adapter;
 
-        DOMDataReadOnlyTransactionAdapter(DOMDataTreeReadTransaction delegateTx) {
+        DOMDataReadOnlyTransactionAdapter(final DOMDataTreeReadTransaction delegateTx) {
             adapter = new DOMDataTransactionAdapter(delegateTx);
         }
 
         @Override
-        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
             return adapter.read(store, path);
         }
 
         @Override
-        public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+        public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
             return adapter.exists(store, path);
         }
 
