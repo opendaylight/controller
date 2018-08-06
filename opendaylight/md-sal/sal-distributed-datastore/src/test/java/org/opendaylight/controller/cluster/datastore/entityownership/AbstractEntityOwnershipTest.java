@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
@@ -30,10 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import org.hamcrest.Description;
 import org.junit.Assert;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Matchers;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
@@ -41,7 +38,6 @@ import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
-import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
@@ -126,7 +122,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             final QName childMap, final QName child, final Object key, final boolean expectPresent) {
         Optional<DataContainerChild<? extends PathArgument, ?>> childNode =
                 parent.getChild(new NodeIdentifier(childMap));
-        assertEquals("Missing " + childMap.toString(), true, childNode.isPresent());
+        // We have to account for empty maps disappearing. If we expect the entry to be non-present, tolerate a missing
+        // map.
+        if (!expectPresent && !childNode.isPresent()) {
+            return null;
+        }
+
+        assertTrue("Missing " + childMap.toString(), childNode.isPresent());
 
         MapNode entityTypeMapNode = (MapNode) childNode.get();
         Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.getChild(new NodeIdentifierWithPredicates(
@@ -220,37 +222,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity, final boolean expWasOwner,
             final boolean expIsOwner, final boolean expHasOwner, final boolean expInJeopardy) {
-        return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
-            @Override
-            public boolean matches(final Object argument) {
-                DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
-                return expEntity.equals(change.getEntity()) && expWasOwner == change.getState().wasOwner()
-                        && expIsOwner == change.getState().isOwner() && expHasOwner == change.getState().hasOwner()
-                        && expInJeopardy == change.inJeopardy();
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
-                        expWasOwner, expIsOwner, expHasOwner), expInJeopardy));
-            }
-        });
+        return argThat(change -> expEntity.equals(change.getEntity()) && expWasOwner == change.getState().wasOwner()
+                && expIsOwner == change.getState().isOwner() && expHasOwner == change.getState().hasOwner()
+                && expInJeopardy == change.inJeopardy());
     }
 
     static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity) {
-        return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
-            @Override
-            public boolean matches(final Object argument) {
-                DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
-                return expEntity.equals(change.getEntity());
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
-                        false, false, false)));
-            }
-        });
+        return argThat(change -> expEntity.equals(change.getEntity()));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
