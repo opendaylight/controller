@@ -8,6 +8,6 @@
   -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" name="odl-controller-${project.version}">
     <feature name="odl-mdsal-remoterpc-connector" version="${project.version}">
-        <feature version="[3.1.0,4)">odl-akka-leveldb-0.7</feature>
+        <feature version="[4,5)">odl-akka-leveldb-0.10</feature>
     </feature>
 </features>
