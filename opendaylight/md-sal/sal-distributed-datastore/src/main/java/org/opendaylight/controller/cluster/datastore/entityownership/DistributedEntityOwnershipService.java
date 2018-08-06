@@ -16,10 +16,10 @@ import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -184,13 +184,13 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
         DataTree dataTree = getLocalEntityOwnershipShardDataTree();
         if (dataTree == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         java.util.Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
                 entityPath(forEntity.getType(), forEntity.getIdentifier()));
         if (!entityNode.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         // Check if there are any candidates, if there are none we do not really have ownership state
@@ -200,7 +200,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         final boolean hasCandidates = optionalCandidates.isPresent()
                 && ((MapNode) optionalCandidates.get()).getValue().size() > 0;
         if (!hasCandidates) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         MemberName localMemberName = context.getCurrentMemberName();
