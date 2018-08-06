@@ -36,7 +36,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
         final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
         rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
- 
+
         final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(rpcRegistry1Probe.duration("5 seconds"),
             RpcResponse.class);
 
