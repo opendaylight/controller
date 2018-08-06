@@ -12,8 +12,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -139,7 +139,9 @@ public class DistributedDataStoreIntegrationTest {
                             ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
                     testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                            .build());
                 }
             }
         };
@@ -401,7 +403,7 @@ public class DistributedDataStoreIntegrationTest {
                     assertEquals("isPresent", true, optional.isPresent());
 
                     optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-                    assertEquals("isPresent", true, optional.isPresent());
+                    assertEquals("isPresent", false, optional.isPresent());
 
                     optional = readTx.read(listEntryPath).get(5, TimeUnit.SECONDS);
                     assertEquals("isPresent", false, optional.isPresent());
@@ -809,7 +811,9 @@ public class DistributedDataStoreIntegrationTest {
                     // 6. Create a new RW Tx from the chain, write more data,
                     // and ready it
                     final DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
-                    final MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+                    final MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                            .build();
                     rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
 
                     final DOMStoreThreePhaseCommitCohort cohort2 = rwTx.ready();
@@ -1053,7 +1057,9 @@ public class DistributedDataStoreIntegrationTest {
                     // Create another write tx and issue the write.
                     DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
                     writeTx2.write(TestModel.OUTER_LIST_PATH,
-                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                            .build());
 
                     // Ensure the reads succeed.
 
@@ -1189,7 +1195,9 @@ public class DistributedDataStoreIntegrationTest {
 
                     // Write 2 updates.
                     testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+                            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                            .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                            .build());
 
                     YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                             .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();

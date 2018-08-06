@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -70,7 +70,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     private void canCommitSuccess() {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).successfulCanCommit();
+            invocation.<SimpleShardDataTreeCohort>getArgument(0).successfulCanCommit();
             return null;
         }).when(mockShardDataTree).startCanCommit(cohort);
 
@@ -84,7 +84,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     private void testValidatationPropagates(final Exception cause) {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).failedCanCommit(cause);
+            invocation.<SimpleShardDataTreeCohort>getArgument(0).failedCanCommit(cause);
             return null;
         }).when(mockShardDataTree).startCanCommit(cohort);
 
@@ -114,7 +114,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     private DataTreeCandidateTip preCommitSuccess() {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).successfulPreCommit(mockCandidate);
+            invocation.<SimpleShardDataTreeCohort>getArgument(0).successfulPreCommit(mockCandidate);
             return null;
         }).when(mockShardDataTree).startPreCommit(cohort);
 
@@ -136,8 +136,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         final DataTreeCandidateTip candidate = preCommitSuccess();
 
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).successfulCommit(UnsignedLong.valueOf(0),
-                () -> { });
+            invocation.<SimpleShardDataTreeCohort>getArgument(0).successfulCommit(UnsignedLong.valueOf(0), () -> { });
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
@@ -157,7 +156,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         final Exception cause = new IllegalArgumentException("mock");
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).failedPreCommit(cause);
+            invocation.<SimpleShardDataTreeCohort>getArgument(0).failedPreCommit(cause);
             return null;
         }).when(mockShardDataTree).startPreCommit(cohort);
 
@@ -195,7 +194,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         final Exception cause = new IllegalArgumentException("mock");
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SimpleShardDataTreeCohort.class).failedCommit(cause);
+            invocation.<SimpleShardDataTreeCohort>getArgument(0).failedCommit(cause);
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
