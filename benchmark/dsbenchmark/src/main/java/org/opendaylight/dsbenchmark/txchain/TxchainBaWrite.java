@@ -13,14 +13,13 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
-import org.opendaylight.mdsal.binding.api.BindingTransactionChain;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
-import org.opendaylight.mdsal.common.api.AsyncTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionChain;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.Operation;
@@ -49,7 +48,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
     @Override
     public void executeList() {
-        final BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
+        final TransactionChain chain = bindingDataBroker.createTransactionChain(this);
         final LogicalDatastoreType dsType = getDataStoreType();
 
         WriteTransaction tx = chain.newWriteOnlyTransaction();
@@ -107,15 +106,14 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-        LOG.error("Broken chain {} in DatastoreBaAbstractWrite, transaction {}, cause {}",
-                chain, transaction.getIdentifier(), cause);
+    public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
+            final Throwable cause) {
+        LOG.error("Broken chain {} in DatastoreBaAbstractWrite, transaction {}, cause {}", chain,
+            transaction.getIdentifier(), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain chain) {
         LOG.debug("DatastoreBaAbstractWrite closed successfully, chain {}", chain);
     }
-
 }

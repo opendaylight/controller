@@ -12,8 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -68,11 +68,11 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
-import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainClosedException;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -139,6 +139,7 @@ public class DistributedDataStoreIntegrationTest {
 
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                 ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
         }
     }
@@ -346,6 +347,7 @@ public class DistributedDataStoreIntegrationTest {
 
                     writeTx.merge(TestModel.OUTER_LIST_PATH,
                         ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                        .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                         .build());
 
                     writeTx.write(listEntryPath,
@@ -772,6 +774,7 @@ public class DistributedDataStoreIntegrationTest {
             // and ready it
             final DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
             final MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                    .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                     .build();
             rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
 
@@ -883,7 +886,7 @@ public class DistributedDataStoreIntegrationTest {
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+            final DOMTransactionChainListener listener = Mockito.mock(DOMTransactionChainListener.class);
             DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
             final List<ListenableFuture<?>> futures = new ArrayList<>();
@@ -970,7 +973,7 @@ public class DistributedDataStoreIntegrationTest {
 
             // Try to create another Tx of each type - should fail b/c
             // the previous Tx was closed.
-            testKit.assertExceptionOnTxChainCreates(txChain, TransactionChainClosedException.class);
+            testKit.assertExceptionOnTxChainCreates(txChain, DOMTransactionChainClosedException.class);
         }
     }
 
@@ -998,6 +1001,7 @@ public class DistributedDataStoreIntegrationTest {
             DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
             writeTx2.write(TestModel.OUTER_LIST_PATH,
                 ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
 
             // Ensure the reads succeed.
@@ -1027,7 +1031,7 @@ public class DistributedDataStoreIntegrationTest {
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+            final DOMTransactionChainListener listener = Mockito.mock(DOMTransactionChainListener.class);
             final DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
             final DOMDataTreeReadWriteTransaction writeTx = txChain.newReadWriteTransaction();
@@ -1067,7 +1071,7 @@ public class DistributedDataStoreIntegrationTest {
                 .put(LogicalDatastoreType.CONFIGURATION, dataStore).build(),
                 MoreExecutors.directExecutor());
 
-            final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+            final DOMTransactionChainListener listener = Mockito.mock(DOMTransactionChainListener.class);
             final DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
             final DOMDataTreeWriteTransaction writeTx = txChain.newReadWriteTransaction();
@@ -1126,6 +1130,7 @@ public class DistributedDataStoreIntegrationTest {
             // Write 2 updates.
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                 ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
 
             YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)

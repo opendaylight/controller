@@ -145,7 +145,7 @@ public class AbstractRpcTest {
             final ErrorType errorType, final String tag, final String message, final String applicationTag,
             final String info, final String causeMsg) {
         assertNotNull("RpcResult was null", rpcResult);
-        final Collection<RpcError> rpcErrors = rpcResult.getErrors();
+        final Collection<? extends RpcError> rpcErrors = rpcResult.getErrors();
         assertEquals("RpcErrors count", 1, rpcErrors.size());
         assertRpcErrorEquals(rpcErrors.iterator().next(), severity, errorType, tag, message,
                 applicationTag, info, causeMsg);

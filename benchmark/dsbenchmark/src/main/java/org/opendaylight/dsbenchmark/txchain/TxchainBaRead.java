@@ -13,10 +13,10 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
-import org.opendaylight.mdsal.common.api.AsyncTransaction;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionChain;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -44,12 +44,8 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
-        TxchainBaWrite dd = new TxchainBaWrite(bindingDataBroker,
-                                               StartTestInput.Operation.PUT,
-                                               outerListElem,
-                                               innerListElem,
-                                               outerListElem,
-                                               dataStore);
+        TxchainBaWrite dd = new TxchainBaWrite(bindingDataBroker, StartTestInput.Operation.PUT, outerListElem,
+            innerListElem, outerListElem, dataStore);
         dd.createList();
         dd.executeList();
     }
@@ -98,15 +94,14 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-                                         final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}",
-                chain, transaction.getIdentifier(), cause);
+    public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
+            final Throwable cause) {
+        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}", chain, transaction.getIdentifier(),
+            cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain chain) {
         LOG.debug("TxchainBaDelete closed successfully, chain {}", chain);
     }
-
 }
