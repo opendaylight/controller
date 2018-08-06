@@ -116,4 +116,9 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
 
         return trackedService;
     }
+
+    @Override
+    public boolean isStaticLifecycle() {
+        return true;
+    }
 }
