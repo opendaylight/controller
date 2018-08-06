@@ -76,14 +76,14 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         txContext.executeModification(DELETE, null);
         assertEquals(2, limiter.availablePermits());
 
-        Future<Object> future = txContext.sendBatchedModifications();
+        final Future<Object> sendFuture = txContext.sendBatchedModifications();
         assertEquals(2, limiter.availablePermits());
 
         BatchedModifications msg = kit.expectMsgClass(BatchedModifications.class);
         assertEquals(2, msg.getModifications().size());
         assertEquals(1, msg.getTotalMessagesSent());
         sendReply(new Failure(new NullPointerException()));
-        assertFuture(future, new OnComplete<Object>() {
+        assertFuture(sendFuture, new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 assertTrue(failure instanceof NullPointerException);
@@ -106,7 +106,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
             }
         });
 
-        future = txContext.directCommit(null);
+        final Future<Object> commitFuture = txContext.directCommit(null);
 
         msg = kit.expectMsgClass(BatchedModifications.class);
         // Modification should have been thrown away by the dropped transmit induced by executeRead()
@@ -115,7 +115,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         assertTrue(msg.isReady());
         assertEquals(2, msg.getTotalMessagesSent());
         sendReply(new Failure(new IllegalStateException()));
-        assertFuture(future, new OnComplete<Object>() {
+        assertFuture(commitFuture, new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 assertTrue(failure instanceof IllegalStateException);
@@ -140,7 +140,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
         // Last acquire should have failed ...
         assertEquals(0, limiter.availablePermits());
 
-        Future<Object> future = txContext.sendBatchedModifications();
+        final Future<Object> future = txContext.sendBatchedModifications();
         assertEquals(0, limiter.availablePermits());
 
         BatchedModifications msg = kit.expectMsgClass(BatchedModifications.class);
