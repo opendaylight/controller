@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -250,7 +250,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     @Test
     public void testSlicingFailureOnTransmit() {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, SliceOptions.class).getOnFailureCallback().accept(new Exception("mock"));
+            invocation.<SliceOptions>getArgument(0).getOnFailureCallback().accept(new Exception("mock"));
             return Boolean.FALSE;
         }).when(mockMessageSlicer).slice(any());
 
