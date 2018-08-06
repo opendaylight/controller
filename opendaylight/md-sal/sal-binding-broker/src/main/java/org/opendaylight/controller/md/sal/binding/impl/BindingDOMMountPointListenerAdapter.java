@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService.MountPointListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.mdsal.dom.api.DOMMountPointListener;

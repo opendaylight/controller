@@ -29,9 +29,9 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
 
 import akka.actor.ActorRef;
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
