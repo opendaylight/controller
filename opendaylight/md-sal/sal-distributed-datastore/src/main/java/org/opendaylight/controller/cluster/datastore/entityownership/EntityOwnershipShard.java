@@ -33,6 +33,7 @@ import akka.pattern.Patterns;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -543,13 +544,14 @@ class EntityOwnershipShard extends Shard {
     }
 
     private static Collection<String> getCandidateNames(final MapEntryNode entity) {
-        Collection<MapEntryNode> candidates = ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getValue();
-        Collection<String> candidateNames = new ArrayList<>(candidates.size());
-        for (MapEntryNode candidate: candidates) {
-            candidateNames.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
-        }
-
-        return candidateNames;
+        return entity.getChild(CANDIDATE_NODE_ID).map(child -> {
+            Collection<MapEntryNode> candidates = ((MapNode) child).getValue();
+            Collection<String> candidateNames = new ArrayList<>(candidates.size());
+            for (MapEntryNode candidate: candidates) {
+                candidateNames.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
+            }
+            return candidateNames;
+        }).orElse(ImmutableList.of());
     }
 
     private void searchForEntitiesOwnedBy(final Set<String> ownedBy, final EntityWalker walker) {
@@ -586,7 +588,8 @@ class EntityOwnershipShard extends Shard {
     }
 
     private static boolean hasCandidate(final MapEntryNode entity, final MemberName candidateName) {
-        return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName.getName()))
+        return entity.getChild(CANDIDATE_NODE_ID)
+                .flatMap(child -> ((MapNode)child).getChild(candidateNodeKey(candidateName.getName())))
                 .isPresent();
     }
 
