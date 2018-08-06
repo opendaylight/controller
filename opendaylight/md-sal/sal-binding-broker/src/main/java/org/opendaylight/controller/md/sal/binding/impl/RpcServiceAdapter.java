@@ -154,7 +154,7 @@ class RpcServiceAdapter implements InvocationHandler {
 
             // DOMRpcResult does not have a notion of success, hence we have to reverse-engineer it by looking
             // at reported errors and checking whether they are just warnings.
-            final Collection<RpcError> errors = input.getErrors();
+            final Collection<? extends RpcError> errors = input.getErrors();
             return RpcResult.class.cast(RpcResultBuilder.status(errors.stream()
                 .noneMatch(error -> error.getSeverity() == ErrorSeverity.ERROR))
                 .withResult(bindingResult).withRpcErrors(errors).build());

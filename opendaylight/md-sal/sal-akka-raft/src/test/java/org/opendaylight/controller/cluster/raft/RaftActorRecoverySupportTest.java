@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -25,12 +25,10 @@ import akka.persistence.SnapshotOffer;
 import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
-import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -93,11 +91,11 @@ public class RaftActorRecoverySupportTest {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    private void sendMessageToSupport(Object message) {
+    private void sendMessageToSupport(final Object message) {
         sendMessageToSupport(message, false);
     }
 
-    private void sendMessageToSupport(Object message, boolean expComplete) {
+    private void sendMessageToSupport(final Object message, final boolean expComplete) {
         boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
         assertEquals("complete", expComplete, complete);
     }
@@ -300,18 +298,8 @@ public class RaftActorRecoverySupportTest {
     }
 
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
-        return Matchers.argThat(new ArgumentMatcher<UpdateElectionTerm>() {
-            @Override
-            public boolean matches(Object argument) {
-                UpdateElectionTerm other = (UpdateElectionTerm) argument;
-                return term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor());
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendValue(new UpdateElectionTerm(term, votedFor));
-            }
-        });
+        return ArgumentMatchers.argThat(
+            other -> term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor()));
     }
 
     @Test
