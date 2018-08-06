@@ -11,7 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -206,20 +207,20 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final DataTree mock = mock(DataTree.class);
 
         doAnswer(invocation -> {
-            actual.validate(invocation.getArgumentAt(0, DataTreeModification.class));
+            actual.validate(invocation.getArgument(0));
             return null;
         }).when(mock).validate(any(DataTreeModification.class));
 
-        doAnswer(invocation -> actual.prepare(invocation.getArgumentAt(0, DataTreeModification.class))).when(
+        doAnswer(invocation -> actual.prepare(invocation.getArgument(0))).when(
                 mock).prepare(any(DataTreeModification.class));
 
         doAnswer(invocation -> {
-            actual.commit(invocation.getArgumentAt(0, DataTreeCandidate.class));
+            actual.commit(invocation.getArgument(0));
             return null;
         }).when(mock).commit(any(DataTreeCandidate.class));
 
         doAnswer(invocation -> {
-            actual.setSchemaContext(invocation.getArgumentAt(0, SchemaContext.class));
+            actual.setSchemaContext(invocation.getArgument(0));
             return null;
         }).when(mock).setSchemaContext(any(SchemaContext.class));
 
@@ -506,14 +507,14 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         private static <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual) {
             FutureCallback<T> mock = mock(FutureCallback.class);
             doAnswer(invocation -> {
-                actual.onFailure(invocation.getArgumentAt(0, Throwable.class));
+                actual.onFailure(invocation.getArgument(0));
                 return null;
             }).when(mock).onFailure(any(Throwable.class));
 
             doAnswer(invocation -> {
-                actual.onSuccess((T) invocation.getArgumentAt(0, Throwable.class));
+                actual.onSuccess(invocation.getArgument(0));
                 return null;
-            }).when(mock).onSuccess((T) any(Object.class));
+            }).when(mock).onSuccess((T) nullable(Object.class));
 
             return mock;
         }

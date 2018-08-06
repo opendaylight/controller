@@ -3,7 +3,7 @@
            xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
 
-  <bean id="executor" class="org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin"
+  <bean id="executor" class="org.opendaylight.controller.config.yang.netty.eventexecutor.CloseableEventExecutorMixin"
           factory-method="globalEventExecutor"/>
 
   <service ref="executor" interface="io.netty.util.concurrent.EventExecutor"
