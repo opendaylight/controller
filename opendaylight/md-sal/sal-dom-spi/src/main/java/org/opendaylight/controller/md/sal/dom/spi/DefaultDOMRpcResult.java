@@ -32,7 +32,7 @@ public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Seria
     // interface isn't. In lieu of changing the interface, we assume the implementation is Serializable which is
     // reasonable since the only implementation that is actually used is from the RpcResultBuilder.
     @SuppressFBWarnings("SE_BAD_FIELD")
-    private final Collection<RpcError> errors;
+    private final Collection<? extends RpcError> errors;
 
     // Unfortunately the NormalizedNode interface isn't Serializable but we assume the implementations are.
     @SuppressFBWarnings("SE_BAD_FIELD")
@@ -58,7 +58,8 @@ public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Seria
         this(result, Collections.<RpcError>emptyList());
     }
 
-    public DefaultDOMRpcResult(final NormalizedNode<?, ?> result, final @Nonnull Collection<RpcError> errors) {
+    public DefaultDOMRpcResult(final NormalizedNode<?, ?> result,
+            final @Nonnull Collection<? extends RpcError> errors) {
         this.result = result;
         this.errors = Preconditions.checkNotNull(errors);
     }
@@ -68,7 +69,7 @@ public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Seria
     }
 
     @Override
-    public @Nonnull Collection<RpcError> getErrors() {
+    public @Nonnull Collection<? extends RpcError> getErrors() {
         return errors;
     }
 
