@@ -13,7 +13,6 @@
 
   <bean id="timer" class="org.opendaylight.controller.config.yang.netty.timer.HashedWheelTimerCloseable"
           factory-method="newInstance">
-    <argument><null/></argument> <!-- ThreadFactory -->
     <argument value="${tick-duration}"/>
     <argument value="${ticks-per-wheel}"/>
   </bean>
