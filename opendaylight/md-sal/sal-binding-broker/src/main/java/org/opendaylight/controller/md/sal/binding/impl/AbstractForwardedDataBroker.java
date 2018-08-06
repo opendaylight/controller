@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
@@ -94,7 +94,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     protected Optional<DataObject> toBindingData(final InstanceIdentifier<?> path, final NormalizedNode<?, ?> data) {
         if (path.isWildcarded()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return (Optional<DataObject>) getCodec().deserializeFunction(path)
                 .apply(Optional.<NormalizedNode<?, ?>>of(data));
