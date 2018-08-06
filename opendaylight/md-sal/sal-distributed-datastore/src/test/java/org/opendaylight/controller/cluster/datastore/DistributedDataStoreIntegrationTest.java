@@ -12,8 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -139,6 +139,7 @@ public class DistributedDataStoreIntegrationTest {
 
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                 ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
         }
     }
@@ -346,6 +347,7 @@ public class DistributedDataStoreIntegrationTest {
 
                     writeTx.merge(TestModel.OUTER_LIST_PATH,
                         ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                        .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                         .build());
 
                     writeTx.write(listEntryPath,
@@ -772,6 +774,7 @@ public class DistributedDataStoreIntegrationTest {
             // and ready it
             final DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
             final MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                    .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                     .build();
             rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
 
@@ -998,6 +1001,7 @@ public class DistributedDataStoreIntegrationTest {
             DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
             writeTx2.write(TestModel.OUTER_LIST_PATH,
                 ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
 
             // Ensure the reads succeed.
@@ -1126,6 +1130,7 @@ public class DistributedDataStoreIntegrationTest {
             // Write 2 updates.
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                 ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
 
             YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
