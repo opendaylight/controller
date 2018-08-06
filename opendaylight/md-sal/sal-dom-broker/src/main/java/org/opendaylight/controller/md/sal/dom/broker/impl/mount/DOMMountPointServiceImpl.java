@@ -38,8 +38,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
     @Override
     public Optional<DOMMountPoint> getMountPoint(final YangInstanceIdentifier path) {
-        final Optional<org.opendaylight.mdsal.dom.api.DOMMountPoint> delegateMountPoint = delegate.getMountPoint(path);
-        return delegateMountPoint.isPresent() ? Optional.of(convert(delegateMountPoint.get())) : Optional.absent();
+        return Optional.fromJavaUtil(delegate.getMountPoint(path).map(DOMMountPointServiceImpl::convert));
     }
 
     private static DOMMountPoint convert(final org.opendaylight.mdsal.dom.api.DOMMountPoint from) {
@@ -51,7 +50,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
             @Override
             public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
-                return from.getService(cls);
+                return Optional.fromJavaUtil(from.getService(cls));
             }
 
             @Override

@@ -52,7 +52,7 @@ public class RpcErrorsException extends DOMRpcException {
 
     private final List<RpcErrorData> rpcErrorDataList = new ArrayList<>();
 
-    public RpcErrorsException(final String message, final Iterable<RpcError> rpcErrors) {
+    public RpcErrorsException(final String message, final Iterable<? extends RpcError> rpcErrors) {
         super(message);
 
         for (final RpcError rpcError: rpcErrors) {
