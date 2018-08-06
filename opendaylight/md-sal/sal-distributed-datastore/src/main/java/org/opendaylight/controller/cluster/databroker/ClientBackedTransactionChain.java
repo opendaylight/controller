@@ -15,7 +15,6 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientH
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
-import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
@@ -73,19 +72,11 @@ final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
     }
 
     private ClientSnapshot createSnapshot() {
-        try {
-            return recordSnapshot(history.takeSnapshot());
-        } catch (org.opendaylight.mdsal.common.api.TransactionChainClosedException e) {
-            throw new TransactionChainClosedException("Transaction chain has been closed", e);
-        }
+        return recordSnapshot(history.takeSnapshot());
     }
 
     private ClientTransaction createTransaction() {
-        try {
-            return recordSnapshot(history.createTransaction());
-        } catch (org.opendaylight.mdsal.common.api.TransactionChainClosedException e) {
-            throw new TransactionChainClosedException("Transaction chain has been closed", e);
-        }
+        return recordSnapshot(history.createTransaction());
     }
 
     private Throwable allocationContext() {
