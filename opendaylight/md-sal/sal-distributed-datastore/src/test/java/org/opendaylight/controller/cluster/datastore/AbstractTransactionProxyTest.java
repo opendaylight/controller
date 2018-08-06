@@ -11,10 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -185,6 +185,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
+        doReturn(new Timeout(5, TimeUnit.SECONDS)).when(mockActorContext).getTransactionCommitOperationTimeout();
 
         final ClientIdentifier mockClientId = MockIdentifiers.clientIdentifier(getClass(), memberName);
         mockComponentFactory = new TransactionContextFactory(mockActorContext, mockClientId);
@@ -199,31 +200,26 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
     protected CreateTransaction eqCreateTransaction(final String expMemberName,
             final TransactionType type) {
-        ArgumentMatcher<CreateTransaction> matcher = new ArgumentMatcher<CreateTransaction>() {
+        class CreateTransactionArgumentMatcher implements ArgumentMatcher<CreateTransaction> {
             @Override
-            public boolean matches(final Object argument) {
-                if (CreateTransaction.class.equals(argument.getClass())) {
-                    CreateTransaction obj = CreateTransaction.fromSerializable(argument);
-                    return obj.getTransactionId().getHistoryId().getClientId().getFrontendId().getMemberName()
-                            .getName().equals(expMemberName) && obj.getTransactionType() == type.ordinal();
-                }
-
-                return false;
+            public boolean matches(CreateTransaction argument) {
+                return argument.getTransactionId().getHistoryId().getClientId().getFrontendId().getMemberName()
+                        .getName().equals(expMemberName) && argument.getTransactionType() == type.ordinal();
             }
-        };
+        }
 
-        return argThat(matcher);
+        return argThat(new CreateTransactionArgumentMatcher());
     }
 
     protected DataExists eqDataExists() {
-        ArgumentMatcher<DataExists> matcher = new ArgumentMatcher<DataExists>() {
+        class DataExistsArgumentMatcher implements ArgumentMatcher<DataExists> {
             @Override
-            public boolean matches(final Object argument) {
-                return argument instanceof DataExists && ((DataExists)argument).getPath().equals(TestModel.TEST_PATH);
+            public boolean matches(DataExists argument) {
+                return argument.getPath().equals(TestModel.TEST_PATH);
             }
-        };
+        }
 
-        return argThat(matcher);
+        return argThat(new DataExistsArgumentMatcher());
     }
 
     protected ReadData eqReadData() {
@@ -231,14 +227,14 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     protected ReadData eqReadData(final YangInstanceIdentifier path) {
-        ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
+        class ReadDataArgumentMatcher implements ArgumentMatcher<ReadData> {
             @Override
-            public boolean matches(final Object argument) {
-                return argument instanceof ReadData && ((ReadData)argument).getPath().equals(path);
+            public boolean matches(ReadData argument) {
+                return argument.getPath().equals(path);
             }
-        };
+        }
 
-        return argThat(matcher);
+        return argThat(new ReadDataArgumentMatcher());
     }
 
     protected Future<Object> readyTxReply(final String path) {

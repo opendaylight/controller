@@ -15,6 +15,7 @@ import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.serialization.Snapshot;
 import akka.persistence.serialization.SnapshotSerializer;
 import akka.persistence.snapshot.japi.SnapshotStore;
+import akka.serialization.JavaSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
@@ -39,6 +40,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -133,15 +135,17 @@ public class LocalSnapshotStore extends SnapshotStore {
     }
 
     private Object deserialize(final File file) throws IOException {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-            return in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Error loading snapshot file " + file, e);
-        } catch (IOException e) {
-            LOG.debug("Error loading snapshot file {}", file, e);
-
-            return tryDeserializeAkkaSnapshot(file);
-        }
+        return JavaSerializer.currentSystem().withValue((ExtendedActorSystem) context().system(),
+            (Callable<Object>) () -> {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+                    return in.readObject();
+                } catch (ClassNotFoundException e) {
+                    throw new IOException("Error loading snapshot file " + file, e);
+                } catch (IOException e) {
+                    LOG.debug("Error loading snapshot file {}", file, e);
+                    return tryDeserializeAkkaSnapshot(file);
+                }
+            });
     }
 
     private Object tryDeserializeAkkaSnapshot(final File file) throws IOException {
