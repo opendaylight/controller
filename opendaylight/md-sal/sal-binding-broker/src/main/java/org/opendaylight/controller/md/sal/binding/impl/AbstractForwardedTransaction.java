@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.common.api.MappingCheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -62,8 +63,9 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
         Preconditions.checkArgument(!path.isWildcarded(), "Invalid read of wildcarded path %s", path);
 
         return MappingCheckedFuture.create(
-                    Futures.transform(readTx.read(store, codec.toYangInstanceIdentifierBlocking(path)),
-                                      codec.deserializeFunction(path)),
-                    ReadFailedException.MAPPER);
+            Futures.transform(readTx.read(store, codec.toYangInstanceIdentifierBlocking(path)),
+                result -> Optional.fromJavaUtil(codec.deserializeFunction(path).apply(result.toJavaUtil())),
+                MoreExecutors.directExecutor()),
+            ReadFailedException.MAPPER);
     }
 }
