@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -905,7 +905,9 @@ public class ShardTest extends AbstractShardTest {
 
                 final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
                 new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-                final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+                final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                        .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 5))
+                        .build();
                 new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
                 final TransactionIdentifier txId = nextTransactionId();
@@ -939,7 +941,9 @@ public class ShardTest extends AbstractShardTest {
 
                 final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
                 new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-                final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+                final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                        .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 5))
+                        .build();
                 new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
                 final TransactionIdentifier txId = nextTransactionId();
