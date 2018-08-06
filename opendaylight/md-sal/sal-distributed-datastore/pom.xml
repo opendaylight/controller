@@ -191,6 +191,10 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-dom-inmemory-datastore</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
