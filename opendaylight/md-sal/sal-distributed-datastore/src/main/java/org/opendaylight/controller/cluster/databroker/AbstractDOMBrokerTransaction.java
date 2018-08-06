@@ -5,24 +5,22 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.databroker;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
-import org.opendaylight.mdsal.common.api.AsyncTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction> implements
-        AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
+public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction> implements DOMDataTreeTransaction {
 
     private final EnumMap<LogicalDatastoreType, T> backingTxs;
     private final Object identifier;
@@ -35,9 +33,8 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
      */
     protected AbstractDOMBrokerTransaction(final Object identifier,
             Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
-        this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
-        this.storeTxFactories = Preconditions.checkNotNull(storeTxFactories,
-                "Store Transaction Factories should not be null");
+        this.identifier = requireNonNull(identifier, "Identifier should not be null");
+        this.storeTxFactories = requireNonNull(storeTxFactories, "Store Transaction Factories should not be null");
         this.backingTxs = new EnumMap<>(LogicalDatastoreType.class);
     }
 
@@ -52,14 +49,14 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
      *             if no subtransaction is associated with key.
      */
     protected final T getSubtransaction(final LogicalDatastoreType key) {
-        Preconditions.checkNotNull(key, "key must not be null.");
+        requireNonNull(key, "key must not be null.");
 
         T ret = backingTxs.get(key);
         if (ret == null) {
             ret = createTransaction(key);
             backingTxs.put(key, ret);
         }
-        Preconditions.checkArgument(ret != null, "No subtransaction associated with %s", key);
+        checkArgument(ret != null, "No subtransaction associated with %s", key);
         return ret;
     }
 

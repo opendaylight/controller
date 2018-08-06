@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryReq
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainClosedException;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -185,7 +185,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
 
     private void checkNotClosed() {
         if (state == State.CLOSED) {
-            throw new TransactionChainClosedException(String.format("Local history %s is closed", identifier));
+            throw new DOMTransactionChainClosedException(String.format("Local history %s is closed", identifier));
         }
     }
 
@@ -193,7 +193,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * Allocate a new {@link ClientTransaction}.
      *
      * @return A new {@link ClientTransaction}
-     * @throws TransactionChainClosedException if this history is closed
+     * @throws DOMTransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
     public ClientTransaction createTransaction() {
@@ -210,7 +210,7 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
      * Create a new {@link ClientSnapshot}.
      *
      * @return A new {@link ClientSnapshot}
-     * @throws TransactionChainClosedException if this history is closed
+     * @throws DOMTransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
     public ClientSnapshot takeSnapshot() {
