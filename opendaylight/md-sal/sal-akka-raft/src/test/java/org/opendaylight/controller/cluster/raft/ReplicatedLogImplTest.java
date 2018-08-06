@@ -8,23 +8,21 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import akka.japi.Procedure;
 import java.util.Collections;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.Same;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -66,12 +64,12 @@ public class ReplicatedLogImplTest {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void verifyPersist(Object message, Matcher<?> matcher, boolean async) throws Exception {
+    private void verifyPersist(Object message, ArgumentMatcher<?> matcher, boolean async) throws Exception {
         ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         if (async) {
-            verify(mockPersistence).persistAsync(Matchers.argThat(matcher), procedure.capture());
+            verify(mockPersistence).persistAsync(argThat(matcher), procedure.capture());
         } else {
-            verify(mockPersistence).persist(Matchers.argThat(matcher), procedure.capture());
+            verify(mockPersistence).persist(argThat(matcher), procedure.capture());
         }
 
         procedure.getValue().apply(message);
@@ -93,7 +91,7 @@ public class ReplicatedLogImplTest {
         reset(mockPersistence);
 
         ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
-        Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
+        Procedure<ReplicatedLogEntry> mockCallback = mock(Procedure.class);
         log.appendAndPersist(logEntry2, mockCallback, true);
 
         verifyPersist(logEntry2);
@@ -108,7 +106,7 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersisWithDuplicateEntry() throws Exception {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
-        Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
+        Procedure<ReplicatedLogEntry> mockCallback = mock(Procedure.class);
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
         log.appendAndPersist(logEntry, mockCallback, true);
@@ -196,18 +194,7 @@ public class ReplicatedLogImplTest {
         verifyNoMoreInteractions(mockPersistence);
     }
 
-    public Matcher<DeleteEntries> match(final DeleteEntries actual) {
-        return new BaseMatcher<DeleteEntries>() {
-            @Override
-            public boolean matches(Object obj) {
-                DeleteEntries other = (DeleteEntries) obj;
-                return actual.getFromIndex() == other.getFromIndex();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("DeleteEntries: fromIndex: " + actual.getFromIndex());
-            }
-        };
+    public ArgumentMatcher<DeleteEntries> match(final DeleteEntries actual) {
+        return other -> actual.getFromIndex() == other.getFromIndex();
     }
 }
