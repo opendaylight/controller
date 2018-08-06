@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
@@ -23,7 +23,6 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public final class ShardDataTreeMocking {
@@ -114,14 +113,13 @@ public final class ShardDataTreeMocking {
         return commitCallback;
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> Object invokeSuccess(final InvocationOnMock invocation, final T value) {
-        invocation.getArgumentAt(0, FutureCallback.class).onSuccess(value);
+        invocation.<FutureCallback<T>>getArgument(0).onSuccess(value);
         return null;
     }
 
     private static Object invokeFailure(final InvocationOnMock invocation) {
-        invocation.getArgumentAt(0, FutureCallback.class).onFailure(mock(Exception.class));
+        invocation.<FutureCallback<?>>getArgument(0).onFailure(mock(Exception.class));
         return null;
     }
 
@@ -183,8 +181,7 @@ public final class ShardDataTreeMocking {
 
     public static void immediatePayloadReplication(final ShardDataTree shardDataTree, final Shard mockShard) {
         doAnswer(invocation -> {
-            shardDataTree.applyReplicatedPayload(invocation.getArgumentAt(0, TransactionIdentifier.class),
-                    invocation.getArgumentAt(1, Payload.class));
+            shardDataTree.applyReplicatedPayload(invocation.getArgument(0), invocation.getArgument(1));
             return null;
         }).when(mockShard).persistPayload(any(TransactionIdentifier.class), any(CommitTransactionPayload.class),
                 anyBoolean());

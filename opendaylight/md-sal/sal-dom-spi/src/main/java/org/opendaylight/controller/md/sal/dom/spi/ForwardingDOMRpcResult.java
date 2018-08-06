@@ -23,7 +23,7 @@ public abstract class ForwardingDOMRpcResult extends ForwardingObject implements
     protected abstract @Nonnull DOMRpcResult delegate();
 
     @Override
-    public Collection<RpcError> getErrors() {
+    public Collection<? extends RpcError> getErrors() {
         return delegate().getErrors();
     }
 
