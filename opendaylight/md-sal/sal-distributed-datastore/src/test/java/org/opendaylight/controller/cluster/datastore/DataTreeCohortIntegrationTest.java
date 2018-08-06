@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -120,7 +120,9 @@ public class DataTreeCohortIntegrationTest {
                     any(SchemaContext.class), any(Collection.class));
 
             kit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                    .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                    .build());
             verify(cohort).canCommit(any(Object.class), any(SchemaContext.class), any(Collection.class));
 
             cohortReg.close();
