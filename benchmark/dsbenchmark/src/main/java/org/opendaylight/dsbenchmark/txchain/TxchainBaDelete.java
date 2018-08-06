@@ -11,14 +11,13 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
-import org.opendaylight.mdsal.binding.api.BindingTransactionChain;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
-import org.opendaylight.mdsal.common.api.AsyncTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionChain;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -45,12 +44,8 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
 
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
-        TxchainBaWrite dd = new TxchainBaWrite(bindingDataBroker,
-                                               StartTestInput.Operation.PUT,
-                                               outerListElem,
-                                               innerListElem,
-                                               outerListElem,
-                                               dataStore);
+        TxchainBaWrite dd = new TxchainBaWrite(bindingDataBroker, StartTestInput.Operation.PUT, outerListElem,
+            innerListElem, outerListElem, dataStore);
         dd.createList();
         dd.executeList();
     }
@@ -58,7 +53,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     @Override
     public void executeList() {
         final LogicalDatastoreType dsType = getDataStoreType();
-        final BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
+        final TransactionChain chain = bindingDataBroker.createTransactionChain(this);
 
         WriteTransaction tx = chain.newWriteOnlyTransaction();
         int txSubmitted = 0;
@@ -109,14 +104,14 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}",
-                chain, transaction.getIdentifier(), cause);
+    public void onTransactionChainFailed(final TransactionChain chain, final Transaction transaction,
+            final Throwable cause) {
+        LOG.error("Broken chain {} in TxchainBaDelete, transaction {}, cause {}", chain, transaction.getIdentifier(),
+            cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final TransactionChain chain) {
         LOG.debug("TxchainBaDelete closed successfully, chain {}", chain);
     }
 }

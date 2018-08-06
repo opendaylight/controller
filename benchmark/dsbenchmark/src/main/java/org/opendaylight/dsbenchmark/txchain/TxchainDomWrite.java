@@ -13,14 +13,13 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
-import org.opendaylight.mdsal.common.api.AsyncTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionChain;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -31,7 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainDomWrite extends DatastoreAbstractWriter implements TransactionChainListener {
+public class TxchainDomWrite extends DatastoreAbstractWriter implements DOMTransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomWrite.class);
     private final DOMDataBroker domDataBroker;
     private List<MapEntryNode> list;
@@ -113,14 +112,14 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> chain,
-            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
-        LOG.error("Broken chain {} in TxchainDomWrite, transaction {}, cause {}",
-                chain, transaction.getIdentifier(), cause);
+    public void onTransactionChainFailed(final DOMTransactionChain chain, final DOMDataTreeTransaction transaction,
+            final Throwable cause) {
+        LOG.error("Broken chain {} in TxchainDomWrite, transaction {}, cause {}", chain, transaction.getIdentifier(),
+            cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
+    public void onTransactionChainSuccessful(final DOMTransactionChain chain) {
         LOG.debug("Chain {} closed successfully", chain);
     }
 }
