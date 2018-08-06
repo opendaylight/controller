@@ -857,7 +857,9 @@ public class ShardTest extends AbstractShardTest {
 
         final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-        final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+        final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                .build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
         final TransactionIdentifier txId = nextTransactionId();
@@ -888,7 +890,9 @@ public class ShardTest extends AbstractShardTest {
 
         final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-        final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+        final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                .build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
         final TransactionIdentifier txId = nextTransactionId();
