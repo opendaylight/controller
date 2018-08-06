@@ -8,18 +8,16 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collection;
-import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
@@ -97,19 +95,8 @@ public class BindingDOMDataTreeChangeServiceAdapterTest {
     }
 
     static DOMDataTreeIdentifier domDataTreeIdentifier(final YangInstanceIdentifier yangID) {
-        return Matchers.argThat(new ArgumentMatcher<DOMDataTreeIdentifier>() {
-            @Override
-            public boolean matches(final Object argument) {
-                final DOMDataTreeIdentifier treeId = (DOMDataTreeIdentifier) argument;
-                return treeId.getDatastoreType() == LogicalDatastoreType.CONFIGURATION
-                        && yangID.equals(treeId.getRootIdentifier());
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-                description.appendValue(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, yangID));
-            }
-        });
+        return ArgumentMatchers.argThat(treeId -> treeId.getDatastoreType() == LogicalDatastoreType.CONFIGURATION
+                        && yangID.equals(treeId.getRootIdentifier()));
     }
 
     private static class TestClusteredDataTreeChangeListener implements ClusteredDataTreeChangeListener<Top> {
