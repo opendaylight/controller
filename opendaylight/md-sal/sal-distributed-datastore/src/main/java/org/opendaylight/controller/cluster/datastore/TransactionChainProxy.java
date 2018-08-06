@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainClosedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
@@ -114,7 +114,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     private static final State CLOSED_STATE = new DefaultState() {
         @Override
         void checkReady() {
-            throw new TransactionChainClosedException("Transaction chain has been closed");
+            throw new DOMTransactionChainClosedException("Transaction chain has been closed");
         }
     };
 

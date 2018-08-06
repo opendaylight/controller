@@ -19,9 +19,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.mdsal.common.api.TransactionChainListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
 import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
     private static final Logger LOG = LoggerFactory.getLogger(DOMBrokerTransactionChain.class);
     private final AtomicLong txNum = new AtomicLong();
     private final AbstractDOMBroker broker;
-    private final TransactionChainListener listener;
+    private final DOMTransactionChainListener listener;
     private final long chainId;
 
     private volatile State state = State.RUNNING;
@@ -62,7 +62,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
      *             If any of arguments is null.
      */
     DOMBrokerTransactionChain(final long chainId, final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-            final AbstractDOMBroker broker, final TransactionChainListener listener) {
+            final AbstractDOMBroker broker, final DOMTransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
         this.broker = Preconditions.checkNotNull(broker);

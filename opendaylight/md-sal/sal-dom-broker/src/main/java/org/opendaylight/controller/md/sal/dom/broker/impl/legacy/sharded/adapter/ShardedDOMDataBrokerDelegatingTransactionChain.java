@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -20,14 +19,13 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.mdsal.common.api.TransactionChain;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChainListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-
-class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionChain, org.opendaylight.mdsal.common
-        .api.TransactionChainListener {
+class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionChain, DOMTransactionChainListener {
     private final org.opendaylight.mdsal.dom.api.DOMTransactionChain txChainDelegate;
     private final SchemaContext schemaContext;
     private final TransactionChainListener txChainListener;
@@ -41,10 +39,10 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
                                                           final org.opendaylight.mdsal.dom.api.DOMDataBroker
                                                                   brokerDelegate,
                                                           final TransactionChainListener txChainListener) {
-        checkNotNull(brokerDelegate);
-        this.schemaContext = checkNotNull(schemaContext);
-        this.txChainIdentifier = checkNotNull(txChainIdentifier);
-        this.txChainListener = checkNotNull(txChainListener);
+        requireNonNull(brokerDelegate);
+        this.schemaContext = requireNonNull(schemaContext);
+        this.txChainIdentifier = requireNonNull(txChainIdentifier);
+        this.txChainListener = requireNonNull(txChainListener);
         this.txChainDelegate = brokerDelegate.createTransactionChain(this);
         transactionMap = Maps.newHashMap();
     }
@@ -94,16 +92,13 @@ class ShardedDOMDataBrokerDelegatingTransactionChain implements DOMTransactionCh
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> transactionChain,
-                                         final org.opendaylight.mdsal.common.api.AsyncTransaction<?, ?>
-                                                 asyncTransaction,
-                                         final Throwable throwable) {
-        txChainListener
-                .onTransactionChainFailed(this, transactionFromDelegate(asyncTransaction.getIdentifier()), throwable);
+    public void onTransactionChainFailed(org.opendaylight.mdsal.dom.api.DOMTransactionChain chain,
+            DOMDataTreeTransaction transaction, Throwable cause) {
+        txChainListener.onTransactionChainFailed(this, transactionFromDelegate(transaction.getIdentifier()), cause);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> transactionChain) {
+    public void onTransactionChainSuccessful(org.opendaylight.mdsal.dom.api.DOMTransactionChain chain) {
         txChainListener.onTransactionChainSuccessful(this);
     }
 
