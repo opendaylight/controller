@@ -96,6 +96,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private static ActorSystem system;
+    private static SchemaContext SCHEMA_CONTEXT;
 
     private final Configuration configuration = new MockConfiguration() {
         Map<String, ShardStrategy> strategyMap = ImmutableMap.<String, ShardStrategy>builder().put(
@@ -143,8 +144,6 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
     protected TransactionContextFactory mockComponentFactory;
 
-    private SchemaContext schemaContext;
-
     @Mock
     private ClusterWrapper mockClusterWrapper;
 
@@ -162,26 +161,26 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                         "akka.testkit.CallingThreadDispatcherConfigurator").build())
                 .withFallback(ConfigFactory.load());
         system = ActorSystem.create("test", config);
+        SCHEMA_CONTEXT = TestModel.createTestContext();
     }
 
     @AfterClass
     public static void tearDownClass() {
         TestKit.shutdownActorSystem(system);
         system = null;
+        SCHEMA_CONTEXT = null;
     }
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        schemaContext = TestModel.createTestContext();
-
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
         doReturn(MemberName.forName(memberName)).when(mockActorContext).getCurrentMemberName();
         doReturn(new ShardStrategyFactory(configuration,
                 LogicalDatastoreType.CONFIGURATION)).when(mockActorContext).getShardStrategyFactory();
-        doReturn(schemaContext).when(mockActorContext).getSchemaContext();
+        doReturn(SCHEMA_CONTEXT).when(mockActorContext).getSchemaContext();
         doReturn(new Timeout(operationTimeoutInSeconds, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
