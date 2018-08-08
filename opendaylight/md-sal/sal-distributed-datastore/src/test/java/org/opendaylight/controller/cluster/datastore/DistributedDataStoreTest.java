@@ -17,7 +17,9 @@ import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -34,7 +36,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     private static final ClientIdentifier UNKNOWN_ID = ClientIdentifier.create(
             FrontendIdentifier.create(MemberName.forName("local"), FrontendType.forName("unknown")), 0);
 
-    private SchemaContext schemaContext;
+    private static SchemaContext SCHEMA_CONTEXT;
 
     @Mock
     private ActorContext actorContext;
@@ -45,13 +47,21 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     @Mock
     private Timeout shardElectionTimeout;
 
+    @BeforeClass
+    public static void beforeClass() {
+        SCHEMA_CONTEXT = TestModel.createTestContext();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        SCHEMA_CONTEXT = null;
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        schemaContext = TestModel.createTestContext();
-
-        doReturn(schemaContext).when(actorContext).getSchemaContext();
+        doReturn(SCHEMA_CONTEXT).when(actorContext).getSchemaContext();
         doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
     }
 
