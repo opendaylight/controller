@@ -11,7 +11,9 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Optional;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -19,15 +21,27 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class AbstractModificationTest {
+    private static SchemaContext TEST_SCHEMA_CONTEXT;
 
     protected InMemoryDOMDataStore store;
+
+    @BeforeClass
+    public static void beforeClass() {
+        TEST_SCHEMA_CONTEXT = TestModel.createTestContext();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        TEST_SCHEMA_CONTEXT = null;
+    }
 
     @Before
     public void setUp() {
         store = new InMemoryDOMDataStore("test", MoreExecutors.newDirectExecutorService());
-        store.onGlobalContextUpdated(TestModel.createTestContext());
+        store.onGlobalContextUpdated(TEST_SCHEMA_CONTEXT);
     }
 
     protected void commitTransaction(final DOMStoreWriteTransaction transaction) {
