@@ -8,10 +8,12 @@
 package org.opendaylight.controller.md.sal.binding.test.tests;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.path;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
 
+import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import org.junit.runners.MethodSorters;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.controller.md.sal.common.api.data.DataValidationFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -27,6 +30,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUsesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.mandatory.rev180815.HelloWorldContainer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.mandatory.rev180815.HelloWorldContainerBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
@@ -76,4 +81,17 @@ public class AbstractDataBrokerTestTest extends AbstractConcurrentDataBrokerTest
         }
     }
 
+    @Test
+    public void testPutInvalidDueToMissingMandatory() throws Exception {
+        InstanceIdentifier<HelloWorldContainer> iid = InstanceIdentifier.create(HelloWorldContainer.class);
+        WriteTransaction tx = getDataBroker().newWriteOnlyTransaction();
+        tx.put(LogicalDatastoreType.OPERATIONAL, iid,
+                new HelloWorldContainerBuilder() /* .setName("hello, world") */.build());
+        try {
+            tx.commit().get();
+            fail("This should have failed with an ExecutionException");
+        } catch (ExecutionException e) {
+            assertThat(e.getCause()).isInstanceOf(DataValidationFailedException.class);
+        }
+    }
 }

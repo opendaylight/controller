@@ -1,0 +1,15 @@
+module opendaylight-test-mandatory {
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:mandatory";
+    prefix "opendaylight-test-mandatory";
+
+    revision "2018-08-15" {
+        description "Initial revision";
+    }
+
+    container HelloWorldContainer {
+        leaf name {
+            mandatory true;
+            type string;
+        }
+    }
+}
