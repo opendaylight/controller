@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
@@ -13,6 +12,7 @@ import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUti
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataTreeChangeListenerTest;
@@ -46,7 +46,7 @@ public class Bug1125RegressionTest extends AbstractDataTreeChangeListenerTest {
                     TreeComplexUsesAugment.class);
 
     @Override
-    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+    protected Set<YangModuleInfo> getModuleInfos() throws Exception {
         return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
                 BindingReflections.getModuleInfo(TreeComplexUsesAugment.class));
     }

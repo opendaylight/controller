@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +40,7 @@ public class ForwardedNotificationAdapterTest extends AbstractNotificationBroker
     private static final Logger LOG = LoggerFactory.getLogger(ForwardedNotificationAdapterTest.class);
 
     @Override
-    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+    protected Set<YangModuleInfo> getModuleInfos() throws Exception {
         return ImmutableSet.of(BindingReflections.getModuleInfo(TwoLevelListChanged.class));
 
     }
