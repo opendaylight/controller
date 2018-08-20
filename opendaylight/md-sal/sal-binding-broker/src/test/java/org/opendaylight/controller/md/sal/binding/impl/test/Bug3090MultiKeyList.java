@@ -32,7 +32,7 @@ public class Bug3090MultiKeyList extends AbstractDataTreeChangeListenerTest {
     private static final InstanceIdentifier<Root> ROOT_PATH = InstanceIdentifier.create(Root.class);
 
     @Override
-    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+    protected Set<YangModuleInfo> getModuleInfos() throws Exception {
         return ImmutableSet.of(BindingReflections.getModuleInfo(Root.class));
     }
 
@@ -61,7 +61,7 @@ public class Bug3090MultiKeyList extends AbstractDataTreeChangeListenerTest {
         listener.verify();
     }
 
-    private boolean checkData(Root expected, Root actual) {
+    private static boolean checkData(final Root expected, final Root actual) {
         if (actual == null) {
             return false;
         }
