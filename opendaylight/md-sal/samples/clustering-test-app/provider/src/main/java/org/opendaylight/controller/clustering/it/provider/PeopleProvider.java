@@ -75,7 +75,7 @@ public class PeopleProvider implements PeopleService, AutoCloseable {
 
             @Override
             public void onFailure(final Throwable ex) {
-                LOG.error(String.format("RPC addPerson : person addition failed [%s]", person), ex);
+                LOG.error("RPC addPerson : person addition failed [{}]", person, ex);
                 futureResult.set(RpcResultBuilder.<AddPersonOutput>failed()
                         .withError(RpcError.ErrorType.APPLICATION, ex.getMessage()).build());
             }

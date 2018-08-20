@@ -305,7 +305,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.warn("{}: Failed to delete prior snapshots", persistenceId(),
                     ((DeleteSnapshotsFailure) message).cause());
         } else if (message instanceof DeleteSnapshotsSuccess) {
-            LOG.debug("{}: Successfully deleted prior snapshots", persistenceId(), message);
+            LOG.debug("{}: Successfully deleted prior snapshots", persistenceId());
         } else if (message instanceof RegisterRoleChangeListenerReply) {
             LOG.trace("{}: Received RegisterRoleChangeListenerReply", persistenceId());
         } else if (message instanceof ClusterEvent.MemberEvent) {
@@ -441,13 +441,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
                     shardReplicaOperationsInProgress.remove(shardName);
-                    String msg = String.format("RemoveServer request to leader %s for shard %s failed",
-                            primaryPath, shardName);
 
-                    LOG.debug("{}: {}", persistenceId(), msg, failure);
+                    LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", persistenceId(), primaryPath,
+                        shardName, failure);
 
                     // FAILURE
-                    sender.tell(new Status.Failure(new RuntimeException(msg, failure)), self());
+                    sender.tell(new Status.Failure(new RuntimeException(
+                        String.format("RemoveServer request to leader %s for shard %s failed", primaryPath, shardName),
+                        failure)), self());
                 } else {
                     // SUCCESS
                     self().tell(new WrappedShardResponse(shardId, response, primaryPath), sender);
@@ -481,13 +482,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
                     shardReplicaOperationsInProgress.remove(shardName);
-                    String msg = String.format("RemoveServer request to leader %s for shard %s failed",
-                            primaryPath, shardName);
-
-                    LOG.debug("{}: {}", persistenceId(), msg, failure);
+                    LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", persistenceId(), primaryPath,
+                        shardName, failure);
 
                     // FAILURE
-                    sender.tell(new Status.Failure(new RuntimeException(msg, failure)), self());
+                    sender.tell(new Status.Failure(new RuntimeException(
+                        String.format("RemoveServer request to leader %s for shard %s failed", primaryPath, shardName),
+                        failure)), self());
                 } else {
                     // SUCCESS
                     self().tell(new WrappedShardResponse(shardId, response, primaryPath), sender);
@@ -859,7 +860,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         try {
             shardId = ShardIdentifier.fromShardIdString(actorName);
         } catch (IllegalArgumentException e) {
-            LOG.debug("{}: ignoring actor {}", actorName, e);
+            LOG.debug("{}: ignoring actor {}", persistenceId, actorName, e);
             return;
         }
 
@@ -1320,9 +1321,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private boolean isShardReplicaOperationInProgress(final String shardName, final ActorRef sender) {
         if (shardReplicaOperationsInProgress.contains(shardName)) {
-            String msg = String.format("A shard replica operation for %s is already in progress", shardName);
-            LOG.debug("{}: {}", persistenceId(), msg);
-            sender.tell(new Status.Failure(new IllegalStateException(msg)), getSelf());
+            LOG.debug("{}: A shard replica operation for {} is already in progress", persistenceId(), shardName);
+            sender.tell(new Status.Failure(new IllegalStateException(
+                String.format("A shard replica operation for %s is already in progress", shardName))), getSelf());
             return true;
         }
 
@@ -1338,10 +1339,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         // Create the localShard
         if (schemaContext == null) {
-            String msg = String.format(
-                    "No SchemaContext is available in order to create a local shard instance for %s", shardName);
-            LOG.debug("{}: {}", persistenceId(), msg);
-            getSender().tell(new Status.Failure(new IllegalStateException(msg)), getSelf());
+            LOG.debug("{}: No SchemaContext is available in order to create a local shard instance for {}",
+                persistenceId(), shardName);
+            getSender().tell(new Status.Failure(new IllegalStateException(
+                "No SchemaContext is available in order to create a local shard instance for " + shardName)),
+                getSelf());
             return;
         }
 
@@ -1370,18 +1372,19 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         // verify the shard with the specified name is present in the cluster configuration
         if (!this.configuration.isShardConfigured(shardName)) {
-            String msg = String.format("No module configuration exists for shard %s", shardName);
-            LOG.debug("{}: {}", persistenceId(), msg);
-            getSender().tell(new Status.Failure(new IllegalArgumentException(msg)), getSelf());
+            LOG.debug("{}: No module configuration exists for shard {}", persistenceId(), shardName);
+            getSender().tell(new Status.Failure(new IllegalArgumentException(
+                "No module configuration exists for shard " + shardName)), getSelf());
             return;
         }
 
         // Create the localShard
         if (schemaContext == null) {
-            String msg = String.format(
-                  "No SchemaContext is available in order to create a local shard instance for %s", shardName);
-            LOG.debug("{}: {}", persistenceId(), msg);
-            getSender().tell(new Status.Failure(new IllegalStateException(msg)), getSelf());
+            LOG.debug("{}: No SchemaContext is available in order to create a local shard instance for {}",
+                persistenceId(), shardName);
+            getSender().tell(new Status.Failure(new IllegalStateException(
+                "No SchemaContext is available in order to create a local shard instance for " + shardName)),
+                getSelf());
             return;
         }
 
@@ -1404,9 +1407,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void sendLocalReplicaAlreadyExistsReply(final String shardName, final ActorRef sender) {
-        String msg = String.format("Local shard %s already exists", shardName);
-        LOG.debug("{}: {}", persistenceId(), msg);
-        sender.tell(new Status.Failure(new AlreadyExistsException(msg)), getSelf());
+        LOG.debug("{}: Local shard {} already exists", persistenceId(), shardName);
+        sender.tell(new Status.Failure(new AlreadyExistsException(
+            String.format("Local shard %s already exists", shardName))), getSelf());
     }
 
     private void addPrefixShard(final String shardName, final YangInstanceIdentifier shardPrefix,
@@ -1758,15 +1761,16 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         getSelf().tell((RunnableMessage) () -> onLocalShardFound.accept((LocalShardFound) response),
                                 sender);
                     } else if (response instanceof LocalShardNotFound) {
-                        String msg = String.format("Local shard %s does not exist", shardName);
-                        LOG.debug("{}: {}", persistenceId, msg);
-                        sender.tell(new Status.Failure(new IllegalArgumentException(msg)), self());
+                        LOG.debug("{}: Local shard {} does not exist", persistenceId, shardName);
+                        sender.tell(new Status.Failure(new IllegalArgumentException(
+                            String.format("Local shard %s does not exist", shardName))), self());
                     } else {
-                        String msg = String.format("Failed to find local shard %s: received response: %s",
-                                shardName, response);
-                        LOG.debug("{}: {}", persistenceId, msg);
-                        sender.tell(new Status.Failure(response instanceof Throwable ? (Throwable) response :
-                                new RuntimeException(msg)), self());
+                        LOG.debug("{}: Failed to find local shard {}: received response: {}", persistenceId, shardName,
+                            response);
+                        sender.tell(new Status.Failure(response instanceof Throwable ? (Throwable) response
+                                : new RuntimeException(
+                                    String.format("Failed to find local shard %s: received response: %s", shardName,
+                                        response))), self());
                     }
                 }
             }
@@ -1795,10 +1799,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             public void onComplete(final Throwable failure, final Object response) {
                 shardReplicaOperationsInProgress.remove(shardName);
                 if (failure != null) {
-                    String msg = String.format("ChangeServersVotingStatus request to local shard %s failed",
-                            shardActorRef.path());
-                    LOG.debug("{}: {}", persistenceId(), msg, failure);
-                    sender.tell(new Status.Failure(new RuntimeException(msg, failure)), self());
+                    LOG.debug("{}: ChangeServersVotingStatus request to local shard {} failed", persistenceId(),
+                        shardActorRef.path(), failure);
+                    sender.tell(new Status.Failure(new RuntimeException(
+                        String.format("ChangeServersVotingStatus request to local shard %s failed",
+                            shardActorRef.path()), failure)), self());
                 } else {
                     LOG.debug("{}: Received {} from local shard {}", persistenceId(), response, shardActorRef.path());
 
@@ -1960,11 +1965,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         @Override
         public void onUnknownResponse(final Object response) {
-            String msg = String.format("Failed to find leader for shard %s: received response: %s",
-                    shardName, response);
-            LOG.debug("{}: {}", persistenceId, msg);
-            targetActor.tell(new Status.Failure(response instanceof Throwable ? (Throwable) response :
-                    new RuntimeException(msg)), shardManagerActor);
+            LOG.debug("{}: Failed to find leader for shard {}: received response: {}", persistenceId, shardName,
+                response);
+            targetActor.tell(new Status.Failure(response instanceof Throwable ? (Throwable) response
+                    : new RuntimeException(String.format("Failed to find leader for shard %s: received response: %s",
+                        shardName, response))), shardManagerActor);
         }
     }
 

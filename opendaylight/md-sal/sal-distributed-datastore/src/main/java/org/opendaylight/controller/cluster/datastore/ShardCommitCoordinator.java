@@ -251,8 +251,8 @@ final class ShardCommitCoordinator {
 
             @Override
             public void onFailure(final Throwable failure) {
-                log.debug("{}: An exception occurred during canCommit for {}: {}", name,
-                        cohortEntry.getTransactionId(), failure);
+                log.debug("{}: An exception occurred during canCommit for {}", name, cohortEntry.getTransactionId(),
+                    failure);
 
                 cohortCache.remove(cohortEntry.getTransactionId());
                 cohortEntry.getReplySender().tell(new Failure(failure), cohortEntry.getShard().self());
@@ -276,7 +276,7 @@ final class ShardCommitCoordinator {
             // between canCommit and ready and the entry was expired from the cache or it was aborted.
             IllegalStateException ex = new IllegalStateException(
                     String.format("%s: Cannot canCommit transaction %s - no cohort entry found", name, transactionID));
-            log.error(ex.getMessage());
+            log.error("{}: Inconsistency during transaction {} canCommit", name, transactionID, ex);
             sender.tell(new Failure(ex), shard.self());
             return;
         }
@@ -353,7 +353,7 @@ final class ShardCommitCoordinator {
             // or it was aborted.
             IllegalStateException ex = new IllegalStateException(
                     String.format("%s: Cannot commit transaction %s - no cohort entry found", name, transactionID));
-            log.error(ex.getMessage());
+            log.error("{}: Inconsistency during transaction {} commit", name, transactionID, ex);
             sender.tell(new Failure(ex), shard.self());
             return;
         }

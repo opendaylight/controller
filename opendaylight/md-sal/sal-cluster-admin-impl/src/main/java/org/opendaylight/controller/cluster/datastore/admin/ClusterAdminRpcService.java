@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -228,7 +229,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             public void onComplete(final Throwable failure, final ActorRef actorRef) {
                 if (failure != null) {
                     LOG.warn("No local shard found for {} datastoreType {} - Cannot request leadership transfer to"
-                                    + " local shard.", shardName, failure);
+                            + " local shard.", shardName, dataStoreType, failure);
                     makeLeaderLocalAsk.failure(failure);
                 } else {
                     makeLeaderLocalAsk
@@ -672,9 +673,10 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         onMessageFailure(String.format("Failed to back up datastore to file %s", fileName), returnFuture, failure);
     }
 
+    @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     private static <T> void onMessageFailure(final String msg, final SettableFuture<RpcResult<T>> returnFuture,
             final Throwable failure) {
-        LOG.error(msg, failure);
+        LOG.error("{}", msg, failure);
         returnFuture.set(ClusterAdminRpcService.<T>newFailedRpcResultBuilder(String.format("%s: %s", msg,
                 failure.getMessage())).build());
     }

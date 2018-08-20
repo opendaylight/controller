@@ -75,7 +75,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void applySnapshot(final Snapshot.State snapshotState) {
         if (!(snapshotState instanceof ShardSnapshotState)) {
-            log.debug("{}: applySnapshot ignoring snapshot: {}", snapshotState);
+            log.debug("{}: applySnapshot ignoring snapshot: {}", logId, snapshotState);
         }
 
         final ShardDataTreeSnapshot snapshot = ((ShardSnapshotState)snapshotState).getSnapshot();

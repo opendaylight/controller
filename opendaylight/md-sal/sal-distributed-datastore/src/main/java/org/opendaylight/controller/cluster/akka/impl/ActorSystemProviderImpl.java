@@ -24,7 +24,8 @@ import scala.concurrent.duration.Duration;
 
 public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseable {
     private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
-    static final Logger LOG = LoggerFactory.getLogger(ActorSystemProviderImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActorSystemProviderImpl.class);
+
     private final ActorSystem actorSystem;
     private final ListenerRegistry<ActorSystemProviderListener> listeners = new ListenerRegistry<>();
 

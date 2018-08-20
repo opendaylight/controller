@@ -277,7 +277,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // non-leader cannot satisfy leadership request
             LOG.warn("{}: onRequestLeadership {} was sent to non-leader."
                     + " Current behavior: {}. Sending failure response",
-                    persistenceId(), getCurrentBehavior().state());
+                    persistenceId(), message, getCurrentBehavior().state());
             message.getReplyTo().tell(new LeadershipTransferFailedException("Cannot transfer leader to "
                     + message.getRequestedFollowerId()
                     + ". RequestLeadership message was sent to non-leader " + persistenceId()), getSelf());

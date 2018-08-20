@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
@@ -31,6 +32,8 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
     private final AbstractThreePhaseCommitCohort<?> delegate;
     private final Throwable debugContext;
     private final TransactionIdentifier transactionId;
+
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_FINAL")
     private Logger log = LOG;
 
     DebugThreePhaseCommitCohort(final TransactionIdentifier transactionId,

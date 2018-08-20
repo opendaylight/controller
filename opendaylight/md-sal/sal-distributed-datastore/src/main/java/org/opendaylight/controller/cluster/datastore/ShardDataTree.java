@@ -738,8 +738,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
                 // For debugging purposes, allow dumping of the modification. Coupled with the above
                 // precondition log, it should allow us to understand what went on.
-                LOG.debug("{}: Store Tx {}: modifications: {} tree: {}", cohort.getIdentifier(), modification,
-                        dataTree);
+                LOG.debug("{}: Store Tx {}: modifications: {} tree: {}", logContext, cohort.getIdentifier(),
+                    modification, dataTree);
                 cause = new TransactionCommitFailedException("Data did not pass validation for path " + e.getPath(), e);
             } catch (Exception e) {
                 LOG.warn("{}: Unexpected failure in validation phase", logContext, e);
@@ -873,7 +873,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingTransaction();
     }
 
-    private void insertEntry(Deque<CommitEntry> queue, CommitEntry entry, int atIndex) {
+    private void insertEntry(final Deque<CommitEntry> queue, final CommitEntry entry, final int atIndex) {
         if (atIndex == 0) {
             queue.addFirst(entry);
             return;
@@ -892,7 +892,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private Collection<String> extractPrecedingShardNames(
-            java.util.Optional<SortedSet<String>> participatingShardNames) {
+            final java.util.Optional<SortedSet<String>> participatingShardNames) {
         return participatingShardNames.map((Function<SortedSet<String>, Collection<String>>)
             set -> set.headSet(shard.getShardName())).orElse(Collections.<String>emptyList());
     }

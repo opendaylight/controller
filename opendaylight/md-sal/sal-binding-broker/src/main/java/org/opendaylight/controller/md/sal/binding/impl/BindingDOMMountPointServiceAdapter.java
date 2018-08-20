@@ -22,26 +22,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BindingDOMMountPointServiceAdapter implements MountPointService {
-    public static final Logger LOG = LoggerFactory.getLogger(BindingDOMMountPointServiceAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BindingDOMMountPointServiceAdapter.class);
 
     private final BindingToNormalizedNodeCodec codec;
     private final DOMMountPointService mountService;
     private final LoadingCache<DOMMountPoint, BindingMountPointAdapter> bindingMountpoints = CacheBuilder.newBuilder()
             .weakKeys().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
-
                 @Override
-                public BindingMountPointAdapter load(DOMMountPoint key) {
-                    return new BindingMountPointAdapter(codec,key);
+                public BindingMountPointAdapter load(final DOMMountPoint key) {
+                    return new BindingMountPointAdapter(codec, key);
                 }
             });
 
-    public BindingDOMMountPointServiceAdapter(DOMMountPointService mountService,BindingToNormalizedNodeCodec codec) {
+    public BindingDOMMountPointServiceAdapter(final DOMMountPointService mountService,
+            final BindingToNormalizedNodeCodec codec) {
         this.codec = codec;
         this.mountService = mountService;
     }
 
     @Override
-    public Optional<MountPoint> getMountPoint(InstanceIdentifier<?> mountPoint) {
+    public Optional<MountPoint> getMountPoint(final InstanceIdentifier<?> mountPoint) {
 
         YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(mountPoint);
         Optional<DOMMountPoint> domMount = mountService.getMountPoint(domPath);
@@ -52,8 +52,8 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
     }
 
     @Override
-    public <T extends MountPointListener> ListenerRegistration<T> registerListener(InstanceIdentifier<?> path,
-            T listener) {
+    public <T extends MountPointListener> ListenerRegistration<T> registerListener(final InstanceIdentifier<?> path,
+            final T listener) {
         return new BindingDOMMountPointListenerAdapter<>(listener, codec, mountService);
     }
 }

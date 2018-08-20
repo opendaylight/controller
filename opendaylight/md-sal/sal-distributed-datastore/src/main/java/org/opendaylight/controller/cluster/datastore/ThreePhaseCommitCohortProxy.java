@@ -291,7 +291,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
                 @Override
                 public void onFailure(final Throwable failure) {
-                    LOG.debug("Tx {}: a {} cohort path Future failed: {}", transactionId, operationName, failure);
+                    LOG.debug("Tx {}: a {} cohort path Future failed", transactionId, operationName, failure);
 
                     if (propagateException) {
                         returnFuture.setException(failure);

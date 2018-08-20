@@ -513,7 +513,7 @@ class EntityOwnershipShard extends Shard {
 
             } else {
                 LOG.debug("{}: Found entity {} but no other candidates - not clearing owner", persistenceId(),
-                        entityPath, newOwner);
+                        entityPath);
             }
         });
 

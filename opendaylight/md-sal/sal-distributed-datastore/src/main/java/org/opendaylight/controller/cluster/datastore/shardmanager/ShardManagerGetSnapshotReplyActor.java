@@ -60,12 +60,13 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
             params.replyToActor.tell(message, getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         } else if (message instanceof ReceiveTimeout) {
-            String msg = String.format(
-                    "Timed out after %s ms while waiting for snapshot replies from %d shard(s). %d shard(s) %s "
-                    + "did not respond.", params.receiveTimeout.toMillis(), params.shardNames.size(),
-                    remainingShardNames.size(), remainingShardNames);
-            LOG.warn("{}: {}", params.id, msg);
-            params.replyToActor.tell(new Failure(new TimeoutException(msg)), getSelf());
+            LOG.warn("{}: Timed out after {} ms while waiting for snapshot replies from {} shard(s). "
+                + "{} shard(s) {} did not respond", params.id, params.receiveTimeout.toMillis(),
+                params.shardNames.size(), remainingShardNames.size(), remainingShardNames);
+            params.replyToActor.tell(new Failure(new TimeoutException(String.format(
+                "Timed out after %s ms while waiting for snapshot replies from %d shard(s). %d shard(s) %s "
+                + "did not respond.", params.receiveTimeout.toMillis(), params.shardNames.size(),
+                remainingShardNames.size(), remainingShardNames))), getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         }
     }

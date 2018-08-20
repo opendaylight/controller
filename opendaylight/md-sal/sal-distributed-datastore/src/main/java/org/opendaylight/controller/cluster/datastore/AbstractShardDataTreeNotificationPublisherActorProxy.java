@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 @NotThreadSafe
 abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements ShardDataTreeNotificationPublisher {
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ActorContext actorContext;
@@ -31,8 +33,8 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
     private final String logContext;
     private ActorRef publisherActor;
 
-    protected AbstractShardDataTreeNotificationPublisherActorProxy(ActorContext actorContext, String actorName,
-            String logContext) {
+    protected AbstractShardDataTreeNotificationPublisherActorProxy(final ActorContext actorContext,
+            final String actorName, final String logContext) {
         this.actorContext = actorContext;
         this.actorName = actorName;
         this.logContext = logContext;
@@ -49,7 +51,7 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
     }
 
     @Override
-    public void publishChanges(DataTreeCandidate candidate) {
+    public void publishChanges(final DataTreeCandidate candidate) {
         publisherActor().tell(new ShardDataTreeNotificationPublisherActor.PublishNotifications(candidate),
                 ActorRef.noSender());
     }

@@ -377,7 +377,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             versions.remove(addr);
             final Bucket<T> bucket = remoteBuckets.remove(addr);
             if (bucket != null) {
-                LOG.debug("Source actor dead, removing bucket {} from ", bucket, addr);
+                LOG.debug("Source actor dead, removing bucket {} from {}", bucket, addr);
                 onBucketRemoved(addr, bucket);
             }
         }

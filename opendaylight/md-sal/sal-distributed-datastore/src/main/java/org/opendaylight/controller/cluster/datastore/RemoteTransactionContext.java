@@ -240,8 +240,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
                 }
 
                 if (failure != null) {
-                    LOG.debug("Tx {} {} operation failed: {}", getIdentifier(), readCmd.getClass().getSimpleName(),
-                            failure);
+                    LOG.debug("Tx {} {} operation failed", getIdentifier(), readCmd.getClass().getSimpleName(),
+                        failure);
 
                     returnFuture.setException(new ReadFailedException("Error checking "
                         + readCmd.getClass().getSimpleName() + " for path " + readCmd.getPath(), failure));
