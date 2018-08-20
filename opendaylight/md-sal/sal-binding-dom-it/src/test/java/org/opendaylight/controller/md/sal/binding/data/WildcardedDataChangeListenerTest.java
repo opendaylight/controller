@@ -13,6 +13,7 @@ import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastor
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -80,7 +81,7 @@ public class WildcardedDataChangeListenerTest extends AbstractDataTreeChangeList
             .withKey(LIST_VIA_USES_KEY).setName("john").build();
 
     @Override
-    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+    protected Set<YangModuleInfo> getModuleInfos() throws Exception {
         return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class),
                 BindingReflections.getModuleInfo(TreeComplexUsesAugment.class));
     }
