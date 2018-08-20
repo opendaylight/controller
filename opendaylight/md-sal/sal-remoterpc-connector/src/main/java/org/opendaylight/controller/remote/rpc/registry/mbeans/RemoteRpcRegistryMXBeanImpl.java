@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
 import akka.actor.Address;
 import akka.util.Timeout;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 
-
 public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements RemoteRpcRegistryMXBean {
 
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String LOCAL_CONSTANT = "local";
@@ -39,7 +39,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
     private final BucketStoreAccess rpcRegistryAccess;
     private final Timeout timeout;
 
-    public RemoteRpcRegistryMXBeanImpl(final BucketStoreAccess rpcRegistryAccess, Timeout timeout) {
+    public RemoteRpcRegistryMXBeanImpl(final BucketStoreAccess rpcRegistryAccess, final Timeout timeout) {
         super("RemoteRpcRegistry", "RemoteRpcBroker", null);
         this.rpcRegistryAccess = rpcRegistryAccess;
         this.timeout = timeout;

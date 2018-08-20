@@ -108,7 +108,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
 
         // XXX: do we need to account for cookies?
         purgedHistories.add(historyId.getHistoryId());
-        LOG.debug("{}: Purged history {}", historyId);
+        LOG.debug("{}: Purged history {}", shardName, historyId);
     }
 
     void onTransactionAborted(final TransactionIdentifier txId) {

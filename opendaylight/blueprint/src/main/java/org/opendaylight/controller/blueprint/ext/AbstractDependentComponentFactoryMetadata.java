@@ -8,6 +8,7 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 abstract class AbstractDependentComponentFactoryMetadata implements DependentComponentFactoryMetadata {
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     final Logger log = LoggerFactory.getLogger(getClass());
     private final String id;
     private final AtomicBoolean started = new AtomicBoolean();

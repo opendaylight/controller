@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Forwarder class responsible for routing requests from the previous connection incarnation back to the originator,
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public abstract class ReconnectForwarder {
-    static final Logger LOG = LoggerFactory.getLogger(ReconnectForwarder.class);
     // Visible for subclass method handle
     private final AbstractReceivingClientConnection<?> successor;
 

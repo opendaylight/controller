@@ -72,7 +72,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
-    Future<ActorSelection> initiateCoordinatedCommit(Optional<SortedSet<String>> participatingShardNames) {
+    Future<ActorSelection> initiateCoordinatedCommit(final Optional<SortedSet<String>> participatingShardNames) {
         final Future<Object> messageFuture = initiateCommit(false, participatingShardNames);
         final Future<ActorSelection> ret = TransactionReadyReplyMapper.transform(messageFuture, actorContext,
                 transaction.getIdentifier());
@@ -104,7 +104,8 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
                     LOG.debug("Transaction {} committed successfully", transaction.getIdentifier());
                     transactionCommitted(transaction);
                 } else {
-                    LOG.error("Transaction {} resulted in unhandled message type {}, aborting", message.getClass());
+                    LOG.error("Transaction {} resulted in unhandled message type {}, aborting",
+                        transaction.getIdentifier(), message.getClass());
                     transactionAborted(transaction);
                 }
             }
@@ -137,9 +138,9 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         throw new UnsupportedOperationException();
     }
 
-    protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> aborted) {
+    protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier> aborted) {
     }
 
-    protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> comitted) {
+    protected void transactionCommitted(final SnapshotBackedWriteTransaction<TransactionIdentifier> comitted) {
     }
 }

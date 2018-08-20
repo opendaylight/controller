@@ -73,7 +73,7 @@ public class SerializedDOMDataBroker extends AbstractDOMDataBroker {
             commitFuture = executor.submit(new CommitCoordinationTask<>(transaction, cohorts, commitStatsTracker,
                     futureValueSupplier));
         } catch (RejectedExecutionException e) {
-            LOG.error("The commit executor's queue is full - submit task was rejected. \n" + executor, e);
+            LOG.error("The commit executor {} queue is full - submit task was rejected. \n", executor, e);
             commitFuture = Futures.immediateFailedFuture(new TransactionCommitFailedException(
                     "Could not submit the commit task - the commit queue capacity has been exceeded.", e));
         }

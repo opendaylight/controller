@@ -119,7 +119,7 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
         if (!(snapshotState instanceof ShardSnapshotState)) {
-            log.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", snapshotState);
+            log.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", shardName, snapshotState);
         }
 
         log.debug("{}: Applying recovered snapshot", shardName);

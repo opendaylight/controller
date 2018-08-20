@@ -262,7 +262,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             TimeUnit.NANOSECONDS.sleep(delay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.debug("Interrupted after sleeping {}ns", e, currentTime() - now);
+            LOG.debug("Interrupted after sleeping {}ns", currentTime() - now, e);
         }
     }
 

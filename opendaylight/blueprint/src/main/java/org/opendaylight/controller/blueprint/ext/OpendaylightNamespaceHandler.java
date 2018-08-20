@@ -208,7 +208,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
                     + " can only be used on the root <blueprint> element");
         }
 
-        LOG.debug("{}: {}", propertyName, attr.getValue());
+        LOG.debug("Property {} = {}", propertyName, attr.getValue());
 
         if (!Boolean.parseBoolean(attr.getValue())) {
             return component;

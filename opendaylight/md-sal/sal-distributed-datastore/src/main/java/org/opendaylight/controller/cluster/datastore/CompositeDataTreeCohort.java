@@ -232,7 +232,7 @@ class CompositeDataTreeCohort {
 
         aggregateFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
-            public void onComplete(Throwable failure, Iterable<Object> results) {
+            public void onComplete(final Throwable failure, final Iterable<Object> results) {
                 callbackExecutor.execute(
                     () -> processResponses(failure, results, currentState, afterState, returnFuture));
             }
@@ -244,8 +244,8 @@ class CompositeDataTreeCohort {
     // FB issues violation for passing null to CompletableFuture#complete but it is valid and necessary when the
     // generic type is Void.
     @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
-    private void processResponses(Throwable failure, Iterable<Object> results, State currentState, State afterState,
-            CompletableFuture<Void> resultFuture) {
+    private void processResponses(final Throwable failure, final Iterable<Object> results,
+            final State currentState, final State afterState, final CompletableFuture<Void> resultFuture) {
         if (failure != null) {
             successfulFromPrevious = Collections.emptyList();
             resultFuture.completeExceptionally(failure);
@@ -260,7 +260,7 @@ class CompositeDataTreeCohort {
             } else if (result instanceof Status.Failure) {
                 failed.add((Failure) result);
             } else {
-                LOG.warn("{}: unrecognized response {}, ignoring it", result);
+                LOG.warn("{}: unrecognized response {}, ignoring it", txId, result);
             }
         }
 

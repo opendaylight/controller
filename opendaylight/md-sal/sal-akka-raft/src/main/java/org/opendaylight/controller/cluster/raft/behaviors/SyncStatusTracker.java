@@ -68,7 +68,7 @@ public class SyncStatusTracker {
             LOG.debug("{}: Lagging {} entries behind leader {}", id, lag, leaderId);
             changeSyncStatus(NOT_IN_SYNC, false);
         } else if (commitIndex >= syncTarget.minimumCommitIndex) {
-            LOG.debug("{}: Lagging {} entries behind leader and reached {} (of expected {})", id, lag, leaderId,
+            LOG.debug("{}: Lagging {} entries behind leader {} and reached {} (of expected {})", id, lag, leaderId,
                 commitIndex, syncTarget.minimumCommitIndex);
             changeSyncStatus(IN_SYNC, false);
         }

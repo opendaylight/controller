@@ -120,13 +120,12 @@ public class KitchenServiceImpl extends AbstractMXBean
             if (result.isSuccessful()) {
                 LOG.info("makeBreakfast succeeded");
             } else {
-                LOG.warn("makeBreakfast failed: " + result.getErrors());
+                LOG.warn("makeBreakfast failed: {}", result.getErrors());
             }
 
             return result.isSuccessful();
-
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("An error occurred while maing breakfast: " + e);
+            LOG.warn("An error occurred while maing breakfast", e);
         }
 
         return Boolean.FALSE;
@@ -146,7 +145,7 @@ public class KitchenServiceImpl extends AbstractMXBean
      */
     @Override
     public void onToasterRestocked(final ToasterRestocked notification) {
-        LOG.info("ToasterRestocked notification - amountOfBread: " + notification.getAmountOfBread());
+        LOG.info("ToasterRestocked notification - amountOfBread: {}", notification.getAmountOfBread());
         toasterOutOfBread = false;
     }
 }

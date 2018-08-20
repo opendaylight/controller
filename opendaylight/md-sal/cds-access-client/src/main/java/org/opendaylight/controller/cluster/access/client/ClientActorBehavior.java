@@ -418,7 +418,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             try {
                 return cookie.equals(extractCookie(id));
             } catch (IllegalArgumentException e) {
-                LOG.debug("extractCookie failed while cancelling slicing for cookie {}: {}", cookie, e);
+                LOG.debug("extractCookie failed while cancelling slicing for cookie {}", cookie, e);
                 return false;
             }
         });
