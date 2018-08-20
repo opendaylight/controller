@@ -17,12 +17,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * SchemaContext.
  *
  * @author Michael Vorburger
+ * @deprecated This class should not be used, as it pollutes the classpath.
  */
+@Deprecated
 public final class SchemaContextSingleton {
 
     private static SchemaContext staticSchemaContext;
 
-    public static synchronized SchemaContext getSchemaContext(Supplier<SchemaContext> supplier) throws Exception {
+    public static synchronized SchemaContext getSchemaContext(final Supplier<SchemaContext> supplier) throws Exception {
         if (staticSchemaContext == null) {
             staticSchemaContext = supplier.get();
         }
