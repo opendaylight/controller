@@ -15,7 +15,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * it for each Test, and is thus faster.
  *
  * @author Michael Vorburger
+ * @deprecated This class is no longer useful, as {@link AbstractSchemaAwareTest#getSchemaContext()} provides effective
+ *             caching.
  */
+@Deprecated
 public class ConstantSchemaAbstractDataBrokerTest extends AbstractConcurrentDataBrokerTest {
 
     public ConstantSchemaAbstractDataBrokerTest() {

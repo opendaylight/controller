@@ -45,7 +45,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataTreeChangeL
     private static final InstanceIdentifier<TopLevelList> TOP_BAR = TOP.child(TopLevelList.class, TOP_BAR_KEY);
 
     @Override
-    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+    protected Set<YangModuleInfo> getModuleInfos() throws Exception {
         return ImmutableSet.of(BindingReflections.getModuleInfo(Top.class));
     }
 
@@ -160,7 +160,8 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataTreeChangeL
         barListener.verify();
     }
 
-    private Function<DataTreeModification<Top>, Boolean> topSubtreeModified(TopLevelList topFoo, TopLevelList topBar) {
+    private Function<DataTreeModification<Top>, Boolean> topSubtreeModified(final TopLevelList topFoo,
+            final TopLevelList topBar) {
         return match(ModificationType.SUBTREE_MODIFIED, TOP,
             (Function<Top, Boolean>) dataBefore -> Objects.equals(top(topFoo), dataBefore),
             dataAfter -> {
