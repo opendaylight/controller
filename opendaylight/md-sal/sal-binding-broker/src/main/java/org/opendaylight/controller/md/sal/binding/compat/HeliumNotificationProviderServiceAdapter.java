@@ -22,8 +22,8 @@ public class HeliumNotificationProviderServiceAdapter extends HeliumNotification
 
     private final NotificationPublishService notificationPublishService;
 
-    public HeliumNotificationProviderServiceAdapter(NotificationPublishService notificationPublishService,
-                                                 NotificationService notificationService) {
+    public HeliumNotificationProviderServiceAdapter(final NotificationPublishService notificationPublishService,
+            final NotificationService notificationService) {
         super(notificationService);
         this.notificationPublishService = notificationPublishService;
     }
@@ -33,7 +33,7 @@ public class HeliumNotificationProviderServiceAdapter extends HeliumNotification
         try {
             notificationPublishService.putNotification(notification);
         } catch (InterruptedException e) {
-            LOG.error("Notification publication was interupted: "  + e);
+            LOG.error("Notification publication was interupted", e);
         }
     }
 
@@ -42,17 +42,18 @@ public class HeliumNotificationProviderServiceAdapter extends HeliumNotification
         try {
             notificationPublishService.putNotification(notification);
         } catch (InterruptedException e) {
-            LOG.error("Notification publication was interupted: "  + e);
+            LOG.error("Notification publication was interupted", e);
         }
     }
 
     @Override
     public ListenerRegistration<NotificationInterestListener> registerInterestListener(
-            NotificationInterestListener interestListener) {
+            final NotificationInterestListener interestListener) {
         throw new UnsupportedOperationException("InterestListener is not supported.");
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
+
     }
 }

@@ -76,7 +76,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                             + "cannot be registered", logContext(), shardName, getInstance(), registeredPath);
                 } else if (failure != null) {
                     LOG.error("{}: Failed to find local shard {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered: {}", logContext(), shardName, getInstance(), registeredPath,
+                            + "cannot be registered", logContext(), shardName, getInstance(), registeredPath,
                             failure);
                 } else {
                     doRegistration(shard);

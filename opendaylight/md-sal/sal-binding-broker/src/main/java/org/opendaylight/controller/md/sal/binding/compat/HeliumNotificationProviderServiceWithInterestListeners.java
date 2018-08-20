@@ -68,7 +68,7 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
                 try {
                     notifyListener(listenerRef, baEvent);
                 } catch (RuntimeException  e) {
-                    LOG.warn("Unhandled exception during invoking listener {}", e, listenerRef);
+                    LOG.warn("Unhandled exception during invoking listener {}", listenerRef, e);
                 }
             }
         }
@@ -90,7 +90,7 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
         };
     }
 
-    private void notifyListener(final NotificationInterestListener listener,
+    private static void notifyListener(final NotificationInterestListener listener,
             final Set<Class<? extends Notification>> baEvent) {
         for (final Class<? extends Notification> event: baEvent) {
             listener.onNotificationSubscribtion(event);
@@ -114,7 +114,7 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
         domListener.close();
     }

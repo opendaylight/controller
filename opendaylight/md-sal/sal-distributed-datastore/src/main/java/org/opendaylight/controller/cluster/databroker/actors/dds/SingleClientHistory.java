@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 final class SingleClientHistory extends AbstractClientHistory {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractClientHistory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SingleClientHistory.class);
 
     SingleClientHistory(final AbstractDataStoreClientBehavior client, final LocalHistoryIdentifier identifier) {
         super(client, identifier);

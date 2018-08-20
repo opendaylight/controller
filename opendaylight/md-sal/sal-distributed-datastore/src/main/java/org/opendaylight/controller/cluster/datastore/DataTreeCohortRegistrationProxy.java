@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
@@ -37,8 +36,8 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
     @GuardedBy("this")
     private ActorRef cohortRegistry;
 
-
-    DataTreeCohortRegistrationProxy(ActorContext actorContext, DOMDataTreeIdentifier subtree, C cohort) {
+    DataTreeCohortRegistrationProxy(final ActorContext actorContext, final DOMDataTreeIdentifier subtree,
+            final C cohort) {
         super(cohort);
         this.subtree = Preconditions.checkNotNull(subtree);
         this.actorContext = Preconditions.checkNotNull(actorContext);
@@ -46,8 +45,7 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
                 subtree.getRootIdentifier()).withDispatcher(actorContext.getNotificationDispatcherPath()));
     }
 
-
-    public void init(String shardName) {
+    public void init(final String shardName) {
         // FIXME: Add late binding to shard.
         Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName);
         findFuture.onComplete(new OnComplete<ActorRef>() {
@@ -58,7 +56,7 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
                             + "cannot be registered", shardName, getInstance(), subtree);
                 } else if (failure != null) {
                     LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered: {}", shardName, getInstance(), subtree, failure);
+                            + "cannot be registered", shardName, getInstance(), subtree, failure);
                 } else {
                     performRegistration(shard);
                 }
@@ -66,7 +64,7 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
         }, actorContext.getClientDispatcher());
     }
 
-    private synchronized void performRegistration(ActorRef shard) {
+    private synchronized void performRegistration(final ActorRef shard) {
         if (isClosed()) {
             return;
         }
@@ -76,7 +74,7 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
         future.onComplete(new OnComplete<Object>() {
 
             @Override
-            public void onComplete(Throwable failure, Object val) {
+            public void onComplete(final Throwable failure, final Object val) {
                 if (failure != null) {
                     LOG.error("Unable to register {} as commit cohort", getInstance(), failure);
                 }

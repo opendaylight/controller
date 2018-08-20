@@ -54,7 +54,7 @@ final class TransactionContextCleanup extends FinalizablePhantomReference<Transa
 
     @Override
     public void finalizeReferent() {
-        LOG.trace("Cleaning up {} Tx actors {}", cleanup);
+        LOG.trace("Cleaning up {} Tx actors", cleanup);
 
         if (CACHE.remove(cleanup) != null) {
             cleanup.closeTransaction();
