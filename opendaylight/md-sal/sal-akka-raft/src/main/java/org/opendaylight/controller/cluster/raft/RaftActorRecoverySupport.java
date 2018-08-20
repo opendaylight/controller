@@ -46,7 +46,7 @@ class RaftActorRecoverySupport {
         this.log = context.getLogger();
     }
 
-    boolean handleRecoveryMessage(Object message, PersistentDataProvider persistentProvider) {
+    boolean handleRecoveryMessage(final Object message, final PersistentDataProvider persistentProvider) {
         log.trace("{}: handleRecoveryMessage: {}", context.getId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -105,7 +105,7 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private void onRecoveredSnapshot(SnapshotOffer offer) {
+    private void onRecoveredSnapshot(final SnapshotOffer offer) {
         log.debug("{}: SnapshotOffer called.", context.getId());
 
         initRecoveryTimer();
@@ -153,7 +153,7 @@ class RaftActorRecoverySupport {
                 replicatedLog().getSnapshotTerm(), replicatedLog().size());
     }
 
-    private void onRecoveredJournalLogEntry(ReplicatedLogEntry logEntry) {
+    private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
         if (log.isDebugEnabled()) {
             log.debug("{}: Received ReplicatedLogEntry for recovery: index: {}, size: {}", context.getId(),
                     logEntry.getIndex(), logEntry.size());
@@ -174,7 +174,7 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private void onRecoveredApplyLogEntries(long toIndex) {
+    private void onRecoveredApplyLogEntries(final long toIndex) {
         if (!context.getPersistenceProvider().isRecoveryApplicable()) {
             dataRecoveredWithPersistenceDisabled = true;
             return;
@@ -206,7 +206,7 @@ class RaftActorRecoverySupport {
         context.setCommitIndex(lastApplied);
     }
 
-    private void onDeleteEntries(DeleteEntries deleteEntries) {
+    private void onDeleteEntries(final DeleteEntries deleteEntries) {
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             replicatedLog().removeFrom(deleteEntries.getFromIndex());
         } else {
@@ -214,7 +214,7 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private void batchRecoveredLogEntry(ReplicatedLogEntry logEntry) {
+    private void batchRecoveredLogEntry(final ReplicatedLogEntry logEntry) {
         initRecoveryTimer();
 
         int batchSize = context.getConfigParams().getJournalRecoveryLogBatchSize();
@@ -236,7 +236,7 @@ class RaftActorRecoverySupport {
         currentRecoveryBatchCount = 0;
     }
 
-    private void onRecoveryCompletedMessage(PersistentDataProvider persistentProvider) {
+    private void onRecoveryCompletedMessage(final PersistentDataProvider persistentProvider) {
         if (currentRecoveryBatchCount > 0) {
             endCurrentLogRecoveryBatch();
         }
@@ -248,9 +248,9 @@ class RaftActorRecoverySupport {
             recoveryTimer = null;
         }
 
-        log.info("Recovery completed" + recoveryTime + " - Switching actor to Follower - " + "Persistence Id =  "
-                  + context.getId() + " Last index in log = {}, snapshotIndex = {}, snapshotTerm = {}, "
-                  + "journal-size = {}", replicatedLog().lastIndex(), replicatedLog().getSnapshotIndex(),
+        log.info("Recovery completed {} - Switching actor to Follower - Persistence Id = {}"
+                 + " Last index in log = {}, snapshotIndex = {}, snapshotTerm = {}, journal-size = {}",
+                 recoveryTime, context.getId(), replicatedLog().lastIndex(), replicatedLog().getSnapshotIndex(),
                  replicatedLog().getSnapshotTerm(), replicatedLog().size());
 
         if (dataRecoveredWithPersistenceDisabled
@@ -284,19 +284,19 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private static boolean isServerConfigurationPayload(ReplicatedLogEntry repLogEntry) {
+    private static boolean isServerConfigurationPayload(final ReplicatedLogEntry repLogEntry) {
         return repLogEntry.getData() instanceof ServerConfigurationPayload;
     }
 
-    private static boolean isPersistentPayload(ReplicatedLogEntry repLogEntry) {
+    private static boolean isPersistentPayload(final ReplicatedLogEntry repLogEntry) {
         return repLogEntry.getData() instanceof PersistentPayload;
     }
 
-    private static boolean isMigratedPayload(ReplicatedLogEntry repLogEntry) {
+    private static boolean isMigratedPayload(final ReplicatedLogEntry repLogEntry) {
         return isMigratedSerializable(repLogEntry.getData());
     }
 
-    private static boolean isMigratedSerializable(Object message) {
+    private static boolean isMigratedSerializable(final Object message) {
         return message instanceof MigratedSerializable && ((MigratedSerializable)message).isMigrated();
     }
 }

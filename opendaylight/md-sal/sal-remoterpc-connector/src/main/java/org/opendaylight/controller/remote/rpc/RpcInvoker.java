@@ -90,7 +90,7 @@ final class RpcInvoker extends AbstractUntypedActor {
             public void onFailure(final Throwable failure) {
                 LOG.debug("Failed to execute RPC {}", msg.getRpc(), failure);
                 LOG.error("Failed to execute RPC {} due to {}. More details are available on DEBUG level.",
-                    msg.getRpc(), Throwables.getRootCause(failure));
+                    msg.getRpc(), Throwables.getRootCause(failure).getMessage());
                 sender.tell(new akka.actor.Status.Failure(failure), self);
             }
         }, MoreExecutors.directExecutor());

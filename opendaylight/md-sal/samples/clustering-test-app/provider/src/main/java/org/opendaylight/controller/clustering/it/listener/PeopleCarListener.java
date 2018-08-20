@@ -60,7 +60,7 @@ public class PeopleCarListener implements CarPurchaseListener {
 
             @Override
             public void onFailure(final Throwable ex) {
-                LOG.error(String.format("Failed to add car-person entry: [%s]", carPerson), ex);
+                LOG.error("Failed to add car-person entry: [{}]", carPerson, ex);
             }
         }, MoreExecutors.directExecutor());
     }

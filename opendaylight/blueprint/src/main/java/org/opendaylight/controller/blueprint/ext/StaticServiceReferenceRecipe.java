@@ -58,7 +58,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
         LOG.debug("{}: In untrack {}", getName(), reference);
 
         if (trackedServiceReference == reference) {
-            LOG.debug("{}: Current reference has been untracked", getName(), trackedServiceReference);
+            LOG.debug("{}: Current reference {} has been untracked", getName(), trackedServiceReference);
         }
     }
 

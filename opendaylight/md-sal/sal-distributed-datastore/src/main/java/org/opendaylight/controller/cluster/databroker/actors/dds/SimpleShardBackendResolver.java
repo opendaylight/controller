@@ -88,7 +88,7 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
             synchronized (this) {
                 LOG.debug("Invalidating backend information {}", staleInfo);
                 flushCache(shardName);
-                LOG.trace("Invalidated cache %s", staleInfo);
+                LOG.trace("Invalidated cache {}", staleInfo);
                 state = null;
             }
         }

@@ -129,7 +129,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
             LOG.debug("Invalidating backend information {}", staleInfo);
             flushCache(staleInfo.getShardName());
 
-            LOG.trace("Invalidated cache %s", staleInfo);
+            LOG.trace("Invalidated cache {}", staleInfo);
             backends.remove(cookie, existing);
         }
 

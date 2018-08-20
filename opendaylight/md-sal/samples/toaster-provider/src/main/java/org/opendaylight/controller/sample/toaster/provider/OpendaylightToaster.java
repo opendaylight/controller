@@ -215,7 +215,7 @@ public class OpendaylightToaster extends AbstractMXBean
      */
     @Override
     public ListenableFuture<RpcResult<MakeToastOutput>> makeToast(final MakeToastInput input) {
-        LOG.info("makeToast: " + input);
+        LOG.info("makeToast: {}", input);
 
         final SettableFuture<RpcResult<MakeToastOutput>> futureResult = SettableFuture.create();
 
@@ -322,7 +322,7 @@ public class OpendaylightToaster extends AbstractMXBean
      */
     @Override
     public ListenableFuture<RpcResult<RestockToasterOutput>> restockToaster(final RestockToasterInput input) {
-        LOG.info("restockToaster: " + input);
+        LOG.info("restockToaster: {}", input);
 
         amountOfBreadInStock.set(input.getAmountOfBreadToStock());
 

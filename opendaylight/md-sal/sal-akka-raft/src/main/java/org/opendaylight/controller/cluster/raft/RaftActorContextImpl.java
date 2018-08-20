@@ -159,7 +159,7 @@ public class RaftActorContextImpl implements RaftActorContext {
                 cluster = Optional.of(Cluster.get(getActorSystem()));
             } catch (Exception e) {
                 // An exception means there's no cluster configured. This will only happen in unit tests.
-                log.debug("{}: Could not obtain Cluster: {}", getId(), e);
+                log.debug("{}: Could not obtain Cluster", getId(), e);
                 cluster = Optional.empty();
             }
         }

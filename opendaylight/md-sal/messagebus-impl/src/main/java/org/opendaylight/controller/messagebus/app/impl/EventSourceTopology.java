@@ -110,7 +110,7 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
 
             @Override
             public void onFailure(final Throwable ex) {
-                LOG.error("Can not put data into datastore [store: {}] [path: {}] [exception: {}]",store,path, ex);
+                LOG.error("Can not put data into datastore [store: {}] [path: {}]", store, path, ex);
             }
         }, MoreExecutors.directExecutor());
     }
@@ -127,7 +127,7 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
 
             @Override
             public void onFailure(final Throwable ex) {
-                LOG.error("Can not delete data from datastore [store: {}] [path: {}] [exception: {}]",store,path, ex);
+                LOG.error("Can not delete data from datastore [store: {}] [path: {}]", store, path, ex);
             }
         }, MoreExecutors.directExecutor());
     }

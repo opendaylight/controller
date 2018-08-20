@@ -47,7 +47,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
 
         changes.forEach(change -> {
             if (change.getRootNode().getDataAfter().isPresent()) {
-                LOG.trace("Received change, data before: {}, data after: ",
+                LOG.trace("Received change, data before: {}, data after: {}",
                         change.getRootNode().getDataBefore().isPresent()
                                 ? change.getRootNode().getDataBefore().get() : "",
                         change.getRootNode().getDataAfter().get());

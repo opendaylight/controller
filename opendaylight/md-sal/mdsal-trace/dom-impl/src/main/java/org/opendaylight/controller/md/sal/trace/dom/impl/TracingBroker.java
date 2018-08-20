@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.trace.dom.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,7 +101,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class TracingBroker implements TracingDOMDataBroker {
-
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     static final Logger LOG = LoggerFactory.getLogger(TracingBroker.class);
 
     private static final int STACK_TRACE_FIRST_RELEVANT_FRAME = 2;

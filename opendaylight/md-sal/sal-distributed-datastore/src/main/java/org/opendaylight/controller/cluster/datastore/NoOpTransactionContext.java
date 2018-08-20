@@ -38,14 +38,14 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
 
     @Override
     public Future<Object> directCommit(final Boolean havePermit) {
-        LOG.debug("Tx {} directCommit called, failure: {}", getIdentifier(), failure);
+        LOG.debug("Tx {} directCommit called, failure", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
     public Future<ActorSelection> readyTransaction(final Boolean havePermit,
             final Optional<SortedSet<String>> participatingShardNamess) {
-        LOG.debug("Tx {} readyTransaction called, failure: {}", getIdentifier(), failure);
+        LOG.debug("Tx {} readyTransaction called, failure", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);
     }
 
