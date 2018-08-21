@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aeafa6d_7bc3c27c",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/ConstantSchemaAbstractDataBrokerTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-08-21T12:02:41Z",
+      "side": 1,
+      "message": "So I assume the alternative for users of ConstantSchemaAbstractDataBrokerTest is to subclass AbstractSchemaAwareTest. How about we add a CachedSchemaAbstractDataBrokerTest for this purpose?",
+      "revId": "1020154be231676238af6812d3033ad07e8f24b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
