@@ -16,6 +16,24 @@
       "revId": "1020154be231676238af6812d3033ad07e8f24b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef512e7c_e3691e2a",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/ConstantSchemaAbstractDataBrokerTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-08-21T12:26:09Z",
+      "side": 1,
+      "message": "Correct and AbstractSchemaAwareTest is already in the class hierarchy of AbstractConcurrentDataBrokerTest (and others) -- getSchemaContext() is actually specified by it.\n\nI do not believe having a non-caching variant is all that useful. The reasons for that are:\n- users keep it simple and are not aware of the costs involved\n- test classes form a hierarchy, so rolling out caching would touch quite a few classes\n- class design revolves around YangModuleInfo, which means we are inherently tied to contents of the class path\n\nThis class is actually quite dangerous:\n\nif there are multiple subclasses of this class on the classpath with overridden getModuleInfos(), the first one to execute will populate the static variable and all others will end up using the incorrect SchemaContext.",
+      "parentUuid": "5aeafa6d_7bc3c27c",
+      "revId": "1020154be231676238af6812d3033ad07e8f24b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
