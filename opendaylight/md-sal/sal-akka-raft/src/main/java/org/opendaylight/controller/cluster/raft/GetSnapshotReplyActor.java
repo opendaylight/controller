@@ -11,7 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
-import akka.actor.UntypedActor;
+import akka.actor.UntypedAbstractActor;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -28,7 +28,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-class GetSnapshotReplyActor extends UntypedActor {
+class GetSnapshotReplyActor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(GetSnapshotReplyActor.class);
 
     private final Params params;
