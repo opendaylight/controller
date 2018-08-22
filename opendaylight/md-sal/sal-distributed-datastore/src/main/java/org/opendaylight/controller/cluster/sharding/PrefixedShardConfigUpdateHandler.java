@@ -97,21 +97,19 @@ public class PrefixedShardConfigUpdateHandler {
             switch (candidate.getRootNode().getModificationType()) {
                 case UNMODIFIED:
                     break;
-                case SUBTREE_MODIFIED:
                 case APPEARED:
-                case WRITE:
-                    resolveWrite(candidate.getRootNode());
-                    break;
                 case DELETE:
                 case DISAPPEARED:
-                    resolveDelete(candidate.getRootNode());
+                case SUBTREE_MODIFIED:
+                case WRITE:
+                    resolveModifiedRoot(candidate.getRootNode());
                     break;
                 default:
                     break;
             }
         }
 
-        private void resolveWrite(final DataTreeCandidateNode rootNode) {
+        private void resolveModifiedRoot(final DataTreeCandidateNode rootNode) {
 
             LOG.debug("{}: New config received {}", logName, rootNode);
             LOG.debug("{}: Data after: {}", logName, rootNode.getDataAfter());
@@ -181,10 +179,6 @@ public class PrefixedShardConfigUpdateHandler {
             final PrefixShardRemoved message = new PrefixShardRemoved(domDataTreeIdentifier);
 
             handlingActor.tell(message, noSender());
-        }
-
-        private void resolveDelete(final DataTreeCandidateNode rootNode) {
-
         }
 
         @Override
