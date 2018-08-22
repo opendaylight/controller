@@ -24,6 +24,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -279,7 +280,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         testkit.watch(actor);
 
         actor.tell(PoisonPill.getInstance(), null);
-        testkit.expectMsgClass(testkit.duration("5 seconds"), Terminated.class);
+        testkit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         testkit.unwatch(actor);
     }

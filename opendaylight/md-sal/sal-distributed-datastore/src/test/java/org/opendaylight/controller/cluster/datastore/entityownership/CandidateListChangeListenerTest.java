@@ -15,7 +15,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableSet;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,7 +31,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Unit tests for CandidateListChangeListener.
@@ -72,7 +71,7 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
                 ImmutableSet.copyOf(candidateAdded.getAllCandidates()));
 
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, memberName1));
-        kit.expectNoMessage(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
+        kit.expectNoMessage(Duration.ofMillis(500));
 
         String memberName2 = "member-2";
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, memberName2));
