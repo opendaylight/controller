@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import static akka.actor.ActorRef.noSender;
@@ -30,15 +29,12 @@ public class RoleChangeListenerActorTest extends AbstractActorTest {
 
     @Test
     public void testRegisterRoleChangeListenerOnStart() {
-        new TestKit(getSystem()) {
-            {
-                final LeaderLocationListener listener = mock(LeaderLocationListener.class);
-                final Props props = RoleChangeListenerActor.props(getRef(), listener);
+        final TestKit testKit = new TestKit(getSystem());
+        final LeaderLocationListener listener = mock(LeaderLocationListener.class);
+        final Props props = RoleChangeListenerActor.props(testKit.getRef(), listener);
 
-                getSystem().actorOf(props, "testRegisterRoleChangeListenerOnStart");
-                expectMsgClass(RegisterRoleChangeListener.class);
-            }
-        };
+        getSystem().actorOf(props, "testRegisterRoleChangeListenerOnStart");
+        testKit.expectMsgClass(RegisterRoleChangeListener.class);
     }
 
     @Test
@@ -57,6 +53,5 @@ public class RoleChangeListenerActorTest extends AbstractActorTest {
 
         subject.tell(new LeaderStateChanged("member-1", "member-2", (short) 0), noSender());
         verify(listener, timeout(5000)).onLeaderLocationChanged(eq(LeaderLocation.REMOTE));
-
     }
 }
