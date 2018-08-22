@@ -27,8 +27,8 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableSortedSet;
+import java.time.Duration;
 import java.util.SortedSet;
-import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -43,7 +43,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Unit tests for various 3PC coordination scenarios.
@@ -116,7 +115,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         // in the participating shard list.
 
         shardA.tell(new CanCommitTransaction(txId2, CURRENT_VERSION).toSerializable(), kit2.getRef());
-        kit2.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit2.expectNoMessage(Duration.ofMillis(100));
 
         // Send tx1 CanCommit to A - it's at the head of the queue so should proceed.
 
@@ -132,7 +131,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         // Send tx2 CanCommit to B - tx1 should now be at the head of he queue.
 
         shardB.tell(new CanCommitTransaction(txId2, CURRENT_VERSION).toSerializable(), kit2.getRef());
-        kit2.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit2.expectNoMessage(Duration.ofMillis(100));
 
         // Finish commit of tx1.
 
@@ -261,18 +260,18 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         // shard list [A] matches that of tx5 so tx3 should be moved ahead of tx5 in the queue.
 
         shardB.tell(new CanCommitTransaction(txId3, CURRENT_VERSION).toSerializable(), kit3.getRef());
-        kit3.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit3.expectNoMessage(Duration.ofMillis(100));
 
         // Send tx4 CanCommit to B - tx4's participating shard list [A] matches that of tx3 and tx5 - so tx4 should
         // be moved ahead of tx5 in the queue but not tx3 since should be in the CAN_COMMIT_PENDING state.
 
         shardB.tell(new CanCommitTransaction(txId4, CURRENT_VERSION).toSerializable(), kit4.getRef());
-        kit4.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit4.expectNoMessage(Duration.ofMillis(100));
 
         // Send tx5 CanCommit to B - it's position in the queue should remain the same.
 
         shardB.tell(new CanCommitTransaction(txId5, CURRENT_VERSION).toSerializable(), kit5.getRef());
-        kit5.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit5.expectNoMessage(Duration.ofMillis(100));
 
         // Finish commit of tx1.
 
@@ -412,7 +411,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         // shard list [A] do not match that of tx2 [B] so tx1 should not be allowed to proceed.
 
         shardC.tell(new CanCommitTransaction(txId1, CURRENT_VERSION).toSerializable(), kit1.getRef());
-        kit1.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit1.expectNoMessage(Duration.ofMillis(100));
 
         // Send tx2 CanCommit to C - it's at the head of the queue so should proceed.
 
@@ -520,7 +519,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         // shard list [A] do not match that of tx2 [] so tx1 should not be allowed to proceed.
 
         shardB.tell(new CanCommitTransaction(txId1, CURRENT_VERSION).toSerializable(), kit1.getRef());
-        kit1.expectNoMessage(FiniteDuration.create(100, TimeUnit.MILLISECONDS));
+        kit1.expectNoMessage(Duration.ofMillis(100));
 
         // Send tx2 CanCommit to B - it's at the head of the queue so should proceed.
 
