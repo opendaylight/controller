@@ -14,10 +14,10 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -43,6 +43,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,7 +92,6 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTest extends AbstractActorTest {
@@ -183,7 +183,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // kill the actor
         followerActor.tell(PoisonPill.getInstance(), null);
-        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         kit.unwatch(followerActor);
 
@@ -1062,14 +1062,15 @@ public class RaftActorTest extends AbstractActorTest {
         // Test with timeout
 
         mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(
-                Duration.create(200, TimeUnit.MILLISECONDS));
+            FiniteDuration.create(200, TimeUnit.MILLISECONDS));
         reset(mockRaftActor.snapshotCohortDelegate);
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
         Failure failure = kit.expectMsgClass(akka.actor.Status.Failure.class);
         assertEquals("Failure cause type", TimeoutException.class, failure.cause().getClass());
 
-        mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(Duration.create(30, TimeUnit.SECONDS));
+        mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(
+            FiniteDuration.create(30, TimeUnit.SECONDS));
 
         // Test with persistence disabled.
 
