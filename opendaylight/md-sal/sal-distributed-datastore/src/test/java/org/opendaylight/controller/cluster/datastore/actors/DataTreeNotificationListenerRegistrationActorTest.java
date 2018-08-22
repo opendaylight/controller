@@ -11,6 +11,7 @@ import static org.mockito.Mockito.timeout;
 
 import akka.actor.ActorRef;
 import akka.testkit.javadsl.TestKit;
+import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -46,12 +47,12 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
                         mockOnClose), ActorRef.noSender());
                 subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), getRef());
 
-                expectMsgClass(duration("5 second"), CloseDataTreeNotificationListenerRegistrationReply.class);
+                expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
                 Mockito.verify(mockListenerReg, timeout(5000)).close();
                 Mockito.verify(mockOnClose, timeout(5000)).run();
 
-                expectTerminated(duration("5 second"), subject);
+                expectTerminated(Duration.ofSeconds(5), subject);
             }
         };
     }
@@ -65,7 +66,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
                 watch(subject);
 
                 subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), getRef());
-                expectMsgClass(duration("5 second"), CloseDataTreeNotificationListenerRegistrationReply.class);
+                expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
                 subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
                         mockOnClose), ActorRef.noSender());
@@ -73,7 +74,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
                 Mockito.verify(mockListenerReg, timeout(5000)).close();
                 Mockito.verify(mockOnClose, timeout(5000)).run();
 
-                expectTerminated(duration("5 second"), subject);
+                expectTerminated(Duration.ofSeconds(5), subject);
             }
         };
     }

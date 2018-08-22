@@ -14,9 +14,10 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
@@ -61,10 +62,10 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
                 subject.tell(new DataTreeChanged(mockCandidates), getRef());
 
-                within(duration("1 seconds"), () -> {
+                within(Duration.ofSeconds(1), () -> {
                     expectNoMessage();
                     Mockito.verify(mockListener, Mockito.never())
-                        .onDataTreeChanged(Matchers.anyCollectionOf(DataTreeCandidate.class));
+                        .onDataTreeChanged(ArgumentMatchers.anyCollection());
                     return null;
                 });
             }
@@ -89,7 +90,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 while (true) {
                     DeadLetter deadLetter;
                     try {
-                        deadLetter = expectMsgClass(duration("1 seconds"), DeadLetter.class);
+                        deadLetter = expectMsgClass(Duration.ofSeconds(1), DeadLetter.class);
                     } catch (AssertionError e) {
                         // Timed out - got no DeadLetter - this is good
                         break;
