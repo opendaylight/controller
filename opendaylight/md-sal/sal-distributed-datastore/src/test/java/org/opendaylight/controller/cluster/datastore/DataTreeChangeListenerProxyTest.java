@@ -24,6 +24,7 @@ import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
@@ -44,7 +45,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     private final DOMDataTreeChangeListener mockListener = mock(DOMDataTreeChangeListener.class);
@@ -61,7 +61,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         new Thread(() -> proxy.init("shard-1")).start();
 
-        FiniteDuration timeout = kit.duration("5 seconds");
+        Duration timeout = Duration.ofSeconds(5);
         FindLocalShard findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
         assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
@@ -111,7 +111,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         new Thread(() -> proxy.init("shard-1")).start();
 
-        FiniteDuration timeout = kit.duration("5 seconds");
+        Duration timeout = Duration.ofSeconds(5);
         FindLocalShard findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
         assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
@@ -137,13 +137,13 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         new Thread(() -> proxy.init("shard-1")).start();
 
-        FiniteDuration timeout = kit.duration("5 seconds");
+        Duration timeout = Duration.ofSeconds(5);
         FindLocalShard findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
         assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
         kit.reply(new LocalShardNotFound("shard-1"));
 
-        kit.expectNoMessage(kit.duration("1 seconds"));
+        kit.expectNoMessage(Duration.ofSeconds(1));
 
         proxy.close();
     }
@@ -160,13 +160,13 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         new Thread(() -> proxy.init("shard-1")).start();
 
-        FiniteDuration timeout = kit.duration("5 seconds");
+        Duration timeout = Duration.ofSeconds(5);
         FindLocalShard findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
         assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
         kit.reply(new NotInitializedException("not initialized"));
 
-        kit.within(kit.duration("1 seconds"), () ->  {
+        kit.within(Duration.ofSeconds(1), () ->  {
             kit.expectNoMessage();
             return null;
         });
@@ -236,7 +236,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         proxy.init(shardName);
 
-        kit.expectMsgClass(kit.duration("5 seconds"), CloseDataTreeNotificationListenerRegistration.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistration.class);
 
         assertEquals("getListenerRegistrationActor", null, proxy.getListenerRegistrationActor());
     }

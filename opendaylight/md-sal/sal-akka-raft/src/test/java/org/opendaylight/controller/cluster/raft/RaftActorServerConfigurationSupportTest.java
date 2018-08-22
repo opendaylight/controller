@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -173,7 +174,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.getSnapshot().getState());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
@@ -253,7 +254,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.getSnapshot().getState());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
@@ -299,7 +300,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), false), testKit.getRef());
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
@@ -336,7 +337,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID2, followerActor.path().toString(), false), testKit.getRef());
 
-        addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", java.util.Optional.of(LEADER_ID), addServerReply.getLeaderHint());
 
@@ -389,10 +390,10 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         newFollowerRaftActor.tell(installSnapshot, leaderActor);
 
         // Verify both complete successfully
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
 
-        addServerReply = testKit2.expectMsgClass(testKit2.duration("5 seconds"), AddServerReply.class);
+        addServerReply = testKit2.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
 
         // Verify ServerConfigurationPayload entries in leader's log
@@ -442,7 +443,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         leaderRaftActor.setDropMessageOfType(null);
         leaderActor.tell(commitMsg, leaderActor);
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
@@ -484,7 +485,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.TIMEOUT, addServerReply.getStatus());
 
         assertEquals("Leader peers size", 0, leaderActorContext.getPeerIds().size());
@@ -532,7 +533,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new RaftActorServerConfigurationSupport.ServerOperationTimeout(NEW_SERVER_ID), leaderActor);
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, addServerReply.getStatus());
 
         assertEquals("Leader peers size", 0, leaderActorContext.getPeerIds().size());
@@ -578,7 +579,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         leaderRaftActor.setDropMessageOfType(null);
         leaderActor.tell(snapshotReply, leaderActor);
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, addServerReply.getStatus());
 
         assertEquals("Leader peers size", 0, leaderActorContext.getPeerIds().size());
@@ -609,7 +610,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new UnInitializedFollowerSnapshotReply("bogus"), leaderActor);
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.TIMEOUT, addServerReply.getStatus());
 
         assertEquals("Leader peers size", 0, leaderActorContext.getPeerIds().size());
@@ -636,7 +637,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         noLeaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true),
                 testKit.getRef());
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, addServerReply.getStatus());
 
         LOG.info("testAddServerWithNoLeader ending");
@@ -683,7 +684,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         leaderActor.tell(new AddServer(NEW_SERVER_ID2, "", false), testKit.getRef());
 
         // The first AddServer should succeed with OK even though consensus wasn't reached
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
@@ -692,12 +693,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 votingServer(NEW_SERVER_ID));
 
         // The second AddServer should fail since consensus wasn't reached for the first
-        addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.PRIOR_REQUEST_CONSENSUS_TIMEOUT, addServerReply.getStatus());
 
         // Re-send the second AddServer - should also fail
         leaderActor.tell(new AddServer(NEW_SERVER_ID2, "", false), testKit.getRef());
-        addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.PRIOR_REQUEST_CONSENSUS_TIMEOUT, addServerReply.getStatus());
 
         LOG.info("testAddServerWithNoConsensusReached ending");
@@ -716,7 +717,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(FOLLOWER_ID, followerActor.path().toString(), true), testKit.getRef());
 
-        AddServerReply addServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"), AddServerReply.class);
+        AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.ALREADY_EXISTS, addServerReply.getStatus());
 
         LOG.info("testAddServerWithExistingServer ending");
@@ -793,8 +794,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
 
         leaderActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());
-        RemoveServerReply removeServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"),
-                RemoveServerReply.class);
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, removeServerReply.getStatus());
 
         LOG.info("testRemoveServerWithNoLeader ending");
@@ -812,8 +812,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(LEADER_ID));
 
         leaderActor.tell(new RemoveServer(NEW_SERVER_ID), testKit.getRef());
-        RemoveServerReply removeServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"),
-                RemoveServerReply.class);
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.DOES_NOT_EXIST, removeServerReply.getStatus());
 
         LOG.info("testRemoveServerNonExistentServer ending");
@@ -886,8 +885,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         follower2Actor.underlyingActor().waitForInitializeBehaviorComplete();
 
         leaderActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());
-        RemoveServerReply removeServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"),
-                RemoveServerReply.class);
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
@@ -937,8 +935,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 followerActorId);
 
         leaderActor.tell(new RemoveServer(LEADER_ID), testKit.getRef());
-        RemoveServerReply removeServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"),
-                RemoveServerReply.class);
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(followerCollector, ApplyState.class);
@@ -961,8 +958,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(LEADER_ID));
 
         leaderActor.tell(new RemoveServer(LEADER_ID), testKit.getRef());
-        RemoveServerReply removeServerReply = testKit.expectMsgClass(testKit.duration("5 seconds"),
-                RemoveServerReply.class);
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NOT_SUPPORTED, removeServerReply.getStatus());
 
         LOG.info("testRemoveServerLeaderWithNoFollowers ending");
@@ -1005,7 +1001,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(FOLLOWER_ID, false, FOLLOWER_ID2, false)),
                 testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
@@ -1030,7 +1026,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Send second ChangeServersVotingStatus message
 
         leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(FOLLOWER_ID, true)), testKit.getRef());
-        reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
@@ -1083,7 +1079,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Send ChangeServersVotingStatus message
 
         leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(LEADER_ID, false)), testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
@@ -1115,7 +1111,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId(LEADER_ID));
 
         leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(LEADER_ID, false)), testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.INVALID_REQUEST, reply.getStatus());
 
         LOG.info("testChangeLeaderToNonVotingInSingleNode ending");
@@ -1188,7 +1184,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(ImmutableMap.of(node1ID, true,
                 node2ID, true, "downNode1", false, "downNode2", false));
         node1RaftActorRef.tell(changeServers, testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
 
@@ -1209,7 +1205,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         node1RaftActor.setPeerAddress(node2ID, node2RaftActorRef.path().toString());
 
         node1RaftActorRef.tell(changeServers, testKit.getRef());
-        reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         ApplyJournalEntries apply = MessageCollectorActor.expectFirstMatching(node1Collector,
@@ -1283,7 +1279,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(ImmutableMap.of(node1ID, true));
         node1RaftActorRef.tell(changeServers, testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
 
         assertEquals("Server config", Sets.newHashSet(nonVotingServer(node1ID), votingServer(node2ID)),
@@ -1343,7 +1339,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(
                 ImmutableMap.of(node1ID, true, node2ID, true));
         node1RaftActorRef.tell(changeServers, testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
@@ -1413,7 +1409,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         node2RaftActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
-        ServerChangeReply reply = testKit.expectMsgClass(testKit.duration("5 seconds"), ServerChangeReply.class);
+        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
