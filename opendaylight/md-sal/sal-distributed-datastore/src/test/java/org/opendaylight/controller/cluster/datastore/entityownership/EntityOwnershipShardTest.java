@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -29,6 +29,7 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -523,7 +524,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.watch(peer2);
         peer2.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
         kit.unwatch(peer2);
 
         leader.tell(new PeerDown(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
@@ -590,7 +591,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.watch(peer1);
         peer1.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
         kit.unwatch(peer1);
         leader.tell(new PeerDown(peerId1.getMemberName(), peerId1.toString()), ActorRef.noSender());
 
@@ -647,7 +648,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.watch(leader);
         leader.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        kit.expectMsgClass(kit.duration("5 seconds"), Terminated.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
         kit.unwatch(leader);
         peer2.tell(new PeerDown(leaderId.getMemberName(), leaderId.toString()), ActorRef.noSender());
         peer2.tell(TimeoutNow.INSTANCE, peer2);
