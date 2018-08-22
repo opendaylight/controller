@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -23,6 +23,7 @@ import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,7 +45,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     private final DOMDataTreeChangeListener mockListener = mock(DOMDataTreeChangeListener.class);
@@ -62,7 +62,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 new Thread(() -> proxy.init("shard-1")).start();
 
-                FiniteDuration timeout = duration("5 seconds");
+                Duration timeout = Duration.ofSeconds(5);
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
                 Assert.assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
@@ -115,7 +115,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 new Thread(() -> proxy.init("shard-1")).start();
 
-                FiniteDuration timeout = duration("5 seconds");
+                Duration timeout = Duration.ofSeconds(5);
                 FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
                 Assert.assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
@@ -144,13 +144,12 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 new Thread(() -> proxy.init("shard-1")).start();
 
-                FiniteDuration timeout = duration("5 seconds");
-                FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
+                FindLocalShard findLocalShard = expectMsgClass(Duration.ofSeconds(5), FindLocalShard.class);
                 Assert.assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
                 reply(new LocalShardNotFound("shard-1"));
 
-                expectNoMessage(duration("1 seconds"));
+                expectNoMessage(Duration.ofSeconds(1));
 
                 proxy.close();
             }
@@ -170,13 +169,12 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 new Thread(() -> proxy.init("shard-1")).start();
 
-                FiniteDuration timeout = duration("5 seconds");
-                FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
+                FindLocalShard findLocalShard = expectMsgClass(Duration.ofSeconds(5), FindLocalShard.class);
                 Assert.assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
 
                 reply(new NotInitializedException("not initialized"));
 
-                within(duration("1 seconds"), () ->  {
+                within(Duration.ofSeconds(1), () ->  {
                     expectNoMessage();
                     return null;
                 });
@@ -252,7 +250,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 proxy.init(shardName);
 
-                expectMsgClass(duration("5 seconds"), CloseDataTreeNotificationListenerRegistration.class);
+                expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistration.class);
 
                 Assert.assertEquals("getListenerRegistrationActor", null, proxy.getListenerRegistrationActor());
             }
