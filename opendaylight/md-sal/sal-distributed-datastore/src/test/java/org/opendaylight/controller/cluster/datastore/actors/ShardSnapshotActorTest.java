@@ -31,37 +31,34 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
     private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
             final boolean withInstallSnapshot) throws Exception {
-        new TestKit(getSystem()) {
-            {
-                final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(), testName);
-                watch(snapshotActor);
+        final TestKit kit = new TestKit(getSystem());
+        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(), testName);
+        kit.watch(snapshotActor);
 
-                final NormalizedNode<?, ?> expectedRoot = snapshot.getRootNode().get();
+        final NormalizedNode<?, ?> expectedRoot = snapshot.getRootNode().get();
 
-                ByteArrayOutputStream installSnapshotStream = withInstallSnapshot ? new ByteArrayOutputStream() : null;
-                ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot,
-                        Optional.ofNullable(installSnapshotStream), getRef());
+        ByteArrayOutputStream installSnapshotStream = withInstallSnapshot ? new ByteArrayOutputStream() : null;
+        ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot,
+            Optional.ofNullable(installSnapshotStream), kit.getRef());
 
-                final CaptureSnapshotReply reply = expectMsgClass(duration("3 seconds"), CaptureSnapshotReply.class);
-                assertNotNull("getSnapshotState is null", reply.getSnapshotState());
-                assertEquals("SnapshotState type", ShardSnapshotState.class, reply.getSnapshotState().getClass());
-                assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.getSnapshotState()).getSnapshot());
+        final CaptureSnapshotReply reply = kit.expectMsgClass(kit.duration("3 seconds"), CaptureSnapshotReply.class);
+        assertNotNull("getSnapshotState is null", reply.getSnapshotState());
+        assertEquals("SnapshotState type", ShardSnapshotState.class, reply.getSnapshotState().getClass());
+        assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.getSnapshotState()).getSnapshot());
 
-                if (installSnapshotStream != null) {
-                    final ShardDataTreeSnapshot deserialized;
-                    try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
-                            installSnapshotStream.toByteArray()))) {
-                        deserialized = ShardDataTreeSnapshot.deserialize(in);
-                    }
-
-                    assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
-
-                    final Optional<NormalizedNode<?, ?>> maybeNode = deserialized.getRootNode();
-                    assertEquals("isPresent", true, maybeNode.isPresent());
-                    assertEquals("Root node", expectedRoot, maybeNode.get());
-                }
+        if (installSnapshotStream != null) {
+            final ShardDataTreeSnapshot deserialized;
+            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
+                installSnapshotStream.toByteArray()))) {
+                deserialized = ShardDataTreeSnapshot.deserialize(in);
             }
-        };
+
+            assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
+
+            final Optional<NormalizedNode<?, ?>> maybeNode = deserialized.getRootNode();
+            assertEquals("isPresent", true, maybeNode.isPresent());
+            assertEquals("Root node", expectedRoot, maybeNode.get());
+        }
     }
 
     @Test
