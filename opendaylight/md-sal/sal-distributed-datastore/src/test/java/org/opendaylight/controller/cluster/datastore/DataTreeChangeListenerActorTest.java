@@ -68,8 +68,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
         testKit.within(Duration.ofSeconds(1), () -> {
             testKit.expectNoMessage();
-            verify(mockListener, never())
-            .onDataTreeChanged(anyCollection());
+            verify(mockListener, never()).onDataTreeChanged(anyCollection());
             return null;
         });
     }
