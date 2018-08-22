@@ -62,7 +62,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
                 Snapshot.create(shard2SnapshotState, Collections.<ReplicatedLogEntry>emptyList(),
                         2, 1, 2, 1, 1, "member-1", null)), ActorRef.noSender());
 
-        kit.expectNoMsg(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
+        kit.expectNoMessage(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
 
         ByteState shard3SnapshotState = ByteState.of(new byte[]{7,8,9});
         replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard3", MEMBER_1, "config").toString(),

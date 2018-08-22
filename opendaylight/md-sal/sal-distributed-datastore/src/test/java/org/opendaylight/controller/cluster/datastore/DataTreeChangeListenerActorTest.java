@@ -62,7 +62,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 subject.tell(new DataTreeChanged(mockCandidates), getRef());
 
                 within(duration("1 seconds"), () -> {
-                    expectNoMsg();
+                    expectNoMessage();
                     Mockito.verify(mockListener, Mockito.never())
                         .onDataTreeChanged(Matchers.anyCollectionOf(DataTreeCandidate.class));
                     return null;

@@ -62,7 +62,7 @@ public class ReconnectingClientConnectionTest
         final Consumer<Response<?, ?>> callback = mock(Consumer.class);
         final Request<?, ?> request = createRequest(replyToProbe.ref());
         connection.sendRequest(request, callback);
-        backendProbe.expectNoMsg();
+        backendProbe.expectNoMessage();
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(CLIENT_ID, 0L);
         final RequestSuccess<?, ?> message = new TransactionAbortSuccess(new TransactionIdentifier(historyId, 0L), 0L);
         final ResponseEnvelope<?> envelope = new SuccessEnvelope(message, 0L, 0L, 0L);

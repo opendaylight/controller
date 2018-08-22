@@ -140,7 +140,7 @@ public class ActorBehaviorTest {
         probe.expectMsgClass(MockedSnapshotStore.DeleteByCriteriaRequest.class);
         probe.reply(new RuntimeException("delete failed"));
         //actor shouldn't terminate
-        probe.expectNoMsg();
+        probe.expectNoMessage();
     }
 
     @SuppressWarnings("unchecked")

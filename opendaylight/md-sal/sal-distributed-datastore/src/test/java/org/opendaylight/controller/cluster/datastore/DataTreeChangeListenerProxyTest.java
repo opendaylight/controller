@@ -94,7 +94,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 proxy.close();
 
-                expectNoMsg();
+                expectNoMessage();
             }
         };
     }
@@ -150,7 +150,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
                 reply(new LocalShardNotFound("shard-1"));
 
-                expectNoMsg(duration("1 seconds"));
+                expectNoMessage(duration("1 seconds"));
 
                 proxy.close();
             }
@@ -177,7 +177,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                 reply(new NotInitializedException("not initialized"));
 
                 within(duration("1 seconds"), () ->  {
-                    expectNoMsg();
+                    expectNoMessage();
                     return null;
                 });
 

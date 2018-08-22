@@ -123,7 +123,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
         for (int i = 0; i < getMaxInFlightMessages(); i++) {
             probe.expectMsgClass(RequestEnvelope.class);
         }
-        probe.expectNoMsg();
+        probe.expectNoMessage();
         final Collection<ConnectionEntry> entries = queue.drain();
         assertEquals(sentMessages, entries.size());
         assertThat(entries, everyItem(entryWithRequest(request)));
@@ -288,7 +288,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
         final Request<?, ?> request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
         queue.enqueueOrForward(new ConnectionEntry(request2, mockConsumer, now), now);
         verifyNoMoreInteractions(mockMessageSlicer);
-        probe.expectNoMsg();
+        probe.expectNoMessage();
 
         RequestEnvelope requestEnvelope = (RequestEnvelope) sliceOptions.getValue().getMessage();
         queue.complete(new FailureEnvelope(request.toRequestFailure(mock(RequestException.class)),

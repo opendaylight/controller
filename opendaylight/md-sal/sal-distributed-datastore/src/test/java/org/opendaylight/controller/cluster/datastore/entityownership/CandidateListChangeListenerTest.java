@@ -72,7 +72,7 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
                 ImmutableSet.copyOf(candidateAdded.getAllCandidates()));
 
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, memberName1));
-        kit.expectNoMsg(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
+        kit.expectNoMessage(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
 
         String memberName2 = "member-2";
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, memberName2));

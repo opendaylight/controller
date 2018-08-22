@@ -156,7 +156,7 @@ public class ActorContextTest extends AbstractActorTest {
 
                     assertEquals(shardActorRef, out.get());
 
-                    expectNoMsg();
+                    expectNoMessage();
                     return null;
                 });
             }

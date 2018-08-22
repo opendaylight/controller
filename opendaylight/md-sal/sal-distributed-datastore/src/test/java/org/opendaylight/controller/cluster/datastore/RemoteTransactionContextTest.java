@@ -122,7 +122,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
             }
         });
 
-        kit.expectNoMsg();
+        kit.expectNoMessage();
     }
 
     /**
@@ -158,7 +158,7 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
             }
         });
 
-        kit.expectNoMsg();
+        kit.expectNoMessage();
     }
 
     private void sendReply(final Object message) {

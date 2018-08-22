@@ -526,18 +526,18 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 // RoleChangeNotification.
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
-                expectNoMsg(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
+                expectNoMessage(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
 
                 shardManager.tell(new ActorInitialized(), mockShardActor);
 
-                expectNoMsg(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
+                expectNoMessage(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.tell(
                         new RoleChangeNotification(memberId, RaftState.Candidate.name(), RaftState.Leader.name()),
                         mockShardActor);
 
-                expectNoMsg(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
+                expectNoMessage(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
 
                 DataTree mockDataTree = mock(DataTree.class);
                 shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
@@ -549,7 +549,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         primaryFound.getPrimaryPath().contains("member-1-shard-default"));
                 assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
 
-                expectNoMsg(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
+                expectNoMessage(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
             }
         };
 
@@ -571,7 +571,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new ActorInitialized(), mockShardActor);
 
-                expectNoMsg(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
+                expectNoMessage(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
             }
         };
 
