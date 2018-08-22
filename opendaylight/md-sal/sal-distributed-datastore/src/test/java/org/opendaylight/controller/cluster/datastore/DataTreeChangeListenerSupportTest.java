@@ -26,6 +26,7 @@ import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
+import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Unit tests for DataTreeChangeListenerSupport.
@@ -93,7 +94,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         listener.reset(1);
         TestKit kit = new TestKit(getSystem());
         entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
-        kit.expectMsgClass(kit.duration("5 seconds"), CloseDataTreeNotificationListenerRegistrationReply.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
         writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
         listener.verifyNoNotifiedData(TEST_PATH);
@@ -164,7 +165,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         try {
             reply = (RegisterDataTreeNotificationListenerReply)
                     Await.result(Patterns.ask(shardActor, new RegisterDataTreeChangeListener(path, dclActor, false),
-                        new Timeout(5, TimeUnit.SECONDS)), Duration.create(5, TimeUnit.SECONDS));
+                        new Timeout(5, TimeUnit.SECONDS)), FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
