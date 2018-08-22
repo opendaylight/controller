@@ -9,11 +9,12 @@ package org.opendaylight.controller.remote.rpc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import akka.actor.Status.Failure;
+import java.time.Duration;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
@@ -36,9 +37,8 @@ public class RpcBrokerTest extends AbstractRpcTest {
         final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
         rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
- 
-        final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(rpcRegistry1Probe.duration("5 seconds"),
-            RpcResponse.class);
+
+        final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), RpcResponse.class);
 
         assertEquals(rpcResult.getResult(), rpcResponse.getResultNormalizedNode());
     }
@@ -52,8 +52,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
         rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
 
-        final Failure rpcResponse = rpcRegistry1Probe.expectMsgClass(rpcRegistry1Probe.duration("5 seconds"),
-            Failure.class);
+        final Failure rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), Failure.class);
 
         assertTrue(rpcResponse.cause() instanceof DOMRpcException);
     }

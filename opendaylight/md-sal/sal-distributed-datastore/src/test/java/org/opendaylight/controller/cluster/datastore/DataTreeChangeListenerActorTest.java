@@ -20,6 +20,7 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
@@ -65,7 +66,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
         subject.tell(new DataTreeChanged(mockCandidates), testKit.getRef());
 
-        testKit.within(testKit.duration("1 seconds"), () -> {
+        testKit.within(Duration.ofSeconds(1), () -> {
             testKit.expectNoMessage();
             verify(mockListener, never()).onDataTreeChanged(anyCollection());
             return null;
@@ -88,7 +89,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
         while (true) {
             DeadLetter deadLetter;
             try {
-                deadLetter = testKit.expectMsgClass(testKit.duration("1 seconds"), DeadLetter.class);
+                deadLetter = testKit.expectMsgClass(Duration.ofSeconds(1), DeadLetter.class);
             } catch (AssertionError e) {
                 // Timed out - got no DeadLetter - this is good
                 break;

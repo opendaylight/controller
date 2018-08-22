@@ -15,6 +15,7 @@ import akka.testkit.javadsl.TestKit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
+import java.time.Duration;
 import java.util.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
@@ -41,7 +42,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot,
             Optional.ofNullable(installSnapshotStream), kit.getRef());
 
-        final CaptureSnapshotReply reply = kit.expectMsgClass(kit.duration("3 seconds"), CaptureSnapshotReply.class);
+        final CaptureSnapshotReply reply = kit.expectMsgClass(Duration.ofSeconds(3), CaptureSnapshotReply.class);
         assertNotNull("getSnapshotState is null", reply.getSnapshotState());
         assertEquals("SnapshotState type", ShardSnapshotState.class, reply.getSnapshotState().getClass());
         assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.getSnapshotState()).getSnapshot());
