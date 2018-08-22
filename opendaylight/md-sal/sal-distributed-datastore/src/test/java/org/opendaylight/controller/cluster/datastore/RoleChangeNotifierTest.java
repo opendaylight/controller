@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNull;
 import akka.actor.ActorRef;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -26,95 +27,87 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class RoleChangeNotifierTest extends AbstractActorTest {
+    private TestKit testKit;
+
+    @Before
+    public void setup() {
+        testKit = new TestKit(getSystem());
+    }
 
     @Test
     public void testHandleRegisterRoleChangeListener() {
-        new TestKit(getSystem()) {
-            {
-                String memberId = "testHandleRegisterRoleChangeListener";
-                ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
+        String memberId = "testHandleRegisterRoleChangeListener";
+        ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
 
-                TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
-                        RoleChangeNotifier.getProps(memberId), memberId);
+        TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
+            RoleChangeNotifier.getProps(memberId), memberId);
 
-                notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
+        notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
 
-                RegisterRoleChangeListenerReply reply = MessageCollectorActor.getFirstMatching(listenerActor,
-                        RegisterRoleChangeListenerReply.class);
-                assertNotNull(reply);
+        RegisterRoleChangeListenerReply reply = MessageCollectorActor.getFirstMatching(listenerActor,
+            RegisterRoleChangeListenerReply.class);
+        assertNotNull(reply);
 
-                RoleChangeNotification notification = MessageCollectorActor.getFirstMatching(listenerActor,
-                        RoleChangeNotification.class);
-                assertNull(notification);
-            }
-        };
+        RoleChangeNotification notification = MessageCollectorActor.getFirstMatching(listenerActor,
+            RoleChangeNotification.class);
+        assertNull(notification);
     }
 
     @Test
     public void testHandleRaftRoleChanged() {
-        new TestKit(getSystem()) {
-            {
-                String memberId = "testHandleRegisterRoleChangeListenerWithNotificationSet";
-                ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
-                ActorRef shardActor = getTestActor();
+        String memberId = "testHandleRegisterRoleChangeListenerWithNotificationSet";
+        ActorRef listenerActor = getSystem().actorOf(MessageCollectorActor.props());
+        ActorRef shardActor = testKit.getTestActor();
 
-                TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
-                        RoleChangeNotifier.getProps(memberId), memberId);
+        TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
+            RoleChangeNotifier.getProps(memberId), memberId);
 
-                notifierTestActorRef.tell(
-                        new RoleChanged(memberId, RaftState.Candidate.name(), RaftState.Leader.name()), shardActor);
+        notifierTestActorRef.tell(
+            new RoleChanged(memberId, RaftState.Candidate.name(), RaftState.Leader.name()), shardActor);
 
-                // no notification should be sent as listener has not yet
-                // registered
-                assertNull(MessageCollectorActor.getFirstMatching(listenerActor, RoleChangeNotification.class));
+        // no notification should be sent as listener has not yet
+        // registered
+        assertNull(MessageCollectorActor.getFirstMatching(listenerActor, RoleChangeNotification.class));
 
-                // listener registers after role has been changed, ensure we
-                // sent the latest role change after a reply
-                notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
+        // listener registers after role has been changed, ensure we
+        // sent the latest role change after a reply
+        notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
 
-                RegisterRoleChangeListenerReply reply = MessageCollectorActor.getFirstMatching(listenerActor,
-                        RegisterRoleChangeListenerReply.class);
-                assertNotNull(reply);
+        RegisterRoleChangeListenerReply reply = MessageCollectorActor.getFirstMatching(listenerActor,
+            RegisterRoleChangeListenerReply.class);
+        assertNotNull(reply);
 
-                RoleChangeNotification notification = MessageCollectorActor.getFirstMatching(listenerActor,
-                        RoleChangeNotification.class);
-                assertNotNull(notification);
-                assertEquals(RaftState.Candidate.name(), notification.getOldRole());
-                assertEquals(RaftState.Leader.name(), notification.getNewRole());
-
-            }
-        };
-
+        RoleChangeNotification notification = MessageCollectorActor.getFirstMatching(listenerActor,
+            RoleChangeNotification.class);
+        assertNotNull(notification);
+        assertEquals(RaftState.Candidate.name(), notification.getOldRole());
+        assertEquals(RaftState.Leader.name(), notification.getNewRole());
     }
 
     @Test
     public void testHandleLeaderStateChanged() {
-        new TestKit(getSystem()) {
-            {
-                String actorId = "testHandleLeaderStateChanged";
-                TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
-                        RoleChangeNotifier.getProps(actorId), actorId);
+        String actorId = "testHandleLeaderStateChanged";
+        TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
+            RoleChangeNotifier.getProps(actorId), actorId);
 
-                notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader1", (short) 5), ActorRef.noSender());
+        notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader1", (short) 5), ActorRef.noSender());
 
-                // listener registers after the sate has been changed, ensure we
-                // sent the latest state change after a reply
-                notifierTestActorRef.tell(new RegisterRoleChangeListener(), getRef());
+        // listener registers after the sate has been changed, ensure we
+        // sent the latest state change after a reply
+        notifierTestActorRef.tell(new RegisterRoleChangeListener(), testKit.getRef());
 
-                expectMsgClass(RegisterRoleChangeListenerReply.class);
+        testKit.expectMsgClass(RegisterRoleChangeListenerReply.class);
 
-                LeaderStateChanged leaderStateChanged = expectMsgClass(LeaderStateChanged.class);
-                assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
-                assertEquals("getLeaderId", "leader1", leaderStateChanged.getLeaderId());
-                assertEquals("getLeaderPayloadVersion", 5, leaderStateChanged.getLeaderPayloadVersion());
+        LeaderStateChanged leaderStateChanged = testKit.expectMsgClass(LeaderStateChanged.class);
+        assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
+        assertEquals("getLeaderId", "leader1", leaderStateChanged.getLeaderId());
+        assertEquals("getLeaderPayloadVersion", 5, leaderStateChanged.getLeaderPayloadVersion());
 
-                notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader2", (short) 6), ActorRef.noSender());
+        notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader2", (short) 6), ActorRef.noSender());
 
-                leaderStateChanged = expectMsgClass(LeaderStateChanged.class);
-                assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
-                assertEquals("getLeaderId", "leader2", leaderStateChanged.getLeaderId());
-                assertEquals("getLeaderPayloadVersion", 6, leaderStateChanged.getLeaderPayloadVersion());
-            }
-        };
+        leaderStateChanged = testKit.expectMsgClass(LeaderStateChanged.class);
+        assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
+        assertEquals("getLeaderId", "leader2", leaderStateChanged.getLeaderId());
+        assertEquals("getLeaderPayloadVersion", 6, leaderStateChanged.getLeaderPayloadVersion());
     }
 }
