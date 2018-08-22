@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -141,89 +142,66 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testFindLocalShardWithShardFound() {
-        new TestKit(getSystem()) {
-            {
-                within(duration("1 seconds"), () -> {
-                    ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
+        final TestKit testKit = new TestKit(getSystem());
+        testKit.within(testKit.duration("1 seconds"), () -> {
+            ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
-                    ActorRef shardManagerActorRef = getSystem()
-                            .actorOf(MockShardManager.props(true, shardActorRef));
+            ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(true, shardActorRef));
 
-                    ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
-                        mock(ClusterWrapper.class), mock(Configuration.class));
+            ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
+                mock(ClusterWrapper.class), mock(Configuration.class));
 
-                    Optional<ActorRef> out = actorContext.findLocalShard("default");
+            Optional<ActorRef> out = actorContext.findLocalShard("default");
 
-                    assertEquals(shardActorRef, out.get());
+            assertEquals(shardActorRef, out.get());
 
-                    expectNoMessage();
-                    return null;
-                });
-            }
-        };
-
+            testKit.expectNoMessage();
+            return null;
+        });
     }
 
     @Test
     public void testFindLocalShardWithShardNotFound() {
-        new TestKit(getSystem()) {
-            {
-                ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(false, null));
+        ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(false, null));
 
-                ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
-                        mock(ClusterWrapper.class), mock(Configuration.class));
+        ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef, mock(ClusterWrapper.class),
+            mock(Configuration.class));
 
-                Optional<ActorRef> out = actorContext.findLocalShard("default");
-                assertTrue(!out.isPresent());
-            }
-        };
-
+        Optional<ActorRef> out = actorContext.findLocalShard("default");
+        assertFalse(out.isPresent());
     }
 
     @Test
     public void testExecuteRemoteOperation() {
-        new TestKit(getSystem()) {
-            {
-                ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
+        ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
-                ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(true, shardActorRef));
+        ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(true, shardActorRef));
 
-                ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
-                        mock(ClusterWrapper.class), mock(Configuration.class));
+        ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
+            mock(ClusterWrapper.class), mock(Configuration.class));
 
-                ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
+        ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                Object out = actorContext.executeOperation(actor, "hello");
+        Object out = actorContext.executeOperation(actor, "hello");
 
-                assertEquals("hello", out);
-            }
-        };
+        assertEquals("hello", out);
     }
 
     @Test
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public void testExecuteRemoteOperationAsync() {
-        new TestKit(getSystem()) {
-            {
-                ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
+    public void testExecuteRemoteOperationAsync() throws Exception {
+        ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
-                ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(true, shardActorRef));
+        ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(true, shardActorRef));
 
-                ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
-                        mock(ClusterWrapper.class), mock(Configuration.class));
+        ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
+            mock(ClusterWrapper.class), mock(Configuration.class));
 
-                ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
+        ActorSelection actor = actorContext.actorSelection(shardActorRef.path());
 
-                Future<Object> future = actorContext.executeOperationAsync(actor, "hello");
+        Future<Object> future = actorContext.executeOperationAsync(actor, "hello");
 
-                try {
-                    Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
-                    assertEquals("Result", "hello", result);
-                } catch (Exception e) {
-                    throw new AssertionError(e);
-                }
-            }
-        };
+        Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        assertEquals("Result", "hello", result);
     }
 
     @Test
@@ -313,34 +291,31 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testSetDatastoreContext() {
-        new TestKit(getSystem()) {
-            {
-                ActorContext actorContext = new ActorContext(getSystem(), getRef(),
-                        mock(ClusterWrapper.class), mock(Configuration.class), DatastoreContext.newBuilder()
-                                .operationTimeoutInSeconds(5).shardTransactionCommitTimeoutInSeconds(7).build(),
-                        new PrimaryShardInfoFutureCache());
+        final TestKit testKit = new TestKit(getSystem());
+        ActorContext actorContext = new ActorContext(getSystem(), testKit.getRef(),
+            mock(ClusterWrapper.class), mock(Configuration.class), DatastoreContext.newBuilder()
+            .operationTimeoutInSeconds(5).shardTransactionCommitTimeoutInSeconds(7).build(),
+            new PrimaryShardInfoFutureCache());
 
-                assertEquals("getOperationDuration", 5, actorContext.getOperationDuration().toSeconds());
-                assertEquals("getTransactionCommitOperationTimeout", 7,
-                        actorContext.getTransactionCommitOperationTimeout().duration().toSeconds());
+        assertEquals("getOperationDuration", 5, actorContext.getOperationDuration().toSeconds());
+        assertEquals("getTransactionCommitOperationTimeout", 7,
+            actorContext.getTransactionCommitOperationTimeout().duration().toSeconds());
 
-                DatastoreContext newContext = DatastoreContext.newBuilder().operationTimeoutInSeconds(6)
-                        .shardTransactionCommitTimeoutInSeconds(8).build();
+        DatastoreContext newContext = DatastoreContext.newBuilder().operationTimeoutInSeconds(6)
+                .shardTransactionCommitTimeoutInSeconds(8).build();
 
-                DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
-                Mockito.doReturn(newContext).when(mockContextFactory).getBaseDatastoreContext();
+        DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
+        Mockito.doReturn(newContext).when(mockContextFactory).getBaseDatastoreContext();
 
-                actorContext.setDatastoreContext(mockContextFactory);
+        actorContext.setDatastoreContext(mockContextFactory);
 
-                expectMsgClass(duration("5 seconds"), DatastoreContextFactory.class);
+        testKit.expectMsgClass(testKit.duration("5 seconds"), DatastoreContextFactory.class);
 
-                Assert.assertSame("getDatastoreContext", newContext, actorContext.getDatastoreContext());
+        Assert.assertSame("getDatastoreContext", newContext, actorContext.getDatastoreContext());
 
-                assertEquals("getOperationDuration", 6, actorContext.getOperationDuration().toSeconds());
-                assertEquals("getTransactionCommitOperationTimeout", 8,
-                        actorContext.getTransactionCommitOperationTimeout().duration().toSeconds());
-            }
-        };
+        assertEquals("getOperationDuration", 6, actorContext.getOperationDuration().toSeconds());
+        assertEquals("getTransactionCommitOperationTimeout", 8,
+            actorContext.getTransactionCommitOperationTimeout().duration().toSeconds());
     }
 
     @Test
@@ -471,34 +446,30 @@ public class ActorContextTest extends AbstractActorTest {
 
     @Test
     public void testBroadcast() {
-        new TestKit(getSystem()) {
-            {
-                ActorRef shardActorRef1 = getSystem().actorOf(MessageCollectorActor.props());
-                ActorRef shardActorRef2 = getSystem().actorOf(MessageCollectorActor.props());
+        ActorRef shardActorRef1 = getSystem().actorOf(MessageCollectorActor.props());
+        ActorRef shardActorRef2 = getSystem().actorOf(MessageCollectorActor.props());
 
-                TestActorRef<MockShardManager> shardManagerActorRef = TestActorRef.create(getSystem(),
-                        MockShardManager.props());
-                MockShardManager shardManagerActor = shardManagerActorRef.underlyingActor();
-                shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(
-                        shardActorRef1.path().toString(), DataStoreVersions.CURRENT_VERSION));
-                shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(
-                        shardActorRef2.path().toString(), DataStoreVersions.CURRENT_VERSION));
-                shardManagerActor.addFindPrimaryResp("shard3", new NoShardLeaderException("not found"));
+        TestActorRef<MockShardManager> shardManagerActorRef = TestActorRef.create(getSystem(),
+            MockShardManager.props());
+        MockShardManager shardManagerActor = shardManagerActorRef.underlyingActor();
+        shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(
+            shardActorRef1.path().toString(), DataStoreVersions.CURRENT_VERSION));
+        shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(
+            shardActorRef2.path().toString(), DataStoreVersions.CURRENT_VERSION));
+        shardManagerActor.addFindPrimaryResp("shard3", new NoShardLeaderException("not found"));
 
-                Configuration mockConfig = mock(Configuration.class);
-                doReturn(Sets.newLinkedHashSet(Arrays.asList("shard1", "shard2", "shard3"))).when(mockConfig)
-                        .getAllShardNames();
+        Configuration mockConfig = mock(Configuration.class);
+        doReturn(Sets.newLinkedHashSet(Arrays.asList("shard1", "shard2", "shard3"))).when(mockConfig)
+        .getAllShardNames();
 
-                ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
-                        mock(ClusterWrapper.class), mockConfig,
-                        DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(),
-                        new PrimaryShardInfoFutureCache());
+        ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
+            mock(ClusterWrapper.class), mockConfig,
+            DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(),
+            new PrimaryShardInfoFutureCache());
 
-                actorContext.broadcast(v -> new TestMessage(), TestMessage.class);
+        actorContext.broadcast(v -> new TestMessage(), TestMessage.class);
 
-                MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
-                MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);
-            }
-        };
+        MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
+        MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);
     }
 }
