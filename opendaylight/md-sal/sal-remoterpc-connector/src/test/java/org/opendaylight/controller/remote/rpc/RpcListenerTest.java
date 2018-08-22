@@ -29,47 +29,39 @@ public class RpcListenerTest {
     private static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier
             .create(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME));
     private static final DOMRpcIdentifier RPC_ID = DOMRpcIdentifier.create(RPC_TYPE, TEST_PATH);
-    static ActorSystem system;
 
+    private static ActorSystem SYSTEM;
 
     @BeforeClass
     public static void setup() {
-        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
+        SYSTEM = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("odl-cluster-rpc"));
     }
 
     @AfterClass
     public static void teardown() {
-        TestKit.shutdownActorSystem(system);
-        system = null;
+        TestKit.shutdownActorSystem(SYSTEM);
+        SYSTEM = null;
     }
 
     @Test
     public void testRouteAdd() {
-        new TestKit(system) {
-            {
-                // Test announcements
-                final TestKit probeReg = new TestKit(system);
-                final ActorRef rpcRegistry = probeReg.getRef();
+        // Test announcements
+        final TestKit probeReg = new TestKit(SYSTEM);
+        final ActorRef rpcRegistry = probeReg.getRef();
 
-                final RpcListener rpcListener = new RpcListener(rpcRegistry);
-                rpcListener.onRpcAvailable(Collections.singleton(RPC_ID));
-                probeReg.expectMsgClass(RpcRegistry.Messages.AddOrUpdateRoutes.class);
-            }
-        };
+        final RpcListener rpcListener = new RpcListener(rpcRegistry);
+        rpcListener.onRpcAvailable(Collections.singleton(RPC_ID));
+        probeReg.expectMsgClass(RpcRegistry.Messages.AddOrUpdateRoutes.class);
     }
 
     @Test
     public void testRouteRemove() {
-        new TestKit(system) {
-            {
-                // Test announcements
-                final TestKit probeReg = new TestKit(system);
-                final ActorRef rpcRegistry = probeReg.getRef();
+        // Test announcements
+        final TestKit probeReg = new TestKit(SYSTEM);
+        final ActorRef rpcRegistry = probeReg.getRef();
 
-                final RpcListener rpcListener = new RpcListener(rpcRegistry);
-                rpcListener.onRpcUnavailable(Collections.singleton(RPC_ID));
-                probeReg.expectMsgClass(RpcRegistry.Messages.RemoveRoutes.class);
-            }
-        };
+        final RpcListener rpcListener = new RpcListener(rpcRegistry);
+        rpcListener.onRpcUnavailable(Collections.singleton(RPC_ID));
+        probeReg.expectMsgClass(RpcRegistry.Messages.RemoveRoutes.class);
     }
 }
