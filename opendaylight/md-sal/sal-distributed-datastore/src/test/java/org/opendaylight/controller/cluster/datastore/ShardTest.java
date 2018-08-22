@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -34,6 +34,7 @@ import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -141,7 +142,7 @@ public class ShardTest extends AbstractShardTest {
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, false), getRef());
 
-                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("3 seconds"),
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(Duration.ofSeconds(3),
                         RegisterDataTreeNotificationListenerReply.class);
                 final String replyPath = reply.getListenerRegistrationPath().toString();
                 assertTrue("Incorrect reply path: " + replyPath,
@@ -202,12 +203,12 @@ public class ShardTest extends AbstractShardTest {
                 assertEquals("Got first ElectionTimeout", true, onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
 
                 shard.tell(new RegisterDataTreeChangeListener(path, dclActor, false), getRef());
-                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(Duration.ofSeconds(5),
                         RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistratioznPath", reply.getListenerRegistrationPath());
 
                 shard.tell(FindLeader.INSTANCE, getRef());
-                final FindLeaderReply findLeadeReply = expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
+                final FindLeaderReply findLeadeReply = expectMsgClass(Duration.ofSeconds(5), FindLeaderReply.class);
                 assertFalse("Expected the shard not to be the leader", findLeadeReply.getLeaderActor().isPresent());
 
                 onChangeListenerRegistered.countDown();
@@ -231,7 +232,7 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
                         DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
 
-                final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
+                final CreateTransactionReply reply = expectMsgClass(Duration.ofSeconds(3),
                         CreateTransactionReply.class);
 
                 final String path = reply.getTransactionPath().toString();
@@ -253,7 +254,7 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
                         DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
 
-                final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
+                final CreateTransactionReply reply = expectMsgClass(Duration.ofSeconds(3),
                         CreateTransactionReply.class);
 
                 final String path = reply.getTransactionPath().toString();
@@ -403,8 +404,8 @@ public class ShardTest extends AbstractShardTest {
         final CountDownLatch commitLatch = new CountDownLatch(2);
 
         final long timeoutSec = 5;
-        final FiniteDuration duration = FiniteDuration.create(timeoutSec, TimeUnit.SECONDS);
-        final Timeout timeout = new Timeout(duration);
+        final Duration duration = Duration.ofSeconds(timeoutSec);
+        final Timeout timeout = Timeout.create(duration);
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
                 newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -574,7 +575,7 @@ public class ShardTest extends AbstractShardTest {
                 waitUntilLeader(shard);
 
                 final TransactionIdentifier transactionID = nextTransactionId();
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 // Send a BatchedModifications to start a transaction.
 
@@ -627,7 +628,7 @@ public class ShardTest extends AbstractShardTest {
                 waitUntilLeader(shard);
 
                 final TransactionIdentifier transactionID = nextTransactionId();
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 // Send a BatchedModifications to start a transaction.
 
@@ -675,7 +676,7 @@ public class ShardTest extends AbstractShardTest {
 
                 shard.tell(batched, getRef());
 
-                final Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                final Failure failure = expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
 
                 if (failure != null) {
                     Throwables.propagateIfPossible(failure.cause(), Exception.class);
@@ -708,7 +709,7 @@ public class ShardTest extends AbstractShardTest {
                 BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
                 batched.addModification(new MergeModification(TestModel.TEST_PATH, invalidData));
                 shard.tell(batched, getRef());
-                Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                Failure failure = expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
 
                 final Throwable cause = failure.cause();
 
@@ -718,7 +719,7 @@ public class ShardTest extends AbstractShardTest {
 
                 shard.tell(batched, getRef());
 
-                failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                failure = expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
                 assertEquals("Failure cause", cause, failure.cause());
             }
         };
@@ -738,7 +739,7 @@ public class ShardTest extends AbstractShardTest {
                 final TransactionIdentifier transactionID1 = new TransactionIdentifier(historyId, 0);
                 final TransactionIdentifier transactionID2 = new TransactionIdentifier(historyId, 1);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 // Send a BatchedModifications to start a chained write
                 // transaction and ready it.
@@ -753,12 +754,12 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new CreateTransaction(transactionID2, TransactionType.READ_ONLY.ordinal(),
                         DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
 
-                final CreateTransactionReply createReply = expectMsgClass(duration("3 seconds"),
+                final CreateTransactionReply createReply = expectMsgClass(Duration.ofSeconds(3),
                         CreateTransactionReply.class);
 
                 getSystem().actorSelection(createReply.getTransactionPath())
                         .tell(new ReadData(path, DataStoreVersions.CURRENT_VERSION), getRef());
-                final ReadDataReply readReply = expectMsgClass(duration("3 seconds"), ReadDataReply.class);
+                final ReadDataReply readReply = expectMsgClass(Duration.ofSeconds(3), ReadDataReply.class);
                 assertEquals("Read node", containerNode, readReply.getNormalizedNode());
 
                 // Commit the write transaction.
@@ -881,7 +882,7 @@ public class ShardTest extends AbstractShardTest {
                             getRef());
                 }
 
-                expectMsgClass(duration("5 seconds"), CommitTransactionReply.class);
+                expectMsgClass(Duration.ofSeconds(5), CommitTransactionReply.class);
 
                 final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
                 assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
@@ -982,7 +983,7 @@ public class ShardTest extends AbstractShardTest {
 
                 // Setup a simulated transactions with a mock cohort.
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 final TransactionIdentifier transactionID = nextTransactionId();
                 final NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
@@ -1028,7 +1029,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
                 final TransactionIdentifier transactionID = nextTransactionId();
 
                 if (readWrite) {
@@ -1085,8 +1086,8 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
-                final Timeout timeout = new Timeout(duration);
+                final Duration duration = Duration.ofSeconds(5);
+                final Timeout timeout = Timeout.create(duration);
 
                 // Setup 2 simulated transactions with mock cohorts. The first
                 // one fails in the
@@ -1162,8 +1163,8 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
-                final Timeout timeout = new Timeout(duration);
+                final Duration duration = Duration.ofSeconds(5);
+                final Timeout timeout = Timeout.create(duration);
 
                 doThrow(new RuntimeException("mock preCommit failure")).when(dataTree)
                         .prepare(any(DataTreeModification.class));
@@ -1230,7 +1231,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
                 final TransactionIdentifier transactionID1 = nextTransactionId();
 
                 doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock canCommit failure"))
@@ -1280,7 +1281,7 @@ public class ShardTest extends AbstractShardTest {
                 doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock canCommit failure"))
                         .doNothing().when(dataTree).validate(any(DataTreeModification.class));
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 final TransactionIdentifier transactionID1 = nextTransactionId();
 
@@ -1335,7 +1336,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 final TransactionIdentifier transactionID = nextTransactionId();
 
@@ -1372,7 +1373,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
                 writeToStore(shard, TestModel.OUTER_LIST_PATH,
@@ -1505,7 +1506,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 final TransactionIdentifier transactionID1 = nextTransactionId();
                 shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
@@ -1544,7 +1545,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
@@ -1602,7 +1603,7 @@ public class ShardTest extends AbstractShardTest {
                         "testCanCommitBeforeReadyFailure");
 
                 shard.tell(new CanCommitTransaction(nextTransactionId(), CURRENT_VERSION).toSerializable(), getRef());
-                expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
             }
         };
     }
@@ -1616,8 +1617,8 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
-                final Timeout timeout = new Timeout(duration);
+                final Duration duration = Duration.ofSeconds(5);
+                final Timeout timeout = Timeout.create(duration);
 
                 // Ready 2 transactions - the first one will be aborted.
 
@@ -1654,7 +1655,8 @@ public class ShardTest extends AbstractShardTest {
 
                 // Wait for the 2nd Tx to complete the canCommit phase.
 
-                canCommitReply = (CanCommitTransactionReply) Await.result(canCommitFuture, duration);
+                canCommitReply = (CanCommitTransactionReply) Await.result(canCommitFuture,
+                    FiniteDuration.create(5, TimeUnit.SECONDS));
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
             }
         };
@@ -1670,7 +1672,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 // Ready a tx.
 
@@ -1714,7 +1716,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                final FiniteDuration duration = duration("5 seconds");
+                final Duration duration = Duration.ofSeconds(5);
 
                 // Ready 3 tx's.
 
@@ -2010,7 +2012,7 @@ public class ShardTest extends AbstractShardTest {
                 waitUntilNoLeader(shard);
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());
-                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(Duration.ofSeconds(5),
                         RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
@@ -2043,7 +2045,7 @@ public class ShardTest extends AbstractShardTest {
                 waitUntilNoLeader(shard);
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());
-                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(Duration.ofSeconds(5),
                         RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
@@ -2095,7 +2097,7 @@ public class ShardTest extends AbstractShardTest {
                         actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
                 followerShard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());
-                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(duration("5 seconds"),
+                final RegisterDataTreeNotificationListenerReply reply = expectMsgClass(Duration.ofSeconds(5),
                         RegisterDataTreeNotificationListenerReply.class);
                 assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 

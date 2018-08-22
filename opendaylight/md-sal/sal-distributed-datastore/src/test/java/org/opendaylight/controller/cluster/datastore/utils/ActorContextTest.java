@@ -33,6 +33,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.typesafe.config.ConfigFactory;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ActorContextTest extends AbstractActorTest {
@@ -217,7 +217,7 @@ public class ActorContextTest extends AbstractActorTest {
                 Future<Object> future = actorContext.executeOperationAsync(actor, "hello");
 
                 try {
-                    Object result = Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+                    Object result = Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
                     assertEquals("Result", "hello", result);
                 } catch (Exception e) {
                     throw new AssertionError(e);
@@ -332,7 +332,7 @@ public class ActorContextTest extends AbstractActorTest {
 
                 actorContext.setDatastoreContext(mockContextFactory);
 
-                expectMsgClass(duration("5 seconds"), DatastoreContextFactory.class);
+                expectMsgClass(Duration.ofSeconds(5), DatastoreContextFactory.class);
 
                 Assert.assertSame("getDatastoreContext", newContext, actorContext.getDatastoreContext());
 
@@ -363,7 +363,7 @@ public class ActorContextTest extends AbstractActorTest {
         };
 
         Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
-        PrimaryShardInfo actual = Await.result(foobar, Duration.apply(5000, TimeUnit.MILLISECONDS));
+        PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
         assertEquals("LocalShardDataTree present", false, actual.getLocalShardDataTree().isPresent());
@@ -404,7 +404,7 @@ public class ActorContextTest extends AbstractActorTest {
         };
 
         Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
-        PrimaryShardInfo actual = Await.result(foobar, Duration.apply(5000, TimeUnit.MILLISECONDS));
+        PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
         assertEquals("LocalShardDataTree present", true, actual.getLocalShardDataTree().isPresent());
@@ -456,7 +456,7 @@ public class ActorContextTest extends AbstractActorTest {
         Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
 
         try {
-            Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
+            Await.result(foobar, FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
             fail("Expected" + expectedException.getClass().toString());
         } catch (Exception e) {
             if (!expectedException.getClass().isInstance(e)) {

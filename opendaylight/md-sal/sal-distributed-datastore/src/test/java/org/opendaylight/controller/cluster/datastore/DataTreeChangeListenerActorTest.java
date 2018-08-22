@@ -14,6 +14,7 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -89,7 +90,7 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
                 while (true) {
                     DeadLetter deadLetter;
                     try {
-                        deadLetter = expectMsgClass(duration("1 seconds"), DeadLetter.class);
+                        deadLetter = expectMsgClass(Duration.ofSeconds(1), DeadLetter.class);
                     } catch (AssertionError e) {
                         // Timed out - got no DeadLetter - this is good
                         break;
