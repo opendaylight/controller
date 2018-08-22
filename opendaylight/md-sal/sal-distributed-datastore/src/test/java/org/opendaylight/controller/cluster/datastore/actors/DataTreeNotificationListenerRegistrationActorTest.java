@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.testkit.javadsl.TestKit;
@@ -15,7 +17,6 @@ import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -29,81 +30,72 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
     @Mock
     private Runnable mockOnClose;
 
+    private TestKit testKit;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         DataTreeNotificationListenerRegistrationActor.killDelay = 100;
+        testKit = new TestKit(getSystem());
     }
 
     @Test
     public void testOnReceiveCloseListenerRegistrationAfterSetRegistration() {
-        new TestKit(getSystem()) {
-            {
-                final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
-                        "testOnReceiveCloseListenerRegistrationAfterSetRegistration");
-                watch(subject);
+        final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
+                "testOnReceiveCloseListenerRegistrationAfterSetRegistration");
+        testKit.watch(subject);
 
-                subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
-                        mockOnClose), ActorRef.noSender());
-                subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), getRef());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
+            mockOnClose), ActorRef.noSender());
+        subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), testKit.getRef());
 
-                expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
+        testKit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
-                Mockito.verify(mockListenerReg, timeout(5000)).close();
-                Mockito.verify(mockOnClose, timeout(5000)).run();
+        verify(mockListenerReg, timeout(5000)).close();
+        verify(mockOnClose, timeout(5000)).run();
 
-                expectTerminated(Duration.ofSeconds(5), subject);
-            }
-        };
+        testKit.expectTerminated(Duration.ofSeconds(5), subject);
     }
 
     @Test
     public void testOnReceiveCloseListenerRegistrationBeforeSetRegistration() {
-        new TestKit(getSystem()) {
-            {
-                final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
-                        "testOnReceiveSetRegistrationAfterPriorClose");
-                watch(subject);
+        final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
+                "testOnReceiveSetRegistrationAfterPriorClose");
+        testKit.watch(subject);
 
-                subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), getRef());
-                expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
+        subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), testKit.getRef());
+        testKit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
-                subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
-                        mockOnClose), ActorRef.noSender());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
+            mockOnClose), ActorRef.noSender());
 
-                Mockito.verify(mockListenerReg, timeout(5000)).close();
-                Mockito.verify(mockOnClose, timeout(5000)).run();
+        verify(mockListenerReg, timeout(5000)).close();
+        verify(mockOnClose, timeout(5000)).run();
 
-                expectTerminated(Duration.ofSeconds(5), subject);
-            }
-        };
+        testKit.expectTerminated(Duration.ofSeconds(5), subject);
     }
 
     @Test
     public void testOnReceiveSetRegistrationAfterPriorClose() {
-        new TestKit(getSystem()) {
-            {
-                DataTreeNotificationListenerRegistrationActor.killDelay = 1000;
-                final ListenerRegistration<?> mockListenerReg2 = Mockito.mock(ListenerRegistration.class);
-                final Runnable mockOnClose2 = Mockito.mock(Runnable.class);
+        DataTreeNotificationListenerRegistrationActor.killDelay = 1000;
+        final ListenerRegistration<?> mockListenerReg2 = mock(ListenerRegistration.class);
+        final Runnable mockOnClose2 = mock(Runnable.class);
 
-                final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
-                        "testOnReceiveSetRegistrationAfterPriorClose");
-                watch(subject);
+        final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
+            "testOnReceiveSetRegistrationAfterPriorClose");
+        testKit.watch(subject);
 
-                subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
-                        mockOnClose), ActorRef.noSender());
-                subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
-                subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg2,
-                        mockOnClose2), ActorRef.noSender());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
+            mockOnClose), ActorRef.noSender());
+        subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg2,
+            mockOnClose2), ActorRef.noSender());
 
-                Mockito.verify(mockListenerReg, timeout(5000)).close();
-                Mockito.verify(mockOnClose, timeout(5000)).run();
-                Mockito.verify(mockListenerReg2, timeout(5000)).close();
-                Mockito.verify(mockOnClose2, timeout(5000)).run();
+        verify(mockListenerReg, timeout(5000)).close();
+        verify(mockOnClose, timeout(5000)).run();
+        verify(mockListenerReg2, timeout(5000)).close();
+        verify(mockOnClose2, timeout(5000)).run();
 
-                expectTerminated(duration("5 second"), subject);
-            }
-        };
+        testKit.expectTerminated(testKit.duration("5 second"), subject);
     }
 }
