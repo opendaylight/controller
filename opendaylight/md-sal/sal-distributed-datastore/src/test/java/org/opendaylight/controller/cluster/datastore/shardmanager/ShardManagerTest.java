@@ -45,6 +45,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.net.URI;
+import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
@@ -346,7 +347,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary("non-existent", false), getRef());
 
-                expectMsgClass(duration("5 seconds"), PrimaryNotFoundException.class);
+                expectMsgClass(Duration.ofSeconds(5), PrimaryNotFoundException.class);
             }
         };
     }
@@ -374,7 +375,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"),
+                LocalPrimaryShardFound primaryFound = expectMsgClass(Duration.ofSeconds(5),
                         LocalPrimaryShardFound.class);
                 assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
                         primaryFound.getPrimaryPath().contains("member-1-shard-default"));
@@ -405,7 +406,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(5), NoShardLeaderException.class);
             }
         };
 
@@ -434,7 +435,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                RemotePrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"),
+                RemotePrimaryShardFound primaryFound = expectMsgClass(Duration.ofSeconds(5),
                         RemotePrimaryShardFound.class);
                 assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
                         primaryFound.getPrimaryPath().contains("member-2-shard-default"));
@@ -453,7 +454,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
             }
         };
     }
@@ -469,7 +470,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(5), NoShardLeaderException.class);
             }
         };
     }
@@ -491,7 +492,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(5), NoShardLeaderException.class);
 
                 DataTree mockDataTree = mock(DataTree.class);
                 shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
@@ -499,7 +500,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-                LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"),
+                LocalPrimaryShardFound primaryFound = expectMsgClass(Duration.ofSeconds(5),
                         LocalPrimaryShardFound.class);
                 assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
                         primaryFound.getPrimaryPath().contains("member-1-shard-default"));
@@ -526,30 +527,30 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 // RoleChangeNotification.
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
-                expectNoMessage(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
+                expectNoMessage(Duration.ofMillis(150));
 
                 shardManager.tell(new ActorInitialized(), mockShardActor);
 
-                expectNoMessage(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
+                expectNoMessage(Duration.ofMillis(150));
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.tell(
                         new RoleChangeNotification(memberId, RaftState.Candidate.name(), RaftState.Leader.name()),
                         mockShardActor);
 
-                expectNoMessage(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
+                expectNoMessage(Duration.ofMillis(150));
 
                 DataTree mockDataTree = mock(DataTree.class);
                 shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
                         DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
-                LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"),
+                LocalPrimaryShardFound primaryFound = expectMsgClass(Duration.ofSeconds(5),
                         LocalPrimaryShardFound.class);
                 assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
                         primaryFound.getPrimaryPath().contains("member-1-shard-default"));
                 assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
 
-                expectNoMessage(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
+                expectNoMessage(Duration.ofMillis(200));
             }
         };
 
@@ -567,11 +568,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
-                expectMsgClass(duration("2 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(2), NotInitializedException.class);
 
                 shardManager.tell(new ActorInitialized(), mockShardActor);
 
-                expectNoMessage(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
+                expectNoMessage(Duration.ofMillis(200));
             }
         };
 
@@ -592,7 +593,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
-                expectMsgClass(duration("2 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(2), NoShardLeaderException.class);
             }
         };
 
@@ -613,7 +614,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
-                expectMsgClass(duration("2 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(2), NoShardLeaderException.class);
             }
         };
 
@@ -632,7 +633,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
-                expectMsgClass(duration("2 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(2), NoShardLeaderException.class);
             }
         };
 
@@ -690,7 +691,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 shardManager1.underlyingActor().waitForMemberUp();
                 shardManager1.tell(new FindPrimary("astronauts", false), getRef());
 
-                RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+                RemotePrimaryShardFound found = expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
                 String path = found.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-astronauts-config"));
                 assertEquals("getPrimaryVersion", leaderVersion, found.getPrimaryVersion());
@@ -705,7 +706,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 //
 //                shardManager1.tell(new FindPrimary("astronauts", false), getRef());
 //
-//                expectMsgClass(duration("5 seconds"), PrimaryNotFoundException.class);
+//                expectMsgClass(Duration.ofSeconds(5), PrimaryNotFoundException.class);
             }
         };
 
@@ -768,7 +769,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
-                RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+                RemotePrimaryShardFound found = expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
                 String path = found.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
@@ -789,7 +790,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
-                expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(5), NoShardLeaderException.class);
 
                 shardManager1.tell(
                         MockClusterWrapper.createReachableMember("member-2", "akka://cluster-test@127.0.0.1:2558"),
@@ -803,7 +804,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
-                RemotePrimaryShardFound found1 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+                RemotePrimaryShardFound found1 = expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
                 String path1 = found1.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path1, path1.contains("member-2-shard-default-config"));
 
@@ -825,7 +826,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         MockClusterWrapper.createReachableMember("member-2", "akka://cluster-test@127.0.0.1:2558"),
                         getRef());
 
-                RemotePrimaryShardFound found2 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+                RemotePrimaryShardFound found2 = expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
                 String path2 = found2.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path2, path2.contains("member-2-shard-default-config"));
             }
@@ -892,7 +893,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
-                RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+                RemotePrimaryShardFound found = expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
                 String path = found.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
@@ -906,7 +907,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
-                expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+                expectMsgClass(Duration.ofSeconds(5), NoShardLeaderException.class);
 
                 assertNull("Expected primaryShardInfoCache entry removed",
                         primaryShardInfoCache.getIfPresent("default"));
@@ -919,7 +920,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
-                LocalPrimaryShardFound found1 = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+                LocalPrimaryShardFound found1 = expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
                 String path1 = found1.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path1, path1.contains("member-1-shard-default-config"));
 
@@ -992,7 +993,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager256.tell(new FindPrimary("default", true), getRef());
 
-                LocalPrimaryShardFound found = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+                LocalPrimaryShardFound found = expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
                 String path = found.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path + " which must on member-256",
                             path.contains("member-256-shard-default-config"));
@@ -1008,7 +1009,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 // Make sure leader shard on member-256 is still leader and still in the cache.
                 shardManager256.tell(new FindPrimary("default", true), getRef());
-                found = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+                found = expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
                 path = found.getPrimaryPath();
                 assertTrue("Unexpected primary path " + path + " which must still not on member-256",
                             path.contains("member-256-shard-default-config"));
@@ -1040,7 +1041,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindLocalShard("non-existent", false), getRef());
 
-                LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+                LocalShardNotFound notFound = expectMsgClass(Duration.ofSeconds(5), LocalShardNotFound.class);
 
                 assertEquals("getShardName", "non-existent", notFound.getShardName());
             }
@@ -1058,7 +1059,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
 
-                LocalShardFound found = expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                LocalShardFound found = expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
                 assertTrue("Found path contains " + found.getPath().path().toString(),
                         found.getPath().path().toString().contains("member-1-shard-default-config"));
@@ -1074,7 +1075,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
 
-                expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
             }
         };
     }
@@ -1324,11 +1325,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         "foo", null, members("member-1", "member-5", "member-6"));
                 shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), getRef());
 
-                expectMsgClass(duration("5 seconds"), Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Success.class);
 
                 shardManager.tell(new FindLocalShard("foo", true), getRef());
 
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
                 assertEquals("isRecoveryApplicable", false, shardBuilder.getDatastoreContext().isPersistent());
                 assertTrue("Epxected ShardPeerAddressResolver", shardBuilder.getDatastoreContext().getShardRaftConfig()
@@ -1346,7 +1347,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
-                Success success = expectMsgClass(duration("5 seconds"), Success.class);
+                Success success = expectMsgClass(Duration.ofSeconds(5), Success.class);
                 assertNotNull("Success status is null", success.status());
             }
         };
@@ -1372,10 +1373,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         "foo", null, members("member-5", "member-6"));
 
                 shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
-                expectMsgClass(duration("5 seconds"), Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Success.class);
 
                 shardManager.tell(new FindLocalShard("foo", true), getRef());
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
                 assertEquals("peerMembers size", 0, shardBuilder.getPeerAddresses().size());
                 assertEquals("schemaContext", DisableElectionsRaftPolicy.class.getName(), shardBuilder
@@ -1401,14 +1402,14 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         "foo", null, members("member-1"));
                 shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
-                expectMsgClass(duration("5 seconds"), Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Success.class);
 
                 SchemaContext schemaContext = TEST_SCHEMA_CONTEXT;
                 shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
 
                 shardManager.tell(new FindLocalShard("foo", true), getRef());
 
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
                 assertSame("schemaContext", schemaContext, shardBuilder.getSchemaContext());
                 assertNotNull("schemaContext is null", shardBuilder.getDatastoreContext());
@@ -1529,7 +1530,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.tell(new AddShardReplica("model-inventory"), getRef());
-                Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
+                Status.Failure resp = expectMsgClass(Duration.ofSeconds(2), Status.Failure.class);
 
                 assertEquals("Failure obtained", true, resp.cause() instanceof IllegalArgumentException);
             }
@@ -1608,7 +1609,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         AddServer.class);
                 String addServerId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
                 assertEquals("AddServer serverId", addServerId, addServerMsg.getNewServerId());
-                expectMsgClass(duration("5 seconds"), Status.Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Status.Success.class);
 
                 InMemorySnapshotStore.waitForSavedSnapshot(shardManagerID, ShardManagerSnapshot.class);
                 InMemorySnapshotStore.waitForDeletedSnapshot(shardManagerID);
@@ -1653,17 +1654,17 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 MessageCollectorActor.expectFirstMatching(leaderShardActor, AddServer.class);
 
-                Failure resp = expectMsgClass(duration("5 seconds"), Failure.class);
+                Failure resp = expectMsgClass(Duration.ofSeconds(5), Failure.class);
                 assertEquals("Failure cause", AlreadyExistsException.class, resp.cause().getClass());
 
                 shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
                 // Send message again to verify previous in progress state is
                 // cleared
 
                 shardManager.tell(new AddShardReplica(Shard.DEFAULT_NAME), getRef());
-                resp = expectMsgClass(duration("5 seconds"), Failure.class);
+                resp = expectMsgClass(Duration.ofSeconds(5), Failure.class);
                 assertEquals("Failure cause", AlreadyExistsException.class, resp.cause().getClass());
 
                 // Send message again with an AddServer timeout to verify the
@@ -1675,10 +1676,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         getRef());
                 leaderShardActor.tell(MockRespondActor.CLEAR_RESPONSE, ActorRef.noSender());
                 shardManager.tell(new AddShardReplica(Shard.DEFAULT_NAME), getRef());
-                expectMsgClass(duration("5 seconds"), Failure.class);
+                expectMsgClass(Duration.ofSeconds(5), Failure.class);
 
                 shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
             }
         };
 
@@ -1702,11 +1703,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         mockShardActor);
 
                 shardManager.tell(new AddShardReplica(Shard.DEFAULT_NAME), getRef());
-                Failure resp = expectMsgClass(duration("5 seconds"), Failure.class);
+                Failure resp = expectMsgClass(Duration.ofSeconds(5), Failure.class);
                 assertEquals("Failure cause", AlreadyExistsException.class, resp.cause().getClass());
 
                 shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
             }
         };
 
@@ -1742,18 +1743,18 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         addServerMsg.getNewServerId());
                 mockShardLeaderKit.reply(new AddServerReply(ServerChangeStatus.TIMEOUT, null));
 
-                Failure failure = expectMsgClass(duration("5 seconds"), Failure.class);
+                Failure failure = expectMsgClass(Duration.ofSeconds(5), Failure.class);
                 assertEquals("Failure cause", TimeoutException.class, failure.cause().getClass());
 
                 shardManager.tell(new FindLocalShard("astronauts", false), getRef());
-                expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+                expectMsgClass(Duration.ofSeconds(5), LocalShardNotFound.class);
 
                 terminateWatcher.expectTerminated(mockNewReplicaShardActor);
 
                 shardManager.tell(new AddShardReplica("astronauts"), getRef());
                 mockShardLeaderKit.expectMsgClass(AddServer.class);
                 mockShardLeaderKit.reply(new AddServerReply(ServerChangeStatus.NO_LEADER, null));
-                failure = expectMsgClass(duration("5 seconds"), Failure.class);
+                failure = expectMsgClass(Duration.ofSeconds(5), Failure.class);
                 assertEquals("Failure cause", NoShardLeaderException.class, failure.cause().getClass());
             }
         };
@@ -1785,7 +1786,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         AddressFromURIString.parse("akka://non-existent@127.0.0.1:5").toString());
 
                 newReplicaShardManager.tell(new AddShardReplica("astronauts"), getRef());
-                Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
+                Status.Failure resp = expectMsgClass(Duration.ofSeconds(5), Status.Failure.class);
                 assertEquals("Failure obtained", true, resp.cause() instanceof RuntimeException);
             }
         };
@@ -1802,7 +1803,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
                 shardManager.tell(new RemoveShardReplica("model-inventory", MEMBER_1), getRef());
-                Status.Failure resp = expectMsgClass(duration("10 seconds"), Status.Failure.class);
+                Status.Failure resp = expectMsgClass(Duration.ofSeconds(10), Status.Failure.class);
                 assertEquals("Failure obtained", true, resp.cause() instanceof PrimaryNotFoundException);
             }
         };
@@ -1835,7 +1836,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         RemoveServer.class);
                 assertEquals(ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString(),
                         removeServer.getServerId());
-                expectMsgClass(duration("5 seconds"), Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Success.class);
             }
         };
     }
@@ -1926,7 +1927,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         RemoveServer.class);
                 String removeServerId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
                 assertEquals("RemoveServer serverId", removeServerId, removeServer.getServerId());
-                expectMsgClass(duration("5 seconds"), Status.Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Status.Success.class);
             }
         };
     }
@@ -1972,7 +1973,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.tell(secondServerChange, secondRequestKit.getRef());
 
-                secondRequestKit.expectMsgClass(duration("5 seconds"), Failure.class);
+                secondRequestKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
             }
         };
     }
@@ -1992,10 +1993,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager.underlyingActor().waitForRecoveryComplete();
                 shardManager.tell(new FindLocalShard("people", false), getRef());
-                expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
 
                 shardManager.tell(new FindLocalShard("default", false), getRef());
-                expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
 
                 // Removed the default shard replica from member-1
                 ShardIdentifier.Builder builder = new ShardIdentifier.Builder();
@@ -2069,7 +2070,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 newRestoredShardManager.underlyingActor().waitForRecoveryComplete();
 
                 newRestoredShardManager.tell(new FindLocalShard("people", false), getRef());
-                LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+                LocalShardNotFound notFound = expectMsgClass(Duration.ofSeconds(5), LocalShardNotFound.class);
                 assertEquals("for uninitialized shard", "people", notFound.getShardName());
 
                 // Verify a local shard is created for the restored shards,
@@ -2077,10 +2078,10 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 // as the actor initialization
                 // message is not sent for them
                 newRestoredShardManager.tell(new FindLocalShard("default", false), getRef());
-                expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
 
                 newRestoredShardManager.tell(new FindLocalShard("astronauts", false), getRef());
-                expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+                expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
             }
         };
 
@@ -2163,7 +2164,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                                 .create("default", MemberName.forName("member-2"), shardMrgIDSuffix).toString(),
                                 Boolean.TRUE));
 
-                expectMsgClass(duration("5 seconds"), Success.class);
+                expectMsgClass(Duration.ofSeconds(5), Success.class);
             }
         };
     }
@@ -2190,7 +2191,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 MessageCollectorActor.expectFirstMatching(respondActor, ChangeServersVotingStatus.class);
 
-                Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
+                Status.Failure resp = expectMsgClass(Duration.ofSeconds(5), Status.Failure.class);
                 assertEquals("Failure resposnse", true, resp.cause() instanceof NoShardLeaderException);
             }
         };
