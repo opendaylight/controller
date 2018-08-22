@@ -14,7 +14,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import akka.actor.Status.Failure;
-import akka.testkit.javadsl.TestKit;
 import java.time.Duration;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
@@ -30,41 +29,31 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
     @Test
     public void testExecuteRpc() {
-        new TestKit(node1) {
-            {
+        final ContainerNode invokeRpcResult = makeRPCOutput("bar");
+        final DOMRpcResult rpcResult = new DefaultDOMRpcResult(invokeRpcResult);
+        when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(
+            FluentFutures.immediateFluentFuture(rpcResult));
 
-                final ContainerNode invokeRpcResult = makeRPCOutput("bar");
-                final DOMRpcResult rpcResult = new DefaultDOMRpcResult(invokeRpcResult);
-                when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(
-                        FluentFutures.immediateFluentFuture(rpcResult));
+        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
-                final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
+        rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
 
-                rpcInvoker1.tell(executeMsg, getRef());
+        final RpcResponse rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), RpcResponse.class);
 
-                final RpcResponse rpcResponse = expectMsgClass(Duration.ofSeconds(5), RpcResponse.class);
-
-                assertEquals(rpcResult.getResult(), rpcResponse.getResultNormalizedNode());
-            }
-        };
+        assertEquals(rpcResult.getResult(), rpcResponse.getResultNormalizedNode());
     }
 
     @Test
     public void testExecuteRpcFailureWithException() {
-        new TestKit(node1) {
-            {
-                when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any()))
-                        .thenReturn(FluentFutures.immediateFailedFluentFuture(
-                                new DOMRpcImplementationNotAvailableException("NOT FOUND")));
+        when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), any())).thenReturn(FluentFutures.immediateFailedFluentFuture(
+            new DOMRpcImplementationNotAvailableException("NOT FOUND")));
 
-                final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
+        final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
-                rpcInvoker1.tell(executeMsg, getRef());
+        rpcInvoker1.tell(executeMsg, rpcRegistry1Probe.getRef());
 
-                final Failure rpcResponse = expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        final Failure rpcResponse = rpcRegistry1Probe.expectMsgClass(Duration.ofSeconds(5), Failure.class);
 
-                assertTrue(rpcResponse.cause() instanceof DOMRpcException);
-            }
-        };
+        assertTrue(rpcResponse.cause() instanceof DOMRpcException);
     }
 }
