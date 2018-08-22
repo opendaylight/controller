@@ -22,6 +22,7 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,7 +107,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION),
                         getRef());
 
-                ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
+                ReadDataReply reply = expectMsgClass(Duration.ofSeconds(5), ReadDataReply.class);
 
                 assertNotNull(reply.getNormalizedNode());
             }
@@ -127,7 +128,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
                 transaction.tell(new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
 
-                ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
+                ReadDataReply reply = expectMsgClass(Duration.ofSeconds(5), ReadDataReply.class);
 
                 assertTrue(reply.getNormalizedNode() == null);
             }
@@ -149,7 +150,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION),
                         getRef());
 
-                DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
+                DataExistsReply reply = expectMsgClass(Duration.ofSeconds(5), DataExistsReply.class);
 
                 assertTrue(reply.exists());
             }
@@ -170,7 +171,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
                 transaction.tell(new DataExists(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
 
-                DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
+                DataExistsReply reply = expectMsgClass(Duration.ofSeconds(5), DataExistsReply.class);
 
                 assertFalse(reply.exists());
             }
@@ -207,7 +208,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 transaction.tell(batched, getRef());
 
-                BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"),
+                BatchedModificationsReply reply = expectMsgClass(Duration.ofSeconds(5),
                         BatchedModificationsReply.class);
                 assertEquals("getNumBatched", 3, reply.getNumBatched());
 
@@ -239,7 +240,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 batched.addModification(new WriteModification(writePath, writeData));
 
                 transaction.tell(batched, getRef());
-                BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"),
+                BatchedModificationsReply reply = expectMsgClass(Duration.ofSeconds(5),
                         BatchedModificationsReply.class);
                 assertEquals("getNumBatched", 1, reply.getNumBatched());
 
@@ -248,8 +249,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
-                expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
-                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+                expectMsgClass(Duration.ofSeconds(5), ReadyTransactionReply.class);
+                watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
             }
         };
     }
@@ -277,8 +278,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 batched.setTotalMessagesSent(1);
 
                 transaction.tell(batched, getRef());
-                expectMsgClass(duration("5 seconds"), CommitTransactionReply.class);
-                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+                expectMsgClass(Duration.ofSeconds(5), CommitTransactionReply.class);
+                watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
             }
         };
     }
@@ -308,15 +309,15 @@ public class ShardTransactionTest extends AbstractActorTest {
                 batched.addModification(new WriteModification(path, node));
 
                 transaction.tell(batched, getRef());
-                expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
 
                 batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
                 batched.setReady();
                 batched.setTotalMessagesSent(2);
 
                 transaction.tell(batched, getRef());
-                Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
-                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+                Failure failure = expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+                watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
                 if (failure != null) {
                     Throwables.propagateIfPossible(failure.cause(), Exception.class);
@@ -344,8 +345,8 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 transaction.tell(batched, getRef());
 
-                Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
-                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+                Failure failure = expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+                watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
                 if (failure != null) {
                     Throwables.throwIfInstanceOf(failure.cause(), Exception.class);
@@ -367,7 +368,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-                expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
+                expectMsgClass(Duration.ofSeconds(3), CloseTransactionReply.class);
                 expectTerminated(duration("3 seconds"), transaction);
             }
         };
@@ -384,7 +385,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-                expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
+                expectMsgClass(Duration.ofSeconds(3), CloseTransactionReply.class);
                 expectTerminated(duration("3 seconds"), transaction);
             }
         };
@@ -401,7 +402,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-                expectMsgClass(duration("3 seconds"), Terminated.class);
+                expectMsgClass(Duration.ofSeconds(3), Terminated.class);
             }
         };
     }
@@ -418,7 +419,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
                 watch(transaction);
 
-                expectMsgClass(duration("3 seconds"), Terminated.class);
+                expectMsgClass(Duration.ofSeconds(3), Terminated.class);
             }
         };
     }
