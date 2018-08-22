@@ -13,6 +13,7 @@ import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
 import akka.testkit.javadsl.TestKit;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -48,7 +48,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         ShardManagerSnapshot shardManagerSnapshot = new ShardManagerSnapshot(shardList, Collections.emptyMap());
         ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 shardList, "config", shardManagerSnapshot, kit.getRef(),
-                "shard-manager", Duration.create(100, TimeUnit.SECONDS)), "testSuccess");
+                "shard-manager", FiniteDuration.create(100, TimeUnit.SECONDS)), "testSuccess");
 
         kit.watch(replyActor);
 
@@ -62,7 +62,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
                 Snapshot.create(shard2SnapshotState, Collections.<ReplicatedLogEntry>emptyList(),
                         2, 1, 2, 1, 1, "member-1", null)), ActorRef.noSender());
 
-        kit.expectNoMessage(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
+        kit.expectNoMessage(Duration.ofMillis(500));
 
         ByteState shard3SnapshotState = ByteState.of(new byte[]{7,8,9});
         replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard3", MEMBER_1, "config").toString(),
@@ -95,7 +95,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
         ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 Arrays.asList("shard1", "shard2"), "config", null, kit.getRef(), "shard-manager",
-                Duration.create(100, TimeUnit.SECONDS)), "testGetSnapshotFailureReply");
+                FiniteDuration.create(100, TimeUnit.SECONDS)), "testGetSnapshotFailureReply");
 
         kit.watch(replyActor);
 
@@ -115,7 +115,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
         ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 Arrays.asList("shard1"), "config", null, kit.getRef(), "shard-manager",
-                Duration.create(100, TimeUnit.MILLISECONDS)), "testGetSnapshotTimeout");
+                FiniteDuration.create(100, TimeUnit.MILLISECONDS)), "testGetSnapshotTimeout");
 
         kit.watch(replyActor);
 

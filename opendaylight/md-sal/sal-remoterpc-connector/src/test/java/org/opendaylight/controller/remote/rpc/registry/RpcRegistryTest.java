@@ -5,9 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
@@ -26,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +40,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,8 +55,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.Duration;
-import scala.concurrent.duration.FiniteDuration;
 
 public class RpcRegistryTest {
     private static final Logger LOG = LoggerFactory.getLogger(RpcRegistryTest.class);
@@ -191,7 +191,7 @@ public class RpcRegistryTest {
         verifyBucket(buckets.get(nodeAddress), addedRouteIds);
 
         Map<Address, Long> versions = retrieveVersions(registry1, testKit);
-        Assert.assertEquals("Version for bucket " + nodeAddress, (Long) buckets.get(nodeAddress).getVersion(),
+        assertEquals("Version for bucket " + nodeAddress, (Long) buckets.get(nodeAddress).getVersion(),
                 versions.get(nodeAddress));
 
         // Now remove rpc
@@ -269,14 +269,14 @@ public class RpcRegistryTest {
         List<DOMRpcIdentifier> addedRouteIds1 = createRouteIds();
         registry1.tell(new AddOrUpdateRoutes(addedRouteIds1), ActorRef.noSender());
 
-        final UpdateRemoteEndpoints req1 = registrar3.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+        final UpdateRemoteEndpoints req1 = registrar3.expectMsgClass(Duration.ofSeconds(3),
             UpdateRemoteEndpoints.class);
 
         // Add rpc on node 2
         List<DOMRpcIdentifier> addedRouteIds2 = createRouteIds();
         registry2.tell(new AddOrUpdateRoutes(addedRouteIds2), ActorRef.noSender());
 
-        final UpdateRemoteEndpoints req2 = registrar3.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+        final UpdateRemoteEndpoints req2 = registrar3.expectMsgClass(Duration.ofSeconds(3),
             UpdateRemoteEndpoints.class);
         Address node2Address = node2.provider().getDefaultAddress();
         Address node1Address = node1.provider().getDefaultAddress();
@@ -288,9 +288,9 @@ public class RpcRegistryTest {
         verifyBucket(buckets.get(node2Address), addedRouteIds2);
 
         Map<Address, Long> versions = retrieveVersions(registry3, testKit);
-        Assert.assertEquals("Version for bucket " + node1Address, (Long) buckets.get(node1Address).getVersion(),
+        assertEquals("Version for bucket " + node1Address, (Long) buckets.get(node1Address).getVersion(),
                 versions.get(node1Address));
-        Assert.assertEquals("Version for bucket " + node2Address, (Long) buckets.get(node2Address).getVersion(),
+        assertEquals("Version for bucket " + node2Address, (Long) buckets.get(node2Address).getVersion(),
                 versions.get(node2Address));
 
         assertEndpoints(req1, node1Address, invoker1);
@@ -300,38 +300,38 @@ public class RpcRegistryTest {
 
     private static void assertEndpoints(final UpdateRemoteEndpoints msg, final Address address, final TestKit invoker) {
         final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = msg.getEndpoints();
-        Assert.assertEquals(1, endpoints.size());
+        assertEquals(1, endpoints.size());
 
         final Optional<RemoteRpcEndpoint> maybeEndpoint = endpoints.get(address);
-        Assert.assertNotNull(maybeEndpoint);
-        Assert.assertTrue(maybeEndpoint.isPresent());
+        assertNotNull(maybeEndpoint);
+        assertTrue(maybeEndpoint.isPresent());
 
         final RemoteRpcEndpoint endpoint = maybeEndpoint.get();
         final ActorRef router = endpoint.getRouter();
-        Assert.assertNotNull(router);
+        assertNotNull(router);
 
         router.tell("hello", ActorRef.noSender());
-        final String s = invoker.expectMsgClass(Duration.create(3, TimeUnit.SECONDS), String.class);
-        Assert.assertEquals("hello", s);
+        final String s = invoker.expectMsgClass(Duration.ofSeconds(3), String.class);
+        assertEquals("hello", s);
     }
 
     private static Map<Address, Long> retrieveVersions(final ActorRef bucketStore, final TestKit testKit) {
         bucketStore.tell(GET_BUCKET_VERSIONS, testKit.getRef());
         @SuppressWarnings("unchecked")
-        final Map<Address, Long> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS), Map.class);
+        final Map<Address, Long> reply = testKit.expectMsgClass(Duration.ofSeconds(3), Map.class);
         return reply;
     }
 
     private static void verifyBucket(final Bucket<RoutingTable> bucket, final List<DOMRpcIdentifier> expRouteIds) {
         RoutingTable table = bucket.getData();
-        Assert.assertNotNull("Bucket RoutingTable is null", table);
+        assertNotNull("Bucket RoutingTable is null", table);
         for (DOMRpcIdentifier r : expRouteIds) {
             if (!table.contains(r)) {
-                Assert.fail("RoutingTable does not contain " + r + ". Actual: " + table);
+                fail("RoutingTable does not contain " + r + ". Actual: " + table);
             }
         }
 
-        Assert.assertEquals("RoutingTable size", expRouteIds.size(), table.size());
+        assertEquals("RoutingTable size", expRouteIds.size(), table.size());
     }
 
     private static Map<Address, Bucket<RoutingTable>> retrieveBuckets(final ActorRef bucketStore,
@@ -340,8 +340,7 @@ public class RpcRegistryTest {
         while (true) {
             bucketStore.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
-                    Map.class);
+            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.ofSeconds(3), Map.class);
 
             boolean foundAll = true;
             for (Address addr : addresses) {
@@ -357,8 +356,7 @@ public class RpcRegistryTest {
             }
 
             if (++numTries >= 50) {
-                Assert.fail("Missing expected buckets for addresses: " + Arrays.toString(addresses)
-                        + ", Actual: " + buckets);
+                fail("Missing expected buckets for addresses: " + Arrays.toString(addresses) + ", Actual: " + buckets);
             }
 
             Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
@@ -381,25 +379,24 @@ public class RpcRegistryTest {
                     ActorRef.noSender());
         }
 
-        FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
         int numTries = 0;
         while (true) {
             registry1.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(duration, Map.class);
+            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.ofSeconds(3), Map.class);
 
             Bucket<RoutingTable> localBucket = buckets.values().iterator().next();
             RoutingTable table = localBucket.getData();
             if (table != null && table.size() == nRoutes) {
                 for (DOMRpcIdentifier r : added) {
-                    Assert.assertTrue("RoutingTable contains " + r, table.contains(r));
+                    assertTrue("RoutingTable contains " + r, table.contains(r));
                 }
 
                 break;
             }
 
             if (++numTries >= 50) {
-                Assert.fail("Expected # routes: " + nRoutes + ", Actual: " + table.size());
+                fail("Expected # routes: " + nRoutes + ", Actual: " + table.size());
             }
 
             Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);

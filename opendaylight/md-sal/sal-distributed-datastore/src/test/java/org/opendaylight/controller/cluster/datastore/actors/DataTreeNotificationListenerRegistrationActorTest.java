@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.testkit.javadsl.TestKit;
+import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -48,12 +49,12 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
             mockOnClose), ActorRef.noSender());
         subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
 
-        kit.expectMsgClass(kit.duration("5 second"), CloseDataTreeNotificationListenerRegistrationReply.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
         verify(mockListenerReg, timeout(5000)).close();
         verify(mockOnClose, timeout(5000)).run();
 
-        kit.expectTerminated(kit.duration("5 second"), subject);
+        kit.expectTerminated(Duration.ofSeconds(5), subject);
     }
 
     @Test
@@ -63,7 +64,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
         kit.watch(subject);
 
         subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
-        kit.expectMsgClass(kit.duration("5 second"), CloseDataTreeNotificationListenerRegistrationReply.class);
+        kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
         subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
             mockOnClose), ActorRef.noSender());
@@ -71,7 +72,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
         verify(mockListenerReg, timeout(5000)).close();
         verify(mockOnClose, timeout(5000)).run();
 
-        kit.expectTerminated(kit.duration("5 second"), subject);
+        kit.expectTerminated(Duration.ofSeconds(5), subject);
     }
 
     @Test
@@ -95,6 +96,6 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
         verify(mockListenerReg2, timeout(5000)).close();
         verify(mockOnClose2, timeout(5000)).run();
 
-        kit.expectTerminated(kit.duration("5 second"), subject);
+        kit.expectTerminated(Duration.ofSeconds(5), subject);
     }
 }
