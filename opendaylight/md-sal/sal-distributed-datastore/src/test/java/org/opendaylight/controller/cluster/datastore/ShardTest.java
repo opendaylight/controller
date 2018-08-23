@@ -195,7 +195,7 @@ public class ShardTest extends AbstractShardTest {
                 "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration");
 
         final ShardTestKit testKit = new ShardTestKit(getSystem());
-        assertEquals("Got first ElectionTimeout", true, onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
+        assertTrue("Got first ElectionTimeout", onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
 
         shard.tell(new RegisterDataTreeChangeListener(path, dclActor, false), testKit.getRef());
         final RegisterDataTreeNotificationListenerReply reply = testKit.expectMsgClass(Duration.ofSeconds(5),
@@ -441,9 +441,8 @@ public class ShardTest extends AbstractShardTest {
 
             @Override
             void onSuccess(final Object resp) {
-                final CanCommitTransactionReply canCommitReply =
-                        CanCommitTransactionReply.fromSerializable(resp);
-                assertEquals("Can commit", true, canCommitReply.getCanCommit());
+                final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(resp);
+                assertTrue("Can commit", canCommitReply.getCanCommit());
 
                 final Future<Object> commitFuture = Patterns.ask(shard,
                         new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), timeout);
@@ -474,7 +473,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Ready 2 more Tx's.
 
@@ -521,7 +520,7 @@ public class ShardTest extends AbstractShardTest {
             throw new RuntimeException(t);
         }
 
-        assertEquals("Commits complete", true, done);
+        assertTrue("Commits complete", done);
 
 //                final InOrder inOrder = inOrder(cohort1.getCanCommit(), cohort1.getPreCommit(), cohort1.getCommit(),
 //                        cohort2.getCanCommit(), cohort2.getPreCommit(), cohort2.getCommit(), cohort3.getCanCommit(),
@@ -580,7 +579,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Send the CommitTransaction message.
 
@@ -731,7 +730,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
@@ -910,7 +909,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(txId, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Send the CanCommitTransaction message.
 
@@ -946,7 +945,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Send the CanCommitTransaction message.
 
@@ -994,7 +993,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
@@ -1055,7 +1054,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Send the CanCommitTransaction message for the 2nd Tx. This
         // should get queued and
@@ -1081,7 +1080,7 @@ public class ShardTest extends AbstractShardTest {
             }
         }, getSystem().dispatcher());
 
-        assertEquals("2nd CanCommit complete", true, latch.await(5, TimeUnit.SECONDS));
+        assertTrue("2nd CanCommit complete", latch.await(5, TimeUnit.SECONDS));
 
         final InOrder inOrder = inOrder(dataTree);
         inOrder.verify(dataTree).validate(any(DataTreeModification.class));
@@ -1125,7 +1124,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Send the CanCommitTransaction message for the 2nd Tx. This
         // should get queued and
@@ -1151,7 +1150,7 @@ public class ShardTest extends AbstractShardTest {
             }
         }, getSystem().dispatcher());
 
-        assertEquals("2nd CanCommit complete", true, latch.await(5, TimeUnit.SECONDS));
+        assertTrue("2nd CanCommit complete", latch.await(5, TimeUnit.SECONDS));
 
         final InOrder inOrder = inOrder(dataTree);
         inOrder.verify(dataTree).validate(any(DataTreeModification.class));
@@ -1195,7 +1194,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
         final CanCommitTransactionReply reply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(CanCommitTransactionReply.class));
-        assertEquals("getCanCommit", true, reply.getCanCommit());
+        assertTrue("getCanCommit", reply.getCanCommit());
     }
 
     @Test
@@ -1553,7 +1552,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
 
         // Send the CanCommitTransaction message for the 2nd Tx. This
         // should get queued and
@@ -1573,7 +1572,7 @@ public class ShardTest extends AbstractShardTest {
 
         canCommitReply = (CanCommitTransactionReply) Await.result(canCommitFuture,
             FiniteDuration.create(5, TimeUnit.SECONDS));
-        assertEquals("Can commit", true, canCommitReply.getCanCommit());
+        assertTrue("Can commit", canCommitReply.getCanCommit());
     }
 
     @Test
@@ -1743,7 +1742,7 @@ public class ShardTest extends AbstractShardTest {
     private static void awaitAndValidateSnapshot(final AtomicReference<CountDownLatch> latch,
             final AtomicReference<Object> savedSnapshot, final NormalizedNode<?, ?> expectedRoot)
                     throws InterruptedException {
-        assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
+        assertTrue("Snapshot saved", latch.get().await(5, TimeUnit.SECONDS));
 
         assertTrue("Invalid saved snapshot " + savedSnapshot.get(), savedSnapshot.get() instanceof Snapshot);
 
@@ -1816,17 +1815,17 @@ public class ShardTest extends AbstractShardTest {
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardProps(), "testOnDatastoreContext");
 
-        assertEquals("isRecoveryApplicable", true, shard.underlyingActor().persistence().isRecoveryApplicable());
+        assertTrue("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
 
         ShardTestKit.waitUntilLeader(shard);
 
         shard.tell(dataStoreContextBuilder.persistent(false).build(), ActorRef.noSender());
 
-        assertEquals("isRecoveryApplicable", false, shard.underlyingActor().persistence().isRecoveryApplicable());
+        assertFalse("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
 
         shard.tell(dataStoreContextBuilder.persistent(true).build(), ActorRef.noSender());
 
-        assertEquals("isRecoveryApplicable", true, shard.underlyingActor().persistence().isRecoveryApplicable());
+        assertTrue("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
     }
 
     @Test
@@ -1846,8 +1845,7 @@ public class ShardTest extends AbstractShardTest {
 
         ShardLeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
             ShardLeaderStateChanged.class);
-        assertEquals("getLocalShardDataTree present", true,
-            leaderStateChanged.getLocalShardDataTree().isPresent());
+        assertTrue("getLocalShardDataTree present", leaderStateChanged.getLocalShardDataTree().isPresent());
         assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(),
             leaderStateChanged.getLocalShardDataTree().get());
 
@@ -1857,9 +1855,8 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new RequestVote(10000, "member2", 50, 50), testKit.getRef());
 
-        leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
-            ShardLeaderStateChanged.class);
-        assertEquals("getLocalShardDataTree present", false, leaderStateChanged.getLocalShardDataTree().isPresent());
+        leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener, ShardLeaderStateChanged.class);
+        assertFalse("getLocalShardDataTree present", leaderStateChanged.getLocalShardDataTree().isPresent());
     }
 
     @Test
@@ -1871,12 +1868,12 @@ public class ShardTest extends AbstractShardTest {
         shard.underlyingActor().handleNonRaftCommand(new FollowerInitialSyncUpStatus(false,
                 "member-1-shard-inventory-operational"));
 
-        assertEquals(false, shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
+        assertFalse(shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
 
         shard.underlyingActor().handleNonRaftCommand(new FollowerInitialSyncUpStatus(true,
                 "member-1-shard-inventory-operational"));
 
-        assertEquals(true, shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
+        assertTrue(shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
     }
 
     @Test
