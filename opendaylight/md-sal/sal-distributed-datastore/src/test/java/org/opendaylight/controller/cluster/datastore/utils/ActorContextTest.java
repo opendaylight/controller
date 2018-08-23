@@ -210,62 +210,60 @@ public class ActorContextTest extends AbstractActorTest {
         ActorContext actorContext = null;
 
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(false, actorContext.isPathLocal(null));
-        assertEquals(false, actorContext.isPathLocal(""));
+        assertFalse(actorContext.isPathLocal(null));
+        assertFalse(actorContext.isPathLocal(""));
 
         clusterWrapper.setSelfAddress(null);
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(false, actorContext.isPathLocal(""));
+        assertFalse(actorContext.isPathLocal(""));
 
         // even if the path is in local format, match the primary path (first 3 elements) and return true
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(true, actorContext.isPathLocal("akka://test/user/$a"));
+        assertTrue(actorContext.isPathLocal("akka://test/user/$a"));
 
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(true, actorContext.isPathLocal("akka://test/user/$a"));
+        assertTrue(actorContext.isPathLocal("akka://test/user/$a"));
 
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(true, actorContext.isPathLocal("akka://test/user/token2/token3/$a"));
+        assertTrue(actorContext.isPathLocal("akka://test/user/token2/token3/$a"));
 
         // self address of remote format,but Tx path local format.
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(true, actorContext.isPathLocal(
-            "akka://system/user/shardmanager/shard/transaction"));
+        assertTrue(actorContext.isPathLocal("akka://system/user/shardmanager/shard/transaction"));
 
         // self address of local format,but Tx path remote format.
         clusterWrapper.setSelfAddress(new Address("akka", "system"));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(false, actorContext.isPathLocal(
-            "akka://system@127.0.0.1:2550/user/shardmanager/shard/transaction"));
+        assertFalse(actorContext.isPathLocal("akka://system@127.0.0.1:2550/user/shardmanager/shard/transaction"));
 
         //local path but not same
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(true, actorContext.isPathLocal("akka://test1/user/$a"));
+        assertTrue(actorContext.isPathLocal("akka://test1/user/$a"));
 
         //ip and port same
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(true, actorContext.isPathLocal("akka://system@127.0.0.1:2550/"));
+        assertTrue(actorContext.isPathLocal("akka://system@127.0.0.1:2550/"));
 
         // forward-slash missing in address
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(false, actorContext.isPathLocal("akka://system@127.0.0.1:2550"));
+        assertFalse(actorContext.isPathLocal("akka://system@127.0.0.1:2550"));
 
         //ips differ
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(false, actorContext.isPathLocal("akka://system@127.1.0.1:2550/"));
+        assertFalse(actorContext.isPathLocal("akka://system@127.1.0.1:2550/"));
 
         //ports differ
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorContext = new ActorContext(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertEquals(false, actorContext.isPathLocal("akka://system@127.0.0.1:2551/"));
+        assertFalse(actorContext.isPathLocal("akka://system@127.0.0.1:2551/"));
     }
 
     @Test
@@ -341,7 +339,7 @@ public class ActorContextTest extends AbstractActorTest {
         PrimaryShardInfo actual = Await.result(foobar, Duration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
-        assertEquals("LocalShardDataTree present", false, actual.getLocalShardDataTree().isPresent());
+        assertFalse("LocalShardDataTree present", actual.getLocalShardDataTree().isPresent());
         assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
         assertEquals("getPrimaryShardVersion", expPrimaryVersion, actual.getPrimaryShardVersion());
@@ -382,7 +380,7 @@ public class ActorContextTest extends AbstractActorTest {
         PrimaryShardInfo actual = Await.result(foobar, Duration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
-        assertEquals("LocalShardDataTree present", true, actual.getLocalShardDataTree().isPresent());
+        assertTrue("LocalShardDataTree present", actual.getLocalShardDataTree().isPresent());
         assertSame("LocalShardDataTree", mockDataTree, actual.getLocalShardDataTree().get());
         assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));

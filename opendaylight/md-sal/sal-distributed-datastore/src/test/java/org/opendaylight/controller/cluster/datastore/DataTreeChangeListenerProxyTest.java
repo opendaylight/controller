@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -70,7 +72,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
         RegisterDataTreeChangeListener registerMsg = kit.expectMsgClass(timeout,
             RegisterDataTreeChangeListener.class);
         assertEquals("getPath", path, registerMsg.getPath());
-        assertEquals("isRegisterOnAllInstances", false, registerMsg.isRegisterOnAllInstances());
+        assertFalse("isRegisterOnAllInstances", registerMsg.isRegisterOnAllInstances());
 
         kit.reply(new RegisterDataTreeNotificationListenerReply(kit.getRef()));
 
@@ -120,7 +122,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
         RegisterDataTreeChangeListener registerMsg = kit.expectMsgClass(timeout,
             RegisterDataTreeChangeListener.class);
         assertEquals("getPath", path, registerMsg.getPath());
-        assertEquals("isRegisterOnAllInstances", true, registerMsg.isRegisterOnAllInstances());
+        assertTrue("isRegisterOnAllInstances", registerMsg.isRegisterOnAllInstances());
 
         proxy.close();
     }

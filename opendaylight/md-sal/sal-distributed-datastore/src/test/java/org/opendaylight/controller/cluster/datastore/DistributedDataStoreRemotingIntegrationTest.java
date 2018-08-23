@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -217,7 +218,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static void verifyCars(final DOMStoreReadTransaction readTx, final MapEntryNode... entries)
             throws Exception {
         final Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, optional.isPresent());
+        assertTrue("isPresent", optional.isPresent());
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> listBuilder = ImmutableNodes.mapNodeBuilder(
                 CarsModel.CAR_QNAME);
@@ -231,14 +232,14 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static void verifyNode(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> expNode) throws Exception {
         final Optional<NormalizedNode<?, ?>> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, optional.isPresent());
+        assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expNode, optional.get());
     }
 
     private static void verifyExists(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path)
             throws Exception {
         final Boolean exists = readTx.exists(path).get(5, TimeUnit.SECONDS);
-        assertEquals("exists", true, exists);
+        assertEquals("exists", Boolean.TRUE, exists);
     }
 
     @Test
@@ -315,8 +316,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        TestKit.shutdownActorSystem(leaderSystem, Boolean.TRUE);
-        TestKit.shutdownActorSystem(followerSystem, Boolean.TRUE);
+        TestKit.shutdownActorSystem(leaderSystem, true);
+        TestKit.shutdownActorSystem(followerSystem, true);
 
         final ActorSystem newSystem = newActorSystem("reinstated-member2", "Member2");
 
@@ -476,11 +477,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         readWriteTx.merge(personPath, person);
 
         Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, optional.isPresent());
+        assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", car, optional.get());
 
         optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, optional.isPresent());
+        assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", person, optional.get());
 
         final DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
@@ -500,7 +501,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifyCars(readTx, car);
 
         optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", false, optional.isPresent());
+        assertFalse("isPresent", optional.isPresent());
     }
 
     @Test
@@ -638,7 +639,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final com.google.common.base.Optional<ActorRef> carsFollowerShard =
                 followerDistributedDataStore.getActorContext().findLocalShard("cars");
-        assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
+        assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
 
         final DataTree dataTree = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
@@ -706,7 +707,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final com.google.common.base.Optional<ActorRef> carsFollowerShard =
                 followerDistributedDataStore.getActorContext().findLocalShard("cars");
-        assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
+        assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
 
         carsFollowerShard.get().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
         final DataTree dataTree = followerTestKit.expectMsgClass(DataTree.class);
@@ -1143,7 +1144,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         final Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
                 CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, readOptional.isPresent());
+        assertTrue("isPresent", readOptional.isPresent());
         assertEquals("Node", carsNode, readOptional.get());
 
         verifySnapshot(InMemorySnapshotStore.waitForSavedSnapshot(leaderCarShardName, Snapshot.class),
