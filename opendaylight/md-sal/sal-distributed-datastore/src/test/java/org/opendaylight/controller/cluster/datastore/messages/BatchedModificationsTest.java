@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSortedSet;
 import java.io.Serializable;
@@ -52,9 +54,9 @@ public class BatchedModificationsTest extends AbstractTest {
         batched.addModification(new WriteModification(writePath, writeData));
         batched.addModification(new MergeModification(mergePath, mergeData));
         batched.addModification(new DeleteModification(deletePath));
-        assertEquals("isReady", false, batched.isReady());
+        assertFalse("isReady", batched.isReady());
         batched.setReady();
-        assertEquals("isReady", true, batched.isReady());
+        assertTrue("isReady", batched.isReady());
         batched.setTotalMessagesSent(5);
 
         BatchedModifications clone = (BatchedModifications) SerializationUtils.clone(
@@ -62,9 +64,9 @@ public class BatchedModificationsTest extends AbstractTest {
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", tx1, clone.getTransactionId());
-        assertEquals("isReady", true, clone.isReady());
-        assertEquals("isDoCommitOnReady", false, clone.isDoCommitOnReady());
-        assertEquals("participatingShardNames present", false, clone.getParticipatingShardNames().isPresent());
+        assertTrue("isReady", clone.isReady());
+        assertFalse("isDoCommitOnReady", clone.isDoCommitOnReady());
+        assertFalse("participatingShardNames present", clone.getParticipatingShardNames().isPresent());
         assertEquals("getTotalMessagesSent", 5, clone.getTotalMessagesSent());
 
         assertEquals("getModifications size", 3, clone.getModifications().size());
@@ -90,15 +92,15 @@ public class BatchedModificationsTest extends AbstractTest {
         final SortedSet<String> shardNames = ImmutableSortedSet.of("one", "two");
         batched.setReady(Optional.of(shardNames));
         batched.setDoCommitOnReady(true);
-        assertEquals("isReady", true, batched.isReady());
+        assertTrue("isReady", batched.isReady());
 
         clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", tx2, clone.getTransactionId());
-        assertEquals("isReady", true, clone.isReady());
-        assertEquals("isDoCommitOnReady", true, clone.isDoCommitOnReady());
-        assertEquals("participatingShardNames present", true, clone.getParticipatingShardNames().isPresent());
+        assertTrue("isReady", clone.isReady());
+        assertTrue("isDoCommitOnReady", clone.isDoCommitOnReady());
+        assertTrue("participatingShardNames present", clone.getParticipatingShardNames().isPresent());
         assertEquals("participatingShardNames", shardNames, clone.getParticipatingShardNames().get());
         assertEquals("getModifications size", 0, clone.getModifications().size());
 
@@ -110,7 +112,7 @@ public class BatchedModificationsTest extends AbstractTest {
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", tx2, clone.getTransactionId());
-        assertEquals("isReady", false, clone.isReady());
+        assertFalse("isReady", clone.isReady());
         assertEquals("getModifications size", 0, clone.getModifications().size());
 
         // Test pre-Flourine
@@ -123,8 +125,8 @@ public class BatchedModificationsTest extends AbstractTest {
 
         assertEquals("getVersion", DataStoreVersions.BORON_VERSION, clone.getVersion());
         assertEquals("getTransactionID", tx2, clone.getTransactionId());
-        assertEquals("isReady", true, clone.isReady());
-        assertEquals("participatingShardNames present", false, clone.getParticipatingShardNames().isPresent());
+        assertTrue("isReady", clone.isReady());
+        assertFalse("participatingShardNames present", clone.getParticipatingShardNames().isPresent());
         assertEquals("getModifications size", 1, clone.getModifications().size());
     }
 
