@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -26,8 +27,8 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
     public CreateTransactionReply(final String transactionPath, final TransactionIdentifier transactionId,
             final short version) {
         super(version);
-        this.transactionPath = Preconditions.checkNotNull(transactionPath);
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionPath = requireNonNull(transactionPath);
+        this.transactionId = requireNonNull(transactionId);
     }
 
     public String getTransactionPath() {
@@ -60,7 +61,7 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
     }
 
     public static CreateTransactionReply fromSerializable(Object serializable) {
-        Preconditions.checkNotNull(serializable instanceof CreateTransactionReply);
+        checkArgument(serializable instanceof CreateTransactionReply);
         return (CreateTransactionReply)serializable;
     }
 
