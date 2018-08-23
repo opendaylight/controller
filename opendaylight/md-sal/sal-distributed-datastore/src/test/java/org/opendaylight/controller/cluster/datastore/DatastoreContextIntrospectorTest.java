@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS;
@@ -67,7 +69,7 @@ public class DatastoreContextIntrospectorTest {
         DatastoreContext context = introspector.getContext();
 
         assertEquals(1000, context.getShardBatchedModificationCount());
-        assertEquals(false, context.isTransactionDebugContextEnabled());
+        assertFalse(context.isTransactionDebugContextEnabled());
     }
 
     @Test
@@ -96,7 +98,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("persistent", "false");
 
         boolean updated = introspector.update(properties);
-        assertEquals("updated", true, updated);
+        assertTrue("updated", updated);
         DatastoreContext context = introspector.getContext();
 
         assertEquals(31, context.getShardTransactionIdleTimeout().toMinutes());
@@ -117,7 +119,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(1111, context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
         assertEquals(2222, context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
         assertEquals(3333, context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
-        assertEquals(false, context.isPersistent());
+        assertFalse(context.isPersistent());
 
         properties.put("shard-transaction-idle-timeout-in-minutes", "32");
         properties.put("operation-timeout-in-seconds", "27");
@@ -128,7 +130,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("persistent", "true");
 
         updated = introspector.update(properties);
-        assertEquals("updated", true, updated);
+        assertTrue("updated", updated);
         context = introspector.getContext();
 
         assertEquals(32, context.getShardTransactionIdleTimeout().toMinutes());
@@ -148,13 +150,13 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(1111, context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
         assertEquals(2222, context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
         assertEquals(4444, context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
-        assertEquals(true, context.isPersistent());
+        assertTrue(context.isPersistent());
 
         updated = introspector.update(null);
-        assertEquals("updated", false, updated);
+        assertFalse("updated", updated);
 
         updated = introspector.update(new Hashtable<>());
-        assertEquals("updated", false, updated);
+        assertFalse("updated", updated);
     }
 
 
@@ -176,7 +178,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put("unknownProperty", "1"); // bad - invalid property name
 
         final boolean updated = introspector.update(properties);
-        assertEquals("updated", true, updated);
+        assertTrue("updated", updated);
         DatastoreContext context = introspector.getContext();
 
         assertEquals(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT, context.getShardTransactionIdleTimeout());
@@ -210,20 +212,20 @@ public class DatastoreContextIntrospectorTest {
 
         final DatastoreContextIntrospector operIntrospector = INTROSPECTOR_FACTORY.newInstance(OPERATIONAL);
         boolean updated = operIntrospector.update(properties);
-        assertEquals("updated", true, updated);
+        assertTrue("updated", updated);
         DatastoreContext operContext = operIntrospector.getContext();
 
         assertEquals(33, operContext.getShardTransactionIdleTimeout().toMinutes());
-        assertEquals(true, operContext.isPersistent());
+        assertTrue(operContext.isPersistent());
         assertEquals(333, operContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
 
         final DatastoreContextIntrospector configIntrospector = INTROSPECTOR_FACTORY.newInstance(CONFIGURATION);
         updated = configIntrospector.update(properties);
-        assertEquals("updated", true, updated);
+        assertTrue("updated", updated);
         DatastoreContext configContext = configIntrospector.getContext();
 
         assertEquals(44, configContext.getShardTransactionIdleTimeout().toMinutes());
-        assertEquals(false, configContext.isPersistent());
+        assertFalse(configContext.isPersistent());
         assertEquals(444, configContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
     }
 

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import akka.actor.ExtendedActorSystem;
 import akka.testkit.javadsl.TestKit;
@@ -71,9 +72,9 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         BatchedModifications batched = (BatchedModifications)deserialized;
         assertEquals("getTransactionID", txId, batched.getTransactionId());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, batched.getVersion());
-        assertEquals("isReady", true, batched.isReady());
-        assertEquals("isDoCommitOnReady", true, batched.isDoCommitOnReady());
-        assertEquals("participatingShardNames present", true, batched.getParticipatingShardNames().isPresent());
+        assertTrue("isReady", batched.isReady());
+        assertTrue("isDoCommitOnReady", batched.isDoCommitOnReady());
+        assertTrue("participatingShardNames present", batched.getParticipatingShardNames().isPresent());
         assertEquals("participatingShardNames", shardNames, batched.getParticipatingShardNames().get());
 
         List<Modification> batchedMods = batched.getModifications();
