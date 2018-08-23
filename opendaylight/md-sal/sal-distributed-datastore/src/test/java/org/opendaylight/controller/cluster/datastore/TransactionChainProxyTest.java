@@ -8,11 +8,11 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -162,7 +162,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
                 }
             }).start();
 
-            assertEquals("Tx 2 write should've completed", true, write2Complete.await(5, TimeUnit.SECONDS));
+            assertTrue("Tx 2 write should've completed", write2Complete.await(5, TimeUnit.SECONDS));
 
             if (caughtEx.get() != null) {
                 throw caughtEx.get();
@@ -231,7 +231,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
                 }
             }).start();
 
-            assertEquals("Tx 2 write should've completed", true, write2Complete.await(5, TimeUnit.SECONDS));
+            assertTrue("Tx 2 write should've completed", write2Complete.await(5, TimeUnit.SECONDS));
 
             if (caughtEx.get() != null) {
                 throw caughtEx.get();

@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.CLIENT_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.HISTORY_ID;
@@ -20,7 +23,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -66,32 +68,32 @@ public class DirectTransactionCommitCohortTest {
     public void testCanCommit() throws Exception {
         final ListenableFuture<Boolean> canCommit = cohort.canCommit();
         final ModifyTransactionRequest request = transaction.expectTransactionRequest(ModifyTransactionRequest.class);
-        Assert.assertTrue(request.getPersistenceProtocol().isPresent());
-        Assert.assertEquals(PersistenceProtocol.SIMPLE, request.getPersistenceProtocol().get());
+        assertTrue(request.getPersistenceProtocol().isPresent());
+        assertEquals(PersistenceProtocol.SIMPLE, request.getPersistenceProtocol().get());
         final RequestSuccess<?, ?> success = new TransactionCommitSuccess(transaction.getTransaction().getIdentifier(),
                 transaction.getLastReceivedMessage().getSequence());
         transaction.replySuccess(success);
-        Assert.assertTrue(getWithTimeout(canCommit));
+        assertEquals(Boolean.TRUE, getWithTimeout(canCommit));
     }
 
     @Test
     public void testPreCommit() throws Exception {
         final ListenableFuture<Void> preCommit = cohort.preCommit();
-        Assert.assertNull(getWithTimeout(preCommit));
+        assertNull(getWithTimeout(preCommit));
     }
 
     @Test
     public void testAbort() throws Exception {
         final ListenableFuture<Void> abort = cohort.abort();
         verify(history).onTransactionComplete(transaction.getTransaction().getIdentifier());
-        Assert.assertNull(getWithTimeout(abort));
+        assertNull(getWithTimeout(abort));
     }
 
     @Test
     public void testCommit() throws Exception {
         final ListenableFuture<Void> commit = cohort.commit();
         verify(history).onTransactionComplete(transaction.getTransaction().getIdentifier());
-        Assert.assertNull(getWithTimeout(commit));
+        assertNull(getWithTimeout(commit));
     }
 
     private static TransactionTester<?> createTransactionTester(final TestProbe backendProbe,
