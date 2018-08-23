@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import akka.actor.ActorRef;
@@ -346,13 +347,13 @@ public class IntegrationTestKit extends ShardTestKit {
         DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
         Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, optional.isPresent());
+        assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", nodeToWrite, optional.get());
     }
 
     public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
         Boolean canCommit = cohort.canCommit().get(commitTimeout, TimeUnit.SECONDS);
-        assertEquals("canCommit", true, canCommit);
+        assertEquals("canCommit", Boolean.TRUE, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
     }
@@ -360,7 +361,7 @@ public class IntegrationTestKit extends ShardTestKit {
     void doCommit(final ListenableFuture<Boolean> canCommitFuture, final DOMStoreThreePhaseCommitCohort cohort)
             throws Exception {
         Boolean canCommit = canCommitFuture.get(commitTimeout, TimeUnit.SECONDS);
-        assertEquals("canCommit", true, canCommit);
+        assertEquals("canCommit", Boolean.TRUE, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
     }

@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -77,7 +79,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
         RegisterDataTreeChangeListener registerMsg = testKit.expectMsgClass(timeout,
             RegisterDataTreeChangeListener.class);
         assertEquals("getPath", path, registerMsg.getPath());
-        assertEquals("isRegisterOnAllInstances", false, registerMsg.isRegisterOnAllInstances());
+        assertFalse("isRegisterOnAllInstances", registerMsg.isRegisterOnAllInstances());
 
         testKit.reply(new RegisterDataTreeNotificationListenerReply(testKit.getRef()));
 
@@ -126,7 +128,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
         RegisterDataTreeChangeListener registerMsg = testKit.expectMsgClass(timeout,
             RegisterDataTreeChangeListener.class);
         assertEquals("getPath", path, registerMsg.getPath());
-        assertEquals("isRegisterOnAllInstances", true, registerMsg.isRegisterOnAllInstances());
+        assertTrue("isRegisterOnAllInstances", registerMsg.isRegisterOnAllInstances());
 
         proxy.close();
     }
