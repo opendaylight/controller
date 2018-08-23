@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -83,7 +83,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final TransactionTester<LocalReadWriteProxyTransaction> tester = getTester();
         final CommitLocalTransactionRequest req = tester.expectTransactionRequest(CommitLocalTransactionRequest.class);
         tester.replySuccess(new TransactionCommitSuccess(TRANSACTION_ID, req.getSequence()));
-        assertFutureEquals(true, result);
+        assertFutureEquals(Boolean.TRUE, result);
     }
 
     @Test

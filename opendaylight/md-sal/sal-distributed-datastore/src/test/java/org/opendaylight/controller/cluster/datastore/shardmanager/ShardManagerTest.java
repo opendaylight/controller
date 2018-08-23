@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -309,7 +310,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
 
-        assertEquals("Shard actors created", true, newShardActorLatch.await(5, TimeUnit.SECONDS));
+        assertTrue("Shard actors created", newShardActorLatch.await(5, TimeUnit.SECONDS));
         assertEquals("getShardElectionTimeoutFactor", 6,
                 shardInfoMap.get("default").getValue().getShardElectionTimeoutFactor());
         assertEquals("getShardElectionTimeoutFactor", 7,
@@ -1104,7 +1105,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testByDefaultSyncStatusIsFalse() {
         TestShardManager shardManager = newTestShardManager();
 
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
@@ -1114,7 +1115,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         shardManager.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
-        assertEquals(true, shardManager.getMBean().getSyncStatus());
+        assertTrue(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
@@ -1125,13 +1126,13 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         shardManager.onReceiveCommand(new RoleChangeNotification(shardId,
                 RaftState.Follower.name(), RaftState.Candidate.name()));
 
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send a FollowerInitialSyncStatus with status = true for the replica whose current state is candidate
         shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(
                 true, shardId));
 
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
@@ -1143,17 +1144,17 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 RaftState.Candidate.name(), RaftState.Follower.name()));
 
         // Initially will be false
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send status true will make sync status true
         shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(true, shardId));
 
-        assertEquals(true, shardManager.getMBean().getSyncStatus());
+        assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Send status false will make sync status false
         shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(false, shardId));
 
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
@@ -1167,7 +1168,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         }));
 
         // Initially will be false
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make default shard leader
         String defaultShardId = "member-1-shard-default-" + shardMrgIDSuffix;
@@ -1175,7 +1176,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         // default = Leader, astronauts is unknown so sync status remains false
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make astronauts shard leader as well
         String astronautsShardId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
@@ -1183,20 +1184,20 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         // Now sync status should be true
-        assertEquals(true, shardManager.getMBean().getSyncStatus());
+        assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Make astronauts a Follower
         shardManager.onReceiveCommand(new RoleChangeNotification(astronautsShardId,
                 RaftState.Leader.name(), RaftState.Follower.name()));
 
         // Sync status is not true
-        assertEquals(false, shardManager.getMBean().getSyncStatus());
+        assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make the astronauts follower sync status true
         shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(true, astronautsShardId));
 
         // Sync status is now true
-        assertEquals(true, shardManager.getMBean().getSyncStatus());
+        assertTrue(shardManager.getMBean().getSyncStatus());
 
         LOG.info("testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards ending");
     }
@@ -1249,7 +1250,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         kit.expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
-        assertEquals("isRecoveryApplicable", false, shardBuilder.getDatastoreContext().isPersistent());
+        assertFalse("isRecoveryApplicable", shardBuilder.getDatastoreContext().isPersistent());
         assertTrue("Epxected ShardPeerAddressResolver", shardBuilder.getDatastoreContext().getShardRaftConfig()
             .getPeerAddressResolver() instanceof ShardPeerAddressResolver);
         assertEquals("peerMembers", Sets.newHashSet(
@@ -1441,7 +1442,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         shardManager.tell(new AddShardReplica("model-inventory"), kit.getRef());
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(2), Status.Failure.class);
 
-        assertEquals("Failure obtained", true, resp.cause() instanceof IllegalArgumentException);
+        assertTrue("Failure obtained", resp.cause() instanceof IllegalArgumentException);
     }
 
     @Test
@@ -1679,7 +1680,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         newReplicaShardManager.tell(new AddShardReplica("astronauts"), kit.getRef());
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(5), Status.Failure.class);
-        assertEquals("Failure obtained", true, resp.cause() instanceof RuntimeException);
+        assertTrue("Failure obtained", resp.cause() instanceof RuntimeException);
 
         LOG.info("testAddShardReplicaWithFindPrimaryTimeout ending");
     }
@@ -1693,7 +1694,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         shardManager.tell(new RemoveShardReplica("model-inventory", MEMBER_1), kit.getRef());
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(10), Status.Failure.class);
-        assertEquals("Failure obtained", true, resp.cause() instanceof PrimaryNotFoundException);
+        assertTrue("Failure obtained", resp.cause() instanceof PrimaryNotFoundException);
     }
 
     @Test
@@ -2052,7 +2053,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         MessageCollectorActor.expectFirstMatching(respondActor, ChangeServersVotingStatus.class);
 
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(5), Status.Failure.class);
-        assertEquals("Failure resposnse", true, resp.cause() instanceof NoShardLeaderException);
+        assertTrue("Failure resposnse", resp.cause() instanceof NoShardLeaderException);
     }
 
     public static class TestShardManager extends ShardManager {
@@ -2119,37 +2120,36 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         }
 
         void waitForRecoveryComplete() {
-            assertEquals("Recovery complete", true,
+            assertTrue("Recovery complete",
                     Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
         }
 
         public void waitForMemberUp() {
-            assertEquals("MemberUp received", true,
+            assertTrue("MemberUp received",
                     Uninterruptibles.awaitUninterruptibly(memberUpReceived, 5, TimeUnit.SECONDS));
             memberUpReceived = new CountDownLatch(1);
         }
 
         void waitForMemberRemoved() {
-            assertEquals("MemberRemoved received", true,
+            assertTrue("MemberRemoved received",
                     Uninterruptibles.awaitUninterruptibly(memberRemovedReceived, 5, TimeUnit.SECONDS));
             memberRemovedReceived = new CountDownLatch(1);
         }
 
         void waitForUnreachableMember() {
-            assertEquals("UnreachableMember received", true,
-                Uninterruptibles.awaitUninterruptibly(memberUnreachableReceived, 5, TimeUnit.SECONDS
-                ));
+            assertTrue("UnreachableMember received",
+                Uninterruptibles.awaitUninterruptibly(memberUnreachableReceived, 5, TimeUnit.SECONDS));
             memberUnreachableReceived = new CountDownLatch(1);
         }
 
         void waitForReachableMember() {
-            assertEquals("ReachableMember received", true,
+            assertTrue("ReachableMember received",
                 Uninterruptibles.awaitUninterruptibly(memberReachableReceived, 5, TimeUnit.SECONDS));
             memberReachableReceived = new CountDownLatch(1);
         }
 
         void verifyFindPrimary() {
-            assertEquals("FindPrimary received", true,
+            assertTrue("FindPrimary received",
                     Uninterruptibles.awaitUninterruptibly(findPrimaryMessageReceived, 5, TimeUnit.SECONDS));
             findPrimaryMessageReceived = new CountDownLatch(1);
         }
@@ -2186,7 +2186,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         }
 
         void verifySnapshotPersisted(final Set<String> shardList) {
-            assertEquals("saveSnapshot invoked", true,
+            assertTrue("saveSnapshot invoked",
                     Uninterruptibles.awaitUninterruptibly(snapshotPersist, 5, TimeUnit.SECONDS));
             assertEquals("Shard Persisted", shardList, Sets.newHashSet(snapshot.getShardList()));
         }
