@@ -249,7 +249,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
 
         DOMEntity entity2 = new DOMEntity(ENTITY_TYPE, "two");
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity2);
-        assertEquals("getOwnershipState present", false, state.isPresent());
+        assertFalse("getOwnershipState present", state.isPresent());
 
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity2.getIdentifier(), "member-1"),
                 shardDataTree);
@@ -259,7 +259,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
 
         deleteNode(candidatePath(entityPath(entity2.getType(), entity2.getIdentifier()), "member-1"), shardDataTree);
         Optional<EntityOwnershipState> state2 = service.getOwnershipState(entity2);
-        assertEquals("getOwnershipState present", false, state2.isPresent());
+        assertFalse("getOwnershipState present", state2.isPresent());
         service.close();
     }
 
@@ -282,7 +282,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
     private static void verifyGetOwnershipState(final DistributedEntityOwnershipService service, final DOMEntity entity,
             final EntityOwnershipState expState) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
-        assertEquals("getOwnershipState present", true, state.isPresent());
+        assertTrue("getOwnershipState present", state.isPresent());
         assertEquals("EntityOwnershipState", expState, state.get());
     }
 

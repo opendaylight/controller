@@ -790,7 +790,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         Future<Object> future = Patterns.ask(leaderDistributedDataStore.getActorContext().getShardManager(),
                 new ChangeShardMembersVotingStatus(ENTITY_OWNERSHIP_SHARD_NAME,
-                        ImmutableMap.of("member-4", false, "member-5", false)), new Timeout(10, TimeUnit.SECONDS));
+                        ImmutableMap.of("member-4", Boolean.FALSE, "member-5", Boolean.FALSE)),
+                new Timeout(10, TimeUnit.SECONDS));
         Object response = Await.result(future, FiniteDuration.apply(10, TimeUnit.SECONDS));
         if (response instanceof Throwable) {
             throw new AssertionError("ChangeShardMembersVotingStatus failed", (Throwable)response);
@@ -823,7 +824,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         future = Patterns.ask(leaderDistributedDataStore.getActorContext().getShardManager(),
                 new ChangeShardMembersVotingStatus(ENTITY_OWNERSHIP_SHARD_NAME,
-                        ImmutableMap.of("member-3", false, "member-4", true, "member-5", true)),
+                        ImmutableMap.of("member-3", Boolean.FALSE, "member-4", Boolean.TRUE, "member-5", Boolean.TRUE)),
                 new Timeout(10, TimeUnit.SECONDS));
         response = Await.result(future, FiniteDuration.apply(10, TimeUnit.SECONDS));
         if (response instanceof Throwable) {
@@ -852,7 +853,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                     .read(entityPath(entity.getType(), entity.getIdentifier()).node(Candidate.QNAME))
                     .get(5, TimeUnit.SECONDS);
             try {
-                assertEquals("Candidates not found for " + entity, true, possible.isPresent());
+                assertTrue("Candidates not found for " + entity, possible.isPresent());
                 Collection<String> actual = new ArrayList<>();
                 for (MapEntryNode candidate: ((MapNode)possible.get()).getValue()) {
                     actual.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());

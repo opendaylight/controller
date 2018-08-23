@@ -154,7 +154,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
                 Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testRecovery");
 
-        assertEquals("Recovery complete", true, recoveryComplete.await(5, TimeUnit.SECONDS));
+        assertTrue("Recovery complete", recoveryComplete.await(5, TimeUnit.SECONDS));
 
         // Verify data in the data store.
 

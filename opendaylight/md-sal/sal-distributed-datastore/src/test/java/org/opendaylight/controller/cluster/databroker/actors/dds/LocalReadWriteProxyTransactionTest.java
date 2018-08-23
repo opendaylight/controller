@@ -83,7 +83,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         final TransactionTester<LocalReadWriteProxyTransaction> tester = getTester();
         final CommitLocalTransactionRequest req = tester.expectTransactionRequest(CommitLocalTransactionRequest.class);
         tester.replySuccess(new TransactionCommitSuccess(TRANSACTION_ID, req.getSequence()));
-        assertFutureEquals(true, result);
+        assertFutureEquals(Boolean.TRUE, result);
     }
 
     @Test
