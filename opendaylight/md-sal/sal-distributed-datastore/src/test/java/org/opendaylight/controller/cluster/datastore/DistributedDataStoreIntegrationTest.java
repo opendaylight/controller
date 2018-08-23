@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -119,7 +120,7 @@ public class DistributedDataStoreIntegrationTest {
 
     @After
     public void tearDown() {
-        TestKit.shutdownActorSystem(system, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, true);
         system = null;
     }
 
@@ -179,11 +180,11 @@ public class DistributedDataStoreIntegrationTest {
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             Optional<NormalizedNode<?, ?>> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
             optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", person, optional.get());
         }
     }
@@ -205,10 +206,10 @@ public class DistributedDataStoreIntegrationTest {
 
             // 3. Read the data from Tx
             final Boolean exists = readWriteTx.exists(nodePath).get(5, TimeUnit.SECONDS);
-            assertEquals("exists", true, exists);
+            assertEquals("exists", Boolean.TRUE, exists);
 
             Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", nodeToWrite, optional.get());
 
             // 4. Ready the Tx for commit
@@ -221,7 +222,7 @@ public class DistributedDataStoreIntegrationTest {
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", nodeToWrite, optional.get());
         }
     }
@@ -258,10 +259,10 @@ public class DistributedDataStoreIntegrationTest {
             readWriteTx.write(personPath, person);
 
             final Boolean exists = readWriteTx.exists(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("exists", true, exists);
+            assertEquals("exists", Boolean.TRUE, exists);
 
             Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
             testKit.doCommit(readWriteTx.ready());
@@ -270,11 +271,11 @@ public class DistributedDataStoreIntegrationTest {
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
             optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", person, optional.get());
         }
     }
@@ -304,7 +305,7 @@ public class DistributedDataStoreIntegrationTest {
 
             final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
                     .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
         }
     }
@@ -368,7 +369,7 @@ public class DistributedDataStoreIntegrationTest {
                 throw caughtEx.get();
             }
 
-            assertEquals("Tx ready", true, done);
+            assertTrue("Tx ready", done);
 
             // At this point the Tx operations should be waiting for the
             // shard to initialize so
@@ -382,13 +383,13 @@ public class DistributedDataStoreIntegrationTest {
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
 
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
 
             optional = readTx.read(listEntryPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", false, optional.isPresent());
+            assertFalse("isPresent", optional.isPresent());
         }
     }
 
@@ -452,7 +453,7 @@ public class DistributedDataStoreIntegrationTest {
                 throw caughtEx.get();
             }
 
-            assertEquals("Tx reads done", true, done);
+            assertTrue("Tx reads done", done);
 
             // At this point the Tx operations should be waiting for the
             // shard to initialize so
@@ -460,8 +461,8 @@ public class DistributedDataStoreIntegrationTest {
             blockRecoveryLatch.countDown();
 
             // Wait for the reads to complete and verify.
-            assertEquals("exists", true, txExistsFuture.get().get(5, TimeUnit.SECONDS));
-            assertEquals("read", true, txReadFuture.get().get(5, TimeUnit.SECONDS).isPresent());
+            assertEquals("exists", Boolean.TRUE, txExistsFuture.get().get(5, TimeUnit.SECONDS));
+            assertTrue("read", txReadFuture.get().get(5, TimeUnit.SECONDS).isPresent());
 
             readWriteTx.close();
         }
@@ -516,7 +517,7 @@ public class DistributedDataStoreIntegrationTest {
             throw caughtEx.get();
         }
 
-        assertEquals("Tx ready", true, done);
+        assertTrue("Tx ready", done);
 
         // Wait for the commit to complete. Since the shard never
         // initialized, the Tx should
@@ -584,7 +585,7 @@ public class DistributedDataStoreIntegrationTest {
                 throw caughtEx.get();
             }
 
-            assertEquals("Tx read done", true, done);
+            assertTrue("Tx read done", done);
 
             // Wait for the read to complete. Since the shard never
             // initialized, the Tx should
@@ -659,7 +660,7 @@ public class DistributedDataStoreIntegrationTest {
                     throw caughtEx.get();
                 }
 
-                assertEquals("Tx ready", true, done);
+                assertTrue("Tx ready", done);
 
                 // Wait for the commit to complete. Since no shard
                 // leader was elected in time, the Tx
@@ -764,7 +765,7 @@ public class DistributedDataStoreIntegrationTest {
             // Tx is visible after being readied.
             DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
             Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", testNode, optional.get());
 
             // 6. Create a new RW Tx from the chain, write more data,
@@ -781,7 +782,7 @@ public class DistributedDataStoreIntegrationTest {
             // verify it is visible.
             readTx = txChain.newReadWriteTransaction();
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", outerNode, optional.get());
 
             // 8. Wait for the 2 commits to complete and close the
@@ -801,7 +802,7 @@ public class DistributedDataStoreIntegrationTest {
             // committed data.
             readTx = dataStore.newReadOnlyTransaction();
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", outerNode, optional.get());
         }
     }
@@ -836,11 +837,11 @@ public class DistributedDataStoreIntegrationTest {
             readWriteTx.merge(personPath, person);
 
             Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", car, optional.get());
 
             optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", person, optional.get());
 
             final DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
@@ -863,10 +864,10 @@ public class DistributedDataStoreIntegrationTest {
             final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", false, optional.isPresent());
+            assertFalse("isPresent", optional.isPresent());
 
             optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", person, optional.get());
         }
     }
@@ -908,7 +909,7 @@ public class DistributedDataStoreIntegrationTest {
 
             final Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
                     .read(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
 
             txChain.close();
@@ -931,9 +932,8 @@ public class DistributedDataStoreIntegrationTest {
 
             final DOMStoreReadWriteTransaction rwTx2 = txChain.newReadWriteTransaction();
 
-            final Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(
-                5, TimeUnit.SECONDS);
-            assertEquals("isPresent", false, optional.isPresent());
+            final Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+            assertFalse("isPresent", optional.isPresent());
 
             txChain.close();
         }
@@ -1002,8 +1002,8 @@ public class DistributedDataStoreIntegrationTest {
 
             // Ensure the reads succeed.
 
-            assertEquals("isPresent", true, readFuture1.get(5, TimeUnit.SECONDS).isPresent());
-            assertEquals("isPresent", true, readFuture2.get(5, TimeUnit.SECONDS).isPresent());
+            assertTrue("isPresent", readFuture1.get(5, TimeUnit.SECONDS).isPresent());
+            assertTrue("isPresent", readFuture2.get(5, TimeUnit.SECONDS).isPresent());
 
             // Ensure the writes succeed.
             DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
@@ -1011,7 +1011,7 @@ public class DistributedDataStoreIntegrationTest {
             testKit.doCommit(cohort1);
             testKit.doCommit(cohort2);
 
-            assertEquals("isPresent", true, txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH)
+            assertTrue("isPresent", txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH)
                 .get(5, TimeUnit.SECONDS).isPresent());
         }
     }
@@ -1191,11 +1191,11 @@ public class DistributedDataStoreIntegrationTest {
 
             // two reads
             Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", carsNode, optional.get());
 
             optional = readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
+            assertTrue("isPresent", optional.isPresent());
             assertEquals("Data node", peopleNode, optional.get());
         }
     }

@@ -128,8 +128,8 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             followerOperDatastore.close();
         }
 
-        TestKit.shutdownActorSystem(leaderSystem, Boolean.TRUE);
-        TestKit.shutdownActorSystem(followerSystem, Boolean.TRUE);
+        TestKit.shutdownActorSystem(leaderSystem, true);
+        TestKit.shutdownActorSystem(followerSystem, true);
 
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();

@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
@@ -40,29 +42,26 @@ public class ClientBackedReadTransactionTest extends ClientBackedTransactionTest
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        Mockito.doReturn(CLIENT_ID).when(clientContext).getIdentifier();
-        Mockito.doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
+        doReturn(CLIENT_ID).when(clientContext).getIdentifier();
+        doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
 
-        Mockito.doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(delegate)
-                .exists(YangInstanceIdentifier.EMPTY);
-        Mockito.doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate)
-                .read(YangInstanceIdentifier.EMPTY);
+        doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(delegate).exists(YangInstanceIdentifier.EMPTY);
+        doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.EMPTY);
 
         object = new ClientBackedReadTransaction(delegate, null, null);
     }
 
     @Test
     public void testRead() throws Exception {
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> result = object().read(
-                YangInstanceIdentifier.EMPTY);
+        final ListenableFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.EMPTY);
         final Optional<NormalizedNode<?, ?>> resultData = result.get();
-        Assert.assertTrue(resultData.isPresent());
-        Assert.assertEquals(data, resultData.get());
+        assertTrue(resultData.isPresent());
+        assertEquals(data, resultData.get());
     }
 
     @Test
     public void testExists() throws Exception {
         final ListenableFuture<Boolean> result = object().exists(YangInstanceIdentifier.EMPTY);
-        Assert.assertTrue(result.get());
+        assertEquals(Boolean.TRUE, result.get());
     }
 }

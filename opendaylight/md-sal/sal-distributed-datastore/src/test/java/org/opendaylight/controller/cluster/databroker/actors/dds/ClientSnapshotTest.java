@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -44,14 +45,14 @@ public class ClientSnapshotTest extends AbstractClientHandleTest<ClientSnapshot>
     public void testExists() throws Exception {
         final ListenableFuture<Boolean> exists = getHandle().exists(PATH);
         verify(getDataTreeSnapshot()).readNode(PATH);
-        Assert.assertFalse(getWithTimeout(exists));
+        assertEquals(Boolean.FALSE, getWithTimeout(exists));
     }
 
     @Test
     public void testRead() throws Exception {
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> exists = getHandle().read(PATH);
         verify(getDataTreeSnapshot()).readNode(PATH);
-        Assert.assertFalse(getWithTimeout(exists).isPresent());
+        assertFalse(getWithTimeout(exists).isPresent());
     }
 
 }
