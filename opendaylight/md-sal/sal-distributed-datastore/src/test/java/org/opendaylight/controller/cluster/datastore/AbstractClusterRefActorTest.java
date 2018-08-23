@@ -25,7 +25,7 @@ public abstract class AbstractClusterRefActorTest extends AbstractTest {
 
     @AfterClass
     public static void tearDownClass() {
-        TestKit.shutdownActorSystem(system, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, true);
         system = null;
     }
 

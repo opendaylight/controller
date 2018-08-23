@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.getWithTimeout;
@@ -34,20 +36,20 @@ public class EmptyTransactionCommitCohortTest {
     @Test
     public void testCanCommit() throws Exception {
         final ListenableFuture<Boolean> canCommit = cohort.canCommit();
-        Assert.assertTrue(getWithTimeout(canCommit));
+        assertEquals(Boolean.TRUE, getWithTimeout(canCommit));
     }
 
     @Test
     public void testPreCommit() throws Exception {
         final ListenableFuture<Void> preCommit = cohort.preCommit();
-        Assert.assertNull(getWithTimeout(preCommit));
+        assertNull(getWithTimeout(preCommit));
     }
 
     @Test
     public void testAbort() throws Exception {
         final ListenableFuture<Void> abort = cohort.abort();
         verify(history).onTransactionComplete(TRANSACTION_ID);
-        Assert.assertNull(getWithTimeout(abort));
+        assertNull(getWithTimeout(abort));
     }
 
     @Test

@@ -44,8 +44,8 @@ public abstract class LocalProxyTransactionTest<T extends LocalProxyTransaction>
     @Override
     @Test
     public void testExists() throws Exception {
-        assertFutureEquals(true, transaction.exists(PATH_1));
-        assertFutureEquals(false, transaction.exists(PATH_3));
+        assertFutureEquals(Boolean.TRUE, transaction.exists(PATH_1));
+        assertFutureEquals(Boolean.FALSE, transaction.exists(PATH_3));
     }
 
     @Override
