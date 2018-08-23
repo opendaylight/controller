@@ -61,7 +61,7 @@ public abstract class AbstractTest {
     @After
     public void actorSystemCleanup() {
         for (final ActorSystem system : actorSystems) {
-            TestKit.shutdownActorSystem(system, Boolean.TRUE);
+            TestKit.shutdownActorSystem(system, true);
         }
     }
 

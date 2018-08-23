@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.TRANSACTION_ID;
@@ -17,7 +19,6 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -79,7 +80,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     public void testExists() throws Exception {
         final FluentFuture<Boolean> exists = getHandle().exists(PATH);
         verify(modification).readNode(PATH);
-        Assert.assertTrue(getWithTimeout(exists));
+        assertEquals(Boolean.TRUE, getWithTimeout(exists));
     }
 
     @Test
@@ -87,8 +88,8 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
         final FluentFuture<Optional<NormalizedNode<?, ?>>> resultFuture = getHandle().read(PATH);
         verify(modification).readNode(PATH);
         final Optional<NormalizedNode<?, ?>> result = getWithTimeout(resultFuture);
-        Assert.assertTrue(result.isPresent());
-        Assert.assertEquals(DATA, result.get());
+        assertTrue(result.isPresent());
+        assertEquals(DATA, result.get());
     }
 
     @Test
@@ -112,7 +113,7 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
     @Test
     public void testReadyEmpty() throws Exception {
         final DOMStoreThreePhaseCommitCohort cohort = getHandle().ready();
-        assertFutureEquals(true, cohort.canCommit());
+        assertFutureEquals(Boolean.TRUE, cohort.canCommit());
         assertFutureEquals(null, cohort.preCommit());
         assertFutureEquals(null, cohort.commit());
     }
@@ -125,8 +126,8 @@ public class ClientTransactionTest extends AbstractClientHandleTest<ClientTransa
         final ListenableFuture<Boolean> actual = cohort.canCommit();
         final CommitLocalTransactionRequest request =
                 backendRespondToRequest(CommitLocalTransactionRequest.class, response);
-        Assert.assertEquals(modification, request.getModification());
-        assertFutureEquals(true, actual);
+        assertEquals(modification, request.getModification());
+        assertFutureEquals(Boolean.TRUE, actual);
         assertFutureEquals(null, cohort.preCommit());
         assertFutureEquals(null, cohort.commit());
     }
