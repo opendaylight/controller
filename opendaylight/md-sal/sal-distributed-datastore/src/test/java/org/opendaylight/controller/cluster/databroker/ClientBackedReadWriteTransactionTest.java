@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -41,13 +43,11 @@ public class ClientBackedReadWriteTransactionTest
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        Mockito.doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
-        Mockito.doReturn(readyCohort).when(delegate).ready();
+        doReturn(TRANSACTION_ID).when(delegate).getIdentifier();
+        doReturn(readyCohort).when(delegate).ready();
 
-        Mockito.doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(delegate)
-                .exists(YangInstanceIdentifier.EMPTY);
-        Mockito.doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate)
-                .read(YangInstanceIdentifier.EMPTY);
+        doReturn(Futures.immediateCheckedFuture(Boolean.TRUE)).when(delegate).exists(YangInstanceIdentifier.EMPTY);
+        doReturn(Futures.immediateCheckedFuture(Optional.of(data))).when(delegate).read(YangInstanceIdentifier.EMPTY);
 
         object = new ClientBackedReadWriteTransaction(delegate, null);
     }
@@ -56,12 +56,12 @@ public class ClientBackedReadWriteTransactionTest
     public void testRead() throws Exception {
         final FluentFuture<Optional<NormalizedNode<?, ?>>> result = object().read(YangInstanceIdentifier.EMPTY);
         final Optional<NormalizedNode<?, ?>> resultData = result.get();
-        Assert.assertTrue(resultData.isPresent());
-        Assert.assertEquals(data, resultData.get());
+        assertTrue(resultData.isPresent());
+        assertEquals(data, resultData.get());
     }
 
     @Test
     public void testExists() throws Exception {
-        Assert.assertTrue(object().exists(YangInstanceIdentifier.EMPTY).get());
+        assertEquals(Boolean.TRUE, object().exists(YangInstanceIdentifier.EMPTY).get());
     }
 }
