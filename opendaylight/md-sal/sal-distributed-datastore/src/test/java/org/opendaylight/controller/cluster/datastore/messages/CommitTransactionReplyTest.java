@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
@@ -34,7 +36,7 @@ public class CommitTransactionReplyTest {
 
     @Test
     public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, CommitTransactionReply.isSerializedType(new CommitTransactionReply()));
-        assertEquals("isSerializedType", false, CommitTransactionReply.isSerializedType(new Object()));
+        assertTrue("isSerializedType", CommitTransactionReply.isSerializedType(new CommitTransactionReply()));
+        assertFalse("isSerializedType", CommitTransactionReply.isSerializedType(new Object()));
     }
 }
