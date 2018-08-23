@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.ByteArrayInputStream;
@@ -52,7 +53,7 @@ public class ShardDataTreeSnapshotTest {
         }
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
-        assertEquals("rootNode present", true, actualNode.isPresent());
+        assertTrue("rootNode present", actualNode.isPresent());
         assertEquals("rootNode", expectedNode, actualNode.get());
         assertEquals("Deserialized type", MetadataShardDataTreeSnapshot.class, deserialized.getClass());
         assertEquals("Metadata size", 0, ((MetadataShardDataTreeSnapshot)deserialized).getMetadata().size());
@@ -78,7 +79,7 @@ public class ShardDataTreeSnapshotTest {
         }
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
-        assertEquals("rootNode present", true, actualNode.isPresent());
+        assertTrue("rootNode present", actualNode.isPresent());
         assertEquals("rootNode", expectedNode, actualNode.get());
         assertEquals("Deserialized type", MetadataShardDataTreeSnapshot.class, deserialized.getClass());
         assertEquals("Metadata", expMetadata, ((MetadataShardDataTreeSnapshot)deserialized).getMetadata());
