@@ -219,10 +219,6 @@
                 org.opendaylight.controller.cluster.sharding;
                 org.opendaylight.controller.cluster.databroker.actors.dds;
             </Export-Package>
-            <Import-Package>
-                *;
-                org.opendaylight.controller.md.sal.dom.broker.impl.jmx
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

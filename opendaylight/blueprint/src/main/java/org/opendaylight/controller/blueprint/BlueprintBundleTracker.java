@@ -50,7 +50,8 @@ import org.slf4j.LoggerFactory;
 public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCustomizer<Bundle>, BlueprintListener,
         SynchronousBundleListener {
     private static final Logger LOG = LoggerFactory.getLogger(BlueprintBundleTracker.class);
-    private static final String BLUEPRINT_FILE_PATH = "org/opendaylight/blueprint/";
+    private static final String ODL_CUSTOM_BLUEPRINT_FILE_PATH = "org/opendaylight/blueprint/";
+    private static final String STANDARD_BLUEPRINT_FILE_PATH = "OSGI-INF/blueprint/";
     private static final String BLUEPRINT_FLE_PATTERN = "*.xml";
     private static final long SYSTEM_BUNDLE_ID = 0;
 
@@ -207,7 +208,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         }
 
         if (bundle.getState() == Bundle.ACTIVE) {
-            List<Object> paths = findBlueprintPaths(bundle);
+            List<Object> paths = findBlueprintPaths(bundle, ODL_CUSTOM_BLUEPRINT_FILE_PATH);
 
             if (!paths.isEmpty()) {
                 LOG.info("Creating blueprint container for bundle {} with paths {}", bundle, paths);
@@ -254,9 +255,14 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     static List<Object> findBlueprintPaths(final Bundle bundle) {
-        Enumeration<?> rntries = bundle.findEntries(BLUEPRINT_FILE_PATH, BLUEPRINT_FLE_PATTERN, false);
+        List<Object> paths = findBlueprintPaths(bundle, STANDARD_BLUEPRINT_FILE_PATH);
+        return !paths.isEmpty() ? paths : findBlueprintPaths(bundle, ODL_CUSTOM_BLUEPRINT_FILE_PATH);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static List<Object> findBlueprintPaths(final Bundle bundle, final String path) {
+        Enumeration<?> rntries = bundle.findEntries(path, BLUEPRINT_FLE_PATTERN, false);
         if (rntries == null) {
             return Collections.emptyList();
         } else {
