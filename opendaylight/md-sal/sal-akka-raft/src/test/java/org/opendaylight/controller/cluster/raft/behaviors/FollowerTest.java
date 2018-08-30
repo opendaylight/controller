@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Dispatchers;
+import akka.protobuf.ByteString;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Optional;
@@ -29,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
-import com.google.protobuf.ByteString;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
