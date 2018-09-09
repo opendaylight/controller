@@ -33,3 +33,8 @@ opendaylight/md-sal/sal-distributed-datastore/journal
 maven-metadata-local.xml
 .fbExcludeFilterFile
 META-INF
+
+# Sphinx documentation
+.tox/
+docs/_build/
+
