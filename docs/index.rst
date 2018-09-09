@@ -1,0 +1,5 @@
+.. _controller:
+
+########################
+Controller Documentation
+########################
