@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
-public enum LogicalDatastoreType {
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
+@NonNullByDefault
+public enum LogicalDatastoreType {
     /**
      * Logical atastore representing operational state of the system
      * and it's components
@@ -18,7 +20,12 @@ public enum LogicalDatastoreType {
      * the system and it's operation related data.
      *
      */
-    OPERATIONAL,
+    OPERATIONAL {
+        @Override
+        public org.opendaylight.mdsal.common.api.LogicalDatastoreType toMdsal() {
+            return org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
+        }
+    },
     /**
      * Logical Datastore representing configuration state of the system
      * and it's components.
@@ -28,5 +35,17 @@ public enum LogicalDatastoreType {
      * the system and intended operation mode.
      *
      */
-    CONFIGURATION
+    CONFIGURATION {
+        @Override
+        public org.opendaylight.mdsal.common.api.LogicalDatastoreType toMdsal() {
+            return org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
+        }
+    };
+
+    /**
+     * Convert this logical datastore type to its MD-SAL counterpart.
+     *
+     * @return MD-SAL counterpart of this type.
+     */
+    public abstract org.opendaylight.mdsal.common.api.LogicalDatastoreType toMdsal();
 }
