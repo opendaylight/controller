@@ -35,8 +35,8 @@ public class InMemoryDOMDataStore
     public InMemoryDOMDataStore(final String name, final LogicalDatastoreType type,
             final ExecutorService dataChangeListenerExecutor,
             final int maxDataChangeListenerQueueSize, final boolean debugTransactions) {
-        delegate = new org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore(name, dataChangeListenerExecutor,
-            maxDataChangeListenerQueueSize, debugTransactions);
+        delegate = new org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore(name, type.toMdsal(),
+            dataChangeListenerExecutor, maxDataChangeListenerQueueSize, debugTransactions);
     }
 
     @Override
