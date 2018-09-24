@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
