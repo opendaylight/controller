@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Optional;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,15 +23,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader.ConfigURLProvider;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -150,7 +149,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         // the data isn't present, we won't get an initial DTCN update so the read will indicate the data
         // isn't present.
 
-        DataTreeIdentifier<DataObject> dataTreeId = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
+        DataTreeIdentifier<DataObject> dataTreeId = DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION,
                 bindingContext.appConfigPath);
         appConfigChangeListenerReg = dataBroker.registerDataTreeChangeListener(dataTreeId,
                 (ClusteredDataTreeChangeListener<DataObject>) this::onAppConfigChanged);
@@ -159,23 +158,22 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private void readInitialAppConfig(final DataBroker dataBroker) {
-        final ReadOnlyTransaction readOnlyTx = dataBroker.newReadOnlyTransaction();
-        ListenableFuture<Optional<DataObject>> future = readOnlyTx.read(
-                LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath);
-        Futures.addCallback(future, new FutureCallback<Optional<DataObject>>() {
+        final FluentFuture<Optional<DataObject>> future;
+        try (ReadTransaction readOnlyTx = dataBroker.newReadOnlyTransaction()) {
+            future = readOnlyTx.read(LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath);
+        }
+
+        future.addCallback(new FutureCallback<Optional<DataObject>>() {
             @Override
             public void onSuccess(final Optional<DataObject> possibleAppConfig) {
                 LOG.debug("{}: Read of app config {} succeeded: {}", logName(), bindingContext
                         .appConfigBindingClass.getName(), possibleAppConfig);
 
-                readOnlyTx.close();
                 setInitialAppConfig(possibleAppConfig);
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                readOnlyTx.close();
-
                 // We may have gotten the app config via the data tree change listener so only retry if not.
                 if (readingInitialAppConfig.get()) {
                     LOG.warn("{}: Read of app config {} failed - retrying", logName(),
@@ -248,7 +246,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                         appConfigFile.getAbsolutePath());
 
                 if (!appConfigFile.exists()) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
 
                 LOG.debug("{}: Found file {}", logName(), appConfigFile.getAbsolutePath());
