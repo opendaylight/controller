@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.MappingCheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableEx
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainClosedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
@@ -180,17 +182,17 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         legacyChain.set(new DOMTransactionChain() {
             @Override
             public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-                return new DOMDataReadOnlyTransactionAdapter(delegateChain.newReadOnlyTransaction());
+                return new DOMDataReadOnlyTransactionAdapter(wrapException(delegateChain::newReadOnlyTransaction));
             }
 
             @Override
             public DOMDataReadWriteTransaction newReadWriteTransaction() {
-                return new DOMDataTransactionAdapter(delegateChain.newReadWriteTransaction());
+                return new DOMDataTransactionAdapter(wrapException(delegateChain::newReadWriteTransaction));
             }
 
             @Override
             public DOMDataWriteTransaction newWriteOnlyTransaction() {
-                return new DOMDataTransactionAdapter(delegateChain.newWriteOnlyTransaction());
+                return new DOMDataTransactionAdapter(wrapException(delegateChain::newWriteOnlyTransaction));
             }
 
             @Override
@@ -200,6 +202,14 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         });
 
         return legacyChain.get();
+    }
+
+    static <T> T wrapException(final Supplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (org.opendaylight.mdsal.common.api.TransactionChainClosedException e) {
+            throw new TransactionChainClosedException("Transaction chain already closed", e);
+        }
     }
 
     private static class DOMDataTransactionAdapter implements DOMDataReadWriteTransaction {
