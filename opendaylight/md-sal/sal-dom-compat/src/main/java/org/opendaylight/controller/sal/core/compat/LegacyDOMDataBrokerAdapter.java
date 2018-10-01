@@ -102,8 +102,8 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
 
                     final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener> reg =
                         delegateTreeChangeService.registerDataTreeChangeListener(
-                            new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(convert(treeId.getDatastoreType()),
-                                    treeId.getRootIdentifier()), delegateListener);
+                            new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(
+                                treeId.getDatastoreType().toMdsal(), treeId.getRootIdentifier()), delegateListener);
 
                     return new ListenerRegistration<L>() {
                         @Override
@@ -202,10 +202,6 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         return legacyChain.get();
     }
 
-    private static org.opendaylight.mdsal.common.api.LogicalDatastoreType convert(LogicalDatastoreType datastoreType) {
-        return org.opendaylight.mdsal.common.api.LogicalDatastoreType.valueOf(datastoreType.name());
-    }
-
     private static class DOMDataTransactionAdapter implements DOMDataReadWriteTransaction {
         private final DOMDataTreeReadTransaction readDelegate;
         private final DOMDataTreeWriteTransaction writeDelegate;
@@ -245,30 +241,30 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         @Override
         public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(LogicalDatastoreType store,
                 YangInstanceIdentifier path) {
-            return MappingCheckedFuture.create(readDelegate().read(convert(store), path).transform(
+            return MappingCheckedFuture.create(readDelegate().read(store.toMdsal(), path).transform(
                 Optional::fromJavaUtil, MoreExecutors.directExecutor()), ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
         public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
                 YangInstanceIdentifier path) {
-            return MappingCheckedFuture.create(readDelegate().exists(convert(store), path),
+            return MappingCheckedFuture.create(readDelegate().exists(store.toMdsal(), path),
                     ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
         public void delete(LogicalDatastoreType store, YangInstanceIdentifier path) {
-            writeDelegate().delete(convert(store), path);
+            writeDelegate().delete(store.toMdsal(), path);
         }
 
         @Override
         public void put(LogicalDatastoreType store, YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-            writeDelegate().put(convert(store), path, data);
+            writeDelegate().put(store.toMdsal(), path, data);
         }
 
         @Override
         public void merge(LogicalDatastoreType store, YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-            writeDelegate().merge(convert(store), path, data);
+            writeDelegate().merge(store.toMdsal(), path, data);
         }
 
         @Override
