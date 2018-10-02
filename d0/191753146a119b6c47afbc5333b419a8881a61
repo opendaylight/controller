@@ -1,0 +1,7 @@
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 02 Oct 2018 12:59:37 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/76558
+Project: controller
+Branch: refs/heads/stable/fluorine
