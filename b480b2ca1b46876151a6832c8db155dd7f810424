@@ -22,6 +22,30 @@
       "revId": "b480b2ca1b46876151a6832c8db155dd7f810424",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52f7f255_c65d2f1f",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-10-02T15:22:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4154ecee_75a222a2",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 71
+      },
+      "revId": "b480b2ca1b46876151a6832c8db155dd7f810424",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
