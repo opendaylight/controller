@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4154ecee_75a222a2",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2018-10-02T11:44:30Z",
+      "side": 1,
+      "message": "How about:\n\ntry (fReadTransaction readOnlyTx \u003d dataBroker.newReadOnlyTransaction()) {\n    return readOnlyTx.read(LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath)\n        .addCallback(new FutureCallback\u003cOptional\u003cDataObject\u003e\u003e() {\n    [...]\n}",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 71
+      },
+      "revId": "b480b2ca1b46876151a6832c8db155dd7f810424",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
