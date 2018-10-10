@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.Actor;
@@ -152,7 +151,7 @@ public class TestActorFactory implements AutoCloseable {
                 ActorSelection actorSelection = system.actorSelection(actorRef.path().toString());
                 Future<Object> future = Patterns.ask(actorSelection, new Identify(""), timeout);
                 ActorIdentity reply = (ActorIdentity)Await.result(future, timeout.duration());
-                Assert.assertNotNull("Identify returned null", reply.getRef());
+                Assert.assertTrue("Identify returned non-present", reply.getActorRef().isPresent());
                 return;
             } catch (Exception | AssertionError e) {
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
