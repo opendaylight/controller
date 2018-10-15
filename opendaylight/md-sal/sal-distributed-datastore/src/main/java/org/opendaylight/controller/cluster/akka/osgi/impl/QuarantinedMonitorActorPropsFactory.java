@@ -25,6 +25,7 @@ public final class QuarantinedMonitorActorPropsFactory {
             // restart the entire karaf container
             LOG.warn("Restarting karaf container");
             System.setProperty("karaf.restart.jvm", "true");
+            System.setProperty("karaf.restart", "true");
             bundleContext.getBundle(0).stop();
         });
     }
