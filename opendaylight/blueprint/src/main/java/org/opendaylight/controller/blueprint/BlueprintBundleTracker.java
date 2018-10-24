@@ -22,6 +22,7 @@ import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
+import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -72,6 +73,9 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     @Override
     public void start(final BundleContext context) {
         LOG.info("Starting {}", getClass().getSimpleName());
+
+        // CONTROLLER-1867: force UntrustedXML initialization, so that it uses our TCCL to initialize
+        UntrustedXML.newDocumentBuilder();
 
         restartService = new BlueprintContainerRestartServiceImpl();
 
@@ -231,7 +235,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      * @param event the event to handle
      */
     @Override
-    public void blueprintEvent(BlueprintEvent event) {
+    public void blueprintEvent(final BlueprintEvent event) {
         if (event.getType() == BlueprintEvent.CREATED) {
             LOG.info("Blueprint container for bundle {} was successfully created", event.getBundle());
             return;
