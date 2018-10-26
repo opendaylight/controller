@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Luis Gomez <ecelgp@gmail.com>
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Submitted-by: Stephen Kitt <skitt@redhat.com>
+Submitted-at: Fri, 26 Oct 2018 07:58:30 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/77274
+Project: controller
+Branch: refs/heads/stable/oxygen
