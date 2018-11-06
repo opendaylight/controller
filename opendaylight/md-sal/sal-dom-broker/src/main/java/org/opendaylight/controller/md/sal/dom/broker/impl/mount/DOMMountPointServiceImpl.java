@@ -13,10 +13,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
 import org.opendaylight.controller.md.sal.dom.broker.spi.mount.SimpleDOMMountPoint;
+import org.opendaylight.controller.sal.core.compat.LegacyDOMDataBrokerAdapter;
 import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -50,7 +54,21 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
             @Override
             public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
-                return Optional.fromJavaUtil(from.getService(cls));
+                if (DOMDataBroker.class.equals(cls)) {
+                    final Optional<org.opendaylight.mdsal.dom.api.DOMDataBroker> mdsalDataBrokerOptional =
+                            from.getService(org.opendaylight.mdsal.dom.api.DOMDataBroker.class);
+                    if (mdsalDataBrokerOptional.isPresent()) {
+                        return Optional.of(cls.cast(new LegacyDOMDataBrokerAdapter(mdsalDataBrokerOptional.get())));
+                    }
+                } else if (DOMRpcService.class.equals(cls)) {
+                    final Optional<org.opendaylight.mdsal.dom.api.DOMRpcService> mdsalRpcServiceOptional =
+                            from.getService(org.opendaylight.mdsal.dom.api.DOMRpcService.class);
+                    if (mdsalRpcServiceOptional.isPresent()) {
+                        return Optional.of(cls.cast(new DOMRpcRouter(mdsalRpcServiceOptional.get(), null)));
+                    }
+                }
+
+                return from.getService(cls);
             }
 
             @Override
