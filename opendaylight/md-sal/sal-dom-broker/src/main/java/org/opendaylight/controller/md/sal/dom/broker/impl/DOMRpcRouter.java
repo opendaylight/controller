@@ -11,7 +11,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +27,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMRpcImplementationRegistration;
 import org.opendaylight.controller.sal.core.compat.LegacyDOMRpcResultFutureAdapter;
 import org.opendaylight.controller.sal.core.compat.MdsalDOMRpcResultFutureAdapter;
+import org.opendaylight.controller.sal.core.compat.RpcAvailabilityListenerAdapter;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -77,7 +77,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
             new org.opendaylight.mdsal.dom.api.DOMRpcImplementation() {
                 @Override
                 public FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> invokeRpc(
-                        org.opendaylight.mdsal.dom.api.DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
+                        final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
                     return new MdsalDOMRpcResultFutureAdapter(implementation.invokeRpc(convert(rpc), input));
                 }
 
@@ -103,17 +103,12 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         };
     }
 
-    private static org.opendaylight.mdsal.dom.api.DOMRpcIdentifier convert(DOMRpcIdentifier from) {
+    private static org.opendaylight.mdsal.dom.api.DOMRpcIdentifier convert(final DOMRpcIdentifier from) {
         return org.opendaylight.mdsal.dom.api.DOMRpcIdentifier.create(from.getType(), from.getContextReference());
     }
 
-    private static DOMRpcIdentifier convert(org.opendaylight.mdsal.dom.api.DOMRpcIdentifier from) {
+    private static DOMRpcIdentifier convert(final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier from) {
         return DOMRpcIdentifier.create(from.getType(), from.getContextReference());
-    }
-
-    private static Collection<DOMRpcIdentifier> convert(
-            Collection<org.opendaylight.mdsal.dom.api.DOMRpcIdentifier> from) {
-        return from.stream().map(DOMRpcRouter::convert).collect(Collectors.toList());
     }
 
     @Override
@@ -129,17 +124,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     public synchronized <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(
             final T listener) {
         final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener> reg =
-            delegateRpcService.registerRpcListener(new org.opendaylight.mdsal.dom.api.DOMRpcAvailabilityListener() {
-                @Override
-                public void onRpcAvailable(Collection<org.opendaylight.mdsal.dom.api.DOMRpcIdentifier> rpcs) {
-                    listener.onRpcAvailable(convert(rpcs));
-                }
-
-                @Override
-                public void onRpcUnavailable(Collection<org.opendaylight.mdsal.dom.api.DOMRpcIdentifier> rpcs) {
-                    listener.onRpcUnavailable(convert(rpcs));
-                }
-
+            delegateRpcService.registerRpcListener(new RpcAvailabilityListenerAdapter<T>(listener) {
                 @Override
                 public boolean acceptsImplementation(final org.opendaylight.mdsal.dom.api.DOMRpcImplementation impl) {
                     // If the DOMRpcImplementation wasn't registered thru this interface then the mapping won't be
@@ -147,7 +132,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
                     // behavior. This should be fine since a legacy listener would not be aware of implementation types
                     // registered via the new mdsal API.
                     final DOMRpcImplementation legacyImpl = implMapping.get(impl);
-                    return legacyImpl != null ? listener.acceptsImplementation(legacyImpl) : true;
+                    return legacyImpl != null ? delegate().acceptsImplementation(legacyImpl) : true;
                 }
             });
 

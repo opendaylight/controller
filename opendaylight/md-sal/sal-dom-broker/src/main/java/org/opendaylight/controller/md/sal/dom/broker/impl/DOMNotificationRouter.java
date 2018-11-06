@@ -9,21 +9,16 @@ package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.md.sal.dom.api.DOMEvent;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListener;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
-import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
+import org.opendaylight.controller.sal.core.compat.LegacyDOMNotificationServiceAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
@@ -44,18 +39,17 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * is realized by arming a background wakeup interrupt.
  */
 @SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION", justification = "Void is the only allowed value")
-public final class DOMNotificationRouter implements AutoCloseable, DOMNotificationPublishService,
-        DOMNotificationService, DOMNotificationSubscriptionListenerRegistry {
+public final class DOMNotificationRouter extends LegacyDOMNotificationServiceAdapter implements AutoCloseable,
+        DOMNotificationPublishService, DOMNotificationSubscriptionListenerRegistry {
 
-    private final org.opendaylight.mdsal.dom.api.DOMNotificationService delegateNotificationService;
     private final org.opendaylight.mdsal.dom.api.DOMNotificationPublishService delegateNotificationPublishService;
     private final org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry delegateListenerRegistry;
 
     private DOMNotificationRouter(
-            org.opendaylight.mdsal.dom.api.DOMNotificationService delegateNotificationService,
-            org.opendaylight.mdsal.dom.api.DOMNotificationPublishService delegateNotificationPublishService,
-            org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry delegateListenerRegistry) {
-        this.delegateNotificationService = delegateNotificationService;
+            final org.opendaylight.mdsal.dom.api.DOMNotificationService delegateNotificationService,
+            final org.opendaylight.mdsal.dom.api.DOMNotificationPublishService delegateNotificationPublishService,
+            final org.opendaylight.mdsal.dom.spi.DOMNotificationSubscriptionListenerRegistry delegateListenerRegistry) {
+        super(delegateNotificationService);
         this.delegateNotificationPublishService = delegateNotificationPublishService;
         this.delegateListenerRegistry = delegateListenerRegistry;
     }
@@ -84,36 +78,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
     @Override
     public synchronized <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(
             final T listener, final Collection<SchemaPath> types) {
-        org.opendaylight.mdsal.dom.api.DOMNotificationListener delegateListener = notification -> {
-            if (notification instanceof DOMNotification) {
-                listener.onNotification((DOMNotification)notification);
-                return;
-            }
-
-            if (notification instanceof org.opendaylight.mdsal.dom.api.DOMEvent) {
-                listener.onNotification(new DefaultDOMEvent(notification,
-                        (org.opendaylight.mdsal.dom.api.DOMEvent)notification));
-                return;
-            }
-
-            listener.onNotification(new DefaultDOMNotification(notification));
-        };
-
-        final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMNotificationListener> reg =
-                delegateNotificationService.registerNotificationListener(delegateListener, types);
-
-        return new AbstractListenerRegistration<T>(listener) {
-            @Override
-            protected void removeRegistration() {
-                reg.close();
-            }
-        };
-    }
-
-    @Override
-    public <T extends DOMNotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener,
-            final SchemaPath... types) {
-        return registerNotificationListener(listener, Arrays.asList(types));
+        return super.registerNotificationListener(listener, types);
     }
 
     @Override
@@ -140,41 +105,5 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
 
     @Override
     public void close() {
-    }
-
-    private static class DefaultDOMNotification implements DOMNotification {
-        private final SchemaPath schemaPath;
-        private final ContainerNode body;
-
-        DefaultDOMNotification(org.opendaylight.mdsal.dom.api.DOMNotification from) {
-            this.schemaPath = from.getType();
-            this.body = from.getBody();
-        }
-
-        @Override
-        public SchemaPath getType() {
-            return schemaPath;
-        }
-
-        @Override
-        public ContainerNode getBody() {
-            return body;
-        }
-    }
-
-    private static class DefaultDOMEvent extends DefaultDOMNotification implements DOMEvent {
-        private final Date eventTime;
-
-        DefaultDOMEvent(org.opendaylight.mdsal.dom.api.DOMNotification fromNotification,
-                org.opendaylight.mdsal.dom.api.DOMEvent fromEvent) {
-            super(fromNotification);
-            final Instant eventInstant = fromEvent.getEventInstant();
-            this.eventTime = eventInstant != null ? Date.from(eventInstant) : null;
-        }
-
-        @Override
-        public Date getEventTime() {
-            return eventTime;
-        }
     }
 }
