@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl.mount;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -17,6 +16,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.mount.SimpleDOMMountPoint;
+import org.opendaylight.controller.sal.core.compat.DOMMountPointAdapter;
 import org.opendaylight.mdsal.dom.api.DOMMountPointListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -24,7 +24,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class DOMMountPointServiceImpl implements DOMMountPointService {
-
     private final org.opendaylight.mdsal.dom.api.DOMMountPointService delegate;
 
     @VisibleForTesting
@@ -38,45 +37,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
 
     @Override
     public Optional<DOMMountPoint> getMountPoint(final YangInstanceIdentifier path) {
-        return Optional.fromJavaUtil(delegate.getMountPoint(path).map(DOMMountPointServiceImpl::convert));
-    }
-
-    private static DOMMountPoint convert(final org.opendaylight.mdsal.dom.api.DOMMountPoint from) {
-        return new DOMMountPoint() {
-            @Override
-            public YangInstanceIdentifier getIdentifier() {
-                return from.getIdentifier();
-            }
-
-            @Override
-            public <T extends DOMService> Optional<T> getService(final Class<T> cls) {
-                return Optional.fromJavaUtil(from.getService(cls));
-            }
-
-            @Override
-            public SchemaContext getSchemaContext() {
-                return from.getSchemaContext();
-            }
-
-            @Override
-            public int hashCode() {
-                return from.getIdentifier().hashCode();
-            }
-
-            @Override
-            public boolean equals(final Object obj) {
-                if (this == obj) {
-                    return true;
-                }
-
-                if (!(obj instanceof DOMMountPoint)) {
-                    return false;
-                }
-
-                DOMMountPoint other = (DOMMountPoint) obj;
-                return from.getIdentifier().equals(other.getIdentifier());
-            }
-        };
+        return Optional.fromJavaUtil(delegate.getMountPoint(path).map(DOMMountPointAdapter::new));
     }
 
     @Override
