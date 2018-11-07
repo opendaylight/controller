@@ -10,27 +10,23 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import java.util.EventListener;
 import javax.annotation.concurrent.GuardedBy;
-import org.opendaylight.controller.cluster.datastore.messages.ListenerRegistrationMessage;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
-class DelayedListenerRegistration<L extends EventListener, M extends ListenerRegistrationMessage>
-        implements ListenerRegistration<L> {
-    private final M registrationMessage;
+class DelayedDataTreeChangeListenerRegistration<L extends EventListener> implements ListenerRegistration<L> {
+    private final RegisterDataTreeChangeListener registrationMessage;
     private final ActorRef registrationActor;
 
     @GuardedBy("this")
     private boolean closed;
 
-    protected DelayedListenerRegistration(M registrationMessage, ActorRef registrationActor) {
+    DelayedDataTreeChangeListenerRegistration(final RegisterDataTreeChangeListener registrationMessage,
+            final ActorRef registrationActor) {
         this.registrationMessage = registrationMessage;
         this.registrationActor = registrationActor;
     }
 
-    M getRegistrationMessage() {
-        return registrationMessage;
-    }
-
-    synchronized void doRegistration(final AbstractDataListenerSupport<L, M> support) {
+    synchronized void doRegistration(final DataTreeChangeListenerSupport support) {
         if (!closed) {
             support.doRegistration(registrationMessage, registrationActor);
         }
@@ -39,8 +35,8 @@ class DelayedListenerRegistration<L extends EventListener, M extends ListenerReg
     @Override
     public L getInstance() {
         // ObjectRegistration annotates this method as @Nonnull but we could return null if the delegate is not set yet.
-        // In reality, we do not and should not ever call this method on DelayedListenerRegistration instances anyway
-        // but, since we have to provide an implementation to satisfy the interface, we throw
+        // In reality, we do not and should not ever call this method on DelayedDataTreeChangeListenerRegistration
+        // instances anyway but, since we have to provide an implementation to satisfy the interface, we throw
         // UnsupportedOperationException to honor the API contract of not returning null and to avoid a FindBugs error
         // for possibly returning null.
         throw new UnsupportedOperationException(
