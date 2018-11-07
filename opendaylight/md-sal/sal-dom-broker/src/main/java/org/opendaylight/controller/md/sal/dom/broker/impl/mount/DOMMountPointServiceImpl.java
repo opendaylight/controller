@@ -50,21 +50,8 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         return delegate.registerProvisionListener(listener);
     }
 
-    /**
-     * Deprecated.
-
-     * @deprecated this method should never have been exposed publicly - registration should be done via the
-     *         public {@link #createMountPoint} interface. As such, this method expects the {@code mountPoint} param
-     *         to be of type {@link SimpleDOMMountPoint}.
-     */
-    @Deprecated
-    public ObjectRegistration<DOMMountPoint> registerMountPoint(final DOMMountPoint mountPoint) {
-        Preconditions.checkArgument(mountPoint instanceof SimpleDOMMountPoint, "Expected SimpleDOMMountPoint");
-        return doRegisterMountPoint((SimpleDOMMountPoint) mountPoint);
-    }
-
     @SuppressWarnings("unchecked")
-    ObjectRegistration<DOMMountPoint> doRegisterMountPoint(final SimpleDOMMountPoint mountPoint) {
+    ObjectRegistration<DOMMountPoint> registerMountPoint(final SimpleDOMMountPoint mountPoint) {
         final org.opendaylight.mdsal.dom.api.DOMMountPointService.DOMMountPointBuilder delegateBuilder =
                 delegate.createMountPoint(mountPoint.getIdentifier());
 
@@ -116,7 +103,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         public ObjectRegistration<DOMMountPoint> register() {
             Preconditions.checkState(mountPoint == null, "Mount point is already built.");
             mountPoint = SimpleDOMMountPoint.create(path, services, schemaContext);
-            return doRegisterMountPoint(mountPoint);
+            return registerMountPoint(mountPoint);
         }
     }
 }
