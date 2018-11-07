@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
@@ -25,6 +24,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMRpcImplementationRegistration;
+import org.opendaylight.controller.sal.core.compat.DOMRpcServiceAdapter;
 import org.opendaylight.controller.sal.core.compat.LegacyDOMRpcResultFutureAdapter;
 import org.opendaylight.controller.sal.core.compat.MdsalDOMRpcResultFutureAdapter;
 import org.opendaylight.controller.sal.core.compat.RpcAvailabilityListenerAdapter;
@@ -78,8 +78,10 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
                 @Override
                 public FluentFuture<org.opendaylight.mdsal.dom.api.DOMRpcResult> invokeRpc(
                         final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
-                    return new MdsalDOMRpcResultFutureAdapter(implementation.invokeRpc(convert(rpc), input));
+                    return new MdsalDOMRpcResultFutureAdapter(implementation.invokeRpc(DOMRpcIdentifier.fromMdsal(rpc),
+                        input));
                 }
+
 
                 @Override
                 public long invocationCost() {
@@ -91,8 +93,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
 
         final org.opendaylight.mdsal.dom.api.DOMRpcImplementationRegistration
             <org.opendaylight.mdsal.dom.api.DOMRpcImplementation> reg = delegateRpcProviderService
-                .registerRpcImplementation(delegateImpl,
-                        rpcs.stream().map(DOMRpcRouter::convert).collect(Collectors.toSet()));
+                .registerRpcImplementation(delegateImpl, DOMRpcServiceAdapter.convert(rpcs));
 
         return new AbstractDOMRpcImplementationRegistration<T>(implementation) {
             @Override
@@ -101,14 +102,6 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
                 implMapping.remove(delegateImpl);
             }
         };
-    }
-
-    private static org.opendaylight.mdsal.dom.api.DOMRpcIdentifier convert(final DOMRpcIdentifier from) {
-        return org.opendaylight.mdsal.dom.api.DOMRpcIdentifier.create(from.getType(), from.getContextReference());
-    }
-
-    private static DOMRpcIdentifier convert(final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier from) {
-        return DOMRpcIdentifier.create(from.getType(), from.getContextReference());
     }
 
     @Override
