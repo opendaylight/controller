@@ -48,4 +48,21 @@ public enum LogicalDatastoreType {
      * @return MD-SAL counterpart of this type.
      */
     public abstract org.opendaylight.mdsal.common.api.LogicalDatastoreType toMdsal();
+
+    /**
+     * Convert MD-SAL logical datastore type to this counterpart.
+     *
+     * @param type MD-SAL counterpart of this type.
+     * @return Corresponding value in this type.
+     */
+    public static LogicalDatastoreType fromMdsal(final org.opendaylight.mdsal.common.api.LogicalDatastoreType type) {
+        switch (type) {
+            case CONFIGURATION:
+                return CONFIGURATION;
+            case OPERATIONAL:
+                return OPERATIONAL;
+            default:
+                throw new IllegalArgumentException("Unhandled type " + type);
+        }
+    }
 }
