@@ -31,13 +31,13 @@ class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTran
     @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
                     final NormalizedNode<?, ?> data) {
-        delegateTx.put(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path, data);
+        delegateTx.put(store.toMdsal(), path, data);
     }
 
     @Override
     public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
                       final NormalizedNode<?, ?> data) {
-        delegateTx.merge(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path, data);
+        delegateTx.merge(store.toMdsal(), path, data);
     }
 
     @Override
@@ -47,7 +47,7 @@ class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTran
 
     @Override
     public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
-        delegateTx.delete(LegacyShardedDOMDataBrokerAdapterUtils.translateDataStoreType(store), path);
+        delegateTx.delete(store.toMdsal(), path);
     }
 
     @Override
