@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * Request a {@link org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener} registration be made on the
  * shard leader.
  */
-public final class RegisterDataTreeChangeListener implements Externalizable, ListenerRegistrationMessage {
+public final class RegisterDataTreeChangeListener implements Externalizable {
     private static final long serialVersionUID = 1L;
     private ActorRef dataTreeChangeListenerPath;
     private YangInstanceIdentifier path;
@@ -38,17 +38,14 @@ public final class RegisterDataTreeChangeListener implements Externalizable, Lis
         this.registerOnAllInstances = registerOnAllInstances;
     }
 
-    @Override
     public YangInstanceIdentifier getPath() {
         return path;
     }
 
-    @Override
     public ActorPath getListenerActorPath() {
         return dataTreeChangeListenerPath.path();
     }
 
-    @Override
     public boolean isRegisterOnAllInstances() {
         return registerOnAllInstances;
     }
