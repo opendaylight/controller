@@ -97,19 +97,22 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
      *         public {@link #createMountPoint} interface. As such, this method expects the {@code mountPoint} param
      *         to be of type {@link SimpleDOMMountPoint}.
      */
-    @SuppressWarnings("unchecked")
     @Deprecated
     public ObjectRegistration<DOMMountPoint> registerMountPoint(final DOMMountPoint mountPoint) {
         Preconditions.checkArgument(mountPoint instanceof SimpleDOMMountPoint, "Expected SimpleDOMMountPoint");
+        return doRegisterMountPoint((SimpleDOMMountPoint) mountPoint);
+    }
 
+    @SuppressWarnings("unchecked")
+    ObjectRegistration<DOMMountPoint> doRegisterMountPoint(final SimpleDOMMountPoint mountPoint) {
         final org.opendaylight.mdsal.dom.api.DOMMountPointService.DOMMountPointBuilder delegateBuilder =
-            delegate.createMountPoint(mountPoint.getIdentifier());
+                delegate.createMountPoint(mountPoint.getIdentifier());
 
         if (mountPoint.getSchemaContext() != null) {
             delegateBuilder.addInitialSchemaContext(mountPoint.getSchemaContext());
         }
 
-        ((SimpleDOMMountPoint)mountPoint).getAllServices().forEach(
+        mountPoint.getAllServices().forEach(
             entry -> delegateBuilder.addService((Class<DOMService>)entry.getKey(), entry.getValue()));
 
         final ObjectRegistration<org.opendaylight.mdsal.dom.api.DOMMountPoint> delegateReg = delegateBuilder.register();
@@ -153,7 +156,7 @@ public class DOMMountPointServiceImpl implements DOMMountPointService {
         public ObjectRegistration<DOMMountPoint> register() {
             Preconditions.checkState(mountPoint == null, "Mount point is already built.");
             mountPoint = SimpleDOMMountPoint.create(path, services, schemaContext);
-            return registerMountPoint(mountPoint);
+            return doRegisterMountPoint(mountPoint);
         }
     }
 }
