@@ -36,6 +36,25 @@ public final class DOMDataTreeIdentifier implements Immutable,
     }
 
     /**
+     * Return a counterpart to an MD-SAL data tree identifier.
+     *
+     * @return Controller data tree identifier.
+     */
+    public static DOMDataTreeIdentifier fromMdsal(final org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier mdsal) {
+        return new DOMDataTreeIdentifier(LogicalDatastoreType.fromMdsal(mdsal.getDatastoreType()),
+            mdsal.getRootIdentifier());
+    }
+
+    /**
+     * Return MD-SAL counterpart of this object.
+     *
+     * @return MD-SAL data tree identifier.
+     */
+    public org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier toMdsal() {
+        return new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(datastoreType.toMdsal(), rootIdentifier);
+    }
+
+    /**
      * Return the logical data store type.
      *
      * @return Logical data store type. Guaranteed to be non-null.
