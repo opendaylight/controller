@@ -79,6 +79,14 @@ public abstract class DOMRpcIdentifier {
         return new Local(type, contextReference);
     }
 
+    public static DOMRpcIdentifier fromMdsal(final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier mdsal) {
+        return create(mdsal.getType(), mdsal.getContextReference());
+    }
+
+    public org.opendaylight.mdsal.dom.api.DOMRpcIdentifier toMdsal() {
+        return org.opendaylight.mdsal.dom.api.DOMRpcIdentifier.create(type, getContextReference());
+    }
+
     /**
      * Return the RPC type.
      *

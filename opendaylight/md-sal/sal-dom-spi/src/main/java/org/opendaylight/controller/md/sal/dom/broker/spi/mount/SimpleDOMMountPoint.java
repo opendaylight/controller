@@ -55,6 +55,10 @@ public final class SimpleDOMMountPoint implements DOMMountPoint {
         return services.entrySet();
     }
 
+    public ClassToInstanceMap<DOMService> getServices() {
+        return services;
+    }
+
     @Override
     public int hashCode() {
         return identifier.hashCode();

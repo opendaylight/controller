@@ -42,10 +42,6 @@ public class RpcAvailabilityListenerAdapter<T extends DOMRpcAvailabilityListener
 
     private static @NonNull Collection<DOMRpcIdentifier> convert(
             final Collection<org.opendaylight.mdsal.dom.api.DOMRpcIdentifier> from) {
-        return from.stream().map(RpcAvailabilityListenerAdapter::convert).collect(Collectors.toList());
-    }
-
-    private static @NonNull DOMRpcIdentifier convert(final org.opendaylight.mdsal.dom.api.DOMRpcIdentifier from) {
-        return DOMRpcIdentifier.create(from.getType(), from.getContextReference());
+        return from.stream().map(DOMRpcIdentifier::fromMdsal).collect(Collectors.toList());
     }
 }
