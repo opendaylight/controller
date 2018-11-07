@@ -103,9 +103,7 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
                     }
 
                     final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener> reg =
-                        delegateTreeChangeService.registerDataTreeChangeListener(
-                            new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(
-                                treeId.getDatastoreType().toMdsal(), treeId.getRootIdentifier()), delegateListener);
+                        delegateTreeChangeService.registerDataTreeChangeListener(treeId.toMdsal(), delegateListener);
 
                     return new ListenerRegistration<L>() {
                         @Override
@@ -249,31 +247,33 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         }
 
         @Override
-        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+        public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
             return MappingCheckedFuture.create(readDelegate().read(store.toMdsal(), path).transform(
                 Optional::fromJavaUtil, MoreExecutors.directExecutor()), ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
-        public CheckedFuture<Boolean, ReadFailedException> exists(LogicalDatastoreType store,
-                YangInstanceIdentifier path) {
+        public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+                final YangInstanceIdentifier path) {
             return MappingCheckedFuture.create(readDelegate().exists(store.toMdsal(), path),
                     ReadFailedExceptionAdapter.INSTANCE);
         }
 
         @Override
-        public void delete(LogicalDatastoreType store, YangInstanceIdentifier path) {
+        public void delete(final LogicalDatastoreType store, final YangInstanceIdentifier path) {
             writeDelegate().delete(store.toMdsal(), path);
         }
 
         @Override
-        public void put(LogicalDatastoreType store, YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                final NormalizedNode<?, ?> data) {
             writeDelegate().put(store.toMdsal(), path, data);
         }
 
         @Override
-        public void merge(LogicalDatastoreType store, YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+                final NormalizedNode<?, ?> data) {
             writeDelegate().merge(store.toMdsal(), path, data);
         }
 
