@@ -58,8 +58,7 @@ abstract class LeaderLocalDelegateFactory<M> {
     /**
      * Invoked whenever the local shard's leadership role changes.
      *
-     * @param isLeader true if the shard has become leader, false if it has
- *                 become a follower.
+     * @param isLeader true if the shard has become leader, false if it has become a follower.
      * @param hasLeader true if the shard knows about leader ID
      */
     abstract void onLeadershipChange(boolean isLeader, boolean hasLeader);
