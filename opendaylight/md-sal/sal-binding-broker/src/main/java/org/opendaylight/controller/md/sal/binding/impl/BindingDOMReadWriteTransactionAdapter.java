@@ -29,4 +29,10 @@ class BindingDOMReadWriteTransactionAdapter extends
             final LogicalDatastoreType store, final InstanceIdentifier<T> path) {
         return doRead(getDelegate(), store, path);
     }
+
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+            final InstanceIdentifier<?> path) {
+        return doExists(getDelegate(), store, path);
+    }
 }
