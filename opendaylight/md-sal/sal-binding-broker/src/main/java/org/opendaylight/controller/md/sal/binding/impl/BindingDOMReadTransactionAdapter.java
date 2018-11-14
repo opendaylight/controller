@@ -25,9 +25,15 @@ class BindingDOMReadTransactionAdapter extends AbstractForwardedTransaction<DOMD
     }
 
     @Override
-    public <T extends DataObject> CheckedFuture<Optional<T>,ReadFailedException> read(
+    public <T extends DataObject> CheckedFuture<Optional<T>, ReadFailedException> read(
             final LogicalDatastoreType store, final InstanceIdentifier<T> path) {
         return doRead(getDelegate(),store, path);
+    }
+
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+            final InstanceIdentifier<?> path) {
+        return doExists(getDelegate(), store, path);
     }
 
     @Override
