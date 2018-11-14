@@ -28,7 +28,7 @@ public class ForwardingReadWriteTransaction extends ForwardingObject implements 
 
     private final ReadWriteTransaction delegate;
 
-    protected ForwardingReadWriteTransaction(ReadWriteTransaction delegate) {
+    protected ForwardingReadWriteTransaction(final ReadWriteTransaction delegate) {
         this.delegate = delegate;
     }
 
@@ -38,20 +38,27 @@ public class ForwardingReadWriteTransaction extends ForwardingObject implements 
     }
 
     @Override
-    public <T extends DataObject> void put(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
+    public <T extends DataObject> void put(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
+            final T data) {
         delegate.put(store, path, data);
     }
 
     @Override
-    public <T extends DataObject> void put(LogicalDatastoreType store, InstanceIdentifier<T> path, T data,
-            boolean createMissingParents) {
+    public <T extends DataObject> void put(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
+            final T data, final boolean createMissingParents) {
         delegate.put(store, path, data, createMissingParents);
     }
 
     @Override
-    public <T extends DataObject> CheckedFuture<Optional<T>, ReadFailedException> read(LogicalDatastoreType store,
-            InstanceIdentifier<T> path) {
+    public <T extends DataObject> CheckedFuture<Optional<T>, ReadFailedException> read(final LogicalDatastoreType store,
+            final InstanceIdentifier<T> path) {
         return delegate.read(store, path);
+    }
+
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+            final InstanceIdentifier<?> path) {
+        return delegate.exists(store, path);
     }
 
     @Override
@@ -65,13 +72,14 @@ public class ForwardingReadWriteTransaction extends ForwardingObject implements 
     }
 
     @Override
-    public <T extends DataObject> void merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
+    public <T extends DataObject> void merge(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
+            final T data) {
         delegate.merge(store, path, data);
     }
 
     @Override
-    public <T extends DataObject> void merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data,
-            boolean createMissingParents) {
+    public <T extends DataObject> void merge(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
+            final T data, final boolean createMissingParents) {
         delegate.merge(store, path, data, createMissingParents);
     }
 
@@ -81,7 +89,7 @@ public class ForwardingReadWriteTransaction extends ForwardingObject implements 
     }
 
     @Override
-    public void delete(LogicalDatastoreType store, InstanceIdentifier<?> path) {
+    public void delete(final LogicalDatastoreType store, final InstanceIdentifier<?> path) {
         delegate.delete(store, path);
     }
 

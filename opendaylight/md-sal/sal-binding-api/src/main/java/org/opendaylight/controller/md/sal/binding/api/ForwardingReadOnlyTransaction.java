@@ -24,7 +24,7 @@ public class ForwardingReadOnlyTransaction extends ForwardingObject implements R
 
     private final ReadOnlyTransaction delegate;
 
-    protected ForwardingReadOnlyTransaction(ReadOnlyTransaction delegate) {
+    protected ForwardingReadOnlyTransaction(final ReadOnlyTransaction delegate) {
         this.delegate = delegate;
     }
 
@@ -34,9 +34,15 @@ public class ForwardingReadOnlyTransaction extends ForwardingObject implements R
     }
 
     @Override
-    public <T extends DataObject> CheckedFuture<Optional<T>, ReadFailedException> read(LogicalDatastoreType store,
-            InstanceIdentifier<T> path) {
+    public <T extends DataObject> CheckedFuture<Optional<T>, ReadFailedException> read(final LogicalDatastoreType store,
+            final InstanceIdentifier<T> path) {
         return delegate.read(store, path);
+    }
+
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final LogicalDatastoreType store,
+            final InstanceIdentifier<?> path) {
+        return delegate.exists(store, path);
     }
 
     @Override
