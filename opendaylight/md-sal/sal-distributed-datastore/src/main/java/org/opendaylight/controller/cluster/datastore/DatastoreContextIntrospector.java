@@ -160,7 +160,7 @@ public class DatastoreContextIntrospector {
             // constructors but the one we want has the bean ConstructorProperties annotation.
             for (final Constructor<?> ctor: propertyType.getConstructors()) {
                 final ConstructorProperties ctorPropsAnnotation = ctor.getAnnotation(ConstructorProperties.class);
-                if (ctor.getParameterTypes().length == 1 && ctorPropsAnnotation != null) {
+                if (ctor.getParameterCount() == 1 && ctorPropsAnnotation != null) {
                     findYangTypeGetter(propertyType, ctorPropsAnnotation.value()[0]);
                     CONSTRUCTORS.put(propertyType, ctor);
                     break;
