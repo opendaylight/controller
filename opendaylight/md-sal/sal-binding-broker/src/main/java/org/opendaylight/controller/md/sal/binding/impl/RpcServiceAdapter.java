@@ -98,7 +98,7 @@ class RpcServiceAdapter implements InvocationHandler {
 
         final RpcInvocationStrategy rpc = rpcNames.get(method);
         if (rpc != null) {
-            if (method.getParameterTypes().length == 0) {
+            if (method.getParameterCount() == 0) {
                 return rpc.invokeEmpty();
             }
             if (args.length != 1) {
@@ -116,11 +116,11 @@ class RpcServiceAdapter implements InvocationHandler {
     private static boolean isObjectMethod(final Method method) {
         switch (method.getName()) {
             case "toString":
-                return method.getReturnType().equals(String.class) && method.getParameterTypes().length == 0;
+                return method.getReturnType().equals(String.class) && method.getParameterCount() == 0;
             case "hashCode":
-                return method.getReturnType().equals(int.class) && method.getParameterTypes().length == 0;
+                return method.getReturnType().equals(int.class) && method.getParameterCount() == 0;
             case "equals":
-                return method.getReturnType().equals(boolean.class) && method.getParameterTypes().length == 1 && method
+                return method.getReturnType().equals(boolean.class) && method.getParameterCount() == 1 && method
                         .getParameterTypes()[0] == Object.class;
             default:
                 return false;
