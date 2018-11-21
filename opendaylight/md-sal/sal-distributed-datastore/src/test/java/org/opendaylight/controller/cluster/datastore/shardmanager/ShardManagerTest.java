@@ -16,8 +16,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -57,6 +60,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -120,12 +124,14 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ShardManagerTest extends AbstractShardManagerTest {
@@ -2180,6 +2186,61 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 assertEquals("Failure resposnse", true, resp.cause() instanceof NoShardLeaderException);
             }
         };
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRegisterForShardLeaderChanges() {
+        LOG.info("testRegisterForShardLeaderChanges starting");
+
+        final String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+        final String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+        final TestKit kit = new TestKit(getSystem());
+        final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
+
+        shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
+        shardManager.tell(new ActorInitialized(), mockShardActor);
+
+        final Consumer<String> mockCallback = mock(Consumer.class);
+        shardManager.tell(new RegisterForShardAvailabilityChanges(mockCallback), kit.getRef());
+
+        final Success reply = kit.expectMsgClass(Duration.apply(5, TimeUnit.SECONDS), Success.class);
+        final Registration reg = (Registration) reply.status();
+
+        final DataTree mockDataTree = mock(DataTree.class);
+        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId1, mockDataTree,
+            DataStoreVersions.CURRENT_VERSION), mockShardActor);
+
+        verify(mockCallback, timeout(5000)).accept("default");
+
+        reset(mockCallback);
+        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId1, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        verifyNoMoreInteractions(mockCallback);
+
+        shardManager.tell(new ShardLeaderStateChanged(memberId1, null, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+
+        verify(mockCallback, timeout(5000)).accept("default");
+
+        reset(mockCallback);
+        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+
+        verify(mockCallback, timeout(5000)).accept("default");
+
+        reset(mockCallback);
+        reg.close();
+
+        shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId1, mockDataTree,
+                DataStoreVersions.CURRENT_VERSION), mockShardActor);
+
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        verifyNoMoreInteractions(mockCallback);
+
+        LOG.info("testRegisterForShardLeaderChanges ending");
     }
 
     public static class TestShardManager extends ShardManager {
