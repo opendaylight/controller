@@ -9,7 +9,9 @@ package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
 import javax.annotation.Nonnull;
+import org.opendaylight.yangtools.concepts.Registration;
 
 /**
  * Caching resolver which resolves a cookie to a leader {@link ActorRef}. This class needs to be specialized by the
@@ -26,7 +28,7 @@ import javax.annotation.Nonnull;
  *
  * @author Robert Varga
  */
-public abstract class BackendInfoResolver<T extends BackendInfo> {
+public abstract class BackendInfoResolver<T extends BackendInfo> implements AutoCloseable {
     /**
      * Request resolution of a particular backend identified by a cookie. This request can be satisfied from the cache.
      *
@@ -46,4 +48,18 @@ public abstract class BackendInfoResolver<T extends BackendInfo> {
      */
     @Nonnull
     public abstract CompletionStage<? extends T> refreshBackendInfo(@Nonnull Long cookie, @Nonnull T staleInfo);
+
+    /**
+     * Registers a callback to be notified when BackendInfo that may have been previously obtained is now stale and
+     * should be refreshed.
+     *
+     * @param callback the callback that takes the backend cookie whose BackendInfo is now stale.
+     * @return a Registration
+     */
+    @Nonnull
+    public abstract Registration notifyWhenBackendInfoIsStale(Consumer<Long> callback);
+
+    @Override
+    public void close() {
+    }
 }

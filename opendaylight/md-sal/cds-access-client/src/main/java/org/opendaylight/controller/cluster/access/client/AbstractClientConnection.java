@@ -422,7 +422,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         context.executeInActor(current -> {
             final double time = beenOpen * 1.0 / 1_000_000_000;
             entry.complete(entry.getRequest().toRequestFailure(
-                new RequestTimeoutException("Timed out after " + time + "seconds")));
+                new RequestTimeoutException("Timed out after " + time + " seconds")));
             return current;
         });
     }
