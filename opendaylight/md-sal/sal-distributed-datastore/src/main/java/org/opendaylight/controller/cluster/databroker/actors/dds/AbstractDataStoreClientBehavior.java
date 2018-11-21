@@ -218,7 +218,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     }
 
     @Override
-    public final void close() {
+    public void close() {
+        super.close();
         context().executeInActor(this::shutdown);
     }
 
