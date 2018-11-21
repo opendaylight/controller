@@ -279,4 +279,13 @@ final class ShardInformation {
     void setSchemaContext(final SchemaContext schemaContext) {
         schemaContextProvider.set(Preconditions.checkNotNull(schemaContext));
     }
+
+    @Override
+    public String toString() {
+        return "ShardInformation [shardId=" + shardId + ", leaderAvailable=" + leaderAvailable + ", actorInitialized="
+                + actorInitialized + ", followerSyncStatus=" + followerSyncStatus + ", role=" + role + ", leaderId="
+                + leaderId + ", activeMember=" + activeMember + "]";
+    }
+
+
 }
