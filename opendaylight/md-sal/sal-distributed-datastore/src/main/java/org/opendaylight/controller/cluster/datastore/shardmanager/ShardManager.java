@@ -115,6 +115,7 @@ import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -170,6 +171,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final Set<String> shardReplicaOperationsInProgress = new HashSet<>();
 
     private final Map<String, CompositeOnComplete<Boolean>> shardActorsStopping = new HashMap<>();
+
+    private final Set<Consumer<String>> shardLeaderChangeCallbacks = new HashSet<>();
 
     private final String persistenceId;
     private final AbstractDataStore dataStore;
@@ -301,6 +304,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onGetShardRole((GetShardRole) message);
         } else if (message instanceof RunnableMessage) {
             ((RunnableMessage)message).run();
+        } else if (message instanceof RegisterForShardLeaderChanges) {
+            onRegisterForShardLeaderChanges((RegisterForShardLeaderChanges)message);
         } else if (message instanceof DeleteSnapshotsFailure) {
             LOG.warn("{}: Failed to delete prior snapshots", persistenceId(),
                     ((DeleteSnapshotsFailure) message).cause());
@@ -313,6 +318,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         } else {
             unknownMessage(message);
         }
+    }
+
+    private void onRegisterForShardLeaderChanges(RegisterForShardLeaderChanges message) {
+        final Consumer<String> callback = message.getCallback();
+        shardLeaderChangeCallbacks.add(callback);
+
+        getSender().tell(new Status.Success((Registration)
+            () -> executeInSelf(() -> shardLeaderChangeCallbacks.remove(callback))), self());
     }
 
     private void onGetShardRole(final GetShardRole message) {
@@ -763,6 +776,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInformation.setLeaderVersion(leaderStateChanged.getLeaderPayloadVersion());
             if (shardInformation.setLeaderId(leaderStateChanged.getLeaderId())) {
                 primaryShardInfoCache.remove(shardInformation.getShardName());
+
+                if (shardInformation.getLeaderId() != null) {
+                    shardLeaderChangeCallbacks.forEach(callback -> callback.accept(shardInformation.getShardName()));
+                }
             }
 
             checkReady();
