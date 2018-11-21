@@ -34,4 +34,10 @@ final class DistributedDataStoreClientBehavior extends AbstractDataStoreClientBe
     Long resolveShardForPath(final YangInstanceIdentifier path) {
         return pathToShard.apply(path);
     }
+
+    @Override
+    public void close() {
+        super.close();
+        resolver().close();
+    }
 }
