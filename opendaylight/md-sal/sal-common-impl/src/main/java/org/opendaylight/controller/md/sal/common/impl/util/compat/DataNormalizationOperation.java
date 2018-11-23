@@ -378,7 +378,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         UnorderedMapMixinNormalization(final ListSchemaNode list) {
             super(new NodeIdentifier(list.getQName()),list);
             this.innerNode = new ListItemNormalization(new NodeIdentifierWithPredicates(list.getQName(),
-                    Collections.<QName, Object>emptyMap()), list);
+                    ImmutableMap.of()), list);
         }
 
         @Override
