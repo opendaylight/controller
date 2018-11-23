@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.StringReader;
@@ -27,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
+import org.opendaylight.yangtools.util.ImmutableMapTemplate;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -278,14 +281,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     }
 
     private Map<QName, Object> readKeyValueMap() throws IOException {
-        int count = input.readInt();
-        Map<QName, Object> keyValueMap = new HashMap<>(count);
-
+        final int count = input.readInt();
+        // ImmutableList is used by ImmutableMapTemplate for lookups, hence we use that.
+        final Builder<QName> keys = ImmutableList.builderWithExpectedSize(count);
+        final Object[] values = new Object[count];
         for (int i = 0; i < count; i++) {
-            keyValueMap.put(readQName(), readObject());
+            keys.add(readQName());
+            values[i] = readObject();
         }
 
-        return keyValueMap;
+        return ImmutableMapTemplate.ordered(keys.build()).instantiateWithValues(values);
     }
 
     private Object readObject() throws IOException {

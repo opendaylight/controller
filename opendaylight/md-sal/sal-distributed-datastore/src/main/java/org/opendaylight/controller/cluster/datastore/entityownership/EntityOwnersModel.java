@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Map.Entry;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.Entity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
+import org.opendaylight.yangtools.util.ImmutableMapTemplate;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -49,6 +51,9 @@ public final class EntityOwnersModel {
     static final YangInstanceIdentifier ENTITY_TYPES_PATH =
             YangInstanceIdentifier.of(EntityOwners.QNAME).node(EntityType.QNAME);
 
+    private static final ImmutableMapTemplate<QName> NODE_KEY_TEMPLATE = ImmutableMapTemplate.ordered(
+        ImmutableSet.of(CANDIDATE_NAME_QNAME));
+
     private EntityOwnersModel() {
     }
 
@@ -65,7 +70,6 @@ public final class EntityOwnersModel {
                 .nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME)
                         .nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).node(Candidate.QNAME)
                                 .nodeWithKey(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
-
     }
 
     static YangInstanceIdentifier candidatePath(final YangInstanceIdentifier entityPath, final String candidateName) {
@@ -74,7 +78,8 @@ public final class EntityOwnersModel {
     }
 
     static NodeIdentifierWithPredicates candidateNodeKey(final String candidateName) {
-        return new NodeIdentifierWithPredicates(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
+        return new NodeIdentifierWithPredicates(Candidate.QNAME,
+            NODE_KEY_TEMPLATE.instantiateWithValues(candidateName));
     }
 
     static NormalizedNode<?, ?> entityOwnersWithCandidate(final String entityType,
