@@ -26,6 +26,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
+import org.opendaylight.yangtools.util.ImmutableOffsetMapTemplate;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -136,8 +137,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 return leafSetEntryBuilder().withNodeIdentifier(leafIdentifier).withValue(value).build();
 
             case NodeTypes.MAP_ENTRY_NODE :
-                NodeIdentifierWithPredicates entryIdentifier = new NodeIdentifierWithPredicates(
-                        readQName(), readKeyValueMap());
+                NodeIdentifierWithPredicates entryIdentifier = readNormalizedNodeWithPredicates();
 
                 LOG.trace("Reading map entry node {} ", entryIdentifier);
 
@@ -276,15 +276,26 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         return children;
     }
 
-    private Map<QName, Object> readKeyValueMap() throws IOException {
-        int count = input.readInt();
-        Map<QName, Object> keyValueMap = new HashMap<>(count);
+    private NodeIdentifierWithPredicates readNormalizedNodeWithPredicates() throws IOException {
+        final QName qname = readQName();
+        final int count = input.readInt();
+        switch (count) {
+            case 0:
+                return new NodeIdentifierWithPredicates(qname);
+            case 1:
+                return new NodeIdentifierWithPredicates(qname, readQName(), readObject());
+            default:
+                // ImmutableList is used by ImmutableOffsetMapTemplate for lookups, hence we use that.
+                final Builder<QName> keys = ImmutableList.builderWithExpectedSize(count);
+                final Object[] values = new Object[count];
+                for (int i = 0; i < count; i++) {
+                    keys.add(readQName());
+                    values[i] = readObject();
+                }
 
-        for (int i = 0; i < count; i++) {
-            keyValueMap.put(readQName(), readObject());
+                return new NodeIdentifierWithPredicates(qname, ImmutableOffsetMapTemplate.ordered(keys.build())
+                    .instantiateWithValues(values));
         }
-
-        return keyValueMap;
     }
 
     private Object readObject() throws IOException {
@@ -403,7 +414,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 return new NodeIdentifier(readQName());
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES :
-                return new NodeIdentifierWithPredicates(readQName(), readKeyValueMap());
+                return readNormalizedNodeWithPredicates();
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
                 return new NodeWithValue<>(readQName(), readObject());
