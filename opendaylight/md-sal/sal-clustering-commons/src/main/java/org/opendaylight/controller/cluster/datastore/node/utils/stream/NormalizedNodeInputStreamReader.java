@@ -10,17 +10,16 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -358,12 +357,12 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
         final boolean absolute = input.readBoolean();
         final int size = input.readInt();
-        final Collection<QName> qnames = new ArrayList<>(size);
+
+        final Builder<QName> qnames = ImmutableList.builderWithExpectedSize(size);
         for (int i = 0; i < size; ++i) {
             qnames.add(readQName());
         }
-
-        return SchemaPath.create(qnames, absolute);
+        return SchemaPath.create(qnames.build(), absolute);
     }
 
     @Override
@@ -374,13 +373,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private YangInstanceIdentifier readYangInstanceIdentifierInternal() throws IOException {
         int size = input.readInt();
-
-        List<PathArgument> pathArguments = new ArrayList<>(size);
-
+        final Builder<PathArgument> pathArguments = ImmutableList.builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
             pathArguments.add(readPathArgument());
         }
-        return YangInstanceIdentifier.create(pathArguments);
+        return YangInstanceIdentifier.create(pathArguments.build());
     }
 
     private Set<String> readObjSet() throws IOException {
