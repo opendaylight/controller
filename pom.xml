@@ -36,6 +36,46 @@
     <!-- archetypes -->
     <module>opendaylight/archetypes</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>sonar-jacoco-aggregate</id>
+      <activation>
+        <property>
+          <name>odl.jacoco.aggregateFile</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>merge</id>
+                <goals>
+                    <goal>merge</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <destFile>${odl.jacoco.aggregateFile}</destFile>
+                  <fileSets>
+                    <fileSet>
+                      <directory>${project.basedir}</directory>
+                      <includes>
+                        <include>**/target/code-coverage/*.exec</include>
+                      </includes>
+                    </fileSet>
+                  </fileSets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
