@@ -45,6 +45,30 @@
       "revId": "2cd0dcf5b12846632c2393c3a5f9770c45659829",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f675f0c3_896526c6",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-11-26T23:15:38Z",
+      "side": 1,
+      "message": "yeah I know - I was trying to be a bit fancy  :)",
+      "parentUuid": "e71fe375_13375028",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 68
+      },
+      "revId": "2cd0dcf5b12846632c2393c3a5f9770c45659829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
