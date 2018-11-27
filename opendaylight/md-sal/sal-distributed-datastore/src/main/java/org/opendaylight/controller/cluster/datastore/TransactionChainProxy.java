@@ -177,7 +177,6 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         currentState = CLOSED_STATE;
 
         // Send a close transaction chain request to each and every shard
-
         getActorContext().broadcast(version -> new CloseTransactionChain(getHistoryId(), version).toSerializable(),
                 CloseTransactionChain.class);
     }

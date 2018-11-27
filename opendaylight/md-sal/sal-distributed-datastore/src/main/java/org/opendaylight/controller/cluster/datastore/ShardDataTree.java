@@ -424,20 +424,22 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             }
             allMetadataPurgedTransaction(((PurgeTransactionPayload) payload).getIdentifier());
         } else if (payload instanceof CloseLocalHistoryPayload) {
+            final CloseLocalHistoryPayload closePayload = (CloseLocalHistoryPayload) payload;
             if (identifier != null) {
-                payloadReplicationComplete((CloseLocalHistoryPayload) payload);
+                payloadReplicationComplete(closePayload);
             }
-            allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
+            allMetadataClosedLocalHistory(closePayload.getIdentifier());
         } else if (payload instanceof CreateLocalHistoryPayload) {
             if (identifier != null) {
                 payloadReplicationComplete((CreateLocalHistoryPayload)payload);
             }
             allMetadataCreatedLocalHistory(((CreateLocalHistoryPayload) payload).getIdentifier());
         } else if (payload instanceof PurgeLocalHistoryPayload) {
+            final PurgeLocalHistoryPayload purgePayload = (PurgeLocalHistoryPayload) payload;
             if (identifier != null) {
-                payloadReplicationComplete((PurgeLocalHistoryPayload)payload);
+                payloadReplicationComplete(purgePayload);
             }
-            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
+            allMetadataPurgedLocalHistory(purgePayload.getIdentifier());
         } else {
             LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
         }
@@ -598,6 +600,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         chain.close();
         replicatePayload(id, CloseLocalHistoryPayload.create(id), callback);
+    }
+
+    void legacyCloseTransactionChain(final LocalHistoryIdentifier id) {
+        // FIXME: CONTROLLER-1628: stage purge once no transactions are present
+        closeTransactionChain(id, null);
+        purgeTransactionChain(id, null);
     }
 
     /**
