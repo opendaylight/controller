@@ -67,6 +67,6 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
 
     abstract void onHistoryClosed(LocalHistoryIdentifier historyId);
 
-    abstract void onHistoryPurged(LocalHistoryIdentifier historyId);
+    abstract void onHistoryPurged(LocalHistoryIdentifier historyId, boolean delayed);
 
 }

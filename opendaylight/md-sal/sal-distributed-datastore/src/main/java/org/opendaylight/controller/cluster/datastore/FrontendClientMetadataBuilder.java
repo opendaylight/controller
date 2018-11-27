@@ -100,7 +100,19 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         }
     }
 
-    void onHistoryPurged(final LocalHistoryIdentifier historyId) {
+    void onHistoryPurged(final LocalHistoryIdentifier historyId, final boolean delayed) {
+        if (delayed) {
+            final FrontendHistoryMetadataBuilder history = currentHistories.get(historyId);
+            if (history != null && history.markDelayed()) {
+                LOG.debug("{}: Marked history {} for delayed purge", shardName, historyId);
+                return;
+            }
+        }
+
+        purgeHistory(historyId);
+    }
+
+    private void purgeHistory(final LocalHistoryIdentifier historyId) {
         final FrontendHistoryMetadataBuilder history = currentHistories.remove(historyId);
         if (history == null) {
             LOG.warn("{}: Purging unknown history {}", shardName, historyId);
