@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Stephen Kitt <skitt@redhat.com>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 27 Nov 2018 14:44:11 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/78029
+Project: controller
+Branch: refs/heads/master
