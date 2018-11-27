@@ -788,9 +788,16 @@ public class Shard extends RaftActor {
     }
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
-        final LocalHistoryIdentifier id = closeTransactionChain.getIdentifier();
-        store.closeTransactionChain(id, null);
-        store.purgeTransactionChain(id, null);
+        if (isLeader()) {
+            final LocalHistoryIdentifier id = closeTransactionChain.getIdentifier();
+            // FIXME: CONTROLLER-1628: stage purge once no transactions are present
+            store.closeTransactionChain(id, null);
+            store.purgeTransactionChain(id, null);
+        } else if (getLeader() != null) {
+            getLeader().forward(closeTransactionChain, getContext());
+        } else {
+            LOG.warn("{}: Could not close transaction {}", persistenceId(), closeTransactionChain.getIdentifier());
+        }
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
