@@ -41,7 +41,6 @@ import org.opendaylight.controller.cluster.access.commands.OutOfSequenceEnvelope
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -788,10 +787,7 @@ public class Shard extends RaftActor {
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
         if (isLeader()) {
-            final LocalHistoryIdentifier id = closeTransactionChain.getIdentifier();
-            // FIXME: CONTROLLER-1628: stage purge once no transactions are present
-            store.closeTransactionChain(id, null);
-            store.purgeTransactionChain(id, null);
+            store.closeAndAutoPurgeTransactionChain(closeTransactionChain.getIdentifier());
         } else if (getLeader() != null) {
             getLeader().forward(closeTransactionChain, getContext());
         } else {
