@@ -50,6 +50,7 @@ import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort.State;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifiablePayload;
+import org.opendaylight.controller.cluster.datastore.persisted.AutoPurgeLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CloseLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CreateLocalHistoryPayload;
@@ -359,7 +360,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         } else if (payload instanceof CloseLocalHistoryPayload) {
             allMetadataClosedLocalHistory(((CloseLocalHistoryPayload) payload).getIdentifier());
         } else if (payload instanceof PurgeLocalHistoryPayload) {
-            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
+            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier(), false);
+        } else if (payload instanceof AutoPurgeLocalHistoryPayload) {
+            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier(), true);
         } else {
             LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
         }
@@ -437,7 +440,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             if (identifier != null) {
                 payloadReplicationComplete((PurgeLocalHistoryPayload)payload);
             }
-            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier());
+            allMetadataPurgedLocalHistory(((PurgeLocalHistoryPayload) payload).getIdentifier(), false);
+        } else if (payload instanceof AutoPurgeLocalHistoryPayload) {
+            if (identifier != null) {
+                payloadReplicationComplete((AutoPurgeLocalHistoryPayload)payload);
+            }
+            allMetadataPurgedLocalHistory(((AutoPurgeLocalHistoryPayload) payload).getIdentifier(), true);
         } else {
             LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
         }
@@ -508,9 +516,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void allMetadataPurgedLocalHistory(final LocalHistoryIdentifier historyId) {
+    private void allMetadataPurgedLocalHistory(final LocalHistoryIdentifier historyId, final boolean delayed) {
         for (ShardDataTreeMetadata<?> m : metadata) {
-            m.onHistoryPurged(historyId);
+            m.onHistoryPurged(historyId, delayed);
         }
     }
 
@@ -620,6 +628,26 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         replicatePayload(id, PurgeLocalHistoryPayload.create(
                 id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+    }
+
+    /**
+     * Combined close-and-purge of a transaction chain for ask-based protocol. Since it is using a single message
+     * to close the chain with the possibility of there being outstanding transactions, we cannot issue an
+     * PurgeLocalHistoryPayload, but rather have to issue a special instruction to purge once all transactions have
+     * been accounted for.
+     *
+     * @param id History identifier
+     */
+    void closeAndAutoPurgeTransactionChain(final LocalHistoryIdentifier id) {
+        final ShardDataTreeTransactionChain chain = transactionChains.get(id);
+        if (chain == null) {
+            LOG.debug("{}: Attempted to close-and-purge a non-existent transaction chain {}", logContext, id);
+            return;
+        }
+
+        chain.close();
+        replicatePayload(id, CloseLocalHistoryPayload.create(id), null);
+        replicatePayload(id, AutoPurgeLocalHistoryPayload.create(id), null);
     }
 
     Optional<DataTreeCandidate> readCurrentData() {
