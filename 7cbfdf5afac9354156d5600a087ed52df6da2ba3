@@ -22,6 +22,30 @@
       "revId": "7cbfdf5afac9354156d5600a087ed52df6da2ba3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8810c636_d68d5782",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-11-27T14:27:35Z",
+      "side": 1,
+      "message": "It\u0027s cleaned up on line 330 via close() on the returned Registration instance.",
+      "parentUuid": "25cd41d5_0ac59d16",
+      "range": {
+        "startLine": 175,
+        "startChar": 18,
+        "endLine": 175,
+        "endChar": 85
+      },
+      "revId": "7cbfdf5afac9354156d5600a087ed52df6da2ba3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
