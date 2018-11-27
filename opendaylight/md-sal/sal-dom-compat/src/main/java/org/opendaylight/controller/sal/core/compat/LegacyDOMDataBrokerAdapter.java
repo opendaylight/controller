@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.core.compat;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
@@ -18,6 +20,7 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -50,6 +53,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
  * Adapter between the legacy controller API-based DOMDataBroker and the mdsal API-based DOMDataBroker.
@@ -96,10 +100,9 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
                         DOMDataTreeIdentifier treeId, final L listener) {
                     final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegateListener;
                     if (listener instanceof ClusteredDOMDataTreeChangeListener) {
-                        delegateListener = (org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener)
-                            listener::onDataTreeChanged;
+                        delegateListener = new ClusteredProxyListener(listener);
                     } else {
-                        delegateListener = listener::onDataTreeChanged;
+                        delegateListener = new ProxyListener(listener);
                     }
 
                     final ListenerRegistration<org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener> reg =
@@ -332,6 +335,33 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         @Override
         public void close() {
             adapter.readDelegate().close();
+        }
+    }
+
+    private static class ProxyListener extends ForwardingObject
+            implements org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener {
+        private final DOMDataTreeChangeListener delegate;
+
+        ProxyListener(final DOMDataTreeChangeListener delegate) {
+            this.delegate = requireNonNull(delegate);
+        }
+
+        @Override
+        public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
+            delegate.onDataTreeChanged(changes);
+        }
+
+        @Override
+        protected DOMDataTreeChangeListener delegate() {
+            return delegate;
+        }
+    }
+
+    private static final class ClusteredProxyListener extends ProxyListener
+            implements org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener {
+
+        ClusteredProxyListener(DOMDataTreeChangeListener delegate) {
+            super(delegate);
         }
     }
 }
