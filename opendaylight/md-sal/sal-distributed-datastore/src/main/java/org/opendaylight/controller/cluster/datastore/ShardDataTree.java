@@ -872,7 +872,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingTransaction();
     }
 
-    private void insertEntry(final Deque<CommitEntry> queue, final CommitEntry entry, final int atIndex) {
+    private static void insertEntry(final Deque<CommitEntry> queue, final CommitEntry entry, final int atIndex) {
         if (atIndex == 0) {
             queue.addFirst(entry);
             return;
