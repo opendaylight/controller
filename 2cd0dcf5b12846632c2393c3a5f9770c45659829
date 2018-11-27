@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7f71d0da_55401b7d",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-11-27T01:01:35Z",
+      "side": 1,
+      "message": "That would pick up AutoCloseable but this class doesn\u0027t seem to fit the definition of a Registration.",
+      "parentUuid": "fafb02ec_8d79cfde",
+      "range": {
+        "startLine": 31,
+        "startChar": 76,
+        "endLine": 31,
+        "endChar": 89
+      },
+      "revId": "2cd0dcf5b12846632c2393c3a5f9770c45659829",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e71fe375_13375028",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientActorBehavior.java",
         "patchSetId": 2
