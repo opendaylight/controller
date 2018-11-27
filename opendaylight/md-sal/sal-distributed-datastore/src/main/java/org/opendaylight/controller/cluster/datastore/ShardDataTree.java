@@ -600,6 +600,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         replicatePayload(id, CloseLocalHistoryPayload.create(id), callback);
     }
 
+    void legacyCloseTransactionChain(final LocalHistoryIdentifier id) {
+        // FIXME: CONTROLLER-1628: stage purge once no transactions are present
+        closeTransactionChain(id, null);
+        purgeTransactionChain(id, null);
+    }
+
     /**
      * Purge a single transaction chain.
      *
