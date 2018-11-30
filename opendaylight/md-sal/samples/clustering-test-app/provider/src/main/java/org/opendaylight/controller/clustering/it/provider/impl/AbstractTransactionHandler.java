@@ -19,6 +19,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.TransactionsParams;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -76,7 +77,7 @@ abstract class AbstractTransactionHandler {
 
     private ScheduledFuture<?> writingFuture;
     private ScheduledFuture<?> completingFuture;
-    private long txCounter;
+    private final AtomicLong txCounter = new AtomicLong();
     private volatile State state;
 
     AbstractTransactionHandler(final TransactionsParams params) {
@@ -117,7 +118,7 @@ abstract class AbstractTransactionHandler {
         }
 
         // Not completed yet: create a transaction and hook it up
-        final long txId = txCounter++;
+        final long txId = txCounter.incrementAndGet();
         final ListenableFuture<?> execFuture = execWrite(txId);
         LOG.debug("New future #{} allocated", txId);
 
@@ -150,7 +151,7 @@ abstract class AbstractTransactionHandler {
             LOG.debug("Completed waiting for all futures");
             state = State.SUCCESSFUL;
             completingFuture.cancel(false);
-            runSuccessful(txCounter);
+            runSuccessful(txCounter.get());
             return true;
         }
 
@@ -176,7 +177,7 @@ abstract class AbstractTransactionHandler {
     }
 
     final void txFailure(final ListenableFuture<?> execFuture, final long txId, final Throwable cause) {
-        LOG.debug("Future #{} failed", txId, cause);
+        LOG.error("Commit future failed for tx # {}", txId, cause);
         futures.remove(execFuture);
 
         final State local = state;
@@ -188,7 +189,7 @@ abstract class AbstractTransactionHandler {
             case WAITING:
                 state = State.FAILED;
                 writingFuture.cancel(false);
-                runFailed(cause);
+                runFailed(cause, txId);
                 break;
             default:
                 throw new IllegalStateException("Unhandled state " + local);
@@ -221,14 +222,14 @@ abstract class AbstractTransactionHandler {
         }
 
         state = State.FAILED;
-        runTimedOut(new TimeoutException("Collection did not finish in " + DEAD_TIMEOUT_SECONDS + " seconds"));
+        runTimedOut("Transactions did not finish in " + DEAD_TIMEOUT_SECONDS + " seconds");
     }
 
     abstract ListenableFuture<?> execWrite(long txId);
 
-    abstract void runFailed(Throwable cause);
+    abstract void runFailed(Throwable cause, long txId);
 
     abstract void runSuccessful(long allTx);
 
-    abstract void runTimedOut(Exception cause);
+    abstract void runTimedOut(String cause);
 }

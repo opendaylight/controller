@@ -135,10 +135,10 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
     }
 
     @Override
-    void runFailed(final Throwable cause) {
+    void runFailed(final Throwable cause, final long txId) {
         closeProducer(itemProducer);
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
-            .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
+            .withError(RpcError.ErrorType.APPLICATION, "Commit failed for tx # " + txId, cause).build());
     }
 
     @Override
@@ -154,10 +154,9 @@ public final class ProduceTransactionsHandler extends AbstractTransactionHandler
     }
 
     @Override
-    void runTimedOut(final Exception cause) {
+    void runTimedOut(final String cause) {
         closeProducer(itemProducer);
         future.set(RpcResultBuilder.<ProduceTransactionsOutput>failed()
-            .withError(RpcError.ErrorType.APPLICATION,
-                    "Final submit was timed out by the test provider or was interrupted", cause).build());
+            .withError(RpcError.ErrorType.APPLICATION, cause).build());
     }
 }
