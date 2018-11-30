@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Function;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
@@ -36,10 +36,12 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPurgeReque
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
+import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -65,8 +67,6 @@ import org.slf4j.LoggerFactory;
  */
 final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteProxyTransaction.class);
-
-    private static final Function<Exception, Exception> NOOP_EXCEPTION_MAPPER = ex -> ex;
 
     // FIXME: make this tuneable
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
@@ -131,14 +131,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
         final SettableFuture<Boolean> future = SettableFuture.create();
         return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
-            isSnapshotOnly()), t -> completeExists(future, t), future);
+            isSnapshotOnly()), t -> completeExists(path, future, t), future);
     }
 
     @Override
     FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(final YangInstanceIdentifier path) {
         final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
         return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
-            isSnapshotOnly()), t -> completeRead(future, t), future);
+            isSnapshotOnly()), t -> completeRead(path, future, t), future);
     }
 
     private void ensureInitializedBuilder() {
@@ -197,15 +197,16 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             // Happy path
             recordSuccessfulRequest(request);
         } else {
-            recordFailedResponse(response, NOOP_EXCEPTION_MAPPER);
+            recordFailedResponse(response);
         }
     }
 
-    private <X extends Exception> X recordFailedResponse(final Response<?, ?> response,
-            final Function<Exception, X> exMapper) {
+    private Exception recordFailedResponse(final Response<?, ?> response) {
         final Exception failure;
         if (response instanceof RequestFailure) {
-            failure = ((RequestFailure<?, ?>) response).getCause();
+            final RequestException cause = ((RequestFailure<?, ?>) response).getCause();
+            failure = cause instanceof RequestTimeoutException
+                    ? new DataStoreUnavailableException(cause.getMessage(), cause) : cause;
         } else {
             LOG.warn("Unhandled response {}", response);
             failure = new IllegalArgumentException("Unhandled response " + response.getClass());
@@ -215,33 +216,35 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             LOG.debug("Transaction {} failed", getIdentifier(), failure);
             operationFailure = failure;
         }
-        return exMapper.apply(failure);
+        return failure;
     }
 
-    private void failReadFuture(final SettableFuture<?> future, final Response<?, ?> response) {
-        future.setException(recordFailedResponse(response, ReadFailedException.MAPPER));
+    private void failReadFuture(final SettableFuture<?> future, final String message,
+            final Response<?, ?> response) {
+        future.setException(new ReadFailedException(message, recordFailedResponse(response)));
     }
 
-    private void completeExists(final SettableFuture<Boolean> future, final Response<?, ?> response) {
-        LOG.debug("Exists request completed with {}", response);
+    private void completeExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> future,
+            final Response<?, ?> response) {
+        LOG.debug("Exists request for {} completed with {}", path, response);
 
         if (response instanceof ExistsTransactionSuccess) {
             future.set(((ExistsTransactionSuccess) response).getExists());
         } else {
-            failReadFuture(future, response);
+            failReadFuture(future, "Error executing exists request for path " + path, response);
         }
 
         recordFinishedRequest(response);
     }
 
-    private void completeRead(final SettableFuture<Optional<NormalizedNode<?, ?>>> future,
-            final Response<?, ?> response) {
-        LOG.debug("Read request completed with {}", response);
+    private void completeRead(final YangInstanceIdentifier path,
+            final SettableFuture<Optional<NormalizedNode<?, ?>>> future, final Response<?, ?> response) {
+        LOG.debug("Read request for {} completed with {}", path, response);
 
         if (response instanceof ReadTransactionSuccess) {
             future.set(((ReadTransactionSuccess) response).getData());
         } else {
-            failReadFuture(future, response);
+            failReadFuture(future, "Error reading data for path " + path, response);
         }
 
         recordFinishedRequest(response);

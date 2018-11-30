@@ -29,10 +29,13 @@ public class BackendInfo {
     private final ActorRef actor;
     private final int maxMessages;
     private final long sessionId;
+    private final String name;
 
-    protected BackendInfo(final ActorRef actor, final long sessionId, final ABIVersion version, final int maxMessages) {
+    protected BackendInfo(final ActorRef actor, final String name, final long sessionId, final ABIVersion version,
+            final int maxMessages) {
         this.version = Preconditions.checkNotNull(version);
         this.actor = Preconditions.checkNotNull(actor);
+        this.name = Preconditions.checkNotNull(name);
         Preconditions.checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
         this.maxMessages = maxMessages;
         this.sessionId = sessionId;
@@ -40,6 +43,10 @@ public class BackendInfo {
 
     public final ActorRef getActor() {
         return actor;
+    }
+
+    public final String getName() {
+        return name;
     }
 
     public final ABIVersion getVersion() {

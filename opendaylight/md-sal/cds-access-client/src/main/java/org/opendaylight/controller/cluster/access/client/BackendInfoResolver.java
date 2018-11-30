@@ -59,6 +59,9 @@ public abstract class BackendInfoResolver<T extends BackendInfo> implements Auto
     @Nonnull
     public abstract Registration notifyWhenBackendInfoIsStale(Consumer<Long> callback);
 
+    @Nonnull
+    public abstract String resolveCookieName(Long cookie);
+
     @Override
     public void close() {
     }
