@@ -12,13 +12,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SplittableRandom;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
@@ -115,11 +116,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     private static final Logger LOG = LoggerFactory.getLogger(WriteTransactionsHandler.class);
 
     final SettableFuture<RpcResult<WriteTransactionsOutput>> completionFuture = SettableFuture.create();
-    private final Set<Integer> usedValues = new HashSet<>();
+    private final Set<Integer> usedValues = ConcurrentHashMap.newKeySet();
     private final YangInstanceIdentifier idListItem;
 
-    private long insertTx = 0;
-    private long deleteTx = 0;
+    private final AtomicLong insertTx = new AtomicLong();
+    private final AtomicLong deleteTx = new AtomicLong();
 
     WriteTransactionsHandler(final YangInstanceIdentifier idListItem, final WriteTransactionsInput input) {
         super(input);
@@ -205,13 +206,13 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
         if (usedValues.contains(i)) {
             LOG.debug("Deleting item: {}", i);
-            deleteTx++;
+            deleteTx.incrementAndGet();
             tx.delete(LogicalDatastoreType.CONFIGURATION, entryId);
             usedValues.remove(i);
 
         } else {
             LOG.debug("Inserting item: {}", i);
-            insertTx++;
+            insertTx.incrementAndGet();
             final MapEntryNode entry = ImmutableNodes.mapEntry(ITEM, NUMBER, i);
             tx.put(LogicalDatastoreType.CONFIGURATION, entryId, entry);
             usedValues.add(i);
@@ -221,17 +222,17 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     }
 
     @Override
-    void runFailed(final Throwable cause) {
+    void runFailed(final Throwable cause, final long txId) {
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-            .withError(RpcError.ErrorType.APPLICATION, "Submit failed", cause).build());
+            .withError(RpcError.ErrorType.APPLICATION, "Commit failed for tx # " + txId, cause).build());
     }
 
     @Override
     void runSuccessful(final long allTx) {
         final WriteTransactionsOutput output = new WriteTransactionsOutputBuilder()
                 .setAllTx(allTx)
-                .setInsertTx(insertTx)
-                .setDeleteTx(deleteTx)
+                .setInsertTx(insertTx.get())
+                .setDeleteTx(deleteTx.get())
                 .build();
 
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>success()
@@ -239,10 +240,9 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
     }
 
     @Override
-    void runTimedOut(final Exception cause) {
+    void runTimedOut(final String cause) {
         completionFuture.set(RpcResultBuilder.<WriteTransactionsOutput>failed()
-            .withError(RpcError.ErrorType.APPLICATION,
-                    "Final submit was timed out by the test provider or was interrupted", cause).build());
+            .withError(RpcError.ErrorType.APPLICATION, cause).build());
     }
 
     abstract DOMDataWriteTransaction createTransaction();
