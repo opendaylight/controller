@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,8 +42,9 @@ public class ReconnectingClientConnectionTest
 
     @Override
     protected ReconnectingClientConnection<BackendInfo> createConnection() {
-        final BackendInfo backend = new BackendInfo(backendProbe.ref(), 0L, ABIVersion.BORON, 10);
-        final ConnectingClientConnection<BackendInfo> connectingConn = new ConnectingClientConnection<>(context, 0L);
+        final BackendInfo backend = new BackendInfo(backendProbe.ref(), "test", 0L, ABIVersion.BORON, 10);
+        final ConnectingClientConnection<BackendInfo> connectingConn = new ConnectingClientConnection<>(context, 0L,
+                backend.getName());
         final ConnectedClientConnection<BackendInfo> connectedConn =
                 new ConnectedClientConnection<>(connectingConn, backend);
         return new ReconnectingClientConnection<>(connectedConn, mock(RequestException.class));
