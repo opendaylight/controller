@@ -556,9 +556,14 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
                         .withRpcError(error).build());
             }
 
+            final boolean nodesEqual = idIntsListener.checkEqual(readResult.get());
+            if (!nodesEqual) {
+                LOG.error("Final read of id-int does not match IdIntsListener's copy. {}",
+                        idIntsListener.diffWithLocalCopy(readResult.get()));
+            }
+
             return Futures.immediateFuture(
-                    RpcResultBuilder.success(new UnsubscribeDtclOutputBuilder()
-                            .setCopyMatches(idIntsListener.checkEqual(readResult.get()))).build());
+                    RpcResultBuilder.success(new UnsubscribeDtclOutputBuilder().setCopyMatches(nodesEqual)).build());
 
         } catch (final InterruptedException | ExecutionException e) {
             final RpcError error = RpcResultBuilder.newError(
