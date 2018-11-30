@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static akka.pattern.Patterns.ask;
+import static com.google.common.base.Verify.verifyNotNull;
 
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.OnComplete;
@@ -159,7 +160,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
             }
 
             LOG.debug("Invalidating backend information {}", staleInfo);
-            flushCache(staleInfo.getShardName());
+            flushCache(staleInfo.getName());
 
             LOG.trace("Invalidated cache {}", staleInfo);
             backends.remove(cookie, existing);
@@ -176,5 +177,10 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
                 reply.close();
             }
         }, ExecutionContexts.global());
+    }
+
+    @Override
+    public String resolveCookieName(Long cookie) {
+        return verifyNotNull(shards.inverse().get(cookie), "Unexpected null cookie: %s", cookie);
     }
 }

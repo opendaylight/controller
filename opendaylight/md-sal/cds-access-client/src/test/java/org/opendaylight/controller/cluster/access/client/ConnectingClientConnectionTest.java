@@ -13,7 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -150,14 +150,14 @@ public class ConnectingClientConnectionTest {
         doReturn(mock(MessageSlicer.class)).when(mockContext).messageSlicer();
 
         mockActor = TestProbe.apply(actorSystem);
-        mockBackendInfo = new BackendInfo(mockActor.ref(), 0, ABIVersion.current(), 5);
+        mockBackendInfo = new BackendInfo(mockActor.ref(), "test", 0, ABIVersion.current(), 5);
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
         mockRequest2 = new MockRequest(mockIdentifier, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
         mockResponseEnvelope = new FailureEnvelope(mockResponse, 0, 0, 0);
         mockCookie = ThreadLocalRandom.current().nextLong();
 
-        queue = new ConnectingClientConnection<>(mockContext, mockCookie);
+        queue = new ConnectingClientConnection<>(mockContext, mockCookie, mockBackendInfo.getName());
     }
 
     @After
@@ -361,7 +361,7 @@ public class ConnectingClientConnectionTest {
 
     private void setupBackend() {
         final ConnectingClientConnection<BackendInfo> connectingConn =
-                new ConnectingClientConnection<>(mockContext, mockCookie);
+                new ConnectingClientConnection<>(mockContext, mockCookie, "test");
         final ConnectedClientConnection<BackendInfo> connectedConn =
                 new ConnectedClientConnection<>(connectingConn, mockBackendInfo);
         queue.setForwarder(new SimpleReconnectForwarder(connectedConn));

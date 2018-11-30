@@ -440,7 +440,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     private ConnectingClientConnection<T> createConnection(final Long shard) {
-        final ConnectingClientConnection<T> conn = new ConnectingClientConnection<>(context(), shard);
+        final ConnectingClientConnection<T> conn = new ConnectingClientConnection<>(context(), shard,
+                resolver().resolveCookieName(shard));
         resolveConnection(shard, conn);
         return conn;
     }
