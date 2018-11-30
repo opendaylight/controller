@@ -28,12 +28,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 final class ShardBackendInfo extends BackendInfo {
     private final Optional<DataTree> dataTree;
     private final UnsignedLong cookie;
-    private final String shardName;
 
     ShardBackendInfo(final ActorRef actor, final long sessionId, final ABIVersion version, final String shardName,
         final UnsignedLong cookie, final Optional<DataTree> dataTree, final int maxMessages) {
-        super(actor, sessionId, version, maxMessages);
-        this.shardName = Preconditions.checkNotNull(shardName);
+        super(actor, shardName, sessionId, version, maxMessages);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.dataTree = Preconditions.checkNotNull(dataTree);
     }
@@ -46,10 +44,6 @@ final class ShardBackendInfo extends BackendInfo {
         return dataTree;
     }
 
-    String getShardName() {
-        return shardName;
-    }
-
     LocalHistoryIdentifier brandHistory(final LocalHistoryIdentifier id) {
         Preconditions.checkArgument(id.getCookie() == 0, "History %s is already branded", id);
         return new LocalHistoryIdentifier(id.getClientId(), id.getHistoryId(), cookie.longValue());
@@ -57,7 +51,7 @@ final class ShardBackendInfo extends BackendInfo {
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("cookie", cookie).add("shard", shardName)
+        return super.addToStringAttributes(toStringHelper).add("cookie", cookie).add("shard", getName())
                 .add("dataTree", getDataTree().isPresent() ? "present" : "absent");
     }
 }

@@ -21,8 +21,8 @@ public final class ConnectingClientConnection<T extends BackendInfo> extends Abs
     private static final int TARGET_QUEUE_DEPTH = 4000;
 
     // Initial state, never instantiated externally
-    ConnectingClientConnection(final ClientActorContext context, final Long cookie) {
-        super(context, cookie, TARGET_QUEUE_DEPTH);
+    ConnectingClientConnection(final ClientActorContext context, final Long cookie, final String backendName) {
+        super(context, cookie, backendName, TARGET_QUEUE_DEPTH);
     }
 
     @Override

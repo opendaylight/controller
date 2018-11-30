@@ -78,6 +78,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @GuardedBy("lock")
     private final TransmitQueue queue;
     private final Long cookie;
+    private final String backendName;
 
     @GuardedBy("lock")
     private boolean haveTimer;
@@ -90,9 +91,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private volatile RequestException poisoned;
 
     // Private constructor to avoid code duplication.
-    private AbstractClientConnection(final AbstractClientConnection<T> oldConn, final TransmitQueue newQueue) {
+    private AbstractClientConnection(final AbstractClientConnection<T> oldConn, final TransmitQueue newQueue,
+            final String backendName) {
         this.context = Preconditions.checkNotNull(oldConn.context);
         this.cookie = Preconditions.checkNotNull(oldConn.cookie);
+        this.backendName = Preconditions.checkNotNull(backendName);
         this.queue = Preconditions.checkNotNull(newQueue);
         // Will be updated in finishReplay if needed.
         this.lastReceivedTicks = oldConn.lastReceivedTicks;
@@ -100,9 +103,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
 
     // This constructor is only to be called by ConnectingClientConnection constructor.
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final ClientActorContext context, final Long cookie, final int queueDepth) {
+    AbstractClientConnection(final ClientActorContext context, final Long cookie, final String backendName,
+            final int queueDepth) {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
+        this.backendName = Preconditions.checkNotNull(backendName);
         this.queue = new TransmitQueue.Halted(queueDepth);
         this.lastReceivedTicks = currentTime();
     }
@@ -110,14 +115,15 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // This constructor is only to be called (indirectly) by ReconnectingClientConnection constructor.
     // Do not allow subclassing outside of this package
     AbstractClientConnection(final AbstractClientConnection<T> oldConn) {
-        this(oldConn, new TransmitQueue.Halted(oldConn.queue, oldConn.currentTime()));
+        this(oldConn, new TransmitQueue.Halted(oldConn.queue, oldConn.currentTime()), oldConn.backendName);
     }
 
     // This constructor is only to be called (indirectly) by ConnectedClientConnection constructor.
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final AbstractClientConnection<T> oldConn, final T newBackend, final int queueDepth) {
+    AbstractClientConnection(final AbstractClientConnection<T> oldConn, final T newBackend,
+            final int queueDepth) {
         this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, oldConn.currentTime(),
-                Preconditions.checkNotNull(oldConn.context).messageSlicer()));
+                Preconditions.checkNotNull(oldConn.context).messageSlicer()), newBackend.getName());
     }
 
     public final ClientActorContext context() {
@@ -171,6 +177,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private long enqueueOrForward(final ConnectionEntry entry, final long now) {
         lock.lock();
         try {
+            LOG.debug("{}: enqueueOrForward: queue: {}", getClass().getName(), queue);
             commonEnqueue(entry, now);
             return queue.enqueueOrForward(entry, now);
         } finally {
@@ -422,7 +429,8 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         context.executeInActor(current -> {
             final double time = beenOpen * 1.0 / 1_000_000_000;
             entry.complete(entry.getRequest().toRequestFailure(
-                new RequestTimeoutException("Timed out after " + time + " seconds")));
+                new RequestTimeoutException("The request operation timed out after " + time
+                        + " seconds. The backend for \"" + backendName + "\" is not available.")));
             return current;
         });
     }

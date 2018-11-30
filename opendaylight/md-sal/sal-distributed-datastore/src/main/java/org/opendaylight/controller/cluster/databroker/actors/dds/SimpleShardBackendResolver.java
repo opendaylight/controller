@@ -95,4 +95,9 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
 
         return getBackendInfo(cookie);
     }
+
+    @Override
+    public String resolveCookieName(Long cookie) {
+        return shardName;
+    }
 }

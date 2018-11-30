@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Function;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -65,8 +64,6 @@ import org.slf4j.LoggerFactory;
  */
 final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteProxyTransaction.class);
-
-    private static final Function<Exception, Exception> NOOP_EXCEPTION_MAPPER = ex -> ex;
 
     // FIXME: make this tuneable
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
@@ -131,14 +128,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
         final SettableFuture<Boolean> future = SettableFuture.create();
         return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
-            isSnapshotOnly()), t -> completeExists(future, t), future);
+            isSnapshotOnly()), t -> completeExists(path, future, t), future);
     }
 
     @Override
     FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(final YangInstanceIdentifier path) {
         final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
         return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
-            isSnapshotOnly()), t -> completeRead(future, t), future);
+            isSnapshotOnly()), t -> completeRead(path, future, t), future);
     }
 
     private void ensureInitializedBuilder() {
@@ -197,12 +194,11 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             // Happy path
             recordSuccessfulRequest(request);
         } else {
-            recordFailedResponse(response, NOOP_EXCEPTION_MAPPER);
+            recordFailedResponse(response);
         }
     }
 
-    private <X extends Exception> X recordFailedResponse(final Response<?, ?> response,
-            final Function<Exception, X> exMapper) {
+    private Exception recordFailedResponse(final Response<?, ?> response) {
         final Exception failure;
         if (response instanceof RequestFailure) {
             failure = ((RequestFailure<?, ?>) response).getCause();
@@ -215,33 +211,35 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             LOG.debug("Transaction {} failed", getIdentifier(), failure);
             operationFailure = failure;
         }
-        return exMapper.apply(failure);
+        return failure;
     }
 
-    private void failReadFuture(final SettableFuture<?> future, final Response<?, ?> response) {
-        future.setException(recordFailedResponse(response, ReadFailedException.MAPPER));
+    private void failReadFuture(final String message, final SettableFuture<?> future,
+            final Response<?, ?> response) {
+        future.setException(new ReadFailedException(message, recordFailedResponse(response)));
     }
 
-    private void completeExists(final SettableFuture<Boolean> future, final Response<?, ?> response) {
-        LOG.debug("Exists request completed with {}", response);
+    private void completeExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> future,
+            final Response<?, ?> response) {
+        LOG.debug("Exists request for {} completed with {}", path, response);
 
         if (response instanceof ExistsTransactionSuccess) {
             future.set(((ExistsTransactionSuccess) response).getExists());
         } else {
-            failReadFuture(future, response);
+            failReadFuture("Error executing exists request for path " + path, future, response);
         }
 
         recordFinishedRequest(response);
     }
 
-    private void completeRead(final SettableFuture<Optional<NormalizedNode<?, ?>>> future,
-            final Response<?, ?> response) {
-        LOG.debug("Read request completed with {}", response);
+    private void completeRead(final YangInstanceIdentifier path,
+            final SettableFuture<Optional<NormalizedNode<?, ?>>> future, final Response<?, ?> response) {
+        LOG.debug("Read request for {} completed with {}", path, response);
 
         if (response instanceof ReadTransactionSuccess) {
             future.set(((ReadTransactionSuccess) response).getData());
         } else {
-            failReadFuture(future, response);
+            failReadFuture("Error reading data for path " + path, future, response);
         }
 
         recordFinishedRequest(response);

@@ -262,6 +262,7 @@ abstract class TransmitQueue {
 
     final long enqueueOrForward(final ConnectionEntry entry, final long now) {
         if (successor != null) {
+            LOG.debug("enqueueOrForward: forwarding to {}", successor);
             // This call will pay the enqueuing price, hence the caller does not have to
             successor.forwardEntry(entry, now);
             return 0;
@@ -297,7 +298,7 @@ abstract class TransmitQueue {
          */
         final int toSend = canTransmitCount(inflight.size());
         if (toSend <= 0) {
-            LOG.trace("Queue is at capacity, delayed sending of request {}", entry.getRequest());
+            LOG.debug("Queue is at capacity, delayed sending of request {}", entry.getRequest());
             pending.addLast(entry);
             return delay;
         }
