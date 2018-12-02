@@ -21,7 +21,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
@@ -43,7 +42,6 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private final AtomicLong lastNotifTimestamp = new AtomicLong(0);
     private ScheduledExecutorService executorService;
     private ScheduledFuture<?> scheduledFuture;
-    private final AtomicBoolean loggedIgnoredNotificationDiff = new AtomicBoolean();
 
     @Override
     public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
@@ -63,13 +61,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
                                 ? change.getRootNode().getDataBefore().get() : "",
                         change.getRootNode().getDataAfter().get());
 
-                if (localCopy == null || checkEqual(change.getRootNode().getDataBefore().get())) {
-                    localCopy = change.getRootNode().getDataAfter().get();
-                } else {
-                    LOG.warn("Ignoring notification {}", loggedIgnoredNotificationDiff.compareAndSet(false, true)
-                        ? diffWithLocalCopy(change.getRootNode().getDataBefore().get()) : "");
-                    LOG.trace("Ignored notification content: {}", change);
-                }
+                localCopy = change.getRootNode().getDataAfter().get();
             } else {
                 LOG.warn("getDataAfter() is missing from notification. change: {}", change);
             }
