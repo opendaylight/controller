@@ -39,6 +39,11 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
             this.replicatedLogEntry = replicatedLogEntry;
         }
 
+        static int estimatedSerializedSize(ReplicatedLogEntry replicatedLogEntry) {
+            return 8 /* index */ + 8 /* term */ + replicatedLogEntry.getData().size()
+                    + 400 /* estimated extra padding for class info */;
+        }
+
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(replicatedLogEntry.getIndex());
@@ -108,6 +113,10 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     private Object writeReplace() {
         return new Proxy(this);
+    }
+
+    public int estimatedSerializedSize() {
+        return Proxy.estimatedSerializedSize(this);
     }
 
     @Override
