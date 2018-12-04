@@ -537,7 +537,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(historyId, this);
             transactionChains.put(historyId, chain);
-            replicatePayload(historyId, CreateLocalHistoryPayload.create(historyId), callback);
+            replicatePayload(historyId, CreateLocalHistoryPayload.create(
+                    historyId, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
         } else if (callback != null) {
             callback.run();
         }
@@ -597,7 +598,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         chain.close();
-        replicatePayload(id, CloseLocalHistoryPayload.create(id), callback);
+        replicatePayload(id, CloseLocalHistoryPayload.create(
+                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     /**
@@ -616,7 +618,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        replicatePayload(id, PurgeLocalHistoryPayload.create(id), callback);
+        replicatePayload(id, PurgeLocalHistoryPayload.create(
+                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     Optional<DataTreeCandidate> readCurrentData() {
@@ -640,7 +643,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
         final TransactionIdentifier id = transaction.getIdentifier();
         LOG.debug("{}: aborting transaction {}", logContext, id);
-        replicatePayload(id, AbortTransactionPayload.create(id), callback);
+        replicatePayload(id, AbortTransactionPayload.create(
+                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     @Override
@@ -660,7 +664,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
         LOG.debug("{}: purging transaction {}", logContext, id);
-        replicatePayload(id, PurgeTransactionPayload.create(id), callback);
+        replicatePayload(id, PurgeTransactionPayload.create(
+                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
     }
 
     public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
@@ -999,7 +1004,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final TransactionIdentifier txId = cohort.getIdentifier();
         final Payload payload;
         try {
-            payload = CommitTransactionPayload.create(txId, candidate);
+            payload = CommitTransactionPayload.create(txId, candidate,
+                    shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity());
         } catch (IOException e) {
             LOG.error("{}: Failed to encode transaction {} candidate {}", logContext, txId, candidate, e);
             pendingCommits.poll().cohort.failedCommit(e);

@@ -11,6 +11,6 @@ public class AbortTransactionPayloadTest extends AbstractIdentifiablePayloadTest
 
     @Override
     AbortTransactionPayload object() {
-        return AbortTransactionPayload.create(nextTransactionId());
+        return AbortTransactionPayload.create(nextTransactionId(), 512);
     }
 }
