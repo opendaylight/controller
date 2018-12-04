@@ -96,6 +96,7 @@ public class DatastoreContextIntrospectorTest {
         properties.put(" max shard data change listener queue size", "2222");
         properties.put("mAx-shaRd-data-STORE-executor-quEUe-size", "3333");
         properties.put("persistent", "false");
+        properties.put("initial-payload-serialized-buffer-capacity", "600");
 
         boolean updated = introspector.update(properties);
         assertTrue("updated", updated);
@@ -119,6 +120,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(1111, context.getDataStoreProperties().getMaxDataChangeExecutorQueueSize());
         assertEquals(2222, context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
         assertEquals(3333, context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
+        assertEquals(600, context.getInitialPayloadSerializedBufferCapacity());
         assertFalse(context.isPersistent());
 
         properties.put("shard-transaction-idle-timeout-in-minutes", "32");

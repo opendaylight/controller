@@ -12,9 +12,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -67,6 +67,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardDataTreeTest extends AbstractTest {
+    private static final DatastoreContext DATASTORE_CONTEXT = DatastoreContext.newBuilder().build();
 
     private final Shard mockShard = Mockito.mock(Shard.class);
     private ShardDataTree shardDataTree;
@@ -75,7 +76,8 @@ public class ShardDataTreeTest extends AbstractTest {
     @Before
     public void setUp() {
         doReturn(Ticker.systemTicker()).when(mockShard).ticker();
-        doReturn(Mockito.mock(ShardStats.class)).when(mockShard).getShardMBean();
+        doReturn(mock(ShardStats.class)).when(mockShard).getShardMBean();
+        doReturn(DATASTORE_CONTEXT).when(mockShard).getDatastoreContext();
 
         fullSchema = SchemaContextHelper.full();
 

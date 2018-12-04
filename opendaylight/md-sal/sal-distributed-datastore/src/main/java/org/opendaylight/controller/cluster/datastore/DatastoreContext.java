@@ -33,7 +33,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-// Noo-final for mocking
+// Non-final for mocking
 public class DatastoreContext implements ClientActorConfig {
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
@@ -59,6 +59,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS =
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
+    public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
@@ -92,6 +93,7 @@ public class DatastoreContext implements ClientActorConfig {
     private long backendAlivenessTimerInterval = AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS;
     private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
+    private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -132,6 +134,7 @@ public class DatastoreContext implements ClientActorConfig {
         this.backendAlivenessTimerInterval = other.backendAlivenessTimerInterval;
         this.requestTimeout = other.requestTimeout;
         this.noProgressTimeout = other.noProgressTimeout;
+        this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -335,6 +338,10 @@ public class DatastoreContext implements ClientActorConfig {
     @Override
     public long getNoProgressTimeout() {
         return noProgressTimeout;
+    }
+
+    public int getInitialPayloadSerializedBufferCapacity() {
+        return initialPayloadSerializedBufferCapacity;
     }
 
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
@@ -610,6 +617,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder frontendNoProgressTimeoutInSeconds(final long timeout) {
             datastoreContext.noProgressTimeout = TimeUnit.SECONDS.toNanos(timeout);
+            return this;
+        }
+
+        public Builder initialPayloadSerializedBufferCapacity(final int capacity) {
+            datastoreContext.initialPayloadSerializedBufferCapacity = capacity;
             return this;
         }
 

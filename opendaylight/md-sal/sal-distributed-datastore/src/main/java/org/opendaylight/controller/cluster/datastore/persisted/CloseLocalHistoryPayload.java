@@ -54,8 +54,9 @@ public final class CloseLocalHistoryPayload extends AbstractIdentifiablePayload<
         super(historyId, serialized);
     }
 
-    public static CloseLocalHistoryPayload create(final LocalHistoryIdentifier historyId) {
-        final ByteArrayDataOutput out = ByteStreams.newDataOutput();
+    public static CloseLocalHistoryPayload create(final LocalHistoryIdentifier historyId,
+            final int initialSerializedBufferCapacity) {
+        final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
             historyId.writeTo(out);
         } catch (IOException e) {
