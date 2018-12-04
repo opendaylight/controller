@@ -54,8 +54,9 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
         super(transactionId, serialized);
     }
 
-    public static AbortTransactionPayload create(final TransactionIdentifier transactionId) {
-        final ByteArrayDataOutput out = ByteStreams.newDataOutput();
+    public static AbortTransactionPayload create(final TransactionIdentifier transactionId,
+            final int initialSerializedBufferCapacity) {
+        final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
         try {
             transactionId.writeTo(out);
         } catch (IOException e) {

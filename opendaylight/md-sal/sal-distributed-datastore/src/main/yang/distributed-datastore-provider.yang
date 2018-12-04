@@ -261,6 +261,12 @@ module distributed-datastore-provider {
             description "The timeout interval whereby the client front-end hasn't made progress with the
                          back-end on any request and terminates.";
         }
+
+        leaf initial-payload-serialized-buffer-capacity {
+            default 512;
+            type non-zero-uint32-type;
+            description "The initial buffer capacity, in bytes, to use when serializing message payloads.";
+        }
     }
 
     container data-store-properties-container {
