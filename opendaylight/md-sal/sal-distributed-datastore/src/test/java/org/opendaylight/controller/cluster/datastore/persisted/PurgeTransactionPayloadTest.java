@@ -11,6 +11,6 @@ public class PurgeTransactionPayloadTest extends AbstractIdentifiablePayloadTest
 
     @Override
     PurgeTransactionPayload object() {
-        return PurgeTransactionPayload.create(nextTransactionId());
+        return PurgeTransactionPayload.create(nextTransactionId(), 512);
     }
 }
