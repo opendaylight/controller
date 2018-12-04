@@ -11,6 +11,6 @@ public class PurgeLocalHistoryPayloadTest extends AbstractIdentifiablePayloadTes
 
     @Override
     PurgeLocalHistoryPayload object() {
-        return PurgeLocalHistoryPayload.create(nextHistoryId());
+        return PurgeLocalHistoryPayload.create(nextHistoryId(), 512);
     }
 }

@@ -365,7 +365,8 @@ public class Shard extends RaftActor {
                         (DataTreeCohortActorRegistry.CohortRegistryCommand) message);
             } else if (message instanceof PersistAbortTransactionPayload) {
                 final TransactionIdentifier txId = ((PersistAbortTransactionPayload) message).getTransactionId();
-                persistPayload(txId, AbortTransactionPayload.create(txId), true);
+                persistPayload(txId, AbortTransactionPayload.create(
+                        txId, datastoreContext.getInitialPayloadSerializedBufferCapacity()), true);
             } else if (message instanceof MakeLeaderLocal) {
                 onMakeLeaderLocal();
             } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {

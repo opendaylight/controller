@@ -11,6 +11,6 @@ public class CloseLocalHistoryPayloadTest extends AbstractIdentifiablePayloadTes
 
     @Override
     CloseLocalHistoryPayload object() {
-        return CloseLocalHistoryPayload.create(nextHistoryId());
+        return CloseLocalHistoryPayload.create(nextHistoryId(), 512);
     }
 }
