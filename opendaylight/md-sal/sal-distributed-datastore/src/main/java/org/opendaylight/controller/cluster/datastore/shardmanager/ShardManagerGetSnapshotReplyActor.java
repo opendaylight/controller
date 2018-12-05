@@ -26,7 +26,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnaps
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Temporary actor used by the ShardManager to compile GetSnapshot replies from the Shard actors and return
@@ -90,7 +90,7 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
 
     public static Props props(final Collection<String> shardNames, final String datastoreType,
             final ShardManagerSnapshot shardManagerSnapshot, final ActorRef replyToActor, final String id,
-            final Duration receiveTimeout) {
+            final FiniteDuration receiveTimeout) {
         return Props.create(ShardManagerGetSnapshotReplyActor.class, new Params(shardNames, datastoreType,
                 shardManagerSnapshot, replyToActor, id, receiveTimeout));
     }
@@ -101,11 +101,11 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
         final ShardManagerSnapshot shardManagerSnapshot;
         final ActorRef replyToActor;
         final String id;
-        final Duration receiveTimeout;
+        final FiniteDuration receiveTimeout;
 
         Params(final Collection<String> shardNames, final String datastoreType,
                 final ShardManagerSnapshot shardManagerSnapshot, final ActorRef replyToActor, final String id,
-                final Duration receiveTimeout) {
+                final FiniteDuration receiveTimeout) {
             this.shardNames = shardNames;
             this.datastoreType = datastoreType;
             this.shardManagerSnapshot = shardManagerSnapshot;
