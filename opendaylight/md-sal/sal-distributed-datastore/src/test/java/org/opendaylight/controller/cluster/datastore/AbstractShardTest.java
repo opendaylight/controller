@@ -84,7 +84,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFac
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract base for shard unit tests.
@@ -303,7 +303,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(),
                 id, node, true, true, 1), new Timeout(5, TimeUnit.SECONDS));
         try {
-            Await.ready(future, Duration.create(5, TimeUnit.SECONDS));
+            Await.ready(future, FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (TimeoutException e) {
             throw new ExecutionException(e);
         }

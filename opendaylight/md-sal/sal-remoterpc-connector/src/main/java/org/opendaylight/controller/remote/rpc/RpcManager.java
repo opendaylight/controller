@@ -13,12 +13,13 @@ import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import com.google.common.base.Preconditions;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * This class acts as a supervisor, creates all the actors, resumes them, if an exception is thrown. It also registers
@@ -87,7 +88,7 @@ public class RpcManager extends AbstractUntypedActor {
 
     @Override
     public SupervisorStrategy supervisorStrategy() {
-        return new OneForOneStrategy(10, Duration.create("1 minute"), t -> {
+        return new OneForOneStrategy(10, FiniteDuration.create(1, TimeUnit.MINUTES), t -> {
             LOG.error("An exception happened actor will be resumed", t);
             return SupervisorStrategy.resume();
         });

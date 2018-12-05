@@ -33,13 +33,12 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ActorBehaviorTest {
 
     private static final String MEMBER_1_FRONTEND_TYPE_1 = "member-1-frontend-type-1";
-    private static final FiniteDuration TIMEOUT = Duration.apply(5, TimeUnit.SECONDS);
+    private static final FiniteDuration TIMEOUT = FiniteDuration.create(5, TimeUnit.SECONDS);
 
     private ActorSystem system;
     private TestProbe probe;

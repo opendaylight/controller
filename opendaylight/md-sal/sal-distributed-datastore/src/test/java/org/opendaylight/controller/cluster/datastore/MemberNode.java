@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Class that represents a cluster member node for unit tests. It encapsulates an actor system with
@@ -135,7 +135,7 @@ public class MemberNode {
         ActorContext actorContext = datastore.getActorContext();
 
         Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
-        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+        ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();

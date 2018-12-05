@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTestKit extends TestKit {
@@ -51,7 +50,7 @@ public class RaftActorTestKit extends TestKit {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static void waitUntilLeader(final ActorRef actorRef) {
-        FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
+        FiniteDuration duration = FiniteDuration.create(100, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
             try {

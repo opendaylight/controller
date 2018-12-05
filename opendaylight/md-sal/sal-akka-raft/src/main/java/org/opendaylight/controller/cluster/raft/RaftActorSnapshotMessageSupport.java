@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Handles snapshot related messages for a RaftActor.
@@ -41,7 +41,7 @@ class RaftActorSnapshotMessageSupport {
     private final RaftActorSnapshotCohort cohort;
     private final Logger log;
 
-    private Duration snapshotReplyActorTimeout = Duration.create(30, TimeUnit.SECONDS);
+    private FiniteDuration snapshotReplyActorTimeout = FiniteDuration.create(30, TimeUnit.SECONDS);
 
     RaftActorSnapshotMessageSupport(final RaftActorContext context, final RaftActorSnapshotCohort cohort) {
         this.context = context;
@@ -129,7 +129,7 @@ class RaftActorSnapshotMessageSupport {
     }
 
     @VisibleForTesting
-    void setSnapshotReplyActorTimeout(Duration snapshotReplyActorTimeout) {
+    void setSnapshotReplyActorTimeout(FiniteDuration snapshotReplyActorTimeout) {
         this.snapshotReplyActorTimeout = snapshotReplyActorTimeout;
     }
 }

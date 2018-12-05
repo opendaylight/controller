@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc;
 
 import static org.mockito.Mockito.mock;
@@ -23,7 +22,7 @@ import org.junit.Test;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 public class RemoteRpcProviderTest {
     static ActorSystem system;
@@ -53,7 +52,7 @@ public class RemoteRpcProviderTest {
 
             final ActorRef actorRef = Await.result(
                     system.actorSelection(moduleConfig.getRpcManagerPath()).resolveOne(
-                            Duration.create(1, TimeUnit.SECONDS)), Duration.create(2, TimeUnit.SECONDS));
+                            FiniteDuration.create(1, TimeUnit.SECONDS)), FiniteDuration.create(2, TimeUnit.SECONDS));
 
             Assert.assertTrue(actorRef.path().toString().contains(moduleConfig.getRpcManagerPath()));
         }

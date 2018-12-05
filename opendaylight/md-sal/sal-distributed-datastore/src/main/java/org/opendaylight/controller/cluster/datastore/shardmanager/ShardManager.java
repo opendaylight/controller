@@ -122,7 +122,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -1325,7 +1324,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @Override
     public SupervisorStrategy supervisorStrategy() {
 
-        return new OneForOneStrategy(10, Duration.create("1 minute"),
+        return new OneForOneStrategy(10, FiniteDuration.create(1, TimeUnit.MINUTES),
                 (Function<Throwable, Directive>) t -> {
                     LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
                     return SupervisorStrategy.resume();

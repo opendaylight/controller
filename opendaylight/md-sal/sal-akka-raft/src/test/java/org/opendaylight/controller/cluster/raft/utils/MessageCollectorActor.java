@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.actor.ActorRef;
@@ -27,7 +26,6 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class MessageCollectorActor extends UntypedAbstractActor {
@@ -57,7 +55,7 @@ public class MessageCollectorActor extends UntypedAbstractActor {
 
     @SuppressWarnings({"unchecked", "checkstyle:illegalCatch"})
     public static List<Object> getAllMessages(final ActorRef actor) {
-        FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
+        FiniteDuration operationDuration = FiniteDuration.create(5, TimeUnit.SECONDS);
         Timeout operationTimeout = new Timeout(operationDuration);
         Future<Object> future = Patterns.ask(actor, GET_ALL_MESSAGES, operationTimeout);
 
@@ -228,7 +226,7 @@ public class MessageCollectorActor extends UntypedAbstractActor {
 
     public static void waitUntilReady(final ActorRef actor) throws TimeoutException, InterruptedException {
         long timeout = 500;
-        FiniteDuration duration = Duration.create(timeout, TimeUnit.MILLISECONDS);
+        FiniteDuration duration = FiniteDuration.create(timeout, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 10; i++) {
             try {
                 Await.ready(Patterns.ask(actor, ARE_YOU_READY, timeout), duration);

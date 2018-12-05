@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
@@ -26,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Covers negative test cases.
@@ -68,13 +67,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
                 new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
-        Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
         future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
                 DataStoreVersions.CURRENT_VERSION), 3000);
-        Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
     }
 
 
@@ -90,13 +89,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
                 new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
-        Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
         future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
                 DataStoreVersions.CURRENT_VERSION), 3000);
-        Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
     }
 
     @Test(expected = ReadFailedException.class)
@@ -111,12 +110,12 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
                 new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
-        Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
         future = akka.pattern.Patterns.ask(subject,
                 new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
-        Await.result(future, Duration.create(3, TimeUnit.SECONDS));
+        Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
     }
 }
