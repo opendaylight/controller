@@ -85,7 +85,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract base class for TransactionProxy unit tests.
@@ -458,7 +458,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         for (Future<?> future : proxy.getCohortFutures()) {
             assertNotNull("Ready operation Future is null", future);
             try {
-                futureResults.add(Await.result(future, Duration.create(5, TimeUnit.SECONDS)));
+                futureResults.add(Await.result(future, FiniteDuration.create(5, TimeUnit.SECONDS)));
             } catch (Exception e) {
                 futureResults.add(e);
             }

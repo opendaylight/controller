@@ -18,7 +18,7 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Actor co-located with a shard. It exists only to terminate the registration when
@@ -59,7 +59,7 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
             registration = null;
 
             if (killSchedule == null) {
-                killSchedule = getContext().system().scheduler().scheduleOnce(Duration.create(killDelay,
+                killSchedule = getContext().system().scheduler().scheduleOnce(FiniteDuration.create(killDelay,
                         TimeUnit.MILLISECONDS), getSelf(), PoisonPill.getInstance(), getContext().dispatcher(),
                         ActorRef.noSender());
             }

@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ShardTestKit extends TestKit {
@@ -45,7 +44,7 @@ public class ShardTestKit extends TestKit {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static String waitUntilLeader(final ActorRef shard) {
-        FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
+        FiniteDuration duration = FiniteDuration.create(100, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
@@ -69,7 +68,7 @@ public class ShardTestKit extends TestKit {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void waitUntilNoLeader(final ActorRef shard) {
-        FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
+        FiniteDuration duration = FiniteDuration.create(100, TimeUnit.MILLISECONDS);
         Object lastResponse = null;
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));

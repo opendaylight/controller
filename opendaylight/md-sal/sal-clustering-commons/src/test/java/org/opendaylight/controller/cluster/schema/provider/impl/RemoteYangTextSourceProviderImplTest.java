@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 public class RemoteYangTextSourceProviderImplTest {
 
@@ -56,7 +56,7 @@ public class RemoteYangTextSourceProviderImplTest {
                 remoteRepository.getYangTextSchemaSource(ID);
         assertTrue(retrievedSourceFuture.isCompleted());
         YangTextSchemaSource resultSchemaSource = Await.result(retrievedSourceFuture,
-                Duration.Zero()).getRepresentation();
+                FiniteDuration.Zero()).getRepresentation();
         assertEquals(resultSchemaSource.getIdentifier(), schemaSource.getIdentifier());
         assertArrayEquals(resultSchemaSource.read(), schemaSource.read());
     }
@@ -70,13 +70,13 @@ public class RemoteYangTextSourceProviderImplTest {
         Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =
                 remoteRepository.getYangTextSchemaSource(ID);
         assertTrue(retrievedSourceFuture.isCompleted());
-        Await.result(retrievedSourceFuture, Duration.Zero());
+        Await.result(retrievedSourceFuture, FiniteDuration.Zero());
     }
 
     @Test
     public void testGetProvidedSources() throws Exception {
         Set<SourceIdentifier> remoteProvidedSources = Await.result(remoteRepository
-                .getProvidedSources(), Duration.Zero());
+                .getProvidedSources(), FiniteDuration.Zero());
         assertEquals(providedSources, remoteProvidedSources);
     }
 

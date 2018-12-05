@@ -61,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -252,7 +251,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
+            FiniteDuration operationDuration = FiniteDuration.create(5, TimeUnit.SECONDS);
             Future<Object> future = Patterns.ask(shard, GetOnDemandRaftState.INSTANCE, new Timeout(operationDuration));
             OnDemandRaftState raftState = (OnDemandRaftState)Await.result(future, operationDuration);
             try {

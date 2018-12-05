@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static akka.pattern.Patterns.ask;
@@ -59,7 +58,6 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -150,10 +148,11 @@ public class ActorContext {
     private void setCachedProperties() {
         txRateLimiter = new TransactionRateLimiter(this);
 
-        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInMillis(), TimeUnit.MILLISECONDS);
+        operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
+            TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
 
-        transactionCommitOperationTimeout =  new Timeout(Duration.create(
+        transactionCommitOperationTimeout =  new Timeout(FiniteDuration.create(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
 
         shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));

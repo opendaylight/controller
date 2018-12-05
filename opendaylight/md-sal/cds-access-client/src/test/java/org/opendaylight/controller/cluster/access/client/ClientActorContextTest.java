@@ -23,7 +23,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ClientActorContextTest {
@@ -69,8 +68,7 @@ public class ClientActorContextTest {
 
     @Test
     public void testExecuteInActorScheduled() {
-        final FiniteDuration delay = Duration.apply(1, TimeUnit.SECONDS);
-        ctx.executeInActor(command, delay);
+        ctx.executeInActor(command, FiniteDuration.create(1, TimeUnit.SECONDS));
         probe.expectMsg(command);
     }
 

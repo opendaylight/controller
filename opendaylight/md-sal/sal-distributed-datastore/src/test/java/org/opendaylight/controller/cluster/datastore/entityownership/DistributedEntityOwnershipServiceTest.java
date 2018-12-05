@@ -67,7 +67,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Unit tests for DistributedEntityOwnershipService.
@@ -123,7 +123,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
 
         Future<ActorRef> future = dataStore.getActorContext().findLocalShardAsync(
                 DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME);
-        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+        ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
         assertNotNull(DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME + " not found", shardActor);
 
         service.close();

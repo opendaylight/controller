@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseable {
     private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
@@ -56,7 +56,7 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
         LOG.info("Shutting down ActorSystem");
 
         try {
-            Await.result(actorSystem.terminate(), Duration.create(10, TimeUnit.SECONDS));
+            Await.result(actorSystem.terminate(), FiniteDuration.create(10, TimeUnit.SECONDS));
         } catch (final Exception e) {
             LOG.warn("Error awaiting actor termination", e);
         }
