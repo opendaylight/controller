@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.typesafe.config.Config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class CommonConfig extends AbstractConfig {
@@ -83,7 +83,7 @@ public class CommonConfig extends AbstractConfig {
                 ? get().getDuration(PATH, TimeUnit.NANOSECONDS)
                 : DEFAULT_MAILBOX_PUSH_TIMEOUT;
 
-        cachedMailBoxPushTimeout = new FiniteDuration(timeout, TimeUnit.NANOSECONDS);
+        cachedMailBoxPushTimeout = FiniteDuration.create(timeout, TimeUnit.NANOSECONDS);
         return cachedMailBoxPushTimeout;
     }
 
@@ -107,7 +107,7 @@ public class CommonConfig extends AbstractConfig {
 
         @SuppressWarnings("unchecked")
         public T mailboxCapacity(int capacity) {
-            Preconditions.checkArgument(capacity > 0, "mailbox capacity must be >0");
+            checkArgument(capacity > 0, "mailbox capacity must be >0");
 
             Map<String, Object> boundedMailbox = (Map<String, Object>) configHolder.get(TAG_MAILBOX);
             boundedMailbox.put(TAG_MAILBOX_CAPACITY, capacity);
@@ -116,8 +116,8 @@ public class CommonConfig extends AbstractConfig {
 
         @SuppressWarnings("unchecked")
         public T mailboxPushTimeout(String timeout) {
-            Duration pushTimeout = Duration.create(timeout);
-            Preconditions.checkArgument(pushTimeout.isFinite(), "invalid value for mailbox push timeout");
+            checkArgument(FiniteDuration.create(timeout).isFinite(), "invalid value \"%s\" for mailbox push timeout",
+                timeout);
 
             Map<String, Object> boundedMailbox = (Map<String, Object>) configHolder.get(TAG_MAILBOX);
             boundedMailbox.put(TAG_MAILBOX_PUSH_TIMEOUT, timeout);
