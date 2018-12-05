@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractTest {
     protected static final MemberName MEMBER_NAME = MemberName.forName("member-1");
@@ -53,7 +53,7 @@ public abstract class AbstractTest {
         return new LocalHistoryIdentifier(CLIENT_ID, HISTORY_COUNTER.incrementAndGet());
     }
 
-    protected static <T> T waitOnAsyncTask(final CompletionStage<T> completionStage, final Duration timeout)
+    protected static <T> T waitOnAsyncTask(final CompletionStage<T> completionStage, final FiniteDuration timeout)
             throws Exception {
         return Await.result(FutureConverters.toScala(completionStage), timeout);
     }
