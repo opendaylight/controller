@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Temporary actor used to receive a CaptureSnapshotReply message and return a GetSnapshotReply instance.
@@ -66,7 +66,7 @@ class GetSnapshotReplyActor extends UntypedAbstractActor {
     }
 
     public static Props props(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm,
-            final ActorRef replyToActor, final Duration receiveTimeout, final String id,
+            final ActorRef replyToActor, final FiniteDuration receiveTimeout, final String id,
             final ServerConfigurationPayload updatedPeerInfo) {
         return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, electionTerm, replyToActor,
                 receiveTimeout, id, updatedPeerInfo));
@@ -76,12 +76,12 @@ class GetSnapshotReplyActor extends UntypedAbstractActor {
         final CaptureSnapshot captureSnapshot;
         final ActorRef replyToActor;
         final ElectionTerm electionTerm;
-        final Duration receiveTimeout;
+        final FiniteDuration receiveTimeout;
         final String id;
         final ServerConfigurationPayload peerInformation;
 
         Params(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm, final ActorRef replyToActor,
-                final Duration receiveTimeout, final String id, final ServerConfigurationPayload peerInfo) {
+                final FiniteDuration receiveTimeout, final String id, final ServerConfigurationPayload peerInfo) {
             this.captureSnapshot = Preconditions.checkNotNull(captureSnapshot);
             this.electionTerm = Preconditions.checkNotNull(electionTerm);
             this.replyToActor = Preconditions.checkNotNull(replyToActor);
