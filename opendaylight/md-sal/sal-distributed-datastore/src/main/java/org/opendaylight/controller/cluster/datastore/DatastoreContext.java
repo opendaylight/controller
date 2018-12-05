@@ -26,7 +26,6 @@ import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStoreConfigPrope
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -161,7 +160,7 @@ public class DatastoreContext implements ClientActorConfig {
         return dataStoreProperties;
     }
 
-    public Duration getShardTransactionIdleTimeout() {
+    public FiniteDuration getShardTransactionIdleTimeout() {
         return shardTransactionIdleTimeout;
     }
 
