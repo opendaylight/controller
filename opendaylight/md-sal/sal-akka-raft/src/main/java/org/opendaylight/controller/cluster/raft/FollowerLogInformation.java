@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,6 +51,8 @@ public final class FollowerLogInformation {
     private LeaderInstallSnapshotState installSnapshotState;
 
     private long slicedLogEntryIndex = NO_INDEX;
+
+    private boolean needsLeaderAddress;
 
     /**
      * Constructs an instance.
@@ -334,6 +337,14 @@ public final class FollowerLogInformation {
      */
     public boolean isLogEntrySlicingInProgress() {
         return slicedLogEntryIndex != NO_INDEX;
+    }
+
+    public void setNeedsLeaderAddress(boolean value) {
+        needsLeaderAddress = value;
+    }
+
+    public Optional<String> needsLeaderAddress(String leaderId) {
+        return needsLeaderAddress ? Optional.ofNullable(context.getPeerAddress(leaderId)) : Optional.empty();
     }
 
     @Override
