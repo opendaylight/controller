@@ -17,10 +17,19 @@ import javax.annotation.Nullable;
 @FunctionalInterface
 public interface PeerAddressResolver {
     /**
-     * Resolves a raft actor peer id to it's remote actor address.
+     * Resolves a raft actor peer id to its remote actor address.
      *
      * @param peerId the id of the peer to resolve
      * @return the peer's actor path string or null if not found
      */
     @Nullable String resolve(String peerId);
+
+    /**
+     * Sets the actor address for a raft peer.
+     *
+     * @param peerId the id of the peer
+     * @param address the peer's actor's address
+     */
+    default void setResolved(String peerId, String address) {
+    }
 }

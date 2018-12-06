@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import akka.actor.Address;
+import akka.actor.AddressFromURIString;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,5 +94,11 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
 
         ShardIdentifier shardId = ShardIdentifier.fromShardIdString(peerId);
         return getShardActorAddress(shardId.getShardName(), shardId.getMemberName());
+    }
+
+    @Override
+    public void setResolved(String peerId, String address) {
+        memberNameToAddress.put(ShardIdentifier.fromShardIdString(peerId).getMemberName(),
+                AddressFromURIString.parse(address));
     }
 }
