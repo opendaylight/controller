@@ -16,5 +16,6 @@ public interface RaftVersions {
     short HELIUM_VERSION = 0;
     short LITHIUM_VERSION = 1;
     short BORON_VERSION = 3;
-    short CURRENT_VERSION = BORON_VERSION;
+    short FLUORINE_VERSION = 4;
+    short CURRENT_VERSION = FLUORINE_VERSION;
 }

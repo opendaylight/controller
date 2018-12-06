@@ -148,7 +148,8 @@ public class Follower extends AbstractRaftActorBehavior {
         if (snapshotTracker != null || context.getSnapshotManager().isApplying()) {
             // if snapshot install is in progress, follower should just acknowledge append entries with a reply.
             AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
-                    lastIndex(), lastTerm(), context.getPayloadVersion());
+                    lastIndex(), lastTerm(), context.getPayloadVersion(), false, needsLeaderAddress(),
+                    appendEntries.getLeaderRaftVersion());
 
             log.debug("{}: snapshot install is in progress, replying immediately with {}", logName(), reply);
             sender.tell(reply, actor());
@@ -159,6 +160,14 @@ public class Follower extends AbstractRaftActorBehavior {
         // If we got here then we do appear to be talking to the leader
         leaderId = appendEntries.getLeaderId();
         leaderPayloadVersion = appendEntries.getPayloadVersion();
+
+        if (appendEntries.getLeaderAddress().isPresent()) {
+            final String address = appendEntries.getLeaderAddress().get();
+            log.debug("New leader address: {}", address);
+
+            context.setPeerAddress(leaderId, address);
+            context.getConfigParams().getPeerAddressResolver().setResolved(leaderId, address);
+        }
 
         // First check if the logs are in sync or not
         if (isOutOfSync(appendEntries, sender)) {
@@ -184,7 +193,8 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
-                lastIndex, lastTerm(), context.getPayloadVersion());
+                lastIndex, lastTerm(), context.getPayloadVersion(), false, needsLeaderAddress(),
+                appendEntries.getLeaderRaftVersion());
 
         if (log.isTraceEnabled()) {
             log.trace("{}: handleAppendEntries returning : {}", logName(), reply);
@@ -267,14 +277,16 @@ public class Follower extends AbstractRaftActorBehavior {
 
                         log.info("{}: Could not remove entries - sending reply to force snapshot", logName());
                         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
-                                lastTerm(), context.getPayloadVersion(), true), actor());
+                                lastTerm(), context.getPayloadVersion(), true, needsLeaderAddress(),
+                                appendEntries.getLeaderRaftVersion()), actor());
                         return false;
                     }
 
                     break;
                 } else {
                     sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
-                            lastTerm(), context.getPayloadVersion(), true), actor());
+                            lastTerm(), context.getPayloadVersion(), true, needsLeaderAddress(),
+                            appendEntries.getLeaderRaftVersion()), actor());
                     return false;
                 }
             }
@@ -332,7 +344,7 @@ public class Follower extends AbstractRaftActorBehavior {
             log.info("{}: The followers log is empty and the senders prevLogIndex is {}", logName(),
                 appendEntries.getPrevLogIndex());
 
-            sendOutOfSyncAppendEntriesReply(sender, false);
+            sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
             return true;
         }
 
@@ -351,7 +363,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         appendEntries.getPrevLogTerm(), lastIndex, context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm());
 
-                    sendOutOfSyncAppendEntriesReply(sender, false);
+                    sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
                     return true;
                 }
             } else if (appendEntries.getPrevLogIndex() != -1) {
@@ -362,7 +374,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         + "snapshotIndex: {}, snapshotTerm: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
                         context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm());
 
-                sendOutOfSyncAppendEntriesReply(sender, false);
+                sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
                 return true;
             }
         }
@@ -378,7 +390,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         appendEntries.getReplicatedToAllIndex(), lastIndex,
                         context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm());
 
-                sendOutOfSyncAppendEntriesReply(sender, false);
+                sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
                 return true;
             }
 
@@ -389,7 +401,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         entries.get(0).getIndex() - 1, lastIndex, context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm());
 
-                sendOutOfSyncAppendEntriesReply(sender, false);
+                sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
                 return true;
             }
         }
@@ -397,13 +409,19 @@ public class Follower extends AbstractRaftActorBehavior {
         return false;
     }
 
-    private void sendOutOfSyncAppendEntriesReply(final ActorRef sender, boolean forceInstallSnapshot) {
+    private void sendOutOfSyncAppendEntriesReply(final ActorRef sender, boolean forceInstallSnapshot,
+            short leaderRaftVersion) {
         // We found that the log was out of sync so just send a negative reply.
         final AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex(),
-                lastTerm(), context.getPayloadVersion(), forceInstallSnapshot);
+                lastTerm(), context.getPayloadVersion(), forceInstallSnapshot, needsLeaderAddress(),
+                leaderRaftVersion);
 
         log.info("{}: Follower is out-of-sync so sending negative reply: {}", logName(), reply);
         sender.tell(reply, actor());
+    }
+
+    private boolean needsLeaderAddress() {
+        return context.getPeerAddress(leaderId) == null;
     }
 
     @Override
