@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 
 /**
  * Unit tests for AppendEntriesReply.
@@ -21,7 +22,8 @@ public class AppendEntriesReplyTest {
 
     @Test
     public void testSerialization() {
-        AppendEntriesReply expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6);
+        AppendEntriesReply expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
+                RaftVersions.CURRENT_VERSION);
         AppendEntriesReply cloned = (AppendEntriesReply) SerializationUtils.clone(expected);
 
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
@@ -30,5 +32,24 @@ public class AppendEntriesReplyTest {
         assertEquals("getLogLastIndex", expected.getLogLastIndex(), cloned.getLogLastIndex());
         assertEquals("getPayloadVersion", expected.getPayloadVersion(), cloned.getPayloadVersion());
         assertEquals("getRaftVersion", expected.getRaftVersion(), cloned.getRaftVersion());
+        assertEquals("isForceInstallSnapshot", expected.isForceInstallSnapshot(), cloned.isForceInstallSnapshot());
+        assertEquals("isNeedsLeaderAddress", expected.isNeedsLeaderAddress(), cloned.isNeedsLeaderAddress());
+    }
+
+    @Test
+    @Deprecated
+    public void testPreFluorineSerialization() {
+        AppendEntriesReply expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
+                RaftVersions.BORON_VERSION);
+        AppendEntriesReply cloned = (AppendEntriesReply) SerializationUtils.clone(expected);
+
+        assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
+        assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
+        assertEquals("getLogLastTerm", expected.getLogLastTerm(), cloned.getLogLastTerm());
+        assertEquals("getLogLastIndex", expected.getLogLastIndex(), cloned.getLogLastIndex());
+        assertEquals("getPayloadVersion", expected.getPayloadVersion(), cloned.getPayloadVersion());
+        assertEquals("getRaftVersion", expected.getRaftVersion(), cloned.getRaftVersion());
+        assertEquals("isForceInstallSnapshot", expected.isForceInstallSnapshot(), cloned.isForceInstallSnapshot());
+        assertEquals("isNeedsLeaderAddress", false, cloned.isNeedsLeaderAddress());
     }
 }

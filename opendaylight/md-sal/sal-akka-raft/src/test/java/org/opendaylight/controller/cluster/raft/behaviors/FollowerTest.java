@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -46,9 +47,13 @@ import org.opendaylight.controller.cluster.raft.MockRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.Builder;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.NoopPeerAddressResolver;
+import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -111,6 +116,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     protected  MockRaftActorContext createActorContext(final ActorRef actorRef) {
         MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
         context.setPayloadVersion(payloadVersion);
+        ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(
+            peerId -> leaderActor.path().toString());
         return context;
     }
 
@@ -804,7 +811,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 4);
     }
 
-
     /**
      * This test verifies that when InstallSnapshot is received by
      * the follower its applied correctly.
@@ -1301,6 +1307,36 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 MockRaftActor.fromState(snapshot.getState()));
     }
 
+    @Test
+    public void testNeedsLeaderAddress() {
+        logStart("testNeedsLeaderAddress");
+
+        MockRaftActorContext context = createActorContext();
+        context.setReplicatedLog(new MockRaftActorContext.SimpleReplicatedLog());
+        context.addToPeers("leader", null, VotingState.VOTING);
+        ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(NoopPeerAddressResolver.INSTANCE);
+
+        follower = createBehavior(context);
+
+        follower.handleMessage(leaderActor,
+                new AppendEntries(1, "leader", -1, -1, Collections.emptyList(), -1, -1, (short)0));
+
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+        assertTrue(reply.isNeedsLeaderAddress());
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        PeerAddressResolver mockResolver = mock(PeerAddressResolver.class);
+        ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(mockResolver);
+
+        follower.handleMessage(leaderActor, new AppendEntries(1, "leader", -1, -1, Collections.emptyList(), -1, -1,
+                (short)0, RaftVersions.CURRENT_VERSION, leaderActor.path().toString()));
+
+        reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+        assertFalse(reply.isNeedsLeaderAddress());
+
+        verify(mockResolver).setResolved("leader", leaderActor.path().toString());
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static RaftActorSnapshotCohort newRaftActorSnapshotCohort(
             final AtomicReference<MockRaftActor> followerRaftActor) {
@@ -1366,6 +1402,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLogLastIndex", expLogLastIndex, reply.getLogLastIndex());
         assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
         assertEquals("isForceInstallSnapshot", expForceInstallSnapshot, reply.isForceInstallSnapshot());
+        assertEquals("isNeedsLeaderAddress", false, reply.isNeedsLeaderAddress());
     }
 
 
