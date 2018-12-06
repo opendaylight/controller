@@ -137,7 +137,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                     appendEntries.getTerm(), currentTerm());
 
             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex(), lastTerm(),
-                    context.getPayloadVersion()), actor());
+                    context.getPayloadVersion(), false, false, appendEntries.getLeaderRaftVersion()), actor());
             return this;
         }
 

@@ -51,6 +51,8 @@ public final class FollowerLogInformation {
 
     private long slicedLogEntryIndex = NO_INDEX;
 
+    private boolean needsLeaderAddress;
+
     /**
      * Constructs an instance.
      *
@@ -334,6 +336,15 @@ public final class FollowerLogInformation {
      */
     public boolean isLogEntrySlicingInProgress() {
         return slicedLogEntryIndex != NO_INDEX;
+    }
+
+    public void setNeedsLeaderAddress(boolean value) {
+        needsLeaderAddress = value;
+    }
+
+    @Nullable
+    public String needsLeaderAddress(String leaderId) {
+        return needsLeaderAddress ? context.getPeerAddress(leaderId) : null;
     }
 
     @Override

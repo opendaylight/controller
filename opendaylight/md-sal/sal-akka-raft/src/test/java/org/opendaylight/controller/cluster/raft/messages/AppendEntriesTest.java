@@ -8,12 +8,14 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
@@ -31,15 +33,44 @@ public class AppendEntriesTest {
         ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
 
         short payloadVersion = 5;
+
+        // Without leader address
+
         AppendEntries expected = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry1, entry2), 10L,
-                -1, payloadVersion);
+                -1, payloadVersion, RaftVersions.CURRENT_VERSION, null);
 
         AppendEntries cloned = (AppendEntries) SerializationUtils.clone(expected);
 
-        verifyAppendEntries(expected, cloned);
+        verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
+
+        // With leader address
+
+        expected = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry1, entry2), 10L,
+                -1, payloadVersion, RaftVersions.CURRENT_VERSION, "leader address");
+
+        cloned = (AppendEntries) SerializationUtils.clone(expected);
+
+        verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
     }
 
-    private static void verifyAppendEntries(AppendEntries expected, AppendEntries actual) {
+    @Test
+    @Deprecated
+    public void testPreFluorineSerialization() {
+        ReplicatedLogEntry entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
+
+        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
+
+        short payloadVersion = 5;
+
+        AppendEntries expected = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry1, entry2), 10L,
+                -1, payloadVersion, RaftVersions.BORON_VERSION, "leader address");
+
+        AppendEntries cloned = (AppendEntries) SerializationUtils.clone(expected);
+
+        verifyAppendEntries(expected, cloned, RaftVersions.BORON_VERSION);
+    }
+
+    private static void verifyAppendEntries(AppendEntries expected, AppendEntries actual, short recipientRaftVersion) {
         assertEquals("getLeaderId", expected.getLeaderId(), actual.getLeaderId());
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getLeaderCommit", expected.getLeaderCommit(), actual.getLeaderCommit());
@@ -52,6 +83,14 @@ public class AppendEntriesTest {
         Iterator<ReplicatedLogEntry> iter = expected.getEntries().iterator();
         for (ReplicatedLogEntry e: actual.getEntries()) {
             verifyReplicatedLogEntry(iter.next(), e);
+        }
+
+        if (recipientRaftVersion >= RaftVersions.FLUORINE_VERSION) {
+            assertEquals("getLeaderAddress", expected.getLeaderAddress(), actual.getLeaderAddress());
+            assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
+        } else {
+            assertFalse(actual.getLeaderAddress().isPresent());
+            assertEquals("getLeaderRaftVersion", RaftVersions.BORON_VERSION, actual.getLeaderRaftVersion());
         }
     }
 
