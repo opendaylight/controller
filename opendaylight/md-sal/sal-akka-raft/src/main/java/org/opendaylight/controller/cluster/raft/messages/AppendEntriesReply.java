@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -41,22 +42,29 @@ public class AppendEntriesReply extends AbstractRaftRPC {
 
     private final boolean forceInstallSnapshot;
 
+    private final boolean needsLeaderAddress;
+
+    private final short recipientRaftVersion;
+
+    @VisibleForTesting
     public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
             short payloadVersion) {
-        this(followerId, term, success, logLastIndex, logLastTerm, payloadVersion, false);
+        this(followerId, term, success, logLastIndex, logLastTerm, payloadVersion, false, false,
+                RaftVersions.CURRENT_VERSION);
     }
 
     public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
-            short payloadVersion, boolean forceInstallSnapshot) {
+            short payloadVersion, boolean forceInstallSnapshot, boolean needsLeaderAddress,
+            short recipientRaftVersion) {
         this(followerId, term, success, logLastIndex, logLastTerm, payloadVersion, forceInstallSnapshot,
-                RaftVersions.CURRENT_VERSION);
+                needsLeaderAddress, RaftVersions.CURRENT_VERSION, recipientRaftVersion);
 
     }
 
     private AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
-                              short payloadVersion, boolean forceInstallSnapshot, short raftVersion) {
+            short payloadVersion, boolean forceInstallSnapshot, boolean needsLeaderAddress, short raftVersion,
+            short recipientRaftVersion) {
         super(term);
-
         this.followerId = followerId;
         this.success = success;
         this.logLastIndex = logLastIndex;
@@ -64,6 +72,8 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         this.payloadVersion = payloadVersion;
         this.forceInstallSnapshot = forceInstallSnapshot;
         this.raftVersion = raftVersion;
+        this.needsLeaderAddress = needsLeaderAddress;
+        this.recipientRaftVersion = recipientRaftVersion;
     }
 
     public boolean isSuccess() {
@@ -94,17 +104,80 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         return forceInstallSnapshot;
     }
 
+    public boolean isNeedsLeaderAddress() {
+        return needsLeaderAddress;
+    }
+
     @Override
     public String toString() {
         return "AppendEntriesReply [term=" + getTerm() + ", success=" + success + ", followerId=" + followerId
                 + ", logLastIndex=" + logLastIndex + ", logLastTerm=" + logLastTerm + ", forceInstallSnapshot="
-                + forceInstallSnapshot + ", payloadVersion=" + payloadVersion + ", raftVersion=" + raftVersion + "]";
+                + forceInstallSnapshot + ", needsLeaderAddress=" + needsLeaderAddress
+                + ", payloadVersion=" + payloadVersion + ", raftVersion=" + raftVersion
+                + ", recipientRaftVersion=" + recipientRaftVersion + "]";
     }
 
     private Object writeReplace() {
-        return new Proxy(this);
+        return recipientRaftVersion >= RaftVersions.FLUORINE_VERSION ? new Proxy2(this) : new Proxy(this);
     }
 
+    /**
+     * Fluorine version that adds the needsLeaderAddress flag.
+     */
+    private static class Proxy2 implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        private AppendEntriesReply appendEntriesReply;
+
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
+        public Proxy2() {
+        }
+
+        Proxy2(AppendEntriesReply appendEntriesReply) {
+            this.appendEntriesReply = appendEntriesReply;
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeShort(appendEntriesReply.raftVersion);
+            out.writeLong(appendEntriesReply.getTerm());
+            out.writeObject(appendEntriesReply.followerId);
+            out.writeBoolean(appendEntriesReply.success);
+            out.writeLong(appendEntriesReply.logLastIndex);
+            out.writeLong(appendEntriesReply.logLastTerm);
+            out.writeShort(appendEntriesReply.payloadVersion);
+            out.writeBoolean(appendEntriesReply.forceInstallSnapshot);
+            out.writeBoolean(appendEntriesReply.needsLeaderAddress);
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            short raftVersion = in.readShort();
+            long term = in.readLong();
+            String followerId = (String) in.readObject();
+            boolean success = in.readBoolean();
+            long logLastIndex = in.readLong();
+            long logLastTerm = in.readLong();
+            short payloadVersion = in.readShort();
+            boolean forceInstallSnapshot = in.readBoolean();
+            boolean needsLeaderAddress = in.readBoolean();
+
+            appendEntriesReply = new AppendEntriesReply(followerId, term, success, logLastIndex, logLastTerm,
+                    payloadVersion, forceInstallSnapshot, needsLeaderAddress, raftVersion,
+                    RaftVersions.CURRENT_VERSION);
+        }
+
+        private Object readResolve() {
+            return appendEntriesReply;
+        }
+    }
+
+    /**
+     * Pre-Fluorine version.
+     */
+    @Deprecated
     private static class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
@@ -144,7 +217,7 @@ public class AppendEntriesReply extends AbstractRaftRPC {
             boolean forceInstallSnapshot = in.readBoolean();
 
             appendEntriesReply = new AppendEntriesReply(followerId, term, success, logLastIndex, logLastTerm,
-                    payloadVersion, forceInstallSnapshot, raftVersion);
+                    payloadVersion, forceInstallSnapshot, false, raftVersion, RaftVersions.CURRENT_VERSION);
         }
 
         private Object readResolve() {

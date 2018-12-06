@@ -81,6 +81,21 @@ public class ShardPeerAddressResolverTest {
     }
 
     @Test
+    public void testSetResolved() {
+        String type = "config";
+        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver(type, MEMBER_1);
+
+        String peerId = ShardIdentifier.create("default", MEMBER_2, type).toString();
+
+        String address = "akka.tcp://opendaylight-cluster-data@127.0.0.1:2550/user/shardmanager-" + type
+                + "/" + MEMBER_2.getName() + "-shard-default-" + type;
+
+        resolver.setResolved(peerId, address);
+
+        assertEquals("resolve", address, resolver.resolve(peerId));
+    }
+
+    @Test
     public void testGetShardManagerPeerActorAddresses() {
         ShardPeerAddressResolver resolver = new ShardPeerAddressResolver("config", MEMBER_1);
 
