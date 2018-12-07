@@ -34,6 +34,24 @@
       "revId": "9f9a71467dfb29aab1467f0de8a980381ea54445",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9449f694_9509bb72",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftVersions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-12-07T13:53:55Z",
+      "side": 1,
+      "message": "OK, let’s leave Fluorine then.",
+      "parentUuid": "94a1f731_9545e6a9",
+      "revId": "9f9a71467dfb29aab1467f0de8a980381ea54445",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
