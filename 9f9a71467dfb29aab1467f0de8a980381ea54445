@@ -16,6 +16,24 @@
       "revId": "9f9a71467dfb29aab1467f0de8a980381ea54445",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94a1f731_9545e6a9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftVersions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2018-12-07T13:39:57Z",
+      "side": 1,
+      "message": "yeah  thought about that. I plan to backport to Fluorine so I was kind of treating it as if it was introduced in Fluorine. Plus it would be a little strange to see a reference to NEON in the Fluorine code base :) That said, we can call it NEON - functionally it really doesn\u0027t matter either way.",
+      "parentUuid": "6b2a3596_fd78349e",
+      "revId": "9f9a71467dfb29aab1467f0de8a980381ea54445",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
