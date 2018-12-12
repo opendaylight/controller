@@ -146,6 +146,21 @@ module opendaylight-inventory {
         }
     }
 
+    container device-incarnation-ids {
+        config false;
+        description "device incarnation id";
+        list device-incarnation-id {
+            key node-id;
+            uses device-incarnation;
+        }
+    }
+
+    grouping device-incarnation {
+        leaf node-id { type uint64; }
+        leaf incarnation-id { type uint32; }
+        leaf deviceAdminTime { type string; }
+    }
+
     //The following notifications should really be replaced by direct writes to the data tree with data change listeners listening to those changes.
     //Notifications should be reserved for one time events which do not require persistence to the data tree.
     notification node-updated {
