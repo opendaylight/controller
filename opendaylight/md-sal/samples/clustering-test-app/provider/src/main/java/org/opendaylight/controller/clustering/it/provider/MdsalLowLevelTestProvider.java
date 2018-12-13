@@ -537,9 +537,8 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         dtclReg = null;
 
         if (!idIntsListener.hasTriggered()) {
-            final RpcError error = RpcResultBuilder.newError(
-                    ErrorType.APPLICATION, "No notification received.", "id-ints listener has not received"
-                            + "any notifications.");
+            final RpcError error = RpcResultBuilder.newError(ErrorType.APPLICATION, "data-missing",
+                    "id-ints listener did not receive any notifications.");
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
                     .withRpcError(error).build());
         }
@@ -551,7 +550,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
             if (!readResult.isPresent()) {
                 final RpcError error = RpcResultBuilder.newError(
-                        ErrorType.APPLICATION, "Final read empty.", "No data read from id-ints list.");
+                        ErrorType.APPLICATION, "data-missing", "No data read from id-ints list.");
                 return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
                         .withRpcError(error).build());
             }
@@ -567,7 +566,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         } catch (final InterruptedException | ExecutionException e) {
             final RpcError error = RpcResultBuilder.newError(
-                    ErrorType.APPLICATION, "Read failed.", "Final read from id-ints failed.");
+                    ErrorType.APPLICATION, "operation-failed", "Final read from id-ints failed.", null, null, e);
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
                     .withRpcError(error).build());
 
