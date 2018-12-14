@@ -338,16 +338,18 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if (lastIndex > -1) {
             if (isLogEntryPresent(appendEntries.getPrevLogIndex())) {
-                final long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
-                if (prevLogTerm != appendEntries.getPrevLogTerm()) {
+                final long leadersPrevLogTermInFollowersLogOrSnapshot =
+                        getLogEntryOrSnapshotTerm(appendEntries.getPrevLogIndex());
+                if (leadersPrevLogTermInFollowersLogOrSnapshot != appendEntries.getPrevLogTerm()) {
 
                     // The follower's log is out of sync because the Leader's prevLogIndex entry does exist
-                    // in the follower's log but it has a different term in it
+                    // in the follower's log or snapshot but it has a different term.
 
                     log.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append "
-                            + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(),
-                            appendEntries.getPrevLogIndex(), prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
-                            context.getReplicatedLog().getSnapshotIndex());
+                        + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        appendEntries.getPrevLogIndex(), leadersPrevLogTermInFollowersLogOrSnapshot,
+                        appendEntries.getPrevLogTerm(), lastIndex, context.getReplicatedLog().getSnapshotIndex(),
+                        context.getReplicatedLog().getSnapshotTerm());
 
                     sendOutOfSyncAppendEntriesReply(sender, false);
                     return true;
@@ -357,8 +359,8 @@ public class Follower extends AbstractRaftActorBehavior {
                 // The follower's log is out of sync because the Leader's prevLogIndex entry was not found in it's log
 
                 log.info("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, "
-                        + "snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
-                        context.getReplicatedLog().getSnapshotIndex());
+                        + "snapshotIndex: {}, snapshotTerm: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
+                        context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false);
                 return true;
@@ -372,7 +374,9 @@ public class Follower extends AbstractRaftActorBehavior {
                 // the previous entry in it's in-memory journal
 
                 log.info("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the "
-                        + "in-memory journal", logName(), appendEntries.getReplicatedToAllIndex());
+                        + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        appendEntries.getReplicatedToAllIndex(), lastIndex,
+                        context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false);
                 return true;
@@ -381,7 +385,9 @@ public class Follower extends AbstractRaftActorBehavior {
             final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
             if (entries.size() > 0 && !isLogEntryPresent(entries.get(0).getIndex() - 1)) {
                 log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
-                        + "in-memory journal", logName(), entries.get(0).getIndex() - 1);
+                        + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        entries.get(0).getIndex() - 1, lastIndex, context.getReplicatedLog().getSnapshotIndex(),
+                        context.getReplicatedLog().getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false);
                 return true;
