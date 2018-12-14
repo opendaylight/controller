@@ -229,7 +229,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         followerLogInformation.setRaftVersion(appendEntriesReply.getRaftVersion());
 
         long followerLastLogIndex = appendEntriesReply.getLogLastIndex();
-        long followersLastLogTermInLeadersLog = getLogEntryTerm(followerLastLogIndex);
         boolean updated = false;
         if (appendEntriesReply.getLogLastIndex() > context.getReplicatedLog().lastIndex()) {
             // The follower's log is actually ahead of the leader's log. Normally this doesn't happen
@@ -246,9 +245,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             // However in this case the log terms won't match and the logs will conflict - this is handled
             // elsewhere.
             log.info("{}: handleAppendEntriesReply: follower {} lastIndex {} is ahead of our lastIndex {} "
-                    + "(snapshotIndex {}) - forcing install snaphot", logName(), followerLogInformation.getId(),
-                    appendEntriesReply.getLogLastIndex(), context.getReplicatedLog().lastIndex(),
-                    context.getReplicatedLog().getSnapshotIndex());
+                    + "(snapshotIndex {}, snapshotTerm {}) - forcing install snaphot", logName(),
+                    followerLogInformation.getId(), appendEntriesReply.getLogLastIndex(),
+                    context.getReplicatedLog().lastIndex(), context.getReplicatedLog().getSnapshotIndex(),
+                    context.getReplicatedLog().getSnapshotTerm());
 
             followerLogInformation.setMatchIndex(-1);
             followerLogInformation.setNextIndex(-1);
@@ -257,6 +257,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             updated = true;
         } else if (appendEntriesReply.isSuccess()) {
+            long followersLastLogTermInLeadersLog = getLogEntryTerm(followerLastLogIndex);
             if (followerLastLogIndex >= 0 && followersLastLogTermInLeadersLog >= 0
                     && followersLastLogTermInLeadersLog != appendEntriesReply.getLogLastTerm()) {
                 // The follower's last entry is present in the leader's journal but the terms don't match so the
@@ -278,9 +279,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
             }
         } else {
-            log.info("{}: handleAppendEntriesReply - received unsuccessful reply: {}, leader snapshotIndex: {}",
-                    logName(), appendEntriesReply, context.getReplicatedLog().getSnapshotIndex());
+            log.info("{}: handleAppendEntriesReply - received unsuccessful reply: {}, leader snapshotIndex: {}, "
+                    + "snapshotTerm: {}, replicatedToAllIndex: {}", logName(), appendEntriesReply,
+                    context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm(),
+                    getReplicatedToAllIndex());
 
+            long followersLastLogTermInLeadersLogOrSnapshot = getLogEntryOrSnapshotTerm(followerLastLogIndex);
             if (appendEntriesReply.isForceInstallSnapshot()) {
                 // Reset the followers match and next index. This is to signal that this follower has nothing
                 // in common with this Leader and so would require a snapshot to be installed
@@ -289,12 +293,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 // Force initiate a snapshot capture
                 initiateCaptureSnapshot(followerId);
-            } else if (followerLastLogIndex < 0 || followersLastLogTermInLeadersLog >= 0
-                    && followersLastLogTermInLeadersLog == appendEntriesReply.getLogLastTerm()) {
-                // The follower's log is empty or the last entry is present in the leader's journal
-                // and the terms match so the follower is just behind the leader's journal from
-                // the last snapshot, if any. We'll catch up the follower quickly by starting at the
-                // follower's last log index.
+            } else if (followerLastLogIndex < 0 || followersLastLogTermInLeadersLogOrSnapshot >= 0
+                    && followersLastLogTermInLeadersLogOrSnapshot == appendEntriesReply.getLogLastTerm()) {
+                // The follower's log is empty or the follower's last entry is present in the leader's journal or
+                // snapshot and the terms match so the follower is just behind the leader's journal from the last
+                // snapshot, if any. We'll catch up the follower quickly by starting at the follower's last log index.
 
                 updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
 
@@ -310,7 +313,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                     log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
                             logName(), followerId, appendEntriesReply.getLogLastTerm(),
-                            followersLastLogTermInLeadersLog, followerLogInformation.getNextIndex());
+                            followersLastLogTermInLeadersLogOrSnapshot, followerLogInformation.getNextIndex());
                 }
             }
         }
