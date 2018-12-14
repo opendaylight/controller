@@ -9,12 +9,14 @@ package org.opendaylight.controller.md.sal.trace.tests;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestModule;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
@@ -29,6 +31,21 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltra
  * @author Michael Vorburger.ch
  */
 public class TracingBrokerTest {
+
+    @Test
+    public void testEnd2End() {
+        DataBrokerTestModule wiring = new DataBrokerTestModule(true);
+        wiring.getDataBroker(); // required so DataBrokerTestModule creates the DOMDataBroker
+        DOMDataBroker realDomBroker = wiring.getDOMDataBroker();
+        TracingBroker tracingDomBroker = new TracingBroker("Test", realDomBroker, new ConfigBuilder()
+                // CONTROLLER-1877: configure it like the default/initial mdsaltrace_config.xml in mdsal-trace-api
+                .setTransactionDebugContextEnabled(true)
+                .setWriteWatches(singletonList("/this/will/never/exist"))
+                .setRegistrationWatches(singletonList("/this/will/never/exist"))
+                .build(),
+                wiring.getBindingToNormalizedNodeCodec());
+        tracingDomBroker.newWriteOnlyTransaction().cancel();
+    }
 
     @Test
     @SuppressWarnings({ "resource", "unused" }) // Finding resource leaks is the point of this test
