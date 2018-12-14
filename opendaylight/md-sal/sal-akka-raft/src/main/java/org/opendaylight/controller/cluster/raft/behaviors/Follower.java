@@ -345,9 +345,9 @@ public class Follower extends AbstractRaftActorBehavior {
                     // in the follower's log but it has a different term in it
 
                     log.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append "
-                            + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(),
-                            appendEntries.getPrevLogIndex(), prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
-                            context.getReplicatedLog().getSnapshotIndex());
+                        + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        appendEntries.getPrevLogIndex(), prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
+                        context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm());
 
                     sendOutOfSyncAppendEntriesReply(sender, false);
                     return true;
@@ -357,8 +357,8 @@ public class Follower extends AbstractRaftActorBehavior {
                 // The follower's log is out of sync because the Leader's prevLogIndex entry was not found in it's log
 
                 log.info("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, "
-                        + "snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
-                        context.getReplicatedLog().getSnapshotIndex());
+                        + "snapshotIndex: {}, snapshotTerm: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
+                        context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false);
                 return true;

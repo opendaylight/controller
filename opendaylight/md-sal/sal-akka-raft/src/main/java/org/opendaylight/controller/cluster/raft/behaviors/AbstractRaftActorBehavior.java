@@ -334,8 +334,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return the log entry index or -1 if not found
      */
     protected long getLogEntryIndex(final long index) {
-        if (index == context.getReplicatedLog().getSnapshotIndex()) {
-            return context.getReplicatedLog().getSnapshotIndex();
+        if (context.getReplicatedLog().isInSnapshot(index)) {
+            return index;
         }
 
         ReplicatedLogEntry entry = context.getReplicatedLog().get(index);
@@ -352,7 +352,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return the log entry term or -1 if not found
      */
     protected long getLogEntryTerm(final long index) {
-        if (index == context.getReplicatedLog().getSnapshotIndex()) {
+        if (context.getReplicatedLog().isInSnapshot(index)) {
             return context.getReplicatedLog().getSnapshotTerm();
         }
 
