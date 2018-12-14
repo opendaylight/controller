@@ -259,7 +259,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
     @Test
     public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog() {
-        logStart("testHandleFirstAppendEntries");
+        logStart("testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog");
 
         MockRaftActorContext context = createActorContext();
         context.getReplicatedLog().clear(0,2);
@@ -285,7 +285,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
     @Test
     public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot() {
-        logStart("testHandleFirstAppendEntries");
+        logStart("testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot");
 
         MockRaftActorContext context = createActorContext();
         context.getReplicatedLog().clear(0,2);
@@ -511,7 +511,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     /**
-     * This test verifies that when an AppendEntries is received a specific prevLogTerm
+     * This test verifies that when an AppendEntries is received with a prevLogTerm
      * which does not match the term that is in RaftActors log entry at prevLogIndex
      * then the RaftActor does not change it's state and it returns a failure.
      */
@@ -521,13 +521,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        // First set the receivers term to lower number
-        context.getTermInformation().update(95, "test");
-
-        // AppendEntries is now sent with a bigger term
-        // this will set the receivers term to be the same as the sender's term
-        AppendEntries appendEntries = new AppendEntries(100, "leader", 0, 0, Collections.emptyList(), 101, -1,
-                (short)0);
+        AppendEntries appendEntries = new AppendEntries(2, "leader", 0, 2, Collections.emptyList(), 101, -1, (short)0);
 
         follower = createBehavior(context);
 
@@ -539,6 +533,28 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 AppendEntriesReply.class);
 
         assertEquals("isSuccess", false, reply.isSuccess());
+    }
+
+    @Test
+    public void testHandleAppendEntriesSenderPrevLogIndexIsInTheSnapshot() {
+        logStart("testHandleAppendEntriesSenderPrevLogIndexIsInTheSnapshot");
+
+        MockRaftActorContext context = createActorContext();
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(5, 8, 3).build());
+        context.getReplicatedLog().setSnapshotIndex(4);
+        context.getReplicatedLog().setSnapshotTerm(3);
+
+        AppendEntries appendEntries = new AppendEntries(3, "leader", 1, 3, Collections.emptyList(), 8, -1, (short)0);
+
+        follower = createBehavior(context);
+
+        RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
+
+        Assert.assertSame(follower, newBehavior);
+
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        assertEquals("isSuccess", true, reply.isSuccess());
     }
 
     /**
