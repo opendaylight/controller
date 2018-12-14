@@ -347,7 +347,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     /**
-     * Returns the actual term of the entry in replicated log for the given index or -1 if not found.
+     * Returns the actual term of the entry in the replicated log for the given index or -1 if not found.
      *
      * @return the log entry term or -1 if not found
      */
@@ -362,6 +362,20 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
 
         return -1;
+    }
+
+    /**
+     * Returns the actual term of the entry in the replicated log for the given index or, if not present, returns the
+     * snapshot term if the given index is in the snapshot or -1 otherwise.
+     *
+     * @return the term or -1 otherwise
+     */
+    protected long getLogEntryOrSnapshotTerm(final long index) {
+        if (context.getReplicatedLog().isInSnapshot(index)) {
+            return context.getReplicatedLog().getSnapshotTerm();
+        }
+
+        return getLogEntryTerm(index);
     }
 
     /**
