@@ -34,7 +34,7 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
 
     private void recordOp(LogicalDatastoreType store, YangInstanceIdentifier yiid, String method,
             NormalizedNode<?, ?> node) {
-        if (!tracingBroker.isWriteWatched(yiid, store)) {
+        if (yiid != null && !tracingBroker.isWriteWatched(yiid, store)) {
             return;
         }
 
