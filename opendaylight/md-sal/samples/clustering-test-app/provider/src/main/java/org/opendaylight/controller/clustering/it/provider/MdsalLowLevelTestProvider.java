@@ -537,7 +537,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         dtclReg = null;
 
         if (!idIntsListener.hasTriggered()) {
-            final RpcError error = RpcResultBuilder.newError(ErrorType.APPLICATION, "data-missing",
+            final RpcError error = RpcResultBuilder.newError(ErrorType.APPLICATION, "operation-failed",
                     "id-ints listener did not receive any notifications.");
             return Futures.immediateFuture(RpcResultBuilder.<UnsubscribeDtclOutput>failed()
                     .withRpcError(error).build());
