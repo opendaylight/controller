@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;

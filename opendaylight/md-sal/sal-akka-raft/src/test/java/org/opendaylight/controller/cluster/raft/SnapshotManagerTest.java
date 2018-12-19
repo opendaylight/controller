@@ -12,9 +12,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -210,7 +209,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCaptureWithCreateProcedureError() {
-        doThrow(new RuntimeException("mock")).when(mockProcedure).accept(anyObject());
+        doThrow(new RuntimeException("mock")).when(mockProcedure).accept(any());
 
         boolean capture = snapshotManager.capture(new SimpleReplicatedLogEntry(9, 1,
                 new MockRaftActorContext.MockPayload()), 9);
@@ -219,7 +218,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(false, snapshotManager.isCapturing());
 
-        verify(mockProcedure).accept(anyObject());
+        verify(mockProcedure).accept(any());
     }
 
     @SuppressWarnings("unchecked")
@@ -230,7 +229,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(capture);
 
-        verify(mockProcedure).accept(anyObject());
+        verify(mockProcedure).accept(any());
 
         reset(mockProcedure);
 
@@ -240,7 +239,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertFalse(capture);
 
-        verify(mockProcedure, never()).accept(anyObject());
+        verify(mockProcedure, never()).accept(any());
     }
 
     @Test
@@ -361,7 +360,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Test
     public void testPersistSendInstallSnapshot() throws Exception {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
-        doNothing().when(mockProcedure).accept(anyObject());
+        doNothing().when(mockProcedure).accept(any());
 
         // when replicatedToAllIndex = -1
         boolean capture = snapshotManager.captureToInstall(new SimpleReplicatedLogEntry(9, 6,
