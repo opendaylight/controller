@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
@@ -413,7 +412,7 @@ public class RaftActorTest extends AbstractActorTest {
         final Identifier id = new MockIdentifier("apply-state");
         mockRaftActor.getRaftActorContext().getApplyStateConsumer().accept(new ApplyState(mockActorRef, id, entry));
 
-        verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq(id), anyObject());
+        verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq(id), any());
     }
 
     @Test
@@ -585,7 +584,7 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.getRaftActorContext().getSnapshotManager().capture(
                 new SimpleReplicatedLogEntry(6, 1, new MockRaftActorContext.MockPayload("x")), 4);
 
-        verify(leaderActor.snapshotCohortDelegate).createSnapshot(anyObject(), anyObject());
+        verify(leaderActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
@@ -675,7 +674,7 @@ public class RaftActorTest extends AbstractActorTest {
         followerActor.getRaftActorContext().getSnapshotManager().capture(
                 new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("D")), 4);
 
-        verify(followerActor.snapshotCohortDelegate).createSnapshot(anyObject(), anyObject());
+        verify(followerActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
         assertEquals(6, followerActor.getReplicatedLog().size());
 
@@ -1078,7 +1077,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
         reply = kit.expectMsgClass(GetSnapshotReply.class);
-        verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(anyObject(), anyObject());
+        verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(any(), any());
 
         assertEquals("getId", persistenceId, reply.getId());
         replySnapshot = reply.getSnapshot();

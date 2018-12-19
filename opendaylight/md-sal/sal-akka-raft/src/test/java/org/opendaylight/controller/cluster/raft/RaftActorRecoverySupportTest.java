@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -259,7 +258,7 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
-        doNothing().when(mockCohort).applyRecoverySnapshot(anyObject());
+        doNothing().when(mockCohort).applyRecoverySnapshot(any());
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
 
@@ -290,7 +289,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort, never()).applyRecoverySnapshot(anyObject());
+        verify(mockCohort, never()).applyRecoverySnapshot(any());
         verify(mockCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 
