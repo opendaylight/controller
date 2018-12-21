@@ -59,7 +59,7 @@
           <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
             <artifactId>findbugs</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
           </dependency>
         </dependencies>
         <configuration>
