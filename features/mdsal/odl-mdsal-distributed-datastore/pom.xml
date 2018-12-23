@@ -41,6 +41,12 @@
             <classifier>features</classifier>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>odl-apache-commons-text</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>odl-mdsal-clustering-commons</artifactId>
             <type>xml</type>

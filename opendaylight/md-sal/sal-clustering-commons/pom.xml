@@ -73,6 +73,7 @@
     </dependency>
     <dependency>
       <!-- Enforce Netty’s optional dependency on servlet API -->
+      <!-- FIXME: is this really needed ? -->
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
