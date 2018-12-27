@@ -34,7 +34,7 @@ public class MessageSlice implements Serializable {
     private final int lastSliceHashCode;
     private final ActorRef replyTo;
 
-    public MessageSlice(Identifier identifier, byte[] data, int sliceIndex, int totalSlices, int lastSliceHashCode,
+    MessageSlice(Identifier identifier, byte[] data, int sliceIndex, int totalSlices, int lastSliceHashCode,
             final ActorRef replyTo) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.data = Preconditions.checkNotNull(data);
