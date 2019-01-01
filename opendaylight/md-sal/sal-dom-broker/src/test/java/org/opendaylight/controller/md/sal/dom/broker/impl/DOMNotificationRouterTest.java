@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +51,8 @@ public class DOMNotificationRouterTest {
         new NodeIdentifier(QName.create(TestModel.TEST_QNAME.getModule(), "test-notification")))
             .withChild(ImmutableNodes.leafNode(QName.create(TestModel.TEST_QNAME.getModule(), "value-leaf"), "foo"))
                 .build();
-    private static final Instant INSTANT = Instant.now();
+    // Truncate to milliseconds, as Java 9+ we get microsecond precision, which cannot be expressed in terms of Date
+    private static final Instant INSTANT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static SchemaPath notificationSchemaPath;
 
@@ -154,11 +156,11 @@ public class DOMNotificationRouterTest {
         SettableFuture<DOMNotification> receivedNotification = SettableFuture.create();
 
         @Override
-        public void onNotification(DOMNotification notification) {
+        public void onNotification(final DOMNotification notification) {
             receivedNotification.set(notification);
         }
 
-        void verifyReceived(SchemaPath path, ContainerNode body, @Nullable Date eventTime)
+        void verifyReceived(final SchemaPath path, final ContainerNode body, @Nullable final Date eventTime)
                 throws InterruptedException, ExecutionException, TimeoutException {
             final DOMNotification actual = receivedNotification.get(5, TimeUnit.SECONDS);
             assertEquals(path, actual.getType());
@@ -185,11 +187,11 @@ public class DOMNotificationRouterTest {
         SettableFuture<org.opendaylight.mdsal.dom.api.DOMNotification> receivedNotification = SettableFuture.create();
 
         @Override
-        public void onNotification(org.opendaylight.mdsal.dom.api.DOMNotification notification) {
+        public void onNotification(final org.opendaylight.mdsal.dom.api.DOMNotification notification) {
             receivedNotification.set(notification);
         }
 
-        void verifyReceived(SchemaPath path, ContainerNode body, @Nullable Instant eventTime)
+        void verifyReceived(final SchemaPath path, final ContainerNode body, @Nullable final Instant eventTime)
                 throws InterruptedException, ExecutionException, TimeoutException {
             final org.opendaylight.mdsal.dom.api.DOMNotification actual =
                     receivedNotification.get(5, TimeUnit.SECONDS);
@@ -211,11 +213,11 @@ public class DOMNotificationRouterTest {
         SettableFuture<Set<SchemaPath>> receivedNotification = SettableFuture.create();
 
         @Override
-        public void onSubscriptionChanged(Set<SchemaPath> currentTypes) {
+        public void onSubscriptionChanged(final Set<SchemaPath> currentTypes) {
             receivedNotification.set(currentTypes);
         }
 
-        void verifyReceived(SchemaPath... paths)
+        void verifyReceived(final SchemaPath... paths)
                 throws InterruptedException, ExecutionException, TimeoutException {
             final Set<SchemaPath> actual = receivedNotification.get(5, TimeUnit.SECONDS);
             assertEquals(ImmutableSet.copyOf(paths), actual);
