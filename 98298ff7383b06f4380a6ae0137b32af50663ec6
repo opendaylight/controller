@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "08361a63_1cff15f0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-03T17:48:48Z",
+      "side": 1,
+      "message": "It is a better alternative as a return value of a method, not for fields -- see https://stackoverflow.com/questions/23454952/uses-for-optional/23464794#23464794\n\nNote that JIT + Escape Analysis really blurs what it means to allocate an object in hot paths.\n\nIn this case, I think the common case is absent address -- which is reusing a singleton anyway.",
+      "parentUuid": "e0385eb3_5f746df8",
+      "range": {
+        "startLine": 61,
+        "startChar": 18,
+        "endLine": 61,
+        "endChar": 34
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e750adb_09fa9871",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
         "patchSetId": 3
