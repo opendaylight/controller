@@ -8,30 +8,31 @@
 package org.opendaylight.controller.messagebus.app.impl;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.messagebus.spi.EventSource;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.mdsal.binding.api.RpcProviderService;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.CreateTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicInputBuilder;
@@ -40,51 +41,53 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.Pattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
 public class EventSourceTopologyTest {
 
     EventSourceTopology eventSourceTopology;
     DataBroker dataBrokerMock;
-    RpcProviderRegistry rpcProviderRegistryMock;
+    RpcProviderService rpcProviderRegistryMock;
+    RpcConsumerRegistry rpcServiceMock;
     CreateTopicInput createTopicInputMock;
     ListenerRegistration<?> listenerRegistrationMock;
     NodeKey nodeKey;
-    RpcRegistration<EventAggregatorService> aggregatorRpcReg;
+    ObjectRegistration<EventAggregatorService> aggregatorRpcReg;
 
     @Before
     public void setUp() {
         dataBrokerMock = mock(DataBroker.class);
-        rpcProviderRegistryMock = mock(RpcProviderRegistry.class);
+        rpcProviderRegistryMock = mock(RpcProviderService.class);
+        rpcServiceMock = mock(RpcConsumerRegistry.class);
     }
 
     @Test
     public void constructorTest() {
         constructorTestHelper();
-        eventSourceTopology = new EventSourceTopology(dataBrokerMock, rpcProviderRegistryMock);
+        eventSourceTopology = new EventSourceTopology(dataBrokerMock, rpcProviderRegistryMock, rpcServiceMock);
         assertNotNull("Instance has not been created correctly.", eventSourceTopology);
     }
 
     private void constructorTestHelper() {
-        aggregatorRpcReg = mock(RpcRegistration.class);
+        aggregatorRpcReg = mock(ObjectRegistration.class);
         EventSourceService eventSourceService = mock(EventSourceService.class);
-        doReturn(aggregatorRpcReg).when(rpcProviderRegistryMock).addRpcImplementation(eq(EventAggregatorService.class),
-                any(EventSourceTopology.class));
-        doReturn(eventSourceService).when(rpcProviderRegistryMock).getRpcService(EventSourceService.class);
+        doReturn(aggregatorRpcReg).when(rpcProviderRegistryMock).registerRpcImplementation(
+            eq(EventAggregatorService.class), any(EventSourceTopology.class));
+        doReturn(eventSourceService).when(rpcServiceMock).getRpcService(EventSourceService.class);
         WriteTransaction writeTransactionMock = mock(WriteTransaction.class);
         doReturn(writeTransactionMock).when(dataBrokerMock).newWriteOnlyTransaction();
-        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
-                any(DataObject.class),eq(true));
-        CheckedFuture checkedFutureMock = mock(CheckedFuture.class);
-        doReturn(checkedFutureMock).when(writeTransactionMock).submit();
+        doNothing().when(writeTransactionMock).mergeParentStructurePut(any(LogicalDatastoreType.class),
+            any(InstanceIdentifier.class), any(DataObject.class));
+        FluentFuture checkedFutureMock = mock(FluentFuture.class);
+        doReturn(checkedFutureMock).when(writeTransactionMock).commit();
     }
 
     @Test
@@ -109,7 +112,7 @@ public class EventSourceTopologyTest {
     private void topicTestHelper() throws Exception {
         constructorTestHelper();
         createTopicInputMock = mock(CreateTopicInput.class);
-        eventSourceTopology = new EventSourceTopology(dataBrokerMock, rpcProviderRegistryMock);
+        eventSourceTopology = new EventSourceTopology(dataBrokerMock, rpcProviderRegistryMock, rpcServiceMock);
 
         NotificationPattern notificationPattern = new NotificationPattern("value1");
         doReturn(notificationPattern).when(createTopicInputMock).getNotificationPattern();
@@ -120,18 +123,15 @@ public class EventSourceTopologyTest {
         doReturn(listenerRegistrationMock).when(dataBrokerMock).registerDataTreeChangeListener(
                 any(DataTreeIdentifier.class), any(EventSourceTopic.class));
 
-        ReadOnlyTransaction readOnlyTransactionMock = mock(ReadOnlyTransaction.class);
+        ReadTransaction readOnlyTransactionMock = mock(ReadTransaction.class);
         doReturn(readOnlyTransactionMock).when(dataBrokerMock).newReadOnlyTransaction();
 
-        CheckedFuture checkedFutureMock = mock(CheckedFuture.class);
+        FluentFuture checkedFutureMock = mock(FluentFuture.class);
         doReturn(checkedFutureMock).when(readOnlyTransactionMock).read(eq(LogicalDatastoreType.OPERATIONAL),
                 any(InstanceIdentifier.class));
-        Optional optionalMock = mock(Optional.class);
-        doReturn(optionalMock).when(checkedFutureMock).checkedGet();
-        doReturn(true).when(optionalMock).isPresent();
-
         Topology topologyMock = mock(Topology.class);
-        doReturn(topologyMock).when(optionalMock).get();
+        doReturn(Optional.of(topologyMock)).when(checkedFutureMock).get();
+
         Node nodeMock = mock(Node.class);
         List<Node> nodeList = new ArrayList<>();
         nodeList.add(nodeMock);
@@ -164,15 +164,12 @@ public class EventSourceTopologyTest {
         nodeKey = new NodeKey(nodeId);
         doReturn(nodeKey).when(nodeMock).key();
         doReturn(nodeKey).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration routedRpcRegistrationMock = mock(
-                BindingAwareBroker.RoutedRpcRegistration.class);
-        doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock)
-                .addRoutedRpcImplementation(EventSourceService.class, eventSourceMock);
-        doNothing().when(routedRpcRegistrationMock).registerPath(eq(NodeContext.class),
-                any(KeyedInstanceIdentifier.class));
+        ObjectRegistration routedRpcRegistrationMock = mock(ObjectRegistration.class);
+        doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock).registerRpcImplementation(
+            eq(EventSourceService.class), eq(eventSourceMock), any(Set.class));
         eventSourceTopology.register(eventSourceMock);
-        verify(routedRpcRegistrationMock, times(1)).registerPath(eq(NodeContext.class),
-                any(KeyedInstanceIdentifier.class));
+        verify(rpcProviderRegistryMock, times(1)).registerRpcImplementation(eq(EventSourceService.class),
+            eq(eventSourceMock), any(Set.class));
     }
 
     @Test
@@ -181,8 +178,7 @@ public class EventSourceTopologyTest {
         EventSource eventSourceMock = mock(EventSource.class);
         NodeId nodeId = new NodeId("nodeIdValue1");
         nodeKey = new NodeKey(nodeId);
-        Map<NodeKey, BindingAwareBroker.RoutedRpcRegistration<EventSourceService>> localMap = eventSourceTopology
-                .getRoutedRpcRegistrations();
+        Map<NodeKey, Registration> localMap = eventSourceTopology.getRoutedRpcRegistrations();
         NodeKey nodeKeyMock = mock(NodeKey.class);
         doReturn(nodeKeyMock).when(eventSourceMock).getSourceNodeKey();
         BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock =
@@ -201,12 +197,9 @@ public class EventSourceTopologyTest {
         nodeKey = new NodeKey(nodeId);
         doReturn(nodeKey).when(nodeMock).key();
         doReturn(nodeKey).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration routedRpcRegistrationMock = mock(
-                BindingAwareBroker.RoutedRpcRegistration.class);
+        ObjectRegistration routedRpcRegistrationMock = mock(ObjectRegistration.class);
         doReturn(routedRpcRegistrationMock).when(rpcProviderRegistryMock)
-                .addRoutedRpcImplementation(EventSourceService.class, eventSourceMock);
-        doNothing().when(routedRpcRegistrationMock).registerPath(eq(NodeContext.class),
-                any(KeyedInstanceIdentifier.class));
+                .registerRpcImplementation(eq(EventSourceService.class), eq(eventSourceMock), any(Set.class));
         assertNotNull("Return value has not been created correctly.",
                 eventSourceTopology.registerEventSource(eventSourceMock));
     }

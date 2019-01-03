@@ -8,26 +8,25 @@
 package org.opendaylight.controller.messagebus.app.impl;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicInput;
@@ -65,14 +64,14 @@ public class EventSourceTopicTest {
 
         WriteTransaction writeTransactionMock = mock(WriteTransaction.class);
         doReturn(writeTransactionMock).when(dataBrokerMock).newWriteOnlyTransaction();
-        doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class), any(DataObject.class),eq(true));
-        CheckedFuture checkedFutureWriteMock = mock(CheckedFuture.class);
-        doReturn(checkedFutureWriteMock).when(writeTransactionMock).submit();
+        doNothing().when(writeTransactionMock).mergeParentStructurePut(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class));
+        FluentFuture checkedFutureWriteMock = mock(FluentFuture.class);
+        doReturn(checkedFutureWriteMock).when(writeTransactionMock).commit();
 
-        ReadOnlyTransaction readOnlyTransactionMock = mock(ReadOnlyTransaction.class);
+        ReadTransaction readOnlyTransactionMock = mock(ReadTransaction.class);
         doReturn(readOnlyTransactionMock).when(dataBrokerMock).newReadOnlyTransaction();
-        CheckedFuture checkedFutureReadMock = mock(CheckedFuture.class);
+        FluentFuture checkedFutureReadMock = mock(FluentFuture.class);
         doReturn(checkedFutureReadMock).when(readOnlyTransactionMock).read(LogicalDatastoreType.OPERATIONAL,
                 EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
         eventSourceTopic = EventSourceTopic.create(notificationPattern, "nodeIdPattern1", eventSourceTopologyMock);
@@ -95,7 +94,7 @@ public class EventSourceTopicTest {
         DataTreeModification<Node> mockDataTreeModification = mock(DataTreeModification.class);
         DataObjectModification<Node> mockModification = mock(DataObjectModification.class);
         doReturn(mockModification).when(mockDataTreeModification).getRootNode();
-        doReturn(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, instanceIdentifierMock))
+        doReturn(DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, instanceIdentifierMock))
                 .when(mockDataTreeModification).getRootPath();
         doReturn(DataObjectModification.ModificationType.WRITE).when(mockModification).getModificationType();
 

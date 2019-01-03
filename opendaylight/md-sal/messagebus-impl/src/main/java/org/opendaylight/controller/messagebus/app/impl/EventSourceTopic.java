@@ -5,10 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -16,17 +14,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.DisJoinTopicInput;
@@ -117,7 +116,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
         LOG.debug("Notify existing nodes");
         final Pattern nodeRegex = this.nodeIdPattern;
 
-        final ReadOnlyTransaction tx = eventSourceTopology.getDataBroker().newReadOnlyTransaction();
+        final ReadTransaction tx = eventSourceTopology.getDataBroker().newReadOnlyTransaction();
         final ListenableFuture<Optional<Topology>> future =
                 tx.read(LogicalDatastoreType.OPERATIONAL, EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH);
 
@@ -171,11 +170,9 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
     }
 
     private void registerListner(final EventSourceTopology eventSourceTopology) {
-        this.listenerRegistration =
-                eventSourceTopology.getDataBroker().registerDataTreeChangeListener(new DataTreeIdentifier<>(
-                        LogicalDatastoreType.OPERATIONAL,
-                        EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class)),
-                        this);
+        this.listenerRegistration = eventSourceTopology.getDataBroker().registerDataTreeChangeListener(
+            DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL,
+                EventSourceTopology.EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class)), this);
     }
 
     @Override
