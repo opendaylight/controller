@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7cafffe9_1f92eed5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/PeerAddressResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-03T14:32:59Z",
+      "side": 1,
+      "message": "I know this is an unfortunate workaround hack for akka weirdness but somehow we have to propagate the address to the ShardManager if akka clustering doesn\u0027t notify the ShardManager as it should. There\u0027s other ways to do it but none are really clean - IMO this was the simplest way and least ugly. This really isn\u0027t a wide-open public interface anyway - there\u0027s really only one implementation (except for the no-op one for UTs) and, in reality, there never will be another implementation.\n\nIf you\u0027re really against this then what would you suggest as an alternative?",
+      "parentUuid": "fa9f7124_fb16839d",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 5
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6626767c_b7e93b02",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e0385eb3_5f746df8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-03T14:32:59Z",
+      "side": 1,
+      "message": "You mean store as String? I guess that would mean passing @Nullable String into the ctor. Why? Optional is supposed to be the better alternative to @Nullable  X.",
+      "parentUuid": "6626767c_b7e93b02",
+      "range": {
+        "startLine": 61,
+        "startChar": 18,
+        "endLine": 61,
+        "endChar": 34
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e750adb_09fa9871",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2019-01-03T13:06:25Z",
       "side": 1,
       "message": "Optional.ofNullable(leaderAddress)",
+      "range": {
+        "startLine": 125,
+        "startChar": 15,
+        "endLine": 125,
+        "endChar": 28
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8407f4c_553efe46",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-03T14:32:59Z",
+      "side": 1,
+      "message": "Why incur the overhead of creating an Optional on every call in lieu of storing as Optional?",
+      "parentUuid": "9e750adb_09fa9871",
       "range": {
         "startLine": 125,
         "startChar": 15,
@@ -105,6 +177,30 @@
       "writtenOn": "2019-01-03T13:06:25Z",
       "side": 1,
       "message": "setResolved() contract is unclear here: given asynchronous resolution through two channels (the other being addPeerAddress() path), how do these interact.\n\nFor addPeerAddress() we have a clear policy, but this is coming from a different source outside of the package -- should it really overwrite the address set via addPeerAddress()?\n\nIf so, this method should be calling addPeerAddress(). If not, this method should use putIfAbsent().",
+      "range": {
+        "startLine": 101,
+        "startChar": 8,
+        "endLine": 102,
+        "endChar": 53
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff6eab0e_0f7777dc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardPeerAddressResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-03T14:32:59Z",
+      "side": 1,
+      "message": "\u003e setResolved() contract is unclear here: given asynchronous\n \u003e resolution through two channels (the other being addPeerAddress()\n \u003e path), how do these interact.\n \u003e \n \u003e For addPeerAddress() we have a clear policy, but this is coming\n \u003e from a different source outside of the package -- should it really\n \u003e overwrite the address set via addPeerAddress()?\n\nIn reality we get here b/c addPeerAddress() was not previously called via akka Member* event. Either way the address will be the same coming from both sources (ie akka). \n\n \u003e \n \u003e If so, this method should be calling addPeerAddress(). If not, this\n \u003e method should use putIfAbsent().\n\nsure",
+      "parentUuid": "797cbf00_293314e5",
       "range": {
         "startLine": 101,
         "startChar": 8,
