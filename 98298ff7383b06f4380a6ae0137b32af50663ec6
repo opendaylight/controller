@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa9f7124_fb16839d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/PeerAddressResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-03T13:06:25Z",
+      "side": 1,
+      "message": "Multiple issues here:\n\nDoes the default implementation imply that the semantics of this method is to provide advice and implementations are free to disregard it in case of conflicts?\n\nI do not like turning an immutable aspect into a mutator -- i.e. resolve() is a request which is completely disconnected from how it is implemented. Users of resolve() should not care how resolution is done. Yet setResolved() means any user can call it and implementations must account for this method being called.\n\nIn any case, full implementations contradict @FunctionalInterface and that should be dropped then.",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 5
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6626767c_b7e93b02",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-03T13:06:25Z",
+      "side": 1,
+      "message": "nullable String, as per Optional usage guidelines.",
+      "range": {
+        "startLine": 61,
+        "startChar": 18,
+        "endLine": 61,
+        "endChar": 34
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e750adb_09fa9871",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-03T13:06:25Z",
+      "side": 1,
+      "message": "Optional.ofNullable(leaderAddress)",
+      "range": {
+        "startLine": 125,
+        "startChar": 15,
+        "endLine": 125,
+        "endChar": 28
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e63859c_3d99c189",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-03T13:06:25Z",
+      "side": 1,
+      "message": "ProxyV2 to be consistent with cds-access-api.",
+      "range": {
+        "startLine": 153,
+        "startChar": 25,
+        "endLine": 153,
+        "endChar": 31
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "797cbf00_293314e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardPeerAddressResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-03T13:06:25Z",
+      "side": 1,
+      "message": "setResolved() contract is unclear here: given asynchronous resolution through two channels (the other being addPeerAddress() path), how do these interact.\n\nFor addPeerAddress() we have a clear policy, but this is coming from a different source outside of the package -- should it really overwrite the address set via addPeerAddress()?\n\nIf so, this method should be calling addPeerAddress(). If not, this method should use putIfAbsent().",
+      "range": {
+        "startLine": 101,
+        "startChar": 8,
+        "endLine": 102,
+        "endChar": 53
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
