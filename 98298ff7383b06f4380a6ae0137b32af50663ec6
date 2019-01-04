@@ -239,6 +239,30 @@
     },
     {
       "key": {
+        "uuid": "6107680d_27f62d3a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-04T19:05:20Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "b8407f4c_553efe46",
+      "range": {
+        "startLine": 125,
+        "startChar": 15,
+        "endLine": 125,
+        "endChar": 28
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e63859c_3d99c189",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
         "patchSetId": 3
@@ -250,6 +274,30 @@
       "writtenOn": "2019-01-03T13:06:25Z",
       "side": 1,
       "message": "ProxyV2 to be consistent with cds-access-api.",
+      "range": {
+        "startLine": 153,
+        "startChar": 25,
+        "endLine": 153,
+        "endChar": 31
+      },
+      "revId": "98298ff7383b06f4380a6ae0137b32af50663ec6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b73be48b_d16b35dd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-04T19:05:20Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "9e63859c_3d99c189",
       "range": {
         "startLine": 153,
         "startChar": 25,
