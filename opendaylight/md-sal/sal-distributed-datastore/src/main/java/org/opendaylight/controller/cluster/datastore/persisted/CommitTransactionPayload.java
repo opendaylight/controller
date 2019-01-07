@@ -84,7 +84,7 @@ public final class CommitTransactionPayload extends Payload implements Serializa
         DataTreeCandidateInputOutput.writeDataTreeCandidate(out, candidate);
         final byte[] serialized = out.toByteArray();
 
-        LOG.info("Initial buffer capacity {}, actual serialized size {}",
+        LOG.debug("Initial buffer capacity {}, actual serialized size {}",
                 initialSerializedBufferCapacity, serialized.length);
 
         return new CommitTransactionPayload(serialized);
