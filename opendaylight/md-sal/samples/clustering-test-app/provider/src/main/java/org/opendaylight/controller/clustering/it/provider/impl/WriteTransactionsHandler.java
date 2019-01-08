@@ -9,7 +9,6 @@
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.LinkedHashSet;
@@ -129,7 +128,7 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
 
     public static ListenableFuture<RpcResult<WriteTransactionsOutput>> start(final DOMDataBroker domDataBroker,
             final WriteTransactionsInput input) {
-        LOG.debug("Starting write-transactions.");
+        LOG.info("Starting write transactions with input {}", input);
 
         final String id = input.getId();
         final MapEntryNode entry = ImmutableNodes.mapEntryBuilder(ID_INT, ID, id)
@@ -152,9 +151,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
             // If we get optimistic lock here it means id-ints already exists and we can continue.
             LOG.debug("Got an optimistic lock when writing initial top level list element.", e);
         } catch (final TransactionCommitFailedException | TimeoutException e) {
-            LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
-            return Futures.immediateFuture(RpcResultBuilder.<WriteTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
+            String msg = String.format("Could not start write transactions - error writing top-level path %s:  %s",
+                    ID_INTS_YID, containerNode);
+            LOG.error(msg, e);
+            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION, msg, e)
+                    .buildFuture();
         }
 
         tx = domDataBroker.newWriteOnlyTransaction();
@@ -163,9 +164,11 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         try {
             tx.submit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.warn("Unable to ensure IdInts list for id: {} exists.", id, e);
-            return Futures.immediateFuture(RpcResultBuilder.<WriteTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
+            String msg = String.format("Could not start write transactions - error writing list entry path %s: %s",
+                    idListItem, entry);
+            LOG.error(msg, e);
+            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION, msg, e)
+                    .buildFuture();
         }
 
         LOG.debug("Filling the item list with initial values.");
@@ -179,9 +182,12 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         try {
             tx.submit().get(INIT_TX_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.warn("Unable to fill the initial item list.", e);
-            return Futures.immediateFuture(RpcResultBuilder.<WriteTransactionsOutput>failed()
-                    .withError(RpcError.ErrorType.APPLICATION, "Unexpected-exception", e).build());
+            String msg = String.format(
+                    "Could not start write transactions - error filling initial item list path %s: %s",
+                    itemListId, mapBuilder.build());
+            LOG.error(msg, e);
+            return RpcResultBuilder.<WriteTransactionsOutput>failed().withError(RpcError.ErrorType.APPLICATION, msg, e)
+                    .buildFuture();
         }
 
         final WriteTransactionsHandler handler;
@@ -192,6 +198,8 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         }
 
         handler.doStart();
+
+        LOG.info("Write transactions successfully started");
         return handler.completionFuture;
     }
 
