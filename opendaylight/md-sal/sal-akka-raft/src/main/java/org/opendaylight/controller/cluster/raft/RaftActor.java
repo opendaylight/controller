@@ -124,7 +124,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private boolean shuttingDown;
 
     protected RaftActor(final String id, final Map<String, String> peerAddresses,
-         final Optional<ConfigParams> configParams, final short payloadVersion) {
+         final Optional<ConfigParams> configParams, final short payloadVersion,
+         final boolean backoffSupervised) {
+        super(backoffSupervised);
 
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);

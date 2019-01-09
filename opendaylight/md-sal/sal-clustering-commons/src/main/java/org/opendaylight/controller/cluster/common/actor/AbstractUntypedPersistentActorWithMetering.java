@@ -12,7 +12,8 @@ package org.opendaylight.controller.cluster.common.actor;
  */
 public abstract class AbstractUntypedPersistentActorWithMetering extends AbstractUntypedPersistentActor {
 
-    public AbstractUntypedPersistentActorWithMetering() {
+    public AbstractUntypedPersistentActorWithMetering(final boolean backoffSupervised) {
+        super(backoffSupervised);
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
         }
