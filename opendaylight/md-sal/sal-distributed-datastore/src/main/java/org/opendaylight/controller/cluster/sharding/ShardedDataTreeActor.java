@@ -96,6 +96,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private final Map<DOMDataTreeIdentifier, ActorProducerRegistration> idToProducer = new HashMap<>();
 
     ShardedDataTreeActor(final ShardedDataTreeActorCreator builder) {
+        super(builder.isBackoffSupervised());
+
         LOG.debug("Creating ShardedDataTreeActor on {}", builder.getClusterWrapper().getCurrentMemberName());
 
         shardingService = builder.getShardingService();
@@ -754,6 +756,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         private ActorSystem actorSystem;
         private ClusterWrapper cluster;
         private int maxRetries;
+        private boolean backoffSupervised;
 
         public DistributedShardedDOMDataTree getShardingService() {
             return shardingService;
@@ -811,6 +814,14 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             return maxRetries;
         }
 
+        public boolean isBackoffSupervised() {
+            return backoffSupervised;
+        }
+
+        public void setBackoffSupervised(final boolean backoffSupervised) {
+            this.backoffSupervised = backoffSupervised;
+        }
+
         private void verify() {
             Preconditions.checkNotNull(shardingService);
             Preconditions.checkNotNull(actorSystem);
@@ -820,7 +831,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         public Props props() {
+            return props(false);
+        }
+
+        public Props props(final boolean newBackoffSupervised) {
             verify();
+            setBackoffSupervised(newBackoffSupervised);
             return Props.create(ShardedDataTreeActor.class, this);
         }
     }
