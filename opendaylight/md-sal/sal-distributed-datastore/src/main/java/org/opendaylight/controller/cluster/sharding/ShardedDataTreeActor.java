@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -110,6 +111,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 DistributedShardedDOMDataTree.ACTOR_ID, clusterWrapper.getCurrentMemberName());
 
         clusterWrapper.subscribeToMemberEvents(self());
+        backoffSupervised.set(builder.isBackoffSupervised());
     }
 
     @Override
@@ -755,6 +757,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         private ActorSystem actorSystem;
         private ClusterWrapper cluster;
         private int maxRetries;
+        private final AtomicBoolean backoffSupervised = new AtomicBoolean(false);
 
         public DistributedShardedDOMDataTree getShardingService() {
             return shardingService;
@@ -812,6 +815,14 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             return maxRetries;
         }
 
+        public boolean isBackoffSupervised() {
+            return backoffSupervised.get();
+        }
+
+        public void setBackoffSupervised(final boolean backoffSupervised) {
+            this.backoffSupervised.set(backoffSupervised);
+        }
+
         private void verify() {
             Preconditions.checkNotNull(shardingService);
             Preconditions.checkNotNull(actorSystem);
@@ -821,7 +832,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         public Props props() {
+            return props(false);
+        }
+
+        public Props props(final boolean newBackoffSupervised) {
             verify();
+            this.setBackoffSupervised(newBackoffSupervised);
             return Props.create(ShardedDataTreeActor.class, this);
         }
     }
