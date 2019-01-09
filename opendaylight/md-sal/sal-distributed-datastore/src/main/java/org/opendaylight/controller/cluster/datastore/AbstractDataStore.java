@@ -21,6 +21,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.common.actor.BackoffSupervisorUtils;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
@@ -48,6 +50,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Base implementation of a distributed DOMStore.
@@ -93,13 +96,27 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 .restoreFromSnapshot(restoreFromSnapshot)
                 .distributedDataStore(this);
 
-        actorUtils = new ActorUtils(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
-                shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(),
-                primaryShardInfoCache);
+        actorUtils = new ActorUtils(actorSystem,
+                createShardManager(actorSystem, creator, shardDispatcher, shardManagerId,
+                        datastoreContextFactory.getBaseDatastoreContext()),
+                cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(), primaryShardInfoCache);
 
-        final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
-            datastoreContextFactory.getBaseDatastoreContext().getDataStoreName(), actorUtils);
-        final ActorRef clientActor = actorSystem.actorOf(clientProps);
+        final MemberName memberName = cluster.getCurrentMemberName();
+        final String datastoreName = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
+        final Props clientProps = DistributedDataStoreClientActor.props(memberName, datastoreName, actorUtils, true);
+        final FiniteDuration minBackoff = Duration.create(
+                datastoreContextFactory.getBaseDatastoreContext().getPersistentActorRestartMinBackoffInSeconds(),
+                TimeUnit.SECONDS);
+        final FiniteDuration maxBackoff = Duration.create(
+                datastoreContextFactory.getBaseDatastoreContext().getPersistentActorRestartMaxBackoffInSeconds(),
+                TimeUnit.SECONDS);
+        final FiniteDuration resetBackoff = Duration.create(
+                datastoreContextFactory.getBaseDatastoreContext().getPersistentActorRestartResetBackoffInSeconds(),
+                TimeUnit.SECONDS);
+        final ActorRef clientActor = BackoffSupervisorUtils.createBackoffSupervisor(actorSystem, minBackoff, maxBackoff,
+                resetBackoff, null, null,
+                BackoffSupervisorUtils.getChildActorName(memberName.getName() + "-frontend-datastore-" + datastoreName),
+                clientProps);
         try {
             client = DistributedDataStoreClientActor.getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
         } catch (Exception e) {
@@ -124,7 +141,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @VisibleForTesting
     protected AbstractDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {
-        this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
+        this.actorUtils = requireNonNull(actorUtils, "actorUtils should not be null");
         this.client = null;
         this.identifier = requireNonNull(identifier);
     }
@@ -132,7 +149,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     @VisibleForTesting
     protected AbstractDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
                                 final DataStoreClient clientActor) {
-        this.actorUtils = requireNonNull(actorUtils, "actorContext should not be null");
+        this.actorUtils = requireNonNull(actorUtils, "actorUtils should not be null");
         this.client = clientActor;
         this.identifier = requireNonNull(identifier);
     }
@@ -261,14 +278,21 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static ActorRef createShardManager(final ActorSystem actorSystem,
-            final AbstractShardManagerCreator<?> creator, final String shardDispatcher,
-            final String shardManagerId) {
+    private static ActorRef createShardManager(final ActorSystem actorSystem, final ShardManagerCreator creator,
+            final String shardDispatcher, final String shardManagerId, final DatastoreContext datastoreContext) {
         Exception lastException = null;
+
+        final FiniteDuration minBackoff =
+                Duration.create(datastoreContext.getPersistentActorRestartMinBackoffInSeconds(), TimeUnit.SECONDS);
+        final FiniteDuration maxBackoff =
+                Duration.create(datastoreContext.getPersistentActorRestartMaxBackoffInSeconds(), TimeUnit.SECONDS);
+        final FiniteDuration resetBackoff =
+                Duration.create(datastoreContext.getPersistentActorRestartResetBackoffInSeconds(), TimeUnit.SECONDS);
 
         for (int i = 0; i < 100; i++) {
             try {
-                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher), shardManagerId);
+                return BackoffSupervisorUtils.createBackoffSupervisor(actorSystem, minBackoff, maxBackoff, resetBackoff,
+                        shardManagerId, null, null, creator.props(true).withDispatcher(shardDispatcher));
             } catch (Exception e) {
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);

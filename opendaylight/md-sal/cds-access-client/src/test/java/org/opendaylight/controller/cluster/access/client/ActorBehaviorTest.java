@@ -182,7 +182,7 @@ public class ActorBehaviorTest {
         }
 
         MockedActor(final FrontendIdentifier frontendId, final ClientActorBehavior<?> initialBehavior) {
-            super(frontendId);
+            super(frontendId, false);
             this.initialBehavior = initialBehavior;
         }
 

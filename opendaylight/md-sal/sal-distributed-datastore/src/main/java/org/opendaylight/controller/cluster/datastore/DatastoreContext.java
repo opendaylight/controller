@@ -64,8 +64,10 @@ public class DatastoreContext implements ClientActorConfig {
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
-
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
+    public static final int DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS = 10;
+    public static final int DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS = 300;
+    public static final int DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS = 60;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContext.class);
 
@@ -99,6 +101,9 @@ public class DatastoreContext implements ClientActorConfig {
     private long requestTimeout = AbstractClientConnection.DEFAULT_REQUEST_TIMEOUT_NANOS;
     private long noProgressTimeout = AbstractClientConnection.DEFAULT_NO_PROGRESS_TIMEOUT_NANOS;
     private int initialPayloadSerializedBufferCapacity = DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY;
+    private int persistentActorRestartMinBackoffInSeconds = DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS;
+    private int persistentActorRestartMaxBackoffInSeconds = DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS;
+    private int persistentActorRestartResetBackoffInSeconds = DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS;
 
     public static Set<String> getGlobalDatastoreNames() {
         return GLOBAL_DATASTORE_NAMES;
@@ -142,6 +147,9 @@ public class DatastoreContext implements ClientActorConfig {
         this.requestTimeout = other.requestTimeout;
         this.noProgressTimeout = other.noProgressTimeout;
         this.initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
+        this.persistentActorRestartMinBackoffInSeconds = other.persistentActorRestartMinBackoffInSeconds;
+        this.persistentActorRestartMaxBackoffInSeconds = other.persistentActorRestartMaxBackoffInSeconds;
+        this.persistentActorRestartResetBackoffInSeconds = other.persistentActorRestartResetBackoffInSeconds;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -363,6 +371,18 @@ public class DatastoreContext implements ClientActorConfig {
 
     public int getInitialPayloadSerializedBufferCapacity() {
         return initialPayloadSerializedBufferCapacity;
+    }
+
+    public int getPersistentActorRestartMinBackoffInSeconds() {
+        return persistentActorRestartMinBackoffInSeconds;
+    }
+
+    public int getPersistentActorRestartMaxBackoffInSeconds() {
+        return persistentActorRestartMaxBackoffInSeconds;
+    }
+
+    public int getPersistentActorRestartResetBackoffInSeconds() {
+        return persistentActorRestartResetBackoffInSeconds;
     }
 
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
@@ -654,6 +674,22 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder initialPayloadSerializedBufferCapacity(final int capacity) {
             datastoreContext.initialPayloadSerializedBufferCapacity = capacity;
+            return this;
+        }
+
+        public Builder persistentActorRestartMinBackoffInSeconds(final int persistentActorRestartMinBackoffInSeconds) {
+            datastoreContext.persistentActorRestartMinBackoffInSeconds = persistentActorRestartMinBackoffInSeconds;
+            return this;
+        }
+
+        public Builder persistentActorRestartMaxBackoffInSeconds(final int persistentActorRestartMaxBackoffInSeconds) {
+            datastoreContext.persistentActorRestartMaxBackoffInSeconds = persistentActorRestartMaxBackoffInSeconds;
+            return this;
+        }
+
+        public Builder persistentActorRestartResetBackoffInSeconds(
+                final int persistentActorRestartResetBackoffInSeconds) {
+            datastoreContext.persistentActorRestartResetBackoffInSeconds = persistentActorRestartResetBackoffInSeconds;
             return this;
         }
 

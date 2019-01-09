@@ -50,7 +50,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
         super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION, false);
         state = Collections.synchronizedList(new ArrayList<>());
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);

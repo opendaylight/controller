@@ -55,4 +55,10 @@ public interface DatastoreConfigurationMXBean {
     int getMaxShardDataStoreExecutorQueueSize();
 
     int getMaximumMessageSliceSize();
+
+    int getPersistentActorRestartMinBackoffInSeconds();
+
+    int getPersistentActorRestartMaxBackoffInSeconds();
+
+    int getPersistentActorRestartResetBackoffInSeconds();
 }

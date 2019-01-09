@@ -170,6 +170,8 @@ public class Shard extends RaftActor {
 
     private final ShardStats shardMBean;
 
+    private final ActorRef shardManagerRef;
+
     private final ShardDataTreeListenerInfoMXBeanImpl listenerInfoMXBean;
 
     private DatastoreContext datastoreContext;
@@ -207,12 +209,14 @@ public class Shard extends RaftActor {
 
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
-                Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
+                Optional.of(builder.getDatastoreContext().getShardRaftConfig()),
+                DataStoreVersions.CURRENT_VERSION, builder.isBackoffSupervised());
 
         this.name = builder.getId().toString();
         this.shardName = builder.getId().getShardName();
         this.datastoreContext = builder.getDatastoreContext();
         this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
+        this.shardManagerRef = builder.getShardManagerRef();
         this.frontendMetadata = new FrontendMetadata(name);
 
         setPersistence(datastoreContext.isPersistent());
@@ -358,13 +362,13 @@ public class Shard extends RaftActor {
                 roleChangeNotifier.get().forward(message, context());
             } else if (message instanceof FollowerInitialSyncUpStatus) {
                 shardMBean.setFollowerInitialSyncStatus(((FollowerInitialSyncUpStatus) message).isInitialSyncDone());
-                context().parent().tell(message, self());
+                tellShardManager(message);
             } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
                 sender().tell(getShardMBean(), self());
             } else if (message instanceof GetShardDataTree) {
                 sender().tell(store.getDataTree(), self());
             } else if (message instanceof ServerRemoved) {
-                context().parent().forward(message, context());
+                forwardToShardManager(message);
             } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
             } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand) {
@@ -379,6 +383,28 @@ public class Shard extends RaftActor {
             } else if (!responseMessageSlicer.handleMessage(message)) {
                 super.handleNonRaftCommand(message);
             }
+        }
+    }
+
+    private void tellShardManager(final Object message) {
+        if (shardManagerRef != null) {
+            if (shardManagerRef.equals(context().parent())) {
+                shardManagerRef.tell(message, self());
+            } else {
+                shardManagerRef.tell(message, context().parent());
+            }
+        } else {
+            Preconditions.checkState(!isBackoffSupervised());
+            context().parent().tell(message, self());
+        }
+    }
+
+    private void forwardToShardManager(final Object message) {
+        if (shardManagerRef != null) {
+            shardManagerRef.forward(message, context());
+        } else {
+            Preconditions.checkState(!isBackoffSupervised());
+            context().parent().forward(message, context());
         }
     }
 
@@ -931,7 +957,7 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = null;
 
         //notify shard manager
-        getContext().parent().tell(new ActorInitialized(), getSelf());
+        tellShardManager(new ActorInitialized());
 
         // Being paranoid here - this method should only be called once but just in case...
         if (txCommitTimeoutCheckSchedule == null) {
@@ -1112,6 +1138,8 @@ public class Shard extends RaftActor {
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private DataTree dataTree;
 
+        private ActorRef shardManagerRef;
+        private boolean backoffSupervised;
         private volatile boolean sealed;
 
         protected AbstractBuilder(final Class<? extends S> shardClass) {
@@ -1163,6 +1191,18 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T shardManagerRef(final ActorRef newShardManagerRef) {
+            checkSealed();
+            shardManagerRef = newShardManagerRef;
+            return self();
+        }
+
+        public T backoffSupervised(final boolean newBackoffSupervised) {
+            checkSealed();
+            backoffSupervised = newBackoffSupervised;
+            return self();
+        }
+
         public ShardIdentifier getId() {
             return id;
         }
@@ -1197,6 +1237,14 @@ public class Shard extends RaftActor {
                     throw new IllegalStateException("Unhandled logical store type "
                             + datastoreContext.getLogicalStoreType());
             }
+        }
+
+        public ActorRef getShardManagerRef() {
+            return shardManagerRef;
+        }
+
+        public boolean isBackoffSupervised() {
+            return backoffSupervised;
         }
 
         protected void verify() {

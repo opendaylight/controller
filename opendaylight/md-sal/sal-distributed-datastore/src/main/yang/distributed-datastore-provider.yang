@@ -274,6 +274,24 @@ module distributed-datastore-provider {
             type non-zero-uint32-type;
             description "The initial buffer capacity, in bytes, to use when serializing message payloads.";
         }
+
+        leaf persistent-actor-restart-min-backoff-in-seconds {
+            default 10;
+            type non-zero-uint32-type;
+            description "Interval until which stopped persistent actor is re-started by the back-off supervisor.";
+        }
+
+        leaf persistent-actor-restart-max-backoff-in-seconds {
+            default 300;
+            type non-zero-uint32-type;
+            description "Exponential back-off interval to which re-start of stopped persistent actor is capped.";
+        }
+
+        leaf persistent-actor-restart-reset-backoff-in-seconds {
+            default 60;
+            type non-zero-uint32-type;
+            description "Internal after which back-off algorithm is reset if persistent actor does not stop.";
+        }
     }
 
     container data-store-properties-container {

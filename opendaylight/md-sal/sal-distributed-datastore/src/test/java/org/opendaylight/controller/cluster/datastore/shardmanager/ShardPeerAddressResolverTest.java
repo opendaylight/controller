@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.common.actor.BackoffSupervisorUtils;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 
 /**
@@ -40,23 +41,23 @@ public class ShardPeerAddressResolverTest {
         resolver.addPeerAddress(MEMBER_3, address3);
         assertEquals("getPeerAddress", address3, resolver.getPeerAddress(MEMBER_3));
 
-        assertEquals("getShardActorAddress",
-                address2.toString() + "/user/shardmanager-config/member-2-shard-default-config",
+        assertEquals("getShardActorAddress", address2.toString() + "/user/shardmanager-config/"
+                + BackoffSupervisorUtils.getChildActorName("shardmanager-config") + "/member-2-shard-default-config",
                 resolver.getShardActorAddress("default", MEMBER_2));
 
-        assertEquals("getShardActorAddress",
-                address3.toString() + "/user/shardmanager-config/member-3-shard-default-config",
+        assertEquals("getShardActorAddress", address3.toString() + "/user/shardmanager-config/"
+                + BackoffSupervisorUtils.getChildActorName("shardmanager-config") + "/member-3-shard-default-config",
                 resolver.getShardActorAddress("default", MEMBER_3));
 
-        assertEquals("getShardActorAddress",
-                address2.toString() + "/user/shardmanager-config/member-2-shard-topology-config",
+        assertEquals("getShardActorAddress", address2.toString() + "/user/shardmanager-config/"
+                + BackoffSupervisorUtils.getChildActorName("shardmanager-config") + "/member-2-shard-topology-config",
                 resolver.getShardActorAddress("topology", MEMBER_2));
 
         resolver.removePeerAddress(MEMBER_2);
         assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("default", MEMBER_2));
         assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("topology", MEMBER_2));
-        assertEquals("getShardActorAddress",
-                address3.toString() + "/user/shardmanager-config/member-3-shard-default-config",
+        assertEquals("getShardActorAddress", address3.toString() + "/user/shardmanager-config/"
+                + BackoffSupervisorUtils.getChildActorName("shardmanager-config") + "/member-3-shard-default-config",
                 resolver.getShardActorAddress("default", MEMBER_3));
     }
 
@@ -74,8 +75,11 @@ public class ShardPeerAddressResolverTest {
         resolver.addPeerAddress(memberName, address);
 
         String shardAddress = resolver.getShardActorAddress("default", memberName);
-        assertEquals("getShardActorAddress", address.toString() + "/user/shardmanager-" + type + "/"
-                + memberName.getName() + "-shard-default-" + type, shardAddress);
+        assertEquals("getShardActorAddress",
+                address.toString() + "/user/shardmanager-" + type
+                        + BackoffSupervisorUtils.getChildActorName("/shardmanager-" + type) + "/" + memberName.getName()
+                        + "-shard-default-" + type,
+                shardAddress);
 
         assertEquals("resolve", shardAddress, resolver.resolve(peerId));
     }
@@ -88,7 +92,8 @@ public class ShardPeerAddressResolverTest {
         String peerId = ShardIdentifier.create("default", MEMBER_2, type).toString();
 
         String address = "akka.tcp://opendaylight-cluster-data@127.0.0.1:2550/user/shardmanager-" + type
-                + "/" + MEMBER_2.getName() + "-shard-default-" + type;
+                + "/" + BackoffSupervisorUtils.getChildActorName("shardmanager-" + type) + "/"
+                + MEMBER_2.getName() + "-shard-default-" + type;
 
         resolver.setResolved(peerId, address);
 

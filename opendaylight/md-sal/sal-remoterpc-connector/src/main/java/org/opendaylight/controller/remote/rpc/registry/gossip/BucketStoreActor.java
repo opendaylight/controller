@@ -89,6 +89,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private boolean persisting;
 
     protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
+        super(false);
         this.config = requireNonNull(config);
         this.initialData = requireNonNull(initialData);
         this.persistenceId = requireNonNull(persistenceId);

@@ -27,6 +27,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     private CountDownLatch waitTillReadyCountDownLatch;
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
+    private boolean backoffSupervised;
     private volatile boolean sealed;
 
     AbstractShardManagerCreator() {
@@ -122,8 +123,17 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         requireNonNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
 
+    boolean isBackoffSupervised() {
+        return backoffSupervised;
+    }
+
     public Props props() {
+        return props(false);
+    }
+
+    public Props props(final boolean newBackoffSupervised) {
         verify();
+        backoffSupervised = newBackoffSupervised;
         return Props.create(ShardManager.class, this);
     }
 }

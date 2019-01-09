@@ -69,6 +69,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.common.actor.BackoffSupervisorUtils;
 import org.opendaylight.controller.cluster.datastore.AbstractShardManagerTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -1536,8 +1537,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testAddShardReplicaWithPreExistingReplicaInRemoteShardLeader() {
         LOG.info("testAddShardReplicaWithPreExistingReplicaInRemoteShardLeader starting");
         final TestKit kit = new TestKit(getSystem());
-        TestActorRef<TestShardManager> shardManager = actorFactory
-                .createTestActor(newPropsShardMgrWithMockShardActor(), shardMgrID);
+        TestActorRef<TestShardManager> shardManagerSupervisor =
+                actorFactory.createTestActor(newPropsShardMgrWithMockShardActor(), shardMgrID);
+        TestActorRef<TestShardManager> shardManager =
+                TestActorRef.create(getSystem(), newPropsShardMgrWithMockShardActor(), shardManagerSupervisor,
+                        BackoffSupervisorUtils.getChildActorName(shardMgrID));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager.tell(new ActorInitialized(), mockShardActor);
@@ -1741,10 +1745,16 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
         ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
 
-        final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
-                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor).cluster(
-                        new ClusterWrapperImpl(system1)).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+        final TestActorRef<TestShardManager> newReplicaShardManagerSupervisor = TestActorRef.create(system1,
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor)
+                        .cluster(new ClusterWrapperImpl(system1)).props()
+                        .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
+        final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor)
+                        .cluster(new ClusterWrapperImpl(system1)).props()
+                        .withDispatcher(Dispatchers.DefaultDispatcherId()),
+                newReplicaShardManagerSupervisor, shardManagerID + "-supervisor");
 
         // Create an ActorSystem ShardManager actor for member-2.
         final ActorSystem system2 = newActorSystem("Member2");
@@ -1758,17 +1768,24 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         LOG.error("Mock Shard Leader Actor : {}", mockShardLeaderActor);
 
-        final TestActorRef<TestShardManager> leaderShardManager = TestActorRef.create(system2,
-                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardLeaderActor).cluster(
-                        new ClusterWrapperImpl(system2)).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+        final TestActorRef<TestShardManager> leaderShardManagerSupervisor = TestActorRef.create(system2,
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardLeaderActor)
+                        .cluster(new ClusterWrapperImpl(system2)).props()
+                        .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
+        final TestActorRef<TestShardManager> leaderShardManager = TestActorRef.create(system2,
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardLeaderActor)
+                        .cluster(new ClusterWrapperImpl(system2)).props()
+                        .withDispatcher(Dispatchers.DefaultDispatcherId()),
+                leaderShardManagerSupervisor, BackoffSupervisorUtils.getChildActorName(shardManagerID));
 
         // Because mockShardLeaderActor is created at the top level of the actor system it has an address like so,
         //    akka://cluster-test@127.0.0.1:2559/user/member-2-shard-default-config1
         // However when a shard manager has a local shard which is a follower and a leader that is remote it will
         // try to compute an address for the remote shard leader using the ShardPeerAddressResolver. This address will
         // look like so,
-        //    akka://cluster-test@127.0.0.1:2559/user/shardmanager-config1/member-2-shard-default-config1
+        //    akka://cluster-test@127.0.0.1:2559/user/shardmanager-config1/shardmanager-config1-backoff-supervised/
+        //        member-2-shard-default-config1
         // In this specific case if we did a FindPrimary for shard default from member-1 we would come up
         // with the address of an actor which does not exist, therefore any message sent to that actor would go to
         // dead letters.

@@ -20,17 +20,25 @@ import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.Function1;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
 public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStoreClientActor.class);
     private static final Function1<ActorRef, ?> GET_CLIENT_FACTORY = ExplicitAsk.toScala(GetClientRequest::new);
 
     private final ActorUtils actorUtils;
 
     AbstractDataStoreClientActor(final FrontendIdentifier frontendId, final ActorUtils actorUtils) {
-        super(frontendId);
+        this(frontendId, actorUtils, false);
+    }
+
+    AbstractDataStoreClientActor(final FrontendIdentifier frontendId, final ActorUtils actorUtils,
+            final boolean backoffSupervised) {
+        super(frontendId, backoffSupervised);
         this.actorUtils = requireNonNull(actorUtils);
     }
 

@@ -48,9 +48,11 @@ import java.util.concurrent.TimeoutException;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.common.actor.BackoffSupervisorUtils;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -91,6 +93,7 @@ import org.slf4j.LoggerFactory;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -148,7 +151,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                         .setDistributedConfigDatastore(distributedConfigDatastore)
                         .setDistributedOperDatastore(distributedOperDatastore)
                         .setLookupTaskMaxRetries(LOOKUP_TASK_MAX_RETRIES),
-                ACTOR_ID);
+                ACTOR_ID, distributedConfigDatastore.getActorUtils().getDatastoreContext());
 
         this.memberName = distributedConfigDatastore.getActorUtils().getCurrentMemberName();
 
@@ -471,9 +474,18 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         LOG.debug("{}: Creating distributed datastore client for shard {}", memberName, shardName);
         final Props distributedDataStoreClientProps =
-                SimpleDataStoreClientActor.props(memberName, "Shard-" + shardName, actorUtils, shardName);
-
-        final ActorRef clientActor = actorSystem.actorOf(distributedDataStoreClientProps);
+                SimpleDataStoreClientActor.props(memberName, "Shard-" + shardName, actorUtils, shardName, true);
+        final FiniteDuration minBackoff = Duration.create(
+                actorUtils.getDatastoreContext().getPersistentActorRestartMinBackoffInSeconds(), TimeUnit.SECONDS);
+        final FiniteDuration maxBackoff = Duration.create(
+                actorUtils.getDatastoreContext().getPersistentActorRestartMaxBackoffInSeconds(), TimeUnit.SECONDS);
+        final FiniteDuration resetBackoff = Duration.create(
+                actorUtils.getDatastoreContext().getPersistentActorRestartResetBackoffInSeconds(), TimeUnit.SECONDS);
+        final ActorRef clientActor = BackoffSupervisorUtils.createBackoffSupervisor(actorSystem, minBackoff, maxBackoff,
+                resetBackoff, null, null,
+                BackoffSupervisorUtils
+                        .getChildActorName(memberName.getName() + "-frontend-datastore-Shard-" + shardName),
+                distributedDataStoreClientProps);
         try {
             return new SimpleEntry<>(SimpleDataStoreClientActor
                     .getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS), clientActor);
@@ -545,12 +557,21 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static ActorRef createShardedDataTreeActor(final ActorSystem actorSystem,
                                                        final ShardedDataTreeActorCreator creator,
-                                                       final String shardDataTreeActorId) {
+                                                       final String shardDataTreeActorId,
+                                                       final DatastoreContext datastoreContext) {
         Exception lastException = null;
+
+        final FiniteDuration minBackoff =
+                Duration.create(datastoreContext.getPersistentActorRestartMinBackoffInSeconds(), TimeUnit.SECONDS);
+        final FiniteDuration maxBackoff =
+                Duration.create(datastoreContext.getPersistentActorRestartMaxBackoffInSeconds(), TimeUnit.SECONDS);
+        final FiniteDuration resetBackoff =
+                Duration.create(datastoreContext.getPersistentActorRestartResetBackoffInSeconds(), TimeUnit.SECONDS);
 
         for (int i = 0; i < MAX_ACTOR_CREATION_RETRIES; i++) {
             try {
-                return actorSystem.actorOf(creator.props(), shardDataTreeActorId);
+                return BackoffSupervisorUtils.createBackoffSupervisor(actorSystem, minBackoff, maxBackoff, resetBackoff,
+                        shardDataTreeActorId, null, null, creator.props(true));
             } catch (final Exception e) {
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(ACTOR_RETRY_DELAY, ACTOR_RETRY_TIME_UNIT);

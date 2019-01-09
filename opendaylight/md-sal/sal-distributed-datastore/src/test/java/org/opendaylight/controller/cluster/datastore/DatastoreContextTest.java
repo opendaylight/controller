@@ -17,6 +17,9 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_MAX_MESSAGE_SLICE_SIZE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_MS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
@@ -73,6 +76,12 @@ public class DatastoreContextTest {
         assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE,
                 context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
         assertEquals(DEFAULT_MAX_MESSAGE_SLICE_SIZE, context.getMaximumMessageSliceSize());
+        assertEquals(DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS,
+                context.getPersistentActorRestartMinBackoffInSeconds());
+        assertEquals(DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS,
+                context.getPersistentActorRestartMaxBackoffInSeconds());
+        assertEquals(DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS,
+                context.getPersistentActorRestartResetBackoffInSeconds());
     }
 
     @Test
@@ -110,6 +119,10 @@ public class DatastoreContextTest {
                 InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE + 1);
         builder.maximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE + 1);
         builder.initialPayloadSerializedBufferCapacity(DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY + 1);
+        builder.persistentActorRestartMinBackoffInSeconds(DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS + 1);
+        builder.persistentActorRestartMaxBackoffInSeconds(DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS + 1);
+        builder.persistentActorRestartResetBackoffInSeconds(
+                DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS + 1);
 
         DatastoreContext context = builder.build();
 
@@ -165,5 +178,11 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_MAX_MESSAGE_SLICE_SIZE + 1, context.getMaximumMessageSliceSize());
         assertEquals(DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY + 1,
                 context.getInitialPayloadSerializedBufferCapacity());
+        assertEquals(DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS + 1,
+                context.getPersistentActorRestartMinBackoffInSeconds());
+        assertEquals(DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS + 1,
+                context.getPersistentActorRestartMaxBackoffInSeconds());
+        assertEquals(DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS + 1,
+                context.getPersistentActorRestartResetBackoffInSeconds());
     }
 }

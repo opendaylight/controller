@@ -133,4 +133,19 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     public int getMaximumMessageSliceSize() {
         return context.getMaximumMessageSliceSize();
     }
+
+    @Override
+    public int getPersistentActorRestartMinBackoffInSeconds() {
+        return context.getPersistentActorRestartMinBackoffInSeconds();
+    }
+
+    @Override
+    public int getPersistentActorRestartMaxBackoffInSeconds() {
+        return context.getPersistentActorRestartMaxBackoffInSeconds();
+    }
+
+    @Override
+    public int getPersistentActorRestartResetBackoffInSeconds() {
+        return context.getPersistentActorRestartResetBackoffInSeconds();
+    }
 }
