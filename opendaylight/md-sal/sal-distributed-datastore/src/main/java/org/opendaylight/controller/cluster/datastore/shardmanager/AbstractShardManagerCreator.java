@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import akka.actor.Props;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
@@ -26,6 +27,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
     private volatile boolean sealed;
+    private final AtomicBoolean backoffSupervised = new AtomicBoolean(false);
 
     AbstractShardManagerCreator() {
         // Prevent outside instantiation
@@ -120,8 +122,17 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         Preconditions.checkNotNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
 
+    boolean isBackoffSupervised() {
+        return backoffSupervised.get();
+    }
+
     public Props props() {
+        return props(false);
+    }
+
+    public Props props(final boolean newBackoffSupervised) {
         verify();
+        this.backoffSupervised.set(newBackoffSupervised);
         return Props.create(ShardManager.class, this);
     }
 }

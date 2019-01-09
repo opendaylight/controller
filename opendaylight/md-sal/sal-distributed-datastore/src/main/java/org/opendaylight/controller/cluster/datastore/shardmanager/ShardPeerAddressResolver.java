@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.common.actor.BackoffSupervisorUtils;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
@@ -75,8 +76,9 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
     String getShardActorAddress(String shardName, MemberName memberName) {
         Address memberAddress = memberNameToAddress.get(memberName);
         if (memberAddress != null) {
-            return getShardManagerActorPathBuilder(memberAddress).append("/").append(
-                    getShardIdentifier(memberName, shardName)).toString();
+            return getShardManagerActorPathBuilder(memberAddress).append("/")
+                    .append(BackoffSupervisorUtils.getChildActorName(shardManagerIdentifier)).append("/")
+                    .append(getShardIdentifier(memberName, shardName)).toString();
         }
 
         return null;

@@ -84,6 +84,14 @@ final class ShardInformation {
         return props;
     }
 
+    Props newProps(final boolean backoffSupervised) {
+        Preconditions.checkNotNull(builder);
+        Props props = builder.id(shardId).peerAddresses(initialPeerAddresses).datastoreContext(datastoreContext)
+                .schemaContextProvider(schemaContextProvider).backoffSupervised(backoffSupervised).props();
+        builder = null;
+        return props;
+    }
+
     String getShardName() {
         return shardName;
     }

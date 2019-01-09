@@ -27,7 +27,12 @@ public final class SimpleDataStoreClientActor extends AbstractDataStoreClientAct
 
     private SimpleDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext,
             final String shardName) {
-        super(frontendId, actorContext);
+        this(frontendId, actorContext, shardName, false);
+    }
+
+    private SimpleDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext,
+            final String shardName, final boolean backoffSupervised) {
+        super(frontendId, actorContext, backoffSupervised);
         this.shardName = Preconditions.checkNotNull(shardName);
     }
 
@@ -38,9 +43,14 @@ public final class SimpleDataStoreClientActor extends AbstractDataStoreClientAct
 
     public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
             final ActorContext ctx, final String shardName) {
+        return props(memberName, storeName, ctx, shardName, false);
+    }
+
+    public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
+            final ActorContext ctx, final String shardName, final boolean backoffSupervised) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
         return Props.create(SimpleDataStoreClientActor.class,
-            () -> new SimpleDataStoreClientActor(frontendId, ctx, shardName));
+            () -> new SimpleDataStoreClientActor(frontendId, ctx, shardName, backoffSupervised));
     }
 }
