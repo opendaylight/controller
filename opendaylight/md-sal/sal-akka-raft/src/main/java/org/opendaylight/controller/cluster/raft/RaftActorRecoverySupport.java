@@ -248,10 +248,10 @@ class RaftActorRecoverySupport {
             recoveryTimer = null;
         }
 
-        log.info("Recovery completed {} - Switching actor to Follower - Persistence Id = {}"
-                 + " Last index in log = {}, snapshotIndex = {}, snapshotTerm = {}, journal-size = {}",
-                 recoveryTime, context.getId(), replicatedLog().lastIndex(), replicatedLog().getSnapshotIndex(),
-                 replicatedLog().getSnapshotTerm(), replicatedLog().size());
+        log.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
+                + "snapshot index = {}, snapshot term = {}, journal size = {}", context.getId(), recoveryTime,
+                replicatedLog().lastIndex(), replicatedLog().lastTerm(), replicatedLog().getSnapshotIndex(),
+                replicatedLog().getSnapshotTerm(), replicatedLog().size());
 
         if (dataRecoveredWithPersistenceDisabled
                 || hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable()) {
