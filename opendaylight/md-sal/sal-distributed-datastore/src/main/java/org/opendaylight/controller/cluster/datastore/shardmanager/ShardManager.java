@@ -51,6 +51,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
+import org.opendaylight.controller.cluster.common.actor.BackoffSupervisorUtils;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -122,6 +123,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -180,6 +182,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private PrefixedShardConfigUpdateHandler configUpdateHandler;
 
     ShardManager(final AbstractShardManagerCreator<?> builder) {
+        super(builder.isBackoffSupervised());
         this.cluster = builder.getCluster();
         this.configuration = builder.getConfiguration();
         this.datastoreContextFactory = builder.getDatastoreContextFactory();
@@ -221,6 +224,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             configListenerReg.close();
             configListenerReg = null;
         }
+
+        super.postStop();
     }
 
     @Override
@@ -1179,8 +1184,23 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @VisibleForTesting
     protected ActorRef newShardActor(final ShardInformation info) {
-        return getContext().actorOf(info.newProps().withDispatcher(shardDispatcherPath),
-                info.getShardId().toString());
+        final OneForOneStrategy supervisorStrategy =
+                new OneForOneStrategy(10, Duration.create("1 minute"), (Function<Throwable, Directive>) t -> {
+                    LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
+                    return SupervisorStrategy.resume();
+                });
+        final FiniteDuration minBackoff = Duration.create(
+                datastoreContextFactory.getBaseDatastoreContext().getPersistentActorRestartMinBackoffInSeconds(),
+                TimeUnit.SECONDS);
+        final FiniteDuration maxBackoff = Duration.create(
+                datastoreContextFactory.getBaseDatastoreContext().getPersistentActorRestartMaxBackoffInSeconds(),
+                TimeUnit.SECONDS);
+        final FiniteDuration resetBackoff = Duration.create(
+                datastoreContextFactory.getBaseDatastoreContext().getPersistentActorRestartResetBackoffInSeconds(),
+                TimeUnit.SECONDS);
+        return BackoffSupervisorUtils.createBackoffSupervisor(getContext(), minBackoff, maxBackoff, resetBackoff,
+                info.getShardId().toString(), supervisorStrategy, null,
+                info.newProps(self(), isBackoffSupervised()).withDispatcher(shardDispatcherPath));
     }
 
     private void findPrimary(final FindPrimary message) {
@@ -1291,9 +1311,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{}: Creating local shard: {}", persistenceId(), shardId);
 
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
-            localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses,
-                    newShardDatastoreContext(shardName), Shard.builder().restoreFromSnapshot(
-                        shardSnapshots.get(shardName)), peerAddressResolver));
+            localShards.put(shardName,
+                    new ShardInformation(shardName, shardId, peerAddresses, newShardDatastoreContext(shardName),
+                            Shard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)).backoffSupervised(true),
+                            peerAddressResolver));
         }
     }
 
@@ -1319,16 +1340,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
         return peerAddresses;
-    }
-
-    @Override
-    public SupervisorStrategy supervisorStrategy() {
-
-        return new OneForOneStrategy(10, FiniteDuration.create(1, TimeUnit.MINUTES),
-                (Function<Throwable, Directive>) t -> {
-                    LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
-                    return SupervisorStrategy.resume();
-                });
     }
 
     @Override
