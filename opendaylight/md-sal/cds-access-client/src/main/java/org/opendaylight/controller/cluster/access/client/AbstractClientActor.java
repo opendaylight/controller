@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
-import akka.persistence.AbstractPersistentActor;
 import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.common.actor.AbstractActorWithPersistenceFailureTracking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +21,21 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public abstract class AbstractClientActor extends AbstractPersistentActor {
+public abstract class AbstractClientActor extends AbstractActorWithPersistenceFailureTracking {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
     private AbstractClientActorBehavior<?> currentBehavior;
+    private volatile String persistenceId;
 
-    protected AbstractClientActor(final FrontendIdentifier frontendId) {
+    protected AbstractClientActor(final FrontendIdentifier frontendId, final boolean backoffSupervised) {
+        super(backoffSupervised);
         currentBehavior = new RecoveringClientActorBehavior(
                 new InitialClientActorContext(this, frontendId.toPersistentId()), frontendId);
+        persistenceId = currentBehavior.persistenceId();
     }
 
     @Override
     public final String persistenceId() {
-        return currentBehavior.persistenceId();
+        return persistenceId;
     }
 
     @Override
@@ -51,6 +54,7 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
                 self().tell(PoisonPill.getInstance(), ActorRef.noSender());
             } else {
                 LOG.debug("{}: switched from {} to {}", persistenceId(), currentBehavior, nextBehavior);
+                persistenceId = nextBehavior.persistenceId();
             }
 
             currentBehavior.close();
