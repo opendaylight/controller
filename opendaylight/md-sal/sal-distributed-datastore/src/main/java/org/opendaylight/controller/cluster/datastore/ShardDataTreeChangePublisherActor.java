@@ -36,6 +36,8 @@ public final class ShardDataTreeChangePublisherActor
             if (reg.initialState.isPresent()) {
                 DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
                         reg.initialState.get(), logContext());
+            } else {
+                reg.listener.onInitialData();
             }
 
             publisher().registerTreeChangeListener(reg.path, reg.listener, Optional.absent(), reg.onRegistration);
