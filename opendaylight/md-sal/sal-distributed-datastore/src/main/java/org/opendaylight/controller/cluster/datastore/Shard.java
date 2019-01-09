@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -259,6 +260,8 @@ public class Shard extends RaftActor {
         listenerInfoMXBean = new ShardDataTreeListenerInfoMXBeanImpl(name, datastoreContext.getDataStoreMXBeanType(),
                 self());
         listenerInfoMXBean.register();
+
+        backoffSupervised.set(builder.isBackoffSupervised());
     }
 
     private void setTransactionCommitTimeout() {
@@ -349,13 +352,13 @@ public class Shard extends RaftActor {
                 roleChangeNotifier.get().forward(message, context());
             } else if (message instanceof FollowerInitialSyncUpStatus) {
                 shardMBean.setFollowerInitialSyncStatus(((FollowerInitialSyncUpStatus) message).isInitialSyncDone());
-                context().parent().tell(message, self());
+                tellParent(message);
             } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
                 sender().tell(getShardMBean(), self());
             } else if (message instanceof GetShardDataTree) {
                 sender().tell(store.getDataTree(), self());
             } else if (message instanceof ServerRemoved) {
-                context().parent().forward(message, context());
+                forwardToParent(message);
             } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
             } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand) {
@@ -372,6 +375,22 @@ public class Shard extends RaftActor {
             } else if (!responseMessageSlicer.handleMessage(message)) {
                 super.handleNonRaftCommand(message);
             }
+        }
+    }
+
+    private void tellParent(final Object message) {
+        if (!backoffSupervised.get()) {
+            context().parent().tell(message, self());
+        } else {
+            context().actorSelection("../..").tell(message, context().parent());
+        }
+    }
+
+    private void forwardToParent(final Object message) {
+        if (!backoffSupervised.get()) {
+            context().parent().forward(message, context());
+        } else {
+            context().actorSelection("../..").forward(message, context());
         }
     }
 
@@ -858,7 +877,7 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = null;
 
         //notify shard manager
-        getContext().parent().tell(new ActorInitialized(), getSelf());
+        tellParent(new ActorInitialized());
 
         // Being paranoid here - this method should only be called once but just in case...
         if (txCommitTimeoutCheckSchedule == null) {
@@ -1032,6 +1051,7 @@ public class Shard extends RaftActor {
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private DataTree dataTree;
         private volatile boolean sealed;
+        private final AtomicBoolean backoffSupervised = new AtomicBoolean(false);
 
         protected AbstractBuilder(final Class<S> shardClass) {
             this.shardClass = shardClass;
@@ -1082,6 +1102,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T backoffSupervised(final boolean newBackoffSupervised) {
+            checkSealed();
+            this.backoffSupervised.set(newBackoffSupervised);
+            return self();
+        }
+
         public ShardIdentifier getId() {
             return id;
         }
@@ -1116,6 +1142,10 @@ public class Shard extends RaftActor {
                     throw new IllegalStateException("Unhandled logical store type "
                             + datastoreContext.getLogicalStoreType());
             }
+        }
+
+        public boolean isBackoffSupervised() {
+            return backoffSupervised.get();
         }
 
         protected void verify() {

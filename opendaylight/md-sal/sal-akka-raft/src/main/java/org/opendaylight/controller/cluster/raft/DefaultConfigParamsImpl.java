@@ -39,6 +39,13 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private static final int SNAPSHOT_CHUNK_SIZE = 2048 * 1000; //2MB
 
+    /*
+     * Interval settings, in seconds, associated with back-off supervisor for
+     * persistent actors.
+     */
+    private static final int PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS = 10;
+    private static final int PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS = 300;
+    private static final int PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS = 60;
 
     /**
      * The interval at which a heart beat message will be sent to the remote
@@ -75,6 +82,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int fileBackedStreamingThreshold = 128 * MEGABYTE;
 
     private long syncIndexThreshold = 10;
+
+    private int persistentActorRestartMinBackoffInSeconds = PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS;
+    private int persistentActorRestartMaxBackoffInSeconds = PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS;
+    private int persistentActorRestartResetBackoffInSeconds = PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS;
 
     public void setHeartBeatInterval(final FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -116,6 +127,18 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setCustomRaftPolicyImplementationClass(final String customRaftPolicyImplementationClass) {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
+    }
+
+    public void setPersistentActorRestartMinBackoffInSeconds(final int persistentActorMinBackoffInSeconds) {
+        this.persistentActorRestartMinBackoffInSeconds = persistentActorMinBackoffInSeconds;
+    }
+
+    public void setPersistentActorRestartMaxBackoffInSeconds(final int persistentActorMaxBackoffInSeconds) {
+        this.persistentActorRestartMaxBackoffInSeconds = persistentActorMaxBackoffInSeconds;
+    }
+
+    public void setPersistentActorRestartResetBackoffInSeconds(final int persistentActorResetBackoffInSeconds) {
+        this.persistentActorRestartResetBackoffInSeconds = persistentActorResetBackoffInSeconds;
     }
 
     @Override
@@ -206,6 +229,18 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setSyncIndexThreshold(final long syncIndexThreshold) {
         checkArgument(syncIndexThreshold >= 0);
         this.syncIndexThreshold = syncIndexThreshold;
+    }
+
+    public int getPersistentActorRestartMinBackoffInSeconds() {
+        return persistentActorRestartMinBackoffInSeconds;
+    }
+
+    public int getPersistentActorRestartMaxBackoffInSeconds() {
+        return persistentActorRestartMaxBackoffInSeconds;
+    }
+
+    public int getPersistentActorRestartResetBackoffInSeconds() {
+        return persistentActorRestartResetBackoffInSeconds;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")

@@ -23,7 +23,12 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
  */
 public final class DistributedDataStoreClientActor extends AbstractDataStoreClientActor {
     private DistributedDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext) {
-        super(frontendId, actorContext);
+        this(frontendId, actorContext, false);
+    }
+
+    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext,
+            final boolean backoffSupervised) {
+        super(frontendId, actorContext, backoffSupervised);
     }
 
     @Override
@@ -33,9 +38,14 @@ public final class DistributedDataStoreClientActor extends AbstractDataStoreClie
 
     public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
             final ActorContext ctx) {
+        return props(memberName, storeName, ctx, false);
+    }
+
+    public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
+            final ActorContext ctx, final boolean backoffSupervised) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
         return Props.create(DistributedDataStoreClientActor.class,
-            () -> new DistributedDataStoreClientActor(frontendId, ctx));
+            () -> new DistributedDataStoreClientActor(frontendId, ctx, backoffSupervised));
     }
 }

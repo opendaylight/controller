@@ -60,8 +60,10 @@ public class DatastoreContext implements ClientActorConfig {
             TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_MAX_MESSAGE_SLICE_SIZE = 2048 * 1000; // 2MB
     public static final int DEFAULT_INITIAL_PAYLOAD_SERIALIZED_BUFFER_CAPACITY = 512;
-
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
+    public static final int DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS = 10;
+    public static final int DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS = 300;
+    public static final int DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS = 60;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContext.class);
 
@@ -108,6 +110,9 @@ public class DatastoreContext implements ClientActorConfig {
         setElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
         setMaximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE);
+        setPersistentActorRestartMinBackoffInSeconds(DEFAULT_PERSISTENT_ACTOR_RESTART_MIN_BACKOFF_IN_SECONDS);
+        setPersistentActorRestartMaxBackoffInSeconds(DEFAULT_PERSISTENT_ACTOR_RESTART_MAX_BACKOFF_IN_SECONDS);
+        setPersistentActorRestartResetBackoffInSeconds(DEFAULT_PERSISTENT_ACTOR_RESTART_RESET_BACKOFF_IN_SECONDS);
     }
 
     private DatastoreContext(final DatastoreContext other) {
@@ -149,6 +154,10 @@ public class DatastoreContext implements ClientActorConfig {
         setTempFileDirectory(other.getTempFileDirectory());
         setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
         setSyncIndexThreshold(other.raftConfig.getSyncIndexThreshold());
+        setPersistentActorRestartMinBackoffInSeconds(other.raftConfig.getPersistentActorRestartMinBackoffInSeconds());
+        setPersistentActorRestartMaxBackoffInSeconds(other.raftConfig.getPersistentActorRestartMaxBackoffInSeconds());
+        setPersistentActorRestartResetBackoffInSeconds(
+                other.raftConfig.getPersistentActorRestartResetBackoffInSeconds());
     }
 
     public static Builder newBuilder() {
@@ -300,6 +309,18 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setSyncIndexThreshold(syncIndexThreshold);
     }
 
+    private void setPersistentActorRestartMinBackoffInSeconds(final int persistentActorRestartMinBackoffInSeconds) {
+        raftConfig.setPersistentActorRestartMinBackoffInSeconds(persistentActorRestartMinBackoffInSeconds);
+    }
+
+    private void setPersistentActorRestartMaxBackoffInSeconds(final int persistentActorRestartMaxBackoffInSeconds) {
+        raftConfig.setPersistentActorRestartMaxBackoffInSeconds(persistentActorRestartMaxBackoffInSeconds);
+    }
+
+    private void setPersistentActorRestartResetBackoffInSeconds(final int persistentActorRestartResetBackoffInSeconds) {
+        raftConfig.setPersistentActorRestartResetBackoffInSeconds(persistentActorRestartResetBackoffInSeconds);
+    }
+
     public int getShardBatchedModificationCount() {
         return shardBatchedModificationCount;
     }
@@ -342,6 +363,18 @@ public class DatastoreContext implements ClientActorConfig {
 
     public int getInitialPayloadSerializedBufferCapacity() {
         return initialPayloadSerializedBufferCapacity;
+    }
+
+    public int getPersistentActorRestartMinBackoffInSeconds() {
+        return raftConfig.getPersistentActorRestartMinBackoffInSeconds();
+    }
+
+    public int getPersistentActorRestartMaxBackoffInSeconds() {
+        return raftConfig.getPersistentActorRestartMaxBackoffInSeconds();
+    }
+
+    public int getPersistentActorRestartResetBackoffInSeconds() {
+        return raftConfig.getPersistentActorRestartResetBackoffInSeconds();
     }
 
     public static class Builder implements org.opendaylight.yangtools.concepts.Builder<DatastoreContext> {
@@ -622,6 +655,23 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder initialPayloadSerializedBufferCapacity(final int capacity) {
             datastoreContext.initialPayloadSerializedBufferCapacity = capacity;
+            return this;
+        }
+
+        public Builder persistentActorRestartMinBackoffInSeconds(final int persistentActorRestartMinBackoffInSeconds) {
+            datastoreContext.setPersistentActorRestartMinBackoffInSeconds(persistentActorRestartMinBackoffInSeconds);
+            return this;
+        }
+
+        public Builder persistentActorRestartMaxBackoffInSeconds(final int persistentActorRestartMaxBackoffInSeconds) {
+            datastoreContext.setPersistentActorRestartMaxBackoffInSeconds(persistentActorRestartMaxBackoffInSeconds);
+            return this;
+        }
+
+        public Builder persistentActorRestartResetBackoffInSeconds(
+                final int persistentActorRestartResetBackoffInSeconds) {
+            datastoreContext
+                    .setPersistentActorRestartResetBackoffInSeconds(persistentActorRestartResetBackoffInSeconds);
             return this;
         }
 
