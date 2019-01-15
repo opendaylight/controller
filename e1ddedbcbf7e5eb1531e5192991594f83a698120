@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fe9e9103_8cd57121",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/BackendInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-15T13:55:09Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "e0933b03_ee5b169a",
+      "range": {
+        "startLine": 48,
+        "startChar": 10,
+        "endLine": 48,
+        "endChar": 17
+      },
+      "revId": "e1ddedbcbf7e5eb1531e5192991594f83a698120",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c89e6c2_862bb0b7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "745688d1_5ce9aa97",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-15T13:55:09Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "4c89e6c2_862bb0b7",
+      "range": {
+        "startLine": 184,
+        "startChar": 15,
+        "endLine": 184,
+        "endChar": 29
+      },
+      "revId": "e1ddedbcbf7e5eb1531e5192991594f83a698120",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3599937_d1b263ea",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2019-01-12T21:40:54Z",
       "side": 1,
       "message": "I think this should be the second argument, the logic being\n we are mutating future with the data contained in message and response. Having future in the middle is counter-intuitive.",
+      "range": {
+        "startLine": 222,
+        "startChar": 32,
+        "endLine": 222,
+        "endChar": 53
+      },
+      "revId": "e1ddedbcbf7e5eb1531e5192991594f83a698120",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "32e13652_863f4e2f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-01-15T13:55:09Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "a3599937_d1b263ea",
       "range": {
         "startLine": 222,
         "startChar": 32,
