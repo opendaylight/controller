@@ -150,6 +150,18 @@ public class ShardTest extends AbstractShardTest {
         writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         listener.waitForChangeEvents();
+        listener.verifyOnInitialDataEvent();
+
+        final MockDataTreeChangeListener listener2 = new MockDataTreeChangeListener(1);
+        final ActorRef dclActor2 = actorFactory.createActor(DataTreeChangeListenerActor.props(listener2,
+            TestModel.TEST_PATH), "testRegisterDataTreeChangeListener-DataTreeChangeListener2");
+
+        shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor2, false), testKit.getRef());
+
+        testKit.expectMsgClass(Duration.ofSeconds(3), RegisterDataTreeNotificationListenerReply.class);
+
+        listener2.waitForChangeEvents();
+        listener2.verifyNoOnInitialDataEvent();
     }
 
     @SuppressWarnings("serial")

@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedRep
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeListenerInfo;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
+import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -39,6 +40,8 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     protected void handleReceive(final Object message) {
         if (message instanceof DataTreeChanged) {
             dataChanged((DataTreeChanged)message);
+        } else if (message instanceof OnInitialData) {
+            onInitialData();
         } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
         } else if (message instanceof GetInfo) {
@@ -46,6 +49,17 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
                     notificationsEnabled, notificationCount), getSelf());
         } else {
             unknownMessage(message);
+        }
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void onInitialData() {
+        LOG.debug("{}: Notifying onInitialData to listener {}", logContext, listener);
+
+        try {
+            this.listener.onInitialData();
+        } catch (Exception e) {
+            LOG.error("{}: Error notifying listener {}", logContext, this.listener, e);
         }
     }
 
