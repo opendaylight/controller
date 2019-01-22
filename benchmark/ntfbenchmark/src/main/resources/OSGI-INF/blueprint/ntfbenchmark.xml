@@ -10,8 +10,8 @@
            xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
            odl:use-default-for-reference-types="true">
 
-  <reference id="publishService" interface="org.opendaylight.mdsal.binding.api.NotificationPublishService"/>
-  <reference id="listenerService" interface="org.opendaylight.mdsal.binding.api.NotificationService"/>
+  <reference id="publishService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService"/>
+  <reference id="listenerService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationService"/>
 
   <bean id="provider" class="ntfbenchmark.impl.NtfbenchmarkProvider"
           init-method="init" destroy-method="close">

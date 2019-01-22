@@ -173,6 +173,7 @@
     <argument ref="listenableFutureExecutor"/>
     <argument value="CommitFutureExecutorStats"/>
     <argument value="DOMDataBroker"/>
+    <argument><null/></argument>
   </bean>
 
   <!-- Distributed EntityOwnershipService -->
