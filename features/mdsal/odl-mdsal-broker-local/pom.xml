@@ -143,12 +143,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sal-inmemory-datastore</artifactId>
         </dependency>
-        <dependency>
-            <!-- TODO start-level="40" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>blueprint</artifactId>
-            <version>0.10.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
 </project>
