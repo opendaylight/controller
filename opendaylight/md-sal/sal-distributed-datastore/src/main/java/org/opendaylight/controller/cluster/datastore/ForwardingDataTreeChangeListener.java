@@ -12,6 +12,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
+import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
@@ -35,6 +36,12 @@ final class ForwardingDataTreeChangeListener implements DOMDataTreeChangeListene
     public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
         LOG.debug("Sending DataTreeChanged to {}", actor);
         actor.tell(new DataTreeChanged(changes), ActorRef.noSender());
+    }
+
+    @Override
+    public void onInitialData() {
+        LOG.debug("Sending OnInitialData to {}", actor);
+        actor.tell(OnInitialData.INSTANCE, ActorRef.noSender());
     }
 
     @Override

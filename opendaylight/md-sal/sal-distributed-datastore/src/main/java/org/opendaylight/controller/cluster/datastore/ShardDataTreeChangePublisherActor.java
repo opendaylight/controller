@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @author Thomas Pantelis
  */
 public final class ShardDataTreeChangePublisherActor
-        extends ShardDataTreeNotificationPublisherActor<ShardDataTreeChangeListenerPublisher> {
+        extends ShardDataTreeNotificationPublisherActor<DefaultShardDataTreeChangeListenerPublisher> {
 
     private ShardDataTreeChangePublisherActor(final String name, final String logContext) {
         super(new DefaultShardDataTreeChangeListenerPublisher(logContext), name, logContext);
@@ -36,9 +36,11 @@ public final class ShardDataTreeChangePublisherActor
             if (reg.initialState.isPresent()) {
                 DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
                         reg.initialState.get(), logContext());
+            } else {
+                reg.listener.onInitialData();
             }
 
-            publisher().registerTreeChangeListener(reg.path, reg.listener, Optional.absent(), reg.onRegistration);
+            publisher().registerTreeChangeListener(reg.path, reg.listener, reg.onRegistration);
         } else {
             super.handleReceive(message);
         }

@@ -63,16 +63,23 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     public void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
             Optional<DataTreeCandidate> initialState,
             Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
+        registerTreeChangeListener(treeId, listener, onRegistration);
+
+        if (initialState.isPresent()) {
+            notifySingleListener(treeId, listener, initialState.get(), logContext);
+        } else {
+            listener.onInitialData();
+        }
+    }
+
+    void registerTreeChangeListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
+            Consumer<ListenerRegistration<DOMDataTreeChangeListener>> onRegistration) {
         LOG.debug("{}: registerTreeChangeListener: path: {}, listener: {}", logContext, treeId, listener);
 
         AbstractDOMDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> registration =
                 super.registerTreeChangeListener(treeId, listener);
 
         onRegistration.accept(registration);
-
-        if (initialState.isPresent()) {
-            notifySingleListener(treeId, listener, initialState.get(), logContext);
-        }
     }
 
     static void notifySingleListener(YangInstanceIdentifier treeId, DOMDataTreeChangeListener listener,
@@ -81,7 +88,10 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
         DefaultShardDataTreeChangeListenerPublisher publisher =
                 new DefaultShardDataTreeChangeListenerPublisher(logContext);
         publisher.logContext = logContext;
-        publisher.registerTreeChangeListener(treeId, listener, Optional.absent(), noop -> { /* NOOP */ });
-        publisher.publishChanges(state);
+        publisher.registerTreeChangeListener(treeId, listener);
+
+        if (!publisher.processCandidateTree(state)) {
+            listener.onInitialData();
+        }
     }
 }

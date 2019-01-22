@@ -625,6 +625,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     Optional<DataTreeCandidate> readCurrentData() {
         final java.util.Optional<NormalizedNode<?, ?>> currentState =
                 dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
+
         return currentState.isPresent() ? Optional.of(DataTreeCandidates.fromNormalizedNode(
             YangInstanceIdentifier.EMPTY, currentState.get())) : Optional.<DataTreeCandidate>absent();
     }
