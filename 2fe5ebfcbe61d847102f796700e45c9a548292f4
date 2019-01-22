@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13063a69_367eb81e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/OnInitialData.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-01-22T15:00:59Z",
+      "side": 1,
+      "message": "This needs to be serializable for ClusteredDataTreeChangeListener, does it not?",
+      "range": {
+        "startLine": 15,
+        "startChar": 19,
+        "endLine": 15,
+        "endChar": 32
+      },
+      "revId": "2fe5ebfcbe61d847102f796700e45c9a548292f4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
