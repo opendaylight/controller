@@ -24,3 +24,4 @@
   <service ref="eventSourceTopology"
           interface="org.opendaylight.controller.messagebus.spi.EventSourceRegistry"/>
 </blueprint>
+

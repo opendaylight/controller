@@ -17,6 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable {
 
+    static AutoCloseableEventExecutor globalEventExecutor() {
+        return CloseableEventExecutorMixin.createCloseableProxy(GlobalEventExecutor.INSTANCE);
+    }
+
+    static AutoCloseableEventExecutor immediateEventExecutor() {
+        return CloseableEventExecutorMixin.createCloseableProxy(ImmediateEventExecutor.INSTANCE);
+    }
 
     class CloseableEventExecutorMixin implements AutoCloseable {
         public static final int DEFAULT_SHUTDOWN_SECONDS = 1;
@@ -32,36 +39,18 @@ public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable
         }
 
 
-        private static AutoCloseableEventExecutor createCloseableProxy(
-                final CloseableEventExecutorMixin closeableEventExecutorMixin) {
+        private static AutoCloseableEventExecutor createCloseableProxy(final EventExecutor eventExecutor) {
+            final CloseableEventExecutorMixin closeableEventExecutor = new CloseableEventExecutorMixin(eventExecutor);
             return Reflection.newProxy(AutoCloseableEventExecutor.class, new AbstractInvocationHandler() {
                 @Override
-                protected Object handleInvocation(final Object proxy, final Method method, final Object[] args) throws Throwable {
+                protected Object handleInvocation(final Object proxy, final Method method, final Object[] args)
+                        throws Throwable {
                     if (method.getName().equals("close")) {
-                        closeableEventExecutorMixin.close();
+                        closeableEventExecutor.close();
                         return null;
                     } else {
-                        return method.invoke(closeableEventExecutorMixin.eventExecutor, args);
+                        return method.invoke(closeableEventExecutor.eventExecutor, args);
                     }
-                }
-            });
-        }
-
-        public static AutoCloseableEventExecutor globalEventExecutor() {
-            return createCloseableProxy(new CloseableEventExecutorMixin(GlobalEventExecutor.INSTANCE));
-        }
-
-        public static AutoCloseableEventExecutor immediateEventExecutor() {
-            return createCloseableProxy(new CloseableEventExecutorMixin(ImmediateEventExecutor.INSTANCE));
-        }
-
-        public static AutoCloseableEventExecutor forwardingEventExecutor(final EventExecutor eventExecutor,
-                final AutoCloseable closeable) {
-            return createCloseableProxy(new CloseableEventExecutorMixin(eventExecutor) {
-                @Override
-                public void close() throws Exception {
-                    // Intentional no-op.
-                    closeable.close();
                 }
             });
         }
