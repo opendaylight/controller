@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -32,6 +34,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     private final List<DataTreeCandidate> changeList = new ArrayList<>();
+
+    private final CountDownLatch onInitialDataLatch = new CountDownLatch(1);
+    private final AtomicInteger onInitialDataEventCount = new AtomicInteger();
 
     private volatile CountDownLatch changeLatch;
     private int expChangeEventCount;
@@ -56,6 +61,23 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
             }
             changeLatch.countDown();
         }
+    }
+
+    @Override
+    public void onInitialData() {
+        onInitialDataEventCount.incrementAndGet();
+        onInitialDataLatch.countDown();
+    }
+
+    public void verifyOnInitialDataEvent() {
+        assertTrue("onInitialData was not triggered",
+                Uninterruptibles.awaitUninterruptibly(onInitialDataLatch, 5, TimeUnit.SECONDS));
+        assertEquals("onInitialDataEventCount", 1, onInitialDataEventCount.get());
+    }
+
+    public void verifyNoOnInitialDataEvent() {
+        assertFalse("onInitialData was triggered unexpectedly",
+                Uninterruptibles.awaitUninterruptibly(onInitialDataLatch, 500, TimeUnit.MILLISECONDS));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
