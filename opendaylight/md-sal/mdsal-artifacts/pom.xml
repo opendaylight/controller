@@ -208,6 +208,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-akka-segmented-journal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
                 <artifactId>cds-access-api</artifactId>
                 <version>1.5.1-SNAPSHOT</version>
             </dependency>
