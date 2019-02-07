@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Exception indicating that no implementation of the requested RPC service is available.
@@ -16,13 +17,13 @@ import javax.annotation.Nonnull;
 public class DOMRpcImplementationNotAvailableException extends DOMRpcException {
     private static final long serialVersionUID = 1L;
 
-    public DOMRpcImplementationNotAvailableException(@Nonnull final String format, final Object... args) {
+    public DOMRpcImplementationNotAvailableException(final @NonNull String format, final Object... args) {
         super(String.format(format, args));
     }
 
-    public DOMRpcImplementationNotAvailableException(@Nonnull final Throwable cause, @Nonnull final String format,
+    public DOMRpcImplementationNotAvailableException(final @NonNull Throwable cause, final @NonNull String format,
             final Object... args) {
-        super(String.format(format, args), Preconditions.checkNotNull(cause));
+        super(String.format(format, args), requireNonNull(cause));
     }
 
     public DOMRpcImplementationNotAvailableException(final String message, final Throwable cause) {

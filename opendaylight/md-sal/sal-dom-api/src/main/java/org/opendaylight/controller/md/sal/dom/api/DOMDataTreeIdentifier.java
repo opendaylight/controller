@@ -5,14 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.api;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.util.Iterator;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.Path;
@@ -26,13 +26,13 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 public final class DOMDataTreeIdentifier implements Immutable,
         Path<DOMDataTreeIdentifier>, Serializable, Comparable<DOMDataTreeIdentifier> {
     private static final long serialVersionUID = 1L;
-    private final YangInstanceIdentifier rootIdentifier;
-    private final LogicalDatastoreType datastoreType;
+    private final @NonNull YangInstanceIdentifier rootIdentifier;
+    private final @NonNull LogicalDatastoreType datastoreType;
 
     public DOMDataTreeIdentifier(final LogicalDatastoreType datastoreType,
             final YangInstanceIdentifier rootIdentifier) {
-        this.datastoreType = Preconditions.checkNotNull(datastoreType);
-        this.rootIdentifier = Preconditions.checkNotNull(rootIdentifier);
+        this.datastoreType = requireNonNull(datastoreType);
+        this.rootIdentifier = requireNonNull(rootIdentifier);
     }
 
     /**
@@ -59,7 +59,7 @@ public final class DOMDataTreeIdentifier implements Immutable,
      *
      * @return Logical data store type. Guaranteed to be non-null.
      */
-    public @Nonnull LogicalDatastoreType getDatastoreType() {
+    public @NonNull LogicalDatastoreType getDatastoreType() {
         return datastoreType;
     }
 
@@ -68,7 +68,7 @@ public final class DOMDataTreeIdentifier implements Immutable,
      *
      * @return Instance identifier corresponding to the root node.
      */
-    public @Nonnull YangInstanceIdentifier getRootIdentifier() {
+    public @NonNull YangInstanceIdentifier getRootIdentifier() {
         return rootIdentifier;
     }
 

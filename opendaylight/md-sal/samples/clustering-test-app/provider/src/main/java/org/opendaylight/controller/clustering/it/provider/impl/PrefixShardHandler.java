@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ID;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
@@ -97,7 +95,7 @@ public class PrefixShardHandler {
                 final ListenableFuture<?> ensureFuture = ensureListExists();
                 Futures.addCallback(ensureFuture, new FutureCallback<Object>() {
                     @Override
-                    public void onSuccess(@Nullable final Object result) {
+                    public void onSuccess(final Object result) {
                         LOG.debug("Initial list write successful.");
                         future.set(RpcResultBuilder.success(new CreatePrefixShardOutputBuilder().build()).build());
                     }
@@ -193,7 +191,7 @@ public class PrefixShardHandler {
         final ListenableFuture<?> future = tx.commit();
         Futures.addCallback(future, new FutureCallback<Object>() {
             @Override
-            public void onSuccess(@Nullable final Object result) {
+            public void onSuccess(final Object result) {
                 try {
                     LOG.debug("Closing producer for initial list.");
                     producer.close();

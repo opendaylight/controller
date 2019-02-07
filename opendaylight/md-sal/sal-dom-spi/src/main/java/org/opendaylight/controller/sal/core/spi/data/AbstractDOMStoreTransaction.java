@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Abstract DOM Store Transaction.
@@ -29,14 +30,14 @@ import javax.annotation.Nullable;
 @Beta
 public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransaction {
     private final Throwable debugContext;
-    private final T identifier;
+    private final @NonNull T identifier;
 
-    protected AbstractDOMStoreTransaction(@Nonnull final T identifier) {
+    protected AbstractDOMStoreTransaction(final @NonNull T identifier) {
         this(identifier, false);
     }
 
-    protected AbstractDOMStoreTransaction(@Nonnull final T identifier, final boolean debug) {
-        this.identifier = Preconditions.checkNotNull(identifier, "Identifier must not be null.");
+    protected AbstractDOMStoreTransaction(final @NonNull T identifier, final boolean debug) {
+        this.identifier = requireNonNull(identifier, "Identifier must not be null.");
         this.debugContext = debug ? new Throwable().fillInStackTrace() : null;
     }
 
@@ -48,11 +49,9 @@ public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransact
     /**
      * Return the context in which this transaction was allocated.
      *
-     * @return The context in which this transaction was allocated, or null
-     *         if the context was not recorded.
+     * @return The context in which this transaction was allocated, or null if the context was not recorded.
      */
-    @Nullable
-    public final Throwable getDebugContext() {
+    public final @Nullable Throwable getDebugContext() {
         return debugContext;
     }
 
@@ -68,7 +67,7 @@ public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransact
      *            ToStringHelper instance
      * @return ToStringHelper instance which was passed in
      */
-    protected ToStringHelper addToStringAttributes(@Nonnull final ToStringHelper toStringHelper) {
+    protected ToStringHelper addToStringAttributes(final @NonNull ToStringHelper toStringHelper) {
         return toStringHelper.add("id", identifier);
     }
 }

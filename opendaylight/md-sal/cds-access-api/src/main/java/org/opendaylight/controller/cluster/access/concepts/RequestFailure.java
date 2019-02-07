@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -26,16 +27,17 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>>
         extends Response<T, C> {
     private static final long serialVersionUID = 1L;
-    private final RequestException cause;
 
-    protected RequestFailure(@Nonnull final C failure, @Nonnull final ABIVersion version) {
+    private final @NonNull RequestException cause;
+
+    protected RequestFailure(final @NonNull C failure, final @NonNull ABIVersion version) {
         super(failure, version);
-        this.cause = Preconditions.checkNotNull(failure.getCause());
+        this.cause = requireNonNull(failure.getCause());
     }
 
-    protected RequestFailure(@Nonnull final T target, final long sequence, @Nonnull final RequestException cause) {
+    protected RequestFailure(final @NonNull T target, final long sequence, final @NonNull RequestException cause) {
         super(target, sequence);
-        this.cause = Preconditions.checkNotNull(cause);
+        this.cause = requireNonNull(cause);
     }
 
     /**
@@ -43,8 +45,7 @@ public abstract class RequestFailure<T extends WritableIdentifier, C extends Req
      *
      * @return Failure cause.
      */
-    @Nonnull
-    public final RequestException getCause() {
+    public final @NonNull RequestException getCause() {
         return cause;
     }
 
@@ -64,5 +65,5 @@ public abstract class RequestFailure<T extends WritableIdentifier, C extends Req
     }
 
     @Override
-    protected abstract AbstractRequestFailureProxy<T, C> externalizableProxy(@Nonnull ABIVersion version);
+    protected abstract AbstractRequestFailureProxy<T, C> externalizableProxy(ABIVersion version);
 }

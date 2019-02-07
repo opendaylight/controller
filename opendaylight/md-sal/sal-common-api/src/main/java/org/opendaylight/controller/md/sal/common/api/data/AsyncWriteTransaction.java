@@ -11,7 +11,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import javax.annotation.CheckReturnValue;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.MappingCheckedFuture;
 import org.opendaylight.mdsal.common.api.CommitInfo;
@@ -339,7 +338,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * @deprecated Use {@link #commit()} instead.
      */
     @Deprecated
-    @CheckReturnValue
     default CheckedFuture<Void, TransactionCommitFailedException> submit() {
         return MappingCheckedFuture.create(commit().transform(ignored -> null, MoreExecutors.directExecutor()),
                 SUBMIT_EXCEPTION_MAPPER);
@@ -374,7 +372,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      *         {@link TransactionCommitFailedException} or an exception derived from TransactionCommitFailedException.
      * @throws IllegalStateException if the transaction is already committed or was canceled.
      */
-    @CheckReturnValue
     @NonNull FluentFuture<? extends @NonNull CommitInfo> commit();
 
     /**

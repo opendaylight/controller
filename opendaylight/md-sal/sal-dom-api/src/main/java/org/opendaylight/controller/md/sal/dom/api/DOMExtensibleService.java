@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import com.google.common.annotations.Beta;
 import java.util.Map;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Marker interface for services which can support {@link DOMServiceExtension}.
@@ -28,5 +28,5 @@ public interface DOMExtensibleService<T extends DOMExtensibleService<T, E>,
      *
      * @return A map of supported functionality.
      */
-    @Nonnull Map<Class<? extends E>, E> getSupportedExtensions();
+    @NonNull Map<Class<? extends E>, E> getSupportedExtensions();
 }

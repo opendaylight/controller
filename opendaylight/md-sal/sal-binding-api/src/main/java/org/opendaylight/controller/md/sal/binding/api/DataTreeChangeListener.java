@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.binding.api;
 
 import java.util.Collection;
 import java.util.EventListener;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
@@ -44,5 +44,5 @@ public interface DataTreeChangeListener<T extends DataObject> extends EventListe
      *
      * @param changes Collection of change events, may not be null or empty.
      */
-    void onDataTreeChanged(@Nonnull Collection<DataTreeModification<T>> changes);
+    void onDataTreeChanged(@NonNull Collection<DataTreeModification<T>> changes);
 }

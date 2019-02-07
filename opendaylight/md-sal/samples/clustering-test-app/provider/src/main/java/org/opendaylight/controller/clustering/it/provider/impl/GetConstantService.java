@@ -5,13 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
@@ -56,10 +53,9 @@ public final class GetConstantService implements DOMRpcImplementation {
         return rpcProviderService.registerRpcImplementation(new GetConstantService(constant), id);
     }
 
-    @Nonnull
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final DOMRpcIdentifier rpc,
-                                                                  @Nullable final NormalizedNode<?, ?> input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc,
+                                                                  final NormalizedNode<?, ?> input) {
         LOG.debug("get-constant invoked, current value: {}", constant);
 
         final LeafNode<Object> value = ImmutableLeafNodeBuilder.create()

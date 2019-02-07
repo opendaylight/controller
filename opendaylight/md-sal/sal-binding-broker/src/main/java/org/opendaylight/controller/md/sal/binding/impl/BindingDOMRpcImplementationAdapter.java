@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
@@ -59,14 +59,13 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
             throw new IllegalArgumentException("Failed to create invokers for type " + type, e);
         }
 
-        this.codec = Preconditions.checkNotNull(codec);
-        this.delegate = Preconditions.checkNotNull(delegate);
+        this.codec = requireNonNull(codec);
+        this.delegate = requireNonNull(delegate);
         inputQname = QName.create(BindingReflections.getQNameModule(type), "input").intern();
     }
 
-    @Nonnull
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final DOMRpcIdentifier rpc,
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc,
             final NormalizedNode<?, ?> input) {
         final SchemaPath schemaPath = rpc.getType();
         final DataObject bindingInput = input != null ? deserialize(rpc.getType(), input) : null;

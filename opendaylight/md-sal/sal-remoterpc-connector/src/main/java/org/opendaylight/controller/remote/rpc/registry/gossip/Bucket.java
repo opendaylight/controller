@@ -9,12 +9,12 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.ActorRef;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 public interface Bucket<T extends BucketData<T>> {
     long getVersion();
 
-    @Nonnull T getData();
+    @NonNull T getData();
 
     default Optional<ActorRef> getWatchActor() {
         return getData().getWatchActor();

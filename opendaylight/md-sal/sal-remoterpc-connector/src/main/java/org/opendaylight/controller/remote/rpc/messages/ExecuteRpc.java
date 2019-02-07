@@ -7,16 +7,17 @@
  */
 package org.opendaylight.controller.remote.rpc.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -31,22 +32,20 @@ public final class ExecuteRpc implements Serializable {
     private final NormalizedNode<?, ?> inputNormalizedNode;
     private final QName rpc;
 
-    private ExecuteRpc(@Nullable final NormalizedNode<?, ?> inputNormalizedNode, @Nonnull final QName rpc) {
-        this.rpc = Preconditions.checkNotNull(rpc, "rpc Qname should not be null");
+    private ExecuteRpc(final @Nullable NormalizedNode<?, ?> inputNormalizedNode, final @NonNull QName rpc) {
+        this.rpc = requireNonNull(rpc, "rpc Qname should not be null");
         this.inputNormalizedNode = inputNormalizedNode;
     }
 
-    public static ExecuteRpc from(@Nonnull final DOMRpcIdentifier rpc, @Nullable final NormalizedNode<?, ?> input) {
+    public static ExecuteRpc from(final @NonNull DOMRpcIdentifier rpc, final @Nullable NormalizedNode<?, ?> input) {
         return new ExecuteRpc(input, rpc.getType().getLastComponent());
     }
 
-    @Nullable
-    public NormalizedNode<?, ?> getInputNormalizedNode() {
+    public @Nullable NormalizedNode<?, ?> getInputNormalizedNode() {
         return inputNormalizedNode;
     }
 
-    @Nonnull
-    public QName getRpc() {
+    public @NonNull QName getRpc() {
         return rpc;
     }
 

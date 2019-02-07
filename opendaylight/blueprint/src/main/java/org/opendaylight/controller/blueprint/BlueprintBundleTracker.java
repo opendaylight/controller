@@ -16,11 +16,11 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
 import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.framework.Bundle;
@@ -342,8 +342,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         return bundlesToDestroy;
     }
 
-    @Nullable
-    private Bundle findBundleWithHighestUsedServiceId(final Collection<Bundle> containerBundles) {
+    private @Nullable Bundle findBundleWithHighestUsedServiceId(final Collection<Bundle> containerBundles) {
         ServiceReference<?> highestServiceRef = null;
         for (Bundle bundle : containerBundles) {
             ServiceReference<?>[] references = bundle.getRegisteredServices();
