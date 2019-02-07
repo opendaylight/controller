@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import akka.dispatch.ControlMessage;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This interface is used to pass the unit of work via the actors mailbox. The command can alter behavior of the actor
@@ -25,5 +25,5 @@ public interface InternalCommand<T extends BackendInfo> extends ControlMessage {
      * @param currentBehavior Current Behavior
      * @return Next behavior to use in the client actor
      */
-    @Nullable ClientActorBehavior<T> execute(@Nonnull ClientActorBehavior<T> currentBehavior);
+    @Nullable ClientActorBehavior<T> execute(@NonNull ClientActorBehavior<T> currentBehavior);
 }

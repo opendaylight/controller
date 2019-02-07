@@ -5,15 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.util.concurrent.CountingRejectedExecutionHandler;
 import org.opendaylight.yangtools.util.concurrent.TrackingLinkedBlockingQueue;
 import org.slf4j.Logger;
@@ -39,9 +39,9 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
      * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
     public ThreadExecutorStatsMXBeanImpl(final ThreadPoolExecutor executor, final String beanName,
-            final String beanType, @Nullable final String beanCategory) {
+            final String beanType, final @Nullable String beanCategory) {
         super(beanName, beanType, beanCategory);
-        this.executor = Preconditions.checkNotNull(executor);
+        this.executor = requireNonNull(executor);
     }
 
     private static ThreadExecutorStatsMXBeanImpl createInternal(final Executor executor,
@@ -67,7 +67,7 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
      *         is a ThreadPoolExecutor, otherwise null.
      */
     public static ThreadExecutorStatsMXBeanImpl create(final Executor executor, final String beanName,
-            final String beanType, @Nullable final String beanCategory) {
+            final String beanType, final @Nullable String beanCategory) {
         ThreadExecutorStatsMXBeanImpl ret = createInternal(executor, beanName, beanType, beanCategory);
         if (ret != null) {
             ret.registerMBean();

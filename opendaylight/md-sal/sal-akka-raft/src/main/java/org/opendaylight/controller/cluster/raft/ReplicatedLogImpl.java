@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.japi.Procedure;
-import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
@@ -29,7 +28,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
             final List<ReplicatedLogEntry> unAppliedEntries,
             final RaftActorContext context) {
         super(snapshotIndex, snapshotTerm, unAppliedEntries, context.getId());
-        this.context = Preconditions.checkNotNull(context);
+        this.context = requireNonNull(context);
     }
 
     static ReplicatedLog newInstance(final Snapshot snapshot, final RaftActorContext context) {
@@ -93,8 +92,8 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public boolean appendAndPersist(@Nonnull final ReplicatedLogEntry replicatedLogEntry,
-            @Nullable final Procedure<ReplicatedLogEntry> callback, final boolean doAsync)  {
+    public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
+            final Procedure<ReplicatedLogEntry> callback, final boolean doAsync)  {
 
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 

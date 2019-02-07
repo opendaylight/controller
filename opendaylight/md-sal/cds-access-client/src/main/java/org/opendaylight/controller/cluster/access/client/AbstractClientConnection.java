@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Optional;
@@ -20,9 +21,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -77,7 +78,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private final ClientActorContext context;
     @GuardedBy("lock")
     private final TransmitQueue queue;
-    private final Long cookie;
+    private final @NonNull Long cookie;
     private final String backendName;
 
     @GuardedBy("lock")
@@ -93,10 +94,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // Private constructor to avoid code duplication.
     private AbstractClientConnection(final AbstractClientConnection<T> oldConn, final TransmitQueue newQueue,
             final String backendName) {
-        this.context = Preconditions.checkNotNull(oldConn.context);
-        this.cookie = Preconditions.checkNotNull(oldConn.cookie);
-        this.backendName = Preconditions.checkNotNull(backendName);
-        this.queue = Preconditions.checkNotNull(newQueue);
+        this.context = requireNonNull(oldConn.context);
+        this.cookie = requireNonNull(oldConn.cookie);
+        this.backendName = requireNonNull(backendName);
+        this.queue = requireNonNull(newQueue);
         // Will be updated in finishReplay if needed.
         this.lastReceivedTicks = oldConn.lastReceivedTicks;
     }
@@ -105,9 +106,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     // Do not allow subclassing outside of this package
     AbstractClientConnection(final ClientActorContext context, final Long cookie, final String backendName,
             final int queueDepth) {
-        this.context = Preconditions.checkNotNull(context);
-        this.cookie = Preconditions.checkNotNull(cookie);
-        this.backendName = Preconditions.checkNotNull(backendName);
+        this.context = requireNonNull(context);
+        this.cookie = requireNonNull(cookie);
+        this.backendName = requireNonNull(backendName);
         this.queue = new TransmitQueue.Halted(queueDepth);
         this.lastReceivedTicks = currentTime();
     }
@@ -123,14 +124,14 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     AbstractClientConnection(final AbstractClientConnection<T> oldConn, final T newBackend,
             final int queueDepth) {
         this(oldConn, new TransmitQueue.Transmitting(oldConn.queue, queueDepth, newBackend, oldConn.currentTime(),
-                Preconditions.checkNotNull(oldConn.context).messageSlicer()), newBackend.getName());
+            requireNonNull(oldConn.context).messageSlicer()), newBackend.getName());
     }
 
     public final ClientActorContext context() {
         return context;
     }
 
-    public final @Nonnull Long cookie() {
+    public final @NonNull Long cookie() {
         return cookie;
     }
 

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
@@ -18,8 +17,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -77,8 +76,7 @@ public interface RaftActorContext {
      *
      * @return the ElectionTerm.
      */
-    @Nonnull
-    ElectionTerm getTermInformation();
+    @NonNull ElectionTerm getTermInformation();
 
     /**
      * Returns the index of highest log entry known to be committed.
@@ -114,31 +112,28 @@ public interface RaftActorContext {
      *
      * @param replicatedLog the ReplicatedLog instance.
      */
-    void setReplicatedLog(@Nonnull ReplicatedLog replicatedLog);
+    void setReplicatedLog(@NonNull ReplicatedLog replicatedLog);
 
     /**
      * Returns the ReplicatedLog instance.
      *
      * @return the ReplicatedLog instance.
      */
-    @Nonnull
-    ReplicatedLog getReplicatedLog();
+    @NonNull ReplicatedLog getReplicatedLog();
 
     /**
      * Returns the The ActorSystem associated with this context.
      *
      * @return the ActorSystem.
      */
-    @Nonnull
-    ActorSystem getActorSystem();
+    @NonNull ActorSystem getActorSystem();
 
     /**
      * Returns the logger to be used for logging messages.
      *
      * @return the logger.
      */
-    @Nonnull
-    Logger getLogger();
+    @NonNull Logger getLogger();
 
     /**
      * Gets the address of a peer as a String. This is the same format in which a consumer would provide the address.
@@ -146,8 +141,7 @@ public interface RaftActorContext {
      * @param peerId the id of the peer.
      * @return the address of the peer or null if the address has not yet been resolved.
      */
-    @Nullable
-    String getPeerAddress(String peerId);
+    @Nullable String getPeerAddress(String peerId);
 
     /**
      * Updates the peers and information to match the given ServerConfigurationPayload.
@@ -161,16 +155,14 @@ public interface RaftActorContext {
      *
      * @return list of PeerInfo
      */
-    @Nonnull
-    Collection<PeerInfo> getPeers();
+    @NonNull Collection<PeerInfo> getPeers();
 
     /**
      * Returns the id's for each peer.
      *
      * @return the list of peer id's.
      */
-    @Nonnull
-    Collection<String> getPeerIds();
+    @NonNull Collection<String> getPeerIds();
 
     /**
      * Returns the PeerInfo for the given peer.
@@ -178,8 +170,7 @@ public interface RaftActorContext {
      * @param peerId the id of the peer
      * @return the PeerInfo or null if not found
      */
-    @Nullable
-    PeerInfo getPeerInfo(String peerId);
+    @Nullable PeerInfo getPeerInfo(String peerId);
 
     /**
      * Adds a new peer.
@@ -203,8 +194,7 @@ public interface RaftActorContext {
      * @param peerId the id of the peer.
      * @return the actorSelection corresponding to the peer or null if the address has not yet been resolved.
      */
-    @Nullable
-    ActorSelection getPeerActorSelection(String peerId);
+    @Nullable ActorSelection getPeerActorSelection(String peerId);
 
     /**
      * Sets the address of a peer.
@@ -219,24 +209,21 @@ public interface RaftActorContext {
      *
      * @return the ConfigParams instance.
      */
-    @Nonnull
-    ConfigParams getConfigParams();
+    @NonNull ConfigParams getConfigParams();
 
     /**
      * Returns the SnapshotManager instance.
      *
      * @return the SnapshotManager instance.
      */
-    @Nonnull
-    SnapshotManager getSnapshotManager();
+    @NonNull SnapshotManager getSnapshotManager();
 
     /**
      * Returns the DataPersistenceProvider instance.
      *
      * @return the DataPersistenceProvider instance.
      */
-    @Nonnull
-    DataPersistenceProvider getPersistenceProvider();
+    @NonNull DataPersistenceProvider getPersistenceProvider();
 
     /**
      * Determines if there are any peer followers.
@@ -273,8 +260,7 @@ public interface RaftActorContext {
      *
      * @return the RaftPolicy instance.
      */
-    @Nonnull
-    RaftPolicy getRaftPolicy();
+    @NonNull RaftPolicy getRaftPolicy();
 
     /**
      * Determines if there have been any dynamic server configuration changes applied.
@@ -296,8 +282,7 @@ public interface RaftActorContext {
      * @return the peer information as a ServerConfigurationPayload or null if no dynamic server configurations have
      *         been applied.
      */
-    @Nullable
-    ServerConfigurationPayload getPeerServerInfo(boolean includeSelf);
+    @Nullable ServerConfigurationPayload getPeerServerInfo(boolean includeSelf);
 
     /**
      * Determines if this peer is a voting member of the cluster.
@@ -333,16 +318,14 @@ public interface RaftActorContext {
      *
      * @return the {@link FileBackedOutputStreamFactory};
      */
-    @Nonnull
-    FileBackedOutputStreamFactory getFileBackedOutputStreamFactory();
+    @NonNull FileBackedOutputStreamFactory getFileBackedOutputStreamFactory();
 
     /**
      * Returns the RaftActorLeadershipTransferCohort if leadership transfer is in progress.
      *
      * @return the RaftActorLeadershipTransferCohort if leadership transfer is in progress, null otherwise
      */
-    @Nullable
-    RaftActorLeadershipTransferCohort getRaftActorLeadershipTransferCohort();
+    @Nullable RaftActorLeadershipTransferCohort getRaftActorLeadershipTransferCohort();
 
     /**
      * Sets the RaftActorLeadershipTransferCohort for transferring leadership.

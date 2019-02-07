@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A failure cause behind a {@link RequestFailure} to process a {@link Request}.
@@ -20,12 +21,12 @@ import javax.annotation.Nonnull;
 public abstract class RequestException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    protected RequestException(@Nonnull final String message) {
-        super(Preconditions.checkNotNull(message));
+    protected RequestException(final @NonNull String message) {
+        super(requireNonNull(message));
     }
 
-    protected RequestException(@Nonnull final String message, @Nonnull final Throwable cause) {
-        super(Preconditions.checkNotNull(message), Preconditions.checkNotNull(cause));
+    protected RequestException(final @NonNull String message, final @NonNull Throwable cause) {
+        super(requireNonNull(message), requireNonNull(cause));
     }
 
     public abstract boolean isRetriable();

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Server information. This class is not directly Serializable, as it is serialized directly as part of
@@ -20,13 +21,12 @@ public final class ServerInfo {
     private final String id;
     private final boolean isVoting;
 
-    public ServerInfo(@Nonnull String id, boolean isVoting) {
-        this.id = Preconditions.checkNotNull(id);
+    public ServerInfo(@NonNull String id, boolean isVoting) {
+        this.id = requireNonNull(id);
         this.isVoting = isVoting;
     }
 
-    @Nonnull
-    public String getId() {
+    public @NonNull String getId() {
         return id;
     }
 

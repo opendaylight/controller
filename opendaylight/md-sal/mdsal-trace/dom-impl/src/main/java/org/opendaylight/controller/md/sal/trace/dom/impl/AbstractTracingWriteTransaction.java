@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.md.sal.trace.dom.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
@@ -27,8 +27,8 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
     private final List<String> logs = new ArrayList<>();
 
     AbstractTracingWriteTransaction(DOMDataWriteTransaction delegate, TracingBroker tracingBroker) {
-        this.delegate = Objects.requireNonNull(delegate);
-        this.tracingBroker = Objects.requireNonNull(tracingBroker);
+        this.delegate = requireNonNull(delegate);
+        this.tracingBroker = requireNonNull(tracingBroker);
         recordOp(null, null, "instantiate", null);
     }
 
@@ -114,7 +114,6 @@ abstract class AbstractTracingWriteTransaction implements DOMDataWriteTransactio
     }
 
     @Override
-    @Nonnull
     public Object getIdentifier() {
         return delegate.getIdentifier();
     }

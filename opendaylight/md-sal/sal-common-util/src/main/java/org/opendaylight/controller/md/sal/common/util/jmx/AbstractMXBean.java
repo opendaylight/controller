@@ -5,13 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
 import com.google.common.annotations.Beta;
 import java.lang.management.ManagementFactory;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -19,6 +16,8 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,7 @@ public abstract class AbstractMXBean {
      * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
      * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
-    protected AbstractMXBean(@Nonnull String beanName, @Nonnull String beanType,
+    protected AbstractMXBean(@NonNull String beanName, @NonNull String beanType,
             @Nullable String beanCategory) {
         this.beanName = beanName;
         this.beanType = beanType;

@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -21,7 +23,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
-import javax.annotation.RegEx;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -46,7 +47,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         }
 
         Proxy(final byte[] serialized) {
-            this.serialized = Preconditions.checkNotNull(serialized);
+            this.serialized = requireNonNull(serialized);
         }
 
         @Override
@@ -67,7 +68,6 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         }
     }
 
-    @RegEx
     private static final String SIMPLE_STRING_REGEX = "^[a-zA-Z0-9-_.*+:=,!~';]+$";
     private static final Pattern SIMPLE_STRING_PATTERN = Pattern.compile(SIMPLE_STRING_REGEX);
     private static final long serialVersionUID = 1L;
@@ -78,12 +78,12 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
     private volatile byte[] serialized;
 
     private FrontendType(final String name) {
-        this.name = Preconditions.checkNotNull(name);
+        this.name = requireNonNull(name);
     }
 
     FrontendType(final String name, final byte[] serialized) {
         this(name);
-        this.serialized = Verify.verifyNotNull(serialized);
+        this.serialized = verifyNotNull(serialized);
     }
 
     /**
@@ -97,8 +97,8 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
      * @throws IllegalArgumentException if the string is null, empty or contains invalid characters
      */
     public static FrontendType forName(final String name) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        Preconditions.checkArgument(SIMPLE_STRING_PATTERN.matcher(name).matches(),
+        checkArgument(!Strings.isNullOrEmpty(name));
+        checkArgument(SIMPLE_STRING_PATTERN.matcher(name).matches(),
             "Supplied name %s does not patch pattern %s", name, SIMPLE_STRING_REGEX);
         return new FrontendType(name);
     }

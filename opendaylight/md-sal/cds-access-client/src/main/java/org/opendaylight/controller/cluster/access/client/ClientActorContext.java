@@ -7,16 +7,17 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
 import akka.actor.Scheduler;
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
@@ -49,11 +50,11 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     ClientActorContext(final ActorRef self, final String persistenceId, final ActorSystem system,
             final ClientIdentifier identifier, final ClientActorConfig config) {
         super(self, persistenceId);
-        this.identifier = Preconditions.checkNotNull(identifier);
-        this.scheduler = Preconditions.checkNotNull(system).scheduler();
+        this.identifier = requireNonNull(identifier);
+        this.scheduler = requireNonNull(system).scheduler();
         this.executionContext = system.dispatcher();
         this.dispatchers = new Dispatchers(system.dispatchers());
-        this.config = Preconditions.checkNotNull(config);
+        this.config = requireNonNull(config);
 
         messageSlicer = MessageSlicer.builder().messageSliceSize(config.getMaximumMessageSliceSize())
             .logContext(persistenceId).expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
@@ -62,23 +63,19 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     }
 
     @Override
-    @Nonnull
     public ClientIdentifier getIdentifier() {
         return identifier;
     }
 
-    @Nonnull
-    public ClientActorConfig config() {
+    public @NonNull ClientActorConfig config() {
         return config;
     }
 
-    @Nonnull
-    public Dispatchers dispatchers() {
+    public @NonNull Dispatchers dispatchers() {
         return dispatchers;
     }
 
-    @Nonnull
-    public MessageSlicer messageSlicer() {
+    public @NonNull MessageSlicer messageSlicer() {
         return messageSlicer;
     }
 
@@ -89,8 +86,7 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
      *
      * @return Client actor time source
      */
-    @Nonnull
-    public Ticker ticker() {
+    public @NonNull Ticker ticker() {
         return Ticker.systemTicker();
     }
 
@@ -100,13 +96,13 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
      * @param command Block of code which needs to be execute
      * @param <T> BackendInfo type
      */
-    public <T extends BackendInfo> void executeInActor(@Nonnull final InternalCommand<T> command) {
-        self().tell(Preconditions.checkNotNull(command), ActorRef.noSender());
+    public <T extends BackendInfo> void executeInActor(final @NonNull InternalCommand<T> command) {
+        self().tell(requireNonNull(command), ActorRef.noSender());
     }
 
-    public <T extends BackendInfo> Cancellable executeInActor(@Nonnull final InternalCommand<T> command,
+    public <T extends BackendInfo> Cancellable executeInActor(final @NonNull InternalCommand<T> command,
             final FiniteDuration delay) {
-        return scheduler.scheduleOnce(Preconditions.checkNotNull(delay), self(), Preconditions.checkNotNull(command),
+        return scheduler.scheduleOnce(requireNonNull(delay), self(), requireNonNull(command),
             executionContext, ActorRef.noSender());
     }
 }

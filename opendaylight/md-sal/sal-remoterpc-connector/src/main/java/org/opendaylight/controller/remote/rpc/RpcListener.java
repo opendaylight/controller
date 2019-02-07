@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
@@ -31,20 +32,20 @@ final class RpcListener implements DOMRpcAvailabilityListener {
     private final ActorRef rpcRegistry;
 
     RpcListener(final ActorRef rpcRegistry) {
-        this.rpcRegistry = Preconditions.checkNotNull(rpcRegistry);
+        this.rpcRegistry = requireNonNull(rpcRegistry);
     }
 
     @Override
-    public void onRpcAvailable(@Nonnull final Collection<DOMRpcIdentifier> rpcs) {
-        Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
+    public void onRpcAvailable(final Collection<DOMRpcIdentifier> rpcs) {
+        checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
         LOG.debug("Adding registration for [{}]", rpcs);
 
         rpcRegistry.tell(new AddOrUpdateRoutes(rpcs), ActorRef.noSender());
     }
 
     @Override
-    public void onRpcUnavailable(@Nonnull final Collection<DOMRpcIdentifier> rpcs) {
-        Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
+    public void onRpcUnavailable(final Collection<DOMRpcIdentifier> rpcs) {
+        checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
 
         LOG.debug("Removing registration for [{}]", rpcs);
         rpcRegistry.tell(new RemoveRoutes(rpcs), ActorRef.noSender());

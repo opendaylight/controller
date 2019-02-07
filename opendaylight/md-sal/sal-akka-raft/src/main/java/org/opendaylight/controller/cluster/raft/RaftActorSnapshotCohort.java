@@ -12,8 +12,8 @@ import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 
 /**
  * Interface for a class that participates in raft actor snapshotting.
@@ -35,14 +35,14 @@ public interface RaftActorSnapshotCohort {
      *        serialized data back to a State instance on the follower end. The serialization for snapshot install is
      *        passed off so the cost of serialization is not charged to the raft actor's thread.
      */
-    void createSnapshot(@Nonnull ActorRef actorRef, @Nonnull Optional<OutputStream> installSnapshotStream);
+    void createSnapshot(@NonNull ActorRef actorRef, @NonNull Optional<OutputStream> installSnapshotStream);
 
     /**
      * This method is called to apply a snapshot installed by the leader.
      *
      * @param snapshotState a snapshot of the state of the actor
      */
-    void applySnapshot(@Nonnull Snapshot.State snapshotState);
+    void applySnapshot(@NonNull State snapshotState);
 
     /**
      * This method is called to de-serialize snapshot data that was previously serialized via {@link #createSnapshot}
@@ -52,6 +52,5 @@ public interface RaftActorSnapshotCohort {
      * @return the converted snapshot State
      * @throws IOException if an error occurs accessing the ByteSource or de-serializing
      */
-    @Nonnull
-    Snapshot.State deserializeSnapshot(@Nonnull ByteSource snapshotBytes) throws IOException;
+    @NonNull State deserializeSnapshot(@NonNull ByteSource snapshotBytes) throws IOException;
 }

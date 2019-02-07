@@ -7,16 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
@@ -36,26 +38,26 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
             + "aren't serialized. FindBugs does not recognize this.")
-    private final List<ActorSelection> alternates;
+    private final @NonNull List<ActorSelection> alternates;
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See justification above.")
     private final DataTree dataTree;
-    private final ActorRef backend;
+    private final @NonNull ActorRef backend;
     private final int maxMessages;
 
     ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
         final List<ActorSelection> alternates, final Optional<DataTree> dataTree, final int maxMessages) {
         super(target, sequence);
-        this.backend = Preconditions.checkNotNull(backend);
+        this.backend = requireNonNull(backend);
         this.alternates = ImmutableList.copyOf(alternates);
         this.dataTree = dataTree.orElse(null);
-        Preconditions.checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
+        checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
         this.maxMessages = maxMessages;
     }
 
-    public ConnectClientSuccess(@Nonnull final ClientIdentifier target, final long sequence,
-            @Nonnull final ActorRef backend, @Nonnull final List<ActorSelection> alternates,
-            @Nonnull final DataTree dataTree, final int maxMessages) {
+    public ConnectClientSuccess(final @NonNull ClientIdentifier target, final long sequence,
+            final @NonNull ActorRef backend, final @NonNull List<ActorSelection> alternates,
+            final @NonNull DataTree dataTree, final int maxMessages) {
         this(target, sequence, backend, alternates, Optional.of(dataTree), maxMessages);
     }
 
@@ -64,13 +66,11 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
      *
      * @return a list of known backend alternates
      */
-    @Nonnull
-    public List<ActorSelection> getAlternates() {
+    public @NonNull List<ActorSelection> getAlternates() {
         return alternates;
     }
 
-    @Nonnull
-    public ActorRef getBackend() {
+    public @NonNull ActorRef getBackend() {
         return backend;
     }
 

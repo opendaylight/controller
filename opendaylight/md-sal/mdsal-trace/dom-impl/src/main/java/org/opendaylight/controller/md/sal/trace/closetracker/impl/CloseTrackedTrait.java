@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Objects;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Implementation of {@link CloseTracked} which can be used as a field in
@@ -31,6 +32,7 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
     private final CloseTrackedRegistry<T> closeTrackedRegistry;
     private final CloseTracked<T> realCloseTracked;
 
+    @SuppressFBWarnings(value = "NP_STORE_INTO_NONNULL_FIELD", justification = "SpotBugs and JDT annotations")
     public CloseTrackedTrait(CloseTrackedRegistry<T> transactionChainRegistry, CloseTracked<T> realCloseTracked) {
         if (transactionChainRegistry.isDebugContextEnabled()) {
             // NB: We're NOT doing the (expensive) getStackTrace() here just yet (only below)
@@ -39,13 +41,12 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
         } else {
             this.allocationContext = null;
         }
-        this.realCloseTracked = Objects.requireNonNull(realCloseTracked, "realCloseTracked");
-        this.closeTrackedRegistry = Objects.requireNonNull(transactionChainRegistry, "transactionChainRegistry");
+        this.realCloseTracked = requireNonNull(realCloseTracked, "realCloseTracked");
+        this.closeTrackedRegistry = requireNonNull(transactionChainRegistry, "transactionChainRegistry");
         this.closeTrackedRegistry.add(this);
     }
 
     @Override
-    @Nullable
     @SuppressFBWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
     public StackTraceElement[] getAllocationContextStackTrace() {
         return allocationContext != null ? allocationContext.getStackTrace() : null;

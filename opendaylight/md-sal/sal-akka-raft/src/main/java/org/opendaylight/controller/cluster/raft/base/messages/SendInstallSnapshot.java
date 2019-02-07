@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.io.ByteSource;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -18,20 +18,19 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * prompt the leader to install the snapshot on its followers as needed.
  */
 public final class SendInstallSnapshot {
-    private final Snapshot snapshot;
-    private final ByteSource snapshotBytes;
+    private final @NonNull Snapshot snapshot;
+    private final @NonNull ByteSource snapshotBytes;
 
-    public SendInstallSnapshot(@Nonnull Snapshot snapshot, @Nonnull ByteSource snapshotBytes) {
-        this.snapshot = Preconditions.checkNotNull(snapshot);
-        this.snapshotBytes = Preconditions.checkNotNull(snapshotBytes);
+    public SendInstallSnapshot(@NonNull Snapshot snapshot, @NonNull ByteSource snapshotBytes) {
+        this.snapshot = requireNonNull(snapshot);
+        this.snapshotBytes = requireNonNull(snapshotBytes);
     }
 
-    @Nonnull
-    public Snapshot getSnapshot() {
+    public @NonNull Snapshot getSnapshot() {
         return snapshot;
     }
 
-    public ByteSource getSnapshotBytes() {
+    public @NonNull ByteSource getSnapshotBytes() {
         return snapshotBytes;
     }
 }

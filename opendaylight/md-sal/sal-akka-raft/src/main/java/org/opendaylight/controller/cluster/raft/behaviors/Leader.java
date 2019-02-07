@@ -7,15 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
@@ -54,7 +55,7 @@ public class Leader extends AbstractLeader {
     static final Object ISOLATED_LEADER_CHECK = new Object();
 
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
-    @Nullable private LeadershipTransferContext leadershipTransferContext;
+    private @Nullable LeadershipTransferContext leadershipTransferContext;
 
     Leader(RaftActorContext context, @Nullable AbstractLeader initializeFromLeader) {
         super(context, RaftState.Leader, initializeFromLeader);
@@ -66,7 +67,7 @@ public class Leader extends AbstractLeader {
 
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
-        Preconditions.checkNotNull(sender, "sender should not be null");
+        requireNonNull(sender, "sender should not be null");
 
         if (ISOLATED_LEADER_CHECK.equals(originalMessage)) {
             if (isLeaderIsolated()) {
@@ -121,7 +122,7 @@ public class Leader extends AbstractLeader {
      *
      * @param leadershipTransferCohort the cohort participating in the leadership transfer
      */
-    public void transferLeadership(@Nonnull RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+    public void transferLeadership(@NonNull RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         log.debug("{}: Attempting to transfer leadership", logName());
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);

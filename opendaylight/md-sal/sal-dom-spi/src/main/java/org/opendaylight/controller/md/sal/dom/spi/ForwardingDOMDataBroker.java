@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.collect.ForwardingObject;
 import java.util.Map;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
@@ -24,7 +24,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
  */
 public abstract class ForwardingDOMDataBroker extends ForwardingObject implements DOMDataBroker {
     @Override
-    protected abstract @Nonnull DOMDataBroker delegate();
+    protected abstract @NonNull DOMDataBroker delegate();
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
