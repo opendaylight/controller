@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Abstract base class for a server configuration change reply.
@@ -26,17 +27,17 @@ public abstract class AbstractServerChangeReply implements Serializable {
     private final String leaderHint;
     private final ServerChangeStatus status;
 
-    AbstractServerChangeReply(final @Nonnull ServerChangeStatus status, final @Nullable String leaderHint) {
-        this.status = Preconditions.checkNotNull(status);
+    AbstractServerChangeReply(final @NonNull ServerChangeStatus status, final @Nullable String leaderHint) {
+        this.status = requireNonNull(status);
         this.leaderHint = leaderHint;
     }
 
     @VisibleForTesting
-    @Nonnull public final Optional<String> getLeaderHint() {
+    public final @NonNull Optional<String> getLeaderHint() {
         return Optional.ofNullable(leaderHint);
     }
 
-    @Nonnull public final ServerChangeStatus getStatus() {
+    public final @NonNull ServerChangeStatus getStatus() {
         return status;
     }
 

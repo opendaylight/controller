@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.Serializable;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Reply to {@link FindLeader} message, containing the address of the leader actor, as known to the raft actor which
@@ -26,7 +25,7 @@ public final class FindLeaderReply implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String leaderActor;
 
-    public FindLeaderReply(@Nullable final String leaderActor) {
+    public FindLeaderReply(final @Nullable String leaderActor) {
         this.leaderActor = leaderActor;
     }
 

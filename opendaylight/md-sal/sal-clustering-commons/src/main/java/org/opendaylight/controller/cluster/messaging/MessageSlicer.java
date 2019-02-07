@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
@@ -20,7 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -101,7 +103,7 @@ public class MessageSlicer implements AutoCloseable {
         if (message != null) {
             LOG.debug("{}: slice: identifier: {}, message: {}", logContext, identifier, message);
 
-            Preconditions.checkNotNull(fileBackedStreamFactory,
+            requireNonNull(fileBackedStreamFactory,
                     "The FiledBackedStreamFactory must be set in order to call this slice method");
 
             // Serialize the message to a FileBackedOutputStream.
@@ -204,7 +206,7 @@ public class MessageSlicer implements AutoCloseable {
      *
      * @param filter filters by Identifier
      */
-    public void cancelSlicing(@Nonnull final Predicate<Identifier> filter) {
+    public void cancelSlicing(final @NonNull Predicate<Identifier> filter) {
         stateCache.asMap().keySet().removeIf(
             messageSliceIdentifier -> filter.test(messageSliceIdentifier.getClientIdentifier()));
     }
@@ -334,7 +336,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
-            this.fileBackedStreamFactory = Preconditions.checkNotNull(newFileBackedStreamFactory);
+            this.fileBackedStreamFactory = requireNonNull(newFileBackedStreamFactory);
             return this;
         }
 
@@ -345,7 +347,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder messageSliceSize(final int newMessageSliceSize) {
-            Preconditions.checkArgument(newMessageSliceSize > 0, "messageSliceSize must be > 0");
+            checkArgument(newMessageSliceSize > 0, "messageSliceSize must be > 0");
             this.messageSliceSize = newMessageSliceSize;
             return this;
         }
@@ -358,7 +360,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder maxSlicingTries(final int newMaxSlicingTries) {
-            Preconditions.checkArgument(newMaxSlicingTries > 0, "newMaxSlicingTries must be > 0");
+            checkArgument(newMaxSlicingTries > 0, "newMaxSlicingTries must be > 0");
             this.maxSlicingTries = newMaxSlicingTries;
             return this;
         }
@@ -373,7 +375,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder expireStateAfterInactivity(final long duration, final TimeUnit unit) {
-            Preconditions.checkArgument(duration > 0, "duration must be > 0");
+            checkArgument(duration > 0, "duration must be > 0");
             this.expireStateAfterInactivityDuration = duration;
             this.expireStateAfterInactivityUnit = unit;
             return this;
@@ -386,7 +388,7 @@ public class MessageSlicer implements AutoCloseable {
          * @return this Builder
          */
         public Builder logContext(final String newLogContext) {
-            this.logContext = Preconditions.checkNotNull(newLogContext);
+            this.logContext = requireNonNull(newLogContext);
             return this;
         }
 

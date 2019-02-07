@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -32,12 +33,13 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public abstract class AbstractReadPathTransactionRequest<T extends AbstractReadPathTransactionRequest<T>>
         extends AbstractReadTransactionRequest<T> {
     private static final long serialVersionUID = 1L;
-    private final YangInstanceIdentifier path;
+
+    private final @NonNull YangInstanceIdentifier path;
 
     AbstractReadPathTransactionRequest(final TransactionIdentifier identifier, final long sequence,
         final ActorRef replyTo, final YangInstanceIdentifier path, final boolean snapshotOnly) {
         super(identifier, sequence, replyTo, snapshotOnly);
-        this.path = Preconditions.checkNotNull(path);
+        this.path = requireNonNull(path);
     }
 
     AbstractReadPathTransactionRequest(final T request, final ABIVersion version) {
@@ -45,8 +47,7 @@ public abstract class AbstractReadPathTransactionRequest<T extends AbstractReadP
         this.path = request.getPath();
     }
 
-    @Nonnull
-    public final YangInstanceIdentifier getPath() {
+    public final @NonNull YangInstanceIdentifier getPath() {
         return path;
     }
 

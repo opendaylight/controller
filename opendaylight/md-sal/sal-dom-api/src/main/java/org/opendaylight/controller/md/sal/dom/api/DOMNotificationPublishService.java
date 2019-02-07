@@ -10,8 +10,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link DOMService} which allows its user to send {@link DOMNotification}s. It
@@ -80,7 +79,7 @@ public interface DOMNotificationPublishService extends DOMService {
      * @throws InterruptedException if interrupted while waiting
      * @throws NullPointerException if notification is null.
      */
-    @Nonnull ListenableFuture<?> putNotification(@Nonnull DOMNotification notification) throws InterruptedException;
+    @NonNull ListenableFuture<?> putNotification(@NonNull DOMNotification notification) throws InterruptedException;
 
     /**
      * Attempt to publish a notification. The result of this method is a {@link ListenableFuture}
@@ -97,7 +96,7 @@ public interface DOMNotificationPublishService extends DOMService {
      *         the implementation from accepting the notification for delivery.
      * @throws NullPointerException if notification is null.
      */
-    @Nonnull ListenableFuture<?> offerNotification(@Nonnull DOMNotification notification);
+    @NonNull ListenableFuture<?> offerNotification(@NonNull DOMNotification notification);
 
     /**
      * Attempt to publish a notification. The result of this method is a {@link ListenableFuture}
@@ -108,7 +107,7 @@ public interface DOMNotificationPublishService extends DOMService {
      * is guaranteed to block more than the specified timeout.
      *
      * @param notification Notification to be published.
-     * @param timeout how long to wait before giving up, in units of unit
+     * @param timeout how long to wait before giving up, in units of unit, must not be negative
      * @param unit a TimeUnit determining how to interpret the timeout parameter
      * @return A listenable future which will report completion when the service
      *         has finished propagating the notification to its immediate registrants,
@@ -118,6 +117,6 @@ public interface DOMNotificationPublishService extends DOMService {
      * @throws NullPointerException if notification or unit is null.
      * @throws IllegalArgumentException if timeout is negative.
      */
-    @Nonnull ListenableFuture<?> offerNotification(@Nonnull DOMNotification notification,
-        @Nonnegative long timeout, @Nonnull TimeUnit unit) throws InterruptedException;
+    @NonNull ListenableFuture<?> offerNotification(@NonNull DOMNotification notification,
+        long timeout, @NonNull TimeUnit unit) throws InterruptedException;
 }

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Object which can track where something has been created, and if it has been correctly "closed".

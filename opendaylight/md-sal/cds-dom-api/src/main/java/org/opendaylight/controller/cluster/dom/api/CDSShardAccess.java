@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.dom.api;
 
 import com.google.common.annotations.Beta;
 import java.util.concurrent.CompletionStage;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
@@ -27,7 +27,7 @@ public interface CDSShardAccess {
      * @throws IllegalStateException if the {@link CDSDataTreeProducer} from which the associated
      *         {@link CDSDataTreeProducer} is no longer valid.
      */
-    @Nonnull DOMDataTreeIdentifier getShardIdentifier();
+    @NonNull DOMDataTreeIdentifier getShardIdentifier();
 
     /**
      * Return the shard leader location relative to the local node.
@@ -36,7 +36,7 @@ public interface CDSShardAccess {
      * @throws IllegalStateException if the {@link CDSDataTreeProducer} from which the associated
      *         {@link CDSDataTreeProducer} is no longer valid.
      */
-    @Nonnull LeaderLocation getLeaderLocation();
+    @NonNull LeaderLocation getLeaderLocation();
 
     /**
      * Request the shard leader to be moved to the local node. The request will be evaluated against shard state and
@@ -56,7 +56,7 @@ public interface CDSShardAccess {
      * @throws IllegalStateException if the {@link CDSDataTreeProducer} from which the associated
      *         {@link CDSDataTreeProducer} is no longer valid.
      */
-    @Nonnull CompletionStage<Void> makeLeaderLocal();
+    @NonNull CompletionStage<Void> makeLeaderLocal();
 
     /**
      * Register a listener to shard location changes. Each listener object can be registered at most once.
@@ -68,6 +68,6 @@ public interface CDSShardAccess {
      *         {@link CDSDataTreeProducer} is no longer valid.
      * @throws NullPointerException if listener is null.
      */
-    @Nonnull <L extends LeaderLocationListener> LeaderLocationListenerRegistration<L> registerLeaderLocationListener(
-            @Nonnull L listener);
+    @NonNull <L extends LeaderLocationListener> LeaderLocationListenerRegistration<L> registerLeaderLocationListener(
+            @NonNull L listener);
 }

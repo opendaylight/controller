@@ -6,8 +6,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
+
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -15,8 +17,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Status;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
@@ -327,7 +327,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete,
-            @Nullable final String followerId, final long newLeaderTimeoutInMillis) {
+            final @Nullable String followerId, final long newLeaderTimeoutInMillis) {
         LOG.debug("{}: Initiating leader transfer", persistenceId());
 
         RaftActorLeadershipTransferCohort leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
@@ -814,8 +814,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * Returns the RaftActorRecoveryCohort to participate in persistence recovery.
      */
-    @Nonnull
-    protected abstract RaftActorRecoveryCohort getRaftActorRecoveryCohort();
+    protected abstract @NonNull RaftActorRecoveryCohort getRaftActorRecoveryCohort();
 
     /**
      * This method is called when recovery is complete.
@@ -825,8 +824,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * Returns the RaftActorSnapshotCohort to participate in snapshot captures.
      */
-    @Nonnull
-    protected abstract RaftActorSnapshotCohort getRaftActorSnapshotCohort();
+    protected abstract @NonNull RaftActorSnapshotCohort getRaftActorSnapshotCohort();
 
     /**
      * This method will be called by the RaftActor when the state of the
@@ -948,7 +946,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         @Nullable abstract String getLastLeaderId();
 
-        @Nullable abstract short getLeaderPayloadVersion();
+        abstract short getLeaderPayloadVersion();
     }
 
     /**
@@ -964,7 +962,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 final RaftActorBehavior behavior) {
             this.lastValidLeaderId = lastValidLeaderId;
             this.lastLeaderId = lastLeaderId;
-            this.behavior = Preconditions.checkNotNull(behavior);
+            this.behavior = requireNonNull(behavior);
             this.leaderPayloadVersion = behavior.getLeaderPayloadVersion();
         }
 
@@ -1027,7 +1025,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         BehaviorState capture(final RaftActorBehavior behavior) {
             if (behavior == null) {
-                Verify.verify(lastValidLeaderId == null, "Null behavior with non-null last leader");
+                verify(lastValidLeaderId == null, "Null behavior with non-null last leader");
                 return NULL_BEHAVIOR_STATE;
             }
 

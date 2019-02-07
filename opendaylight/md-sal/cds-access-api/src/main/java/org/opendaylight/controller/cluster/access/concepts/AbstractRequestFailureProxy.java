@@ -11,7 +11,7 @@ import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -31,7 +31,7 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
         // For Externalizable
     }
 
-    protected AbstractRequestFailureProxy(@Nonnull final C failure) {
+    protected AbstractRequestFailureProxy(final @NonNull C failure) {
         super(failure);
         this.cause = failure.getCause();
     }
@@ -53,6 +53,6 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
         return createFailure(target, sequence, cause);
     }
 
-    @Nonnull
-    protected abstract C createFailure(@Nonnull T target, long sequence, @Nonnull RequestException failureCause);
+    protected abstract @NonNull C createFailure(@NonNull T target, long sequence,
+            @NonNull RequestException failureCause);
 }

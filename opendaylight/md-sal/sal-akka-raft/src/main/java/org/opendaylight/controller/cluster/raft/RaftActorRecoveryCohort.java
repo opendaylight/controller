@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
@@ -52,6 +52,5 @@ public interface RaftActorRecoveryCohort {
      *
      * @return the snapshot or null if there's no snapshot to restore
      */
-    @Nullable
-    Snapshot getRestoreFromSnapshot();
+    @Nullable Snapshot getRestoreFromSnapshot();
 }

@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import java.util.Collection;
 import java.util.EventListener;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
@@ -46,5 +46,5 @@ public interface DOMDataTreeChangeListener extends EventListener {
      *
      * @param changes Collection of change events, may not be null or empty.
      */
-    void onDataTreeChanged(@Nonnull Collection<DataTreeCandidate> changes);
+    void onDataTreeChanged(@NonNull Collection<DataTreeCandidate> changes);
 }

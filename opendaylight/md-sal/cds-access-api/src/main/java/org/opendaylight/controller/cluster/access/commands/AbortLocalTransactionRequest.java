@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
@@ -23,8 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class AbortLocalTransactionRequest extends AbstractLocalTransactionRequest<AbortLocalTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public AbortLocalTransactionRequest(@Nonnull final TransactionIdentifier identifier,
-            @Nonnull final ActorRef replyTo) {
+    public AbortLocalTransactionRequest(final @NonNull TransactionIdentifier identifier,
+            final @NonNull ActorRef replyTo) {
         super(identifier, 0, replyTo);
     }
 }

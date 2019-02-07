@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.api;
 
 import com.google.common.collect.ForwardingObject;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 public abstract class ForwardingDataBroker extends ForwardingObject implements DataBroker {
 
     @Override
-    protected abstract @Nonnull DataBroker delegate();
+    protected abstract @NonNull DataBroker delegate();
 
     @Override
     public ReadOnlyTransaction newReadOnlyTransaction() {

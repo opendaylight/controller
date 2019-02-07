@@ -14,7 +14,7 @@ import io.netty.util.TimerTask;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
 
@@ -39,13 +39,13 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
         return this.timer.stop();
     }
 
-    public static HashedWheelTimerCloseable newInstance(@Nullable final Long duration,
-            @Nullable final Integer ticksPerWheel) {
+    public static HashedWheelTimerCloseable newInstance(final @Nullable Long duration,
+            final @Nullable Integer ticksPerWheel) {
         return newInstance(null, duration, ticksPerWheel);
     }
 
-    public static HashedWheelTimerCloseable newInstance(@Nullable final ThreadFactory threadFactory,
-            @Nullable final Long duration, @Nullable final Integer ticksPerWheel) {
+    public static HashedWheelTimerCloseable newInstance(final @Nullable ThreadFactory threadFactory,
+            final @Nullable Long duration, final @Nullable Integer ticksPerWheel) {
         TimeUnit unit = TimeUnit.MILLISECONDS;
         if(!nullOrNonPositive(duration) && threadFactory == null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(duration, unit));

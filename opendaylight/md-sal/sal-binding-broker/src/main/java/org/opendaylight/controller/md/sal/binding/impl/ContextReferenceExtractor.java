@@ -5,15 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.lang.reflect.Method;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.annotations.RoutingContext;
@@ -57,8 +56,7 @@ abstract class ContextReferenceExtractor {
      */
     abstract @Nullable InstanceIdentifier<?> extract(DataObject obj);
 
-    @Nonnull
-    private static ContextReferenceExtractor create(final Class<?> key) {
+    private static @NonNull ContextReferenceExtractor create(final Class<?> key) {
         final Method contextGetter = getContextGetter(key);
         if (contextGetter == null) {
             return NULL_EXTRACTOR;
@@ -80,8 +78,7 @@ abstract class ContextReferenceExtractor {
         return NULL_EXTRACTOR;
     }
 
-    @Nullable
-    private static Method findGetValueMethod(final Class<?> type, final Class<?> returnType) {
+    private static @Nullable Method findGetValueMethod(final Class<?> type, final Class<?> returnType) {
         try {
             final Method method = type.getMethod(GET_VALUE_NAME);
             if (returnType.equals(method.getReturnType())) {

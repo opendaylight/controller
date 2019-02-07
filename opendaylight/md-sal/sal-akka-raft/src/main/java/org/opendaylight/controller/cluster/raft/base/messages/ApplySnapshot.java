@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.dispatch.ControlMessage;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -32,22 +32,20 @@ public class ApplySnapshot implements ControlMessage {
     private final Snapshot snapshot;
     private final Callback callback;
 
-    public ApplySnapshot(Snapshot snapshot) {
+    public ApplySnapshot(@NonNull Snapshot snapshot) {
         this(snapshot, NOOP_CALLBACK);
     }
 
-    public ApplySnapshot(@Nonnull Snapshot snapshot, @Nonnull Callback callback) {
-        this.snapshot = Preconditions.checkNotNull(snapshot);
-        this.callback = Preconditions.checkNotNull(callback);
+    public ApplySnapshot(@NonNull Snapshot snapshot, @NonNull Callback callback) {
+        this.snapshot = requireNonNull(snapshot);
+        this.callback = requireNonNull(callback);
     }
 
-    @Nonnull
-    public Snapshot getSnapshot() {
+    public @NonNull Snapshot getSnapshot() {
         return snapshot;
     }
 
-    @Nonnull
-    public Callback getCallback() {
+    public @NonNull Callback getCallback() {
         return callback;
     }
 

@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -39,8 +39,8 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
     ConnectClientRequest(final ClientIdentifier identifier, final long txSequence, final ActorRef replyTo,
             final ABIVersion minVersion, final ABIVersion maxVersion) {
         super(identifier, txSequence, replyTo);
-        this.minVersion = Preconditions.checkNotNull(minVersion);
-        this.maxVersion = Preconditions.checkNotNull(maxVersion);
+        this.minVersion = requireNonNull(minVersion);
+        this.maxVersion = requireNonNull(maxVersion);
     }
 
     public ConnectClientRequest(final ClientIdentifier identifier, final ActorRef replyTo, final ABIVersion minVersion,
@@ -79,8 +79,7 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
     }
 
     @Override
-    @Nonnull
-    protected ToStringHelper addToStringAttributes(@Nonnull final ToStringHelper toStringHelper) {
+    protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
         return super.addToStringAttributes(toStringHelper).add("minVersion", minVersion).add("maxVersion", maxVersion);
     }
 }

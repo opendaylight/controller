@@ -7,15 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -39,7 +40,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
         }
 
         Proxy(final LocalHistoryIdentifier historyId, final long transactionId) {
-            this.historyId = Preconditions.checkNotNull(historyId);
+            this.historyId = requireNonNull(historyId);
             this.transactionId = transactionId;
         }
 
@@ -65,8 +66,8 @@ public final class TransactionIdentifier implements WritableIdentifier {
     private final long transactionId;
     private String shortString;
 
-    public TransactionIdentifier(@Nonnull final LocalHistoryIdentifier historyId, final long transactionId) {
-        this.historyId = Preconditions.checkNotNull(historyId);
+    public TransactionIdentifier(final @NonNull LocalHistoryIdentifier historyId, final long transactionId) {
+        this.historyId = requireNonNull(historyId);
         this.transactionId = transactionId;
     }
 

@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -27,16 +28,16 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 @Beta
 public abstract class Request<T extends WritableIdentifier, C extends Request<T, C>> extends Message<T, C> {
     private static final long serialVersionUID = 1L;
-    private final ActorRef replyTo;
+    private final @NonNull ActorRef replyTo;
 
-    protected Request(@Nonnull final T target, final long sequence, @Nonnull final ActorRef replyTo) {
+    protected Request(final @NonNull T target, final long sequence, final @NonNull ActorRef replyTo) {
         super(target, sequence);
-        this.replyTo = Preconditions.checkNotNull(replyTo);
+        this.replyTo = requireNonNull(replyTo);
     }
 
-    protected Request(@Nonnull final C request, @Nonnull final ABIVersion version) {
+    protected Request(final @NonNull C request, final @NonNull ABIVersion version) {
         super(request, version);
-        this.replyTo = Preconditions.checkNotNull(request.getReplyTo());
+        this.replyTo = requireNonNull(request.getReplyTo());
     }
 
     /**
@@ -44,8 +45,7 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
      *
      * @return Original requestor
      */
-    @Nonnull
-    public final ActorRef getReplyTo() {
+    public final @NonNull ActorRef getReplyTo() {
         return replyTo;
     }
 
@@ -55,8 +55,7 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
      * @param cause Failure cause
      * @return {@link RequestFailure} corresponding to this request
      */
-    @Nonnull
-    public abstract RequestFailure<T, ?> toRequestFailure(@Nonnull RequestException cause);
+    public abstract @NonNull RequestFailure<T, ?> toRequestFailure(@NonNull RequestException cause);
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
@@ -64,5 +63,5 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
     }
 
     @Override
-    protected abstract AbstractRequestProxy<T, C> externalizableProxy(@Nonnull ABIVersion version);
+    protected abstract AbstractRequestProxy<T, C> externalizableProxy(ABIVersion version);
 }
