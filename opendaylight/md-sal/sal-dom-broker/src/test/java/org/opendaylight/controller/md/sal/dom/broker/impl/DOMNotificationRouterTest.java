@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.api.DOMEvent;
@@ -160,7 +160,7 @@ public class DOMNotificationRouterTest {
             receivedNotification.set(notification);
         }
 
-        void verifyReceived(final SchemaPath path, final ContainerNode body, @Nullable final Date eventTime)
+        void verifyReceived(final SchemaPath path, final ContainerNode body, final @Nullable Date eventTime)
                 throws InterruptedException, ExecutionException, TimeoutException {
             final DOMNotification actual = receivedNotification.get(5, TimeUnit.SECONDS);
             assertEquals(path, actual.getType());
@@ -191,7 +191,7 @@ public class DOMNotificationRouterTest {
             receivedNotification.set(notification);
         }
 
-        void verifyReceived(final SchemaPath path, final ContainerNode body, @Nullable final Instant eventTime)
+        void verifyReceived(final SchemaPath path, final ContainerNode body, final @Nullable Instant eventTime)
                 throws InterruptedException, ExecutionException, TimeoutException {
             final org.opendaylight.mdsal.dom.api.DOMNotification actual =
                     receivedNotification.get(5, TimeUnit.SECONDS);

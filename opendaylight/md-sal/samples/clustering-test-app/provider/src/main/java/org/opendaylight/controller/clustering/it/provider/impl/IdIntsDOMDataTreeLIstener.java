@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import com.google.common.base.Preconditions;
@@ -18,7 +17,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeListeningException;
@@ -38,8 +36,8 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
     private ScheduledExecutorService executorService;
 
     @Override
-    public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes,
-                                  @Nonnull final Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>> subtrees) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes,
+                                  final Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>> subtrees) {
 
         // There should only be one candidate reported
         Preconditions.checkState(changes.size() == 1);
@@ -69,7 +67,7 @@ public class IdIntsDOMDataTreeLIstener implements DOMDataTreeListener {
     }
 
     @Override
-    public void onDataTreeFailed(@Nonnull Collection<DOMDataTreeListeningException> causes) {
+    public void onDataTreeFailed(Collection<DOMDataTreeListeningException> causes) {
 
     }
 

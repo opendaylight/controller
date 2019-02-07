@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.mdsal.binding.dom.adapter.invoke.NotificationListenerInvoker;
@@ -39,7 +38,7 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
     }
 
     @Override
-    public void onNotification(@Nonnull final DOMNotification notification) {
+    public void onNotification(final DOMNotification notification) {
         final Notification baNotification = deserialize(notification);
         final QName notificationQName = notification.getType().getLastComponent();
         getInvoker(notification.getType()).invokeNotification(delegate, notificationQName, baNotification);

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Interface to resolve raft actor peer addresses.
@@ -31,5 +31,6 @@ public interface PeerAddressResolver {
      * @param address the peer's actor's address
      */
     default void setResolved(String peerId, String address) {
+
     }
 }

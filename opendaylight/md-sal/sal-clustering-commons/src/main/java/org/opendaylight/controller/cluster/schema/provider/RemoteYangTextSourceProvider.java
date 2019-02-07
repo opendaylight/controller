@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.schema.provider;
 
 import com.google.common.annotations.Beta;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.schema.provider.impl.YangTextSchemaSourceSerializationProxy;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import scala.concurrent.Future;
@@ -23,5 +22,5 @@ public interface RemoteYangTextSourceProvider {
 
     Future<Set<SourceIdentifier>> getProvidedSources();
 
-    Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(@Nonnull SourceIdentifier identifier);
+    Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(@NonNull SourceIdentifier identifier);
 }

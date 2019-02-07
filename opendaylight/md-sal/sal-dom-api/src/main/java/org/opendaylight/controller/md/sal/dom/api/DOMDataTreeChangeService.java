@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
@@ -53,6 +53,6 @@ public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
      *         your listener using {@link ListenerRegistration#close()} to stop
      *         delivery of change events.
      */
-    @Nonnull <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
-            @Nonnull DOMDataTreeIdentifier treeId, @Nonnull L listener);
+    @NonNull <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
+            @NonNull DOMDataTreeIdentifier treeId, @NonNull L listener);
 }

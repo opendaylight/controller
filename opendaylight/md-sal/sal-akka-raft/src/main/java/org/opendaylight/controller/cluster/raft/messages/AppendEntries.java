@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.messages;
 
 import static java.util.Objects.requireNonNull;
@@ -18,8 +17,8 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -58,8 +57,8 @@ public class AppendEntries extends AbstractRaftRPC {
 
     private final String leaderAddress;
 
-    private AppendEntries(long term, @Nonnull String leaderId, long prevLogIndex, long prevLogTerm,
-            @Nonnull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
+    private AppendEntries(long term, @NonNull String leaderId, long prevLogIndex, long prevLogTerm,
+            @NonNull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
             short payloadVersion, short recipientRaftVersion, short leaderRaftVersion, @Nullable String leaderAddress) {
         super(term);
         this.leaderId = requireNonNull(leaderId);
@@ -74,23 +73,22 @@ public class AppendEntries extends AbstractRaftRPC {
         this.leaderAddress = leaderAddress;
     }
 
-    public AppendEntries(long term, @Nonnull String leaderId, long prevLogIndex, long prevLogTerm,
-            @Nonnull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
+    public AppendEntries(long term, @NonNull String leaderId, long prevLogIndex, long prevLogTerm,
+            @NonNull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
             short payloadVersion, short recipientRaftVersion, @Nullable String leaderAddress) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
                 recipientRaftVersion, RaftVersions.CURRENT_VERSION, leaderAddress);
     }
 
     @VisibleForTesting
-    public AppendEntries(long term, @Nonnull String leaderId, long prevLogIndex, long prevLogTerm,
-            @Nonnull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
+    public AppendEntries(long term, @NonNull String leaderId, long prevLogIndex, long prevLogTerm,
+            @NonNull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
             short payloadVersion) {
         this(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit, replicatedToAllIndex, payloadVersion,
                 RaftVersions.CURRENT_VERSION, null);
     }
 
-    @Nonnull
-    public String getLeaderId() {
+    public @NonNull String getLeaderId() {
         return leaderId;
     }
 
@@ -102,8 +100,7 @@ public class AppendEntries extends AbstractRaftRPC {
         return prevLogTerm;
     }
 
-    @Nonnull
-    public List<ReplicatedLogEntry> getEntries() {
+    public @NonNull List<ReplicatedLogEntry> getEntries() {
         return entries;
     }
 

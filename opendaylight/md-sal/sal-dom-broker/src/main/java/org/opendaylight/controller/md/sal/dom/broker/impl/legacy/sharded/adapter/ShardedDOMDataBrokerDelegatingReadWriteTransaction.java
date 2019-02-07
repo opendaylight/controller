@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -24,7 +23,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Map;
 import java.util.Queue;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -69,9 +67,9 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
     ShardedDOMDataBrokerDelegatingReadWriteTransaction(final Object readWriteTxId, final SchemaContext ctx,
                                                               final DOMDataReadOnlyTransaction readTxDelegate,
                                                               final DOMDataWriteTransaction writeTxDelegate) {
-        this.readTxDelegate = checkNotNull(readTxDelegate);
-        this.writeTxDelegate = checkNotNull(writeTxDelegate);
-        this.txIdentifier = checkNotNull(readWriteTxId);
+        this.readTxDelegate = requireNonNull(readTxDelegate);
+        this.writeTxDelegate = requireNonNull(writeTxDelegate);
+        this.txIdentifier = requireNonNull(readWriteTxId);
         this.initialReadMap = Maps.newEnumMap(LogicalDatastoreType.class);
 
         final InMemoryDataTreeFactory treeFactory = new InMemoryDataTreeFactory();
@@ -120,7 +118,7 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
         final Queue<Modification> currentHistory = Lists.newLinkedList(modificationHistoryMap.get(store));
         Futures.addCallback(initialReadMap.get(store), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
             @Override
-            public void onSuccess(@Nonnull final Optional<NormalizedNode<?, ?>> result) {
+            public void onSuccess(final Optional<NormalizedNode<?, ?>> result) {
                 final DataTreeModification mod = snapshotMap.get(store).newModification();
                 if (result.isPresent()) {
                     mod.write(path, result.get());
@@ -219,8 +217,8 @@ class ShardedDOMDataBrokerDelegatingReadWriteTransaction implements DOMDataReadW
 
         Modification(final Operation operation, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
             this.data = data;
-            this.path = checkNotNull(path);
-            this.operation = checkNotNull(operation);
+            this.path = requireNonNull(path);
+            this.operation = requireNonNull(operation);
         }
 
         Operation getOperation() {

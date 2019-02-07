@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import akka.persistence.SnapshotSelectionCriteria;
@@ -16,7 +15,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -127,8 +126,7 @@ public class SnapshotManager implements SnapshotState {
         this.snapshotCohort = snapshotCohort;
     }
 
-    @Nonnull
-    public Snapshot.State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
+    public Snapshot.@NonNull State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
         return snapshotCohort.deserializeSnapshot(snapshotBytes);
     }
 

@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Mutable;
 
 /**
@@ -19,22 +20,20 @@ import org.opendaylight.yangtools.concepts.Mutable;
  * @author Robert Varga
  */
 abstract class AbstractClientActorContext implements Mutable {
-    private final String persistenceId;
-    private final ActorRef self;
+    private final @NonNull String persistenceId;
+    private final @NonNull ActorRef self;
 
-    AbstractClientActorContext(@Nonnull final ActorRef self, @Nonnull final String persistenceId) {
-        this.persistenceId = Preconditions.checkNotNull(persistenceId);
-        this.self = Preconditions.checkNotNull(self);
+    AbstractClientActorContext(final @NonNull ActorRef self, final @NonNull String persistenceId) {
+        this.persistenceId = requireNonNull(persistenceId);
+        this.self = requireNonNull(self);
     }
 
     // TODO: rename this to logContext()
-    @Nonnull
-    final String persistenceId() {
+    final @NonNull String persistenceId() {
         return persistenceId;
     }
 
-    @Nonnull
-    public final ActorRef self() {
+    public final @NonNull ActorRef self() {
         return self;
     }
 }

@@ -14,13 +14,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.apache.aries.blueprint.di.AbstractRecipe;
 import org.apache.aries.blueprint.di.ExecutionContext;
 import org.apache.aries.blueprint.di.Recipe;
 import org.apache.aries.blueprint.ext.DependentComponentFactoryMetadata;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
@@ -225,8 +225,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     @SuppressWarnings("unchecked")
-    @Nullable
-    protected <T> T getOSGiService(final Class<T> serviceInterface) {
+    protected <T> @Nullable T getOSGiService(final Class<T> serviceInterface) {
         try {
             ServiceReference<T> serviceReference =
                     container().getBundleContext().getServiceReference(serviceInterface);

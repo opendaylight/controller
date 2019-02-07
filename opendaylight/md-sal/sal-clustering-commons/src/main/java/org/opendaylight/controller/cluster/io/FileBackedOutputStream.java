@@ -22,10 +22,10 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,8 +89,7 @@ public class FileBackedOutputStream extends OutputStream {
      * @return a ByteSource instance
      * @throws IOException if close fails
      */
-    @Nonnull
-    public synchronized ByteSource asByteSource() throws IOException {
+    public synchronized @NonNull ByteSource asByteSource() throws IOException {
         close();
 
         if (source == null) {

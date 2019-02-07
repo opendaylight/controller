@@ -5,18 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
@@ -38,7 +37,7 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
 
     public RemoteYangTextSourceProviderImpl(final SchemaRepository repository,
             final Set<SourceIdentifier> providedSources) {
-        this.repository = Preconditions.checkNotNull(repository);
+        this.repository = requireNonNull(repository);
         this.providedSources = providedSources;
     }
 
@@ -57,7 +56,7 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
 
         Futures.addCallback(future, new FutureCallback<YangTextSchemaSource>() {
             @Override
-            public void onSuccess(@Nonnull final YangTextSchemaSource result) {
+            public void onSuccess(final YangTextSchemaSource result) {
                 try {
                     promise.success(new YangTextSchemaSourceSerializationProxy(result));
                 } catch (IOException e) {

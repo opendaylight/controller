@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.core.spi.data;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -55,6 +55,6 @@ public interface DOMStoreTreeChangePublisher {
      *         your listener using {@link ListenerRegistration#close()} to stop
      *         delivery of change events.
      */
-    @Nonnull <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
-            @Nonnull YangInstanceIdentifier treeId, @Nonnull L listener);
+    <L extends DOMDataTreeChangeListener> @NonNull ListenerRegistration<L> registerTreeChangeListener(
+            @NonNull YangInstanceIdentifier treeId, @NonNull L listener);
 }

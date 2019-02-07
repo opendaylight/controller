@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.api;
 
 import com.google.common.collect.Collections2;
 import java.util.Collection;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.ChoiceIn;
@@ -56,14 +55,14 @@ public interface DataObjectModification<T extends DataObject>
      *
      * @return type of modified object.
      */
-    @Nonnull Class<T> getDataType();
+    @NonNull Class<T> getDataType();
 
     /**
      * Returns type of modification.
      *
      * @return type Type of performed modification.
      */
-    @Nonnull ModificationType getModificationType();
+    @NonNull ModificationType getModificationType();
 
     /**
      * Returns before-state of top level container. Implementations are encouraged,
@@ -86,7 +85,7 @@ public interface DataObjectModification<T extends DataObject>
      *
      * @return unmodifiable collection of modified direct children.
      */
-    @Nonnull Collection<? extends DataObjectModification<? extends DataObject>> getModifiedChildren();
+    @NonNull Collection<? extends DataObjectModification<? extends DataObject>> getModifiedChildren();
 
     /**
      * Returns child list item modification if {@code child} was modified by this modification. This method should be
@@ -99,8 +98,8 @@ public interface DataObjectModification<T extends DataObject>
      *         to generated model.
      */
     default <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>>
-        Collection<DataObjectModification<C>> getModifiedChildren(@Nonnull final Class<H> caseType,
-                @Nonnull final Class<C> childType) {
+        Collection<DataObjectModification<C>> getModifiedChildren(final @NonNull Class<H> caseType,
+                final @NonNull Class<C> childType) {
         final Item<C> item = Item.of(caseType, childType);
         return (Collection<DataObjectModification<C>>) Collections2.filter(getModifiedChildren(),
             mod -> item.equals(mod.getIdentifier()));
@@ -120,8 +119,8 @@ public interface DataObjectModification<T extends DataObject>
      *         to generated model.
      */
     default @Nullable <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>>
-            DataObjectModification<C> getModifiedChildContainer(@Nonnull final Class<H> caseType,
-                    @Nonnull final Class<C> child) {
+            DataObjectModification<C> getModifiedChildContainer(final @NonNull Class<H> caseType,
+                    final @NonNull Class<C> child) {
         return (DataObjectModification<C>) getModifiedChild(Item.of(caseType, child));
     }
 
@@ -137,7 +136,7 @@ public interface DataObjectModification<T extends DataObject>
      *         to generated model.
      */
     @Nullable <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChildContainer(
-            @Nonnull Class<C> child);
+            @NonNull Class<C> child);
 
     /**
      * Returns augmentation child modification if {@code augmentation} was modified by this modification.
@@ -151,7 +150,7 @@ public interface DataObjectModification<T extends DataObject>
      *         according to generated model.
      */
     @Nullable <C extends Augmentation<T> & DataObject> DataObjectModification<C> getModifiedAugmentation(
-            @Nonnull Class<C> augmentation);
+            @NonNull Class<C> augmentation);
 
     /**
      * Returns child list item modification if {@code child} was modified by this modification.
@@ -163,7 +162,7 @@ public interface DataObjectModification<T extends DataObject>
      *         to generated model.
      */
     <N extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<N>> DataObjectModification<N>
-            getModifiedChildListItem(@Nonnull Class<N> listItem, @Nonnull K listKey);
+            getModifiedChildListItem(@NonNull Class<N> listItem, @NonNull K listKey);
 
     /**
      * Returns child list item modification if {@code child} was modified by this modification.
@@ -177,7 +176,7 @@ public interface DataObjectModification<T extends DataObject>
      */
     default <H extends ChoiceIn<? super T> & DataObject, C extends Identifiable<K> & ChildOf<? super H>,
             K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
-                    @Nonnull final Class<H> caseType, @Nonnull final Class<C> listItem, @Nonnull final K listKey) {
+                    final @NonNull Class<H> caseType, final @NonNull Class<C> listItem, final @NonNull K listKey) {
         return (DataObjectModification<C>) getModifiedChild(IdentifiableItem.of(caseType, listItem, listKey));
     }
 

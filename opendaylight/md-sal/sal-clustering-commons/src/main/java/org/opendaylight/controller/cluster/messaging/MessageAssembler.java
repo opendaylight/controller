@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
@@ -19,7 +21,7 @@ import java.io.ObjectInputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
@@ -40,9 +42,9 @@ public final  class MessageAssembler implements AutoCloseable {
     private final String logContext;
 
     MessageAssembler(final Builder builder) {
-        this.fileBackedStreamFactory = Preconditions.checkNotNull(builder.fileBackedStreamFactory,
+        this.fileBackedStreamFactory = requireNonNull(builder.fileBackedStreamFactory,
                 "FiledBackedStreamFactory cannot be null");
-        this.assembledMessageCallback = Preconditions.checkNotNull(builder.assembledMessageCallback,
+        this.assembledMessageCallback = requireNonNull(builder.assembledMessageCallback,
                 "assembledMessageCallback cannot be null");
         this.logContext = builder.logContext;
 
@@ -94,7 +96,7 @@ public final  class MessageAssembler implements AutoCloseable {
      * @param sendTo the reference of the actor to which subsequent message slices should be sent
      * @return true if the message was handled, false otherwise
      */
-    public boolean handleMessage(final Object message, final @Nonnull ActorRef sendTo) {
+    public boolean handleMessage(final Object message, final @NonNull ActorRef sendTo) {
         if (message instanceof MessageSlice) {
             LOG.debug("{}: handleMessage: {}", logContext, message);
             onMessageSlice((MessageSlice) message, sendTo);
@@ -229,7 +231,7 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
-            this.fileBackedStreamFactory = Preconditions.checkNotNull(newFileBackedStreamFactory);
+            this.fileBackedStreamFactory = requireNonNull(newFileBackedStreamFactory);
             return this;
         }
 
@@ -255,7 +257,7 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder expireStateAfterInactivity(final long duration, final TimeUnit unit) {
-            Preconditions.checkArgument(duration > 0, "duration must be > 0");
+            checkArgument(duration > 0, "duration must be > 0");
             this.expireStateAfterInactivityDuration = duration;
             this.expireStateAfterInactivityUnit = unit;
             return this;

@@ -16,7 +16,7 @@ import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -69,7 +69,7 @@ public class RaftActorLeadershipTransferCohort {
         this(raftActor, null);
     }
 
-    RaftActorLeadershipTransferCohort(final RaftActor raftActor, @Nullable final String requestedFollowerId) {
+    RaftActorLeadershipTransferCohort(final RaftActor raftActor, final @Nullable String requestedFollowerId) {
         this.raftActor = raftActor;
         this.requestedFollowerId = requestedFollowerId;
 

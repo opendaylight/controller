@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
-import com.google.common.base.Preconditions;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -247,7 +248,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         protected void operationComplete(final ServerOperationContext<?> operationContext,
-                @Nullable final ServerChangeStatus replyStatus) {
+                final @Nullable ServerChangeStatus replyStatus) {
             if (replyStatus != null) {
                 sendReply(operationContext, replyStatus);
             }
@@ -453,7 +454,7 @@ class RaftActorServerConfigurationSupport {
 
         InstallingSnapshot(final AddServerContext addServerContext, final Cancellable installSnapshotTimer) {
             super(addServerContext);
-            this.installSnapshotTimer = Preconditions.checkNotNull(installSnapshotTimer);
+            this.installSnapshotTimer = requireNonNull(installSnapshotTimer);
         }
 
         @Override
@@ -497,7 +498,7 @@ class RaftActorServerConfigurationSupport {
 
         WaitingForPriorSnapshotComplete(final AddServerContext addServerContext, final Cancellable snapshotTimer) {
             super(addServerContext);
-            this.snapshotTimer = Preconditions.checkNotNull(snapshotTimer);
+            this.snapshotTimer = requireNonNull(snapshotTimer);
         }
 
         @Override
@@ -609,7 +610,7 @@ class RaftActorServerConfigurationSupport {
         private final RemoveServerContext removeServerContext;
 
         protected RemoveServerState(final RemoveServerContext removeServerContext) {
-            this.removeServerContext = Preconditions.checkNotNull(removeServerContext);
+            this.removeServerContext = requireNonNull(removeServerContext);
 
         }
 
@@ -880,7 +881,7 @@ class RaftActorServerConfigurationSupport {
         private final String loggingContext;
 
         ServerOperationTimeout(final String loggingContext) {
-            this.loggingContext = Preconditions.checkNotNull(loggingContext, "loggingContext should not be null");
+            this.loggingContext = requireNonNull(loggingContext, "loggingContext should not be null");
         }
 
         String getLoggingContext() {

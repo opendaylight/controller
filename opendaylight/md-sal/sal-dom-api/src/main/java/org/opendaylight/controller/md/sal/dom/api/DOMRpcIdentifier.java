@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import java.util.Objects;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
@@ -24,7 +25,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public abstract class DOMRpcIdentifier {
 
     private static final class Global extends DOMRpcIdentifier {
-        private Global(final @Nonnull SchemaPath type) {
+        private Global(final @NonNull SchemaPath type) {
             super(type);
         }
 
@@ -37,9 +38,9 @@ public abstract class DOMRpcIdentifier {
     private static final class Local extends DOMRpcIdentifier {
         private final YangInstanceIdentifier contextReference;
 
-        private Local(final @Nonnull SchemaPath type, final @Nonnull YangInstanceIdentifier contextReference) {
+        private Local(final @NonNull SchemaPath type, final @NonNull YangInstanceIdentifier contextReference) {
             super(type);
-            this.contextReference = Preconditions.checkNotNull(contextReference);
+            this.contextReference = requireNonNull(contextReference);
         }
 
         @Override
@@ -51,7 +52,7 @@ public abstract class DOMRpcIdentifier {
     private final SchemaPath type;
 
     private DOMRpcIdentifier(final SchemaPath type) {
-        this.type = Preconditions.checkNotNull(type);
+        this.type = requireNonNull(type);
     }
 
     /**
@@ -60,7 +61,7 @@ public abstract class DOMRpcIdentifier {
      * @param type RPC type, SchemaPath of its definition, may not be null
      * @return A global RPC identifier, guaranteed to be non-null.
      */
-    public static @Nonnull DOMRpcIdentifier create(final @Nonnull SchemaPath type) {
+    public static @NonNull DOMRpcIdentifier create(final @NonNull SchemaPath type) {
         return new Global(type);
     }
 
@@ -71,7 +72,7 @@ public abstract class DOMRpcIdentifier {
      * @param contextReference Context reference, null means a global RPC identifier.
      * @return A global RPC identifier, guaranteed to be non-null.
      */
-    public static @Nonnull DOMRpcIdentifier create(final @Nonnull SchemaPath type,
+    public static @NonNull DOMRpcIdentifier create(final @NonNull SchemaPath type,
             final @Nullable YangInstanceIdentifier contextReference) {
         if (contextReference == null || contextReference.isEmpty()) {
             return new Global(type);
@@ -92,7 +93,7 @@ public abstract class DOMRpcIdentifier {
      *
      * @return RPC type.
      */
-    public final @Nonnull SchemaPath getType() {
+    public final @NonNull SchemaPath getType() {
         return type;
     }
 
@@ -101,7 +102,7 @@ public abstract class DOMRpcIdentifier {
      *
      * @return RPC context reference.
      */
-    public abstract @Nonnull YangInstanceIdentifier getContextReference();
+    public abstract @NonNull YangInstanceIdentifier getContextReference();
 
     @Override
     public final int hashCode() {
