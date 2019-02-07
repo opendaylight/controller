@@ -46,6 +46,30 @@
       "revId": "631e5ce9401c8cf09ce677f7e6150f9d9ae0e9a7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2a04ccd_e06a2f41",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/persisted/ByteState.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-07T23:06:48Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "794fe361_8159978b",
+      "range": {
+        "startLine": 24,
+        "startChar": 22,
+        "endLine": 24,
+        "endChar": 30
+      },
+      "revId": "631e5ce9401c8cf09ce677f7e6150f9d9ae0e9a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
