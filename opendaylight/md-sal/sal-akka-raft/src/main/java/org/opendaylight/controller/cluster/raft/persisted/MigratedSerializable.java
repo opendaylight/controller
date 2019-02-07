@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.Serializable;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Transitional marker interface for use with evolution of serializable classes held in persistence. This interface
@@ -30,5 +30,5 @@ public interface MigratedSerializable extends Serializable {
      *
      * @return Serialization proxy.
      */
-    @Nonnull Object writeReplace();
+    @NonNull Object writeReplace();
 }

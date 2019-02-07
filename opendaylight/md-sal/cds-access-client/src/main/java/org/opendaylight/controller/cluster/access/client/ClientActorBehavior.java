@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Verify;
 import java.util.Collection;
@@ -17,9 +18,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
 import org.opendaylight.controller.cluster.access.commands.OutOfSequenceEnvelopeException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -61,7 +62,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
          * @param enqueuedEntries Previously-enqueued entries
          * @return A {@link ReconnectForwarder} to handle any straggler messages which arrive after this method returns.
          */
-        @Nonnull ReconnectForwarder finishReconnect(@Nonnull Collection<ConnectionEntry> enqueuedEntries);
+        @NonNull ReconnectForwarder finishReconnect(@NonNull Collection<ConnectionEntry> enqueuedEntries);
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
@@ -86,10 +87,10 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     private final MessageAssembler responseMessageAssembler;
     private final Registration staleBackendInfoReg;
 
-    protected ClientActorBehavior(@Nonnull final ClientActorContext context,
-            @Nonnull final BackendInfoResolver<T> resolver) {
+    protected ClientActorBehavior(final @NonNull ClientActorContext context,
+            final @NonNull BackendInfoResolver<T> resolver) {
         super(context);
-        this.resolver = Preconditions.checkNotNull(resolver);
+        this.resolver = requireNonNull(resolver);
 
         final ClientActorConfig config = context.config();
         responseMessageAssembler = MessageAssembler.builder().logContext(persistenceId())
@@ -110,7 +111,6 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     @Override
-    @Nonnull
     public final ClientIdentifier getIdentifier() {
         return context().getIdentifier();
     }
@@ -275,7 +275,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
      *
      * @param cause Failure cause
      */
-    protected abstract void haltClient(@Nonnull Throwable cause);
+    protected abstract void haltClient(@NonNull Throwable cause);
 
     /**
      * Override this method to handle any command which is not handled by the base behavior.
@@ -283,15 +283,14 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
      * @param command the command to process
      * @return Next behavior to use, null if this actor should shut down.
      */
-    @Nullable
-    protected abstract ClientActorBehavior<T> onCommand(@Nonnull Object command);
+    protected abstract @Nullable ClientActorBehavior<T> onCommand(@NonNull Object command);
 
     /**
      * Override this method to provide a backend resolver instance.
      *
      * @return a backend resolver instance
      */
-    protected final @Nonnull BackendInfoResolver<T> resolver() {
+    protected final @NonNull BackendInfoResolver<T> resolver() {
         return resolver;
     }
 
@@ -303,7 +302,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
      * @return ConnectionConnectCohort which will be used to complete the process of bringing the connection up.
      */
     @GuardedBy("connectionsLock")
-    @Nonnull protected abstract ConnectionConnectCohort connectionUp(@Nonnull ConnectedClientConnection<T> newConn);
+    protected abstract @NonNull ConnectionConnectCohort connectionUp(@NonNull ConnectedClientConnection<T> newConn);
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,
             final T backend, final Throwable failure) {

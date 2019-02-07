@@ -10,7 +10,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 import com.google.common.base.Optional;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class ForwardingDOMDataReadOnlyTransaction extends ForwardingObject
         implements DOMDataReadOnlyTransaction {
     @Override
-    protected abstract @Nonnull DOMDataReadOnlyTransaction delegate();
+    protected abstract @NonNull DOMDataReadOnlyTransaction delegate();
 
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,

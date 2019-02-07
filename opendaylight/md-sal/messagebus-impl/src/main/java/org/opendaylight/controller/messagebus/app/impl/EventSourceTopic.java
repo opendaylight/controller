@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -19,7 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
@@ -64,8 +64,8 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
 
     private EventSourceTopic(final NotificationPattern notificationPattern, final String nodeIdRegexPattern,
             final EventSourceService sourceService) {
-        this.notificationPattern = Preconditions.checkNotNull(notificationPattern);
-        this.sourceService = Preconditions.checkNotNull(sourceService);
+        this.notificationPattern = requireNonNull(notificationPattern);
+        this.sourceService = requireNonNull(sourceService);
         this.nodeIdPattern = Pattern.compile(nodeIdRegexPattern);
         this.topicId = new TopicId(getUUIDIdent());
         this.listenerRegistration = null;
@@ -122,7 +122,7 @@ public final class EventSourceTopic implements DataTreeChangeListener<Node>, Aut
 
         Futures.addCallback(future, new FutureCallback<Optional<Topology>>() {
             @Override
-            public void onSuccess(@Nonnull final Optional<Topology> data) {
+            public void onSuccess(final Optional<Topology> data) {
                 if (data.isPresent()) {
                     final List<Node> nodes = data.get().getNode();
                     if (nodes != null) {

@@ -18,7 +18,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
 import org.slf4j.Logger;
@@ -80,12 +80,11 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     private final List<ServerInfo> serverConfig;
     private int serializedSize = -1;
 
-    public ServerConfigurationPayload(@Nonnull final List<ServerInfo> serverConfig) {
+    public ServerConfigurationPayload(final @NonNull List<ServerInfo> serverConfig) {
         this.serverConfig = ImmutableList.copyOf(serverConfig);
     }
 
-    @Nonnull
-    public List<ServerInfo> getServerConfig() {
+    public @NonNull List<ServerInfo> getServerConfig() {
         return serverConfig;
     }
 

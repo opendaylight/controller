@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import akka.actor.ActorRef;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Registration;
 
 /**
@@ -35,8 +35,7 @@ public abstract class BackendInfoResolver<T extends BackendInfo> implements Auto
      * @param cookie Backend cookie
      * @return A {@link CompletionStage} resulting in information about the backend
      */
-    @Nonnull
-    public abstract CompletionStage<? extends T> getBackendInfo(@Nonnull Long cookie);
+    public abstract @NonNull CompletionStage<? extends T> getBackendInfo(@NonNull Long cookie);
 
     /**
      * Request re-resolution of a particular backend identified by a cookie, indicating a particular information as
@@ -46,8 +45,8 @@ public abstract class BackendInfoResolver<T extends BackendInfo> implements Auto
      * @param staleInfo Stale backend information
      * @return A {@link CompletionStage} resulting in information about the backend
      */
-    @Nonnull
-    public abstract CompletionStage<? extends T> refreshBackendInfo(@Nonnull Long cookie, @Nonnull T staleInfo);
+    public abstract @NonNull CompletionStage<? extends T> refreshBackendInfo(@NonNull Long cookie,
+            @NonNull T staleInfo);
 
     /**
      * Registers a callback to be notified when BackendInfo that may have been previously obtained is now stale and
@@ -56,11 +55,9 @@ public abstract class BackendInfoResolver<T extends BackendInfo> implements Auto
      * @param callback the callback that takes the backend cookie whose BackendInfo is now stale.
      * @return a Registration
      */
-    @Nonnull
-    public abstract Registration notifyWhenBackendInfoIsStale(Consumer<Long> callback);
+    public abstract @NonNull Registration notifyWhenBackendInfoIsStale(Consumer<Long> callback);
 
-    @Nonnull
-    public abstract String resolveCookieName(Long cookie);
+    public abstract @NonNull String resolveCookieName(Long cookie);
 
     @Override
     public void close() {

@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.collect.ForwardingObject;
 import java.util.Set;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
@@ -21,7 +21,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
  */
 public abstract class ForwardingDOMRpcProviderService extends ForwardingObject implements DOMRpcProviderService {
     @Override
-    protected abstract @Nonnull DOMRpcProviderService delegate();
+    protected abstract @NonNull DOMRpcProviderService delegate();
 
     @Override
     public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(

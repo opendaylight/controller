@@ -5,16 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
+
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
@@ -27,7 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
@@ -101,7 +102,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private int minReplicationCount;
 
     protected AbstractLeader(final RaftActorContext context, final RaftState state,
-            @Nullable final AbstractLeader initializeFromLeader) {
+            final @Nullable AbstractLeader initializeFromLeader) {
         super(context, state);
 
         appendEntriesMessageSlicer = MessageSlicer.builder().logContext(logName())
@@ -184,7 +185,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    void setSnapshotHolder(@Nullable final SnapshotHolder snapshotHolder) {
+    void setSnapshotHolder(final @Nullable SnapshotHolder snapshotHolder) {
         this.snapshotHolder = Optional.fromNullable(snapshotHolder);
     }
 
@@ -455,7 +456,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
-        Preconditions.checkNotNull(sender, "sender should not be null");
+        requireNonNull(sender, "sender should not be null");
 
         if (appendEntriesMessageSlicer.handleMessage(message)) {
             return this;
@@ -511,6 +512,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return this;
     }
 
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS",
+            justification = "JDT nullness with SpotBugs at setSnapshotHolder(null)")
     private void handleInstallSnapshotReply(final InstallSnapshotReply reply) {
         log.debug("{}: handleInstallSnapshotReply: {}", logName(), reply);
 

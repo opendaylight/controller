@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 
 @FunctionalInterface
@@ -19,5 +19,5 @@ interface RequestCallback {
      * @param response Response to the request
      * @return Next client actor behavior
      */
-    @Nullable ClientActorBehavior<?> complete(@Nonnull Response<?, ?> response);
+    @Nullable ClientActorBehavior<?> complete(@NonNull Response<?, ?> response);
 }

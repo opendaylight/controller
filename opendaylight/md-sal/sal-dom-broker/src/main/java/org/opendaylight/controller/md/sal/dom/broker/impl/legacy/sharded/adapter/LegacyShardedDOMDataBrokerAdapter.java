@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -13,7 +12,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
@@ -77,7 +75,6 @@ public class LegacyShardedDOMDataBrokerAdapter implements DOMDataBroker {
                                                                   listener);
     }
 
-    @Nonnull
     @Override
     public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
         return Collections.emptyMap();

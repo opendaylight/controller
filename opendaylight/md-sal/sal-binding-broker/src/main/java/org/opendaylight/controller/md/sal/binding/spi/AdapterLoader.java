@@ -9,8 +9,8 @@ package org.opendaylight.controller.md.sal.binding.spi;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheLoader;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 public abstract class AdapterLoader<T, D> extends CacheLoader<Class<? extends T>, Optional<T>> {
 
@@ -29,9 +29,7 @@ public abstract class AdapterLoader<T, D> extends CacheLoader<Class<? extends T>
         return  Optional.<T>of(builder.build());
     }
 
-    @Nullable
-    protected abstract D getDelegate(Class<? extends D> reqDeleg);
+    protected abstract @Nullable D getDelegate(Class<? extends D> reqDeleg);
 
-    @Nonnull
-    protected abstract AdapterBuilder<? extends T, D> createBuilder(Class<? extends T> key);
+    protected abstract @NonNull AdapterBuilder<? extends T, D> createBuilder(Class<? extends T> key);
 }

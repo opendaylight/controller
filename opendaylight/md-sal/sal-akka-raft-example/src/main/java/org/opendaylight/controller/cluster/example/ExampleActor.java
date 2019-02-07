@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
@@ -50,10 +49,9 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     private final Map<String, String> state = new HashMap<>();
-
-    private long persistIdentifier = 1;
     private final Optional<ActorRef> roleChangeNotifier;
 
+    private long persistIdentifier = 1;
 
     public ExampleActor(String id, Map<String, String> peerAddresses,
         Optional<ConfigParams> configParams) {
@@ -155,16 +153,17 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         }
     }
 
-    @Override protected void onStateChanged() {
+    @Override
+    protected void onStateChanged() {
 
     }
 
-    @Override public String persistenceId() {
+    @Override
+    public String persistenceId() {
         return getId();
     }
 
     @Override
-    @Nonnull
     protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
         return this;
     }

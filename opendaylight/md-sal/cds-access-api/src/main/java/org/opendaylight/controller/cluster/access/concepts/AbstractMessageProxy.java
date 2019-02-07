@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.base.Verify;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import java.io.DataInput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -34,7 +35,7 @@ abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Mess
         // For Externalizable
     }
 
-    AbstractMessageProxy(@Nonnull final C message) {
+    AbstractMessageProxy(final @NonNull C message) {
         this.target = message.getTarget();
         this.sequence = message.getSequence();
     }
@@ -47,17 +48,15 @@ abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Mess
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-        target = Verify.verifyNotNull(readTarget(in));
+        target = verifyNotNull(readTarget(in));
         sequence = WritableObjects.readLong(in);
     }
 
     protected final Object readResolve() {
-        return Verify.verifyNotNull(createMessage(target, sequence));
+        return verifyNotNull(createMessage(target, sequence));
     }
 
-    @Nonnull
-    protected abstract T readTarget(@Nonnull DataInput in) throws IOException;
+    protected abstract @NonNull T readTarget(@NonNull DataInput in) throws IOException;
 
-    @Nonnull
-    abstract C createMessage(@Nonnull T msgTarget, long msgSequence);
+    abstract @NonNull C createMessage(@NonNull T msgTarget, long msgSequence);
 }

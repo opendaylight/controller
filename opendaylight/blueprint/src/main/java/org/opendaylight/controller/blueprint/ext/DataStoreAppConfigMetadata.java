@@ -17,11 +17,11 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader.ConfigURLProvider;
 import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -79,9 +79,9 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     // project are still used - conversion to the mdsal binding classes hasn't occurred yet.
     private volatile BindingNormalizedNodeSerializer bindingSerializer;
 
-    public DataStoreAppConfigMetadata(@Nonnull final String id, @Nonnull final String appConfigBindingClassName,
-            @Nullable final String appConfigListKeyValue, @Nullable final String defaultAppConfigFileName,
-            @Nonnull final UpdateStrategy updateStrategyValue, @Nullable final Element defaultAppConfigElement) {
+    public DataStoreAppConfigMetadata(final String id, final @NonNull String appConfigBindingClassName,
+            final @Nullable String appConfigListKeyValue, final @Nullable String defaultAppConfigFileName,
+            final @NonNull UpdateStrategy updateStrategyValue, final @Nullable Element defaultAppConfigElement) {
         super(id);
         this.defaultAppConfigElement = defaultAppConfigElement;
         this.defaultAppConfigFileName = defaultAppConfigFileName;
@@ -279,8 +279,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
     }
 
-    @Nullable
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(final SchemaContext schemaContext,
+    private @Nullable NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(final SchemaContext schemaContext,
             final DataSchemaNode dataSchema) throws URISyntaxException, IOException, ParserConfigurationException,
             SAXException, XMLStreamException {
         if (defaultAppConfigElement == null) {

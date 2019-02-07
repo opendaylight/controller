@@ -7,15 +7,16 @@
  */
 package org.opendaylight.controller.md.sal.dom.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -55,21 +56,21 @@ public final class DefaultDOMRpcResult implements DOMRpcResult, Immutable, Seria
     }
 
     public DefaultDOMRpcResult(final NormalizedNode<?, ?> result) {
-        this(result, Collections.<RpcError>emptyList());
+        this(result, Collections.emptyList());
     }
 
     public DefaultDOMRpcResult(final NormalizedNode<?, ?> result,
-            final @Nonnull Collection<? extends RpcError> errors) {
+            final @NonNull Collection<? extends RpcError> errors) {
         this.result = result;
-        this.errors = Preconditions.checkNotNull(errors);
+        this.errors = requireNonNull(errors);
     }
 
-    public DefaultDOMRpcResult(final @Nonnull Collection<RpcError> errors) {
+    public DefaultDOMRpcResult(final @NonNull Collection<RpcError> errors) {
         this(null, errors);
     }
 
     @Override
-    public @Nonnull Collection<? extends RpcError> getErrors() {
+    public Collection<? extends RpcError> getErrors() {
         return errors;
     }
 

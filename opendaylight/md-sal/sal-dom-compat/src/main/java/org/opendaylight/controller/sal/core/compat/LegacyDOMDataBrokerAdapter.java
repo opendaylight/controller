@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.core.compat;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -24,7 +23,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.MappingCheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
@@ -221,20 +220,20 @@ public class LegacyDOMDataBrokerAdapter extends ForwardingObject implements DOMD
         private final DOMDataTreeWriteTransaction writeDelegate;
         private final Object identifier;
 
-        DOMDataTransactionAdapter(@Nonnull final DOMDataTreeReadTransaction readDelegate) {
-            this.readDelegate = Preconditions.checkNotNull(readDelegate);
+        DOMDataTransactionAdapter(final @NonNull DOMDataTreeReadTransaction readDelegate) {
+            this.readDelegate = requireNonNull(readDelegate);
             this.identifier = readDelegate.getIdentifier();
             this.writeDelegate = null;
         }
 
-        DOMDataTransactionAdapter(@Nonnull final DOMDataTreeWriteTransaction writeDelegate) {
-            this.writeDelegate = Preconditions.checkNotNull(writeDelegate);
+        DOMDataTransactionAdapter(final @NonNull DOMDataTreeWriteTransaction writeDelegate) {
+            this.writeDelegate = requireNonNull(writeDelegate);
             this.identifier = writeDelegate.getIdentifier();
             this.readDelegate = null;
         }
 
-        DOMDataTransactionAdapter(@Nonnull final DOMDataTreeReadWriteTransaction rwDelegate) {
-            this.readDelegate = Preconditions.checkNotNull(rwDelegate);
+        DOMDataTransactionAdapter(final @NonNull DOMDataTreeReadWriteTransaction rwDelegate) {
+            this.readDelegate = requireNonNull(rwDelegate);
             this.writeDelegate = rwDelegate;
             this.identifier = readDelegate.getIdentifier();
         }

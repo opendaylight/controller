@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.notifications;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static java.util.Objects.requireNonNull;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A local message initiated internally from the RaftActor when some state of a leader has changed.
@@ -22,13 +22,13 @@ public class LeaderStateChanged {
     private final String leaderId;
     private final short leaderPayloadVersion;
 
-    public LeaderStateChanged(@Nonnull String memberId, @Nullable String leaderId, short leaderPayloadVersion) {
-        this.memberId = Preconditions.checkNotNull(memberId);
+    public LeaderStateChanged(@NonNull String memberId, @Nullable String leaderId, short leaderPayloadVersion) {
+        this.memberId = requireNonNull(memberId);
         this.leaderId = leaderId;
         this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
-    public @Nonnull String getMemberId() {
+    public @NonNull String getMemberId() {
         return memberId;
     }
 

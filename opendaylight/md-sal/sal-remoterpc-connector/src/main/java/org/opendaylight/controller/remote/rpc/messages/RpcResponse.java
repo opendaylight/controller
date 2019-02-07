@@ -12,7 +12,7 @@ import java.io.Externalizable;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -24,12 +24,11 @@ public class RpcResponse implements Serializable {
             + "aren't serialized. FindBugs does not recognize this.")
     private final NormalizedNode<?, ?> resultNormalizedNode;
 
-    public RpcResponse(@Nullable final NormalizedNode<?, ?> inputNormalizedNode) {
+    public RpcResponse(final @Nullable NormalizedNode<?, ?> inputNormalizedNode) {
         resultNormalizedNode = inputNormalizedNode;
     }
 
-    @Nullable
-    public NormalizedNode<?, ?> getResultNormalizedNode() {
+    public @Nullable NormalizedNode<?, ?> getResultNormalizedNode() {
         return resultNormalizedNode;
     }
 

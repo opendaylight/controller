@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.impl.LazySerializedDOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
@@ -29,7 +28,7 @@ final class FunctionalNotificationListenerAdapter<N extends Notification> implem
     }
 
     @Override
-    public void onNotification(@Nonnull final DOMNotification notification) {
+    public void onNotification(final DOMNotification notification) {
         delegate.onNotification(type.cast(deserialize(notification)));
     }
 

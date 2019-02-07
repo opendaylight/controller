@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * ElectionTerm contains information about a RaftActors election term.
@@ -33,8 +32,7 @@ public interface ElectionTerm {
      *
      * @return candidate id that received the vote or null if no candidate was voted for.
      */
-    @Nullable
-    String getVotedFor();
+    @Nullable String getVotedFor();
 
     /**
      * This method updates the in-memory election term state. This method should be called when recovering election

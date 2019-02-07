@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.dom.api;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 
@@ -35,6 +35,6 @@ public interface CDSDataTreeProducer extends DOMDataTreeProducer {
      *         are violated, for example if this producer is bound and this thread
      *         is currently not executing from a listener context.
      */
-    @Nonnull CDSShardAccess getShardAccess(@Nonnull DOMDataTreeIdentifier subtree);
+    @NonNull CDSShardAccess getShardAccess(@NonNull DOMDataTreeIdentifier subtree);
 }
 

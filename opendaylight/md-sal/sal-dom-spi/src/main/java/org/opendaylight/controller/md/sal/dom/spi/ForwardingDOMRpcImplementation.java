@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 public abstract class ForwardingDOMRpcImplementation extends ForwardingObject implements DOMRpcImplementation {
     @Override
-    protected abstract @Nonnull DOMRpcImplementation delegate();
+    protected abstract @NonNull DOMRpcImplementation delegate();
 
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier type,

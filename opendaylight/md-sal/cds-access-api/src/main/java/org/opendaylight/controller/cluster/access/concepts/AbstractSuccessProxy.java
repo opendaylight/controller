@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -27,7 +27,7 @@ public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C exten
         // For Externalizable
     }
 
-    protected AbstractSuccessProxy(@Nonnull final C success) {
+    protected AbstractSuccessProxy(final @NonNull C success) {
         super(success);
     }
 
@@ -36,6 +36,5 @@ public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C exten
         return createSuccess(target, sequence);
     }
 
-    @Nonnull
-    protected abstract C createSuccess(@Nonnull T target, long sequence);
+    protected abstract @NonNull C createSuccess(@NonNull T target, long sequence);
 }

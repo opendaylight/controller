@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Verify.verifyNotNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -34,19 +35,19 @@ public abstract class AbstractDataTreeModificationCursor implements DataTreeModi
     }
 
     @Override
-    public final void enter(@Nonnull final PathArgument child) {
+    public final void enter(final PathArgument child) {
         current = current.node(child);
     }
 
     @Override
-    public final void enter(@Nonnull final PathArgument... path) {
+    public final void enter(final PathArgument... path) {
         for (PathArgument arg : path) {
             enter(arg);
         }
     }
 
     @Override
-    public final void enter(@Nonnull final Iterable<PathArgument> path) {
+    public final void enter(final Iterable<PathArgument> path) {
         for (PathArgument arg : path) {
             enter(arg);
         }
@@ -54,25 +55,25 @@ public abstract class AbstractDataTreeModificationCursor implements DataTreeModi
 
     @Override
     public final void exit() {
-        Preconditions.checkState(!current.isEmpty());
-        current = Verify.verifyNotNull(current.getParent());
+        checkState(!current.isEmpty());
+        current = verifyNotNull(current.getParent());
     }
 
     @Override
     public final void exit(final int depth) {
-        Preconditions.checkArgument(depth >= 0);
+        checkArgument(depth >= 0);
 
         YangInstanceIdentifier next = current;
         for (int i = 0; i < depth; ++i) {
             next = next.getParent();
-            Preconditions.checkState(next != null);
+            checkState(next != null);
         }
 
         current = next;
     }
 
     @Override
-    public final Optional<NormalizedNode<?, ?>> readNode(@Nonnull final PathArgument child) {
+    public final Optional<NormalizedNode<?, ?>> readNode(final PathArgument child) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public enum ABIVersion implements WritableObject {
     private final short value;
 
     ABIVersion(final int intVersion) {
-        Preconditions.checkArgument(intVersion >= 0 && intVersion <= 65535);
+        checkArgument(intVersion >= 0 && intVersion <= 65535);
         value = (short) intVersion;
     }
 
@@ -69,8 +70,7 @@ public enum ABIVersion implements WritableObject {
      *
      * @return Current {@link ABIVersion}
      */
-    @Nonnull
-    public static ABIVersion current() {
+    public static @NonNull ABIVersion current() {
         return BORON;
     }
 
@@ -83,8 +83,7 @@ public enum ABIVersion implements WritableObject {
      * @throws FutureVersionException if the specified integer identifies a future version
      * @throws PastVersionException if the specified integer identifies a past version which is no longer supported
      */
-    @Nonnull
-    public static ABIVersion valueOf(final short value) throws FutureVersionException, PastVersionException {
+    public static @NonNull ABIVersion valueOf(final short value) throws FutureVersionException, PastVersionException {
         switch (Short.toUnsignedInt(value)) {
             case 0:
             case 1:
@@ -112,8 +111,7 @@ public enum ABIVersion implements WritableObject {
      * @return An {@link ABIVersion}
      * @throws IOException If read fails or an unsupported version is encountered
      */
-    @Nonnull
-    public static ABIVersion readFrom(@Nonnull final DataInput in) throws IOException {
+    public static @NonNull ABIVersion readFrom(final @NonNull DataInput in) throws IOException {
         final short s = in.readShort();
         try {
             return valueOf(s);
@@ -122,7 +120,7 @@ public enum ABIVersion implements WritableObject {
         }
     }
 
-    public static ABIVersion inexactReadFrom(@Nonnull final DataInput in) throws IOException {
+    public static @NonNull ABIVersion inexactReadFrom(final @NonNull DataInput in) throws IOException {
         final short onWire = in.readShort();
         try {
             return ABIVersion.valueOf(onWire);

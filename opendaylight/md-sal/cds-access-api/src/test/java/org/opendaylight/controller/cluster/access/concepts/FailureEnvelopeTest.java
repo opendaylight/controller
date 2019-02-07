@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.DataInput;
 import java.io.IOException;
-import javax.annotation.Nonnull;
-import org.junit.Assert;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -25,11 +25,11 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
 
     @Override
     protected void doAdditionalAssertions(final FailureEnvelope envelope, final FailureEnvelope resolvedObject) {
-        Assert.assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
+        assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
         final RequestException expectedCause = envelope.getMessage().getCause();
         final RequestException actualCause = resolvedObject.getMessage().getCause();
-        Assert.assertEquals(expectedCause.getMessage(), actualCause.getMessage());
-        Assert.assertEquals(expectedCause.isRetriable(), actualCause.isRetriable());
+        assertEquals(expectedCause.getMessage(), actualCause.getMessage());
+        assertEquals(expectedCause.isRetriable(), actualCause.isRetriable());
     }
 
     private static class MockRequestFailureProxy extends AbstractRequestFailureProxy<WritableIdentifier, MockFailure> {
@@ -43,16 +43,14 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
             super(mockFailure);
         }
 
-        @Nonnull
         @Override
-        protected MockFailure createFailure(@Nonnull final WritableIdentifier target, final long sequence,
-                                            @Nonnull final RequestException failureCause) {
+        protected MockFailure createFailure(final WritableIdentifier target, final long sequence,
+                                            final RequestException failureCause) {
             return new MockFailure(target, failureCause, sequence);
         }
 
-        @Nonnull
         @Override
-        protected WritableIdentifier readTarget(@Nonnull final DataInput in) throws IOException {
+        protected WritableIdentifier readTarget(final DataInput in) throws IOException {
             return TransactionIdentifier.readFrom(in);
         }
 
@@ -75,7 +73,5 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
         protected MockFailure cloneAsVersion(final ABIVersion version) {
             return this;
         }
-
     }
-
 }

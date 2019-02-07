@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -26,7 +26,7 @@ abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Res
         // for Externalizable
     }
 
-    AbstractResponseProxy(@Nonnull final C response) {
+    AbstractResponseProxy(final @NonNull C response) {
         super(response);
     }
 
@@ -35,6 +35,5 @@ abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Res
         return createResponse(target, sequence);
     }
 
-    @Nonnull
-    abstract C createResponse(@Nonnull T target, long sequence);
+    abstract @NonNull C createResponse(@NonNull T target, long sequence);
 }
