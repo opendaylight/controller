@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
@@ -319,7 +318,6 @@ public class TracingBroker implements TracingDOMDataBroker {
         return new TracingReadOnlyTransaction(delegate.newReadOnlyTransaction(), readOnlyTransactionsRegistry);
     }
 
-    @Nonnull
     @Override
     public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
         Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> res = delegate.getSupportedExtensions();
@@ -331,10 +329,9 @@ public class TracingBroker implements TracingDOMDataBroker {
         res = new HashMap<>(res);
 
         res.put(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
-            @Nonnull
             @Override
             public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
-                    @Nonnull DOMDataTreeIdentifier domDataTreeIdentifier, @Nonnull L listener) {
+                    DOMDataTreeIdentifier domDataTreeIdentifier, L listener) {
                 if (isRegistrationWatched(domDataTreeIdentifier.getRootIdentifier(),
                         domDataTreeIdentifier.getDatastoreType())) {
                     LOG.warn("{} registration (registerDataTreeChangeListener) for {} from {}.",

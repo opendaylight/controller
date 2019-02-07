@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 import java.util.Set;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link DOMService} which allows registration of RPC implementations with a conceptual router. The client
@@ -43,8 +43,8 @@ public interface DOMRpcProviderService extends DOMService {
      * @throws NullPointerException if implementation or types is null
      * @throws IllegalArgumentException if types is empty or contains a null element.
      */
-    @Nonnull <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
-            @Nonnull T implementation, @Nonnull DOMRpcIdentifier... rpcs);
+    @NonNull <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            @NonNull T implementation, @NonNull DOMRpcIdentifier... rpcs);
 
     /**
      * Register an {@link DOMRpcImplementation} object with this service.
@@ -55,6 +55,6 @@ public interface DOMRpcProviderService extends DOMService {
      * @throws NullPointerException if implementation or types is null
      * @throws IllegalArgumentException if types is empty or contains a null element.
      */
-    @Nonnull <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
-            @Nonnull T implementation, @Nonnull Set<DOMRpcIdentifier> rpcs);
+    @NonNull <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            @NonNull T implementation, @NonNull Set<DOMRpcIdentifier> rpcs);
 }

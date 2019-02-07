@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.api;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
@@ -25,13 +24,12 @@ public interface DataTreeModification<T extends DataObject> {
      *
      * @return absolute path of the root node
      */
-    @Nonnull DataTreeIdentifier<T> getRootPath();
+    @NonNull DataTreeIdentifier<T> getRootPath();
 
     /**
      * Get the modification root node.
      *
      * @return modification root node
      */
-    @Nonnull DataObjectModification<T> getRootNode();
-
+    @NonNull DataObjectModification<T> getRootNode();
 }

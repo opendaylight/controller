@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.collect.ForwardingObject;
 import java.util.Collection;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 public abstract class ForwardingDOMRpcResult extends ForwardingObject implements DOMRpcResult {
     @Override
-    protected abstract @Nonnull DOMRpcResult delegate();
+    protected abstract @NonNull DOMRpcResult delegate();
 
     @Override
     public Collection<? extends RpcError> getErrors() {

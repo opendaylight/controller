@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.access;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Abstract base exception used for reporting version mismatches from {@link ABIVersion}.
@@ -19,12 +20,12 @@ import javax.annotation.Nonnull;
 @Beta
 public abstract class AbstractVersionException extends Exception {
     private static final long serialVersionUID = 1L;
-    private final ABIVersion closestVersion;
+    private final @NonNull ABIVersion closestVersion;
     private final int version;
 
     AbstractVersionException(final String message, final short version, final ABIVersion closestVersion) {
         super(message);
-        this.closestVersion = Preconditions.checkNotNull(closestVersion);
+        this.closestVersion = requireNonNull(closestVersion);
         this.version = Short.toUnsignedInt(version);
     }
 
@@ -42,8 +43,7 @@ public abstract class AbstractVersionException extends Exception {
      *
      * @return Closest supported {@link ABIVersion}
      */
-    @Nonnull
-    public final ABIVersion getClosestVersion() {
+    public final @NonNull ABIVersion getClosestVersion() {
         return closestVersion;
     }
 

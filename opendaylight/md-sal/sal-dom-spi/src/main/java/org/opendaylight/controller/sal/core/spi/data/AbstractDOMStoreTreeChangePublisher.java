@@ -9,7 +9,7 @@ package org.opendaylight.controller.sal.core.spi.data;
 
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.AbstractRegistrationTree;
@@ -39,8 +39,8 @@ public abstract class AbstractDOMStoreTreeChangePublisher
      * @param path Path of changed candidate node. Guaranteed to match the path specified by the registration
      * @param node Candidate node
      */
-    protected abstract void notifyListeners(@Nonnull Collection<AbstractDOMDataTreeChangeListenerRegistration<?>>
-            registrations, @Nonnull YangInstanceIdentifier path, @Nonnull DataTreeCandidateNode node);
+    protected abstract void notifyListeners(@NonNull Collection<AbstractDOMDataTreeChangeListenerRegistration<?>>
+            registrations, @NonNull YangInstanceIdentifier path, @NonNull DataTreeCandidateNode node);
 
     /**
      * Callback notifying the subclass that the specified registration is being closed and it's user no longer
@@ -51,14 +51,14 @@ public abstract class AbstractDOMStoreTreeChangePublisher
      *
      * @param registration Registration which is being closed
      */
-    protected abstract void registrationRemoved(@Nonnull AbstractDOMDataTreeChangeListenerRegistration<?> registration);
+    protected abstract void registrationRemoved(@NonNull AbstractDOMDataTreeChangeListenerRegistration<?> registration);
 
     /**
      * Process a candidate tree with respect to registered listeners.
      *
      * @param candidate candidate three which needs to be processed
      */
-    protected final void processCandidateTree(@Nonnull final DataTreeCandidate candidate) {
+    protected final void processCandidateTree(final @NonNull DataTreeCandidate candidate) {
         final DataTreeCandidateNode node = candidate.getRootNode();
         if (node.getModificationType() == ModificationType.UNMODIFIED) {
             LOG.debug("Skipping unmodified candidate {}", candidate);

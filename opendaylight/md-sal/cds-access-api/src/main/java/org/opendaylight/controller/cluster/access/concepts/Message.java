@@ -7,14 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import java.io.Serializable;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -56,13 +57,13 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final ABIVersion version;
+    private final @NonNull ABIVersion version;
     private final long sequence;
-    private final T target;
+    private final @NonNull T target;
 
     private Message(final ABIVersion version, final T target, final long sequence) {
-        this.target = Preconditions.checkNotNull(target);
-        this.version = Preconditions.checkNotNull(version);
+        this.target = requireNonNull(target);
+        this.version = requireNonNull(version);
         this.sequence = sequence;
     }
 
@@ -79,8 +80,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      *
      * @return Target identifier
      */
-    @Nonnull
-    public final T getTarget() {
+    public final @NonNull T getTarget() {
         return target;
     }
 
@@ -94,8 +94,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
     }
 
     @VisibleForTesting
-    @Nonnull
-    public final ABIVersion getVersion() {
+    public final @NonNull ABIVersion getVersion() {
         return version;
     }
 
@@ -106,15 +105,14 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @return A new message which will use ABIVersion as its serialization.
      */
     @SuppressWarnings("unchecked")
-    @Nonnull
-    public final C toVersion(@Nonnull final ABIVersion toVersion) {
+    public final @NonNull C toVersion(final @NonNull ABIVersion toVersion) {
         if (this.version == toVersion) {
             return (C)this;
         }
 
         switch (toVersion) {
             case BORON:
-                return Verify.verifyNotNull(cloneAsVersion(toVersion));
+                return verifyNotNull(cloneAsVersion(toVersion));
             case TEST_PAST_VERSION:
             case TEST_FUTURE_VERSION:
             default:
@@ -134,8 +132,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @return A message with the specified serialization stream
      * @throws IllegalArgumentException if this message does not support the target ABI
      */
-    @Nonnull
-    protected abstract C cloneAsVersion(@Nonnull ABIVersion targetVersion);
+    protected abstract @NonNull C cloneAsVersion(@NonNull ABIVersion targetVersion);
 
     @Override
     public final String toString() {
@@ -150,8 +147,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @return The {@link ToStringHelper} passed in as argument
      * @throws NullPointerException if toStringHelper is null
      */
-    @Nonnull
-    protected ToStringHelper addToStringAttributes(@Nonnull final ToStringHelper toStringHelper) {
+    protected @NonNull ToStringHelper addToStringAttributes(final @NonNull ToStringHelper toStringHelper) {
         return toStringHelper.add("target", target).add("sequence", Long.toUnsignedString(sequence));
     }
 
@@ -163,8 +159,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @param reqVersion Requested ABI version
      * @return Proxy for this object
      */
-    @Nonnull
-    abstract AbstractMessageProxy<T, C> externalizableProxy(@Nonnull ABIVersion reqVersion);
+    abstract @NonNull AbstractMessageProxy<T, C> externalizableProxy(@NonNull ABIVersion reqVersion);
 
     protected final Object writeReplace() {
         return externalizableProxy(version);

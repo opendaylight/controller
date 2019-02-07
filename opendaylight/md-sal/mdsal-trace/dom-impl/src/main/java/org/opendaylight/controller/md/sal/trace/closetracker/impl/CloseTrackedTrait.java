@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Objects;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Implementation of {@link CloseTracked} which can be used as a field in
@@ -39,13 +40,12 @@ public class CloseTrackedTrait<T extends CloseTracked<T>> implements CloseTracke
         } else {
             this.allocationContext = null;
         }
-        this.realCloseTracked = Objects.requireNonNull(realCloseTracked, "realCloseTracked");
-        this.closeTrackedRegistry = Objects.requireNonNull(transactionChainRegistry, "transactionChainRegistry");
+        this.realCloseTracked = requireNonNull(realCloseTracked, "realCloseTracked");
+        this.closeTrackedRegistry = requireNonNull(transactionChainRegistry, "transactionChainRegistry");
         this.closeTrackedRegistry.add(this);
     }
 
     @Override
-    @Nullable
     @SuppressFBWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
     public StackTraceElement[] getAllocationContextStackTrace() {
         return allocationContext != null ? allocationContext.getStackTrace() : null;

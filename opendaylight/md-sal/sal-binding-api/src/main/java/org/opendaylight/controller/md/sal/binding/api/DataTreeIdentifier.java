@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Serializable;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.Path;
@@ -23,12 +24,13 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public final class DataTreeIdentifier<T extends DataObject> implements Immutable,
         Path<DataTreeIdentifier<?>>, Serializable {
     private static final long serialVersionUID = 1L;
-    private final InstanceIdentifier<T> rootIdentifier;
-    private final LogicalDatastoreType datastoreType;
+
+    private final @NonNull InstanceIdentifier<T> rootIdentifier;
+    private final @NonNull LogicalDatastoreType datastoreType;
 
     public DataTreeIdentifier(final LogicalDatastoreType datastoreType, final InstanceIdentifier<T> rootIdentifier) {
-        this.datastoreType = Preconditions.checkNotNull(datastoreType);
-        this.rootIdentifier = Preconditions.checkNotNull(rootIdentifier);
+        this.datastoreType = requireNonNull(datastoreType);
+        this.rootIdentifier = requireNonNull(rootIdentifier);
     }
 
     /**
@@ -36,7 +38,7 @@ public final class DataTreeIdentifier<T extends DataObject> implements Immutable
      *
      * @return Logical data store type. Guaranteed to be non-null.
      */
-    public @Nonnull LogicalDatastoreType getDatastoreType() {
+    public @NonNull LogicalDatastoreType getDatastoreType() {
         return datastoreType;
     }
 
@@ -45,7 +47,7 @@ public final class DataTreeIdentifier<T extends DataObject> implements Immutable
      *
      * @return Instance identifier corresponding to the root node.
      */
-    public @Nonnull InstanceIdentifier<T> getRootIdentifier() {
+    public @NonNull InstanceIdentifier<T> getRootIdentifier() {
         return rootIdentifier;
     }
 

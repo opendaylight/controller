@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import java.util.concurrent.ExecutorService;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
@@ -26,8 +26,7 @@ public final class InMemoryDOMDataStoreFactory {
     private InMemoryDOMDataStoreFactory() {
     }
 
-    public static InMemoryDOMDataStore create(final String name,
-            @Nullable final DOMSchemaService schemaService) {
+    public static InMemoryDOMDataStore create(final String name, final @Nullable DOMSchemaService schemaService) {
         return create(name, schemaService, null);
     }
 
@@ -40,9 +39,8 @@ public final class InMemoryDOMDataStoreFactory {
      *                   default property values are used.
      * @return an InMemoryDOMDataStore instance
      */
-    public static InMemoryDOMDataStore create(final String name,
-            @Nullable final DOMSchemaService schemaService,
-            @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
+    public static InMemoryDOMDataStore create(final String name, final @Nullable DOMSchemaService schemaService,
+            final @Nullable InMemoryDOMDataStoreConfigProperties properties) {
         return create(name, LogicalDatastoreType.OPERATIONAL, schemaService, false, properties);
     }
 
@@ -58,8 +56,8 @@ public final class InMemoryDOMDataStoreFactory {
      * @return an InMemoryDOMDataStore instance
      */
     public static InMemoryDOMDataStore create(final String name, final LogicalDatastoreType type,
-            @Nullable final DOMSchemaService schemaService, final boolean debugTransactions,
-            @Nullable final InMemoryDOMDataStoreConfigProperties properties) {
+            final @Nullable DOMSchemaService schemaService, final boolean debugTransactions,
+            final @Nullable InMemoryDOMDataStoreConfigProperties properties) {
 
         InMemoryDOMDataStoreConfigProperties actualProperties = properties;
         if (actualProperties == null) {

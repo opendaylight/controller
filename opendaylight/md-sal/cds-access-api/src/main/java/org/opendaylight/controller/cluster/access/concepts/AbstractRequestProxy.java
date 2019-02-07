@@ -14,7 +14,7 @@ import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
@@ -34,7 +34,7 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
         // For Externalizable
     }
 
-    protected AbstractRequestProxy(@Nonnull final C request) {
+    protected AbstractRequestProxy(final @NonNull C request) {
         super(request);
         this.replyTo = request.getReplyTo();
     }
@@ -52,11 +52,9 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
     }
 
     @Override
-    @Nonnull
-    final C createMessage(@Nonnull final T target, final long sequence) {
+    final C createMessage(final T target, final long sequence) {
         return createRequest(target, sequence, replyTo);
     }
 
-    @Nonnull
-    protected abstract C createRequest(@Nonnull T target, long sequence, @Nonnull ActorRef replyToActor);
+    protected abstract @NonNull C createRequest(@NonNull T target, long sequence, @NonNull ActorRef replyToActor);
 }
