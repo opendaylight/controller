@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Base behavior attached to {@link AbstractClientActor}.
@@ -22,11 +23,11 @@ import javax.annotation.Nullable;
  */
 @Beta
 public abstract class AbstractClientActorBehavior<C extends AbstractClientActorContext> implements AutoCloseable {
-    private final C context;
+    private final @NonNull C context;
 
-    AbstractClientActorBehavior(@Nonnull final C context) {
+    AbstractClientActorBehavior(final @NonNull C context) {
         // Hidden to prevent outside subclasses. Users instantiated this via ClientActorBehavior
-        this.context = Preconditions.checkNotNull(context);
+        this.context = requireNonNull(context);
     }
 
     /**
@@ -34,8 +35,7 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      *
      * @return A client actor context instance.
      */
-    @Nonnull
-    protected final C context() {
+    protected final @NonNull C context() {
         return context;
     }
 
@@ -45,8 +45,7 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      *
      * @return Persistence identifier
      */
-    @Nonnull
-    protected final String persistenceId() {
+    protected final @NonNull String persistenceId() {
         return context.persistenceId();
     }
 
@@ -55,8 +54,7 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      *
      * @return Actor associated with this behavior
      */
-    @Nonnull
-    public final ActorRef self() {
+    public final @NonNull ActorRef self() {
         return context.self();
     }
 
@@ -70,8 +68,7 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      * @param command Command message
      * @return Behavior which should be used with the next message. Return null if this actor should shut down.
      */
-    @Nullable
-    abstract AbstractClientActorBehavior<?> onReceiveCommand(@Nonnull Object command);
+    abstract @Nullable AbstractClientActorBehavior<?> onReceiveCommand(@NonNull Object command);
 
     /**
      * Implementation-internal method for handling an incoming recovery message coming from persistence.
@@ -79,6 +76,5 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
      * @param recover Recover message
      * @return Behavior which should be used with the next message. Return null if this actor should shut down.
      */
-    @Nullable
-    abstract AbstractClientActorBehavior<?> onReceiveRecover(@Nonnull Object recover);
+    abstract @Nullable AbstractClientActorBehavior<?> onReceiveRecover(@NonNull Object recover);
 }

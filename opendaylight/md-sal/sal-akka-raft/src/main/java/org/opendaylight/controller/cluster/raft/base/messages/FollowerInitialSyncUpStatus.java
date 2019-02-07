@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * The FollowerInitialSyncUpStatus is sent by a Follower to inform any RaftActor subclass whether the Follower
@@ -21,16 +21,16 @@ public final class FollowerInitialSyncUpStatus {
     private final boolean initialSyncDone;
     private final String name;
 
-    public FollowerInitialSyncUpStatus(final boolean initialSyncDone, @Nonnull final String name) {
+    public FollowerInitialSyncUpStatus(final boolean initialSyncDone, final @NonNull String name) {
         this.initialSyncDone = initialSyncDone;
-        this.name = Preconditions.checkNotNull(name);
+        this.name = requireNonNull(name);
     }
 
     public boolean isInitialSyncDone() {
         return initialSyncDone;
     }
 
-    @Nonnull public String getName() {
+    public @NonNull String getName() {
         return name;
     }
 }

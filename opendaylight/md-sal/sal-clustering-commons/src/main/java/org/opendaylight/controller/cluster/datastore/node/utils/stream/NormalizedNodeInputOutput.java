@@ -11,7 +11,7 @@ import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 @Beta
 public final class NormalizedNodeInputOutput {
@@ -27,7 +27,7 @@ public final class NormalizedNodeInputOutput {
      * @return a new {@link NormalizedNodeDataInput} instance
      * @throws IOException if an error occurs reading from the input
      */
-    public static NormalizedNodeDataInput newDataInput(@Nonnull final DataInput input) throws IOException {
+    public static NormalizedNodeDataInput newDataInput(final @NonNull DataInput input) throws IOException {
         final byte marker = input.readByte();
         if (marker != TokenTypes.SIGNATURE_MARKER) {
             throw new InvalidNormalizedNodeStreamException(String.format("Invalid signature marker: %d", marker));
@@ -49,7 +49,7 @@ public final class NormalizedNodeInputOutput {
      * @param input the DataInput to read from
      * @return a new {@link NormalizedNodeDataInput} instance
      */
-    public static NormalizedNodeDataInput newDataInputWithoutValidation(@Nonnull final DataInput input) {
+    public static NormalizedNodeDataInput newDataInputWithoutValidation(final @NonNull DataInput input) {
         return new NormalizedNodeInputStreamReader(input, false);
     }
 
@@ -59,7 +59,7 @@ public final class NormalizedNodeInputOutput {
      * @param output the DataOutput to write to
      * @return a new {@link NormalizedNodeDataOutput} instance
      */
-    public static NormalizedNodeDataOutput newDataOutput(@Nonnull final DataOutput output) {
+    public static NormalizedNodeDataOutput newDataOutput(final @NonNull DataOutput output) {
         return new NormalizedNodeOutputStreamWriter(output);
     }
 }

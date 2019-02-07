@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ITEM;
@@ -22,7 +21,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -44,7 +42,7 @@ public class IdIntsListener implements ClusteredDOMDataTreeChangeListener {
     private ScheduledFuture<?> scheduledFuture;
 
     @Override
-    public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
 
         // There should only be one candidate reported
         Preconditions.checkState(changes.size() == 1);

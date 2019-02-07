@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Snapshot State implementation backed by a byte[].
@@ -19,21 +20,21 @@ import javax.annotation.Nonnull;
 public final class ByteState implements Snapshot.State {
     private static final long serialVersionUID = 1L;
 
-    private final byte[] bytes;
+    private final byte @NonNull[] bytes;
 
-    private ByteState(@Nonnull final byte[] bytes) {
-        this.bytes = Preconditions.checkNotNull(bytes);
+    private ByteState(final byte @NonNull[] bytes) {
+        this.bytes = requireNonNull(bytes);
     }
 
-    public static ByteState of(@Nonnull final byte[] bytes) {
+    public static @NonNull ByteState of(final byte @NonNull[] bytes) {
         return new ByteState(bytes);
     }
 
-    public static ByteState empty() {
+    public static @NonNull ByteState empty() {
         return new ByteState(new byte[0]);
     }
 
-    public byte[] getBytes() {
+    public byte @NonNull[] getBytes() {
         return bytes;
     }
 

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -98,16 +98,14 @@ public interface ConfigParams {
      *
      * @return an instance of RaftPolicy, if set, or an instance of the DefaultRaftPolicy.
      */
-    @Nonnull
-    RaftPolicy getRaftPolicy();
+    @NonNull RaftPolicy getRaftPolicy();
 
     /**
      * Returns the PeerAddressResolver.
      *
      * @return the PeerAddressResolver instance.
      */
-    @Nonnull
-    PeerAddressResolver getPeerAddressResolver();
+    @NonNull PeerAddressResolver getPeerAddressResolver();
 
     /**
      * Returns the custom RaftPolicy class name.
@@ -121,8 +119,7 @@ public interface ConfigParams {
      *
      * @return the directory in which to create temp files.
      */
-    @Nonnull
-    String getTempFileDirectory();
+    @NonNull String getTempFileDirectory();
 
     /**
      * Returns the threshold in terms of number of bytes when streaming data before it should switch from storing in

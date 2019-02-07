@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.io;
 
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A factory for creating {@link FileBackedOutputStream} instances.

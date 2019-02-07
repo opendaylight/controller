@@ -44,7 +44,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
@@ -271,12 +271,11 @@ public class LocalSnapshotStore extends SnapshotStore {
                 .filter(criteria::matches).collect(Collectors.toList());
     }
 
-    private static Stream<SnapshotMetadata> toStream(@Nullable final SnapshotMetadata md) {
+    private static Stream<SnapshotMetadata> toStream(final @Nullable SnapshotMetadata md) {
         return md != null ? Stream.of(md) : Stream.empty();
     }
 
-    @Nullable
-    private static SnapshotMetadata extractMetadata(final File file) {
+    private static @Nullable SnapshotMetadata extractMetadata(final File file) {
         String name = file.getName();
         int sequenceNumberEndIndex = name.lastIndexOf('-');
         int persistenceIdEndIndex = name.lastIndexOf('-', sequenceNumberEndIndex - 1);

@@ -5,15 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.LeaderInstallSnapshotState;
 
 /**
@@ -65,7 +66,7 @@ public final class FollowerLogInformation {
         this.nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
         this.context = context;
-        this.peerInfo = Preconditions.checkNotNull(peerInfo);
+        this.peerInfo = requireNonNull(peerInfo);
     }
 
     /**
@@ -301,8 +302,7 @@ public final class FollowerLogInformation {
      *
      * @return the LeaderInstallSnapshotState if a snapshot install is in progress, null otherwise.
      */
-    @Nullable
-    public LeaderInstallSnapshotState getInstallSnapshotState() {
+    public @Nullable LeaderInstallSnapshotState getInstallSnapshotState() {
         return installSnapshotState;
     }
 
@@ -311,9 +311,9 @@ public final class FollowerLogInformation {
      *
      * @param state the LeaderInstallSnapshotState
      */
-    public void setLeaderInstallSnapshotState(@Nonnull final LeaderInstallSnapshotState state) {
+    public void setLeaderInstallSnapshotState(final @NonNull LeaderInstallSnapshotState state) {
         if (this.installSnapshotState == null) {
-            this.installSnapshotState = Preconditions.checkNotNull(state);
+            this.installSnapshotState = requireNonNull(state);
         }
     }
 
@@ -321,7 +321,7 @@ public final class FollowerLogInformation {
      * Clears the LeaderInstallSnapshotState when an install snapshot is complete.
      */
     public void clearLeaderInstallSnapshotState() {
-        Preconditions.checkState(installSnapshotState != null);
+        checkState(installSnapshotState != null);
         installSnapshotState.close();
         installSnapshotState = null;
     }
@@ -349,8 +349,7 @@ public final class FollowerLogInformation {
         needsLeaderAddress = value;
     }
 
-    @Nullable
-    public String needsLeaderAddress(String leaderId) {
+    public @Nullable String needsLeaderAddress(String leaderId) {
         return needsLeaderAddress ? context.getPeerAddress(leaderId) : null;
     }
 

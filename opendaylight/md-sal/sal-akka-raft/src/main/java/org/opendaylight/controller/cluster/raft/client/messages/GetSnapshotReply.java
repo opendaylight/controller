@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -21,21 +22,19 @@ public class GetSnapshotReply {
     private final String id;
     private final Snapshot snapshot;
 
-    public GetSnapshotReply(@Nonnull String id, @Nonnull Snapshot snapshot) {
-        this.id = Preconditions.checkNotNull(id);
-        this.snapshot = Preconditions.checkNotNull(snapshot);
+    public GetSnapshotReply(@NonNull String id, @NonNull Snapshot snapshot) {
+        this.id = requireNonNull(id);
+        this.snapshot = requireNonNull(snapshot);
     }
 
-    @Nonnull
-    public String getId() {
+    public @NonNull String getId() {
         return id;
     }
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
             + "this is OK since this class is merely a DTO and does not process the byte[] internally. "
             + "Also it would be inefficient to create a return copy as the byte[] could be large.")
-    @Nonnull
-    public Snapshot getSnapshot() {
+    public @NonNull Snapshot getSnapshot() {
         return snapshot;
     }
 

@@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * The response to a GetOnDemandRaftState message.
@@ -139,8 +139,7 @@ public class OnDemandRaftState {
             return (B) this;
         }
 
-        @Nonnull
-        protected abstract OnDemandRaftState state();
+        protected abstract @NonNull OnDemandRaftState state();
 
         public B lastLogIndex(long value) {
             state().lastLogIndex = value;

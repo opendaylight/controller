@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -24,14 +24,14 @@ public abstract class RequestSuccess<T extends WritableIdentifier, C extends Req
         Response<T, C> {
     private static final long serialVersionUID = 1L;
 
-    protected RequestSuccess(@Nonnull final C success, @Nonnull final ABIVersion version) {
+    protected RequestSuccess(final @NonNull C success,  final @NonNull ABIVersion version) {
         super(success, version);
     }
 
-    protected RequestSuccess(@Nonnull final T target, final long sequence) {
+    protected RequestSuccess(final @NonNull T target, final long sequence) {
         super(target, sequence);
     }
 
     @Override
-    protected abstract AbstractSuccessProxy<T, C> externalizableProxy(@Nonnull ABIVersion version);
+    protected abstract AbstractSuccessProxy<T, C> externalizableProxy(ABIVersion version);
 }

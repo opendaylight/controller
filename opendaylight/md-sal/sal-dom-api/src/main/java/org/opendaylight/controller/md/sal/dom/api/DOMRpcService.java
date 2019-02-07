@@ -8,8 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 import com.google.common.util.concurrent.CheckedFuture;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -34,7 +34,7 @@ public interface DOMRpcService extends DOMService {
      *         or report a subclass of {@link DOMRpcException} reporting a transport
      *         error.
      */
-    @Nonnull CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull SchemaPath type,
+    @NonNull CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@NonNull SchemaPath type,
             @Nullable NormalizedNode<?, ?> input);
 
     /**
@@ -56,5 +56,5 @@ public interface DOMRpcService extends DOMService {
      *         a {@link ListenerRegistration#close()} will cancel it. Returned object
      *         is guaranteed to be non-null.
      */
-    @Nonnull <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(@Nonnull T listener);
+    @NonNull <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(@NonNull T listener);
 }

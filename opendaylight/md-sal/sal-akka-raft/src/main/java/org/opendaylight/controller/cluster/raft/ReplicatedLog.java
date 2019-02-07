@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import akka.japi.Procedure;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
@@ -26,16 +25,14 @@ public interface ReplicatedLog {
      * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or
      *         greater than the size of the in-memory journal
      */
-    @Nullable
-    ReplicatedLogEntry get(long index);
+    @Nullable ReplicatedLogEntry get(long index);
 
     /**
      * Return the last replicated log entry in the log or null of not found.
      *
      * @return the last replicated log entry in the log or null of not found.
      */
-    @Nullable
-    ReplicatedLogEntry last();
+    @Nullable ReplicatedLogEntry last();
 
     /**
      * Return the index of the last entry in the log or -1 if the log is empty.
@@ -97,7 +94,7 @@ public interface ReplicatedLog {
      *        delivered after persistence is complete and the associated callback is executed.
      * @return true if the entry was successfully appended, false otherwise.
      */
-    boolean appendAndPersist(@Nonnull ReplicatedLogEntry replicatedLogEntry,
+    boolean appendAndPersist(@NonNull ReplicatedLogEntry replicatedLogEntry,
             @Nullable Procedure<ReplicatedLogEntry> callback, boolean doAsync);
 
     /**
@@ -106,7 +103,7 @@ public interface ReplicatedLog {
      * @param index the index of the first log entry to get.
      * @return the List of entries
      */
-    @Nonnull List<ReplicatedLogEntry> getFrom(long index);
+    @NonNull List<ReplicatedLogEntry> getFrom(long index);
 
     /**
      * Returns a list of log entries starting from the given index up to the given maximum of entries or
@@ -117,7 +114,7 @@ public interface ReplicatedLog {
      * @param maxDataSize the maximum accumulated size of the log entries to get
      * @return the List of entries meeting the criteria.
      */
-    @Nonnull List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
+    @NonNull List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
 
     /**
      * Returns the number of entries in the journal.

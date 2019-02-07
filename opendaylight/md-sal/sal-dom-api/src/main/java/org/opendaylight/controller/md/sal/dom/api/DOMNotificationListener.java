@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.api;
 
 import java.util.EventListener;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Interface implemented by listeners interested in {@link DOMNotification}s.
@@ -20,5 +20,5 @@ public interface DOMNotificationListener extends EventListener {
      *
      * @param notification Received notification
      */
-    void onNotification(@Nonnull DOMNotification notification);
+    void onNotification(@NonNull DOMNotification notification);
 }

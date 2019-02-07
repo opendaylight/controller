@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import java.io.Serializable;
 
 final class BucketImpl<T extends BucketData<T>> implements Bucket<T>, Serializable {
@@ -21,7 +22,7 @@ final class BucketImpl<T extends BucketData<T>> implements Bucket<T>, Serializab
 
     BucketImpl(final long version, final T data) {
         this.version = version;
-        this.data = Preconditions.checkNotNull(data);
+        this.data = requireNonNull(data);
     }
 
     @Override
@@ -40,7 +41,7 @@ final class BucketImpl<T extends BucketData<T>> implements Bucket<T>, Serializab
     }
 
     private Object readResolve() {
-        Verify.verifyNotNull(data);
+        verifyNotNull(data);
         return this;
     }
 }

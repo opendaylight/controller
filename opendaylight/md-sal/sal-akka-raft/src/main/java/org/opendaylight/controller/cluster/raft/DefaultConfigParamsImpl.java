@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
@@ -192,8 +194,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         return peerAddressResolver;
     }
 
-    public void setPeerAddressResolver(@Nonnull final PeerAddressResolver peerAddressResolver) {
-        this.peerAddressResolver = Preconditions.checkNotNull(peerAddressResolver);
+    public void setPeerAddressResolver(final @NonNull PeerAddressResolver peerAddressResolver) {
+        this.peerAddressResolver = requireNonNull(peerAddressResolver);
     }
 
     @Override
@@ -202,7 +204,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     public void setSyncIndexThreshold(final long syncIndexThreshold) {
-        Preconditions.checkArgument(syncIndexThreshold >= 0);
+        checkArgument(syncIndexThreshold >= 0);
         this.syncIndexThreshold = syncIndexThreshold;
     }
 

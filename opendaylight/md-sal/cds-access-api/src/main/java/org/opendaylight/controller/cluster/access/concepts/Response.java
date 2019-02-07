@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -26,14 +26,14 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 public abstract class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C> {
     private static final long serialVersionUID = 1L;
 
-    Response(@Nonnull final T target, final long sequence) {
+    Response(final @NonNull T target, final long sequence) {
         super(target, sequence);
     }
 
-    Response(@Nonnull final C response, @Nonnull final ABIVersion version) {
+    Response(final @NonNull C response, final @NonNull ABIVersion version) {
         super(response, version);
     }
 
     @Override
-    abstract AbstractResponseProxy<T, C> externalizableProxy(@Nonnull ABIVersion version);
+    abstract AbstractResponseProxy<T, C> externalizableProxy(ABIVersion version);
 }

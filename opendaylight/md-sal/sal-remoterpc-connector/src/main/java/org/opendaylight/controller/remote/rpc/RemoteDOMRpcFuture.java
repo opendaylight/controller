@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.mdsal.dom.api.DOMRpcException;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
@@ -32,7 +32,7 @@ final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> {
     private final QName rpcName;
 
     private RemoteDOMRpcFuture(final QName rpcName) {
-        this.rpcName = Preconditions.checkNotNull(rpcName, "rpcName");
+        this.rpcName = requireNonNull(rpcName, "rpcName");
     }
 
     public static RemoteDOMRpcFuture create(final QName rpcName) {
@@ -58,7 +58,7 @@ final class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> {
     }
 
     @Override
-    public DOMRpcResult get(final long timeout, @Nonnull final TimeUnit unit)
+    public DOMRpcResult get(final long timeout, final TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
         try {
             return super.get(timeout, unit);

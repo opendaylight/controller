@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.trace.closetracker.impl;
 
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Convenience abstract base class for {@link CloseTracked} implementors.

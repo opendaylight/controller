@@ -11,7 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ForwardingObject;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class ForwardingDOMDataReadWriteTransaction extends ForwardingObject
         implements DOMDataReadWriteTransaction {
     @Override
-    protected abstract @Nonnull DOMDataReadWriteTransaction delegate();
+    protected abstract @NonNull DOMDataReadWriteTransaction delegate();
 
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final LogicalDatastoreType store,

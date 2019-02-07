@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
 /**
@@ -28,8 +27,7 @@ public interface RaftActorBehavior extends AutoCloseable {
      *
      * @return The new behavior or current behavior, or null if the message was not handled.
      */
-    @Nullable
-    RaftActorBehavior handleMessage(ActorRef sender, Object message);
+    @Nullable RaftActorBehavior handleMessage(ActorRef sender, Object message);
 
     /**
      * Returns the state associated with this behavior.
@@ -43,8 +41,7 @@ public interface RaftActorBehavior extends AutoCloseable {
      *
      * @return the id of the leader or null if not known
      */
-    @Nullable
-    String getLeaderId();
+    @Nullable String getLeaderId();
 
     /**
      * Sets the index of the last log entry that has been replicated to all peers.

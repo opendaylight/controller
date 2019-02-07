@@ -9,7 +9,7 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import java.util.Collection;
 import java.util.EventListener;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An {@link EventListener} used to track RPC implementations becoming (un)available a {@link DOMRpcService}. Note that
@@ -54,14 +54,14 @@ public interface DOMRpcAvailabilityListener extends EventListener {
      *
      * @param rpcs RPC types newly available
      */
-    void onRpcAvailable(@Nonnull Collection<DOMRpcIdentifier> rpcs);
+    void onRpcAvailable(@NonNull Collection<DOMRpcIdentifier> rpcs);
 
     /**
      * Method invoked whenever an RPC type becomes unavailable.
      *
      * @param rpcs RPC types which became unavailable
      */
-    void onRpcUnavailable(@Nonnull Collection<DOMRpcIdentifier> rpcs);
+    void onRpcUnavailable(@NonNull Collection<DOMRpcIdentifier> rpcs);
 
     /**
      * Implementation filtering method. This method is useful for forwarding RPC implementations,
