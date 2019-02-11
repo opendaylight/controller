@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import static org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType.UNMODIFIED;
+
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,22 +76,24 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
     private static void populateList(final List<LazyDataObjectModification<? extends DataObject>> result,
             final BindingCodecTreeNode<?> parentCodec, final Collection<DataTreeCandidateNode> domChildNodes) {
         for (final DataTreeCandidateNode domChildNode : domChildNodes) {
-            final BindingStructuralType type = BindingStructuralType.from(domChildNode);
-            if (type != BindingStructuralType.NOT_ADDRESSABLE) {
-                /*
-                 *  Even if type is UNKNOWN, from perspective of BindingStructuralType
-                 *  we try to load codec for it. We will use that type to further specify
-                 *  debug log.
-                 */
-                try {
-                    final BindingCodecTreeNode<?> childCodec =
-                            parentCodec.yangPathArgumentChild(domChildNode.getIdentifier());
-                    populateList(result,type, childCodec, domChildNode);
-                } catch (final IllegalArgumentException e) {
-                    if (type == BindingStructuralType.UNKNOWN) {
-                        LOG.debug("Unable to deserialize unknown DOM node {}",domChildNode,e);
-                    } else {
-                        LOG.debug("Binding representation for DOM node {} was not found",domChildNode,e);
+            if (domChildNode.getModificationType() != UNMODIFIED) {
+                final BindingStructuralType type = BindingStructuralType.from(domChildNode);
+                if (type != BindingStructuralType.NOT_ADDRESSABLE) {
+                    /*
+                     *  Even if type is UNKNOWN, from perspective of BindingStructuralType
+                     *  we try to load codec for it. We will use that type to further specify
+                     *  debug log.
+                     */
+                    try {
+                        final BindingCodecTreeNode<?> childCodec =
+                                parentCodec.yangPathArgumentChild(domChildNode.getIdentifier());
+                        populateList(result,type, childCodec, domChildNode);
+                    } catch (final IllegalArgumentException e) {
+                        if (type == BindingStructuralType.UNKNOWN) {
+                            LOG.debug("Unable to deserialize unknown DOM node {}",domChildNode,e);
+                        } else {
+                            LOG.debug("Binding representation for DOM node {} was not found",domChildNode,e);
+                        }
                     }
                 }
             }
@@ -234,10 +238,7 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
         while (toEnter.hasNext() && current != null) {
             current = current.getModifiedChild(toEnter.next());
         }
-        if (current != null) {
-            return create(childCodec, current);
-        }
-        return null;
+        return current != null && current.getModificationType() != UNMODIFIED ? create(childCodec, current) : null;
     }
 
     @Override
