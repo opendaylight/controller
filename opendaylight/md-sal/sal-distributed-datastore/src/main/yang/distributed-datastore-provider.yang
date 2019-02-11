@@ -220,7 +220,7 @@ module distributed-datastore-provider {
         }
 
         leaf use-tell-based-protocol {
-            default false;
+            default true;
             type boolean;
             description "Use a newer protocol between the frontend and backend. This feature is considered
                          exprerimental at this point.";
