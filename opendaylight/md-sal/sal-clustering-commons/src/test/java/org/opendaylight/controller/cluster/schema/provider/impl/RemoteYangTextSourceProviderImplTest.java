@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -50,7 +49,7 @@ public class RemoteYangTextSourceProviderImplTest {
         YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(
                 ID, ByteSource.wrap(source.getBytes()));
         Mockito.when(mockedLocalRepository.getSchemaSource(ID, YangTextSchemaSource.class)).thenReturn(
-                Futures.immediateCheckedFuture(schemaSource));
+                Futures.immediateFuture(schemaSource));
 
         Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =
                 remoteRepository.getYangTextSchemaSource(ID);
@@ -64,8 +63,7 @@ public class RemoteYangTextSourceProviderImplTest {
     @Test(expected = SchemaSourceException.class)
     public void testGetNonExistentYangTextSchemaSource() throws Exception {
         Mockito.when(mockedLocalRepository.getSchemaSource(ID, YangTextSchemaSource.class)).thenReturn(
-                Futures.immediateFailedCheckedFuture(
-                        new SchemaSourceException("Source is not provided")));
+                Futures.immediateFailedFuture(new SchemaSourceException("Source is not provided")));
 
         Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =
                 remoteRepository.getYangTextSchemaSource(ID);
