@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "ab0468dd_a6940dc3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedFileJournal.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-19T10:03:39Z",
+      "side": 1,
+      "message": "AsyncWriteJournal is an actor, so no. BiMap ... I was thinking about having a monitor to check child actors, but that is not necessary I think.",
+      "parentUuid": "c5850050_c11414e0",
+      "range": {
+        "startLine": 62,
+        "startChar": 18,
+        "endLine": 62,
+        "endChar": 23
+      },
+      "revId": "ea5085a9e29f62238be9b73b4074445605067583",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "806ea176_f0daeb79",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedFileJournal.java",
         "patchSetId": 3
@@ -59,6 +83,30 @@
       "writtenOn": "2019-02-18T18:46:55Z",
       "side": 1,
       "message": "So handler actors are only initialized via doAsyncWriteMessages. Why don\u0027t you do the same for the operations?  read/replay are called on recovery which aren\u0027t preceded by a write AFAIK.",
+      "range": {
+        "startLine": 129,
+        "startChar": 33,
+        "endLine": 129,
+        "endChar": 41
+      },
+      "revId": "ea5085a9e29f62238be9b73b4074445605067583",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7435ddc8_1c745b0e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedFileJournal.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-19T10:03:39Z",
+      "side": 1,
+      "message": "Leftover from when the actor eagerly initialized storage",
+      "parentUuid": "806ea176_f0daeb79",
       "range": {
         "startLine": 129,
         "startChar": 33,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "fe547777_71c100b9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedJournalActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-19T10:03:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6923ad4_fa9a8c06",
+      "range": {
+        "startLine": 59,
+        "startChar": 23,
+        "endLine": 59,
+        "endChar": 25
+      },
+      "revId": "ea5085a9e29f62238be9b73b4074445605067583",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "429e1170_dd31ad45",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedJournalActor.java",
         "patchSetId": 3
@@ -105,6 +177,30 @@
       "writtenOn": "2019-02-18T18:46:55Z",
       "side": 1,
       "message": "Equivalent to deleteWriter?  lastDelete is the entry payload - why do you commit lastDelete as well as the entry index?",
+      "range": {
+        "startLine": 233,
+        "startChar": 12,
+        "endLine": 233,
+        "endChar": 32
+      },
+      "revId": "ea5085a9e29f62238be9b73b4074445605067583",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce99f638_04b33049",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedJournalActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-19T10:03:39Z",
+      "side": 1,
+      "message": "the two writers are different -- note deleteJournal vs. dataJournal.",
+      "parentUuid": "429e1170_dd31ad45",
       "range": {
         "startLine": 233,
         "startChar": 12,
