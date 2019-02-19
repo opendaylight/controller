@@ -26,7 +26,7 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
     static final Logger LOG = LoggerFactory.getLogger(ActorSystemProviderImpl.class);
     private final ActorSystem actorSystem;
-    private final ListenerRegistry<ActorSystemProviderListener> listeners = new ListenerRegistry<>();
+    private final ListenerRegistry<ActorSystemProviderListener> listeners = ListenerRegistry.create();
 
     public ActorSystemProviderImpl(
             final ClassLoader classLoader, final Props quarantinedMonitorActorProps, final Config akkaConfig) {
