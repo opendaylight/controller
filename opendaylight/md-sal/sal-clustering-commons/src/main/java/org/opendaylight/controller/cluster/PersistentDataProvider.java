@@ -7,20 +7,21 @@
  */
 package org.opendaylight.controller.cluster;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.japi.Procedure;
+import akka.persistence.AbstractPersistentActor;
 import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.UntypedPersistentActor;
-import com.google.common.base.Preconditions;
 
 /**
  * A DataPersistenceProvider implementation with persistence enabled.
  */
 public class PersistentDataProvider implements DataPersistenceProvider {
 
-    private final UntypedPersistentActor persistentActor;
+    private final AbstractPersistentActor persistentActor;
 
-    public PersistentDataProvider(UntypedPersistentActor persistentActor) {
-        this.persistentActor = Preconditions.checkNotNull(persistentActor, "persistentActor can't be null");
+    public PersistentDataProvider(AbstractPersistentActor persistentActor) {
+        this.persistentActor = requireNonNull(persistentActor, "persistentActor can't be null");
     }
 
     @Override

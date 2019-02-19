@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
-import akka.persistence.UntypedPersistentActor;
+import akka.persistence.AbstractPersistentActor;
 import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public abstract class AbstractClientActor extends UntypedPersistentActor {
+public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
     private AbstractClientActorBehavior<?> currentBehavior;
 
@@ -59,7 +59,16 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
     }
 
     @Override
-    public final void onReceiveCommand(final Object command) {
+    public Receive createReceive() {
+        return receiveBuilder().matchAny(this::onReceiveCommand).build();
+    }
+
+    @Override
+    public Receive createReceiveRecover() {
+        return receiveBuilder().matchAny(this::onReceiveRecover).build();
+    }
+
+    private void onReceiveCommand(final Object command) {
         if (command == null) {
             LOG.debug("{}: ignoring null command", persistenceId());
             return;
@@ -72,8 +81,7 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
         }
     }
 
-    @Override
-    public final void onReceiveRecover(final Object recover) {
+    private void onReceiveRecover(final Object recover) {
         switchBehavior(currentBehavior.onReceiveRecover(recover));
     }
 
