@@ -29,7 +29,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHist
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -110,8 +110,8 @@ public class DistributedShardFrontendTest {
     public void testClientTransaction() throws Exception {
 
         final DistributedDataStore distributedDataStore = mock(DistributedDataStore.class);
-        final ActorContext context = mock(ActorContext.class);
-        doReturn(context).when(distributedDataStore).getActorContext();
+        final ActorUtils context = mock(ActorUtils.class);
+        doReturn(context).when(distributedDataStore).getActorUtils();
         doReturn(SchemaContextHelper.full()).when(context).getSchemaContext();
 
         final DistributedShardFrontend rootShard = new DistributedShardFrontend(distributedDataStore, client, ROOT);

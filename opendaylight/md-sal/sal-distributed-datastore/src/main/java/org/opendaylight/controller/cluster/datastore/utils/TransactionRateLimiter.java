@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class TransactionRateLimiter {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionRateLimiter.class);
 
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final long commitTimeoutInSeconds;
     private final String dataStoreName;
     private final RateLimiter txRateLimiter;
@@ -29,11 +29,11 @@ public class TransactionRateLimiter {
 
     private volatile long pollOnCount = 1;
 
-    public TransactionRateLimiter(ActorContext actorContext) {
-        this.actorContext = actorContext;
-        this.commitTimeoutInSeconds = actorContext.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds();
-        this.dataStoreName = actorContext.getDataStoreName();
-        this.txRateLimiter = RateLimiter.create(actorContext.getDatastoreContext()
+    public TransactionRateLimiter(ActorUtils actorUtils) {
+        this.actorUtils = actorUtils;
+        this.commitTimeoutInSeconds = actorUtils.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds();
+        this.dataStoreName = actorUtils.getDataStoreName();
+        this.txRateLimiter = RateLimiter.create(actorUtils.getDatastoreContext()
                 .getTransactionCreationInitialRateLimit());
     }
 
@@ -45,7 +45,7 @@ public class TransactionRateLimiter {
     private void adjustRateLimit() {
         final long count = acquireCount.incrementAndGet();
         if (count >= pollOnCount) {
-            final Timer commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
+            final Timer commitTimer = actorUtils.getOperationTimer(ActorUtils.COMMIT);
             double newRateLimit = calculateNewRateLimit(commitTimer, commitTimeoutInSeconds);
 
             if (newRateLimit < 1.0) {
@@ -71,7 +71,7 @@ public class TransactionRateLimiter {
                 continue;
             }
 
-            double newRateLimit = calculateNewRateLimit(actorContext.getOperationTimer(name, ActorContext.COMMIT),
+            double newRateLimit = calculateNewRateLimit(actorUtils.getOperationTimer(name, ActorUtils.COMMIT),
                     this.commitTimeoutInSeconds);
             if (newRateLimit > 0.0) {
                 LOG.debug("On unused Tx - data Store {} commit rateLimit adjusted to {}",

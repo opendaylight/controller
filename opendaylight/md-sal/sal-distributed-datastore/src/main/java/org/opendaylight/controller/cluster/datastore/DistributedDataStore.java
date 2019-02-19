@@ -13,7 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
@@ -30,13 +30,13 @@ public class DistributedDataStore extends AbstractDataStore {
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
-        this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier());
+        this.txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
     }
 
     @VisibleForTesting
-    DistributedDataStore(final ActorContext actorContext, final ClientIdentifier identifier) {
-        super(actorContext, identifier);
-        this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier());
+    DistributedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier) {
+        super(actorUtils, identifier);
+        this.txContextFactory = new TransactionContextFactory(getActorUtils(), getIdentifier());
     }
 
 
@@ -52,13 +52,13 @@ public class DistributedDataStore extends AbstractDataStore {
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        getActorContext().acquireTxCreationPermit();
+        getActorUtils().acquireTxCreationPermit();
         return new TransactionProxy(txContextFactory, TransactionType.WRITE_ONLY);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        getActorContext().acquireTxCreationPermit();
+        getActorUtils().acquireTxCreationPermit();
         return new TransactionProxy(txContextFactory, TransactionType.READ_WRITE);
     }
 

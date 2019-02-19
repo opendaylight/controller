@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import scala.concurrent.Future;
@@ -26,8 +26,8 @@ import scala.concurrent.Future;
 final class TransactionContextFactory extends AbstractTransactionContextFactory<LocalTransactionFactoryImpl> {
     private final AtomicLong nextHistory = new AtomicLong(1);
 
-    TransactionContextFactory(final ActorContext actorContext, final ClientIdentifier clientId) {
-        super(actorContext, new LocalHistoryIdentifier(clientId, 0));
+    TransactionContextFactory(final ActorUtils actorUtils, final ClientIdentifier clientId) {
+        super(actorUtils, new LocalHistoryIdentifier(clientId, 0));
     }
 
     @Override
@@ -37,12 +37,12 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     @Override
     protected LocalTransactionFactoryImpl factoryForShard(final String shardName, final ActorSelection shardLeader,
             final DataTree dataTree) {
-        return new LocalTransactionFactoryImpl(getActorContext(), shardLeader, dataTree);
+        return new LocalTransactionFactoryImpl(getActorUtils(), shardLeader, dataTree);
     }
 
     @Override
     protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName, TransactionIdentifier txId) {
-        return getActorContext().findPrimaryShardAsync(shardName);
+        return getActorUtils().findPrimaryShardAsync(shardName);
     }
 
     @Override

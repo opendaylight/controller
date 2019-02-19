@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 /**
  * Unit tests for TransactionRateLimitingCallback.
@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 public class TransactionRateLimitingCallbackTest {
 
     @Mock
-    ActorContext mockContext;
+    ActorUtils mockContext;
 
     @Mock
     Timer mockTimer;
@@ -44,7 +44,7 @@ public class TransactionRateLimitingCallbackTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(mockTimer).when(mockContext).getOperationTimer(ActorContext.COMMIT);
+        doReturn(mockTimer).when(mockContext).getOperationTimer(ActorUtils.COMMIT);
         callback = new TransactionRateLimitingCallback(mockContext);
         TransactionRateLimitingCallback.setTicker(mockTicker);
     }

@@ -36,7 +36,7 @@ import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConf
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -147,7 +147,7 @@ public class IntegrationTestKit extends ShardTestKit {
         dataStore.onGlobalContextUpdated(schemaContext);
 
         if (waitUntilLeader) {
-            waitUntilLeader(dataStore.getActorContext(), shardNames);
+            waitUntilLeader(dataStore.getActorUtils(), shardNames);
         }
 
         datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
@@ -210,9 +210,9 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
-    public void waitUntilLeader(final ActorContext actorContext, final String... shardNames) {
+    public void waitUntilLeader(final ActorUtils actorUtils, final String... shardNames) {
         for (String shardName: shardNames) {
-            ActorRef shard = findLocalShard(actorContext, shardName);
+            ActorRef shard = findLocalShard(actorUtils, shardName);
 
             assertNotNull("Shard was not created for " + shardName, shard);
 
@@ -220,9 +220,9 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    public void waitUntilNoLeader(final ActorContext actorContext, final String... shardNames) {
+    public void waitUntilNoLeader(final ActorUtils actorUtils, final String... shardNames) {
         for (String shardName: shardNames) {
-            ActorRef shard = findLocalShard(actorContext, shardName);
+            ActorRef shard = findLocalShard(actorUtils, shardName);
             assertNotNull("No local shard found for " + shardName, shard);
 
             waitUntilNoLeader(shard);
@@ -247,11 +247,11 @@ public class IntegrationTestKit extends ShardTestKit {
         fail("Member(s) " + otherMembersSet + " are not Up");
     }
 
-    public static ActorRef findLocalShard(final ActorContext actorContext, final String shardName) {
+    public static ActorRef findLocalShard(final ActorUtils actorUtils, final String shardName) {
         ActorRef shard = null;
         for (int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            com.google.common.base.Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            com.google.common.base.Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
             if (shardReply.isPresent()) {
                 shard = shardReply.get();
             }
@@ -259,11 +259,11 @@ public class IntegrationTestKit extends ShardTestKit {
         return shard;
     }
 
-    public static void waitUntilShardIsDown(final ActorContext actorContext, final String shardName) {
+    public static void waitUntilShardIsDown(final ActorUtils actorUtils, final String shardName) {
         for (int i = 0; i < 20 * 5 ; i++) {
             LOG.debug("Waiting for shard down {}", shardName);
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            com.google.common.base.Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            com.google.common.base.Optional<ActorRef> shardReply = actorUtils.findLocalShard(shardName);
             if (!shardReply.isPresent()) {
                 return;
             }
@@ -274,15 +274,15 @@ public class IntegrationTestKit extends ShardTestKit {
 
     public static void verifyShardStats(final AbstractDataStore datastore, final String shardName,
             final ShardStatsVerifier verifier) throws Exception {
-        ActorContext actorContext = datastore.getActorContext();
+        ActorUtils actorUtils = datastore.getActorUtils();
 
-        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        Future<ActorRef> future = actorUtils.findLocalShardAsync(shardName);
         ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            ShardStats shardStats = (ShardStats)actorContext
+            ShardStats shardStats = (ShardStats)actorUtils
                     .executeOperation(shardActor, Shard.GET_SHARD_MBEAN_MESSAGE);
 
             try {
@@ -299,15 +299,15 @@ public class IntegrationTestKit extends ShardTestKit {
 
     public static void verifyShardState(final AbstractDataStore datastore, final String shardName,
             final Consumer<OnDemandShardState> verifier) throws Exception {
-        ActorContext actorContext = datastore.getActorContext();
+        ActorUtils actorUtils = datastore.getActorUtils();
 
-        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        Future<ActorRef> future = actorUtils.findLocalShardAsync(shardName);
         ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            OnDemandShardState shardState = (OnDemandShardState)actorContext
+            OnDemandShardState shardState = (OnDemandShardState)actorUtils
                     .executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
 
             try {

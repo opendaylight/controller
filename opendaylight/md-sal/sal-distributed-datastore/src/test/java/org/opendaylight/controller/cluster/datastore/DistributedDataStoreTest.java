@@ -27,7 +27,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
@@ -39,7 +39,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     private static SchemaContext SCHEMA_CONTEXT;
 
     @Mock
-    private ActorContext actorContext;
+    private ActorUtils actorUtils;
 
     @Mock
     private DatastoreContext datastoreContext;
@@ -61,48 +61,48 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        doReturn(SCHEMA_CONTEXT).when(actorContext).getSchemaContext();
-        doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
+        doReturn(SCHEMA_CONTEXT).when(actorUtils).getSchemaContext();
+        doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
     }
 
     @Test
     public void testRateLimitingUsedInReadWriteTxCreation() {
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorUtils, UNKNOWN_ID)) {
 
             distributedDataStore.newReadWriteTransaction();
 
-            verify(actorContext, times(1)).acquireTxCreationPermit();
+            verify(actorUtils, times(1)).acquireTxCreationPermit();
         }
     }
 
     @Test
     public void testRateLimitingUsedInWriteOnlyTxCreation() {
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorUtils, UNKNOWN_ID)) {
 
             distributedDataStore.newWriteOnlyTransaction();
 
-            verify(actorContext, times(1)).acquireTxCreationPermit();
+            verify(actorUtils, times(1)).acquireTxCreationPermit();
         }
     }
 
     @Test
     public void testRateLimitingNotUsedInReadOnlyTxCreation() {
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorUtils, UNKNOWN_ID)) {
 
             distributedDataStore.newReadOnlyTransaction();
             distributedDataStore.newReadOnlyTransaction();
             distributedDataStore.newReadOnlyTransaction();
 
-            verify(actorContext, times(0)).acquireTxCreationPermit();
+            verify(actorUtils, times(0)).acquireTxCreationPermit();
         }
     }
 
     @Test
     public void testWaitTillReadyBlocking() {
-        doReturn(datastoreContext).when(actorContext).getDatastoreContext();
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
         doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
         doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorUtils, UNKNOWN_ID)) {
 
             long start = System.currentTimeMillis();
 
@@ -116,8 +116,8 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testWaitTillReadyCountDown() {
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
-            doReturn(datastoreContext).when(actorContext).getDatastoreContext();
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorUtils, UNKNOWN_ID)) {
+            doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
             doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
             doReturn(FiniteDuration.apply(5000, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
 

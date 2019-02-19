@@ -7,15 +7,16 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -32,22 +33,22 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
     private static final Timeout TIMEOUT = new Timeout(new FiniteDuration(5, TimeUnit.SECONDS));
     private final DOMDataTreeIdentifier subtree;
     private final ActorRef actor;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     @GuardedBy("this")
     private ActorRef cohortRegistry;
 
-    DataTreeCohortRegistrationProxy(final ActorContext actorContext, final DOMDataTreeIdentifier subtree,
+    DataTreeCohortRegistrationProxy(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
             final C cohort) {
         super(cohort);
-        this.subtree = Preconditions.checkNotNull(subtree);
-        this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.actor = actorContext.getActorSystem().actorOf(DataTreeCohortActor.props(getInstance(),
-                subtree.getRootIdentifier()).withDispatcher(actorContext.getNotificationDispatcherPath()));
+        this.subtree = requireNonNull(subtree);
+        this.actorUtils = requireNonNull(actorUtils);
+        this.actor = actorUtils.getActorSystem().actorOf(DataTreeCohortActor.props(getInstance(),
+                subtree.getRootIdentifier()).withDispatcher(actorUtils.getNotificationDispatcherPath()));
     }
 
     public void init(final String shardName) {
         // FIXME: Add late binding to shard.
-        Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName);
+        Future<ActorRef> findFuture = actorUtils.findLocalShardAsync(shardName);
         findFuture.onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(final Throwable failure, final ActorRef shard) {
@@ -61,7 +62,7 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
                     performRegistration(shard);
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
     }
 
     private synchronized void performRegistration(final ActorRef shard) {
@@ -83,7 +84,7 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
                 }
             }
 
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
     }
 
     @Override

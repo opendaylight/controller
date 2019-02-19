@@ -624,8 +624,8 @@ public class DistributedDataStoreIntegrationTest {
 
         try (AbstractDataStore dataStore = testKit.setupAbstractDataStore(testParameter, testName, false, shardName)) {
 
-            final Object result = dataStore.getActorContext().executeOperation(
-                dataStore.getActorContext().getShardManager(), new FindLocalShard(shardName, true));
+            final Object result = dataStore.getActorUtils().executeOperation(
+                dataStore.getActorUtils().getShardManager(), new FindLocalShard(shardName, true));
             assertTrue("Expected LocalShardFound. Actual: " + result, result instanceof LocalShardFound);
 
             // Create the write Tx.

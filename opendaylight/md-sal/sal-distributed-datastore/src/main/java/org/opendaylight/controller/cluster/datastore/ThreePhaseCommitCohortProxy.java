@@ -5,12 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
@@ -29,7 +30,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -65,17 +66,17 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         }
     };
 
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final List<CohortInfo> cohorts;
     private final SettableFuture<Void> cohortsResolvedFuture = SettableFuture.create();
     private final TransactionIdentifier transactionId;
     private volatile OperationCallback commitOperationCallback;
 
-    public ThreePhaseCommitCohortProxy(final ActorContext actorContext, final List<CohortInfo> cohorts,
+    public ThreePhaseCommitCohortProxy(final ActorUtils actorUtils, final List<CohortInfo> cohorts,
             final TransactionIdentifier transactionId) {
-        this.actorContext = actorContext;
+        this.actorUtils = actorUtils;
         this.cohorts = cohorts;
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionId = requireNonNull(transactionId);
 
         if (cohorts.isEmpty()) {
             cohortsResolvedFuture.set(null);
@@ -109,7 +110,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                         }
                     }
                 }
-            }, actorContext.getClientDispatcher());
+            }, actorUtils.getClientDispatcher());
         }
 
         return cohortsResolvedFuture;
@@ -152,7 +153,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
             return;
         }
 
-        commitOperationCallback = new TransactionRateLimitingCallback(actorContext);
+        commitOperationCallback = new TransactionRateLimitingCallback(actorUtils);
         commitOperationCallback.run();
 
         final Iterator<CohortInfo> iterator = cohorts.iterator();
@@ -206,9 +207,9 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         LOG.debug("Tx {}: sending {} to {}", transactionId, message, toCohortInfo.getResolvedActor());
 
-        Future<Object> future = actorContext.executeOperationAsync(toCohortInfo.getResolvedActor(),
-                message.toSerializable(), actorContext.getTransactionCommitOperationTimeout());
-        future.onComplete(onComplete, actorContext.getClientDispatcher());
+        Future<Object> future = actorUtils.executeOperationAsync(toCohortInfo.getResolvedActor(),
+                message.toSerializable(), actorUtils.getTransactionCommitOperationTimeout());
+        future.onComplete(onComplete, actorUtils.getClientDispatcher());
     }
 
     private Future<Iterable<Object>> invokeCohorts(final MessageSupplier messageSupplier) {
@@ -218,11 +219,11 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
             LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message , cohort.getResolvedActor());
 
-            futureList.add(actorContext.executeOperationAsync(cohort.getResolvedActor(), message,
-                    actorContext.getTransactionCommitOperationTimeout()));
+            futureList.add(actorUtils.executeOperationAsync(cohort.getResolvedActor(), message,
+                    actorUtils.getTransactionCommitOperationTimeout()));
         }
 
-        return akka.dispatch.Futures.sequence(futureList, actorContext.getClientDispatcher());
+        return akka.dispatch.Futures.sequence(futureList, actorUtils.getClientDispatcher());
     }
 
     @Override
@@ -350,7 +351,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                     callback.success();
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
     }
 
     @Override
@@ -386,8 +387,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         }
 
         short getActorVersion() {
-            Preconditions.checkState(resolvedActor != null,
-                    "getActorVersion cannot be called until the actor is resolved");
+            checkState(resolvedActor != null, "getActorVersion cannot be called until the actor is resolved");
             return actorVersionSupplier.get();
         }
     }

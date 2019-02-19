@@ -16,7 +16,7 @@ import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
@@ -34,9 +34,9 @@ public class ClientBackedDataStore extends AbstractDataStore {
     }
 
     @VisibleForTesting
-    ClientBackedDataStore(final ActorContext actorContext, final ClientIdentifier identifier,
+    ClientBackedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,
                           final DataStoreClient clientActor) {
-        super(actorContext, identifier, clientActor);
+        super(actorUtils, identifier, clientActor);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ClientBackedDataStore extends AbstractDataStore {
     }
 
     private boolean debugAllocation() {
-        return getActorContext().getDatastoreContext().isTransactionDebugContextEnabled();
+        return getActorUtils().getDatastoreContext().isTransactionDebugContextEnabled();
     }
 
     private Throwable allocationContext() {

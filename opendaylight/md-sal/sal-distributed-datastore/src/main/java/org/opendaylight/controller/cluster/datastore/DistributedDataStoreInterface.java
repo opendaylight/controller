@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStore;
 
 /**
@@ -17,5 +17,5 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStore;
  */
 public interface DistributedDataStoreInterface extends DOMStore {
 
-    ActorContext getActorContext();
+    ActorUtils getActorUtils();
 }

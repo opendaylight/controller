@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.access.client.InternalCommand;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -54,7 +54,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         system = ActorSystem.apply();
         clientActorProbe = new TestProbe(system, "client");
         actorContextProbe = new TestProbe(system, "actor-context");
-        final ActorContext context = createActorContextMock(system, actorContextProbe.ref());
+        final ActorUtils context = createActorContextMock(system, actorContextProbe.ref());
         clientContext =
                 AccessClientUtil.createClientActorContext(system, clientActorProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
         behavior = createBehavior(clientContext, context);
@@ -62,7 +62,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
 
     @SuppressWarnings("checkstyle:hiddenField")
     protected abstract AbstractDataStoreClientBehavior createBehavior(ClientActorContext clientContext,
-                                                                      ActorContext context);
+                                                                      ActorUtils context);
 
     @After
     public void tearDown() {
@@ -163,8 +163,8 @@ public abstract class AbstractDataStoreClientBehaviorTest {
         verify(modification).readNode(YangInstanceIdentifier.EMPTY);
     }
 
-    private static ActorContext createActorContextMock(final ActorSystem system, final ActorRef actor) {
-        final ActorContext mock = mock(ActorContext.class);
+    private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {
+        final ActorUtils mock = mock(ActorUtils.class);
         final Promise<PrimaryShardInfo> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);

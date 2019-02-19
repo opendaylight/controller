@@ -36,7 +36,7 @@ import org.opendaylight.controller.cluster.datastore.modification.AbstractModifi
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -68,7 +68,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @VisibleForTesting
     public TransactionProxy(final AbstractTransactionContextFactory<?> txContextFactory, final TransactionType type) {
-        super(txContextFactory.nextIdentifier(), txContextFactory.getActorContext().getDatastoreContext()
+        super(txContextFactory.nextIdentifier(), txContextFactory.getActorUtils().getDatastoreContext()
                 .isTransactionDebugContextEnabled());
         this.txContextFactory = txContextFactory;
         this.type = Preconditions.checkNotNull(type);
@@ -115,7 +115,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private FluentFuture<Optional<NormalizedNode<?, ?>>> readAllData() {
-        final Set<String> allShardNames = txContextFactory.getActorContext().getConfiguration().getAllShardNames();
+        final Set<String> allShardNames = txContextFactory.getActorUtils().getConfiguration().getAllShardNames();
         final Collection<FluentFuture<Optional<NormalizedNode<?, ?>>>> futures = new ArrayList<>(allShardNames.size());
 
         for (String shardName : allShardNames) {
@@ -129,8 +129,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             (Function<List<Optional<NormalizedNode<?, ?>>>, Optional<NormalizedNode<?, ?>>>) input -> {
                 try {
                     return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY, input,
-                            txContextFactory.getActorContext().getSchemaContext(),
-                            txContextFactory.getActorContext().getDatastoreContext().getLogicalStoreType());
+                            txContextFactory.getActorUtils().getSchemaContext(),
+                            txContextFactory.getActorUtils().getDatastoreContext().getLogicalStoreType());
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
                 }
@@ -262,14 +262,14 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             future = getDirectCommitFuture(transactionContext, operationCallbackRef, null);
         }
 
-        return new SingleCommitCohortProxy(txContextFactory.getActorContext(), future, getIdentifier(),
+        return new SingleCommitCohortProxy(txContextFactory.getActorUtils(), future, getIdentifier(),
             operationCallbackRef);
     }
 
     private Future<?> getDirectCommitFuture(final TransactionContext transactionContext,
             final OperationCallback.Reference operationCallbackRef, final Boolean havePermit) {
         TransactionRateLimitingCallback rateLimitingCallback = new TransactionRateLimitingCallback(
-                txContextFactory.getActorContext());
+                txContextFactory.getActorUtils());
         operationCallbackRef.set(rateLimitingCallback);
         rateLimitingCallback.run();
         return transactionContext.directCommit(havePermit);
@@ -294,11 +294,11 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                     txVersionSupplier));
         }
 
-        return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts, getIdentifier());
+        return new ThreePhaseCommitCohortProxy(txContextFactory.getActorUtils(), cohorts, getIdentifier());
     }
 
     private String shardNameFromIdentifier(final YangInstanceIdentifier path) {
-        return txContextFactory.getActorContext().getShardStrategyFactory().getStrategy(path).findShard(path);
+        return txContextFactory.getActorUtils().getShardStrategyFactory().getStrategy(path).findShard(path);
     }
 
     private TransactionContextWrapper getContextWrapper(final YangInstanceIdentifier path) {
@@ -324,7 +324,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return state != TransactionState.OPEN;
     }
 
-    ActorContext getActorContext() {
-        return txContextFactory.getActorContext();
+    ActorUtils getActorUtils() {
+        return txContextFactory.getActorUtils();
     }
 }

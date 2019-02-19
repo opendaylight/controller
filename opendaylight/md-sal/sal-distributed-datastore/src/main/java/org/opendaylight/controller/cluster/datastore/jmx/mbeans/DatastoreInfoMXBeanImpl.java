@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
 /**
@@ -17,16 +17,16 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
  */
 public class DatastoreInfoMXBeanImpl extends AbstractMXBean implements DatastoreInfoMXBean {
 
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
 
-    public DatastoreInfoMXBeanImpl(String mxBeanType, ActorContext actorContext) {
+    public DatastoreInfoMXBeanImpl(String mxBeanType, ActorUtils actorUtils) {
         super("GeneralRuntimeInfo", mxBeanType, null);
-        this.actorContext = actorContext;
+        this.actorUtils = actorUtils;
     }
 
 
     @Override
     public double getTransactionCreationRateLimit() {
-        return actorContext.getTxCreationLimit();
+        return actorUtils.getTxCreationLimit();
     }
 }

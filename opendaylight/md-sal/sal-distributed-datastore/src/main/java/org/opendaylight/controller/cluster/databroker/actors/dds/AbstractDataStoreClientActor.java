@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
@@ -18,7 +19,7 @@ import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import scala.Function1;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
@@ -26,25 +27,25 @@ import scala.concurrent.duration.Duration;
 public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
     private static final Function1<ActorRef, ?> GET_CLIENT_FACTORY = ExplicitAsk.toScala(GetClientRequest::new);
 
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
 
-    AbstractDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext) {
+    AbstractDataStoreClientActor(final FrontendIdentifier frontendId, final ActorUtils actorUtils) {
         super(frontendId);
-        this.actorContext = Preconditions.checkNotNull(actorContext);
+        this.actorUtils = requireNonNull(actorUtils);
     }
 
     @Override
     protected ClientActorConfig getClientActorConfig() {
-        return actorContext.getDatastoreContext();
+        return actorUtils.getDatastoreContext();
     }
 
     @Override
     protected final AbstractDataStoreClientBehavior initialBehavior(final ClientActorContext context) {
-        return Verify.verifyNotNull(initialBehavior(context, actorContext));
+        return verifyNotNull(initialBehavior(context, actorUtils));
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
-    abstract AbstractDataStoreClientBehavior initialBehavior(ClientActorContext context, ActorContext actorContext);
+    abstract AbstractDataStoreClientBehavior initialBehavior(ClientActorContext context, ActorUtils actorUtils);
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static DataStoreClient getDistributedDataStoreClient(@Nonnull final ActorRef actor,
