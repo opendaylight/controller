@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.sharding;
 
 import akka.actor.ActorRef;
@@ -312,13 +311,13 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         final DOMDataTreeIdentifier prefix = message.getPrefix();
 
-        final ActorUtils context = prefix.getDatastoreType() == LogicalDatastoreType.CONFIGURATION
+        final ActorUtils utils = prefix.getDatastoreType() == LogicalDatastoreType.CONFIGURATION
                         ? distributedConfigDatastore.getActorUtils() : distributedOperDatastore.getActorUtils();
 
         // schedule a notification task for the reply
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
                 new ShardCreationLookupTask(actorSystem, getSender(), clusterWrapper,
-                        context, shardingService, prefix, lookupTaskMaxRetries), actorSystem.dispatcher());
+                        utils, shardingService, prefix, lookupTaskMaxRetries), actorSystem.dispatcher());
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {

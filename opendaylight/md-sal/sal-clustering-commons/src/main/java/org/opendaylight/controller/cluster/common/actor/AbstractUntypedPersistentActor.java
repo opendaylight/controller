@@ -5,17 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.ActorRef;
-import akka.persistence.UntypedPersistentActor;
+import akka.persistence.AbstractPersistentActor;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractUntypedPersistentActor extends UntypedPersistentActor implements ExecuteInSelfActor {
+public abstract class AbstractUntypedPersistentActor extends AbstractPersistentActor implements ExecuteInSelfActor {
 
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
@@ -35,26 +34,16 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     }
 
     @Override
-    public final void onReceiveCommand(final Object message) throws Exception {
-        final String messageType = message.getClass().getSimpleName();
-        LOG.trace("Received message {}", messageType);
-
-        if (message instanceof ExecuteInSelfMessage) {
-            LOG.trace("Executing {}", message);
-            ((ExecuteInSelfMessage) message).run();
-        } else {
-            handleCommand(message);
-        }
-
-        LOG.trace("Done handling message {}", messageType);
+    public final Receive createReceive() {
+        return receiveBuilder()
+                .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
+                .matchAny(this::handleCommand)
+                .build();
     }
 
     @Override
-    public final void onReceiveRecover(final Object message) throws Exception {
-        final String messageType = message.getClass().getSimpleName();
-        LOG.trace("Received message {}", messageType);
-        handleRecover(message);
-        LOG.trace("Done handling message {}", messageType);
+    public final Receive createReceiveRecover() {
+        return receiveBuilder().matchAny(this::handleRecover).build();
     }
 
     protected abstract void handleRecover(Object message) throws Exception;
