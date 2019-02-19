@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Verify.verify;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import com.google.common.collect.Collections2;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,22 +33,23 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
 
     private final Map<LocalHistoryIdentifier, FrontendHistoryMetadataBuilder> currentHistories = new HashMap<>();
     private final UnsignedLongRangeSet purgedHistories;
+    private final LocalHistoryIdentifier standaloneId;
     private final ClientIdentifier identifier;
     private final String shardName;
 
     FrontendClientMetadataBuilder(final String shardName, final ClientIdentifier identifier) {
-        this.shardName = Preconditions.checkNotNull(shardName);
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.shardName = requireNonNull(shardName);
+        this.identifier = requireNonNull(identifier);
         purgedHistories = UnsignedLongRangeSet.create();
 
         // History for stand-alone transactions is always present
-        final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
+        standaloneId = standaloneHistoryId();
         currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
     }
 
     FrontendClientMetadataBuilder(final String shardName, final FrontendClientMetadata meta) {
-        this.shardName = Preconditions.checkNotNull(shardName);
-        this.identifier = Preconditions.checkNotNull(meta.getIdentifier());
+        this.shardName = requireNonNull(shardName);
+        this.identifier = meta.getIdentifier();
         purgedHistories = UnsignedLongRangeSet.create(meta.getPurgedHistories());
 
         for (FrontendHistoryMetadata h : meta.getCurrentHistories()) {
@@ -56,7 +58,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         }
 
         // Sanity check and recovery
-        final LocalHistoryIdentifier standaloneId = standaloneHistoryId();
+        standaloneId = standaloneHistoryId();
         if (!currentHistories.containsKey(standaloneId)) {
             LOG.warn("{}: Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
                 shardName, identifier, currentHistories);
@@ -102,13 +104,18 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
 
     void onHistoryPurged(final LocalHistoryIdentifier historyId) {
         final FrontendHistoryMetadataBuilder history = currentHistories.remove(historyId);
+        final long historyBits = historyId.getHistoryId();
         if (history == null) {
-            LOG.warn("{}: Purging unknown history {}", shardName, historyId);
+            if (!purgedHistories.contains(historyBits)) {
+                purgedHistories.add(historyBits);
+                LOG.warn("{}: Purging unknown history {}", shardName, historyId);
+            } else {
+                LOG.warn("{}: Duplicate purge of history {}", shardName, historyId);
+            }
+        } else {
+            purgedHistories.add(historyBits);
+            LOG.debug("{}: Purged history {}", shardName, historyId);
         }
-
-        // XXX: do we need to account for cookies?
-        purgedHistories.add(historyId.getHistoryId());
-        LOG.debug("{}: Purged history {}", historyId);
     }
 
     void onTransactionAborted(final TransactionIdentifier txId) {
@@ -154,7 +161,7 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         for (FrontendHistoryMetadataBuilder e : currentHistories.values()) {
             if (e.getIdentifier().getHistoryId() != 0) {
                 final AbstractFrontendHistory state = e.toLeaderState(shard);
-                Verify.verify(state instanceof LocalFrontendHistory);
+                verify(state instanceof LocalFrontendHistory, "Unexpected state %s", state);
                 histories.put(e.getIdentifier(), (LocalFrontendHistory) state);
             }
         }
@@ -174,7 +181,15 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     }
 
     private FrontendHistoryMetadataBuilder getHistory(final TransactionIdentifier txId) {
-        return currentHistories.get(txId.getHistoryId());
+        LocalHistoryIdentifier historyId = txId.getHistoryId();
+        if (historyId.getHistoryId() == 0 && historyId.getCookie() != 0) {
+            // We are pre-creating the history for free-standing transactions with a zero cookie, hence our lookup
+            // needs to account for that.
+            LOG.debug("{}: looking up {} instead of {}", shardName, standaloneId, historyId);
+            historyId = standaloneId;
+        }
+
+        return currentHistories.get(historyId);
     }
 
     @Override
