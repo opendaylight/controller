@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
+import akka.actor.AbstractActor.ActorContext;
 import akka.actor.ActorRef;
-import akka.actor.UntypedActorContext;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -29,20 +30,20 @@ class ShardTransactionActorFactory {
     private final DatastoreContext datastoreContext;
     private final String txnDispatcherPath;
     private final ShardStats shardMBean;
-    private final UntypedActorContext actorContext;
+    private final ActorContext actorContext;
     private final ActorRef shardActor;
     private final String shardName;
 
     ShardTransactionActorFactory(ShardDataTree dataTree, DatastoreContext datastoreContext,
-            String txnDispatcherPath, ActorRef shardActor, UntypedActorContext actorContext, ShardStats shardMBean,
+            String txnDispatcherPath, ActorRef shardActor, ActorContext actorContext, ShardStats shardMBean,
             String shardName) {
-        this.dataTree = Preconditions.checkNotNull(dataTree);
-        this.datastoreContext = Preconditions.checkNotNull(datastoreContext);
-        this.txnDispatcherPath = Preconditions.checkNotNull(txnDispatcherPath);
-        this.shardMBean = Preconditions.checkNotNull(shardMBean);
-        this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.shardActor = Preconditions.checkNotNull(shardActor);
-        this.shardName = Preconditions.checkNotNull(shardName);
+        this.dataTree = requireNonNull(dataTree);
+        this.datastoreContext = requireNonNull(datastoreContext);
+        this.txnDispatcherPath = requireNonNull(txnDispatcherPath);
+        this.shardMBean = requireNonNull(shardMBean);
+        this.actorContext = requireNonNull(actorContext);
+        this.shardActor = requireNonNull(shardActor);
+        this.shardName = requireNonNull(shardName);
     }
 
     private String actorNameFor(final TransactionIdentifier txId) {
