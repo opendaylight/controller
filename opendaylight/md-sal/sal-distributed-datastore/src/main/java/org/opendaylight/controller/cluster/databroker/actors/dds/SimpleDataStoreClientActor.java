@@ -7,15 +7,16 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.Props;
-import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 /**
  * A {@link AbstractClientActor} which acts as the point of contact for DistributedDataStore.
@@ -25,22 +26,22 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 public final class SimpleDataStoreClientActor extends AbstractDataStoreClientActor {
     private final String shardName;
 
-    private SimpleDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext,
+    private SimpleDataStoreClientActor(final FrontendIdentifier frontendId, final ActorUtils actorUtils,
             final String shardName) {
-        super(frontendId, actorContext);
-        this.shardName = Preconditions.checkNotNull(shardName);
+        super(frontendId, actorUtils);
+        this.shardName = requireNonNull(shardName);
     }
 
     @Override
-    AbstractDataStoreClientBehavior initialBehavior(final ClientActorContext context, final ActorContext actorContext) {
-        return new SimpleDataStoreClientBehavior(context, actorContext, shardName);
+    AbstractDataStoreClientBehavior initialBehavior(final ClientActorContext context, final ActorUtils actorUtils) {
+        return new SimpleDataStoreClientBehavior(context, actorUtils, shardName);
     }
 
     public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
-            final ActorContext ctx, final String shardName) {
+            final ActorUtils actorUtils, final String shardName) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
         return Props.create(SimpleDataStoreClientActor.class,
-            () -> new SimpleDataStoreClientActor(frontendId, ctx, shardName));
+            () -> new SimpleDataStoreClientActor(frontendId, actorUtils, shardName));
     }
 }

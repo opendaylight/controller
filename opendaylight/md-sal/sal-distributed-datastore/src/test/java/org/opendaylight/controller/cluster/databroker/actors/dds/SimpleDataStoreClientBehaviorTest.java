@@ -8,13 +8,13 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 public class SimpleDataStoreClientBehaviorTest extends AbstractDataStoreClientBehaviorTest {
 
     @Override
     protected AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
-                                                             final ActorContext context) {
+                                                             final ActorUtils context) {
         return new SimpleDataStoreClientBehavior(clientContext, context, SHARD);
     }
 

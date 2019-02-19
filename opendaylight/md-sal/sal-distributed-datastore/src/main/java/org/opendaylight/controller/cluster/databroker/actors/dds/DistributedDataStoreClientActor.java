@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 /**
  * A {@link AbstractClientActor} which acts as the point of contact for DistributedDataStore.
@@ -22,17 +22,17 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
  * @author Robert Varga
  */
 public final class DistributedDataStoreClientActor extends AbstractDataStoreClientActor {
-    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext) {
-        super(frontendId, actorContext);
+    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId, final ActorUtils actorUtils) {
+        super(frontendId, actorUtils);
     }
 
     @Override
-    AbstractDataStoreClientBehavior initialBehavior(final ClientActorContext context, final ActorContext actorContext) {
-        return new DistributedDataStoreClientBehavior(context, actorContext);
+    AbstractDataStoreClientBehavior initialBehavior(final ClientActorContext context, final ActorUtils actorUtils) {
+        return new DistributedDataStoreClientBehavior(context, actorUtils);
     }
 
     public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
-            final ActorContext ctx) {
+            final ActorUtils ctx) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
         return Props.create(DistributedDataStoreClientActor.class,

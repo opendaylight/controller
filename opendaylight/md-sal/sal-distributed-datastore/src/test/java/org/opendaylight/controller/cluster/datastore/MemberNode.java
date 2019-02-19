@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -132,15 +132,15 @@ public class MemberNode {
 
     public static void verifyRaftState(final AbstractDataStore datastore, final String shardName,
             final RaftStateVerifier verifier) throws Exception {
-        ActorContext actorContext = datastore.getActorContext();
+        ActorUtils actorUtils = datastore.getActorUtils();
 
-        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        Future<ActorRef> future = actorUtils.findLocalShardAsync(shardName);
         ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            OnDemandRaftState raftState = (OnDemandRaftState)actorContext
+            OnDemandRaftState raftState = (OnDemandRaftState)actorUtils
                     .executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
 
             try {
@@ -160,7 +160,7 @@ public class MemberNode {
         final Set<String> peerIds = Sets.newHashSet();
         for (String p: peerMemberNames) {
             peerIds.add(ShardIdentifier.create(shardName, MemberName.forName(p),
-                datastore.getActorContext().getDataStoreName()).toString());
+                datastore.getActorUtils().getDataStoreName()).toString());
         }
 
         verifyRaftState(datastore, shardName, raftState -> assertEquals("Peers for shard " + shardName, peerIds,
@@ -170,7 +170,7 @@ public class MemberNode {
     public static void verifyNoShardPresent(final AbstractDataStore datastore, final String shardName) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            Optional<ActorRef> shardReply = datastore.getActorContext().findLocalShard(shardName);
+            Optional<ActorRef> shardReply = datastore.getActorUtils().findLocalShard(shardName);
             if (!shardReply.isPresent()) {
                 return;
             }

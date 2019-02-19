@@ -186,7 +186,7 @@
   <bean id="distributedEntityOwnershipService" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService"
           factory-method="start" destroy-method="close">
     <argument>
-      <bean factory-ref="operDatastore" factory-method="getActorContext"/>
+      <bean factory-ref="operDatastore" factory-method="getActorUtils"/>
     </argument>
     <argument ref="selectionStrategyConfig"/>
   </bean>

@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.access.client.AbstractClientConnectio
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleClientHistory> {
     private ActorSystem system;
@@ -43,8 +43,8 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
         final TestProbe actorContextProbe = new TestProbe(system, "actor-context");
         clientActorContext = AccessClientUtil.createClientActorContext(
                 system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        final ActorContext actorContextMock = createActorContextMock(system, actorContextProbe.ref());
-        behavior = new SimpleDataStoreClientBehavior(clientActorContext, actorContextMock, SHARD_NAME);
+        final ActorUtils actorUtilsMock = createActorUtilsMock(system, actorContextProbe.ref());
+        behavior = new SimpleDataStoreClientBehavior(clientActorContext, actorUtilsMock, SHARD_NAME);
 
         object = new SingleClientHistory(behavior, HISTORY_ID);
     }

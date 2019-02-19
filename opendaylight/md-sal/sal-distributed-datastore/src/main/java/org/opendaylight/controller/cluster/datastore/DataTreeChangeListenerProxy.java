@@ -7,18 +7,19 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
@@ -36,22 +37,22 @@ import scala.concurrent.Future;
 final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
     private final ActorRef dataChangeListenerActor;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final YangInstanceIdentifier registeredPath;
 
     @GuardedBy("this")
     private ActorSelection listenerRegistrationActor;
 
-    DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener,
+    DataTreeChangeListenerProxy(final ActorUtils actorUtils, final T listener,
             final YangInstanceIdentifier registeredPath) {
         super(listener);
-        this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.registeredPath = Preconditions.checkNotNull(registeredPath);
-        this.dataChangeListenerActor = actorContext.getActorSystem().actorOf(
+        this.actorUtils = requireNonNull(actorUtils);
+        this.registeredPath = requireNonNull(registeredPath);
+        this.dataChangeListenerActor = actorUtils.getActorSystem().actorOf(
                 DataTreeChangeListenerActor.props(getInstance(), registeredPath)
-                    .withDispatcher(actorContext.getNotificationDispatcherPath()));
+                    .withDispatcher(actorUtils.getNotificationDispatcherPath()));
 
-        LOG.debug("{}: Created actor {} for DTCL {}", actorContext.getDatastoreContext().getLogicalStoreType(),
+        LOG.debug("{}: Created actor {} for DTCL {}", actorUtils.getDatastoreContext().getLogicalStoreType(),
                 dataChangeListenerActor, listener);
     }
 
@@ -67,7 +68,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     }
 
     void init(final String shardName) {
-        Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName);
+        Future<ActorRef> findFuture = actorUtils.findLocalShardAsync(shardName);
         findFuture.onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(final Throwable failure, final ActorRef shard) {
@@ -82,7 +83,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                     doRegistration(shard);
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
     }
 
     private void setListenerRegistrationActor(final ActorSelection actor) {
@@ -104,10 +105,10 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
 
     private void doRegistration(final ActorRef shard) {
 
-        Future<Object> future = actorContext.executeOperationAsync(shard,
+        Future<Object> future = actorUtils.executeOperationAsync(shard,
                 new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor,
                         getInstance() instanceof ClusteredDOMDataTreeChangeListener),
-                actorContext.getDatastoreContext().getShardInitializationTimeout());
+                actorUtils.getDatastoreContext().getShardInitializationTimeout());
 
         future.onComplete(new OnComplete<Object>() {
             @Override
@@ -117,11 +118,11 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                             getInstance(), registeredPath, failure);
                 } else {
                     RegisterDataTreeNotificationListenerReply reply = (RegisterDataTreeNotificationListenerReply)result;
-                    setListenerRegistrationActor(actorContext.actorSelection(
+                    setListenerRegistrationActor(actorUtils.actorSelection(
                             reply.getListenerRegistrationPath()));
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
     }
 
     @VisibleForTesting
@@ -135,6 +136,6 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     }
 
     private String logContext() {
-        return actorContext.getDatastoreContext().getLogicalStoreType().toString();
+        return actorUtils.getDatastoreContext().getLogicalStoreType().toString();
     }
 }

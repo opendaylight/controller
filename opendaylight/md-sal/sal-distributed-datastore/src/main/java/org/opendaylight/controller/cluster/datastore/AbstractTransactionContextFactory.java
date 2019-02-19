@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +21,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
@@ -42,20 +43,19 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
 
     private final ConcurrentMap<String, F> knownLocal = new ConcurrentHashMap<>();
     private final LocalHistoryIdentifier historyId;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
 
     // Used via TX_COUNTER_UPDATER
     @SuppressWarnings("unused")
     private volatile long nextTx;
 
-    protected AbstractTransactionContextFactory(final ActorContext actorContext,
-            final LocalHistoryIdentifier historyId) {
-        this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.historyId = Preconditions.checkNotNull(historyId);
+    protected AbstractTransactionContextFactory(final ActorUtils actorUtils, final LocalHistoryIdentifier historyId) {
+        this.actorUtils = requireNonNull(actorUtils);
+        this.historyId = requireNonNull(historyId);
     }
 
-    final ActorContext getActorContext() {
-        return actorContext;
+    final ActorUtils getActorUtils() {
+        return actorUtils;
     }
 
     final LocalHistoryIdentifier getHistoryId() {
@@ -116,7 +116,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent,
             final String shardName) {
         final TransactionContextWrapper transactionContextWrapper =
-                new TransactionContextWrapper(parent.getIdentifier(), actorContext, shardName);
+                new TransactionContextWrapper(parent.getIdentifier(), actorUtils, shardName);
 
         Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier());
         if (findPrimaryFuture.isCompleted()) {
@@ -136,7 +136,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                         onFindPrimaryShardFailure(failure, parent, shardName, transactionContextWrapper);
                     }
                 }
-            }, actorContext.getClientDispatcher());
+            }, actorUtils.getClientDispatcher());
         }
 
         return transactionContextWrapper;

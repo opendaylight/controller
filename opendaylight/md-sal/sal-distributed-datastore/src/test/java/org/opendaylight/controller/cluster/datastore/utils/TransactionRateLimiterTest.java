@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 public class TransactionRateLimiterTest {
 
     @Mock
-    public ActorContext actorContext;
+    public ActorUtils actorUtils;
 
     @Mock
     public DatastoreContext datastoreContext;
@@ -49,10 +49,10 @@ public class TransactionRateLimiterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        doReturn(datastoreContext).when(actorContext).getDatastoreContext();
+        doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
         doReturn(30).when(datastoreContext).getShardTransactionCommitTimeoutInSeconds();
         doReturn(100L).when(datastoreContext).getTransactionCreationInitialRateLimit();
-        doReturn(commitTimer).when(actorContext).getOperationTimer("commit");
+        doReturn(commitTimer).when(actorUtils).getOperationTimer("commit");
         doReturn(commitTimerContext).when(commitTimer).time();
         doReturn(commitSnapshot).when(commitTimer).getSnapshot();
     }
@@ -65,7 +65,7 @@ public class TransactionRateLimiterTest {
             doReturn(TimeUnit.MILLISECONDS.toNanos(i) * 1D).when(commitSnapshot).getValue(i * 0.1);
         }
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -86,7 +86,7 @@ public class TransactionRateLimiterTest {
 
         doReturn(TimeUnit.MILLISECONDS.toNanos(0) * 1D).when(commitSnapshot).getValue(0.1);
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -107,7 +107,7 @@ public class TransactionRateLimiterTest {
         // ten seconds
         doReturn(TimeUnit.MILLISECONDS.toNanos(10000) * 1D).when(commitSnapshot).getValue(1.0);
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -125,7 +125,7 @@ public class TransactionRateLimiterTest {
             doReturn(TimeUnit.MILLISECONDS.toNanos(10000) * 1D).when(commitSnapshot).getValue(i * 0.1);
         }
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -148,7 +148,7 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(100) * 1D).when(commitSnapshot).getValue(0.9);
         doReturn(TimeUnit.MILLISECONDS.toNanos(200) * 1D).when(commitSnapshot).getValue(1.0);
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -169,7 +169,7 @@ public class TransactionRateLimiterTest {
         Timer.Context operationalCommitTimerContext = mock(Timer.Context.class);
         Snapshot operationalCommitSnapshot = mock(Snapshot.class);
 
-        doReturn(operationalCommitTimer).when(actorContext).getOperationTimer("operational", "commit");
+        doReturn(operationalCommitTimer).when(actorUtils).getOperationTimer("operational", "commit");
         doReturn(operationalCommitTimerContext).when(operationalCommitTimer).time();
         doReturn(operationalCommitSnapshot).when(operationalCommitTimer).getSnapshot();
 
@@ -183,7 +183,7 @@ public class TransactionRateLimiterTest {
         DatastoreContext.getGlobalDatastoreNames().add("config");
         DatastoreContext.getGlobalDatastoreNames().add("operational");
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -199,7 +199,7 @@ public class TransactionRateLimiterTest {
             doReturn(TimeUnit.SECONDS.toNanos(1) * 1D).when(commitSnapshot).getValue(i * 0.1);
         }
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         StopWatch watch = new StopWatch();
 
@@ -228,7 +228,7 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(100) * 1D).when(commitSnapshot).getValue(0.9);
         doReturn(TimeUnit.MILLISECONDS.toNanos(200) * 1D).when(commitSnapshot).getValue(1.0);
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
 
         rateLimiter.acquire();
 
@@ -261,7 +261,7 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(100) * 1D).when(commitSnapshot).getValue(0.9);
         doReturn(TimeUnit.MILLISECONDS.toNanos(200) * 1D).when(commitSnapshot).getValue(1.0);
 
-        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
+        TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorUtils);
         rateLimiter.setAcquireCount(Long.MAX_VALUE - 1);
         rateLimiter.setPollOnCount(Long.MAX_VALUE);
 

@@ -209,7 +209,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerDistributedDataStore = followerTestKit.setupAbstractDataStore(
                 testParameter, type, moduleShardsConfig, false, shards);
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), shards);
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(), shards);
 
         leaderTestKit.waitForMembersUp("member-2");
         followerTestKit.waitForMembersUp("member-1");
@@ -602,7 +602,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         TestKit.shutdownActorSystem(leaderSystem, true);
         Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
-        followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorContext(), CARS);
+        followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorUtils(), CARS);
 
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_2_ADDRESS);
@@ -615,7 +615,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 newMember1TestKit.setupAbstractDataStore(
                         testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
 
-            followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), CARS);
+            followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), CARS);
 
             // Write a car entry to the new leader - should switch to local Tx
 
@@ -635,10 +635,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @Test
     public void testReadyLocalTransactionForwardedToLeader() throws Exception {
         initDatastoresWithCars("testReadyLocalTransactionForwardedToLeader");
-        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
+        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), "cars");
 
         final com.google.common.base.Optional<ActorRef> carsFollowerShard =
-                followerDistributedDataStore.getActorContext().findLocalShard("cars");
+                followerDistributedDataStore.getActorUtils().findLocalShard("cars");
         assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
 
         final DataTree dataTree = new InMemoryDataTreeFactory().create(
@@ -683,13 +683,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
 
-        final ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
+        final ActorSelection txActor = leaderDistributedDataStore.getActorUtils().actorSelection(
                 ((ReadyTransactionReply)resp).getCohortPath());
 
         final Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
         ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
-                leaderDistributedDataStore.getActorContext(), Arrays.asList(
+                leaderDistributedDataStore.getActorUtils(), Arrays.asList(
                         new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), tx2);
         cohort.canCommit().get(5, TimeUnit.SECONDS);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
@@ -702,10 +702,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     @Test
     public void testForwardedReadyTransactionForwardedToLeader() throws Exception {
         initDatastoresWithCars("testForwardedReadyTransactionForwardedToLeader");
-        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
+        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), "cars");
 
         final com.google.common.base.Optional<ActorRef> carsFollowerShard =
-                followerDistributedDataStore.getActorContext().findLocalShard("cars");
+                followerDistributedDataStore.getActorUtils().findLocalShard("cars");
         assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
 
         carsFollowerShard.get().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
@@ -754,13 +754,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
 
-        ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
+        ActorSelection txActor = leaderDistributedDataStore.getActorUtils().actorSelection(
                 ((ReadyTransactionReply)resp).getCohortPath());
 
         final Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
         final ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
-                leaderDistributedDataStore.getActorContext(), Arrays.asList(
+                leaderDistributedDataStore.getActorUtils(), Arrays.asList(
                         new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), tx2);
         cohort.canCommit().get(5, TimeUnit.SECONDS);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
@@ -851,7 +851,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName())
                 .shardElectionTimeoutFactor(10));
 
-        leaderTestKit.waitUntilNoLeader(leaderDistributedDataStore.getActorContext(), "cars");
+        leaderTestKit.waitUntilNoLeader(leaderDistributedDataStore.getActorUtils(), "cars");
 
         // Submit all tx's - the messages should get queued for retry.
 
@@ -865,9 +865,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder
                 .customRaftPolicyImplementation(null).shardElectionTimeoutFactor(1));
-        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorContext(), "cars")
+        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorUtils(), "cars")
                 .tell(TimeoutNow.INSTANCE, ActorRef.noSender());
-        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorContext(), "people")
+        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorUtils(), "people")
                 .tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         followerTestKit.doCommit(writeTx1CanCommit, writeTx1Cohort);
@@ -924,7 +924,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .shardElectionTimeoutFactor(100));
 
             final FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-            final Future<ActorRef> future = leaderDistributedDataStore.getActorContext().findLocalShardAsync("cars");
+            final Future<ActorRef> future = leaderDistributedDataStore.getActorUtils().findLocalShardAsync("cars");
             final ActorRef leaderActor = Await.result(future, duration);
 
             final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
@@ -968,9 +968,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         successWriteTx.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         // Stop the follower
-        followerTestKit.watch(followerDistributedDataStore.getActorContext().getShardManager());
+        followerTestKit.watch(followerDistributedDataStore.getActorUtils().getShardManager());
         followerDistributedDataStore.close();
-        followerTestKit.expectTerminated(followerDistributedDataStore.getActorContext().getShardManager());
+        followerTestKit.expectTerminated(followerDistributedDataStore.getActorUtils().getShardManager());
 
         // Submit the preIsolatedLeaderWriteTx so it's pending
         final DOMStoreThreePhaseCommitCohort preIsolatedLeaderTxCohort = preIsolatedLeaderWriteTx.ready();

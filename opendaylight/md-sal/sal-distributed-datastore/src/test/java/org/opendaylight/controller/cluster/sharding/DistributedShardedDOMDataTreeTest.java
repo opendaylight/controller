@@ -62,7 +62,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.dom.api.CDSDataTreeProducer;
 import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
@@ -215,7 +215,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
 
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
@@ -258,10 +258,10 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         final String shardName = ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier());
         LOG.debug("Creating distributed datastore client for shard {}", shardName);
 
-        final ActorContext actorContext = leaderDistributedDataStore.getActorContext();
+        final ActorUtils actorUtils = leaderDistributedDataStore.getActorUtils();
         final Props distributedDataStoreClientProps =
-                SimpleDataStoreClientActor.props(actorContext.getCurrentMemberName(),
-                        "Shard-" + shardName, actorContext, shardName);
+                SimpleDataStoreClientActor.props(actorUtils.getCurrentMemberName(), "Shard-" + shardName, actorUtils,
+                    shardName);
 
         final ActorRef clientActor = leaderSystem.actorOf(distributedDataStoreClientProps);
         final DataStoreClient distributedDataStoreClient = SimpleDataStoreClientActor
@@ -287,13 +287,13 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
 
         LOG.warn("Got after waiting for nonleader");
-        final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
+        final ActorRef leaderShardManager = leaderDistributedDataStore.getActorUtils().getShardManager();
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
                 ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
         final YangInstanceIdentifier oid1 = getOuterListIdFor(0);
@@ -303,7 +303,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 leaderShardFactory.createDistributedShard(outerListPath, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
                 ClusterUtils.getCleanShardName(outerListPath.getRootIdentifier()));
 
         final DOMDataTreeProducer shardProducer = leaderShardFactory.createProducer(
@@ -463,15 +463,15 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                     TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                     DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
-            leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+            leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
-            assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+            assertNotNull(findLocalShard(leaderDistributedDataStore.getActorUtils(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
 
             waitOnAsyncTask(reg1.close(), DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
-            waitUntilShardIsDown(leaderDistributedDataStore.getActorContext(),
+            waitUntilShardIsDown(leaderDistributedDataStore.getActorUtils(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
         }
     }
@@ -484,10 +484,10 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorUtils(),
                 ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
-        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorUtils(),
                 ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
 
 

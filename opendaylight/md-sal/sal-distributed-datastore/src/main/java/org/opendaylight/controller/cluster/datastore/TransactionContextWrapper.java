@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
-import com.google.common.base.Preconditions;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +22,7 @@ import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -54,14 +56,14 @@ class TransactionContextWrapper {
     @GuardedBy("queuedTxOperations")
     private boolean pendingEnqueue;
 
-    TransactionContextWrapper(final TransactionIdentifier identifier, final ActorContext actorContext,
+    TransactionContextWrapper(final TransactionIdentifier identifier, final ActorUtils actorUtils,
             final String shardName) {
-        this.identifier = Preconditions.checkNotNull(identifier);
+        this.identifier = requireNonNull(identifier);
         this.limiter = new OperationLimiter(identifier,
                 // 1 extra permit for the ready operation
-                actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1,
-                TimeUnit.MILLISECONDS.toSeconds(actorContext.getDatastoreContext().getOperationTimeoutInMillis()));
-        this.shardName = Preconditions.checkNotNull(shardName);
+                actorUtils.getDatastoreContext().getShardBatchedModificationCount() + 1,
+                TimeUnit.MILLISECONDS.toSeconds(actorUtils.getDatastoreContext().getOperationTimeoutInMillis()));
+        this.shardName = requireNonNull(shardName);
     }
 
     TransactionContext getTransactionContext() {
@@ -95,8 +97,7 @@ class TransactionContextWrapper {
         synchronized (queuedTxOperations) {
             contextOnEntry = transactionContext;
             if (contextOnEntry == null) {
-                Preconditions.checkState(pendingEnqueue == false, "Concurrent access to transaction %s detected",
-                        identifier);
+                checkState(pendingEnqueue == false, "Concurrent access to transaction %s detected", identifier);
                 pendingEnqueue = true;
             }
         }

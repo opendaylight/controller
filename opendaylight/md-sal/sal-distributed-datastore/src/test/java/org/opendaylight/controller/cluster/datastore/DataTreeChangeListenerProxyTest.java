@@ -39,7 +39,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
@@ -54,12 +54,12 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     @Test(timeout = 10000)
     public void testSuccessfulRegistration() {
         final TestKit kit = new TestKit(getSystem());
-        ActorContext actorContext = new ActorContext(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
+        ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
         final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
-                actorContext, mockListener, path);
+                actorUtils, mockListener, path);
 
         new Thread(() -> proxy.init("shard-1")).start();
 
@@ -101,7 +101,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     @Test(timeout = 10000)
     public void testSuccessfulRegistrationForClusteredListener() {
         final TestKit kit = new TestKit(getSystem());
-        ActorContext actorContext = new ActorContext(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
+        ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
         ClusteredDOMDataTreeChangeListener mockClusteredListener = mock(
@@ -109,7 +109,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
         final DataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> proxy =
-                new DataTreeChangeListenerProxy<>(actorContext, mockClusteredListener, path);
+                new DataTreeChangeListenerProxy<>(actorUtils, mockClusteredListener, path);
 
         new Thread(() -> proxy.init("shard-1")).start();
 
@@ -130,12 +130,12 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     @Test(timeout = 10000)
     public void testLocalShardNotFound() {
         final TestKit kit = new TestKit(getSystem());
-        ActorContext actorContext = new ActorContext(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
+        ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
         final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
-                actorContext, mockListener, path);
+                actorUtils, mockListener, path);
 
         new Thread(() -> proxy.init("shard-1")).start();
 
@@ -153,12 +153,12 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     @Test(timeout = 10000)
     public void testLocalShardNotInitialized() {
         final TestKit kit = new TestKit(getSystem());
-        ActorContext actorContext = new ActorContext(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
+        ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
         final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
-                actorContext, mockListener, path);
+                actorUtils, mockListener, path);
 
         new Thread(() -> proxy.init("shard-1")).start();
 
@@ -185,22 +185,22 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
         doReturn(mockActor).when(mockActorSystem).actorOf(any(Props.class));
         ExecutionContextExecutor executor = ExecutionContexts.fromExecutor(MoreExecutors.directExecutor());
 
-        ActorContext actorContext = mock(ActorContext.class);
+        ActorUtils actorUtils = mock(ActorUtils.class);
         final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
 
-        doReturn(executor).when(actorContext).getClientDispatcher();
-        doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
-        doReturn(mockActorSystem).when(actorContext).getActorSystem();
+        doReturn(executor).when(actorUtils).getClientDispatcher();
+        doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
+        doReturn(mockActorSystem).when(actorUtils).getActorSystem();
 
         String shardName = "shard-1";
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
-                actorContext, mockListener, path);
+                actorUtils, mockListener, path);
 
-        doReturn(kit.duration("5 seconds")).when(actorContext).getOperationDuration();
-        doReturn(Futures.successful(kit.getRef())).when(actorContext).findLocalShardAsync(eq(shardName));
-        doReturn(Futures.failed(new RuntimeException("mock"))).when(actorContext).executeOperationAsync(
+        doReturn(kit.duration("5 seconds")).when(actorUtils).getOperationDuration();
+        doReturn(Futures.successful(kit.getRef())).when(actorUtils).findLocalShardAsync(eq(shardName));
+        doReturn(Futures.failed(new RuntimeException("mock"))).when(actorUtils).executeOperationAsync(
             any(ActorRef.class), any(Object.class), any(Timeout.class));
-        doReturn(mock(DatastoreContext.class)).when(actorContext).getDatastoreContext();
+        doReturn(mock(DatastoreContext.class)).when(actorUtils).getDatastoreContext();
 
         proxy.init("shard-1");
 
@@ -212,28 +212,28 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
     @Test
     public void testCloseBeforeRegistration() {
         final TestKit kit = new TestKit(getSystem());
-        ActorContext actorContext = mock(ActorContext.class);
+        ActorUtils actorUtils = mock(ActorUtils.class);
 
         String shardName = "shard-1";
 
-        doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
-        doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(actorContext).getClientDispatcher();
-        doReturn(getSystem()).when(actorContext).getActorSystem();
-        doReturn(Dispatchers.DEFAULT_DISPATCHER_PATH).when(actorContext).getNotificationDispatcherPath();
-        doReturn(getSystem().actorSelection(kit.getRef().path())).when(actorContext).actorSelection(
+        doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
+        doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(actorUtils).getClientDispatcher();
+        doReturn(getSystem()).when(actorUtils).getActorSystem();
+        doReturn(Dispatchers.DEFAULT_DISPATCHER_PATH).when(actorUtils).getNotificationDispatcherPath();
+        doReturn(getSystem().actorSelection(kit.getRef().path())).when(actorUtils).actorSelection(
             kit.getRef().path());
-        doReturn(kit.duration("5 seconds")).when(actorContext).getOperationDuration();
-        doReturn(Futures.successful(kit.getRef())).when(actorContext).findLocalShardAsync(eq(shardName));
+        doReturn(kit.duration("5 seconds")).when(actorUtils).getOperationDuration();
+        doReturn(Futures.successful(kit.getRef())).when(actorUtils).findLocalShardAsync(eq(shardName));
 
         final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy = new DataTreeChangeListenerProxy<>(
-                actorContext, mockListener, YangInstanceIdentifier.of(TestModel.TEST_QNAME));
+                actorUtils, mockListener, YangInstanceIdentifier.of(TestModel.TEST_QNAME));
 
         Answer<Future<Object>> answer = invocation -> {
             proxy.close();
             return Futures.successful((Object) new RegisterDataTreeNotificationListenerReply(kit.getRef()));
         };
 
-        doAnswer(answer).when(actorContext).executeOperationAsync(any(ActorRef.class), any(Object.class),
+        doAnswer(answer).when(actorUtils).executeOperationAsync(any(ActorRef.class), any(Object.class),
             any(Timeout.class));
 
         proxy.init(shardName);

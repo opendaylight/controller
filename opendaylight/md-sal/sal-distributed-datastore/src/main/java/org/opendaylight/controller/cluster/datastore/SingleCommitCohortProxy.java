@@ -7,14 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Arrays;
 import java.util.List;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,17 +31,17 @@ import scala.concurrent.Future;
 class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
     private static final Logger LOG = LoggerFactory.getLogger(SingleCommitCohortProxy.class);
 
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final Future<Object> cohortFuture;
     private final TransactionIdentifier transactionId;
     private volatile DOMStoreThreePhaseCommitCohort delegateCohort = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
     private final OperationCallback.Reference operationCallbackRef;
 
-    SingleCommitCohortProxy(ActorContext actorContext, Future<Object> cohortFuture, TransactionIdentifier transactionId,
+    SingleCommitCohortProxy(ActorUtils actorUtils, Future<Object> cohortFuture, TransactionIdentifier transactionId,
             OperationCallback.Reference operationCallbackRef) {
-        this.actorContext = actorContext;
+        this.actorUtils = actorUtils;
         this.cohortFuture = cohortFuture;
-        this.transactionId = Preconditions.checkNotNull(transactionId);
+        this.transactionId = requireNonNull(transactionId);
         this.operationCallbackRef = operationCallbackRef;
     }
 
@@ -70,7 +71,7 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
                 // immediate success, to complete the 3PC for the front-end.
                 returnFuture.set(Boolean.TRUE);
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         return returnFuture;
     }
