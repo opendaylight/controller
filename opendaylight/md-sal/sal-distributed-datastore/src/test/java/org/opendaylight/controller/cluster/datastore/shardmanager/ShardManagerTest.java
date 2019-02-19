@@ -1047,12 +1047,12 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         TestShardManager shardManager = newTestShardManager();
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(
+        shardManager.handleCommand(new RoleChangeNotification(
                 memberId, RaftState.Candidate.name(), RaftState.Leader.name()));
 
         verify(ready, never()).countDown();
 
-        shardManager.onReceiveCommand(new ShardLeaderStateChanged(memberId, memberId,
+        shardManager.handleCommand(new ShardLeaderStateChanged(memberId, memberId,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
 
         verify(ready, times(1)).countDown();
@@ -1064,13 +1064,13 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         TestShardManager shardManager = newTestShardManager();
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
+        shardManager.handleCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
 
         verify(ready, never()).countDown();
 
-        shardManager.onReceiveCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
+        shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
 
-        shardManager.onReceiveCommand(
+        shardManager.handleCommand(
             new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
 
@@ -1083,15 +1083,15 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         TestShardManager shardManager = newTestShardManager();
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
+        shardManager.handleCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
 
         verify(ready, never()).countDown();
 
-        shardManager.onReceiveCommand(
+        shardManager.handleCommand(
             new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
 
-        shardManager.onReceiveCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
+        shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
 
         verify(ready, times(1)).countDown();
     }
@@ -1100,7 +1100,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
         TestShardManager shardManager = newTestShardManager();
 
-        shardManager.onReceiveCommand(new RoleChangeNotification("unknown", RaftState.Candidate.name(),
+        shardManager.handleCommand(new RoleChangeNotification("unknown", RaftState.Candidate.name(),
             RaftState.Leader.name()));
 
         verify(ready, never()).countDown();
@@ -1117,7 +1117,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     public void testWhenShardIsLeaderSyncStatusIsTrue() throws Exception {
         TestShardManager shardManager = newTestShardManager();
 
-        shardManager.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
+        shardManager.handleCommand(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         assertTrue(shardManager.getMBean().getSyncStatus());
@@ -1128,13 +1128,13 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         TestShardManager shardManager = newTestShardManager();
 
         String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(shardId,
+        shardManager.handleCommand(new RoleChangeNotification(shardId,
                 RaftState.Follower.name(), RaftState.Candidate.name()));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send a FollowerInitialSyncStatus with status = true for the replica whose current state is candidate
-        shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(
                 true, shardId));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
@@ -1145,19 +1145,19 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         TestShardManager shardManager = newTestShardManager();
 
         String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(shardId,
+        shardManager.handleCommand(new RoleChangeNotification(shardId,
                 RaftState.Candidate.name(), RaftState.Follower.name()));
 
         // Initially will be false
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send status true will make sync status true
-        shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(true, shardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(true, shardId));
 
         assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Send status false will make sync status false
-        shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(false, shardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(false, shardId));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
     }
@@ -1177,7 +1177,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Make default shard leader
         String defaultShardId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(defaultShardId,
+        shardManager.handleCommand(new RoleChangeNotification(defaultShardId,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         // default = Leader, astronauts is unknown so sync status remains false
@@ -1185,21 +1185,21 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Make astronauts shard leader as well
         String astronautsShardId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
-        shardManager.onReceiveCommand(new RoleChangeNotification(astronautsShardId,
+        shardManager.handleCommand(new RoleChangeNotification(astronautsShardId,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         // Now sync status should be true
         assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Make astronauts a Follower
-        shardManager.onReceiveCommand(new RoleChangeNotification(astronautsShardId,
+        shardManager.handleCommand(new RoleChangeNotification(astronautsShardId,
                 RaftState.Leader.name(), RaftState.Follower.name()));
 
         // Sync status is not true
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make the astronauts follower sync status true
-        shardManager.onReceiveCommand(new FollowerInitialSyncUpStatus(true, astronautsShardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(true, astronautsShardId));
 
         // Sync status is now true
         assertTrue(shardManager.getMBean().getSyncStatus());
