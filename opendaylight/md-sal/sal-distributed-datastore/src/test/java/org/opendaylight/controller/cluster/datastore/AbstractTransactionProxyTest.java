@@ -71,7 +71,7 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -140,7 +140,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     };
 
     @Mock
-    protected ActorContext mockActorContext;
+    protected ActorUtils mockActorContext;
 
     protected TransactionContextFactory mockComponentFactory;
 

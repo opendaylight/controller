@@ -29,7 +29,7 @@ import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import scala.concurrent.Promise;
@@ -175,8 +175,8 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
         Assert.assertNull(reconnectCohort);
     }
 
-    protected static ActorContext createActorContextMock(final ActorSystem system, final ActorRef actor) {
-        final ActorContext mock = mock(ActorContext.class);
+    protected static ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
+        final ActorUtils mock = mock(ActorUtils.class);
         final Promise<PrimaryShardInfo> promise = new DefaultPromise<>();
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);

@@ -35,7 +35,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.selectionst
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -69,16 +69,16 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     private static final Timeout MESSAGE_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
 
     private final ConcurrentMap<DOMEntity, DOMEntity> registeredEntities = new ConcurrentHashMap<>();
-    private final ActorContext context;
+    private final ActorUtils context;
 
     private volatile ActorRef localEntityOwnershipShard;
     private volatile DataTree localEntityOwnershipShardDataTree;
 
-    DistributedEntityOwnershipService(final ActorContext context) {
+    DistributedEntityOwnershipService(final ActorUtils context) {
         this.context = Preconditions.checkNotNull(context);
     }
 
-    public static DistributedEntityOwnershipService start(final ActorContext context,
+    public static DistributedEntityOwnershipService start(final ActorUtils context,
             final EntityOwnerSelectionStrategyConfig strategyConfig) {
         ActorRef shardManagerActor = context.getShardManager();
 
@@ -248,7 +248,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     public void close() {
     }
 
-    private static EntityOwnershipShard.Builder newShardBuilder(final ActorContext context,
+    private static EntityOwnershipShard.Builder newShardBuilder(final ActorUtils context,
             final EntityOwnerSelectionStrategyConfig strategyConfig) {
         return EntityOwnershipShard.newBuilder().localMemberName(context.getCurrentMemberName())
                 .ownerSelectionStrategyConfig(strategyConfig);

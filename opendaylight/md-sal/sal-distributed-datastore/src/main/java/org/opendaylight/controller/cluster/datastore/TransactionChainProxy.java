@@ -148,7 +148,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             new ConcurrentHashMap<>();
 
     TransactionChainProxy(final TransactionContextFactory parent, final LocalHistoryIdentifier historyId) {
-        super(parent.getActorContext(), historyId);
+        super(parent.getActorUtils(), historyId);
         this.parent = parent;
     }
 
@@ -162,13 +162,13 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        getActorContext().acquireTxCreationPermit();
+        getActorUtils().acquireTxCreationPermit();
         return allocateWriteTransaction(TransactionType.READ_WRITE);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        getActorContext().acquireTxCreationPermit();
+        getActorUtils().acquireTxCreationPermit();
         return allocateWriteTransaction(TransactionType.WRITE_ONLY);
     }
 
@@ -178,7 +178,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
         // Send a close transaction chain request to each and every shard
 
-        getActorContext().broadcast(version -> new CloseTransactionChain(getHistoryId(), version).toSerializable(),
+        getActorUtils().broadcast(version -> new CloseTransactionChain(getHistoryId(), version).toSerializable(),
                 CloseTransactionChain.class);
     }
 
@@ -249,7 +249,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             }
         };
 
-        previous.onComplete(onComplete, getActorContext().getClientDispatcher());
+        previous.onComplete(onComplete, getActorUtils().getClientDispatcher());
         return returnPromise.future();
     }
 
@@ -269,7 +269,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             }
 
             Future<Iterable<Object>> combinedFutures = Futures.sequence(priorReadOnlyTxFutures,
-                    getActorContext().getClientDispatcher());
+                    getActorUtils().getClientDispatcher());
 
             final Promise<T> returnPromise = Futures.promise();
             final OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
@@ -282,7 +282,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
                 }
             };
 
-            combinedFutures.onComplete(onComplete, getActorContext().getClientDispatcher());
+            combinedFutures.onComplete(onComplete, getActorUtils().getClientDispatcher());
             return returnPromise.future();
         } else {
             return future;
@@ -306,7 +306,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         }
 
         // Combine the ready Futures into 1
-        final Future<Iterable<T>> combined = Futures.sequence(cohortFutures, getActorContext().getClientDispatcher());
+        final Future<Iterable<T>> combined = Futures.sequence(cohortFutures, getActorUtils().getClientDispatcher());
 
         // Record the we have outstanding futures
         final State newState = new Submitted(transaction, combined);
@@ -319,7 +319,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             public void onComplete(final Throwable arg0, final Iterable<T> arg1) {
                 STATE_UPDATER.compareAndSet(TransactionChainProxy.this, newState, IDLE_STATE);
             }
-        }, getActorContext().getClientDispatcher());
+        }, getActorUtils().getClientDispatcher());
     }
 
     @Override

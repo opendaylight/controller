@@ -45,7 +45,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RemovePrefixShardR
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -124,7 +124,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         this.serializer = serializer;
 
         this.makeLeaderLocalTimeout =
-                new Timeout(configDataStore.getActorContext().getDatastoreContext()
+                new Timeout(configDataStore.getActorUtils().getDatastoreContext()
                         .getShardLeaderElectionTimeout().duration().$times(2));
     }
 
@@ -213,15 +213,14 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
-        ActorContext actorContext = dataStoreType == DataStoreType.Config
-                ? configDataStore.getActorContext()
-                : operDataStore.getActorContext();
+        ActorUtils actorUtils = dataStoreType == DataStoreType.Config
+                ? configDataStore.getActorUtils() : operDataStore.getActorUtils();
 
         LOG.info("Moving leader to local node {} for shard {}, datastoreType {}",
-                actorContext.getCurrentMemberName().getName(), shardName, dataStoreType);
+                actorUtils.getCurrentMemberName().getName(), shardName, dataStoreType);
 
         final scala.concurrent.Future<ActorRef> localShardReply =
-                actorContext.findLocalShardAsync(shardName);
+                actorUtils.findLocalShardAsync(shardName);
 
         final scala.concurrent.Promise<Object> makeLeaderLocalAsk = akka.dispatch.Futures.promise();
         localShardReply.onComplete(new OnComplete<ActorRef>() {
@@ -233,11 +232,11 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                     makeLeaderLocalAsk.failure(failure);
                 } else {
                     makeLeaderLocalAsk
-                            .completeWith(actorContext
+                            .completeWith(actorUtils
                                     .executeOperationAsync(actorRef, MakeLeaderLocal.INSTANCE, makeLeaderLocalTimeout));
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         final SettableFuture<RpcResult<MakeLeaderLocalOutput>> future = SettableFuture.create();
         makeLeaderLocalAsk.future().onComplete(new OnComplete<Object>() {
@@ -253,7 +252,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 LOG.debug("Leadership transfer complete");
                 future.set(RpcResultBuilder.success(new MakeLeaderLocalOutputBuilder().build()).build());
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         return future;
     }
@@ -626,14 +625,14 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private <T> void sendMessageToManagerForConfiguredShards(final DataStoreType dataStoreType,
             final List<Entry<ListenableFuture<T>, ShardResultBuilder>> shardResultData,
             final Function<String, Object> messageSupplier) {
-        ActorContext actorContext = dataStoreType == DataStoreType.Config ? configDataStore.getActorContext()
-                : operDataStore.getActorContext();
-        Set<String> allShardNames = actorContext.getConfiguration().getAllShardNames();
+        ActorUtils actorUtils = dataStoreType == DataStoreType.Config ? configDataStore.getActorUtils()
+                : operDataStore.getActorUtils();
+        Set<String> allShardNames = actorUtils.getConfiguration().getAllShardNames();
 
-        LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorContext.getDataStoreName());
+        LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorUtils.getDataStoreName());
 
         for (String shardName: allShardNames) {
-            ListenableFuture<T> future = this.ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
+            ListenableFuture<T> future = this.ask(actorUtils.getShardManager(), messageSupplier.apply(shardName),
                                                   SHARD_MGR_TIMEOUT);
             shardResultData.add(new SimpleEntry<>(future,
                     new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
@@ -642,16 +641,16 @@ public class ClusterAdminRpcService implements ClusterAdminService {
 
     private <T> ListenableFuture<List<T>> sendMessageToShardManagers(final Object message) {
         Timeout timeout = SHARD_MGR_TIMEOUT;
-        ListenableFuture<T> configFuture = ask(configDataStore.getActorContext().getShardManager(), message, timeout);
-        ListenableFuture<T> operFuture = ask(operDataStore.getActorContext().getShardManager(), message, timeout);
+        ListenableFuture<T> configFuture = ask(configDataStore.getActorUtils().getShardManager(), message, timeout);
+        ListenableFuture<T> operFuture = ask(operDataStore.getActorUtils().getShardManager(), message, timeout);
 
         return Futures.allAsList(configFuture, operFuture);
     }
 
     private <T> ListenableFuture<T> sendMessageToShardManager(final DataStoreType dataStoreType, final Object message) {
         ActorRef shardManager = dataStoreType == DataStoreType.Config
-                ? configDataStore.getActorContext().getShardManager()
-                        : operDataStore.getActorContext().getShardManager();
+                ? configDataStore.getActorUtils().getShardManager()
+                        : operDataStore.getActorUtils().getShardManager();
         return ask(shardManager, message, SHARD_MGR_TIMEOUT);
     }
 
@@ -695,7 +694,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                     returnFuture.set(resp);
                 }
             }
-        }, configDataStore.getActorContext().getClientDispatcher());
+        }, configDataStore.getActorUtils().getClientDispatcher());
 
         return returnFuture;
     }

@@ -35,7 +35,7 @@ import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -51,16 +51,16 @@ public class RemoteTransactionContextTest extends AbstractActorTest {
 
     private OperationLimiter limiter;
     private RemoteTransactionContext txContext;
-    private ActorContext actorContext;
+    private ActorUtils actorUtils;
     private TestKit kit;
 
     @Before
     public void before() {
         kit = new TestKit(getSystem());
-        actorContext = Mockito.spy(new ActorContext(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
+        actorUtils = Mockito.spy(new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class)));
         limiter = new OperationLimiter(TX_ID, 4, 0);
-        txContext = new RemoteTransactionContext(TX_ID, actorContext.actorSelection(kit.getRef().path()), actorContext,
+        txContext = new RemoteTransactionContext(TX_ID, actorUtils.actorSelection(kit.getRef().path()), actorUtils,
             DataStoreVersions.CURRENT_VERSION, limiter);
         txContext.operationHandOffComplete();
     }

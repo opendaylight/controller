@@ -41,7 +41,7 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersisten
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -88,7 +88,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private final ClusterWrapper clusterWrapper;
     // helper actorContext used only for static calls to executeAsync etc
     // for calls that need specific actor context tied to a datastore use the one provided in the DistributedDataStore
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final ShardingServiceAddressResolver resolver;
     private final AbstractDataStore distributedConfigDatastore;
     private final AbstractDataStore distributedOperDatastore;
@@ -105,7 +105,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         distributedConfigDatastore = builder.getDistributedConfigDatastore();
         distributedOperDatastore = builder.getDistributedOperDatastore();
         lookupTaskMaxRetries = builder.getLookupTaskMaxRetries();
-        actorContext = distributedConfigDatastore.getActorContext();
+        actorUtils = distributedConfigDatastore.getActorUtils();
         resolver = new ShardingServiceAddressResolver(
                 DistributedShardedDOMDataTree.ACTOR_ID, clusterWrapper.getCurrentMemberName());
 
@@ -229,7 +229,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             final ActorSelection actorSelection = actorSystem.actorSelection(address);
             futures.add(
                     FutureConverters.toJava(
-                            actorContext.executeOperationAsync(
+                            actorUtils.executeOperationAsync(
                                     actorSelection, new NotifyProducerCreated(subtrees), DEFAULT_ASK_TIMEOUT))
                     .toCompletableFuture());
         }
@@ -269,7 +269,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             final ActorSelection selection = actorSystem.actorSelection(address);
 
             futures.add(FutureConverters.toJava(
-                    actorContext.executeOperationAsync(selection, new NotifyProducerRemoved(message.getSubtrees())))
+                    actorUtils.executeOperationAsync(selection, new NotifyProducerRemoved(message.getSubtrees())))
                     .toCompletableFuture());
         }
 
@@ -312,8 +312,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         final DOMDataTreeIdentifier prefix = message.getPrefix();
 
-        final ActorContext context = prefix.getDatastoreType() == LogicalDatastoreType.CONFIGURATION
-                        ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
+        final ActorUtils context = prefix.getDatastoreType() == LogicalDatastoreType.CONFIGURATION
+                        ? distributedConfigDatastore.getActorUtils() : distributedOperDatastore.getActorUtils();
 
         // schedule a notification task for the reply
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
@@ -334,7 +334,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         final ShardRemovalLookupTask removalTask =
                 new ShardRemovalLookupTask(actorSystem, getSender(),
-                        actorContext, message.getPrefix(), lookupTaskMaxRetries);
+                        actorUtils, message.getPrefix(), lookupTaskMaxRetries);
 
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL, removalTask, actorSystem.dispatcher());
     }
@@ -348,9 +348,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private void onStartConfigShardLookup(final StartConfigShardLookup message) {
         LOG.debug("Received StartConfigShardLookup: {}", message);
 
-        final ActorContext context =
+        final ActorUtils context =
                 message.getType().equals(LogicalDatastoreType.CONFIGURATION)
-                        ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
+                        ? distributedConfigDatastore.getActorUtils() : distributedOperDatastore.getActorUtils();
 
         // schedule a notification task for the reply
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
@@ -408,7 +408,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         private final ActorSystem system;
         private final ActorRef replyTo;
         private final ClusterWrapper clusterWrapper;
-        private final ActorContext context;
+        private final ActorUtils context;
         private final DistributedShardedDOMDataTree shardingService;
         private final DOMDataTreeIdentifier toLookup;
         private final int lookupMaxRetries;
@@ -416,7 +416,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         ShardCreationLookupTask(final ActorSystem system,
                                 final ActorRef replyTo,
                                 final ClusterWrapper clusterWrapper,
-                                final ActorContext context,
+                                final ActorUtils context,
                                 final DistributedShardedDOMDataTree shardingService,
                                 final DOMDataTreeIdentifier toLookup,
                                 final int lookupMaxRetries) {
@@ -468,7 +468,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         private final ActorSystem system;
         private final ActorRef replyTo;
-        private final ActorContext context;
+        private final ActorUtils context;
         private final ClusterWrapper clusterWrapper;
         private final ActorRef shard;
         private final DistributedShardedDOMDataTree shardingService;
@@ -477,7 +477,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         ShardLeaderLookupTask(final ActorSystem system,
                               final ActorRef replyTo,
-                              final ActorContext context,
+                              final ActorUtils context,
                               final ClusterWrapper clusterWrapper,
                               final ActorRef shard,
                               final DistributedShardedDOMDataTree shardingService,
@@ -603,12 +603,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         private final ActorSystem system;
         private final ActorRef replyTo;
-        private final ActorContext context;
+        private final ActorUtils context;
         private final DOMDataTreeIdentifier toLookup;
 
         ShardRemovalLookupTask(final ActorSystem system,
                                final ActorRef replyTo,
-                               final ActorContext context,
+                               final ActorUtils context,
                                final DOMDataTreeIdentifier toLookup,
                                final int lookupMaxRetries) {
             super(replyTo, lookupMaxRetries);
@@ -654,11 +654,11 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         private final ActorSystem system;
         private final ActorRef replyTo;
-        private final ActorContext context;
+        private final ActorUtils context;
 
         ConfigShardLookupTask(final ActorSystem system,
                               final ActorRef replyTo,
-                              final ActorContext context,
+                              final ActorUtils context,
                               final StartConfigShardLookup message,
                               final int lookupMaxRetries) {
             super(replyTo, lookupMaxRetries);
@@ -695,13 +695,13 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         private final ActorSystem system;
         private final ActorRef replyTo;
-        private final ActorContext context;
+        private final ActorUtils context;
         private final ClusterWrapper clusterWrapper;
         private final ActorRef shard;
 
         ConfigShardReadinessTask(final ActorSystem system,
                                  final ActorRef replyTo,
-                                 final ActorContext context,
+                                 final ActorUtils context,
                                  final ClusterWrapper clusterWrapper,
                                  final ActorRef shard,
                                  final int lookupMaxRetries) {

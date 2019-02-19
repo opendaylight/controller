@@ -14,12 +14,12 @@ import static org.mockito.Mockito.when;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 public class DistributedDataStoreClientBehaviorTest extends AbstractDataStoreClientBehaviorTest {
     @Override
     protected AbstractDataStoreClientBehavior createBehavior(final ClientActorContext clientContext,
-                                                             final ActorContext context) {
+                                                             final ActorUtils context) {
         final ShardStrategyFactory factory = mock(ShardStrategyFactory.class);
         final ShardStrategy strategy = mock(ShardStrategy.class);
         when(strategy.findShard(any())).thenReturn(SHARD);

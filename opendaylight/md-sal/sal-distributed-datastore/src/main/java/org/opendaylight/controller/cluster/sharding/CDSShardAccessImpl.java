@@ -24,7 +24,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.dom.api.CDSShardAccess;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocation;
@@ -56,7 +56,7 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
 
     private final Collection<LeaderLocationListener> listeners = ConcurrentHashMap.newKeySet();
     private final DOMDataTreeIdentifier prefix;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final Timeout makeLeaderLocalTimeout;
 
     private ActorRef roleChangeListenerActor;
@@ -64,20 +64,20 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
     private volatile LeaderLocation currentLeader = LeaderLocation.UNKNOWN;
     private volatile boolean closed = false;
 
-    CDSShardAccessImpl(final DOMDataTreeIdentifier prefix, final ActorContext actorContext) {
+    CDSShardAccessImpl(final DOMDataTreeIdentifier prefix, final ActorUtils actorUtils) {
         this.prefix = requireNonNull(prefix);
-        this.actorContext = requireNonNull(actorContext);
+        this.actorUtils = requireNonNull(actorUtils);
         this.makeLeaderLocalTimeout =
-                new Timeout(actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().$times(2));
+                new Timeout(actorUtils.getDatastoreContext().getShardLeaderElectionTimeout().duration().$times(2));
 
         // register RoleChangeListenerActor
         // TODO Maybe we should do this in async
         final Optional<ActorRef> localShardReply =
-                actorContext.findLocalShard(ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
+                actorUtils.findLocalShard(ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
         checkState(localShardReply.isPresent(),
                 "Local shard for {} not present. Cannot register RoleChangeListenerActor", prefix);
         roleChangeListenerActor =
-                actorContext.getActorSystem().actorOf(RoleChangeListenerActor.props(localShardReply.get(), this));
+                actorUtils.getActorSystem().actorOf(RoleChangeListenerActor.props(localShardReply.get(), this));
     }
 
     private void checkNotClosed() {
@@ -106,7 +106,7 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
 
         // TODO can we cache local shard actorRef?
         final Future<ActorRef> localShardReply =
-                actorContext.findLocalShardAsync(ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
+                actorUtils.findLocalShardAsync(ClusterUtils.getCleanShardName(prefix.getRootIdentifier()));
 
         // we have to tell local shard to make leader local
         final scala.concurrent.Promise<Object> makeLeaderLocalAsk = Futures.promise();
@@ -124,11 +124,11 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
                     makeLeaderLocalAsk.failure(failure);
                 } else {
                     makeLeaderLocalAsk
-                            .completeWith(actorContext
+                            .completeWith(actorUtils
                                     .executeOperationAsync(actorRef, MakeLeaderLocal.INSTANCE, makeLeaderLocalTimeout));
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         // we have to transform make leader local request result
         Future<Void> makeLeaderLocalFuture = makeLeaderLocalAsk.future()
@@ -147,7 +147,7 @@ final class CDSShardAccessImpl implements CDSShardAccess, LeaderLocationListener
                         // wrap exception in LeadershipTransferFailedEx
                         return new LeadershipTransferFailedException("Leadership transfer failed", parameter);
                     }
-                }, actorContext.getClientDispatcher());
+                }, actorUtils.getClientDispatcher());
 
         return FutureConverters.toJava(makeLeaderLocalFuture);
     }

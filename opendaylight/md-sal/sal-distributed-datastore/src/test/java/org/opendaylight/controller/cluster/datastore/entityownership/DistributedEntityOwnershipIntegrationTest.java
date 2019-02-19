@@ -129,7 +129,7 @@ public class DistributedEntityOwnershipIntegrationTest {
     }
 
     private static DistributedEntityOwnershipService newOwnershipService(final AbstractDataStore datastore) {
-        return DistributedEntityOwnershipService.start(datastore.getActorContext(),
+        return DistributedEntityOwnershipService.start(datastore.getActorUtils(),
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
 
@@ -160,7 +160,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         final DOMEntityOwnershipService follower2EntityOwnershipService =
                 newOwnershipService(follower2Node.configDataStore());
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE2, leaderMockListener2);
@@ -305,7 +305,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         final DOMEntityOwnershipService follower2EntityOwnershipService =
                 newOwnershipService(follower2Node.configDataStore());
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register follower1 candidate for entity1 and verify it becomes owner
 
@@ -331,12 +331,12 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Re-enable elections on all remaining followers so one becomes the new leader
 
-        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
+        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorUtils(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
         follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
                 .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        ActorRef follower2Shard = IntegrationTestKit.findLocalShard(follower2Node.configDataStore().getActorContext(),
+        ActorRef follower2Shard = IntegrationTestKit.findLocalShard(follower2Node.configDataStore().getActorUtils(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
         follower2Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
                 .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
@@ -406,7 +406,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 newOwnershipService(follower3Node.configDataStore());
         newOwnershipService(follower4Node.configDataStore());
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register follower1 candidate for entity1 and verify it becomes owner
 
@@ -438,17 +438,17 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Re-enable elections on all remaining followers so one becomes the new leader
 
-        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
+        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorUtils(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
         follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
                 .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        ActorRef follower2Shard = IntegrationTestKit.findLocalShard(follower2Node.configDataStore().getActorContext(),
+        ActorRef follower2Shard = IntegrationTestKit.findLocalShard(follower2Node.configDataStore().getActorUtils(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
         follower2Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
                 .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        ActorRef follower4Shard = IntegrationTestKit.findLocalShard(follower4Node.configDataStore().getActorContext(),
+        ActorRef follower4Shard = IntegrationTestKit.findLocalShard(follower4Node.configDataStore().getActorUtils(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
         follower4Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
                 .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
@@ -503,7 +503,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         final DOMEntityOwnershipService follower2EntityOwnershipService =
                 newOwnershipService(follower2Node.configDataStore());
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
         follower1EntityOwnershipService.registerListener(ENTITY_TYPE1, follower1MockListener);
@@ -587,7 +587,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
         final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
@@ -611,7 +611,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Add replica in follower1
         AddShardReplica addReplica = new AddShardReplica(ENTITY_OWNERSHIP_SHARD_NAME);
-        follower1DistributedDataStore.getActorContext().getShardManager().tell(addReplica,
+        follower1DistributedDataStore.getActorUtils().getShardManager().tell(addReplica,
                 follower1Node.kit().getRef());
         Object reply = follower1Node.kit().expectMsgAnyClassOf(follower1Node.kit().duration("5 sec"),
                 Success.class, Failure.class);
@@ -673,7 +673,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 newOwnershipService(follower1Node.configDataStore());
         newOwnershipService(follower2Node.configDataStore());
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register leader candidate for entity1 and verify it becomes owner
 
@@ -716,7 +716,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 newOwnershipService(follower1Node.configDataStore());
         newOwnershipService(follower2Node.configDataStore());
 
-        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorUtils(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register leader candidate for entity1 and verify it becomes owner
 
@@ -782,12 +782,12 @@ public class DistributedEntityOwnershipIntegrationTest {
                 newOwnershipService(member5FollowerNode.configDataStore());
 
         newOwnershipService(member1LeaderNode.configDataStore());
-        member1LeaderNode.kit().waitUntilLeader(member1LeaderNode.configDataStore().getActorContext(),
+        member1LeaderNode.kit().waitUntilLeader(member1LeaderNode.configDataStore().getActorUtils(),
                 ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Make member4 and member5 non-voting
 
-        Future<Object> future = Patterns.ask(leaderDistributedDataStore.getActorContext().getShardManager(),
+        Future<Object> future = Patterns.ask(leaderDistributedDataStore.getActorUtils().getShardManager(),
                 new ChangeShardMembersVotingStatus(ENTITY_OWNERSHIP_SHARD_NAME,
                         ImmutableMap.of("member-4", Boolean.FALSE, "member-5", Boolean.FALSE)),
                 new Timeout(10, TimeUnit.SECONDS));
@@ -821,7 +821,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         // Switch member4 and member5 back to voting and member3 non-voting. This should result in member4 and member5
         // to become entity owners.
 
-        future = Patterns.ask(leaderDistributedDataStore.getActorContext().getShardManager(),
+        future = Patterns.ask(leaderDistributedDataStore.getActorUtils().getShardManager(),
                 new ChangeShardMembersVotingStatus(ENTITY_OWNERSHIP_SHARD_NAME,
                         ImmutableMap.of("member-3", Boolean.FALSE, "member-4", Boolean.TRUE, "member-5", Boolean.TRUE)),
                 new Timeout(10, TimeUnit.SECONDS));
