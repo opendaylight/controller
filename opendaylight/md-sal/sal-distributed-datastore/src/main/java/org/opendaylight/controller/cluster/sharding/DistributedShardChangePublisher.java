@@ -90,7 +90,7 @@ public class DistributedShardChangePublisher
                 .build());
 
         // XXX: can we guarantee that the root is present in the schemacontext?
-        this.dataTree.setSchemaContext(distributedDataStore.getActorContext().getSchemaContext());
+        this.dataTree.setSchemaContext(distributedDataStore.getActorUtils().getSchemaContext());
         this.shardPath = prefix.getRootIdentifier();
         this.childShards = childShards;
     }

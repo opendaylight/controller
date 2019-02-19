@@ -8,10 +8,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -21,7 +23,7 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,7 @@ import scala.concurrent.Future;
 public class RemoteTransactionContext extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteTransactionContext.class);
 
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final ActorSelection actor;
     private final OperationLimiter limiter;
 
@@ -53,19 +55,19 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private volatile Throwable failedModification;
 
     protected RemoteTransactionContext(final TransactionIdentifier identifier, final ActorSelection actor,
-            final ActorContext actorContext, final short remoteTransactionVersion, final OperationLimiter limiter) {
+            final ActorUtils actorUtils, final short remoteTransactionVersion, final OperationLimiter limiter) {
         super(identifier, remoteTransactionVersion);
-        this.limiter = Preconditions.checkNotNull(limiter);
+        this.limiter = requireNonNull(limiter);
         this.actor = actor;
-        this.actorContext = actorContext;
+        this.actorUtils = actorUtils;
     }
 
     private ActorSelection getActor() {
         return actor;
     }
 
-    protected ActorContext getActorContext() {
-        return actorContext;
+    protected ActorUtils getActorUtils() {
+        return actorUtils;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         LOG.debug("Tx {} closeTransaction called", getIdentifier());
         TransactionContextCleanup.untrack(this);
 
-        actorContext.sendOperationAsync(getActor(), new CloseTransaction(getTransactionVersion()).toSerializable());
+        actorUtils.sendOperationAsync(getActor(), new CloseTransaction(getTransactionVersion()).toSerializable());
     }
 
     @Override
@@ -110,7 +112,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         // Transform the last reply Future into a Future that returns the cohort actor path from
         // the last reply message. That's the end result of the ready operation.
 
-        return TransactionReadyReplyMapper.transform(readyReplyFuture, actorContext, getIdentifier());
+        return TransactionReadyReplyMapper.transform(readyReplyFuture, actorUtils, getIdentifier());
     }
 
     private BatchedModifications newBatchedModifications() {
@@ -130,7 +132,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         batchedModifications.addModification(modification);
 
         if (batchedModifications.getModifications().size()
-                >= actorContext.getDatastoreContext().getShardBatchedModificationCount()) {
+                >= actorUtils.getDatastoreContext().getShardBatchedModificationCount()) {
             sendBatchedModifications();
         }
     }
@@ -175,8 +177,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
                 }
             }
 
-            sent = actorContext.executeOperationAsync(getActor(), toSend.toSerializable(),
-                actorContext.getTransactionCommitOperationTimeout());
+            sent = actorUtils.executeOperationAsync(getActor(), toSend.toSerializable(),
+                actorUtils.getTransactionCommitOperationTimeout());
             sent.onComplete(new OnComplete<Object>() {
                 @Override
                 public void onComplete(final Throwable failure, final Object success) {
@@ -188,7 +190,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
                     }
                     limiter.release(permitsToRelease);
                 }
-            }, actorContext.getClientDispatcher());
+            }, actorUtils.getClientDispatcher());
         }
 
         return sent;
@@ -252,9 +254,9 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             }
         };
 
-        final Future<Object> future = actorContext.executeOperationAsync(getActor(),
-            readCmd.asVersion(getTransactionVersion()).toSerializable(), actorContext.getOperationTimeout());
-        future.onComplete(onComplete, actorContext.getClientDispatcher());
+        final Future<Object> future = actorUtils.executeOperationAsync(getActor(),
+            readCmd.asVersion(getTransactionVersion()).toSerializable(), actorUtils.getOperationTimeout());
+        future.onComplete(onComplete, actorUtils.getClientDispatcher());
     }
 
     /**
@@ -264,7 +266,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
      * @return True if a permit was successfully acquired, false otherwise
      */
     private boolean acquireOperation() {
-        Preconditions.checkState(isOperationHandOffComplete(),
+        checkState(isOperationHandOffComplete(),
             "Attempted to acquire execute operation permit for transaction %s on actor %s during handoff",
             getIdentifier(), actor);
 

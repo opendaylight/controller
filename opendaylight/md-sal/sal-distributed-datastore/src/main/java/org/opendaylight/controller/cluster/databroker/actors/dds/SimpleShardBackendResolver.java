@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.CompletionStage;
 import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,14 +34,14 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     private volatile ShardState state;
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
-    SimpleShardBackendResolver(final ClientIdentifier clientId, final ActorContext actorContext,
+    SimpleShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils,
             final String shardName) {
-        super(clientId, actorContext);
-        this.shardName = Preconditions.checkNotNull(shardName);
+        super(clientId, actorUtils);
+        this.shardName = requireNonNull(shardName);
     }
 
     private CompletionStage<ShardBackendInfo> getBackendInfo(final long cookie) {
-        Preconditions.checkArgument(cookie == 0);
+        checkArgument(cookie == 0);
 
         final ShardState existing = state;
         if (existing != null) {

@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +37,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,7 @@ import scala.compat.java8.FutureConverters;
 /**
  * {@link BackendInfoResolver} implementation for static shard configuration based on ShardManager. Each string-named
  * shard is assigned a single cookie and this mapping is stored in a bidirectional map. Information about corresponding
- * shard leader is resolved via {@link ActorContext}. The product of resolution is {@link ShardBackendInfo}.
+ * shard leader is resolved via {@link ActorUtils}. The product of resolution is {@link ShardBackendInfo}.
  *
  * @author Robert Varga
  */
@@ -57,7 +59,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         private ShardBackendInfo result;
 
         ShardState(final CompletionStage<ShardBackendInfo> stage) {
-            this.stage = Preconditions.checkNotNull(stage);
+            this.stage = requireNonNull(stage);
             stage.whenComplete(this::onStageResolved);
         }
 
@@ -71,7 +73,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
 
         private synchronized void onStageResolved(final ShardBackendInfo info, final Throwable failure) {
             if (failure == null) {
-                this.result = Preconditions.checkNotNull(info);
+                this.result = requireNonNull(info);
             } else {
                 LOG.warn("Failed to resolve shard", failure);
             }
@@ -88,12 +90,12 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
 
     private final AtomicLong nextSessionId = new AtomicLong();
     private final Function1<ActorRef, ?> connectFunction;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final Set<Consumer<Long>> staleBackendInfoCallbacks = ConcurrentHashMap.newKeySet();
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
-    AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorContext actorContext) {
-        this.actorContext = Preconditions.checkNotNull(actorContext);
+    AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
+        this.actorUtils = requireNonNull(actorUtils);
         this.connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.BORON,
             ABIVersion.current()));
     }
@@ -108,19 +110,19 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         staleBackendInfoCallbacks.forEach(callback -> callback.accept(cookie));
     }
 
-    protected ActorContext actorContext() {
-        return actorContext;
+    protected ActorUtils actorUtils() {
+        return actorUtils;
     }
 
     protected final void flushCache(final String shardName) {
-        actorContext.getPrimaryShardInfoCache().remove(shardName);
+        actorUtils.getPrimaryShardInfoCache().remove(shardName);
     }
 
     protected final ShardState resolveBackendInfo(final String shardName, final long cookie) {
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
 
         final CompletableFuture<ShardBackendInfo> future = new CompletableFuture<>();
-        FutureConverters.toJava(actorContext.findPrimaryShardAsync(shardName)).whenComplete((info, failure) -> {
+        FutureConverters.toJava(actorUtils.findPrimaryShardAsync(shardName)).whenComplete((info, failure) -> {
             if (failure == null) {
                 connectShard(shardName, cookie, info, future);
                 return;
@@ -146,7 +148,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
 
     private static TimeoutException wrap(final String message, final Throwable cause) {
         final TimeoutException ret = new TimeoutException(message);
-        ret.initCause(Preconditions.checkNotNull(cause));
+        ret.initCause(requireNonNull(cause));
         return ret;
     }
 
@@ -175,8 +177,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
         }
 
         LOG.debug("Resolved backend information to {}", response);
-        Preconditions.checkArgument(response instanceof ConnectClientSuccess, "Unhandled response %s",
-            response);
+        checkArgument(response instanceof ConnectClientSuccess, "Unhandled response %s", response);
         final ConnectClientSuccess success = (ConnectClientSuccess) response;
         future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
             success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),

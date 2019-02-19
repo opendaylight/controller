@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import java.util.function.Function;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -26,8 +26,8 @@ final class DistributedDataStoreClientBehavior extends AbstractDataStoreClientBe
         pathToShard = resolver::resolveShardForPath;
     }
 
-    DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorContext actorContext) {
-        this(context, new ModuleShardBackendResolver(context.getIdentifier(), actorContext));
+    DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorUtils actorUtils) {
+        this(context, new ModuleShardBackendResolver(context.getIdentifier(), actorUtils));
     }
 
     @Override

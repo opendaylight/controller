@@ -45,7 +45,7 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForSha
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -79,14 +79,14 @@ public class ModuleShardBackendResolverTest {
 
         shardManagerProbe = new TestProbe(system, "ShardManager");
 
-        final ActorContext actorContext = createActorContextMock(system, contextProbe.ref());
-        when(actorContext.getShardManager()).thenReturn(shardManagerProbe.ref());
+        final ActorUtils actorUtils = createActorUtilsMock(system, contextProbe.ref());
+        when(actorUtils.getShardManager()).thenReturn(shardManagerProbe.ref());
 
-        moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorContext);
-        when(actorContext.getShardStrategyFactory()).thenReturn(shardStrategyFactory);
+        moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorUtils);
+        when(actorUtils.getShardStrategyFactory()).thenReturn(shardStrategyFactory);
         when(shardStrategyFactory.getStrategy(YangInstanceIdentifier.EMPTY)).thenReturn(shardStrategy);
         final PrimaryShardInfoFutureCache cache = new PrimaryShardInfoFutureCache();
-        when(actorContext.getPrimaryShardInfoCache()).thenReturn(cache);
+        when(actorUtils.getPrimaryShardInfoCache()).thenReturn(cache);
     }
 
     @After
@@ -184,8 +184,8 @@ public class ModuleShardBackendResolverTest {
         verifyNoMoreInteractions(mockCallback);
     }
 
-    private static ActorContext createActorContextMock(final ActorSystem system, final ActorRef actor) {
-        final ActorContext mock = mock(ActorContext.class);
+    private static ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
+        final ActorUtils mock = mock(ActorUtils.class);
         final Promise<PrimaryShardInfo> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);

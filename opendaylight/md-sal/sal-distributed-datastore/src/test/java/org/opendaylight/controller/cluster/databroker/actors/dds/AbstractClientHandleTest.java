@@ -45,7 +45,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -74,10 +74,10 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         final TestProbe clientContextProbe = new TestProbe(system, "client-context");
         backendProbe = new TestProbe(system, "backend");
         //create handle dependencies
-        final ActorContext actorContext = createActorContextMock(system, contextProbe.ref());
+        final ActorUtils actorUtils = createActorContextMock(system, contextProbe.ref());
         final ClientActorContext clientContext =
                 AccessClientUtil.createClientActorContext(system, clientContextProbe.ref(), CLIENT_ID, PERSISTENCE_ID);
-        client = new SimpleDataStoreClientBehavior(clientContext, actorContext, "shard");
+        client = new SimpleDataStoreClientBehavior(clientContext, actorUtils, "shard");
         client.createLocalHistory();
         parent = new SingleClientHistory(client, HISTORY_ID);
         //connect client
@@ -200,8 +200,8 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
         return dataTreeSnapshot;
     }
 
-    private static ActorContext createActorContextMock(final ActorSystem system, final ActorRef actor) {
-        final ActorContext mock = mock(ActorContext.class);
+    private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {
+        final ActorUtils mock = mock(ActorUtils.class);
         final Promise<PrimaryShardInfo> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
         final ActorSelection selection = system.actorSelection(actor.path());
         final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);

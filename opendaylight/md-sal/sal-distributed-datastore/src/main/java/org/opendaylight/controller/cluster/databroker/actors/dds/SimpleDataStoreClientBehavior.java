@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -25,9 +25,9 @@ final class SimpleDataStoreClientBehavior extends AbstractDataStoreClientBehavio
         super(context, resolver);
     }
 
-    SimpleDataStoreClientBehavior(final ClientActorContext context, final ActorContext actorContext,
+    SimpleDataStoreClientBehavior(final ClientActorContext context, final ActorUtils actorUtils,
             final String shardName) {
-        this(context, new SimpleShardBackendResolver(context.getIdentifier(), actorContext, shardName));
+        this(context, new SimpleShardBackendResolver(context.getIdentifier(), actorUtils, shardName));
     }
 
     @Override

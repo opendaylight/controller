@@ -165,18 +165,18 @@ public class ClusterAdminRpcServiceTest {
 
             ImmutableMap<String, DatastoreSnapshot> map = ImmutableMap.of(snapshots.get(0).getType(), snapshots.get(0),
                     snapshots.get(1).getType(), snapshots.get(1));
-            verifyDatastoreSnapshot(node.configDataStore().getActorContext().getDataStoreName(),
-                    map.get(node.configDataStore().getActorContext().getDataStoreName()), "cars", "people");
+            verifyDatastoreSnapshot(node.configDataStore().getActorUtils().getDataStoreName(),
+                    map.get(node.configDataStore().getActorUtils().getDataStoreName()), "cars", "people");
         } finally {
             new File(fileName).delete();
         }
 
         // Test failure by killing a shard.
 
-        node.configDataStore().getActorContext().getShardManager().tell(node.datastoreContextBuilder()
+        node.configDataStore().getActorUtils().getShardManager().tell(node.datastoreContextBuilder()
                 .shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(), ActorRef.noSender());
 
-        ActorRef carsShardActor = node.configDataStore().getActorContext().findLocalShard("cars").get();
+        ActorRef carsShardActor = node.configDataStore().getActorUtils().findLocalShard("cars").get();
         node.kit().watch(carsShardActor);
         carsShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         node.kit().expectTerminated(carsShardActor);
@@ -214,14 +214,14 @@ public class ClusterAdminRpcServiceTest {
         replicaNode2.kit().waitForMembersUp("member-1", "member-3");
         replicaNode3.kit().waitForMembersUp("member-1", "member-2");
 
-        final ActorRef shardManager1 = member1.configDataStore().getActorContext().getShardManager();
+        final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
 
         shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
                         "prefix", Collections.singleton(MEMBER_1))),
                 ActorRef.noSender());
 
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorContext(),
+        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
                 ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
 
         final InstanceIdentifier<Cars> identifier = InstanceIdentifier.create(Cars.class);
@@ -258,7 +258,7 @@ public class ClusterAdminRpcServiceTest {
         final MemberNode member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorContext(), "default");
+        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(), "default");
 
         final RpcResult<GetShardRoleOutput> successResult =
                 getShardRole(member1, Mockito.mock(BindingNormalizedNodeSerializer.class), "default");
@@ -270,14 +270,14 @@ public class ClusterAdminRpcServiceTest {
 
         verifyFailedRpcResult(failedResult);
 
-        final ActorRef shardManager1 = member1.configDataStore().getActorContext().getShardManager();
+        final ActorRef shardManager1 = member1.configDataStore().getActorUtils().getShardManager();
 
         shardManager1.tell(new PrefixShardCreated(new PrefixShardConfiguration(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH),
                         "prefix", Collections.singleton(MEMBER_1))),
                 ActorRef.noSender());
 
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorContext(),
+        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(),
                 ClusterUtils.getCleanShardName(CarsModel.BASE_PATH));
 
         final InstanceIdentifier<Cars> identifier = InstanceIdentifier.create(Cars.class);
@@ -307,7 +307,7 @@ public class ClusterAdminRpcServiceTest {
         final MemberNode member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        member1.kit().waitUntilLeader(member1.configDataStore().getActorContext(), "default");
+        member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(), "default");
 
 
     }
@@ -506,7 +506,7 @@ public class ClusterAdminRpcServiceTest {
         verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
-        Optional<ActorRef> optional = memberNode.configDataStore().getActorContext().findLocalShard(shardName);
+        Optional<ActorRef> optional = memberNode.configDataStore().getActorUtils().findLocalShard(shardName);
         assertTrue("Replica shard not present", optional.isPresent());
     }
 
@@ -541,7 +541,7 @@ public class ClusterAdminRpcServiceTest {
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
 
-        Optional<ActorRef> optional = memberNode.operDataStore().getActorContext().findLocalShard(shardName);
+        Optional<ActorRef> optional = memberNode.operDataStore().getActorUtils().findLocalShard(shardName);
         assertFalse("Oper shard present", optional.isPresent());
 
         rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName(shardName)
@@ -697,10 +697,10 @@ public class ClusterAdminRpcServiceTest {
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
                                                                                  "pets", null,
                                                                                  Collections.singletonList(MEMBER_1));
-        leaderNode1.configDataStore().getActorContext().getShardManager().tell(
+        leaderNode1.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
-        leaderNode1.kit().waitUntilLeader(leaderNode1.configDataStore().getActorContext(), "pets");
+        leaderNode1.kit().waitUntilLeader(leaderNode1.configDataStore().getActorUtils(), "pets");
 
         MemberNode newReplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
@@ -708,11 +708,11 @@ public class ClusterAdminRpcServiceTest {
         leaderNode1.waitForMembersUp("member-2");
         newReplicaNode2.waitForMembersUp("member-1");
 
-        newReplicaNode2.configDataStore().getActorContext().getShardManager().tell(
+        newReplicaNode2.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), newReplicaNode2.kit().getRef());
         newReplicaNode2.kit().expectMsgClass(Success.class);
 
-        newReplicaNode2.operDataStore().getActorContext().getShardManager().tell(
+        newReplicaNode2.operDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(new ModuleShardConfiguration(URI.create("no-leader-ns"), "no-leader-module",
                                                              "no-leader", null,
                                                              Collections.singletonList(MEMBER_1)),
@@ -762,15 +762,15 @@ public class ClusterAdminRpcServiceTest {
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
                 "pets", null, Arrays.asList(MEMBER_1, MEMBER_2, MEMBER_3));
-        leaderNode1.configDataStore().getActorContext().getShardManager().tell(
+        leaderNode1.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
 
-        replicaNode2.configDataStore().getActorContext().getShardManager().tell(
+        replicaNode2.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), replicaNode2.kit().getRef());
         replicaNode2.kit().expectMsgClass(Success.class);
 
-        replicaNode3.configDataStore().getActorContext().getShardManager().tell(
+        replicaNode3.configDataStore().getActorUtils().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), replicaNode3.kit().getRef());
         replicaNode3.kit().expectMsgClass(Success.class);
 
@@ -1173,16 +1173,16 @@ public class ClusterAdminRpcServiceTest {
     @SafeVarargs
     private static void verifyVotingStates(final AbstractDataStore datastore, final String shardName,
             final SimpleEntry<String, Boolean>... expStates) throws Exception {
-        String localMemberName = datastore.getActorContext().getCurrentMemberName().getName();
+        String localMemberName = datastore.getActorUtils().getCurrentMemberName().getName();
         Map<String, Boolean> expStateMap = new HashMap<>();
         for (Entry<String, Boolean> e: expStates) {
             expStateMap.put(ShardIdentifier.create(shardName, MemberName.forName(e.getKey()),
-                    datastore.getActorContext().getDataStoreName()).toString(), e.getValue());
+                    datastore.getActorUtils().getDataStoreName()).toString(), e.getValue());
         }
 
         verifyRaftState(datastore, shardName, raftState -> {
             String localPeerId = ShardIdentifier.create(shardName, MemberName.forName(localMemberName),
-                    datastore.getActorContext().getDataStoreName()).toString();
+                    datastore.getActorUtils().getDataStoreName()).toString();
             assertEquals("Voting state for " + localPeerId, expStateMap.get(localPeerId), raftState.isVoting());
             for (Entry<String, Boolean> e: raftState.getPeerVotingStates().entrySet()) {
                 assertEquals("Voting state for " + e.getKey(), expStateMap.get(e.getKey()), e.getValue());

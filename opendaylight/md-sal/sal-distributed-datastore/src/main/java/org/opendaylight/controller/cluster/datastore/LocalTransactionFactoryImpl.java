@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
-import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
@@ -33,12 +35,12 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
 
     private final ActorSelection leader;
     private final DataTree dataTree;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
 
-    LocalTransactionFactoryImpl(final ActorContext actorContext, final ActorSelection leader, final DataTree dataTree) {
-        this.leader = Preconditions.checkNotNull(leader);
-        this.dataTree = Preconditions.checkNotNull(dataTree);
-        this.actorContext = actorContext;
+    LocalTransactionFactoryImpl(final ActorUtils actorUtils, final ActorSelection leader, final DataTree dataTree) {
+        this.leader = requireNonNull(leader);
+        this.dataTree = requireNonNull(dataTree);
+        this.actorUtils = actorUtils;
     }
 
     DataTree getDataTree() {
@@ -70,16 +72,16 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
             final SnapshotBackedWriteTransaction<TransactionIdentifier> tx,
             final DataTreeModification tree,
             final Exception readyError) {
-        return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree, readyError);
+        return new LocalThreePhaseCommitCohort(actorUtils, leader, tx, tree, readyError);
     }
 
     @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
-        Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
+        checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
-            return new LocalThreePhaseCommitCohort(actorContext, leader,
+            return new LocalThreePhaseCommitCohort(actorUtils, leader,
                     (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, operationError);
         }
 

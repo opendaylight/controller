@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRe
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -67,13 +67,13 @@ final class RemoteTransactionContextSupport {
 
         // For the total create tx timeout, use 2 times the election timeout. This should be enough time for
         // a leader re-election to occur if we happen to hit it in transition.
-        totalCreateTxTimeout = parent.getActorContext().getDatastoreContext().getShardRaftConfig()
+        totalCreateTxTimeout = parent.getActorUtils().getDatastoreContext().getShardRaftConfig()
                 .getElectionTimeOutInterval().toMillis() * 2;
 
         // We'll use the operationTimeout for the the create Tx message timeout so it can be set appropriately
         // for unit tests but cap it at MAX_CREATE_TX_MSG_TIMEOUT_IN_MS. The operationTimeout could be set
         // larger than the totalCreateTxTimeout in production which we don't want.
-        long operationTimeout = parent.getActorContext().getOperationTimeout().duration().toMillis();
+        long operationTimeout = parent.getActorUtils().getOperationTimeout().duration().toMillis();
         createTxMessageTimeout = new Timeout(Math.min(operationTimeout, MAX_CREATE_TX_MSG_TIMEOUT_IN_MS),
                 TimeUnit.MILLISECONDS);
     }
@@ -86,8 +86,8 @@ final class RemoteTransactionContextSupport {
         return parent.getType();
     }
 
-    private ActorContext getActorContext() {
-        return parent.getActorContext();
+    private ActorUtils getActorUtils() {
+        return parent.getActorUtils();
     }
 
     private TransactionIdentifier getIdentifier() {
@@ -101,7 +101,7 @@ final class RemoteTransactionContextSupport {
         this.primaryShardInfo = newPrimaryShardInfo;
 
         if (getTransactionType() == TransactionType.WRITE_ONLY
-                && getActorContext().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
+                && getActorUtils().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
             ActorSelection primaryShard = newPrimaryShardInfo.getPrimaryShardActor();
 
             LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
@@ -126,7 +126,7 @@ final class RemoteTransactionContextSupport {
         Object serializedCreateMessage = new CreateTransaction(getIdentifier(), getTransactionType().ordinal(),
                     primaryShardInfo.getPrimaryShardVersion()).toSerializable();
 
-        Future<Object> createTxFuture = getActorContext().executeOperationAsync(
+        Future<Object> createTxFuture = getActorUtils().executeOperationAsync(
                 primaryShardInfo.getPrimaryShardActor(), serializedCreateMessage, createTxMessageTimeout);
 
         createTxFuture.onComplete(new OnComplete<Object>() {
@@ -134,20 +134,20 @@ final class RemoteTransactionContextSupport {
             public void onComplete(final Throwable failure, final Object response) {
                 onCreateTransactionComplete(failure, response);
             }
-        }, getActorContext().getClientDispatcher());
+        }, getActorUtils().getClientDispatcher());
     }
 
     private void tryFindPrimaryShard() {
         LOG.debug("Tx {} Retrying findPrimaryShardAsync for shard {}", getIdentifier(), shardName);
 
         this.primaryShardInfo = null;
-        Future<PrimaryShardInfo> findPrimaryFuture = getActorContext().findPrimaryShardAsync(shardName);
+        Future<PrimaryShardInfo> findPrimaryFuture = getActorUtils().findPrimaryShardAsync(shardName);
         findPrimaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
             @Override
             public void onComplete(final Throwable failure, final PrimaryShardInfo newPrimaryShardInfo) {
                 onFindPrimaryShardComplete(failure, newPrimaryShardInfo);
             }
-        }, getActorContext().getClientDispatcher());
+        }, getActorUtils().getClientDispatcher());
     }
 
     private void onFindPrimaryShardComplete(final Throwable failure, final PrimaryShardInfo newPrimaryShardInfo) {
@@ -185,9 +185,9 @@ final class RemoteTransactionContextSupport {
             LOG.debug("Tx {}: create tx on shard {} failed with exception \"{}\" - scheduling retry in {} ms",
                     getIdentifier(), shardName, failure, scheduleInterval);
 
-            getActorContext().getActorSystem().scheduler().scheduleOnce(
+            getActorUtils().getActorSystem().scheduler().scheduleOnce(
                     FiniteDuration.create(scheduleInterval, TimeUnit.MILLISECONDS),
-                    this::tryFindPrimaryShard, getActorContext().getClientDispatcher());
+                    this::tryFindPrimaryShard, getActorUtils().getClientDispatcher());
             return;
         }
 
@@ -234,14 +234,14 @@ final class RemoteTransactionContextSupport {
     private TransactionContext createValidTransactionContext(final CreateTransactionReply reply) {
         LOG.debug("Tx {} Received {}", getIdentifier(), reply);
 
-        return createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
+        return createValidTransactionContext(getActorUtils().actorSelection(reply.getTransactionPath()),
                 reply.getTransactionPath(), primaryShardInfo.getPrimaryShardVersion());
     }
 
     private TransactionContext createValidTransactionContext(final ActorSelection transactionActor,
             final String transactionPath, final short remoteTransactionVersion) {
         final TransactionContext ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(),
-                transactionActor, getActorContext(), remoteTransactionVersion, transactionContextWrapper.getLimiter());
+                transactionActor, getActorUtils(), remoteTransactionVersion, transactionContextWrapper.getLimiter());
 
         if (parent.getType() == TransactionType.READ_ONLY) {
             TransactionContextCleanup.track(parent, ret);

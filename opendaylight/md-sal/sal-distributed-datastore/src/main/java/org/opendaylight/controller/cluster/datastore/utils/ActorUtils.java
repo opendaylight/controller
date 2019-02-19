@@ -61,13 +61,12 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
- * The ActorContext class contains utility methods which could be used by
- * non-actors (like DistributedDataStore) to work with actors a little more
- * easily. An ActorContext can be freely passed around to local object instances
- * but should not be passed to actors especially remote actors
+ * The ActorUtils class contains utility methods which could be used by non-actors (like DistributedDataStore) to work
+ * with actors a little more easily. An ActorContext can be freely passed around to local object instances but should
+ * not be passed to actors especially remote actors.
  */
-public class ActorContext {
-    private static final Logger LOG = LoggerFactory.getLogger(ActorContext.class);
+public class ActorUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(ActorUtils.class);
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
     private static final Mapper<Throwable, Throwable> FIND_PRIMARY_FAILURE_TRANSFORMER =
@@ -113,13 +112,13 @@ public class ActorContext {
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
     private final ShardStrategyFactory shardStrategyFactory;
 
-    public ActorContext(final ActorSystem actorSystem, final ActorRef shardManager,
+    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration) {
         this(actorSystem, shardManager, clusterWrapper, configuration,
                 DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
     }
 
-    public ActorContext(final ActorSystem actorSystem, final ActorRef shardManager,
+    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration,
             final DatastoreContext datastoreContext, final PrimaryShardInfoFutureCache primaryShardInfoCache) {
         this.actorSystem = actorSystem;

@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocation;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocationListener;
 import org.opendaylight.controller.cluster.dom.api.LeaderLocationListenerRegistration;
@@ -45,11 +45,11 @@ public class CDSShardAccessImplTest extends AbstractActorTest {
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
 
     private CDSShardAccessImpl shardAccess;
-    private ActorContext context;
+    private ActorUtils context;
 
     @Before
     public void setUp() {
-        context = mock(ActorContext.class);
+        context = mock(ActorUtils.class);
         final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
         doReturn(Optional.of(getSystem().deadLetters())).when(context).findLocalShard(any());
         doReturn(datastoreContext).when(context).getDatastoreContext();

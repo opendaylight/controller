@@ -26,7 +26,7 @@ import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForShardAvailabilityChanges;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import scala.concurrent.Future;
 /**
  * {@link BackendInfoResolver} implementation for static shard configuration based on ShardManager. Each string-named
  * shard is assigned a single cookie and this mapping is stored in a bidirectional map. Information about corresponding
- * shard leader is resolved via {@link ActorContext}. The product of resolution is {@link ShardBackendInfo}.
+ * shard leader is resolved via {@link ActorUtils}. The product of resolution is {@link ShardBackendInfo}.
  *
  * @author Robert Varga
  */
@@ -54,10 +54,10 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     private volatile BiMap<String, Long> shards = ImmutableBiMap.of(DefaultShardStrategy.DEFAULT_SHARD, 0L);
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
-    ModuleShardBackendResolver(final ClientIdentifier clientId, final ActorContext actorContext) {
-        super(clientId, actorContext);
+    ModuleShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
+        super(clientId, actorUtils);
 
-        shardAvailabilityChangesRegFuture = ask(actorContext.getShardManager(), new RegisterForShardAvailabilityChanges(
+        shardAvailabilityChangesRegFuture = ask(actorUtils.getShardManager(), new RegisterForShardAvailabilityChanges(
             this::onShardAvailabilityChange), Timeout.apply(60, TimeUnit.MINUTES))
                 .map(reply -> (Registration)reply, ExecutionContexts.global());
 
@@ -84,7 +84,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     }
 
     Long resolveShardForPath(final YangInstanceIdentifier path) {
-        final String shardName = actorContext().getShardStrategyFactory().getStrategy(path).findShard(path);
+        final String shardName = actorUtils().getShardStrategyFactory().getStrategy(path).findShard(path);
         Long cookie = shards.get(shardName);
         if (cookie == null) {
             synchronized (this) {

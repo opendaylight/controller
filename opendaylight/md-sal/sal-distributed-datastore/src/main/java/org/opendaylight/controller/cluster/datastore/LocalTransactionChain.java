@@ -104,12 +104,12 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
 
         protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
                 DataTreeModification modification, Exception operationError) {
-            super(parent.getActorContext(), leader, transaction, modification, operationError);
+            super(parent.getActorUtils(), leader, transaction, modification, operationError);
         }
 
         protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
                 Exception operationError) {
-            super(parent.getActorContext(), leader, transaction, operationError);
+            super(parent.getActorUtils(), leader, transaction, operationError);
         }
 
         @Override

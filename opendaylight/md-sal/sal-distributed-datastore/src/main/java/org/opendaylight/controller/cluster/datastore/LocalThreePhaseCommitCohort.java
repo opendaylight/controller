@@ -7,17 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -37,27 +38,27 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
 
     private final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction;
     private final DataTreeModification modification;
-    private final ActorContext actorContext;
+    private final ActorUtils actorUtils;
     private final ActorSelection leader;
     private final Exception operationError;
 
-    protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
+    protected LocalThreePhaseCommitCohort(final ActorUtils actorUtils, final ActorSelection leader,
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
             final DataTreeModification modification,
             final Exception operationError) {
-        this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.leader = Preconditions.checkNotNull(leader);
-        this.transaction = Preconditions.checkNotNull(transaction);
-        this.modification = Preconditions.checkNotNull(modification);
+        this.actorUtils = requireNonNull(actorUtils);
+        this.leader = requireNonNull(leader);
+        this.transaction = requireNonNull(transaction);
+        this.modification = requireNonNull(modification);
         this.operationError = operationError;
     }
 
-    protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
+    protected LocalThreePhaseCommitCohort(final ActorUtils actorUtils, final ActorSelection leader,
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final Exception operationError) {
-        this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.leader = Preconditions.checkNotNull(leader);
-        this.transaction = Preconditions.checkNotNull(transaction);
-        this.operationError = Preconditions.checkNotNull(operationError);
+        this.actorUtils = requireNonNull(actorUtils);
+        this.leader = requireNonNull(leader);
+        this.transaction = requireNonNull(transaction);
+        this.operationError = requireNonNull(operationError);
         this.modification = null;
     }
 
@@ -69,12 +70,12 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
 
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier(),
                 modification, immediate, participatingShardNames);
-        return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
+        return actorUtils.executeOperationAsync(leader, message, actorUtils.getTransactionCommitOperationTimeout());
     }
 
     Future<ActorSelection> initiateCoordinatedCommit(final Optional<SortedSet<String>> participatingShardNames) {
         final Future<Object> messageFuture = initiateCommit(false, participatingShardNames);
-        final Future<ActorSelection> ret = TransactionReadyReplyMapper.transform(messageFuture, actorContext,
+        final Future<ActorSelection> ret = TransactionReadyReplyMapper.transform(messageFuture, actorUtils,
                 transaction.getIdentifier());
         ret.onComplete(new OnComplete<ActorSelection>() {
             @Override
@@ -87,7 +88,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
 
                 LOG.debug("Transaction {} resolved to actor {}", transaction.getIdentifier(), success);
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         return ret;
     }
@@ -109,7 +110,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
                     transactionAborted(transaction);
                 }
             }
-        }, actorContext.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         return messageFuture;
     }

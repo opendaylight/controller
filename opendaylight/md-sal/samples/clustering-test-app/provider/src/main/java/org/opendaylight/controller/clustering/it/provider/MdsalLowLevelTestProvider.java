@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransacti
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory;
@@ -627,7 +627,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private <T> SettableFuture<RpcResult<T>> shutdownShardGracefully(final String shardName, final T success) {
         final SettableFuture<RpcResult<T>> rpcResult = SettableFuture.create();
-        final ActorContext context = configDataStore.getActorContext();
+        final ActorUtils context = configDataStore.getActorUtils();
 
         long timeoutInMS = Math.max(context.getDatastoreContext().getShardRaftConfig()
                 .getElectionTimeOutInterval().$times(3).toMillis(), 10000);
@@ -716,10 +716,10 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
         final String shardName = ClusterUtils.getCleanShardName(ProduceTransactionsHandler.ID_INTS_YID);
         LOG.debug("Creating distributed datastore client for shard {}", shardName);
 
-        final ActorContext actorContext = configDataStore.getActorContext();
+        final ActorUtils actorUtils = configDataStore.getActorUtils();
         final Props distributedDataStoreClientProps =
-                SimpleDataStoreClientActor.props(actorContext.getCurrentMemberName(),
-                        "Shard-" + shardName, actorContext, shardName);
+                SimpleDataStoreClientActor.props(actorUtils.getCurrentMemberName(),
+                        "Shard-" + shardName, actorUtils, shardName);
 
         final ActorRef clientActor = actorSystem.actorOf(distributedDataStoreClientProps);
         final DataStoreClient distributedDataStoreClient;

@@ -13,7 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 /**
  * TransactionRateLimitingCallback computes the new transaction rate limit on the successful completion of a
@@ -33,8 +33,8 @@ public class TransactionRateLimitingCallback implements OperationCallback {
     private long elapsedTime;
     private volatile State state = State.STOPPED;
 
-    TransactionRateLimitingCallback(ActorContext actorContext) {
-        commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
+    TransactionRateLimitingCallback(ActorUtils actorUtils) {
+        commitTimer = actorUtils.getOperationTimer(ActorUtils.COMMIT);
     }
 
     @Override

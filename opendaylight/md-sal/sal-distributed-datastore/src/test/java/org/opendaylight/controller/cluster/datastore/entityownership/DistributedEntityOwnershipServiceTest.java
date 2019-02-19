@@ -118,10 +118,10 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
 
     @Test
     public void testEntityOwnershipShardCreated() throws Exception {
-        DistributedEntityOwnershipService service = DistributedEntityOwnershipService.start(dataStore.getActorContext(),
+        DistributedEntityOwnershipService service = DistributedEntityOwnershipService.start(dataStore.getActorUtils(),
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
 
-        Future<ActorRef> future = dataStore.getActorContext().findLocalShardAsync(
+        Future<ActorRef> future = dataStore.getActorUtils().findLocalShardAsync(
                 DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME);
         ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
         assertNotNull(DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME + " not found", shardActor);
@@ -132,7 +132,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
     @Test
     public void testRegisterCandidate() throws Exception {
         DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
-            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
+            dataStore.getActorUtils(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
@@ -141,7 +141,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
         verifyRegisterCandidateLocal(service, entity);
         verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE, entityId,
-                dataStore.getActorContext().getCurrentMemberName().getName());
+                dataStore.getActorUtils().getCurrentMemberName().getName());
 
         // Register the same entity - should throw exception
 
@@ -161,7 +161,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
 
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE2, entityId,
-                dataStore.getActorContext().getCurrentMemberName().getName());
+                dataStore.getActorUtils().getCurrentMemberName().getName());
 
         service.close();
     }
@@ -169,7 +169,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
     @Test
     public void testCloseCandidateRegistration() throws Exception {
         DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
-            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
+            dataStore.getActorUtils(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         DOMEntity entity = new DOMEntity(ENTITY_TYPE, YangInstanceIdentifier.of(QNAME));
 
@@ -194,7 +194,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
     @Test
     public void testListenerRegistration() {
         DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
-            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
+            dataStore.getActorUtils(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
@@ -222,7 +222,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
     @Test
     public void testGetOwnershipState() throws Exception {
         DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
-            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
+            dataStore.getActorUtils(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         final Shard mockShard = Mockito.mock(Shard.class);
         ShardDataTree shardDataTree = new ShardDataTree(mockShard, SchemaContextHelper.entityOwners(),
@@ -265,7 +265,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEnt
 
     @Test
     public void testIsCandidateRegistered() throws CandidateAlreadyRegisteredException {
-        DistributedEntityOwnershipService service = DistributedEntityOwnershipService.start(dataStore.getActorContext(),
+        DistributedEntityOwnershipService service = DistributedEntityOwnershipService.start(dataStore.getActorUtils(),
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
 
         final DOMEntity test = new DOMEntity("test-type", "test");
