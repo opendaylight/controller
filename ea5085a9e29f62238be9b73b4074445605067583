@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "1b28b652_e6cb0e88",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedFileJournal.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-19T10:03:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab0468dd_a6940dc3",
+      "range": {
+        "startLine": 62,
+        "startChar": 18,
+        "endLine": 62,
+        "endChar": 23
+      },
+      "revId": "ea5085a9e29f62238be9b73b4074445605067583",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "806ea176_f0daeb79",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedFileJournal.java",
         "patchSetId": 3
@@ -107,6 +131,30 @@
       "side": 1,
       "message": "Leftover from when the actor eagerly initialized storage",
       "parentUuid": "806ea176_f0daeb79",
+      "range": {
+        "startLine": 129,
+        "startChar": 33,
+        "endLine": 129,
+        "endChar": 41
+      },
+      "revId": "ea5085a9e29f62238be9b73b4074445605067583",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17555ee3_11e4cee3",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/SegmentedFileJournal.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-19T10:03:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7435ddc8_1c745b0e",
       "range": {
         "startLine": 129,
         "startChar": 33,
