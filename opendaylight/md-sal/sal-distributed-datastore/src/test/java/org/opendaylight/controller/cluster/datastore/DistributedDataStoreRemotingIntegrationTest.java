@@ -654,8 +654,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
         modification.ready();
 
-        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(tx1 , modification, true,
-                java.util.Optional.empty());
+        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(tx1 , modification, true, Optional.empty());
 
         carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
@@ -674,7 +673,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
         modification.ready();
 
-        readyLocal = new ReadyLocalTransaction(tx2 , modification, false, java.util.Optional.empty());
+        readyLocal = new ReadyLocalTransaction(tx2 , modification, false, Optional.empty());
 
         carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
@@ -724,7 +723,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1,
                 DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
                         Mockito.mock(ShardDataTreeTransactionParent.class), tx1, modification), true,
-                java.util.Optional.empty());
+                Optional.empty());
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
@@ -745,7 +744,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         forwardedReady = new ForwardedReadyTransaction(tx2,
                 DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
                         Mockito.mock(ShardDataTreeTransactionParent.class), tx2, modification), false,
-                java.util.Optional.empty());
+                Optional.empty());
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);

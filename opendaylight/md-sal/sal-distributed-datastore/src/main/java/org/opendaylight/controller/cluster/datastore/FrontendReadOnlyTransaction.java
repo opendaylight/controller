@@ -74,7 +74,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
     private void handleModifyTransaction(final ModifyTransactionRequest request, final RequestEnvelope envelope,
             final long now) {
         // The only valid request here is with abort protocol
-        final java.util.Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
+        final Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
         Preconditions.checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
         Preconditions.checkArgument(optProto.get() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s",
                 request);

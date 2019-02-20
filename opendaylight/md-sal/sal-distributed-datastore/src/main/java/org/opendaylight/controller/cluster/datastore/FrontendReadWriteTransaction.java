@@ -509,12 +509,11 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             throw new UnsupportedRequestException(request);
         }
 
-        final java.util.Optional<Exception> optFailure = request.getDelayedFailure();
+        final Optional<Exception> optFailure = request.getDelayedFailure();
         if (optFailure.isPresent()) {
             state = new Ready(history().createFailedCohort(getIdentifier(), sealedModification, optFailure.get()));
         } else {
-            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification,
-                    java.util.Optional.empty()));
+            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification, Optional.empty()));
         }
 
         if (request.isCoordinated()) {
@@ -562,7 +561,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             final RequestEnvelope envelope, final long now) throws RequestException {
         // We need to examine the persistence protocol first to see if this is an idempotent request. If there is no
         // protocol, there is nothing for us to do.
-        final java.util.Optional<PersistenceProtocol> maybeProto = request.getPersistenceProtocol();
+        final Optional<PersistenceProtocol> maybeProto = request.getPersistenceProtocol();
         if (!maybeProto.isPresent()) {
             applyModifications(request.getModifications());
             return replyModifySuccess(request.getSequence());
@@ -608,7 +607,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
 
         applyModifications(modifications);
-        state = new Ready(checkOpen().ready(java.util.Optional.empty()));
+        state = new Ready(checkOpen().ready(Optional.empty()));
         LOG.debug("{}: transitioned {} to ready", persistenceId(), getIdentifier());
     }
 

@@ -246,7 +246,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 captorForSubtrees.capture());
         final List<Collection<DataTreeCandidate>> capturedValue = captorForChanges.getAllValues();
 
-        final java.util.Optional<NormalizedNode<?, ?>> dataAfter =
+        final Optional<NormalizedNode<?, ?>> dataAfter =
                 capturedValue.get(0).iterator().next().getRootNode().getDataAfter();
 
         final NormalizedNode<?,?> expected = ImmutableContainerNodeBuilder.create()
