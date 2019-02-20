@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2929e5b9_a120c64d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-20T16:04:53Z",
+      "side": 1,
+      "message": "I understand, but why does this actor need to know about how it is being supervised?\n\nI believe it should be the other way around: a supervisor knows how to supervise a particular actor. It actually has all the tools needed through SupervisorStrategyhandleFailure() -- which not only has an actor reference, but also failure cause, from which we should be able to infer the fact that persistence failed...",
+      "range": {
+        "startLine": 20,
+        "startChar": 48,
+        "endLine": 22,
+        "endChar": 62
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b509a35f_fb53eef6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-20T16:04:53Z",
+      "side": 1,
+      "message": "why is this field exposed?",
+      "range": {
+        "startLine": 27,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 51
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "66fc6f80_0ffb4278",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-20T16:04:53Z",
+      "side": 1,
+      "message": "What is this magic actorSelection?",
+      "range": {
+        "startLine": 385,
+        "startChar": 12,
+        "endLine": 385,
+        "endChar": 45
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85241fc6_7ff9cf66",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-20T16:04:53Z",
+      "side": 1,
+      "message": "this certainly does not need to be atomic",
+      "range": {
+        "startLine": 1054,
+        "startChar": 22,
+        "endLine": 1054,
+        "endChar": 35
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a9fe7c6_607b3c8b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-20T16:04:53Z",
+      "side": 1,
+      "message": "I think this should be in a separate patch. Also if we are doing this, why not also call super.preStart() above?",
+      "range": {
+        "startLine": 228,
+        "startChar": 8,
+        "endLine": 228,
+        "endChar": 25
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
