@@ -284,14 +284,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    java.util.Optional<ModifyTransactionRequest> flushState() {
+    Optional<ModifyTransactionRequest> flushState() {
         if (!builderBusy) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
 
         final ModifyTransactionRequest request = builder.build();
         builderBusy = false;
-        return java.util.Optional.of(request);
+        return Optional.of(request);
     }
 
     @Override
@@ -342,7 +342,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final ModifyTransactionRequest req) {
         req.getModifications().forEach(this::appendModification);
 
-        final java.util.Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
+        final Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
         if (maybeProto.isPresent()) {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
@@ -483,7 +483,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             final ModifyTransactionRequest req) {
         req.getModifications().forEach(this::appendModification);
 
-        final java.util.Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
+        final Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
         if (maybeProto.isPresent()) {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
