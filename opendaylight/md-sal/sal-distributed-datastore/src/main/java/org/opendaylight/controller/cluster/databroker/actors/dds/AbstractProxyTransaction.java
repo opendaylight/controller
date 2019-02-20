@@ -363,10 +363,14 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
     }
 
-    void sealOnly() {
-        parent.onTransactionSealed(this);
-        final boolean success = STATE_UPDATER.compareAndSet(this, OPEN, SEALED);
-        Verify.verify(success, "Attempted to replay seal on %s", this);
+    /**
+     * Seal this transaction. If this method reports false, the caller needs to deal with propagating the seal operation
+     * towards the successor.
+     *
+     * @return True if seal operation was successful, false if this proxy has a successor.
+     */
+    boolean sealOnly() {
+        return sealState();
     }
 
     /**
@@ -377,8 +381,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @return True if seal operation was successful, false if this proxy has a successor.
      */
     boolean sealAndSend(final Optional<Long> enqueuedTicks) {
-        parent.onTransactionSealed(this);
+        return sealState();
+    }
 
+    private boolean sealState() {
+        parent.onTransactionSealed(this);
         // Transition internal state to sealed and detect presence of a successor
         return STATE_UPDATER.compareAndSet(this, OPEN, SEALED);
     }
