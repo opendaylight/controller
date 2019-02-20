@@ -8,9 +8,12 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.AbstractClientHandle;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
@@ -59,12 +62,19 @@ final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
 
     @Override
     public synchronized void close() {
+        final List<TransactionIdentifier> abortedSnapshots = new ArrayList<>();
         for (AbstractClientHandle<?> snap : openSnapshots.keySet()) {
-            LOG.warn("Aborting unclosed transaction {}", snap.getIdentifier());
-            snap.abort();
+            final TransactionIdentifier id = snap.getIdentifier();
+            LOG.debug("Aborting recorded transaction {}", id);
+            if (snap.abort()) {
+                abortedSnapshots.add(id);
+            }
         }
         openSnapshots.clear();
 
+        if (!abortedSnapshots.isEmpty()) {
+            LOG.warn("Aborted unclosed transactions {}", abortedSnapshots, new Throwable("at"));
+        }
         history.close();
     }
 
