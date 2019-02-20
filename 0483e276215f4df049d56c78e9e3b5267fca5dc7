@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "0e7dc71d_2f88ec0d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-02-20T16:11:29Z",
+      "side": 1,
+      "message": "It seems the actor path is actually dynamic based on supervision -- in which case tellParent() and forwardToParent() are misnomers and should be renamed to \u0027tellShardManager()\u0027 and the actor should be getting an ActorRef to ShardManager in its constructor.",
+      "parentUuid": "66fc6f80_0ffb4278",
+      "range": {
+        "startLine": 385,
+        "startChar": 12,
+        "endLine": 385,
+        "endChar": 45
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85241fc6_7ff9cf66",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 2
