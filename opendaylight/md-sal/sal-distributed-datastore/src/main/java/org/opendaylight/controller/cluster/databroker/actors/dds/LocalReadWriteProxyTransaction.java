@@ -185,9 +185,9 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void sealOnly() {
+    boolean sealOnly() {
         sealModification();
-        super.sealOnly();
+        return super.sealOnly();
     }
 
     @Override
