@@ -62,7 +62,7 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
         try (DOMDataTreeReadTransaction tx = domDataBroker.newReadOnlyTransaction()) {
             for (int l = 0; l < outerListElem; l++) {
                 YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
-                FluentFuture<java.util.Optional<NormalizedNode<?, ?>>> submitFuture = tx.read(dsType, yid);
+                FluentFuture<Optional<NormalizedNode<?, ?>>> submitFuture = tx.read(dsType, yid);
                 try {
                     Optional<NormalizedNode<?,?>> optionalDataObject = submitFuture.get();
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {

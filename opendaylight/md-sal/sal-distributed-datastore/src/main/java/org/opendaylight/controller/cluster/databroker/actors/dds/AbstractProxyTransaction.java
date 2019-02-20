@@ -350,7 +350,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         // At this point the successor has completed transition and is possibly visible by the user thread, which is
         // still stuck here. The successor has not seen final part of our state, nor the fact it is sealed.
         // Propagate state and seal the successor.
-        final java.util.Optional<ModifyTransactionRequest> optState = flushState();
+        final Optional<ModifyTransactionRequest> optState = flushState();
         if (optState.isPresent()) {
             forwardToSuccessor(successor, optState.get(), null);
         }
@@ -722,7 +722,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         if (SEALED.equals(prevState)) {
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             final long enqueuedTicks = parent.currentTime();
-            final java.util.Optional<ModifyTransactionRequest> optState = flushState();
+            final Optional<ModifyTransactionRequest> optState = flushState();
             if (optState.isPresent()) {
                 successor.handleReplayedRemoteRequest(optState.get(), null, enqueuedTicks);
             }
@@ -801,7 +801,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract FluentFuture<Optional<NormalizedNode<?, ?>>> doRead(YangInstanceIdentifier path);
 
     @GuardedBy("this")
-    abstract java.util.Optional<ModifyTransactionRequest> flushState();
+    abstract Optional<ModifyTransactionRequest> flushState();
 
     abstract TransactionRequest<?> abortRequest();
 

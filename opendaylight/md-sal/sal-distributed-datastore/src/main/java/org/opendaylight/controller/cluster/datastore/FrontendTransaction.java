@@ -70,10 +70,10 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         return history().persistenceId();
     }
 
-    final java.util.Optional<TransactionSuccess<?>> replaySequence(final long sequence) throws RequestException {
+    final Optional<TransactionSuccess<?>> replaySequence(final long sequence) throws RequestException {
         // Fast path check: if the requested sequence is the next request, bail early
         if (expectedSequence == sequence) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
 
         // Check sequencing: we do not need to bother with future requests
@@ -109,7 +109,7 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
         }
 
         // Not found
-        return java.util.Optional.empty();
+        return Optional.empty();
     }
 
     final void purgeSequencesUpTo(final long sequence) {
