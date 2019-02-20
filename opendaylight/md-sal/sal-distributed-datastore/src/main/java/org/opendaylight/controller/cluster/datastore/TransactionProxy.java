@@ -278,8 +278,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private AbstractThreePhaseCommitCohort<ActorSelection> createMultiCommitCohort() {
 
         final List<ThreePhaseCommitCohortProxy.CohortInfo> cohorts = new ArrayList<>(txContextWrappers.size());
-        final java.util.Optional<SortedSet<String>> shardNames =
-                java.util.Optional.of(new TreeSet<>(txContextWrappers.keySet()));
+        final Optional<SortedSet<String>> shardNames = Optional.of(new TreeSet<>(txContextWrappers.keySet()));
         for (Entry<String, TransactionContextWrapper> e : txContextWrappers.entrySet()) {
             LOG.debug("Tx {} Readying transaction for shard {}", getIdentifier(), e.getKey());
 

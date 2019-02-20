@@ -977,8 +977,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         doReturn(dataTreeSnapshot).when(dataTree).takeSnapshot();
         doReturn(dataTreeModification).when(dataTreeSnapshot).newModification();
-        doReturn(java.util.Optional.of(readResponse)).when(dataTreeModification).readNode(
-            any(YangInstanceIdentifier.class));
+        doReturn(Optional.of(readResponse)).when(dataTreeModification).readNode(any(YangInstanceIdentifier.class));
 
         return dataTree;
     }
