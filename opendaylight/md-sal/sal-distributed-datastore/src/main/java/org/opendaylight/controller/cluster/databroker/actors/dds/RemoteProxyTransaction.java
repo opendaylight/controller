@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static com.google.common.base.Verify.verify;
+
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -344,7 +346,9 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
             if (markSealed()) {
-                sealOnly();
+                if (!sealOnly()) {
+                    LOG.debug("Proxy {} has a successor, which should receive seal through a separate request", this);
+                }
             }
 
             final TransactionRequest<?> tmp;
@@ -485,7 +489,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
             // Persistence protocol implies we are sealed, propagate the marker, but hold off doing other actions
             // until we know what we are going to do.
             if (markSealed()) {
-                sealOnly();
+                verify(sealOnly(), "Attempted to replay seal on %s", this);
             }
 
             final TransactionRequest<?> tmp;
