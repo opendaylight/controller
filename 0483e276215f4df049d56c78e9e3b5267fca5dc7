@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "69027b78_feac8a0b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 7569
+      },
+      "writtenOn": "2019-02-23T01:22:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b5a137c_27f38d0d",
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2929e5b9_a120c64d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
         "patchSetId": 2
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "c0c052ca_fb7967e2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 7569
+      },
+      "writtenOn": "2019-02-23T01:22:01Z",
+      "side": 1,
+      "message": "Actor needs to know how it is supervised so that it can take appropriate action in postStop (if stopped due to persistence failure, do nothing - if actor was backoff supervised, it will be restarted, else it will remain stopped. if stopped not due to persistence failure and if actor is backoff supervised, send poison-pill to parent supervisor).\n\nWhen persistent actor is stopped because of persistence failure, no exception is thrown, so SupervisorStrategy#handleFailure() is not able to detect it. ref. https://github.com/akka/akka/blob/v2.5.11/akka-actor/src/main/scala/akka/pattern/BackoffOptions.scala#L54, https://github.com/akka/akka/blob/v2.5.11/akka-actor/src/main/scala/akka/pattern/BackoffOptions.scala#L91\n\nAlso if stopped shard is restarted immediately, it will likely fail again, so a backoff based retry mechanism is needed and BackoffSupervisor is built for that.",
+      "parentUuid": "2929e5b9_a120c64d",
+      "range": {
+        "startLine": 20,
+        "startChar": 48,
+        "endLine": 22,
+        "endChar": 62
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b509a35f_fb53eef6",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
         "patchSetId": 2
@@ -53,6 +95,30 @@
       "writtenOn": "2019-02-20T16:04:53Z",
       "side": 1,
       "message": "why is this field exposed?",
+      "range": {
+        "startLine": 27,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 51
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ca29fca_6cbf75bc",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractActorWithPersistenceFailureTracking.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 7569
+      },
+      "writtenOn": "2019-02-23T01:22:01Z",
+      "side": 1,
+      "message": "Moved to constructor",
+      "parentUuid": "b509a35f_fb53eef6",
       "range": {
         "startLine": 27,
         "startChar": 4,
@@ -112,6 +178,30 @@
     },
     {
       "key": {
+        "uuid": "aa1737f4_aa46a7b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 7569
+      },
+      "writtenOn": "2019-02-23T01:22:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e7dc71d_2f88ec0d",
+      "range": {
+        "startLine": 385,
+        "startChar": 12,
+        "endLine": 385,
+        "endChar": 45
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85241fc6_7ff9cf66",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 2
@@ -135,6 +225,30 @@
     },
     {
       "key": {
+        "uuid": "2b076ef7_a2caf4f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 7569
+      },
+      "writtenOn": "2019-02-23T01:22:01Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "85241fc6_7ff9cf66",
+      "range": {
+        "startLine": 1054,
+        "startChar": 22,
+        "endLine": 1054,
+        "endChar": 35
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a9fe7c6_607b3c8b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 2
@@ -146,6 +260,30 @@
       "writtenOn": "2019-02-20T16:04:53Z",
       "side": 1,
       "message": "I think this should be in a separate patch. Also if we are doing this, why not also call super.preStart() above?",
+      "range": {
+        "startLine": 228,
+        "startChar": 8,
+        "endLine": 228,
+        "endChar": 25
+      },
+      "revId": "0483e276215f4df049d56c78e9e3b5267fca5dc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd8752f7_23a7ffd1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 7569
+      },
+      "writtenOn": "2019-02-23T01:22:01Z",
+      "side": 1,
+      "message": "This is required so that appropriate action in base class method AbstractActorWithPersistenceFailureTracking#postStop() can be executed.",
+      "parentUuid": "5a9fe7c6_607b3c8b",
       "range": {
         "startLine": 228,
         "startChar": 8,
