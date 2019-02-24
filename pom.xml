@@ -35,6 +35,9 @@
 
     <!-- archetypes -->
     <module>opendaylight/archetypes</module>
+
+    <!-- documentation -->
+    <module>docs</module>
   </modules>
 
   <properties>
