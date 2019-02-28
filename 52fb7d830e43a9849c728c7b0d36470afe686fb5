@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ca4f988_1ffa6479",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/SegmentedFileJournal.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2019-02-28T02:15:09Z",
+      "side": 1,
+      "message": "Curious why you don\u0027t just lazily compute the handler for every operation, ie why doAsyncReplayMessages and doAsyncDeleteMessagesTo fail fast if no handler is present?",
+      "range": {
+        "startLine": 115,
+        "startChar": 31,
+        "endLine": 115,
+        "endChar": 91
+      },
+      "revId": "52fb7d830e43a9849c728c7b0d36470afe686fb5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
