@@ -53,6 +53,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
+    public static final int DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR = 1;
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
@@ -106,6 +107,7 @@ public class DatastoreContext implements ClientActorConfig {
         setIsolatedLeaderCheckInterval(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS);
         setSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE);
         setElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR);
+        setCandidateElectionTimeoutDivisor(DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR);
         setSyncIndexThreshold(DEFAULT_SYNC_INDEX_THRESHOLD);
         setMaximumMessageSliceSize(DEFAULT_MAX_MESSAGE_SLICE_SIZE);
     }
@@ -142,6 +144,7 @@ public class DatastoreContext implements ClientActorConfig {
         setIsolatedLeaderCheckInterval(other.raftConfig.getIsolatedCheckIntervalInMillis());
         setSnapshotDataThresholdPercentage(other.raftConfig.getSnapshotDataThresholdPercentage());
         setElectionTimeoutFactor(other.raftConfig.getElectionTimeoutFactor());
+        setCandidateElectionTimeoutDivisor(other.raftConfig.getCandidateElectionTimeoutDivisor());
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
         setMaximumMessageSliceSize(other.getMaximumMessageSliceSize());
         setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
@@ -266,6 +269,10 @@ public class DatastoreContext implements ClientActorConfig {
 
     private void setElectionTimeoutFactor(final long shardElectionTimeoutFactor) {
         raftConfig.setElectionTimeoutFactor(shardElectionTimeoutFactor);
+    }
+
+    private void setCandidateElectionTimeoutDivisor(final long candidateElectionTimeoutDivisor) {
+        raftConfig.setCandidateElectionTimeoutDivisor(candidateElectionTimeoutDivisor);
     }
 
     private void setCustomRaftPolicyImplementation(final String customRaftPolicyImplementation) {
@@ -470,6 +477,11 @@ public class DatastoreContext implements ClientActorConfig {
 
         public Builder shardElectionTimeoutFactor(final long shardElectionTimeoutFactor) {
             datastoreContext.setElectionTimeoutFactor(shardElectionTimeoutFactor);
+            return this;
+        }
+
+        public Builder shardCandidateElectionTimeoutDivisor(final long candidateElectionTimeoutDivisor) {
+            datastoreContext.setCandidateElectionTimeoutDivisor(candidateElectionTimeoutDivisor);
             return this;
         }
 
