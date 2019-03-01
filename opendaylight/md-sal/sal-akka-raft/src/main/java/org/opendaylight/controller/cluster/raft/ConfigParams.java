@@ -55,6 +55,14 @@ public interface ConfigParams {
     FiniteDuration getElectionTimeOutInterval();
 
     /**
+     * Returns the number by which a candidate should divide the election timeout it has calculated. This serves
+     * to speed up retries when elections result in a stalemate.
+     *
+     * @return the interval as a FiniteDuration.
+     */
+    long getCandidateElectionTimeoutDivisor();
+
+    /**
      * Returns the maximum election time variance. The election is scheduled using both the election timeout
      * and variance.
      *

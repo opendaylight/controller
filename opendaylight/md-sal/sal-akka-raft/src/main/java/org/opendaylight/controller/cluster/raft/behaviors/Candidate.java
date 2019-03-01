@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * The behavior of a RaftActor when it is in the Candidate raft state.
@@ -121,6 +122,11 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
 
         return this;
+    }
+
+    @Override
+    protected FiniteDuration electionDuration() {
+        return super.electionDuration().$div(context.getConfigParams().getCandidateElectionTimeoutDivisor());
     }
 
     @Override
