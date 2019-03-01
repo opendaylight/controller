@@ -66,6 +66,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
     private long electionTimeoutFactor = 2;
+    private long candidateElectionTimeoutDivisor = 1;
     private String customRaftPolicyImplementationClass;
 
     private PeerAddressResolver peerAddressResolver = NoopPeerAddressResolver.INSTANCE;
@@ -106,6 +107,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         electionTimeOutInterval = null;
     }
 
+    public void setCandidateElectionTimeoutDivisor(final long candidateElectionTimeoutDivisor) {
+        this.candidateElectionTimeoutDivisor = candidateElectionTimeoutDivisor;
+    }
+
     public void setTempFileDirectory(final String tempFileDirectory) {
         this.tempFileDirectory = tempFileDirectory;
     }
@@ -133,7 +138,6 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         return snapshotDataThresholdPercentage;
     }
 
-
     @Override
     public FiniteDuration getHeartBeatInterval() {
         return heartBeatInterval;
@@ -146,6 +150,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         }
 
         return electionTimeOutInterval;
+    }
+
+    @Override
+    public long getCandidateElectionTimeoutDivisor() {
+        return candidateElectionTimeoutDivisor;
     }
 
     @Override
