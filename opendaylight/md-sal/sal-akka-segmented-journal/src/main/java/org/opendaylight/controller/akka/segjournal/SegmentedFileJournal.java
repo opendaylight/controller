@@ -10,7 +10,6 @@ package org.opendaylight.controller.akka.segjournal;
 import static akka.actor.ActorRef.noSender;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Verify.verify;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
@@ -125,9 +124,6 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
         final ActorRef handler = context().actorOf(SegmentedJournalActor.props(persistenceId, directory, storage,
             maxEntrySize, maxSegmentSize));
         LOG.debug("Directory {} handled by {}", directory, handler);
-
-        final ActorRef prev = handlers.putIfAbsent(persistenceId, handler);
-        verify(prev == null, "Duplicate handler for %s, already handled by %s", persistenceId, prev);
         return handler;
     }
 
