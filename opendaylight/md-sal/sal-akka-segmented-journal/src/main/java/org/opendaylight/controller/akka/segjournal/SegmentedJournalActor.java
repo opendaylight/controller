@@ -236,7 +236,7 @@ final class SegmentedJournalActor extends AbstractActor {
             dataJournal.writer().commit(lastDelete);
 
             LOG.debug("{}: compaction started", persistenceId);
-            dataJournal.compact(lastDelete);
+            dataJournal.compact(lastDelete + 1);
             deleteJournal.compact(entry.index());
             LOG.debug("{}: compaction finished", persistenceId);
         } else {
@@ -358,7 +358,7 @@ final class SegmentedJournalActor extends AbstractActor {
         deleteJournal = SegmentedJournal.<Long>builder().withDirectory(directory).withName("delete")
                 .withNamespace(DELETE_NAMESPACE).withMaxSegmentSize(DELETE_SEGMENT_SIZE).build();
         final Indexed<Long> lastEntry = deleteJournal.writer().getLastEntry();
-        lastDelete = lastEntry == null ? 0 : lastEntry.index();
+        lastDelete = lastEntry == null ? 0 : lastEntry.entry();
 
         dataJournal = SegmentedJournal.<DataJournalEntry>builder()
                 .withStorageLevel(storage).withDirectory(directory).withName("data")
