@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11e58717_4e53a7f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-03-13T16:30:52Z",
+      "side": 1,
+      "message": "test?",
+      "range": {
+        "startLine": 158,
+        "startChar": 13,
+        "endLine": 158,
+        "endChar": 21
+      },
+      "revId": "0190722d6ddc51687c31ae9805c913d067b2130b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46480a50_2f54e5e9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-03-13T16:30:52Z",
+      "side": 1,
+      "message": "test?",
+      "range": {
+        "startLine": 164,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 29
+      },
+      "revId": "0190722d6ddc51687c31ae9805c913d067b2130b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
