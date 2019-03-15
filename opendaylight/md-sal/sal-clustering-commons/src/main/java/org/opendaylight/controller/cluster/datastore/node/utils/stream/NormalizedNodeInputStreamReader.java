@@ -18,9 +18,9 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -61,7 +61,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private final DataInput input;
 
-    private final Map<Integer, String> codedStringMap = new HashMap<>();
+    private final List<String> codedStringMap = new ArrayList<>();
 
     private QName lastLeafSetQName;
 
@@ -260,14 +260,14 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 return null;
             case TokenTypes.IS_CODE_VALUE:
                 final int code = input.readInt();
-                final String lookup = codedStringMap.get(code);
-                if (lookup == null) {
-                    throw new IOException("String code " + code + " was not found");
+                try {
+                    return codedStringMap.get(code);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IOException("String code " + code + " was not found", e);
                 }
-                return lookup;
             case TokenTypes.IS_STRING_VALUE:
                 final String value = input.readUTF().intern();
-                codedStringMap.put(codedStringMap.size(), value);
+                codedStringMap.add(value);
                 return value;
             default:
                 throw new IOException("Unhandled string value type " + valueType);
