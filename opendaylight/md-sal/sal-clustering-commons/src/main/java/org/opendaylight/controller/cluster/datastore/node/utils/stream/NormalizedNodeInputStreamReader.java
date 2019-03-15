@@ -254,16 +254,24 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
 
     private String readCodedString() throws IOException {
-        byte valueType = input.readByte();
-        if (valueType == TokenTypes.IS_CODE_VALUE) {
-            return codedStringMap.get(input.readInt());
-        } else if (valueType == TokenTypes.IS_STRING_VALUE) {
-            String value = input.readUTF().intern();
-            codedStringMap.put(codedStringMap.size(), value);
-            return value;
+        final byte valueType = input.readByte();
+        switch (valueType) {
+            case TokenTypes.IS_NULL_VALUE:
+                return null;
+            case TokenTypes.IS_CODE_VALUE:
+                final int code = input.readInt();
+                final String lookup = codedStringMap.get(code);
+                if (lookup == null) {
+                    throw new IOException("String code " + code + " was not found");
+                }
+                return lookup;
+            case TokenTypes.IS_STRING_VALUE:
+                final String value = input.readUTF().intern();
+                codedStringMap.put(codedStringMap.size(), value);
+                return value;
+            default:
+                throw new IOException("Unhandled string value type " + valueType);
         }
-
-        return null;
     }
 
     private Set<QName> readQNameSet() throws IOException {
