@@ -39,7 +39,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
@@ -65,11 +65,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private QName lastLeafSetQName;
 
-    private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
-                                      Object, LeafNode<Object>> leafBuilder;
+    private NormalizedNodeBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>> leafBuilder;
 
     @SuppressWarnings("rawtypes")
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
+    private NormalizedNodeBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
@@ -149,8 +148,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         }
     }
 
-    private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
-                                      Object, LeafNode<Object>> leafBuilder() {
+    private NormalizedNodeBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>> leafBuilder() {
         if (leafBuilder == null) {
             leafBuilder = Builders.leafBuilder();
         }
@@ -159,8 +157,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     }
 
     @SuppressWarnings("rawtypes")
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
-                                      LeafSetEntryNode<Object>> leafSetEntryBuilder() {
+    private NormalizedNodeBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder() {
         if (leafSetEntryBuilder == null) {
             leafSetEntryBuilder = Builders.leafSetEntryBuilder();
         }

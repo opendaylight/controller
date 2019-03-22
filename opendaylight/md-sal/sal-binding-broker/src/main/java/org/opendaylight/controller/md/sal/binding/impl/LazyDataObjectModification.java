@@ -238,7 +238,7 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
         final Iterator<YangInstanceIdentifier.PathArgument> toEnter = domArgumentList.iterator();
         DataTreeCandidateNode current = domData;
         while (toEnter.hasNext() && current != null) {
-            current = current.getModifiedChild(toEnter.next());
+            current = current.getModifiedChild(toEnter.next()).orElse(null);
         }
         return current != null && current.getModificationType() != UNMODIFIED ? create(childCodec, current) : null;
     }
