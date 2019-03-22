@@ -13,7 +13,6 @@ import com.google.common.base.MoreObjects;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import javax.annotation.concurrent.NotThreadSafe;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.DeadHistoryException;
@@ -38,11 +37,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Frontend state as observed by the shard leader. This class is responsible for tracking generations and sequencing
- * in the frontend/backend conversation.
+ * in the frontend/backend conversation. This class is NOT thread-safe.
  *
  * @author Robert Varga
  */
-@NotThreadSafe
 final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(LeaderFrontendState.class);
 

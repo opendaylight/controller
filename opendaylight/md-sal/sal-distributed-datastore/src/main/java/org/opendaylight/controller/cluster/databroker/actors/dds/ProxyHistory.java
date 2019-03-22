@@ -20,7 +20,8 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import javax.annotation.concurrent.GuardedBy;
+import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
@@ -216,7 +217,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             return identifier;
         }
 
-        @GuardedBy("lock")
+        @Holding("lock")
         @Override
         void replayRequests(final Collection<ConnectionEntry> previousEntries) {
             // First look for our Create message
@@ -491,12 +492,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         LOG.debug("Proxy {} purge completed with {}", this, response);
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     void onTransactionAborted(final AbstractProxyTransaction tx) {
         // No-op for most implementations
     }
 
-    @GuardedBy("lock")
+    @Holding("lock")
     void onTransactionCompleted(final AbstractProxyTransaction tx) {
         // No-op for most implementations
     }
